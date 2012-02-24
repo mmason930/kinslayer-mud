@@ -1,0 +1,5 @@
+MUD Port: 2230
+MUD Host: localhost
+Gateway Port: 2222
+Secondary Gateway Port: 666
+Gateway HOST: localhost

@@ -1,0 +1,5 @@
+java \
+BuildExternalScripts \
+run \
+mud.scripts.fundamentals.ExternalScriptExecutor \
+mud.scripts.mudlog.ImportMudLogFileProcess

@@ -1,0 +1,284 @@
+# CircleMUD 3.0 Makefile.in - Makefile template used by 'configure'
+#
+
+# C compiler to use
+CC = g++
+
+# Path to cxref utility
+CXREF = cxref
+
+# Any special flags you want to pass to the compiler
+MYFLAGS = @MYFLAGS@
+
+#flags for profiling (see hacker.doc for more information)
+PROFILE = 
+
+##############################################################################
+# Do Not Modify Anything Below This Line (unless you know what you're doing) #
+##############################################################################
+
+BINDIR = ../bin
+
+CFLAGS = @CFLAGS@ $(MYFLAGS) $(PROFILE)
+
+LIBS = @LIBS@ @CRYPTLIB@ @NETLIB@
+
+OBJFILES = comm.o Act.comm.o Act.informative.o Act.movement.o Act.item.o \
+	Act.offensive.o Act.other.o Act.social.o Act.wizard.o ban.o boards.o \
+	class.o config.o constants.o db.o fight.o graph.o handler.o \
+	 interpreter.o limits.o magic.o mail.o mobact.o modify.o \
+	objsave.o olc.o random.o shop.o spec_assign.o spec_procs.o \
+	spell_parser.o spells.o utils.o weather.o redit.o oedit.o zedit.o \
+	medit.o sedit.o \
+	dg_comm.o dg_db_scripts.o dg_event.o dg_handler.o dg_mobcmd.o \
+	dg_objcmd.o dg_scripts.o dg_triggers.o dg_wldcmd.o dg_olc.o \
+	hedit.o aedit.o kedit.o alias.o buffer.o clans.o poker.o cledit.o wedit.o
+
+CXREF_FILES = Act.comm.cpp Act.informative.cpp Act.item.cpp Act.movement.cpp \
+	Act.offensive.cpp Act.other.cpp Act.social.cpp Act.wizard.cpp ban.cpp boards.cpp \
+	castle.cpp class.cpp comm.cpp config.cpp constants.cpp db.cpp fight.cpp graph.cpp \
+	handler.cpp  interpreter.cpp limits.cpp magic.cpp mail.cpp mobact.cpp \
+	modify.cpp objsave.cpp olc.cpp random.cpp shop.cpp spec_assign.cpp spec_procs.cpp \
+	spell_parser.cpp spells.cpp utils.cpp weather.cpp redit.cpp oedit.cpp zedit.cpp \
+	medit.cpp sedit.cpp \
+	dg_comm.cpp dg_db_scripts.cpp dg_event.cpp dg_handler.cpp dg_mobcmd.cpp \
+	dg_objcmd.cpp dg_scripts.cpp dg_triggers.cpp dg_wldcmd.cpp dg_olc.cpp \
+	hedit.cpp aedit.cpp kedit.cpp alias.cpp buffer.cpp clans.cpp poker.cpp cledit.cpp wedit.cpp
+
+default: all
+
+all: .accepted
+        $(MAKE) $(BINDIR)/circle
+        $(MAKE) utils
+
+.accepted:
+        @./licheck @MORE@
+
+utils: .accepted
+        (cd util; $(MAKE) all)
+circle:
+        $(MAKE) $(BINDIR)/circle
+
+$(BINDIR)/circle : $(OBJFILES)
+        $(CC) -o $(BINDIR)/circle $(PROFILE) $(OBJFILES) $(LIBS)
+
+clean:
+        rm -f *.o
+
+ref:
+#
+# Create the cross reference files
+# Note, this is not meant to be used unless you've installed cxref...
+#
+	@for file in $(CXREF_FILES) ; do \
+	  echo Cross referencing $$file ; \
+	  $(CXREF) -D__CXREF__ -xref -Odoc -Ncircle $$file ; \
+	done
+#
+# Create the source files using cxref
+#
+	@for file in $(CXREF_FILES) ; do \
+	   echo Documenting $$file ; \
+	   ( cd . ; $(CXREF) -D__CXREF__ -warn-xref -xref -Odoc -Ncircle -html $$file ) ; \
+	   rm -f $(DOCS) ; \
+	done
+#
+# Create the index using cxref
+#
+	@echo Indexing
+	@( cd . ; $(CXREF) -D__CXREF__ -index-all -Odoc -Ncircle -html )
+	@rm -f $(DOCS)
+#
+# Make html files for the .h files
+#
+	@echo Creating .h.html files...
+	@for file in *.h ; do \
+	  echo $$file ; \
+	  cat /home/jelson/mud/htmlh-head $$file /home/jelson/mud/htmlh-tail > doc/$$file.html ; \
+	done
+# Copy over to the html directory
+	cp doc/*.html /home/jelson/public_html/circle/cdp/cxref
+	chmod 644 /home/jelson/public_html/circle/cdp/cxref/*.html
+
+# Dependencies for the object files (automagically generated with
+# gcc -MM)
+
+act.comm.o: Act.comm.cpp conf.h sysdep.h structs.h buffer_opt.h utils.h \
+  spells.h comm.h interpreter.h handler.h db.h screen.h dg_scripts.h
+	$(CC) -c $(CFLAGS) Act.comm.cpp
+act.informative.o: Act.informative.cpp conf.h sysdep.h structs.h \
+  buffer_opt.h buffer.h utils.h spells.h comm.h interpreter.h handler.h \
+  db.h screen.h constants.h dg_scripts.h olc.h
+	$(CC) -c $(CFLAGS) Act.informative.cpp
+act.item.o: Act.item.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h \
+  utils.h spells.h comm.h interpreter.h handler.h db.h dg_scripts.h
+	$(CC) -c $(CFLAGS) Act.item.cpp
+act.movement.o: Act.movement.cpp conf.h sysdep.h structs.h buffer_opt.h \
+  buffer.h utils.h spells.h comm.h interpreter.h handler.h db.h screen.h \
+   constants.h dg_scripts.h
+	$(CC) -c $(CFLAGS) Act.movement.cpp
+act.offensive.o: Act.offensive.cpp conf.h sysdep.h structs.h buffer_opt.h \
+  buffer.h utils.h spells.h comm.h interpreter.h handler.h db.h \
+  constants.h screen.h
+	$(CC) -c $(CFLAGS) Act.offensive.cpp
+act.other.o: Act.other.cpp conf.h sysdep.h structs.h buffer_opt.h \
+  buffer.h utils.h spells.h comm.h interpreter.h handler.h db.h screen.h \
+   dg_scripts.h
+	$(CC) -c $(CFLAGS) Act.other.cpp
+act.social.o: Act.social.cpp conf.h sysdep.h structs.h buffer_opt.h \
+  buffer.h utils.h spells.h comm.h interpreter.h handler.h db.h
+	$(CC) -c $(CFLAGS) Act.social.cpp
+act.wizard.o: Act.wizard.cpp conf.h sysdep.h structs.h buffer_opt.h \
+  buffer.h utils.h spells.h comm.h interpreter.h handler.h db.h \
+  screen.h constants.h olc.h dg_scripts.h
+	$(CC) -c $(CFLAGS) Act.wizard.cpp
+aedit.o: aedit.cpp conf.h sysdep.h structs.h buffer_opt.h interpreter.h \
+  handler.h comm.h utils.h spells.h db.h olc.h screen.h
+	$(CC) -c $(CFLAGS) aedit.cpp
+alias.o: alias.cpp conf.h sysdep.h structs.h buffer_opt.h utils.h \
+  spells.h interpreter.h db.h
+	$(CC) -c $(CFLAGS) alias.cpp
+ban.o: ban.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h utils.h \
+  spells.h comm.h interpreter.h handler.h db.h
+	$(CC) -c $(CFLAGS) ban.cpp
+boards.o: boards.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h \
+  utils.h spells.h comm.h db.h boards.h interpreter.h handler.h
+	$(CC) -c $(CFLAGS) boards.cpp
+buffer.o: buffer.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h \
+  buffer_i.h utils.h spells.h interpreter.h
+	$(CC) -c $(CFLAGS) buffer.cpp
+class.o: class.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h db.h \
+  utils.h spells.h interpreter.h handler.h
+	$(CC) -c $(CFLAGS) class.cpp
+comm.o: comm.cpp screen.h conf.h sysdep.h structs.h buffer_opt.h buffer.h \
+  utils.h spells.h comm.h interpreter.h handler.h db.h  olc.h \
+  dg_scripts.h
+	$(CC) -c $(CFLAGS) comm.cpp
+config.o: config.cpp conf.h sysdep.h structs.h buffer_opt.h
+	$(CC) -c $(CFLAGS) config.cpp
+constants.o: constants.cpp conf.h sysdep.h structs.h buffer_opt.h
+	$(CC) -c $(CFLAGS) constants.cpp
+db.o: db.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h utils.h \
+  spells.h db.h comm.h handler.h mail.h interpreter.h \
+  dg_scripts.h olc.h
+	$(CC) -c $(CFLAGS) db.cpp
+dg_comm.o: dg_comm.cpp conf.h sysdep.h structs.h buffer_opt.h \
+  dg_scripts.h utils.h spells.h comm.h handler.h db.h
+	$(CC) -c $(CFLAGS) dg_comm.cpp
+dg_db_scripts.o: dg_db_scripts.cpp conf.h sysdep.h structs.h buffer_opt.h \
+  dg_scripts.h utils.h spells.h db.h handler.h dg_event.h comm.h
+	$(CC) -c $(CFLAGS) dg_db_scripts.cpp
+dg_event.o: dg_event.cpp conf.h sysdep.h structs.h buffer_opt.h utils.h \
+  spells.h dg_event.h
+	$(CC) -c $(CFLAGS) dg_event.cpp
+dg_handler.o: dg_handler.cpp conf.h sysdep.h structs.h buffer_opt.h \
+  dg_scripts.h utils.h spells.h comm.h db.h handler.h dg_event.h
+	$(CC) -c $(CFLAGS) dg_handler.cpp
+dg_mobcmd.o: dg_mobcmd.cpp conf.h sysdep.h structs.h buffer_opt.h \
+  dg_scripts.h db.h utils.h spells.h handler.h interpreter.h comm.h
+	$(CC) -c $(CFLAGS) dg_mobcmd.cpp
+dg_objcmd.o: dg_objcmd.cpp conf.h sysdep.h structs.h buffer_opt.h \
+  screen.h dg_scripts.h utils.h spells.h comm.h interpreter.h handler.h \
+  db.h
+	$(CC) -c $(CFLAGS) dg_objcmd.cpp
+dg_olc.o: dg_olc.cpp conf.h sysdep.h structs.h buffer_opt.h utils.h \
+  spells.h comm.h db.h olc.h dg_olc.h dg_scripts.h dg_event.h
+	$(CC) -c $(CFLAGS) dg_olc.cpp
+dg_scripts.o: dg_scripts.cpp conf.h sysdep.h structs.h buffer_opt.h \
+  dg_scripts.h utils.h spells.h comm.h interpreter.h handler.h dg_event.h \
+  db.h screen.h
+	$(CC) -c $(CFLAGS) dg_scripts.cpp
+dg_triggers.o: dg_triggers.cpp conf.h sysdep.h structs.h buffer_opt.h \
+  dg_scripts.h utils.h spells.h comm.h interpreter.h handler.h db.h olc.h
+	$(CC) -c $(CFLAGS) dg_triggers.cpp
+dg_wldcmd.o: dg_wldcmd.cpp conf.h sysdep.h structs.h buffer_opt.h \
+  screen.h dg_scripts.h utils.h spells.h comm.h interpreter.h handler.h \
+  db.h
+	$(CC) -c $(CFLAGS) dg_wldcmd.cpp
+fight.o: fight.cpp conf.h sysdep.h buffer.h structs.h buffer.h \
+  utils.h comm.h handler.h interpreter.h db.h screen.h dg_scripts.h
+	$(CC) -c $(CFLAGS) fight.cpp
+graph.o: graph.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h \
+  utils.h spells.h comm.h interpreter.h handler.h db.h
+	$(CC) -c $(CFLAGS) graph.cpp
+handler.o: handler.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h \
+  utils.h spells.h comm.h db.h handler.h interpreter.h screen.h \
+  dg_scripts.h
+	$(CC) -c $(CFLAGS) handler.cpp
+hedit.o: hedit.cpp conf.h sysdep.h structs.h buffer_opt.h comm.h utils.h \
+  spells.h db.h boards.h olc.h
+	$(CC) -c $(CFLAGS) hedit.cpp
+interpreter.o: interpreter.cpp conf.h sysdep.h structs.h buffer_opt.h \
+  buffer.h comm.h interpreter.h db.h utils.h spells.h handler.h mail.h \
+  screen.h olc.h dg_scripts.h weaves.h
+	$(CC) -c $(CFLAGS) interpreter.cpp
+kedit.o: kedit.cpp conf.h sysdep.h structs.h buffer_opt.h comm.h utils.h \
+  spells.h db.h olc.h dg_olc.h dg_scripts.h constants.h interpreter.h
+	$(CC) -c $(CFLAGS) kedit.cpp
+limits.o: limits.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h \
+  utils.h spells.h comm.h db.h handler.h dg_scripts.h screen.h
+	$(CC) -c $(CFLAGS) limits.cpp
+magic.o: magic.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h \
+  utils.h spells.h comm.h handler.h db.h dg_scripts.h
+	$(CC) -c $(CFLAGS) magic.cpp
+mail.o: mail.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h utils.h \
+  spells.h comm.h db.h interpreter.h handler.h mail.h
+	$(CC) -c $(CFLAGS) mail.cpp
+medit.o: medit.cpp conf.h sysdep.h structs.h buffer_opt.h comm.h utils.h \
+  spells.h db.h shop.h olc.h handler.h dg_olc.h dg_scripts.h
+	$(CC) -c $(CFLAGS) medit.cpp
+mobact.o: mobact.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h \
+  utils.h spells.h db.h comm.h interpreter.h handler.h
+	$(CC) -c $(CFLAGS) mobact.cpp
+modify.o: modify.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h \
+  utils.h spells.h interpreter.h handler.h db.h comm.h mail.h boards.h \
+  olc.h
+	$(CC) -c $(CFLAGS) modify.cpp
+objsave.o: objsave.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h \
+  comm.h handler.h db.h interpreter.h utils.h spells.h
+	$(CC) -c $(CFLAGS) objsave.cpp
+oedit.o: oedit.cpp conf.h sysdep.h structs.h buffer_opt.h comm.h utils.h \
+  spells.h db.h boards.h shop.h olc.h dg_olc.h dg_scripts.h
+	$(CC) -c $(CFLAGS) oedit.cpp
+olc.o: olc.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h \
+  interpreter.h comm.h utils.h spells.h db.h olc.h dg_olc.h dg_scripts.h \
+  screen.h handler.h
+	$(CC) -c $(CFLAGS) olc.cpp
+random.o: random.cpp
+	$(CC) -c $(CFLAGS) random.cpp
+redit.o: redit.cpp conf.h sysdep.h structs.h buffer_opt.h comm.h utils.h \
+  spells.h db.h boards.h olc.h dg_olc.h dg_scripts.h
+	$(CC) -c $(CFLAGS) redit.cpp
+sedit.o: sedit.cpp conf.h sysdep.h structs.h buffer_opt.h comm.h utils.h \
+  spells.h db.h shop.h olc.h
+	$(CC) -c $(CFLAGS) sedit.cpp
+shop.o: shop.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h comm.h \
+  handler.h db.h interpreter.h utils.h spells.h shop.h dg_scripts.h
+	$(CC) -c $(CFLAGS) shop.cpp
+spec_assign.o: spec_assign.cpp conf.h sysdep.h structs.h buffer_opt.h \
+  buffer.h db.h interpreter.h utils.h spells.h
+	$(CC) -c $(CFLAGS) spec_assign.cpp
+spec_procs.o: spec_procs.cpp conf.h sysdep.h structs.h buffer_opt.h \
+  buffer.h utils.h spells.h comm.h interpreter.h handler.h db.h \
+  dg_scripts.h
+	$(CC) -c $(CFLAGS) spec_procs.cpp
+spell_parser.o: spell_parser.cpp conf.h sysdep.h structs.h buffer_opt.h \
+  buffer.h utils.h spells.h interpreter.h handler.h comm.h db.h
+	$(CC) -c $(CFLAGS) spell_parser.cpp
+spells.o: spells.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h \
+  utils.h spells.h comm.h handler.h db.h constants.h interpreter.h olc.h \
+  screen.h
+	$(CC) -c $(CFLAGS) spells.cpp
+spells.o: spells.cpp weaves.cpp weaves.h conf.h sysdep.h structs.h buffer_opt.h buffer.h \
+  utils.h spells.h comm.h handler.h db.h constants.h interpreter.h olc.h \
+  screen.h
+        $(CC) -c $(CFLAGS) spells.cpp
+utils.o: utils.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h \
+  utils.h spells.h db.h comm.h screen.h handler.h
+	$(CC) -c $(CFLAGS) utils.cpp
+weather.o: weather.cpp conf.h sysdep.h structs.h buffer_opt.h buffer.h \
+  utils.h spells.h comm.h handler.h interpreter.h db.h
+	$(CC) -c $(CFLAGS) weather.cpp
+zedit.o: zedit.cpp conf.h sysdep.h structs.h buffer_opt.h comm.h utils.h \
+  spells.h db.h olc.h
+	$(CC) -c $(CFLAGS) zedit.cpp
