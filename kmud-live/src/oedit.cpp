@@ -20,13 +20,7 @@
 #include "StringUtil.h"
 #include "Descriptor.h"
 
-/*------------------------------------------------------------------------*/
-
-/*
- * External variable declarations.
- */
-
-extern Object *obj_proto;
+//External variable declarations.
 extern struct Index *obj_index;
 extern Object *object_list;
 extern Descriptor *descriptor_list;
@@ -42,14 +36,8 @@ extern const char *apply_types[];
 extern const char *container_bits[];
 extern const char *weapon_types[];
 
-/*------------------------------------------------------------------------*/
-
-/*
- * Handy macros.
- */
+//Handy macros.
 #define S_PRODUCT(s, i) ((s)->producing[(i)])
-
-/*------------------------------------------------------------------------*/
 
 void oedit_disp_container_flags_menu(Descriptor *d);
 void oedit_disp_extradesc_menu(Descriptor *d);
@@ -88,7 +76,6 @@ void oedit_disp_spells_menu(Descriptor *d);
 void oedit_liquid_type(Descriptor *d);
 void oedit_setup_new(Descriptor *d);
 void oedit_setup_existing(Descriptor *d, int real_num);
-//void oedit_save_to_disk(int zone);
 void oedit_save_internally(Descriptor *d);
 
 /*------------------------------------------------------------------------*\
@@ -118,34 +105,32 @@ void oedit_setup_existing(Descriptor *d, int real_num)
 
 	obj = new Object();
 
-	*obj = obj_proto[real_num];
+	*obj = *obj_proto[real_num];
 
 	/*
 	 * Copy all strings over.
 	 */
 
-	obj->name =				 str_dup(obj_proto[real_num].name
-	                        ? obj_proto[real_num].name : "undefined");
+	obj->name =				 str_dup(obj_proto[real_num]->name
+	                        ? obj_proto[real_num]->name : "undefined");
 
-	obj->short_description	= str_dup(obj_proto[real_num].short_description ?
-	                                 obj_proto[real_num].short_description : "undefined");
+	obj->short_description	= str_dup(obj_proto[real_num]->short_description ?
+	                                 obj_proto[real_num]->short_description : "undefined");
 
-	obj->description		= str_dup(obj_proto[real_num].description ?
-	                            obj_proto[real_num].description : "undefined");
+	obj->description		= str_dup(obj_proto[real_num]->description ?
+	                            obj_proto[real_num]->description : "undefined");
 
-	obj->action_description = (obj_proto[real_num].action_description ?
-	                           str_dup(obj_proto[real_num].action_description) : NULL);
+	obj->action_description = (obj_proto[real_num]->action_description ?
+	                           str_dup(obj_proto[real_num]->action_description) : NULL);
 
-	/*
-	 * Extra descriptions if necessary.
-	 */
-	if (obj_proto[real_num].ex_description)
+	//Extra descriptions if necessary.
+	if (obj_proto[real_num]->ex_description)
 	{
 		temp = new extra_descr_data;
 
 		obj->ex_description = temp;
 
-		for (thist = obj_proto[real_num].ex_description; thist; thist = thist->next)
+		for (thist = obj_proto[real_num]->ex_description; thist; thist = thist->next)
 		{
 			temp->keyword = (thist->keyword && *thist->keyword) ? str_dup(thist->keyword) : NULL;
 			temp->description = (thist->description && *thist->description) ?
@@ -185,7 +170,7 @@ void oedit_save_internally(Descriptor *d)
 	unsigned int cmd_no, i;
 	struct extra_descr_data *thist, *next_one;
 	struct Index *new_obj_index;
-	Object *obj, *swap, *new_obj_proto;
+	Object *obj, *swap;
 	Descriptor *dsc;
 	Zone *zone;
 
@@ -236,18 +221,17 @@ void oedit_save_internally(Descriptor *d)
 		swap->retool_sdesc = NULL;
 		free_obj(swap);
 
-		boost::uuids::uuid id = obj_proto[robj_num].objID;
-		obj_proto[robj_num] = *OLC_OBJ(d);
-		obj_proto[robj_num].item_number = robj_num;
-		obj_proto[robj_num].needs_save = true;
-		obj_proto[robj_num].objID = id;
+		boost::uuids::uuid id = obj_proto[robj_num]->objID;
+		*obj_proto[robj_num] = *OLC_OBJ(d);
+		obj_proto[robj_num]->item_number = robj_num;
+		obj_proto[robj_num]->needs_save = true;
+		obj_proto[robj_num]->objID = id;
 	}
 	else
 	{
 		//It's a new object, we must build new tables to contain it.
 		new_obj_index = new Index[top_of_objt + 2];
 		memset(new_obj_index, 0, sizeof(Index) * (top_of_objt + 2));
-		new_obj_proto = new Object[top_of_objt + 2];
 
 		//Start counting through both tables.
 		for (i = 0; i <= top_of_objt; ++i)
@@ -263,19 +247,18 @@ void oedit_save_internally(Descriptor *d)
 					new_obj_index[robj_num].vnum = OLC_NUM(d);
 					new_obj_index[robj_num].number = 0;
 					new_obj_index[robj_num].func = NULL;
-					new_obj_proto[robj_num] = *(OLC_OBJ(d));
-					new_obj_proto[robj_num].in_room = 0;
+
+					Object *newObjectPrototype = new Object();
+					*newObjectPrototype = *(OLC_OBJ(d));
+					obj_proto.insert(obj_proto.begin() + robj_num, newObjectPrototype);
+					obj_proto[robj_num]->in_room = 0;
 
 					//Copy over the object that should be here.
-
 					new_obj_index[robj_num + 1] = obj_index[robj_num];
-					new_obj_proto[robj_num + 1] = obj_proto[robj_num];
-					new_obj_proto[robj_num + 1].item_number = robj_num + 1;
 				}
 
 				else
 				{//New item has not yet been found. Copy to i
-					new_obj_proto[i] = obj_proto[i];
 					new_obj_index[i] = obj_index[i];
 				}
 			}
@@ -283,14 +266,8 @@ void oedit_save_internally(Descriptor *d)
 			else
 			{//New item has been recorded. Now copy to i+1
 				new_obj_index[i + 1] = obj_index[i];
-				new_obj_proto[i + 1] = obj_proto[i];
-				new_obj_proto[i + 1].item_number = i + 1;
+				obj_proto[i]->item_number = i;
 			}
-			obj_proto[i].name = NULL;
-			obj_proto[i].description = NULL;
-			obj_proto[i].ex_description = NULL;
-			obj_proto[i].action_description = NULL;
-			obj_proto[i].short_description = NULL;
 		}
 
 		if(!found)
@@ -300,16 +277,18 @@ void oedit_save_internally(Descriptor *d)
 			new_obj_index[robj_num].vnum = OLC_NUM(d);
 			new_obj_index[robj_num].number = 0;
 			new_obj_index[robj_num].func = NULL;
-			new_obj_proto[robj_num] = *(OLC_OBJ(d));
-			new_obj_proto[robj_num].in_room = 0;
+			
 			ItemCount.push_back(0);
+			
+			Object *newObjectPrototype = new Object();
+			*newObjectPrototype = *(OLC_OBJ(d));
+			obj_proto.push_back(newObjectPrototype);
+			newObjectPrototype->in_room = NULL;
 		}
 
 		//Free and replace old tables.
 
-		delete[] (obj_proto);
 		delete[] (obj_index);
-		obj_proto = new_obj_proto;
 		obj_index = new_obj_index;
 		top_of_objt++;
 
@@ -399,7 +378,7 @@ void oedit_save_to_disk(int zone_num)
 	{
 		if ((realcounter = real_object(counter)) >= 0)
 		{
-			obj = (obj_proto + realcounter);
+			obj = (obj_proto[realcounter]);
 
 			if(obj->deleted)
 				obj->ProtoDelete();

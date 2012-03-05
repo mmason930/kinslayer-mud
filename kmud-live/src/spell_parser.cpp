@@ -481,8 +481,8 @@ void Character::AddChannelingStrain( bool Failure, int spell )
 		return;
 	}
 
-	/* The command started successfully.  If MC add taint.  -Serai */
-	/* The longer they channel (spell timer), the more taint. */
+	// The command started successfully.  If MC add taint.  -Serai
+	// The longer they channel (spell timer), the more taint.
 	if ( this->CanTaint() )
 	{
 		int strain = 0;

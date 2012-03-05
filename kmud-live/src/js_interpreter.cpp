@@ -43,7 +43,7 @@ const int TIMEOUT_SECONDS = TIMEOUT / 1000000;
 JSEnvironment* env;
 unsigned long long end_time = 0;
 bool blocking=false;
-extern Object *obj_proto;
+extern std::vector<Object*> obj_proto;
 extern int top_of_objt;
 
 JSBool kill_script(JSContext * cx);

@@ -24,7 +24,6 @@
 #include "Descriptor.h"
 
 extern int circle_restrict;
-extern Object *obj_proto;
 extern DateTime rebootTime;
 
 /******************************************************************************/

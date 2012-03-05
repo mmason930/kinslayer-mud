@@ -75,16 +75,16 @@ std::list<std::string>	   *Tips;
 std::vector<Room *>			World;
 std::vector<Character *>	MobProto;
 std::vector<Index *>		MobIndex;
-Character *character_list = NULL;				/* global linked list of chars */
-Object *object_list = NULL;						/* global linked list of objs	 */
-Index *obj_index;								/* index table for object file	 */
-Object *obj_proto;								/* prototypes for objs		 */
-MeleeMessageList fight_messages[MAX_MESSAGES];	/* fighting messages	 */
+Character *character_list = NULL;				// global linked list of chars
+Object *object_list = NULL;						// global linked list of objs
+Index *obj_index;								// index table for object file
+std::vector<Object*> obj_proto;;				//Object prototypes
+MeleeMessageList fight_messages[MAX_MESSAGES];	// fighting messages
 std::list<PlayerIndex *> PlayerTable;
-GameTime time_info;								/* the infomation about the time    */
-reset_q_type reset_q;							/* queue of zones to be reset	 */
+GameTime time_info;								// the infomation about the time
+reset_q_type reset_q;							// queue of zones to be reset
 GameTime *mud_time_passed(time_t t2, time_t t1);
-Object *chest_head = NULL;					/* Chest Log List */
+Object *chest_head = NULL;					// Chest Log List
 std::vector<int> ItemCount;
 std::vector<std::string> MySQLTables;
 #ifdef KINSLAYER_JAVASCRIPT
@@ -415,19 +415,13 @@ void bootWorld(void)
 }
 void SetupMySQL( bool crash_on_failure )
 {
-	std::ifstream InFile(SQL_FILE);
+	std::map<std::string, std::string> resources = MiscUtil::loadResourcesFromFile(BASIC_CONFIG_FILE);
 	std::string username, password, dbname, hostname;
-	if( !InFile.is_open() ) {
-		MudLog(BRF, LVL_APPR, TRUE, "SQL file could not be opened for reading.");
-		exit(1);
-	}
 
-	std::getline(InFile, username);
-	std::getline(InFile, password);
-	std::getline(InFile, dbname);
-	std::getline(InFile, hostname);
-
-	InFile.close();
+	username = resources["MySQL Username"];
+	password = resources["MySQL Password"];
+	dbname = resources["MySQL Database"];
+	hostname = resources["MySQL Hostname"];
 
 	try
 	{
@@ -524,9 +518,9 @@ void setupFilesystem()
 		boost::filesystem::create_directory("plrlogs/U-Z");
 	}
 
-	if(!boost::filesystem::exists("misc/sql")) {
+	if(!boost::filesystem::exists("misc/BasicConfig")) {
 
-		Log("lib/misc/sql not found. This file is required. Please create it and fill it with the database login information.");
+		Log("lib/misc/BasicConfig not found. This file is required. Please create it and fill it with the required configuration.");
 		exit(1);
 	}
 }
@@ -830,9 +824,11 @@ void Room::BootWorld()
 	std::list< sql::Row > MyExits, MyJS;
 	std::list< Object* > MyObjects;
 
+	Clock clock1;
+	clock1.turnOn();
 	try {
 		RoomQuery = gameDatabase->sendQuery( "SELECT * FROM rooms ORDER BY vnum ASC;" );
-		ExitQuery = gameDatabase->sendQuery( "SELECT * FROM room_exits ORDER BY room_vnum ASC;" );
+		ExitQuery = gameDatabase->sendQuery( "SELECT * FROM roomExit ORDER BY room_vnum ASC;" );
 		ObjectQuery=gameDatabase->sendQuery( "SELECT id,holder_id FROM objects WHERE holder_type='R' AND holder_id IN(SELECT vnum FROM rooms) ORDER BY (holder_id+0) ASC;" );
 #ifdef KINSLAYER_JAVASCRIPT
 		jsQuery    =gameDatabase->sendQuery( "SELECT * FROM js_attachments WHERE type='R' ORDER BY target_vnum ASC,id ASC;" );
@@ -851,6 +847,7 @@ void Room::BootWorld()
 
 		while( ExitQuery->hasNextRow() && ExitQuery->peekRow()["room_vnum"] == MyRow["vnum"] )
 			MyExits.push_back( ExitQuery->getRow() );
+
 		while( ObjectQuery->hasNextRow() && ObjectQuery->peekRow()["holder_id"] == MyRow["vnum"] )
 		{
 			boost::uuids::string_generator uuidGenerator;
@@ -914,7 +911,7 @@ void Room::DeleteFromDatabase()
 
 		QueryBuffer.str("");
 
-		QueryBuffer << "DELETE FROM room_exits WHERE room_vnum='" << this->vnum << "';";
+		QueryBuffer << "DELETE FROM roomExit WHERE room_vnum='" << this->vnum << "';";
 		gameDatabase->sendRawQuery(QueryBuffer.str());
 
 		QueryBuffer.str("");
@@ -1240,9 +1237,9 @@ int Character::VnumObject(std::string SearchName)
 
 	for (nr = 0; nr <= top_of_objt; ++nr)
 	{
-		if( !isname(SearchName, obj_proto[nr].name) )
+		if( !isname(SearchName, obj_proto[nr]->name) )
 			continue;
-		this->Send("%3d. [%5d] %s\r\n", ++found, obj_index[nr].vnum, obj_proto[nr].short_description);
+		this->Send("%3d. [%5d] %s\r\n", ++found, obj_index[nr].vnum, obj_proto[nr]->short_description);
 	}
 	return (found);
 }
@@ -1345,11 +1342,11 @@ Object *read_object(int nr, int type, bool new_instance, bool increment_top_id)
 	obj = new Object();
 	DateTime createdDatetime = obj->createdDatetime;
 
-	*obj = obj_proto[i];
+	*obj = *obj_proto[i];
 	obj->proto = false;
 	obj->createdDatetime = createdDatetime;
 	obj->obj_flags.mModifiers = new std::map< byte,long double >();
-	if( !obj_proto[i].action_description || strlen(obj_proto[i].action_description) == 0 )
+	if( !obj_proto[i]->action_description || strlen(obj_proto[i]->action_description) == 0 )
 		obj->action_description = NULL;
 
 	obj->next = object_list;
@@ -1946,7 +1943,7 @@ bool Character::LoadSkills()
 
 bool Character::LoadIgnores()
 {
-	std::string query = "SELECT * FROM ignores WHERE user_id=" + MiscUtil::Convert<std::string>(this->player.idnum);
+	std::string query = "SELECT * FROM userIgnore WHERE user_id=" + MiscUtil::Convert<std::string>(this->player.idnum);
 	sql::Query MyQuery;
 	sql::Row MyRow;
 
@@ -1976,9 +1973,9 @@ void MySQLSaveAlias(const std::string &playername, std::map<std::string,std::str
 		return;
 
 	if(update)
-		Query	<< "UPDATE aliases SET replacement='" << sql::escapeString((*a).second) << "'";
+		Query	<< "UPDATE userAlias SET replacement='" << sql::escapeString((*a).second) << "'";
 	else
-		Query	<< "INSERT INTO aliases (user_id,command,replacement) VALUES(" << index->id << ",'"
+		Query	<< "INSERT INTO userAlias (user_id,command,replacement) VALUES(" << index->id << ",'"
 				<< sql::escapeString((*a).first) << "','" << sql::escapeString((*a).second) << "')";
 
 	try { gameDatabase->sendRawQuery(Query.str()); }
@@ -1996,8 +1993,9 @@ void MySQLDeleteAlias(const std::string &playername, const std::string &command)
 	if(index == NULL)
 		return;
 
-	Query	<< "DELETE FROM aliases WHERE user_id=" << index->id
-		<< " AND command = '" << sql::escapeString(command) << "'";
+	Query	<< " DELETE FROM userAlias"
+			<< " WHERE user_id=" << index->id
+			<< " AND command = " << sql::escapeQuoteString(command);
 
 	try{ gameDatabase->sendRawQuery(Query.str()); }
 	catch( sql::QueryException e )
@@ -2012,7 +2010,7 @@ bool Character::LoadAliases()
 	sql::Query MyQuery;
 	sql::Row MyRow;
 
-	Query << "SELECT command,replacement FROM aliases WHERE user_id=" << this->player.idnum;
+	Query << "SELECT command,replacement FROM userAlias WHERE user_id=" << this->player.idnum;
 
 	try { MyQuery = gameDatabase->sendQuery(Query.str()); }
 	catch( sql::QueryException e )
@@ -2615,7 +2613,7 @@ Object::~Object()
 #ifdef KINSLAYER_JAVASCRIPT
 	JSManager::get()->handleExtraction( this );
 #endif
-	if( (this->item_number > -1 && this == &obj_proto[this->item_number]) || item_number == -1 )
+	if( (this->item_number > -1 && this == obj_proto[this->item_number]) || item_number == -1 )
 	{
 		if( this->name )
 			delete[] this->name;
@@ -2775,17 +2773,19 @@ bool Object::IsProto()
 	return proto;
 }
 
-//Galnor - 01/16/2008 - Boot all the object prototypes from the database table 'obj_protos'
+//Galnor - 01/16/2008 - Boot all the object prototypes from the database.
 int BootObjects()
 {
 	std::stringstream QueryBuffer;
-	sql::Query MyQuery;
-	sql::Row MyRow;
+	sql::Query MyQuery, jsAttachmentQuery;
+	sql::Row MyRow, jsAttachmentRow;
+	std::list<int> jsAttachmentList;
 	int i;
 
 	QueryBuffer << "SELECT * FROM obj_protos ORDER BY vnum ASC";
 	try {
 		MyQuery = gameDatabase->sendQuery(QueryBuffer.str());
+		jsAttachmentQuery = gameDatabase->sendQuery("SELECT * FROM js_attachments WHERE type='O' ORDER BY target_vnum ASC");
 	}
 	catch(sql::QueryException e)
 	{
@@ -2795,7 +2795,7 @@ int BootObjects()
 	}
 	top_of_objt = MyQuery->numRows() - 1;
 
-	obj_proto = new Object[top_of_objt + 1];
+	obj_proto.resize( top_of_objt + 1);
 	obj_index = new Index[top_of_objt + 1];
 	ItemCount.resize(top_of_objt + 1);
 	memset(obj_index, 0, sizeof(Index) * (top_of_objt + 1));
@@ -2803,7 +2803,21 @@ int BootObjects()
 	for(i = 0;i <= top_of_objt;++i)
 	{
 		MyRow = MyQuery->getRow();
-		obj_proto[i].ProtoBoot(MyRow,i);
+		jsAttachmentList.clear();
+		int objectPrototypeVnum = atoi(MyRow["vnum"].c_str());
+
+		while(jsAttachmentQuery->hasNextRow() && jsAttachmentQuery->peekRow().getInt("target_vnum") < objectPrototypeVnum)
+			jsAttachmentQuery->skipRow();
+
+		while(jsAttachmentQuery->hasNextRow() && jsAttachmentQuery->peekRow().getInt("target_vnum") == objectPrototypeVnum)
+		{
+			int scriptVnum = jsAttachmentQuery->getRow().getInt("script_vnum");
+
+			jsAttachmentList.push_back(scriptVnum);
+		}
+
+		obj_proto[i] = new Object();
+		obj_proto[i]->ProtoBoot(MyRow, i, jsAttachmentList);
 	}
 	return top_of_objt;
 }
@@ -2912,7 +2926,10 @@ void Object::ProtoDelete()
 	std::stringstream Buffer;
 	sql::Query MyQuery;
 	Buffer << "DELETE FROM obj_protos WHERE vnum=" << obj_index[this->item_number].vnum;
-	try {MyQuery = gameDatabase->sendQuery(Buffer.str());}
+	try
+	{
+		MyQuery = gameDatabase->sendQuery(Buffer.str());
+	}
 	catch( sql::QueryException e )
 	{
 		e.report();
@@ -2920,7 +2937,7 @@ void Object::ProtoDelete()
 		return;
 	}
 }
-void Object::ProtoBoot( sql::Row &MyRow, const int rnum )
+void Object::ProtoBoot( sql::Row &MyRow, const int rnum, const std::list<int> &jsAttachmentList )
 {
 	this->proto = true;
 	obj_index[rnum].number = rnum;
@@ -2983,18 +3000,10 @@ void Object::ProtoBoot( sql::Row &MyRow, const int rnum )
 
 	// Find any js scripts that are listed as attached to this mob in the db, and attach them to it
 	this->js_scripts = shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
-	try {
-		sql::Query q = gameDatabase->sendQuery("SELECT * FROM js_attachments WHERE type='O' AND target_vnum='" + MyRow["vnum"] + "'");
-		while( q->hasNextRow() )
-		{
-			sql::Row row = q->getRow();
-			int vnum = atoi(row["script_vnum"].c_str());
-			JSTrigger* t = JSManager::get()->getTrigger(vnum);
-			this->js_scripts->push_back(t);
-		}
-	} catch( sql::QueryException e ) {
-		cout << "error in js obj load:" << endl;
-		e.report();
+	for(auto scriptVnumIter = jsAttachmentList.begin();scriptVnumIter != jsAttachmentList.end();++scriptVnumIter)
+	{
+		JSTrigger* t = JSManager::get()->getTrigger((*scriptVnumIter));
+		this->js_scripts->push_back(t);
 	}
 #endif
 }
@@ -3495,7 +3504,7 @@ Character::Character(const int nr, const int type, bool full_copy)
 
 					ovnum = real_object(source->MobData->primary_kit->KitItems[kit][tt].GetItemVnum());
 
-					if (ovnum < 0 || (obj_proto[ovnum].Max != -1 && ItemCount[ovnum] >= obj_proto[ovnum].Max))
+					if (ovnum < 0 || (obj_proto[ovnum]->Max != -1 && ItemCount[ovnum] >= obj_proto[ovnum]->Max))
 						continue;
 
 //					if(mob->CanWear((obj = read_object(ovnum, REAL, true)), tt))
@@ -3524,7 +3533,7 @@ Character::Character(const int nr, const int type, bool full_copy)
 
 			ovnum = real_object(k->KitInventory[i].GetItemVnum());
 
-			if (ovnum < 0 || (obj_proto[ovnum].Max != -1 && ItemCount[ovnum] >= obj_proto[ovnum].Max))
+			if (ovnum < 0 || (obj_proto[ovnum]->Max != -1 && ItemCount[ovnum] >= obj_proto[ovnum]->Max))
 				continue;
 			obj = read_object(ovnum, REAL, true);
 			obj_to_char(obj, this);

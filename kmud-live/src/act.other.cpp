@@ -43,7 +43,6 @@ extern int nameserver_is_slow;
 extern int max_filesize;
 extern class Ideas *idea_list;
 extern struct Index *obj_index;
-extern Object *obj_proto;
 
 /* extern procedures */
 void list_skills( Character * ch, Character *teacher );
@@ -197,12 +196,11 @@ void Character::AddIgnore(const std::string &name)
 	}
 
 	this->Send("You will now ignore %s.\r\n", format.c_str());
-	MudLog(NRM, MAX(GET_INVIS_LEV(this), LVL_GOD), TRUE, "%s is now ignoring %s.", GET_NAME(this),
-		format.c_str());
+	MudLog(NRM, MAX(GET_INVIS_LEV(this), LVL_GOD), TRUE, "%s is now ignoring %s.", GET_NAME(this), format.c_str());
 
 	this->ignores.push_back(format);
 
-	query =	"INSERT INTO ignores (user_id, victim) VALUES (" + MiscUtil::Convert<std::string>(this->player.idnum) + ", '" + format + "')";
+	query =	"INSERT INTO userIgnore (user_id, victim) VALUES (" + MiscUtil::Convert<std::string>(this->player.idnum) + ", '" + format + "')";
 
 	sql::Query MyQuery;
 	try {MyQuery = gameDatabase->sendQuery(query);}
@@ -225,7 +223,7 @@ void Character::RemoveIgnore(const std::string &name)
 	MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(this)), TRUE, "%s is no longer ignoring %s.",
 		GET_NAME(this), (*i).c_str());
 
-	std::string query = "DELETE FROM ignores WHERE user_id = " + MiscUtil::Convert<std::string>(this->player.idnum) +
+	std::string query = "DELETE FROM userIgnore WHERE user_id = " + MiscUtil::Convert<std::string>(this->player.idnum) +
 		" AND victim = '" + sql::escapeString(name) + "'";
 
 	sql::Query MyQuery;
@@ -494,8 +492,8 @@ ACMD( do_butcher )
 			if ( !( obj = read_object( real_object( corpse->scalp->Food->vnum ), REAL, true ) ) )
 			{
 				MudLog( BRF, LVL_APPR, TRUE, "Failed Object Load: %s attempted to butcher %s. Attempted item load: %s(#%d).",
-						GET_NAME( ch ), corpse->GetSDesc(), obj_proto[ corpse->scalp->Food->vnum ].short_description,
-						GET_OBJ_VNUM( &obj_proto[ corpse->scalp->Food->vnum ] ) );
+						GET_NAME( ch ), corpse->GetSDesc(), obj_proto[ corpse->scalp->Food->vnum ]->short_description,
+						GET_OBJ_VNUM( obj_proto[ corpse->scalp->Food->vnum ] ) );
 				ch->Send( "You failed to butcher for unknown reasons...\r\n" );
 				return ;
 			}
@@ -544,9 +542,7 @@ ACMD( do_butcher )
 
 			if ( !( obj = read_object( real_object( corpse->scalp->Skin->vnum ), REAL, true ) ) )
 			{
-				MudLog( BRF, LVL_APPR, TRUE, "Failed Object Load: %s attempted to skin %s. Attempted item load: %s(#%d).",
-						GET_NAME( ch ), corpse->GetSDesc(), obj_proto[ corpse->scalp->Skin->vnum ].short_description,
-						GET_OBJ_VNUM( &obj_proto[ corpse->scalp->Skin->vnum ] ) );
+				MudLog( BRF, LVL_APPR, TRUE, "Failed Object Load: %s attempted to skin %s. Attempted item load: #d.", GET_NAME( ch ), corpse->GetSDesc(), corpse->scalp->Skin->vnum );
 				ch->Send( "You failed to skin for unknown reasons...\r\n" );
 				return ;
 			}

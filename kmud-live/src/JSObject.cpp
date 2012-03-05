@@ -20,7 +20,7 @@ void JSEnvironment::LoadJSObject()
 	load_class<JSObject>();
 }
 
-extern Object *obj_proto;
+extern std::vector<Object*> obj_proto;
 void JSObject::attach( int tVnum )
 {
 	if( !real || real->IsProto() ) return;
@@ -104,7 +104,7 @@ flusspferd::value JSObject::load_obj( const int vnum )
 		return lookupValue(0);
 	}
 
-	if( GET_OBJ_TYPE(&obj_proto[r_num]) == ITEM_SPECIAL )
+	if( GET_OBJ_TYPE(obj_proto[r_num]) == ITEM_SPECIAL )
 	{
 		lookupValue(0);
 	}

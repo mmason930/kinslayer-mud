@@ -1,4 +1,7 @@
 #include <string>
+#include <map>
+#include <fstream>
+#include "StringUtil.h"
 #include "MiscUtil.h"
 
 /*** Galnor - 01/14/2010 - Get the current string's color, if there is one set ***/
@@ -128,3 +131,44 @@ std::string MiscUtil::encodeDateTime(const DateTime &dateTime)
 {
 	return DateTime::parse("%Y-%m-%d %H:%M:%S", dateTime);
 }
+
+std::map<std::string, std::string> MiscUtil::loadResourcesFromFile(const std::string &fileName)
+{
+	std::ifstream inFile(fileName.c_str());
+
+	std::map<std::string, std::string> mapping;
+
+	if(inFile.is_open() == false) {
+
+		return mapping;
+	}
+
+	while(inFile.eof() == false)
+	{
+		std::string line;
+		
+		std::getline(inFile, line);
+
+		std::string::size_type pos = line.find(":");
+
+		if(pos == std::string::npos) {
+
+			continue;
+		}
+
+		std::string left = line.substr(0,pos);
+
+		std::string right = line.substr(pos+1);
+		
+		StringUtil::trim(left);
+		
+		StringUtil::trim(right);
+
+		mapping[left] = right;
+	}
+
+	inFile.close();
+
+	return mapping;
+}
+

@@ -670,7 +670,10 @@ void Character::MakeCorpse()
 	IS_CARRYING_N( this ) = 0;
 
 	corpse->MoveToRoom( in_room );
-	in_room->corpseSave();
+	if(!ROOM_FLAGGED(in_room, ROOM_VAULT))
+	{
+		in_room->corpseSave();
+	}
 }
 
 void Character::DeathCry()

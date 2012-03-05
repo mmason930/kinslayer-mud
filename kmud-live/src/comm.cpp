@@ -95,7 +95,6 @@ extern const char *DFLT_DIR;
 extern const char *DFLT_IP;
 extern int MAX_PLAYERS;
 extern Object *object_list;
-extern Object *obj_proto;
 extern Character *character_list;
 extern int top_of_socialt;
 extern struct Index *obj_index;
@@ -454,6 +453,9 @@ void waitForGatewayConnection() {
 				if(vArgs.at(1) == passwordExpected) {
 
 					gatewayConnection = desc;
+					std::stringstream processIdMessage;
+					processIdMessage << "ProcessID " << GetCurrentProcessId() << std::endl;
+					desc->socketWriteInstant(processIdMessage.str());
 					break;
 				}
 			}
@@ -629,6 +631,11 @@ void initiateGame( int port )
 
 	UpdateBootHigh(0, true);
 
+	if(gatewayConnection != NULL) {
+
+		gatewayConnection->socketWriteInstant("FinishedBooting\n");
+	}
+
 	Log( "Entering game loop." );
 	gameLoop();
 
@@ -748,7 +755,12 @@ void initiateGame( int port )
 
 	MobManager::GetManager().Free();
 	delete (Tips);
-	delete[] ( obj_proto );
+
+	for(auto objectProtoIter = obj_proto.begin();objectProtoIter != obj_proto.end();++objectProtoIter)
+	{
+		delete (*objectProtoIter);
+	}
+	obj_proto.clear();
 	delete[] ( obj_index );
 
 	Log("Freeing Legends list...");
@@ -929,6 +941,7 @@ void gameLoop()
 		if(gatewayConnection == NULL) {
 
 			waitForGatewayConnection();
+			gatewayConnection->socketWriteInstant("FinishedBooting\n");
 		}
 
 		while(true) {
@@ -1206,20 +1219,74 @@ void Character::WaitEvents()
 void AutoSave( void )
 {
 	sendToAll("Beginning autosave. Please wait...\r\n", true);
+	Clock clock1;
 
-	Character *NextCh;
-	for( Character *ch = character_list;ch;ch = NextCh )
+	std::map<std::pair<char, std::string>, std::list<Object *>> holderIdAndTypeToContentsMap;
+	Object *object;
+
+	for(Character *ch = character_list;ch;ch = ch->next)
 	{
-		NextCh = ch->next;
 		if( !ch->IsPurged() && !IS_NPC(ch) )
 		{
-			ch->itemSave();
+			std::list<Object*> characterContents;
+			for(object = ch->carrying;object;object = object->next_content)
+			{
+				characterContents.push_back(object);
+			}
+			for(int bodyPosition = 0;bodyPosition < NUM_WEARS;++bodyPosition)
+			{
+				if(GET_EQ(ch, bodyPosition))
+					characterContents.push_back(GET_EQ(ch, bodyPosition));
+			}
+			holderIdAndTypeToContentsMap[ std::pair<char, std::string>('P', MiscUtil::Convert<std::string>(ch->player.idnum)) ] = characterContents;
+
 			ch->Save();
 		}
 	}
-	Room::saveCorpseRooms();
-	sendToAll("\r\nAutosave complete.\r\n", true);
 
+	//Build a list of all rooms that have at least one corpse.
+	std::set<Room*> corpseRooms;
+	for(auto corpseRoomVnumIter = Room::corpseRooms.begin();corpseRoomVnumIter != Room::corpseRooms.end();)
+	{
+		int rnum = real_room((*corpseRoomVnumIter));
+		if( rnum != -1 )
+		{
+			corpseRooms.insert( World[ rnum ] );
+			
+			bool hasCorpse = false;
+			//Ensure that the room has at least one corpse in it still.
+			for(object = World[ rnum ]->contents;object != NULL;object = object->next_content)
+			{
+				if(IS_CORPSE(object))
+				{
+					hasCorpse = true;
+					break;
+				}
+			}
+
+			if(!hasCorpse)
+					corpseRoomVnumIter = Room::corpseRooms.erase(corpseRoomVnumIter);
+			else
+				++corpseRoomVnumIter;
+		}
+	}
+
+	//Now loop through each room and save its corpses.
+	for(auto corpseRoomIter = corpseRooms.begin();corpseRoomIter != corpseRooms.end();++corpseRoomIter)
+	{
+		Room *corpseRoom = (*corpseRoomIter);
+		std::list<Object*> roomContents;
+		for(object = corpseRoom->contents;object;object = object->next_content)
+		{
+			if(IS_CORPSE(object))
+				roomContents.push_back(object);
+		}
+		holderIdAndTypeToContentsMap[ std::pair<char, std::string>('R', MiscUtil::Convert<std::string>(corpseRoom->vnum)) ] = roomContents;
+	}
+
+	Object::saveMultipleHolderItems(holderIdAndTypeToContentsMap, true);
+
+	sendToAll("\r\nAutosave complete.\r\n", true);
         
 	char tmpBuf[MAX_STRING_LENGTH];
 	for( Descriptor *d = descriptor_list;d;d=d->next )
@@ -1399,6 +1466,10 @@ void heartbeat( int pulse )
 	if( !( pulse % (3600 RL_SEC)) )
 	{
 		lagMonitor.startClock();
+		ForumUtil::archiveAndRemoveDeletedForumUsers(gameDatabase);
+		lagMonitor.stopClock( LAG_MONITOR_ARCHIVE_FORUM_USERS );
+
+		lagMonitor.startClock();
 		ForumUtil::addUsersToForum(gameDatabase);
 		lagMonitor.stopClock( LAG_MONITOR_ADD_FORUM_USERS );
 	}
@@ -1478,6 +1549,10 @@ void heartbeat( int pulse )
 		lagMonitor.startClock();
 		AuctionManager::GetManager().UpdateAuctions();
 		lagMonitor.stopClock( LAG_MONITOR_AUCTION_UPDATES );
+
+//		lagMonitor.startClock();
+//		Room::saveCorpseRooms();
+//		lagMonitor.stopClock( LAG_MONITOR_SAVE_CORPSE_ROOMS );
 	}
 	
 	lagMonitor.startClock();

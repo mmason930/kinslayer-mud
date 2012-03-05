@@ -69,7 +69,6 @@ extern DateTime rebootTime;
 extern int rank_req[14];
 extern int Seconds;
 extern std::list<Track *> TrackList;
-extern Object *obj_proto;
 extern void check_autowiz(Character *ch);
 extern char mudname[256];
 extern int mother_desc;
@@ -1218,6 +1217,7 @@ extern class Shop *shop_index;
 
 void rebootCountdown();
 
+void AutoSave( void );
 /*** Extra immortal command to perform various, usually one-time test/maintanence routines ***/
 ACMD(do_extra)
 {
@@ -1237,7 +1237,27 @@ ACMD(do_extra)
 			std::string expression = StringUtil::implode(vArgs, " ");
 			flusspferd::value val = JSManager::get()->executeExpression(expression);
 		}
+		else if( !str_cmp(vArgs.at(0), "forums") )
+		{
+			ForumUtil::archiveAndRemoveDeletedForumUsers(gameDatabase);
+			ForumUtil::addUsersToForum(gameDatabase);
+		}
 #endif
+		else if( !str_cmp(vArgs.at(0), "autosave") )
+		{
+			AutoSave();
+		}
+		else if( !str_cmp(vArgs.at(0), "corpses") )
+		{
+			int numberOfCorpses = MIN(500, atoi(vArgs.at(1).c_str()));
+			while(numberOfCorpses-- > 0)
+			{
+				ch->InterpCommand("at guard k guard");
+				Log("Number of corpses: %d", numberOfCorpses);
+			}
+			ch->Send(OK);
+			return;
+		}
 		else if( !str_cmp(vArgs.at(0), "switch") )
 		{
 			if( !str_cmp(vArgs.at(1), "add") )
@@ -1274,109 +1294,6 @@ ACMD(do_extra)
 	ch->Send("Memory remaining: %lld\r\n", AvailableSystemMemory());
 #endif
 
-	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-//	Character *ptr;
-	skip_spaces(&argument);
-	TwoArguments(argument,arg1,arg2);
-
-	PlayerIndex *p = getPlayerIndexByName( arg1 );
-
-	if( !p ) {
-		ch->Send(NOPERSON);
-		return;
-	}
-	std::ifstream InFile(SQL_FILE);
-	std::string username, password, dbname;
-	if( !InFile.is_open() ) {
-		MudLog(BRF, LVL_APPR, TRUE, "SQL file could not be opened for reading.");
-		exit(1);
-	}
-	std::getline(InFile, username);
-	std::getline(InFile, password);
-	std::getline(InFile, dbname);
-
-	InFile.close();
-
-	sql::Connection BackupDatabase;
-	try {
-		BackupDatabase = sql::Connection( new sql::_Connection("localhost", username, password, "livemud_bak") );
-	} catch( sql::ConnectionException e ) {
-		ch->Send("Could not mount temporary database connection.\r\n");
-		return;
-	}
-
-	std::map< __int64, std::pair<std::string,bool> > mItems; //Item ID => (query to run, exists)
-	std::queue< std::pair< __int64, char > > qOwners; //holder_id => holder_type
-
-	qOwners.push( std::pair< __int64, char >(p->id, 'P') );
-
-	while( qOwners.empty() == false )
-	{
-		__int64 holderId = qOwners.front().first;
-		char holderType  = qOwners.front().second;
-		sql::Query rs;
-		try {
-			rs = BackupDatabase->sendQuery(
-				"SELECT id FROM objects WHERE holder_id='" + MiscUtil::Convert<std::string>(holderId)
-				+ "' AND holder_type='" + holderType + "';"
-			);
-		} catch( sql::QueryException e ) {
-			ch->Send("Could not send query: %s", e.getMessage().c_str());
-			return;
-		}
-		while( rs->hasNextRow() )
-		{
-			sql::Row row = rs->getRow();
-			mItems[ MiscUtil::Convert<__int64>(row["id"]) ].second = false;
-			qOwners.push( std::pair<__int64, char>( MiscUtil::Convert<__int64>(row["id"]), 'O' ) );
-		}
-		qOwners.pop();
-	}
-#ifndef WIN32
-
-/***
-
-	for( std::map< __int64, std::pair<std::string,bool> >::iterator mIter = mItems.begin();mIter != mItems.end();++mIter )
-	{
-		__int64 objID = (*mIter).first;
-		std::stringstream commandBufferStream;
-		commandBufferStream << "mysqldump \"--where=id='" << objID << "'\""
-			<< " --user=" << username
-			<< " --password=" << password
-			<< " livemud_bak objects";
-		std::string commandBuffer = commandBufferStream.str();
-		std::string output = Execute(commandBuffer.c_str());	
-		std::string::size_type iPosBegin = output.find("INSERT");
-		std::string::size_type iPosEnd   = output.find(");", iPosBegin)+2;
-
-		if( iPosBegin == -1 || iPosEnd == -1 ) {
-			ch->Send("Could not find expression in mysqldump's output.\r\n");
-			return;
-		}
-
-		output = output.substr(iPosBegin, iPosEnd-iPosBegin);
-		(*mIter).second.first = output;
-	}
-
-	std::cout << mItems.size() << std::endl;
-
-	for( std::map< __int64, std::pair<std::string,bool> >::iterator mIter = mItems.begin();mIter != mItems.end();++mIter )
-	{
-		if( get_obj_by_id( (*mIter).first ) )
-			(*mIter).second.second = true;
-		else
-		{
-
-			try {
-				gameDatabase->sendRawQuery( (*mIter)->
-			} catch( sql::QueryException e ) {
-				ch->Send("Error trying to insert item #%d - Already exists?", (*mIter).first);
-			}
-		}
-	}
-//	printf("%s\r\n", output.c_str());
-***/
-#endif
 }
 
 
@@ -1935,8 +1852,8 @@ ACMD(do_find)
 		QueryBuffer << "-1";
 		for(i = 0;i < top_of_objt;++i)
 		{
-			if( isname(name, obj_proto[i].name) )
-				QueryBuffer << "," << obj_index[obj_proto[i].item_number].vnum;
+			if( isname(name, obj_proto[i]->name) )
+				QueryBuffer << "," << obj_index[obj_proto[i]->item_number].vnum;
 		}
 	}
 	QueryBuffer << ");";
@@ -4112,7 +4029,7 @@ ACMD(do_oload)
 		return;
 	}
 
-	if( GET_OBJ_TYPE(&obj_proto[r_num]) == ITEM_SPECIAL && GET_LEVEL(ch) < LVL_GRGOD )
+	if( GET_OBJ_TYPE(obj_proto[r_num]) == ITEM_SPECIAL && GET_LEVEL(ch) < LVL_GRGOD )
 	{
 		ch->Send("That item is flagged as special. You may not load it.\r\n");
 		return;

@@ -30,10 +30,7 @@
 
 #include <boost/regex.hpp>
 
-/*
- * External data structures.
- */
-extern Object *obj_proto;
+//External data structures.
 extern struct Index *obj_index;
 
 extern Social *soc_mess_list;
@@ -43,9 +40,7 @@ extern int top_of_objt;
 extern const char *dirs[];
 extern Descriptor *descriptor_list;
 
-/*
- * External functions.
- */
+//External functions.
 extern void kedit_setup_existing( Descriptor *, Kit * );
 extern void kedit_setup_new( Descriptor * );
 void zedit_setup( Descriptor *d, int room_num );
@@ -66,24 +61,17 @@ extern int find_action( int cmd );
 extern int real_shop( int vnum );
 FILE *file;
 
-/*
- * Internal function prototypes.
- */
+//Internal function prototypes.
 int can_edit_zone( Character *ch, int number );
 void olc_saveinfo( Character *ch );
 
-/*
- * Global string constants.
- */
+//Global string constants.
 const char *save_info_msg[ 9 ] =
     {"Rooms", "Objects", "Zone info",
      "Mobiles", "Shops", "Triggers", "Help", "Actions", "Kits"
     };
 
-/*
- * Internal data structures.
- */
-
+//Internal data structures.
 struct olc_scmd_data
 {
 	const char *text;
@@ -944,30 +932,30 @@ void copy_room( int rnum_src, int rnum_targ )
  * success?                             TR 2-20-98           */
 void copy_object( int rnum_src, int rnum_targ )
 {
-	if ( obj_proto[ rnum_src ].name )
-		obj_proto[ rnum_targ ].name = str_dup( obj_proto[ rnum_src ].name );
+	if ( obj_proto[ rnum_src ]->name )
+		obj_proto[ rnum_targ ]->name = str_dup( obj_proto[ rnum_src ]->name );
 
-	if ( obj_proto[ rnum_src ].description )
-		obj_proto[ rnum_targ ].description = str_dup( obj_proto[ rnum_src ].description );
+	if ( obj_proto[ rnum_src ]->description )
+		obj_proto[ rnum_targ ]->description = str_dup( obj_proto[ rnum_src ]->description );
 
-	if ( obj_proto[ rnum_src ].short_description )
-		obj_proto[ rnum_targ ].short_description = str_dup( obj_proto[ rnum_src ].short_description );
+	if ( obj_proto[ rnum_src ]->short_description )
+		obj_proto[ rnum_targ ]->short_description = str_dup( obj_proto[ rnum_src ]->short_description );
 
-	if ( obj_proto[ rnum_src ].action_description )
-		obj_proto[ rnum_targ ].action_description = str_dup( obj_proto[ rnum_src ].action_description );
+	if ( obj_proto[ rnum_src ]->action_description )
+		obj_proto[ rnum_targ ]->action_description = str_dup( obj_proto[ rnum_src ]->action_description );
 
-	if ( obj_proto[ rnum_src ].ex_description )
-		obj_proto[ rnum_targ ].ex_description = obj_proto[ rnum_src ].ex_description;
+	if ( obj_proto[ rnum_src ]->ex_description )
+		obj_proto[ rnum_targ ]->ex_description = obj_proto[ rnum_src ]->ex_description;
 
-	obj_proto[ rnum_targ ].obj_flags = obj_proto[ rnum_src ].obj_flags;
-	obj_proto[ rnum_targ ].worn_on = obj_proto[ rnum_src ].worn_on;
-	/* add more if you want... */
+	obj_proto[ rnum_targ ]->obj_flags = obj_proto[ rnum_src ]->obj_flags;
+	obj_proto[ rnum_targ ]->worn_on = obj_proto[ rnum_src ]->worn_on;
+	// add more if you want...
 
 	return ;
 }
 
 
-/* Create an exit in a room (rnum) in this direction.  (No target) */
+// Create an exit in a room (rnum) in this direction.  (No target)
 int create_dir( int room, int dir )
 {
 	if ( ( room < 0 ) || ( (unsigned int) room > World.size() ) )
@@ -988,7 +976,7 @@ int create_dir( int room, int dir )
 }
 
 
-/* Remove an exit from a room (rnum). */
+// Remove an exit from a room (rnum).
 int free_dir( Room *room, int dir )
 {
 	if ( ( dir < 0 ) || ( dir >= NUM_OF_DIRS ) )
@@ -1018,10 +1006,9 @@ int free_dir( Room *room, int dir )
 }
 
 
-/* These defines were harvested from....  zedit.c ?      */
+// These defines were harvested from....  zedit.c ?
 #define ZCMD (zone_table[zone].cmd[cmd_no])
 #define W_EXIT(room, num) (World[(room)]->dir_option[(num)])
-/* ***************************************************** */
 
 ACMD( do_rlist )
 {
@@ -1446,18 +1433,18 @@ ACMD( do_olist )
 
 	for ( i = 0;i <= top_of_objt;++i )
 	{
-		if ( ( ret = OlistCanDisp( &obj_proto[ i ], arg1, arg2, arg3, RangeCheck ) ) > 0 )
+		if ( ( ret = OlistCanDisp(obj_proto[ i ], arg1, arg2, arg3, RangeCheck) ) > 0 )
 		{
-			if ( GET_OBJ_TYPE( &obj_proto[ i ] ) == ITEM_WEAPON )
+			if ( GET_OBJ_TYPE(obj_proto[ i ]) == ITEM_WEAPON )
 				l = &weapons;
-			else if ( GET_OBJ_TYPE( &obj_proto[ i ] ) == ITEM_ARMOR )
+			else if ( GET_OBJ_TYPE(obj_proto[ i ]) == ITEM_ARMOR )
 				l = &armor;
 			else
 				l = &misc;
 
 			if ( !l->size() )
 			{
-				l->push_back( &obj_proto[ i ] );
+				l->push_back(obj_proto[ i ]);
 				continue;
 			}
 
@@ -1465,73 +1452,73 @@ ACMD( do_olist )
 			{
 				if ( (l == &armor || l == &misc) && !str_cmp( arg3, "abs" ) )
 				{
-					if ( GET_OBJ_ABS( &obj_proto[ i ] ) >= GET_OBJ_ABS( *iter ) )
+					if ( GET_OBJ_ABS(obj_proto[ i ]) >= GET_OBJ_ABS( *iter ) )
 					{
-						l->insert( iter, &obj_proto[ i ] );
+						l->insert( iter, obj_proto[ i ] );
 						break;
 					}
 				}
 				else if ( (l == &armor || l == &misc) && !str_cmp( arg3, "db" ) )
 				{
-					if ( GET_OBJ_DB( &obj_proto[ i ] ) >= GET_OBJ_DB( *iter ) )
+					if ( GET_OBJ_DB(obj_proto[ i ]) >= GET_OBJ_DB( *iter ) )
 					{
-						l->insert( iter, &obj_proto[ i ] );
+						l->insert( iter, obj_proto[ i ] );
 						break;
 					}
 				}
 				else if ( !str_cmp( arg3, "pb" ) )
 				{
-					if ( GET_OBJ_PB( &obj_proto[ i ] ) >= GET_OBJ_PB( *iter ) )
+					if ( GET_OBJ_PB( obj_proto[ i ] ) >= GET_OBJ_PB( *iter ) )
 					{
-						l->insert( iter, &obj_proto[ i ] );
+						l->insert( iter, obj_proto[ i ] );
 						break;
 					}
 				}
 				else if ( (l == &armor || l == &misc) && !str_cmp( arg3, "defense" ) )
 				{
-					if ( GET_OBJ_PB( &obj_proto[ i ] ) + GET_OBJ_DB( &obj_proto[ i ] ) >= GET_OBJ_PB( *iter ) + GET_OBJ_DB( *iter ) )
+					if ( GET_OBJ_PB(obj_proto[ i ] ) + GET_OBJ_DB( obj_proto[ i ] ) >= GET_OBJ_PB( *iter ) + GET_OBJ_DB( *iter ) )
 					{
-						l->insert( iter, &obj_proto[ i ] );
+						l->insert( iter, obj_proto[ i ] );
 						break;
 					}
 				}
 				else if ( !str_cmp( arg3, "ob" ) )
 				{
-					if ( GET_OBJ_OB( &obj_proto[ i ] ) >= GET_OBJ_OB( *iter ) )
+					if ( GET_OBJ_OB( obj_proto[ i ] ) >= GET_OBJ_OB( *iter ) )
 					{
-						l->insert( iter, &obj_proto[ i ] );
+						l->insert( iter, obj_proto[ i ] );
 						break;
 					}
 				}
 				else if ( !str_cmp( arg3, "weight" ) )
 				{
-					if ( GET_OBJ_WEIGHT( &obj_proto[ i ] ) >= GET_OBJ_WEIGHT( *iter ) )
+					if ( GET_OBJ_WEIGHT( obj_proto[ i ] ) >= GET_OBJ_WEIGHT( *iter ) )
 					{
-						l->insert( iter, &obj_proto[ i ] );
+						l->insert( iter, obj_proto[ i ] );
 						break;
 					}
 				}
 				else if ( l == &weapons && !str_cmp( arg3, "dmg1" ) )
 				{
-					if ( GET_OBJ_VAL( &obj_proto[ i ], 1 ) >= GET_OBJ_VAL( ( *iter ), 1 ) )
+					if ( GET_OBJ_VAL( obj_proto[ i ], 1 ) >= GET_OBJ_VAL( ( *iter ), 1 ) )
 					{
-						l->insert( iter, &obj_proto[ i ] );
+						l->insert( iter, obj_proto[ i ] );
 						break;
 					}
 				}
 				else if ( l == &weapons && !str_cmp( arg3, "dmg2" ) )
 				{
-					if ( GET_OBJ_VAL( &obj_proto[ i ], 2 ) >= GET_OBJ_VAL( ( *iter ), 2 ) )
+					if ( GET_OBJ_VAL( obj_proto[ i ], 2 ) >= GET_OBJ_VAL( ( *iter ), 2 ) )
 					{
-						l->insert( iter, &obj_proto[ i ] );
+						l->insert( iter, obj_proto[ i ] );
 						break;
 					}
 				}
 				else if ( l == &weapons && !str_cmp( arg3, "bash" ) )
 				{
-					if ( obj_proto[ i ].BashRating() >= (*iter)->BashRating() )
+					if (obj_proto[ i ]->BashRating() >= (*iter)->BashRating() )
 					{
-						l->insert( iter, &obj_proto[ i ] );
+						l->insert( iter, obj_proto[ i ] );
 						break;
 					}
 				}
@@ -1539,9 +1526,9 @@ ACMD( do_olist )
 				{
 					if ( !*arg3 )
 					{
-						if ( GET_OBJ_VNUM( &obj_proto[ i ] ) < GET_OBJ_VNUM( *iter ) )
+						if ( GET_OBJ_VNUM( obj_proto[ i ] ) < GET_OBJ_VNUM( *iter ) )
 						{
-							l->insert( iter, &obj_proto[ i ] );
+							l->insert( iter, obj_proto[ i ] );
 							break;
 						}
 					}
@@ -1557,7 +1544,7 @@ ACMD( do_olist )
 				}
 			}
 			if ( iter == l->end() )
-				l->push_back( &obj_proto[ i ] );
+				l->push_back( obj_proto[ i ] );
 		}
 		else if ( ret == -1 )
 			break;

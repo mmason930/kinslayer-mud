@@ -1320,9 +1320,15 @@ void Object::MoveToRoom(Room *room, bool vaultSave)
 		room->contents = this;
 		this->in_room = room;
 		this->carried_by = NULL;
-
-		if (ROOM_FLAGGED(room, ROOM_VAULT) && vaultSave)
-			room->itemSave();
+		
+		if (ROOM_FLAGGED(room, ROOM_VAULT))
+		{
+			if(vaultSave)
+				room->itemSave();
+		}
+		else if(IS_CORPSE(this)) {
+			Room::corpseRooms.insert(room->vnum);
+		}
 	}
 }
 

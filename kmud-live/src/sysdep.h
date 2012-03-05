@@ -99,6 +99,7 @@
 #include <string>
 #include <queue>
 #include <stack>
+#include <set>
 #include <iomanip>
 #include <bitset>
 
@@ -347,7 +348,7 @@ typedef long long __int64;
 /* Define the type of a socket and other miscellany */
 #if defined(WIN32)	/* Definitions for Win32 */
 
-// Serai - 06/18 - for copyover
+// Serai - 06/18/04 - for copyover
 # define execl _execl
 # include <process.h>
 

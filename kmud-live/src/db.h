@@ -16,6 +16,7 @@
 
 extern std::list< Character * > CharPurgeList;
 extern std::list< Object *    > ObjPurgeList;
+extern std::vector<Object*> obj_proto;
 
 #define LIB_WORLD		"world/"
 #define LIB_TEXT		"text/"
@@ -26,16 +27,16 @@ extern std::list< Object *    > ObjPurgeList;
 
 extern std::string DebugFileName;
 
-#define SUF_PLOG		"plog"
+#define SUF_PLOG			"plog"
 
-/* names of various files and directories */
-#define INDEX_FILE		"index"					/* index of world files			*/
-#define SHP_PREFIX		LIB_WORLD"shp"SLASH		/* shop definitions				*/
+// names of various files and directories
+#define INDEX_FILE			"index"					// index of world files
+#define SHP_PREFIX			LIB_WORLD"shp"SLASH		// shop definitions
 
-#define SOCMESS_FILE	LIB_MISC"socials"		/* messgs for social Acts		*/
-#define STDERR			LIB_MISC"MudLog"		/* For MudLog file				*/
-#define CHEST_LOG_FILE	LIB_MISC"chestlog"		/* For the chest logs			*/
-#define SQL_FILE		LIB_MISC"sql"			/* For SQL login info			*/
+#define SOCMESS_FILE		LIB_MISC"socials"		// messgs for social Acts
+#define STDERR				LIB_MISC"MudLog"		// For MudLog file
+#define CHEST_LOG_FILE		LIB_MISC"chestlog"		// For the chest logs
+#define BASIC_CONFIG_FILE	LIB_MISC"BasicConfig"	// For SQL login info
 
 template <class _T >
 std::string SQLVal( _T t, bool last=false )

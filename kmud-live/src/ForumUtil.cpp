@@ -93,6 +93,32 @@ void ForumUtil::addForumUser(Character *character)
 	}
 }
 
+void ForumUtil::archiveAndRemoveDeletedForumUsers(sql::Connection connection)
+{
+	std::stringstream queryBuffer;
+	
+	queryBuffer << " INSERT IGNORE INTO phpbb_usersArchive"
+				<< " SELECT"
+				<< "   phpbb_users.*"
+				<< " FROM"
+				<< "   phpbb_users"
+				<< " LEFT JOIN users ON phpbb_users.user_id = users.user_id"
+				<< " WHERE users.user_id IS NULL";
+
+	connection->sendRawQuery(queryBuffer.str());
+
+	queryBuffer.str("");
+
+	queryBuffer << " DELETE"
+				<< "   phpbb_users.*"
+				<< " FROM"
+				<< "   phpbb_users"
+				<< " LEFT JOIN users ON phpbb_users.user_id = users.user_id"
+				<< " WHERE users.user_id IS NULL";
+
+	connection->sendRawQuery(queryBuffer.str());
+
+}
 void ForumUtil::addUsersToForum(sql::Connection connection)
 {
 	//Query for all users who do not yet have a forum account.

@@ -6,6 +6,9 @@
 #include "DateTime.h"
 
 #include "GatewayDescriptor.h"
+#include "MudStatus.h"
+
+#define BASIC_CONFIG_PATH		"lib/misc/BasicConfig"
 
 class GatewayServer
 {
@@ -18,24 +21,32 @@ private:
 	kuClient *motherConnectionToServer;
 
 	std::string inputBufferFromServer;
+	std::string mudRootDirectoryPath;
+	std::string mudExecutablePath;
 
 	std::string serverHost;
 	int serverPort;
 	int listeningPort;
 	int secondaryPort;
+	unsigned int mudProcessId;
 
 	DateTime lastPingSentToGameServer;
 	DateTime lastPingResponseFromGameServer;
+	DateTime statusLastModifiedDatetime;
+	DateTime lastAttemptedMudStartDatetime;
+	DateTime lastMudProcessIdCheckDatetime;
 
 	bool crashed;
 	bool rebooting;
+	bool restartOnShutdown;
+
+	MudStatus *mudStatus;
 
 	void processInputFromMotherConnectionToServer();
 
 public:
 
 	GatewayServer();
-	GatewayServer(const int port, const int *secondaryPort, const std::string &serverHost, const int serverPort);
 	~GatewayServer();
 
 	std::string getServerHost();
@@ -48,10 +59,10 @@ public:
 	bool hasCommand();
 	std::string getCommand();
 
-	void setup(const int port, const int *secondaryGatewayPort, const std::string &serverHost, const int serverPort);
+	void setup();
 	void run();
 	void shutdown();
-	void setupAndRun(const int port, const int *secondaryPort,  const std::string &serverHost, const int serverPort);
+	void setupAndRun();
 
 	void attemptConnectionWithGameServer();
 	void bindListener();
@@ -70,8 +81,16 @@ public:
 	bool mudIsRebooting();
 	bool mudIsDown();
 
+	bool loadConfiguration();
+	void reloadConfiguration();
 	void sendToDescriptors(const std::string &message);
 	void handleGameShutdown();
+	std::string getMudRootDirectoryPath();
+	bool getRestartOnShutdown();
+	bool isMudProcessRunning();
+	MudStatus *getMudStatus();
+	void setMudStatus(MudStatus *mudStatus);
+	void attemptMudStart();
 };
 
 #endif

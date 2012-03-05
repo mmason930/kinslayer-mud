@@ -2,6 +2,9 @@
 #define STRING_UTIL_H
 
 #include <sstream>
+#include <vector>
+#include <list>
+#include <map>
 
 class StringUtil
 {

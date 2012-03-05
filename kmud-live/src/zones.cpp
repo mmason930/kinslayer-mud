@@ -14,7 +14,6 @@
 
 boost::recursive_mutex ZoneManager::SingletonMutex;
 extern Index *obj_index;
-extern Object *obj_proto;
 void add_follower(Character * ch, Character * leader);
 int perform_group( Character *ch, Character *vict );
 
@@ -190,7 +189,7 @@ void Zone::Reset()
 			fol = 0;
 		switch (this->cmd[cmd_no]->command)
 		{
-			case 'M':			/* read a mobile */
+			case 'M':			// read a mobile
 				if (this->cmd[cmd_no]->arg2 >= MiscUtil::random(1, 100) &&
 					(this->cmd[cmd_no]->arg4 == -1 || this->cmd[cmd_no]->arg4 > (int)CountMobsRoom(this->cmd[cmd_no]->arg1, World[this->cmd[cmd_no]->arg3])) &&
 					(this->cmd[cmd_no]->arg5 == -1 || this->cmd[cmd_no]->arg5 > (int)CountMobs(this->cmd[cmd_no]->arg1)) &&
@@ -236,8 +235,8 @@ void Zone::Reset()
 				if (this->cmd[cmd_no]->arg2 >= MiscUtil::random(1, 100) &&
 				(CountObjectsRoom(cmd[cmd_no]->arg1, cmd[cmd_no]->arg3) < this->cmd[cmd_no]->arg4 || cmd[cmd_no]->arg4 == -1)&&
 				(this->cmd[cmd_no]->arg5 == -1 || CountObjects(this->cmd[cmd_no]->arg1) < (unsigned int)cmd[cmd_no]->arg5) &&
-				(this->cmd[cmd_no]->arg6 || !cmd[cmd_no]->obj) && (obj_proto[this->cmd[cmd_no]->arg1].Max == -1 ||
-				ItemCount[this->cmd[cmd_no]->arg1] < obj_proto[this->cmd[cmd_no]->arg1].Max))
+				(this->cmd[cmd_no]->arg6 || !cmd[cmd_no]->obj) && (obj_proto[this->cmd[cmd_no]->arg1]->Max == -1 ||
+				ItemCount[this->cmd[cmd_no]->arg1] < obj_proto[this->cmd[cmd_no]->arg1]->Max))
 				{
 					if (cmd[cmd_no]->arg3 >= 0)
 					{
@@ -270,9 +269,9 @@ void Zone::Reset()
 					last_cmd = 0;
 				break;
 
-			case 'P':			/* object to object */
-				if (cmd[cmd_no]->arg2 >= MiscUtil::random(1, 100) && (obj_proto[cmd[cmd_no]->arg1].Max == -1 ||
-				ItemCount[cmd[cmd_no]->arg1] < obj_proto[cmd[cmd_no]->arg1].Max))
+			case 'P':			// object to object
+				if (cmd[cmd_no]->arg2 >= MiscUtil::random(1, 100) && (obj_proto[cmd[cmd_no]->arg1]->Max == -1 ||
+				ItemCount[cmd[cmd_no]->arg1] < obj_proto[cmd[cmd_no]->arg1]->Max))
 				{
 					if( cmd[cmd_no]->arg4 < 0 || cmd[cmd_no]->arg4 >= World.size() )
 						break;
@@ -285,7 +284,7 @@ void Zone::Reset()
 						break;
 
 					// If weight in container + weight of item to put in > max weight, we terminate this operation.
-					if( (obj_to->Weight() - obj_to->GetTotalWeight() + (&obj_proto[cmd[cmd_no]->arg1])->GetTotalWeight())
+					if( (obj_to->Weight() - obj_to->GetTotalWeight() + (obj_proto[cmd[cmd_no]->arg1])->GetTotalWeight())
 						> obj_to->GetTotalVal0())
 					{
 						break;
@@ -317,10 +316,10 @@ void Zone::Reset()
 					break;
 				}
 
-				/* Serai - This added for more control on loading obj's to mobs */
+				// Serai - This added for more control on loading obj's to mobs
 				if (cmd[cmd_no]->arg2 >= MiscUtil::random(1, 100)
-				&& CountObjectsInv(cmd[cmd_no]->arg1, mob) < cmd[cmd_no]->arg3 && (obj_proto[cmd[cmd_no]->arg1].Max == -1
-				|| ItemCount[cmd[cmd_no]->arg1] < obj_proto[cmd[cmd_no]->arg1].Max))
+				&& CountObjectsInv(cmd[cmd_no]->arg1, mob) < cmd[cmd_no]->arg3 && (obj_proto[cmd[cmd_no]->arg1]->Max == -1
+				|| ItemCount[cmd[cmd_no]->arg1] < obj_proto[cmd[cmd_no]->arg1]->Max))
 				{
 					obj = read_object(cmd[cmd_no]->arg1, REAL, true);
 					sprintf(obj->creator, "zone load -inventory- on mob %d", mob->nr);
@@ -351,8 +350,8 @@ void Zone::Reset()
 
 				else
 				{
-					if(MiscUtil::random(1, 100) <= cmd[cmd_no]->arg2 && (obj_proto[cmd[cmd_no]->arg1].Max == -1
-					|| ItemCount[cmd[cmd_no]->arg1] < obj_proto[cmd[cmd_no]->arg1].Max))
+					if(MiscUtil::random(1, 100) <= cmd[cmd_no]->arg2 && (obj_proto[cmd[cmd_no]->arg1]->Max == -1
+					|| ItemCount[cmd[cmd_no]->arg1] < obj_proto[cmd[cmd_no]->arg1]->Max))
 					{
 						obj = read_object(cmd[cmd_no]->arg1, REAL, true);
 
@@ -488,12 +487,12 @@ void Zone::Save()
 	std::stringstream Query, DeleteQuery;
 
 	if( inDB )
-		Query << "UPDATE zone_index SET name='" << sql::escapeString(Name) << "',lifespan='" << lifespan <<
+		Query << "UPDATE zoneIndex SET name='" << sql::escapeString(Name) << "',lifespan='" << lifespan <<
 		"',x='" << x << "',y='" << y << "',bot='" << bot << "',top='" << top << "',reset_mode='" << reset_mode <<
 		"',sunrise='" << sql::escapeString(Sunrise) << "',sunset='" << sql::escapeString(Sunset) <<
 		"',builders='" << sql::escapeString(Builders) << "',closed='" << (closed?1:0) << "' WHERE id='" << getVnum() << "';";
 	else
-		Query << "INSERT INTO zone_index (id,name,lifespan,x,y,bot,top,reset_mode,sunrise,sunset,builders,closed) VALUES("
+		Query << "INSERT INTO zoneIndex (id,name,lifespan,x,y,bot,top,reset_mode,sunrise,sunset,builders,closed) VALUES("
 			<< SQLVal(getVnum()) << SQLVal(sql::escapeString(Name)) << SQLVal(lifespan) << SQLVal(x) << SQLVal(y)
 			<< SQLVal(bot) << SQLVal(top) << SQLVal(reset_mode) << SQLVal(sql::escapeString(Sunrise))
 			<< SQLVal(sql::escapeString(Sunset)) << SQLVal(sql::escapeString(Builders)) << SQLVal(closed,true) << ");";
@@ -507,7 +506,7 @@ void Zone::Save()
 	inDB = true;
 
 	Query.str("");
-	Query << "DELETE FROM zone_commands WHERE zone_id='" << this->vnum << "';";
+	Query << "DELETE FROM zoneCommand WHERE zone_id='" << this->vnum << "';";
 	gameDatabase->sendRawQuery(Query.str());
 
 	/*********** Save the Zone Commands **************/
@@ -518,7 +517,7 @@ void Zone::Save()
 /*
 		if( this->cmd[cmd_no]->altered && cmd[cmd_no]->dbID != -1 )//In the database, and altered, needs an UPDATE
 		{
-			Query << "UPDATE zone_commands SET cmd='" << cmd[cmd_no]->command << "',if_flag='" << cmd[cmd_no]->if_flag
+			Query << "UPDATE zoneCommand SET cmd='" << cmd[cmd_no]->command << "',if_flag='" << cmd[cmd_no]->if_flag
 				<< "',arg1='" << cmd[cmd_no]->GetRealArg1() << "',arg2='" << cmd[cmd_no]->GetRealArg2() << "',arg3='"
 				<< cmd[cmd_no]->GetRealArg3() << "',arg4='" << cmd[cmd_no]->GetRealArg4() << "',arg5='"
 				<< cmd[cmd_no]->GetRealArg5() << "',arg6='" << cmd[cmd_no]->GetRealArg6() << "',arg7='"
@@ -527,7 +526,7 @@ void Zone::Save()
 		else if(this->cmd[cmd_no]->dbID == -1 )//Not in DB. Needs to be INSERTED
 		{
 */
-			Query << "INSERT INTO zone_commands(zone_id,cmd,if_flag,arg1,arg2,arg3,arg4,arg5,arg6,arg7) VALUES("
+			Query << "INSERT INTO zoneCommand(zone_id,cmd,if_flag,arg1,arg2,arg3,arg4,arg5,arg6,arg7) VALUES("
 				<< SQLVal(getVnum()) << SQLVal(cmd[cmd_no]->command) << SQLVal(cmd[cmd_no]->if_flag)
 				<< SQLVal(cmd[cmd_no]->GetRealArg1()) << SQLVal(cmd[cmd_no]->GetRealArg2()) << SQLVal(cmd[cmd_no]->GetRealArg3())
 				<< SQLVal(cmd[cmd_no]->GetRealArg4()) << SQLVal(cmd[cmd_no]->GetRealArg5()) << SQLVal(cmd[cmd_no]->GetRealArg6())
@@ -535,7 +534,7 @@ void Zone::Save()
 //		}
 //		else if(this->cmd[cmd_no]->deleted == true && cmd[cmd_no]->dbID != -1)//Deletion set. Needs to be REMOVED
 //		{
-//			Query << "DELETE FROM zone_commands WHERE id='" << cmd[cmd_no]->dbID << "';" << std::endl;
+//			Query << "DELETE FROM zoneCommand WHERE id='" << cmd[cmd_no]->dbID << "';" << std::endl;
 //		}
 //		else
 //			continue;
@@ -555,7 +554,7 @@ void Zone::Save()
 	for(unsigned int cmd_no = 0;cmd_no < cmd.size();++cmd_no)
 	{
 		if( !cmd_no )
-			DeleteQuery << "DELETE FROM zone_commands WHERE ";
+			DeleteQuery << "DELETE FROM zoneCommand WHERE ";
 		else
 			DeleteQuery << " AND ";
 		DeleteQuery << "id!='" << cmd[cmd_no]->dbID << "'";
@@ -691,7 +690,7 @@ void ZoneManager::LoadThreadedZoneBatch( sql::Connection connection, const int z
 	try
 	{
 		sql::Row ZoneRow, CmdRow;
-		Query << "SELECT * FROM zone_index ORDER BY id ASC LIMIT " << zoneIndexOffset << "," << zoneIndexFetchSize;
+		Query << "SELECT * FROM zoneIndex ORDER BY id ASC LIMIT " << zoneIndexOffset << "," << zoneIndexFetchSize;
 		MyQuery = connection->sendQuery(Query.str());
 
 		if( MyQuery->numRows() > 0 )
@@ -703,7 +702,7 @@ void ZoneManager::LoadThreadedZoneBatch( sql::Connection connection, const int z
 
 			//Using this range, obtain the matching zone commands.
 			Query.str("");
-			Query << "SELECT * FROM zone_commands WHERE zone_id BETWEEN " << lowZoneID << " AND " << highZoneID << " ORDER BY zone_id, id ASC";
+			Query << "SELECT * FROM zoneCommand WHERE zone_id BETWEEN " << lowZoneID << " AND " << highZoneID << " ORDER BY zone_id, id ASC";
 			SecondQuery = connection->sendQuery(Query.str());
 
 			std::list<sql::Row>::iterator rIter;
@@ -725,7 +724,7 @@ void ZoneManager::LoadThreadedZoneBatch( sql::Connection connection, const int z
 				}
 
 				//Now that we have a list of related commands, we just send them off the Zone::Boot
-				//along with the zone_index row.
+				//along with the zoneIndex row.
 				Zone *zone = this->AddNewZone( atoi(ZoneRow["id"].c_str()) );
 				zone->Boot( ZoneRow, RowList );
 			}
@@ -752,7 +751,7 @@ void ZoneManager::BootZones()
 	sql::Query query;
 	std::list< boost::thread* > threadPool;
 
-	query = gameDatabase->sendQuery("SELECT COUNT(*) AS size FROM zone_index;");
+	query = gameDatabase->sendQuery("SELECT COUNT(*) AS size FROM zoneIndex;");
 	zoneIndexTableSize = atoi(query->getRow()[ "size" ].c_str());
 
 	int zoneIndexOffset = 0;

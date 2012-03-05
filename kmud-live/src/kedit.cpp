@@ -35,11 +35,10 @@ ACMD(do_klist);
 const int KEDIT_DEBUG = 1; 
 #endif
 
-/* externs */
-extern Object *obj_proto;
+// externs
 KitManager *KitManager::Self = NULL;
 
-/* local functions */
+// local functions
 void kedit_disp_menu(Descriptor *);
 void kedit_parse(Descriptor *, char *);
 void kedit_save_internally(Descriptor *);
@@ -192,7 +191,7 @@ void kedit_disp_inventory_menu( Descriptor *d )
 	for( std::vector<KitItem>::iterator kIter = d->olc->kit->KitInventory.begin();kIter != d->olc->kit->KitInventory.end();++kIter )
 	{
 		d->Send("%s%2d%s) [%s%3d%s%%] [%s%6d%s] %s%s%s\r\n", grn, ++i, nrm, cyn, (*kIter).GetPercent(), nrm,
-			grn, (*kIter).GetItemVnum(), nrm, yel, obj_proto[ (*kIter).GetItemRnum() ].short_description, nrm );
+			grn, (*kIter).GetItemVnum(), nrm, yel, obj_proto[ (*kIter).GetItemRnum() ]->short_description, nrm );
 	}
 	d->SendRaw("\r\n");
 	d->Send("%sA%s) Add Item\r\n"
@@ -230,7 +229,7 @@ void kedit_disp_menu(Descriptor *d)
 		        grn, i, nrm, where[i],
 		        cyn, kit->KitItems[OLC_KNUM(d)][i].GetPercent(), nrm,
 		        cyn, OLC_KIT(d)->KitItems[OLC_KNUM(d)][i].GetItemVnum(), nrm,
-		        yel, (obj_nr > -1) ? (obj_proto[obj_nr].short_description) : ("Nothing.")
+		        yel, (obj_nr > -1) ? (obj_proto[obj_nr]->short_description) : ("Nothing.")
 		       );
 		strcat(buf, buf1);
 	}
@@ -375,7 +374,7 @@ void kedit_parse(Descriptor *d, char *arg)
 						        cyn, OLC_KIT(d)->KitItems[OLC_KNUM(d)][pos].GetPercent(), nrm,
 						        cyn, OLC_KIT(d)->KitItems[OLC_KNUM(d)][pos].GetItemVnum(), nrm,
 						        yel, (rnum >= 0
-								? obj_proto[rnum].short_description : "Nothing."), nrm
+								? obj_proto[rnum]->short_description : "Nothing."), nrm
 						       );
 
 						d->Send("%s", buf);
@@ -601,7 +600,7 @@ void kedit_parse(Descriptor *d, char *arg)
 
 			if ((pos = real_object(pos)) >= 0)
 			{
-				if (!CAN_WEAR(&(obj_proto[pos]), wear_bitvectors[OLC_POS(d)]))
+				if (!CAN_WEAR(obj_proto[pos], wear_bitvectors[OLC_POS(d)]))
 				{
 					d->Send("That object can't be worn in this position, try again : ");
 					return;
@@ -609,8 +608,7 @@ void kedit_parse(Descriptor *d, char *arg)
 
 				if (OLC_MODE(d) == KEDIT_WEAR_LIGHT)
 				{
-					// From Act.item.cpp
-					if (GET_OBJ_TYPE(&(obj_proto[pos])) != ITEM_LIGHT)
+					if (GET_OBJ_TYPE(obj_proto[pos]) != ITEM_LIGHT)
 					{
 						d->Send("That object can't be used as a light, try again : ");
 						return;
@@ -620,8 +618,7 @@ void kedit_parse(Descriptor *d, char *arg)
 				if (OLC_MODE(d) == KEDIT_WEAR_HOLD)
 				{
 					// From Act.item.cpp
-					if (!CAN_WEAR(&(obj_proto[pos]), ITEM_WEAR_HOLD)
-					        && GET_OBJ_TYPE(&(obj_proto[pos])) != ITEM_POTION)
+					if (!CAN_WEAR(obj_proto[pos], ITEM_WEAR_HOLD) && GET_OBJ_TYPE(obj_proto[pos]) != ITEM_POTION)
 					{
 						d->Send("That object can't be held, try again : ");
 						return;

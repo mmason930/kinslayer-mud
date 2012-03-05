@@ -36,7 +36,7 @@ extern Character *character_list;
 
 void obj_from_char(struct object_data *object);
 
-std::list< int > Room::CorpseRooms;
+std::set< int > Room::corpseRooms;
 
 /* Extern functions */
 ACMD(do_action);
@@ -283,20 +283,12 @@ std::list< Object* > Room::loadItemList( bool recursive )
 }
 void Room::loadItems( const std::list< Object* > &lItems )
 {
-	bool corpseRoomAdded = false;
 	for( std::list< Object* >::const_iterator oIter = lItems.begin();oIter != lItems.end();++oIter )
 	{
 		Object *obj = (*oIter);
 
 		obj->loadItems();
 		obj->MoveToRoom(this, false);
-
-		if( IS_CORPSE(obj) && !corpseRoomAdded && std::find(Room::CorpseRooms.begin(),Room::CorpseRooms.end(),this->vnum)
-			== Room::CorpseRooms.end() )
-		{
-			Room::CorpseRooms.push_back( this->vnum );
-			corpseRoomAdded=true;//To prevent searching the entire list multiple times per room.
-		}
 	}
 }
 void Room::loadItems()
@@ -370,6 +362,200 @@ void threadedQueryExecutor(sql::Connection connection, const std::string &query)
 	connection->sendRawQuery(query);
 }
 
+void Object::saveMultipleHolderItems(const std::map<std::pair<char, std::string>, std::list<Object *>> &holderTypeAndIdToContentsMap, bool deleteHolderContents)
+{
+	std::stringstream queryBuffer;
+	auto holdTypeAndIdIter = holderTypeAndIdToContentsMap.begin();
+	Clock clockA, clockB, clockC1, clockC2, clockD1, clockD2, clockD3, clockD4, clockD5;
+
+	try
+	{
+		gameDatabase->sendRawQuery("DROP TABLE IF EXISTS `tempTopLevelHolder`");
+
+		queryBuffer << "CREATE TABLE `tempTopLevelHolder`("
+					<< "  `holder_type` char(1) not null,"
+					<< "  `holder_id` varchar(36) not null,"
+					<< "  UNIQUE KEY `holder_type_holder_id`(`holder_type`,`holder_id`),"
+					<< " KEY `holder_type`(`holder_type`),"
+					<< " KEY `holder_id`(`holder_id`)"
+					<< ") ENGINE=MyISAM";
+
+		gameDatabase->sendRawQuery(queryBuffer.str());
+		gameDatabase->sendRawQuery("ALTER TABLE `tempTopLevelHolder` DISABLE KEYS");
+
+		sql::BatchInsertStatement tempTopLevelHolderBatchInsertStatement(gameDatabase, "tempTopLevelHolder", 10000);
+
+		tempTopLevelHolderBatchInsertStatement.addField("holder_type");
+		tempTopLevelHolderBatchInsertStatement.addField("holder_id");
+
+		tempTopLevelHolderBatchInsertStatement.start();
+
+		for(holdTypeAndIdIter = holderTypeAndIdToContentsMap.begin();holdTypeAndIdIter != holderTypeAndIdToContentsMap.end();++holdTypeAndIdIter)
+		{
+			tempTopLevelHolderBatchInsertStatement.beginEntry();
+
+			//first is the pair, whose first is the holder type(char), and second is the holder id(string).
+			tempTopLevelHolderBatchInsertStatement.putChar( (*holdTypeAndIdIter).first.first );
+			tempTopLevelHolderBatchInsertStatement.putString( (*holdTypeAndIdIter).first.second );
+
+			tempTopLevelHolderBatchInsertStatement.endEntry();
+		}
+	
+		tempTopLevelHolderBatchInsertStatement.finish();
+		gameDatabase->sendRawQuery("ALTER TABLE `tempTopLevelHolder` ENABLE KEYS");
+
+		if(deleteHolderContents) {
+
+			queryBuffer.str("");
+			queryBuffer	
+					<<	" DELETE"
+					<<	"   objects.*,"
+					<<	"   object_specials.*,"
+					<<	"   object_retools.* "
+					<<	" FROM("
+					<<	"   objects, "
+					<<  "   tempTopLevelHolder)"
+					<<	" LEFT JOIN object_specials ON objects.id=object_specials.id "
+					<<	" LEFT JOIN object_retools ON objects.id=object_retools.id "
+					<<	" WHERE objects.top_level_holder_type=tempTopLevelHolder.holder_type"
+					<<	" AND objects.top_level_holder_id=tempTopLevelHolder.holder_id";
+			
+			gameDatabase->sendRawQuery(queryBuffer.str());
+		}
+		gameDatabase->sendRawQuery("DROP TABLE IF EXISTS tempObjects, tempObjectRetools, tempObjectSpecials;");
+
+		gameDatabase->sendRawQuery("CREATE TABLE tempObjects LIKE objects;");
+		gameDatabase->sendRawQuery("CREATE TABLE tempObjectRetools LIKE object_retools;");
+		gameDatabase->sendRawQuery("CREATE TABLE tempObjectSpecials LIKE object_specials;");
+
+		sql::BatchInsertStatement tempObjectsBatchInsertStatement(gameDatabase, "tempObjects", 10000, true);
+		sql::BatchInsertStatement tempObjectRetoolsBatchInsertStatement(gameDatabase, "tempObjectRetools", 10000, true);
+		sql::BatchInsertStatement tempObjectSpecialsBatchInsertStatement(gameDatabase, "tempObjectSpecials", 10000, true);
+
+		Object::addFieldsToBatchInsertStatement(tempObjectsBatchInsertStatement, tempObjectRetoolsBatchInsertStatement, tempObjectSpecialsBatchInsertStatement);
+
+		tempObjectsBatchInsertStatement.start();
+		tempObjectRetoolsBatchInsertStatement.start();
+		tempObjectSpecialsBatchInsertStatement.start();
+
+		
+		for(holdTypeAndIdIter = holderTypeAndIdToContentsMap.begin();holdTypeAndIdIter != holderTypeAndIdToContentsMap.end();++holdTypeAndIdIter)
+		{
+			for(auto iter = (*holdTypeAndIdIter).second.begin();iter != (*holdTypeAndIdIter).second.end();++iter)
+			{
+				Object *object = (*iter);
+				clockC1.turnOn();
+				object->saveItems( true, (*holdTypeAndIdIter).first.first, (*holdTypeAndIdIter).first.second, (*holdTypeAndIdIter).first.first, (*holdTypeAndIdIter).first.second, tempObjectsBatchInsertStatement, tempObjectRetoolsBatchInsertStatement, tempObjectSpecialsBatchInsertStatement, true );
+				clockC1.turnOff();
+			}
+		}
+		
+		tempObjectsBatchInsertStatement.finish();
+		tempObjectRetoolsBatchInsertStatement.finish();
+		tempObjectSpecialsBatchInsertStatement.finish();
+
+		//Anything currently contained by one of the objects we're about to insert back into the objects
+		//table needs to be put into limbo to prevent anomalies. The containment will be
+		//corrected with the upcoming insertion.
+		gameDatabase->sendRawQuery(
+			"UPDATE"
+			"  objects,"
+			"  tempObjects "
+			"SET"
+			"  objects.holder_id='',"
+			"  objects.holder_type='' "
+			"WHERE objects.holder_type='O' "
+			"AND   objects.holder_id=tempObjects.id;"
+		);
+
+		//Delete the items we're about to update, if they exist.
+		gameDatabase->sendRawQuery(
+			"DELETE"
+			"  object_specials.*,"
+			"  object_retools.*,"
+			"  objects.* "
+			"FROM"
+			"  tempObjects "
+			"LEFT JOIN objects ON objects.id=tempObjects.id "
+			"LEFT JOIN object_specials ON object_specials.id=tempObjects.id "
+			"LEFT JOIN object_retools ON object_retools.id=tempObjects.id"
+		);
+
+		//Insert the items that we are updating.
+		gameDatabase->sendRawQuery("INSERT DELAYED INTO objects SELECT * FROM tempObjects");
+		gameDatabase->sendRawQuery("INSERT DELAYED INTO object_retools SELECT * FROM tempObjectRetools");
+		gameDatabase->sendRawQuery("INSERT DELAYED INTO object_specials SELECT * FROM tempObjectSpecials");
+
+	}
+	catch(sql::QueryException e) {
+
+		MudLog(BRF, LVL_APPR, TRUE, "Could not save items: %s", e.getMessage().c_str());
+	}
+}
+
+void Object::addFieldsToBatchInsertStatement(sql::BatchInsertStatement &objectBatchInsertStatement, sql::BatchInsertStatement &objectRetoolBatchInsertStatement, sql::BatchInsertStatement &objectSpecialBatchInsertStatement)
+{
+	objectBatchInsertStatement.addField("id");
+	objectBatchInsertStatement.addField("vnum");
+	objectBatchInsertStatement.addField("pos");
+	objectBatchInsertStatement.addField("creator");
+	objectBatchInsertStatement.addField("bitv0");
+	objectBatchInsertStatement.addField("bitv1");
+	objectBatchInsertStatement.addField("bitv2");
+	objectBatchInsertStatement.addField("bitv3");
+	objectBatchInsertStatement.addField("obj_extra0");
+	objectBatchInsertStatement.addField("obj_extra1");
+	objectBatchInsertStatement.addField("holder_type");
+	objectBatchInsertStatement.addField("holder_id");
+	objectBatchInsertStatement.addField("top_level_holder_type");
+	objectBatchInsertStatement.addField("top_level_holder_id");
+	objectBatchInsertStatement.addField("created_datetime");
+	objectBatchInsertStatement.addField("obj_str");
+	objectBatchInsertStatement.addField("special_type");
+	objectBatchInsertStatement.addField("gold");
+	
+	objectRetoolBatchInsertStatement.addField("id");
+	objectRetoolBatchInsertStatement.addField("retool_name");
+	objectRetoolBatchInsertStatement.addField("retool_sdesc");
+	objectRetoolBatchInsertStatement.addField("retool_ldesc");
+	objectRetoolBatchInsertStatement.addField("retool_exdesc");
+
+	objectSpecialBatchInsertStatement.addField("id");
+	objectSpecialBatchInsertStatement.addField("special_type");
+	objectSpecialBatchInsertStatement.addField("name");
+	objectSpecialBatchInsertStatement.addField("sdesc");
+	objectSpecialBatchInsertStatement.addField("ldesc");
+	objectSpecialBatchInsertStatement.addField("val0");
+	objectSpecialBatchInsertStatement.addField("val1");
+	objectSpecialBatchInsertStatement.addField("val2");
+	objectSpecialBatchInsertStatement.addField("val3");
+	objectSpecialBatchInsertStatement.addField("val4");
+	objectSpecialBatchInsertStatement.addField("val5");
+	objectSpecialBatchInsertStatement.addField("val6");
+	objectSpecialBatchInsertStatement.addField("val7");
+	objectSpecialBatchInsertStatement.addField("val8");
+	objectSpecialBatchInsertStatement.addField("val9");
+	objectSpecialBatchInsertStatement.addField("val10");
+	objectSpecialBatchInsertStatement.addField("val11");
+	objectSpecialBatchInsertStatement.addField("extra_flags");
+	objectSpecialBatchInsertStatement.addField("wear_flags");
+	objectSpecialBatchInsertStatement.addField("bitvector0");
+	objectSpecialBatchInsertStatement.addField("bitvector1");
+	objectSpecialBatchInsertStatement.addField("bitvector2");
+	objectSpecialBatchInsertStatement.addField("bitvector3");
+	objectSpecialBatchInsertStatement.addField("weight");
+	objectSpecialBatchInsertStatement.addField("cost");
+	objectSpecialBatchInsertStatement.addField("cost_per_day");
+	objectSpecialBatchInsertStatement.addField("offensive");
+	objectSpecialBatchInsertStatement.addField("parry");
+	objectSpecialBatchInsertStatement.addField("dodge");
+	objectSpecialBatchInsertStatement.addField("level");
+	objectSpecialBatchInsertStatement.addField("race");
+	objectSpecialBatchInsertStatement.addField("scalped");
+	objectSpecialBatchInsertStatement.addField("extra_str1");
+	objectSpecialBatchInsertStatement.addField("timer");
+}
+
 /******
  * This function will completely re-synchronize a container's contents if deleteHolderContents is set to true.
  *
@@ -407,67 +593,7 @@ void Object::saveHolderItems(const char holderType, const std::string &holderId,
 		sql::BatchInsertStatement tempObjectRetoolsBatchInsertStatement(gameDatabase, "tempObjectRetools", 10000, true);
 		sql::BatchInsertStatement tempObjectSpecialsBatchInsertStatement(gameDatabase, "tempObjectSpecials", 10000, true);
 
-		tempObjectsBatchInsertStatement.addField("id");
-		tempObjectsBatchInsertStatement.addField("vnum");
-		tempObjectsBatchInsertStatement.addField("pos");
-		tempObjectsBatchInsertStatement.addField("creator");
-		tempObjectsBatchInsertStatement.addField("bitv0");
-		tempObjectsBatchInsertStatement.addField("bitv1");
-		tempObjectsBatchInsertStatement.addField("bitv2");
-		tempObjectsBatchInsertStatement.addField("bitv3");
-		tempObjectsBatchInsertStatement.addField("obj_extra0");
-		tempObjectsBatchInsertStatement.addField("obj_extra1");
-		tempObjectsBatchInsertStatement.addField("holder_type");
-		tempObjectsBatchInsertStatement.addField("holder_id");
-		tempObjectsBatchInsertStatement.addField("top_level_holder_type");
-		tempObjectsBatchInsertStatement.addField("top_level_holder_id");
-		tempObjectsBatchInsertStatement.addField("created_datetime");
-		tempObjectsBatchInsertStatement.addField("obj_str");
-		tempObjectsBatchInsertStatement.addField("special_type");
-		tempObjectsBatchInsertStatement.addField("gold");
-
-		tempObjectRetoolsBatchInsertStatement.addField("id");
-		tempObjectRetoolsBatchInsertStatement.addField("retool_name");
-		tempObjectRetoolsBatchInsertStatement.addField("retool_sdesc");
-		tempObjectRetoolsBatchInsertStatement.addField("retool_ldesc");
-		tempObjectRetoolsBatchInsertStatement.addField("retool_exdesc");
-
-		tempObjectSpecialsBatchInsertStatement.addField("id");
-		tempObjectSpecialsBatchInsertStatement.addField("holder_type");
-		tempObjectSpecialsBatchInsertStatement.addField("holder_id");
-		tempObjectSpecialsBatchInsertStatement.addField("special_type");
-		tempObjectSpecialsBatchInsertStatement.addField("name");
-		tempObjectSpecialsBatchInsertStatement.addField("sdesc");
-		tempObjectSpecialsBatchInsertStatement.addField("ldesc");
-		tempObjectSpecialsBatchInsertStatement.addField("val0");
-		tempObjectSpecialsBatchInsertStatement.addField("val1");
-		tempObjectSpecialsBatchInsertStatement.addField("val2");
-		tempObjectSpecialsBatchInsertStatement.addField("val3");
-		tempObjectSpecialsBatchInsertStatement.addField("val4");
-		tempObjectSpecialsBatchInsertStatement.addField("val5");
-		tempObjectSpecialsBatchInsertStatement.addField("val6");
-		tempObjectSpecialsBatchInsertStatement.addField("val7");
-		tempObjectSpecialsBatchInsertStatement.addField("val8");
-		tempObjectSpecialsBatchInsertStatement.addField("val9");
-		tempObjectSpecialsBatchInsertStatement.addField("val10");
-		tempObjectSpecialsBatchInsertStatement.addField("val11");
-		tempObjectSpecialsBatchInsertStatement.addField("extra_flags");
-		tempObjectSpecialsBatchInsertStatement.addField("wear_flags");
-		tempObjectSpecialsBatchInsertStatement.addField("bitvector0");
-		tempObjectSpecialsBatchInsertStatement.addField("bitvector1");
-		tempObjectSpecialsBatchInsertStatement.addField("bitvector2");
-		tempObjectSpecialsBatchInsertStatement.addField("bitvector3");
-		tempObjectSpecialsBatchInsertStatement.addField("weight");
-		tempObjectSpecialsBatchInsertStatement.addField("cost");
-		tempObjectSpecialsBatchInsertStatement.addField("cost_per_day");
-		tempObjectSpecialsBatchInsertStatement.addField("offensive");
-		tempObjectSpecialsBatchInsertStatement.addField("parry");
-		tempObjectSpecialsBatchInsertStatement.addField("dodge");
-		tempObjectSpecialsBatchInsertStatement.addField("level");
-		tempObjectSpecialsBatchInsertStatement.addField("race");
-		tempObjectSpecialsBatchInsertStatement.addField("scalped");
-		tempObjectSpecialsBatchInsertStatement.addField("extra_str1");
-		tempObjectSpecialsBatchInsertStatement.addField("timer");
+		Object::addFieldsToBatchInsertStatement(tempObjectsBatchInsertStatement, tempObjectRetoolsBatchInsertStatement, tempObjectSpecialsBatchInsertStatement);
 
 		tempObjectsBatchInsertStatement.start();
 		tempObjectRetoolsBatchInsertStatement.start();
@@ -585,7 +711,6 @@ void Room::corpseSave()
 
 	Object::saveTopLevelHolderItems('R', MiscUtil::toString(this->vnum), corpses);
 
-	/***** (//_-)---<=========8 *****/
 /**
 	//TODO: Finish this
 	std::stringstream QueryBuffer;
@@ -610,36 +735,14 @@ void Room::corpseSave()
 		}
 	}
 	if( hasCorpse ) {
-		if( std::find( Room::CorpseRooms.begin(), Room::CorpseRooms.end(), this->vnum ) == Room::CorpseRooms.end() )
-			Room::CorpseRooms.push_back( this->vnum );
+		if( std::find( Room::corpseRooms.begin(), Room::corpseRooms.end(), this->vnum ) == Room::corpseRooms.end() )
+			Room::corpseRooms.insert( this->vnum );
 	}
 **/
 }
 void Room::saveCorpseRooms()
 {
-	for(std::list<int>::iterator iIter = Room::CorpseRooms.begin();iIter != Room::CorpseRooms.end();)
-	{
-		int rnum = real_room((*iIter));
-		if( rnum == -1 )
-			iIter = Room::CorpseRooms.erase( iIter );
-		else
-		{
-			bool hasCorpse = false;
-			for(Object *obj = World[rnum]->contents;obj;obj = obj->next_content)
-			{
-				if( IS_CORPSE(obj) )
-				{
-					hasCorpse = true;
-					break;
-				}
-			}
-			if( !hasCorpse || ROOM_FLAGGED(World[rnum], ROOM_VAULT) )
-				iIter = Room::CorpseRooms.erase( iIter );
-			else
-				++iIter;
-			World[rnum]->corpseSave();
-		}
-	}
+
 }
 
 void Object::itemSave()
@@ -725,8 +828,6 @@ void Object::saveItems( bool self, char holderType, const std::string &holderID,
 				ExtraStr1 = this->scalp->name;
 
 			tempObjectSpecialsBatchInsertStatement.putString(MiscUtil::toString(this->objID));
-			tempObjectSpecialsBatchInsertStatement.putChar(holderType);
-			tempObjectSpecialsBatchInsertStatement.putString(holderID);
 			tempObjectSpecialsBatchInsertStatement.putInt(specialType);
 			tempObjectSpecialsBatchInsertStatement.putString(name);
 			tempObjectSpecialsBatchInsertStatement.putString(short_description);
@@ -766,13 +867,14 @@ void Object::saveItems( bool self, char holderType, const std::string &holderID,
 	}
 	if( contents )
 	{
-		/* Save all contained items */
+		// Save all contained items
 		for(Object *obj = this->contains;obj;obj = obj->next_content)
 		{
+			bool isChest = this->IsValidChest();
 			obj->saveItems(
 			true,
-				(this->IsValidChest() ? 'C' : 'O'),
-				(this->IsValidChest() ? ToString(this->InRoom()->vnum) : ToString(this->objID)),
+				(isChest ? 'C' : 'O'),
+				(isChest ? ToString(this->InRoom()->vnum) : ToString(this->objID)),
 			topLevelHolderType,
 			topLevelHolderID,
 			tempObjectsBatchInsertStatement,
@@ -783,6 +885,7 @@ void Object::saveItems( bool self, char holderType, const std::string &holderID,
 	}
 }
 
+//TODO: Let's remove this.
 void crashsaveAll()
 {
 	Character *i;

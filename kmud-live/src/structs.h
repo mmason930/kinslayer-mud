@@ -1051,7 +1051,7 @@ class Object
 		byte decayType;										/* The type of material this object is made from */
 		byte decayTimerType;								/* Type of decay timer (ie minutes, hours, etc) */
 		sh_int decayTimer;									/* Timer for decay scripts */
-
+		
 		bool purged;										/* Is this Object queued for purging? */
 		bool deleted;
 		bool needs_save;
@@ -1090,7 +1090,7 @@ class Object
 		void RemoveFromAll();
 		void RemoveFromRoom(bool vaultSave=true);
 
-		void ProtoBoot( class sql::Row &MyRow, const int rnum );
+		void ProtoBoot( class sql::Row &MyRow, const int rnum, const std::list<int> &jsAttachmentList );
 		void ProtoSave();
 		void ProtoDelete();
 
@@ -1106,9 +1106,10 @@ class Object
 		static void saveItemToTopLevelHolder(const char holderType, const std::string &holderId, Object *obj);
 		static void saveTopLevelHolderItems(const char holderType, const std::string &holderId, const std::list<Object *> &contents);
 		static void saveHolderItems(const char holderType, const std::string &holderId, const char topLevelHolderType, const std::string &topLevelHolderId, const std::list<Object *> &contents, bool deleteHolderContents=false);
+		static void addFieldsToBatchInsertStatement(sql::BatchInsertStatement &objectBatchInsertStatement, sql::BatchInsertStatement &objectRetoolBatchInsertStatement, sql::BatchInsertStatement &objectSpecialBatchInsertStatement);
 
 		static Object *bootLiveObject( const sql::Row &MyRow, bool recursive = false );
-
+		static void saveMultipleHolderItems(const std::map<std::pair<char, std::string>, std::list<Object *>> &holderTypeAndIdToContentsMap, bool deleteHolderContents);
 		void addToBatchInsertStatement(sql::BatchInsertStatement &batchInsertStatement, bool recursive);
 
 		float AverageAbsorb( int i, Character *ch );
@@ -1220,34 +1221,42 @@ class Room //That's right! Classroom!
 	public:
 		static int nr_alloc;
 		static int nr_dealloc;
-		room_vnum vnum;											/* Rooms number	(vnum)					*/
-		sh_int zone;											/* Room zone (for resetting)			*/
-		sh_int sector_type;										/* sector type (move/hide)				*/
-		char	*name;											/* Rooms name 'You are ...'				*/
-		char	*description;									/* Shown when entered					*/
-		struct extra_descr_data *ex_description;				/* for examine/look						*/
-		struct Direction *dir_option[ NUM_OF_DIRS ];			/* Directions							*/
-		int room_flags;											/* DEATH,DARK ... etc					*/
-		int auction_vnum;										/* Vnum of the room's associated auction*/
-		Character *EavesWarder;									/* Warding room against listeners		*/
+		room_vnum vnum;											// Rooms number	(vnum)
+		sh_int zone;											// Room zone (for resetting)
+		sh_int sector_type;										// sector type (move/hide)
+		char	*name;											// Rooms name 'You are ...'
+		char	*description;									// Shown when entered
+		struct extra_descr_data *ex_description;				// for examine/look
+		struct Direction *dir_option[ NUM_OF_DIRS ];			// Directions
+		int room_flags;											// DEATH,DARK ... etc
+		int auction_vnum;										// Vnum of the room's associated auction
+		Character *EavesWarder;									// Warding room against listeners
+		bool isCorpseRoom;
+		void setIsCorpseRoom();
+		bool getIsCorpseRoom();
 
-		byte light;												/* Number of lightsources in room		*/
+		byte light;												// Number of lightsources in room
 		SPECIAL( *func );
 
 		std::list<class Track *> Tracks;
-		std::vector<class Character*> eavesdropping;			/* characters eavesdropping on this room*/
+		std::vector<class Character*> eavesdropping;			// Characters eavesdropping on this room
 
-		class Object *contents;									/* List of items in room				*/
-		class Character *people;								/* List of NPC / PC in room				*/
+		class Object *contents;									// List of items in room
+		class Character *people;								// List of NPC / PC in room
 		class PokerTable *PTable;
-		bool deleted;
+		bool deleted;											// Whether or not the room should be deleted on next zone save.
+		
+		static std::set< int > Room::corpseRooms;
 
+
+		//Methods
 		int LinesInDesc();
 
 		std::list< Character* > GetPeople();
 
 		bool IsDark();
 		bool IsPurged() { return false; }
+
 
 		std::list< class Gate* > GetGates();
 		void RemoveGate( class Gate* _Gate );
@@ -1303,7 +1312,6 @@ class Room //That's right! Classroom!
 		void itemSave();
 		void corpseSave();
 		static void saveCorpseRooms();
-		static std::list< int > CorpseRooms;
 
 		Room& operator<< ( const std::string &s );
 		Room& operator<< ( const int );

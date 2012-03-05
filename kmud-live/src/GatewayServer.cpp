@@ -3,6 +3,7 @@
 
 #include "DateTime.h"
 #include "MiscUtil.h"
+#include "SystemUtil.h"
 
 #include "GatewayServer.h"
 #include "GatewayDescriptorStatus.h"
@@ -23,13 +24,12 @@ GatewayServer::GatewayServer()
 	this->lastPingSentToGameServer = DateTime(0);
 	this->serverPort = 0;
 	this->motherConnectionToServer = NULL;
-}
-
-GatewayServer::GatewayServer(const int port, const int *secondaryPort, const std::string &serverHost, const int serverPort)
-{
-	this->lastPingResponseFromGameServer = DateTime(0);
-	this->lastPingSentToGameServer = DateTime(0);
-	setup(port, secondaryPort, serverHost, serverPort);
+	this->restartOnShutdown = false;
+	this->mudProcessId = 0;
+	this->mudStatus = MudStatus::notRunning;
+	this->statusLastModifiedDatetime = DateTime();
+	this->lastAttemptedMudStartDatetime = DateTime(0);
+	this->lastMudProcessIdCheckDatetime = DateTime(0);
 }
 
 GatewayServer::~GatewayServer()
@@ -63,9 +63,7 @@ void openDescriptorCallback(void *data, kuDescriptor *descriptor)
 	GatewayDescriptor *gatewayDescriptor = new GatewayDescriptor();
 	
 	gatewayDescriptor->setClientConnection(descriptor);
-
 	gatewayDescriptor->setStatus(GatewayDescriptorStatus::awaitingConnection);
-
 	gatewayDescriptor->setRandomId(StringUtil::getRandomString(40));
 
 	gatewayServer->getDescriptors().push_back(gatewayDescriptor);
@@ -78,24 +76,68 @@ kuClient *GatewayServer::getMotherConnectionToServer()
 	return motherConnectionToServer;
 }
 
-void GatewayServer::setupAndRun(const int port, const int *secondaryPort, const std::string &serverHost, const int serverPort)
+bool GatewayServer::loadConfiguration()
 {
-	setup(port, secondaryPort, serverHost, serverPort);
+	std::string configFilePath = BASIC_CONFIG_PATH;
+
+	std::cout << "Loading configuration from " << configFilePath << std::endl;
+	
+	std::map<std::string, std::string> resources = MiscUtil::loadResourcesFromFile(configFilePath);
+
+	if(resources.find("Gateway Port") == resources.end()) {
+
+		std::cout << "No Gateway Port specified in configuration file." << std::endl;
+		return false;
+	}
+	if(resources.find("MUD Host") == resources.end()) {
+
+		std::cout << "No MUD Host specified in configuration file." << std::endl;
+		return false;
+	}
+	if(resources.find("MUD Port") == resources.end()) {
+
+		std::cout << "No MUD Port specified in configuration file." << std::endl;
+		return false;
+	}
+	if(resources.find("MUD Root Directory") == resources.end()) {
+
+		std::cout << "No MUD Root Directory specified in confuration file." << std::endl;
+		return false;
+	}
+	if(resources.find("Restart On Shutdown") == resources.end()) {
+
+		std::cout << "No `Restart On Shutdown` specified in confuration file." << std::endl;
+		return false;
+	}
+	if(resources.find("MUD Executable Path") == resources.end()) {
+
+		std::cout << "No `MUD Executable Path` specified in confuration file." << std::endl;
+		return false;
+	}
+
+
+	this->secondaryPort = NULL;
+	if(resources.find("Secondary Gateway Port") != resources.end())
+	{
+		this->secondaryPort = atoi(resources["Secondary Gateway Port"].c_str());
+	}
+	this->serverPort = atoi(resources["MUD Port"].c_str());
+	this->serverHost = resources["MUD Host"];
+	this->listeningPort = atoi(resources["Gateway Port"].c_str());
+	this->mudRootDirectoryPath = resources["MUD Root Directory"];
+	this->restartOnShutdown = atoi(resources["Restart On Shutdown"].c_str());
+	this->mudExecutablePath = resources["MUD Executable Path"];
+}
+
+void GatewayServer::setupAndRun()
+{
+	setup();
 
 	run();
 }
 
-void GatewayServer::setup(const int port, const int *secondaryGatewayPort, const std::string &serverHost, const int serverPort)
+void GatewayServer::setup()
 {
-	this->serverHost = serverHost;
-
-	this->serverPort = serverPort;
-
-	this->listeningPort = port;
-
-	if(secondaryGatewayPort)
-		this->secondaryPort = *secondaryGatewayPort;
-
 	crashReasonVector.clear();
 
 	crashReasonVector.push_back("Galnor's terrible coding");
@@ -145,8 +187,10 @@ void GatewayServer::attemptConnectionWithGameServer()
 
 		crashed = false;
 		rebooting = false;
+		setMudStatus( MudStatus::booting );
 
 		std::cout << makeTimestamp() << " Connection established. Sending validation token." << std::endl;
+		this->mudProcessId = 0;
 
 		motherConnectionToServer->send("Validate 78fd516c2825e7f463f045e609a8523e\r\n");
 	}
@@ -278,6 +322,12 @@ void GatewayServer::processInputFromMotherConnectionToServer()
 
 				lastPingResponseFromGameServer = DateTime();
 			}
+			else if(command == "FinishedBooting") {
+				
+				std::cout << makeTimestamp() << " The MUD has indicated that it has finished booting." << std::endl;
+				
+				setMudStatus( MudStatus::running );
+			}
 			else if(command == "Reboot") {
 
 				std::cout << makeTimestamp() << " Reboot command received. Putting players into awaitingConnection mode." << std::endl;
@@ -288,6 +338,14 @@ void GatewayServer::processInputFromMotherConnectionToServer()
 				rebooting = true;
 
 				handleGameShutdown();
+				setMudStatus(MudStatus::shuttingDown);
+			}
+			else if(command == "ProcessID") {
+
+				int processId = atoi(vArgs.at(1).c_str());
+				std::cout << makeTimestamp() << " The MUD has set its process ID to `" << processId << "`." << std::endl;
+				this->mudProcessId = processId;
+
 			}
 		}
 		catch(std::out_of_range e) {
@@ -306,32 +364,25 @@ void GatewayServer::disconnectDescriptorFromGameAndGateway(GatewayDescriptor *ga
 	debugBoolean = true;
 
 	gatewayDescriptor->getClientConnection()->socketClose();
-
 	gatewayDescriptor->setServerConnection(NULL);
-
 	gatewayDescriptor->setClientConnection(NULL);
-
 	gatewayDescriptor->setStatus(GatewayDescriptorStatus::disconnected);
 }
 
 void GatewayServer::handleGameShutdown()
 {
 	std::list<GatewayDescriptor*>::iterator iter;
-
 	iter = descriptors.begin();
 
 	while(iter != descriptors.end()) {
 
 		GatewayDescriptor *descriptor = (*iter);
-
 		descriptor->setStatus(GatewayDescriptorStatus::awaitingConnection);
-
 		kuClient *connectionToGame = descriptor->getServerConnection();
 
 		if(connectionToGame != NULL) {
 
 			delete connectionToGame;
-
 			descriptor->setServerConnection(NULL);
 		}
 
@@ -341,7 +392,6 @@ void GatewayServer::handleGameShutdown()
 void GatewayServer::sendToDescriptors(const std::string &message)
 {
 	std::list<GatewayDescriptor*>::iterator iter;
-
 	iter = descriptors.begin();
 
 	while(iter != descriptors.end()) {
@@ -365,13 +415,12 @@ void GatewayServer::run()
 		for(auto kuListenerIter = listeners.begin();kuListenerIter != listeners.end();++kuListenerIter)
 		{
 			(*kuListenerIter)->l_AcceptNewHosts();
-
 			(*kuListenerIter)->l_Pulse();
 		}
 
-		if(!isConnectedToGameServer()) {
-
-			if(mudIsDown() == false) {
+		if(!isConnectedToGameServer())
+		{
+			if(getMudStatus() == MudStatus::running || getMudStatus() == MudStatus::booting) {
 			//We lost connection but think the MUD is up. This means the MUD has most likely crashed.
 
 				crashed = true;
@@ -388,12 +437,63 @@ void GatewayServer::run()
 				std::cout << makeTimestamp() << " Game has crashed. Putting players into awaitingConnection mode." << std::endl;
 
 				handleGameShutdown();
-			}
+				setMudStatus( MudStatus::notRunning );
 
+				lastAttemptedMudStartDatetime = DateTime(0);//Reset this to far in the past so we attempt a reboot immediately.
+			}
 			attemptConnectionWithGameServer();
 		}
-		else {
 
+		if(getMudStatus() == MudStatus::shuttingDown)
+		{
+			//Check to see if the MUD has shut down yet.
+			if(SystemUtil::processExists( this->mudProcessId ) == false)
+			{
+				setMudStatus(MudStatus::notRunning);
+				this->mudProcessId = 0;
+
+				sendToDescriptors("The MUD has finished shutting down.\r\n\r\n");
+			}
+			else
+			{
+				//MUD is shutting down, but still running.
+			}
+		}
+
+		
+		//We need to reboot the MUD if configured to carry out the task.
+		if(getMudStatus() == MudStatus::notRunning)
+		{
+			long long secondsSinceLastAttemptedMudStart = (DateTime().getTime() - lastAttemptedMudStartDatetime.getTime());
+
+			if(this->restartOnShutdown && secondsSinceLastAttemptedMudStart >= 60)
+			{
+				sendToDescriptors("Attempting to start the MUD...\r\n\r\n");
+				this->attemptMudStart();
+				lastAttemptedMudStartDatetime = DateTime();
+			}
+		}
+
+		if(getMudStatus() == MudStatus::booting)
+		{
+			if(this->mudProcessId != 0 && DateTime().getTime() - lastMudProcessIdCheckDatetime.getTime() > 5)
+			{
+				std::cout << makeTimestamp() << " Checking to see if MUD process is still alive...";
+
+				if(SystemUtil::processExists(this->mudProcessId))
+					std::cout << "yes" << std::endl;
+				else
+				{
+					std::cout << "no. Treating as crash." << std::endl;
+					this->crashed = true;
+				}
+
+				lastMudProcessIdCheckDatetime = DateTime();
+			}
+		}
+		
+		if(getMudStatus() == MudStatus::running)
+		{
 			__int64 ts = lastPingSentToGameServer.getTime();
 			__int64 tr = lastPingResponseFromGameServer.getTime();
 
@@ -406,6 +506,9 @@ void GatewayServer::run()
 
 				pingGameServer();
 			}
+		}
+
+		if(isConnectedToGameServer() && getMudStatus() != MudStatus::notRunning) {
 
 			processInputFromMotherConnectionToServer();
 		}
@@ -511,7 +614,7 @@ void GatewayServer::removeDescriptor(kuDescriptor *descriptor)
 
 void GatewayServer::pingGameServer()
 {
-	if(motherConnectionToServer != NULL) {
+	if(motherConnectionToServer != NULL && (lastPingSentToGameServer.getTime() == 0 || lastPingSentToGameServer.compareTo(lastPingResponseFromGameServer) <= 0)) {
 
 		std::cout << makeTimestamp() << " Pinging game server." << std::endl;
 
@@ -543,4 +646,42 @@ bool GatewayServer::mudIsRebooting()
 bool GatewayServer::mudIsDown()
 {
 	return crashed || rebooting;
+}
+
+std::string GatewayServer::getMudRootDirectoryPath()
+{
+	return mudRootDirectoryPath;
+}
+
+bool GatewayServer::getRestartOnShutdown()
+{
+	return restartOnShutdown;
+}
+
+bool GatewayServer::isMudProcessRunning()
+{
+	return (SystemUtil::processExists(this->mudProcessId));
+}
+
+MudStatus *GatewayServer::getMudStatus()
+{
+	return mudStatus;
+}
+
+void GatewayServer::setMudStatus(MudStatus *mudStatus)
+{
+	this->mudStatus = mudStatus;
+	this->statusLastModifiedDatetime = DateTime();
+}
+
+void GatewayServer::attemptMudStart()
+{
+	std::cout << makeTimestamp() << " Attempting to start the MUD." << std::endl;
+	std::stringstream commandBuffer;
+#ifdef WIN32
+	commandBuffer << "START CMD /C CALL \"" << this->getMudRootDirectoryPath() << mudExecutablePath << "\"";
+#else
+#error "Need to implement"
+#endif
+	system(commandBuffer.str().c_str());
 }

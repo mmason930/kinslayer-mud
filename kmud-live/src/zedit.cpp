@@ -30,10 +30,7 @@ const int DEBUG = 1;
 
 /*-------------------------------------------------------------------*/
 
-/*
- * External data structures.
- */
-extern Object *obj_proto;
+//External data structures.
 extern struct Index *obj_index;
 extern const char *equipment_types[];
 extern const char *dirs[];
@@ -541,17 +538,17 @@ ACMD(do_zlist)
 			case 'G':
 				sprintf(buf + strlen(buf), "%sive it %s [%s%d%s], Chance %d%%, Max: In Inv: %d",
 					z->cmd[s]->if_flag ? " Then g" : "G",
-					obj_proto[z->cmd[s]->arg1].short_description,
+					obj_proto[z->cmd[s]->arg1]->short_description,
 					cyn, obj_index[z->cmd[s]->arg1].vnum, yel,
 					z->cmd[s]->arg2, z->cmd[s]->arg3
 				);
 				break;
 			case 'O':
-				if(*arg3 && atoi(arg3) != GET_OBJ_VNUM(&obj_proto[z->cmd[s]->arg1]) && atoi(arg3) != -1)
+				if(*arg3 && atoi(arg3) != GET_OBJ_VNUM(obj_proto[z->cmd[s]->arg1]) && atoi(arg3) != -1)
 					continue;
 				sprintf(buf + strlen(buf), "%sLoad %s [%s%d%s], Chance %d%%, Max: Per Room: %d, Zone: %d, Stack: %s",
 					z->cmd[s]->if_flag ? " then " : "",
-					obj_proto[z->cmd[s]->arg1].short_description,
+					obj_proto[z->cmd[s]->arg1]->short_description,
 					cyn, obj_index[z->cmd[s]->arg1].vnum, yel,
 					z->cmd[s]->arg2, z->cmd[s]->arg4, z->cmd[s]->arg5, z->cmd[s]->arg6 ? "Yes" : "No"
 			   );
@@ -559,16 +556,16 @@ ACMD(do_zlist)
 			case 'E':
 				sprintf(buf + strlen(buf), "%sEquip with %s [%s%d%s], %s, Chance %d%%",
 					z->cmd[s]->if_flag ? " then " : "",
-					obj_proto[z->cmd[s]->arg1].short_description,
+					obj_proto[z->cmd[s]->arg1]->short_description,
 					cyn, obj_index[z->cmd[s]->arg1].vnum, yel,
 					equipment_types[z->cmd[s]->arg3], z->cmd[s]->arg2);
 				break;
 			case 'P':
 				sprintf(buf + strlen(buf), "%sPut %s [%s%d%s] in %s [%s%d%s], Chance %d%%",
 					z->cmd[s]->if_flag ? " then " : "",
-					obj_proto[z->cmd[s]->arg1].short_description,
+					obj_proto[z->cmd[s]->arg1]->short_description,
 					cyn, obj_index[z->cmd[s]->arg1].vnum, yel,
-					obj_proto[z->cmd[s]->arg3].short_description,
+					obj_proto[z->cmd[s]->arg3]->short_description,
 					cyn, obj_index[z->cmd[s]->arg3].vnum, yel,
 					z->cmd[s]->arg2
 				);
@@ -576,7 +573,7 @@ ACMD(do_zlist)
 			case 'R':
 				sprintf(buf + strlen(buf), "%sRemove %s [%s%d%s] from room.",
 					z->cmd[s]->if_flag ? " then " : "",
-					obj_proto[z->cmd[s]->arg2].short_description,
+					obj_proto[z->cmd[s]->arg2]->short_description,
 					cyn, obj_index[z->cmd[s]->arg2].vnum, yel
 			   );
 				break;
@@ -738,7 +735,7 @@ void zedit_disp_menu(Descriptor *d)
 		case 'G':
 			sprintf(buf2 + strlen(buf2), "%sive it %s [%s%d%s], Chance %d%%, Max: In Inv: %d",
 				OLC_ZONE(d)->cmd[subcmd]->if_flag ? " Then g" : "G",
-				obj_proto[OLC_ZONE(d)->cmd[subcmd]->arg1].short_description,
+				obj_proto[OLC_ZONE(d)->cmd[subcmd]->arg1]->short_description,
 				cyn, obj_index[OLC_ZONE(d)->cmd[subcmd]->arg1].vnum, yel,
 				OLC_ZONE(d)->cmd[subcmd]->arg2, OLC_ZONE(d)->cmd[subcmd]->arg3
 				);
@@ -746,7 +743,7 @@ void zedit_disp_menu(Descriptor *d)
 		case 'O':
 			sprintf(buf2 + strlen(buf2), "%sLoad %s [%s%d%s], Chance %d%%, Max: Per Room: %d, Zone: %d, Stack: %s",
 				OLC_ZONE(d)->cmd[subcmd]->if_flag ? " then " : "",
-				obj_proto[OLC_ZONE(d)->cmd[subcmd]->arg1].short_description,
+				obj_proto[OLC_ZONE(d)->cmd[subcmd]->arg1]->short_description,
 				cyn, obj_index[OLC_ZONE(d)->cmd[subcmd]->arg1].vnum, yel,
 				OLC_ZONE(d)->cmd[subcmd]->arg2, OLC_ZONE(d)->cmd[subcmd]->arg4,
 				OLC_ZONE(d)->cmd[subcmd]->arg5, OLC_ZONE(d)->cmd[subcmd]->arg6 ? "Yes" : "No"
@@ -755,16 +752,16 @@ void zedit_disp_menu(Descriptor *d)
 		case 'E':
 			sprintf(buf2 + strlen(buf2), "%sEquip with %s [%s%d%s], %s, Chance %d%%",
 				OLC_ZONE(d)->cmd[subcmd]->if_flag ? " then " : "",
-				obj_proto[OLC_ZONE(d)->cmd[subcmd]->arg1].short_description,
+				obj_proto[OLC_ZONE(d)->cmd[subcmd]->arg1]->short_description,
 				cyn, obj_index[OLC_ZONE(d)->cmd[subcmd]->arg1].vnum, yel,
 				equipment_types[OLC_ZONE(d)->cmd[subcmd]->arg3], OLC_ZONE(d)->cmd[subcmd]->arg2);
 			break;
 		case 'P':
 			sprintf(buf2 + strlen(buf2), "%sPut %s [%s%d%s] in %s [%s%d%s], Chance %d%%",
 				OLC_ZONE(d)->cmd[subcmd]->if_flag ? " then " : "",
-				obj_proto[OLC_ZONE(d)->cmd[subcmd]->arg1].short_description,
+				obj_proto[OLC_ZONE(d)->cmd[subcmd]->arg1]->short_description,
 				cyn, obj_index[OLC_ZONE(d)->cmd[subcmd]->arg1].vnum, yel,
-				obj_proto[OLC_ZONE(d)->cmd[subcmd]->arg3].short_description,
+				obj_proto[OLC_ZONE(d)->cmd[subcmd]->arg3]->short_description,
 				cyn, obj_index[OLC_ZONE(d)->cmd[subcmd]->arg3].vnum, yel,
 				OLC_ZONE(d)->cmd[subcmd]->arg2
 			);
@@ -772,7 +769,7 @@ void zedit_disp_menu(Descriptor *d)
 		case 'R':
 			sprintf(buf2 + strlen(buf2), "%sRemove %s [%s%d%s] from room.",
 				OLC_ZONE(d)->cmd[subcmd]->if_flag ? " then " : "",
-				obj_proto[OLC_ZONE(d)->cmd[subcmd]->arg2].short_description,
+				obj_proto[OLC_ZONE(d)->cmd[subcmd]->arg2]->short_description,
 				cyn, obj_index[OLC_ZONE(d)->cmd[subcmd]->arg2].vnum, yel
 			);
 			break;

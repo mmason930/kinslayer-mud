@@ -22,7 +22,6 @@
  */
 extern class Shop *shop_index;
 extern int top_shop;
-extern Object *obj_proto;
 
 extern struct Index *obj_index;
 extern const char *trade_letters[];
@@ -594,7 +593,7 @@ void sedit_products_menu(Descriptor *d)
 	{
 		d->Send("%2d - [%s%5d%s] - %s%s%s\r\n", i,
 		        cyn, obj_index[shop->producing[i]].vnum, nrm,
-		        yel, obj_proto[shop->producing[i]].short_description, nrm);
+		        yel, obj_proto[shop->producing[i]]->short_description, nrm);
 	}
 
 	d->Send("\r\n"

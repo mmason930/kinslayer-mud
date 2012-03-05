@@ -37,7 +37,7 @@
 #include "Descriptor.h"
 
 extern const int rev_dir[];
-extern Object *obj_proto;
+extern std::vector<Object*> obj_proto;
 extern int top_of_objt;
 
 extern Character *character_list;
@@ -1227,12 +1227,12 @@ flusspferd::value getObjProto( int vnum )
 	int rnum = real_object( vnum );
 	if( rnum == -1 )
 		return lookupValue( 0 );
-	return lookupValue( &obj_proto[rnum] );
+	return lookupValue( obj_proto[rnum] );
 }
 flusspferd::value getObjProtoByRnum( int rnum )
 {
 	if( rnum >= 0 && rnum < top_of_objt )
-		return lookupValue( &obj_proto[ rnum ] );
+		return lookupValue( obj_proto[ rnum ] );
 	return lookupValue( 0 );
 }
 flusspferd::value getMobProto( int vnum )

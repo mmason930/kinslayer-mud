@@ -32,16 +32,15 @@
 #include "Descriptor.h"
 
 
-/* External variables */
+// External variables
 extern struct Index *obj_index;
-extern Object *obj_proto;
 
 extern struct GameTime time_info;
 extern const char *drinks[];
 extern const char *item_types[];
 extern const char *extra_bits[];
 
-/* Forward/External function declarations */
+// Forward/External function declarations
 ACMD(do_tell);
 ACMD(do_action);
 ACMD(do_echo);
@@ -49,12 +48,12 @@ ACMD(do_say);
 ACMD(do_slist);
 void sort_keeper_objs(Character * keeper, int shop_nr);
 
-/* Local variables */
+// Local variables
 Shop *shop_index;
 int top_shop = 0;
 int cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
 
-/* local functions */
+// local functions
 void shopping_list(char *arg, Character * ch, Character * keeper, int shop_nr);
 void shopping_value(char *arg, Character * ch, Character * keeper, int shop_nr);
 void shopping_sell(char *arg, Character * ch, Character * keeper, int shop_nr);
@@ -94,7 +93,7 @@ int ok_damage_shopkeeper(Character * ch, Character * victim);
 void read_line(FILE * shop_f, const char *string, void *data);
 
 
-/* config arrays */
+// config arrays
 const char *operator_str[] =
     {
         "[({",
@@ -104,7 +103,7 @@ const char *operator_str[] =
         "^'"
     } ;
 
-/* Constant list for printing out who we sell to */
+// Constant list for printing out who we sell to
 const char *trade_letters[] =
     {
         "Good",                 /* First, the alignment based ones */
@@ -416,7 +415,7 @@ int shop_producing(Object *item, int shop_nr)
 		return (FALSE);
 
 	for (counter = 0; counter < shop_index[shop_nr].producing.size(); ++counter)
-		if (same_obj(item, &obj_proto[ shop_index[shop_nr].producing[counter] ]))
+		if (same_obj(item, obj_proto[ shop_index[shop_nr].producing[counter] ]))
 			return (TRUE);
 
 	return (FALSE);
@@ -745,12 +744,12 @@ Object *slide_obj(Object * obj, Character * keeper, int shop_nr)
 	if (SHOP_SORT(shop_nr) < IS_CARRYING_N(keeper))
 		sort_keeper_objs(keeper, shop_nr);
 
-	/* Extract the object if it is identical to one produced */
+	// Extract the object if it is identical to one produced
 	if (shop_producing(obj, shop_nr))
 	{
 		temp = GET_OBJ_RNUM(obj);
 		obj->Extract(true);
-		return (&obj_proto[temp]);
+		return (obj_proto[temp]);
 	}
 
 	++SHOP_SORT(shop_nr);
@@ -1390,7 +1389,7 @@ void list_detailed_shop(Character * ch, int shop_nr)
 
 	for (index = 0;index < shop_index[shop_nr].producing.size();++index)
 	{
-		obj = &obj_proto[SHOP_PRODUCT(shop_nr, index)];
+		obj = obj_proto[SHOP_PRODUCT(shop_nr, index)];
 
 		if (index)
 			strcat(buf, ", ");

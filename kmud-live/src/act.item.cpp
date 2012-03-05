@@ -42,7 +42,7 @@ extern sh_int donation_room_2;  /* uncomment if needed! */
 extern sh_int donation_room_3;  /* uncomment if needed! */
 #endif
 extern struct Index *obj_index;
-extern Object *obj_proto;
+extern std::vector<Object*> obj_proto;
 extern const char *drinknames[];
 extern const char *drinks[];
 extern int top_of_objt;
@@ -1193,7 +1193,7 @@ void name_from_drinkcon( Object * obj )
 		new_name = str_dup( ( obj->name ) + i + 1 );
 
 
-		if ( GET_OBJ_RNUM( obj ) < 0 || obj->name != obj_proto[ GET_OBJ_RNUM( obj ) ].name )
+		if ( GET_OBJ_RNUM( obj ) < 0 || obj->name != obj_proto[ GET_OBJ_RNUM( obj ) ]->name )
 			delete[] ( obj->name );
 
 		obj->name = new_name;
@@ -1207,7 +1207,7 @@ void name_to_drinkcon( Object * obj, int type )
 	new_name = new char[ strlen( obj->name ) + strlen( drinknames[ type ] ) + 2 ];
 	sprintf( new_name, "%s %s", drinknames[ type ], obj->name );
 
-	if ( GET_OBJ_RNUM( obj ) < 0 || obj->name != obj_proto[ GET_OBJ_RNUM( obj ) ].name )
+	if ( GET_OBJ_RNUM( obj ) < 0 || obj->name != obj_proto[ GET_OBJ_RNUM( obj ) ]->name )
 		delete[] ( obj->name );
 
 	obj->name = new_name;

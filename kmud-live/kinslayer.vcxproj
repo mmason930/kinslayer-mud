@@ -45,8 +45,8 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost\boost_1_44;C:\dev\js\src\dist;C:\dev\kmud-live\reqs\iconv\include;C:\dev\kmud-live\reqs\sqlDatabase;C:\dev\kmud-live\reqs\mysql\include;C:\dev\kmud-live\reqs\flusspferd\include;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost\boost_1_44\lib;C:\dev\js\src\build-debug\dist\lib;C:\dev\kmud-live\reqs\flusspferd\lib\Debug;C:\dev\kmud-live\reqs\mysql\lib\debug;C:\dev\kmud-live\reqs\sqlDatabase\lib\Debug;C:\dev\kmud-live\reqs\iconv\lib\Debug;$(LibraryPath)</LibraryPath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\dev\boost\boost_1_44;C:\dev\js\src\dist;C:\dev\kmud-live\reqs\iconv\include;C:\dev\kmud-live\reqs\sqlDatabase;C:\dev\kmud-live\reqs\mysql\include;C:\dev\kmud-live\reqs\flusspferd\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\dev\kmud-live\reqs\sqlDatabase\lib\Release;C:\dev\kmud-live\reqs\mysql\lib\release;C:\dev\kmud-live\reqs\flusspferd\lib\Release;C:\dev\kmud-live\reqs\iconv\lib\Release;C:\dev\js\src\build-release\dist\lib;C:\dev\boost\boost_1_44\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\dev\boost\boost_1_44;C:\dev\js\src\dist;Z:\dev\kmud-live\reqs\iconv\include;Z:\dev\kmud-live\reqs\sqlDatabase;Z:\dev\kmud-live\reqs\mysql\include;Z:\dev\kmud-live\reqs\flusspferd\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Z:\dev\kmud-live\reqs\sqlDatabase\lib\Release;Z:\dev\kmud-live\reqs\mysql\lib\release;Z:\dev\kmud-live\reqs\flusspferd\lib\Release;Z:\dev\kmud-live\reqs\iconv\lib\Release;C:\dev\js\src\build-release\dist\lib;C:\dev\boost\boost_1_44\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -131,6 +131,7 @@
     <ClCompile Include="src\mobact.cpp" />
     <ClCompile Include="src\mobs.cpp" />
     <ClCompile Include="src\modify.cpp" />
+    <ClCompile Include="src\MudStatus.cpp" />
     <ClCompile Include="src\objsave.cpp" />
     <ClCompile Include="src\oedit.cpp" />
     <ClCompile Include="src\olc.cpp" />
@@ -144,6 +145,7 @@
     <ClCompile Include="src\spells.cpp" />
     <ClCompile Include="src\statedit.cpp" />
     <ClCompile Include="src\stats.cpp" />
+    <ClCompile Include="src\SystemUtil.cpp" />
     <ClCompile Include="src\threaded_jobs.cpp" />
     <ClCompile Include="src\UserLogoutType.cpp" />
     <ClCompile Include="src\weather.cpp" />
@@ -196,6 +198,7 @@
     <ClInclude Include="src\interpreter.h" />
     <ClInclude Include="src\md5.h" />
     <ClInclude Include="src\mobs.h" />
+    <ClInclude Include="src\MudStatus.h" />
     <ClInclude Include="src\olc.h" />
     <ClInclude Include="src\poker.h" />
     <ClInclude Include="src\screen.h" />
@@ -204,6 +207,7 @@
     <ClInclude Include="src\stats.h" />
     <ClInclude Include="src\structs.h" />
     <ClInclude Include="src\sysdep.h" />
+    <ClInclude Include="src\SystemUtil.h" />
     <ClInclude Include="src\telnet.h" />
     <ClInclude Include="src\threaded_jobs.h" />
     <ClInclude Include="src\UserDisabledCommand.h" />

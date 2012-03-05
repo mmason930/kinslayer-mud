@@ -16,7 +16,7 @@
 #include "StringUtil.h"
 
 extern std::list< Direction* > TemporaryDirections;
-extern Object *obj_proto;
+extern std::vector<Object*> obj_proto;
 
 #include "js_interpreter.h"
 
@@ -215,7 +215,7 @@ flusspferd::value JSRoom::load_obj( const int vnum )
 		return lookupValue(0);
 	}
 
-	if( GET_OBJ_TYPE(&obj_proto[r_num]) == ITEM_SPECIAL )
+	if( GET_OBJ_TYPE(obj_proto[r_num]) == ITEM_SPECIAL )
 	{
 		lookupValue(0);
 	}

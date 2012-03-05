@@ -49,7 +49,6 @@ extern const char *aggros[];
 extern const char *class_types[];
 extern const char *sector_types[];
 extern const char *pc_race_types[];
-extern Object *obj_proto;
 extern Index *obj_index;
 extern int top_shop;
 #if defined(OASIS_MPROG)
@@ -731,7 +730,7 @@ void medit_disp_menu(Descriptor *d)
 	else
 		sprintf(FoodString, "%sQuantity: %s%d%s, Food Item: %s%s%s [%s%d%s]", cyn, grn,
 		         mob->MobData->Food->quantity, cyn, grn, real_object(mob->MobData->Food->vnum) != -1 ?
-		         obj_proto[real_object(mob->MobData->Food->vnum)].short_description : "Invalid Vnum!", cyn, grn,
+		         obj_proto[real_object(mob->MobData->Food->vnum)]->short_description : "Invalid Vnum!", cyn, grn,
 		         mob->MobData->Food->vnum, cyn);
 
 	if(!mob->MobData->Skin)
@@ -739,7 +738,7 @@ void medit_disp_menu(Descriptor *d)
 	else
 		sprintf(SkinString, "%sRequirement: %s%d%s, Skin Item: %s%s%s [%s%d%s]", cyn, grn,
 		         mob->MobData->Skin->required, cyn, grn, real_object(mob->MobData->Skin->vnum) != -1 ?
-		         obj_proto[real_object(mob->MobData->Skin->vnum)].short_description : "Invalid Vnum!", cyn, grn,
+		         obj_proto[real_object(mob->MobData->Skin->vnum)]->short_description : "Invalid Vnum!", cyn, grn,
 		         mob->MobData->Skin->vnum, cyn);
 
 	for(iter = Warrants.begin();iter != Warrants.end();++iter)
@@ -1484,7 +1483,7 @@ void medit_parse(Descriptor *d, char *arg)
 			}
 			else if(i == -1)
 				d->Send("Invalid item number!\r\n");
-			else if( GET_OBJ_TYPE( (obj_proto + i) ) != ITEM_FOOD)
+			else if( GET_OBJ_TYPE(obj_proto[ i ]) != ITEM_FOOD)
 				d->Send("Invalid food type: Must be a food item.\r\n");
 			else
 			{
@@ -1553,7 +1552,7 @@ void medit_parse(Descriptor *d, char *arg)
 			}
 			else if(i == -1)
 				d->Send("Invalid item number!\r\n");
-			else if( GET_OBJ_TYPE( (obj_proto + i) ) != ITEM_SKIN)
+			else if( GET_OBJ_TYPE(obj_proto[ i ]) != ITEM_SKIN)
 				d->Send("Invalid skin type: Must be a skin item.\r\n");
 			else
 			{

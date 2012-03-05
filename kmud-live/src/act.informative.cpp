@@ -98,7 +98,7 @@ ACMD(do_warrants);
 ACMD(do_weather);
 ACMD(do_where);
 
-void printObjectLocation(int num, Object * obj, Character * ch, int recur);
+void printObjectLocation(std::stringstream &outputBuffer, int num, Object * obj, Character * ch, int recur);
 void showObjectToCharacter(Object * object, Character * ch, int mode, int ammount);
 void listObjectToCharacter(Object * listy, Character * ch, int mode, int show);
 void performMortalWhere(Character * ch, char *arg);
@@ -2585,8 +2585,7 @@ void performMortalWhere(Character * ch, char *arg)
 }
 
 
-void printObjectLocation(int num, Object * obj, Character * ch,
-                           int recur)
+void printObjectLocation(std::stringstream &outputBuffer, int num, Object *obj, Character *ch, int recur)
 {
 	if (num > 0)
 		sprintf(buf, "O%3d. %-25s - ", num, obj->GetSDesc());
@@ -2596,34 +2595,34 @@ void printObjectLocation(int num, Object * obj, Character * ch,
 	if (obj->in_room)
 	{
 		sprintf(buf + strlen(buf), "[%5d] %s\r\n", obj->in_room->vnum, obj->in_room->name);
-		ch->Send(buf);
+		outputBuffer << buf;
 	}
 
 	else if (obj->carried_by)
 	{
 		sprintf(buf + strlen(buf), "carried by %s\r\n", PERS(obj->carried_by, ch));
-		ch->Send(buf);
+		outputBuffer << buf;
 	}
 
 	else if (obj->worn_by)
 	{
 		sprintf(buf + strlen(buf), "worn by %s\r\n", PERS(obj->worn_by, ch));
-		ch->Send(buf);
+		outputBuffer << buf;
 	}
 
 	else if (obj->in_obj)
 	{
 		sprintf(buf + strlen(buf), "inside %s%s\r\n", obj->in_obj->GetSDesc(), (recur ? ", which is" : " "));
-		ch->Send(buf);
+		outputBuffer << buf;
 
 		if (recur)
-			printObjectLocation(0, obj->in_obj, ch, recur);
+			printObjectLocation(outputBuffer, 0, obj->in_obj, ch, recur);
 	}
 
 	else
 	{
 		sprintf(buf + strlen(buf), "in an unknown location\r\n");
-		ch->Send(buf);
+		outputBuffer << buf;
 	}
 }
 
@@ -2635,37 +2634,37 @@ void performImmortalWhere(Character * ch, char *arg)
 	int num, found = 0;
 	char color[300];
 
+	std::stringstream outputBuffer;
+
 	if (!*arg)
 	{
-		ch->Send("Players\r\n-------\r\n");
+		outputBuffer << "Players\r\n-------" << std::endl;
 
 		for (d = descriptor_list; d; d = d->next)
+		{
 			if (show_on_who_list(d))
 			{
 				i = (d->original ? d->original : d->character);
 
 				if (i && CAN_SEE(ch, i) && i->in_room)
 				{
-
 					if (d->original)
-						sprintf(buf, "%-20s - [%5d] %s (in %s)\r\n",
-						        GET_NAME(i), d->character->in_room->vnum,
-						        d->character->in_room->name, GET_NAME(d->character));
+						sprintf(buf, "%-20s - [%5d] %s (in %s)", GET_NAME(i), d->character->in_room->vnum, d->character->in_room->name, GET_NAME(d->character));
 					else
 					{
 						if(IS_TROLLOC(i) && GET_LEVEL(i) < LVL_IMMORT)
 							strcpy(color, YELLOW);
-
 						else if(IS_HUMAN(i) && GET_LEVEL(i) < LVL_IMMORT)
 							strcpy(color, GREEN);
 						else
 							strcpy(color, NORMAL);
 
-						ch->Send("%s%-20s - [%5d] %s %s\r\n", color, GET_NAME(i),
-						         i->in_room->vnum, i->in_room->name, NORMAL);
+						sprintf(buf, "%s%-20s - [%5d] %s %s", color, GET_NAME(i), i->in_room->vnum, i->in_room->name, NORMAL);
 					}
+					outputBuffer << buf << std::endl;
 				}
 			}
+		}
 	}
 
 	else
@@ -2675,8 +2674,8 @@ void performImmortalWhere(Character * ch, char *arg)
 			if (!i->IsPurged() && isname(arg, i->player.name) && i->in_room && CAN_SEE(ch, i))
 			{
 				found = 1;
-				ch->Send("M%3d. %-25s - [%5d] %s\r\n", ++num, GET_NAME(i),
-				         i->in_room->vnum, i->in_room->name);
+				sprintf(buf, "M%3d. %-25s - [%5d] %s\r\n", ++num, GET_NAME(i), i->in_room->vnum, i->in_room->name);
+				outputBuffer << buf;
 			}
 		}
 		for (num = 0, k = object_list; k; k = k->next)
@@ -2684,12 +2683,19 @@ void performImmortalWhere(Character * ch, char *arg)
 			if (!k->IsPurged() && isname(arg, k->getName()) && CAN_SEE_OBJ(ch, k))
 			{
 				found = 1;
-				printObjectLocation(++num, k, ch, TRUE);
+				printObjectLocation(outputBuffer, ++num, k, ch, TRUE);
 			}
 		}
 		if (!found)
+		{
 			ch->Send("Couldn't find any such thing.\r\n");
+			return;
+		}
 	}
+
+	char *cStringOutputBuffer = str_dup(outputBuffer.str().c_str());
+	page_string(ch->desc, cStringOutputBuffer, TRUE);
+	delete[] cStringOutputBuffer;
 }
 
 ACMD(do_where)

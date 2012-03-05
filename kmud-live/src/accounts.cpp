@@ -89,7 +89,7 @@ Account SwitchManager::GetAccountByName( const std::string &Name )
 	sql::Query MyQuery;
 	Account a;
 
-	QueryBuffer << "SELECT * FROM accounts WHERE account_name='" << sql::escapeString(Name) << "';";
+	QueryBuffer << "SELECT * FROM account WHERE account_name='" << sql::escapeString(Name) << "';";
 
 	try {
 		MyQuery = gameDatabase->sendQuery( QueryBuffer.str() );
@@ -110,7 +110,7 @@ Account SwitchManager::GetAccountByID( const int id )
 	sql::Query MyQuery;
 	Account a;
 
-	QueryBuffer << "SELECT * FROM accounts WHERE id='" << id << "';";
+	QueryBuffer << "SELECT * FROM account WHERE id='" << id << "';";
 
 	try {
 		MyQuery = gameDatabase->sendQuery( QueryBuffer.str() );
@@ -131,7 +131,7 @@ Account SwitchManager::GetAccountByPlayerName( const std::string &Name )
 	sql::Query MyQuery;
 	Account a;
 
-	QueryBuffer << "SELECT a.* FROM accounts a JOIN users u ON u.account_id=a.id WHERE u.username='"
+	QueryBuffer << "SELECT a.* FROM account a JOIN users u ON u.account_id=a.id WHERE u.username='"
 		<< sql::escapeString(Name) << "';";
 
 	try {
@@ -155,7 +155,7 @@ Account SwitchManager::GetAccountByPlayerID( const int id )
 	sql::Query MyQuery;
 	Account a;
 
-	QueryBuffer << "SELECT a.* FROM accounts a JOIN users u ON u.account_id=a.id WHERE u.user_id='" << id << "';";
+	QueryBuffer << "SELECT a.* FROM account a JOIN users u ON u.account_id=a.id WHERE u.user_id='" << id << "';";
 
 	try {
 		MyQuery = gameDatabase->sendQuery( QueryBuffer.str() );
@@ -310,7 +310,7 @@ bool SwitchManager::IsExemptFromWaiting( const std::string &sHostFrom, const std
 	sql::Row MyRow;
 
 	QueryBuffer 
-		<< "SELECT * FROM switch_exemptions"
+		<< "SELECT * FROM switchExemption"
 		<< " WHERE type='" << SwitchManager::SWITCH_EXEMPTION_WAITING << "'"
 		<< " AND (from_username='*' OR from_username='" << sql::escapeString(sNameFrom) << "')"
 		<< " AND (from_host='*' OR from_host='" << sql::escapeString(sHostFrom) << "')"
@@ -338,8 +338,8 @@ bool SwitchManager::IsExemptFromMultiplayRestriction( const std::string &sHost, 
 	sql::Row MyRow;
 
 	QueryBuffer 
-		<< "SELECT * FROM switch_exemptions"
-		<< " WHERE type='" << SwitchManager::SWITCH_EXEMPTION_MULTIPLAYING << "'"
+		<< "SELECT * FROM switchExemption"
+		<< " WHERE type=" << SwitchManager::SWITCH_EXEMPTION_MULTIPLAYING
 		<< ";";
 
 	try {

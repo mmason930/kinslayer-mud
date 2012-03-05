@@ -69,7 +69,7 @@ ACMD(do_say);
 
 struct GameTime *real_time_passed(time_t t2, time_t t1);
 
-extern Object *obj_proto;
+extern std::vector<Object*> obj_proto;
 
 int JSCharacter::getPlayerDeaths()
 {
@@ -367,7 +367,7 @@ flusspferd::value JSCharacter::load_obj( const int vnum )
 		return lookupValue(0);
 	}
 
-	if( GET_OBJ_TYPE(&obj_proto[r_num]) == ITEM_SPECIAL )
+	if( GET_OBJ_TYPE(obj_proto[r_num]) == ITEM_SPECIAL )
 	{
 		lookupValue(0);
 	}

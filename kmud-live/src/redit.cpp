@@ -35,7 +35,6 @@ extern const int	rev_dir[];
 extern const char	*room_bits[];
 extern const char	*sector_types[];
 extern const char	*exit_bits[];
-extern Object		*obj_proto;
 extern Descriptor	*descriptor_list;
 extern Track		*TopTrack, *BottomTrack;
 extern Character	*character_list;
@@ -382,7 +381,7 @@ void redit_save_to_disk( int lowVnum, int highVnum )
 		localConnection->sendRawQuery("DROP TABLE IF EXISTS " + tempExitTableName);
 		localConnection->sendRawQuery("DROP TABLE IF EXISTS " + tempJSAttachmentTable);
 		localConnection->sendRawQuery("CREATE TABLE " + tempRoomTableName + " LIKE rooms");
-		localConnection->sendRawQuery("CREATE TABLE " + tempExitTableName + " LIKE room_exits");
+		localConnection->sendRawQuery("CREATE TABLE " + tempExitTableName + " LIKE roomExit");
 		localConnection->sendRawQuery("CREATE TABLE " + tempJSAttachmentTable + " LIKE js_attachments");
 
 		sql::BatchInsertStatement roomInsert( localConnection, tempRoomTableName    , 1000 );
@@ -447,11 +446,11 @@ void redit_save_to_disk( int lowVnum, int highVnum )
 
 		///////// Insert the exits /////////
 		queryBuffer.str("");
-		queryBuffer << "DELETE FROM room_exits WHERE room_vnum BETWEEN " << lowVnum << " AND " << highVnum;
+		queryBuffer << "DELETE FROM roomExit WHERE room_vnum BETWEEN " << lowVnum << " AND " << highVnum;
 		query3 = queryBuffer.str();
 
 		queryBuffer.str("");
-		queryBuffer << "INSERT INTO room_exits ("
+		queryBuffer << "INSERT INTO roomExit ("
 					<< "room_vnum,to_room,general_description,keyword,exit_info,keeper,hidden_level,pick_req,key_vnum,dir"
 					<< ") SELECT "
 					<< "room_vnum,to_room,general_description,keyword,exit_info,keeper,hidden_level,pick_req,key_vnum,dir"

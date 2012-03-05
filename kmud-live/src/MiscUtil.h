@@ -44,6 +44,7 @@ public:
 	static int dice(int number, int size);
 	static std::list<int> splitToIntList(const std::string &s, const char sep_char = ' ');
 	static std::string encodeDateTime(const DateTime &dateTime);
+	static std::map<std::string, std::string> MiscUtil::loadResourcesFromFile(const std::string &fileName);
 
 	template<typename T>
 	static std::string toString(T convertible)
