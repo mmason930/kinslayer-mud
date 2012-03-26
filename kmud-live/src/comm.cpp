@@ -1412,6 +1412,15 @@ LagRoutineEntry LagMonitor::getRoutineEntry( const std::string &sRoutineName )
 LagMonitor lagMonitor;
 void process_events( void );
 
+
+void invisiblePing()
+{
+	for(Descriptor *descriptor = descriptor_list;descriptor;descriptor = descriptor->next)
+	{
+		descriptor->SendRaw("\0");
+	}
+}
+
 void heartbeat( int pulse )
 {
 	lagMonitor.startClock();
@@ -1495,6 +1504,10 @@ void heartbeat( int pulse )
 		lagMonitor.startClock();
 		checkIdlePasswords();
 		lagMonitor.stopClock( LAG_MONITOR_CHECK_IDLE_PASSWORDS );
+		
+		lagMonitor.startClock();
+		invisiblePing();
+		lagMonitor.stopClock( LAG_MONITOR_INVISIBLE_PING );
 	}
 
 	if ( !( pulse % PULSE_MOBILE ) ) {

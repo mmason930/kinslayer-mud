@@ -1876,7 +1876,6 @@ void Descriptor::Nanny( char* arg )
 				}
       
 			this->Send( "Please enter a password: ", GET_NAME( this->character ) );
-			/*this->EchoOff()*/EchoOffNew(this);
 			STATE( this ) = CON_NEWPASSWD;
 		}
 		else if ( *arg == 'n' || *arg == 'N' )
@@ -1898,6 +1897,7 @@ void Descriptor::Nanny( char* arg )
 			STATE( this ) = CON_CLOSE;
 		else
 		{
+			/*this->EchoOff()*/EchoOffNew(this);
 			if (
 				(!this->character->PasswordUpdated() &&
 				strncmp( CRYPT(arg, this->character->player.passwd.c_str()), GET_PASSWD(this->character).c_str(), 10 )) ||

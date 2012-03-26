@@ -451,9 +451,9 @@ void redit_save_to_disk( int lowVnum, int highVnum )
 
 		queryBuffer.str("");
 		queryBuffer << "INSERT INTO roomExit ("
-					<< "room_vnum,to_room,general_description,keyword,exit_info,keeper,hidden_level,pick_req,key_vnum,dir"
+					<< "room_vnum,to_room,general_description,keyword,exit_info,hidden_level,pick_req,key_vnum,dir"
 					<< ") SELECT "
-					<< "room_vnum,to_room,general_description,keyword,exit_info,keeper,hidden_level,pick_req,key_vnum,dir"
+					<< "room_vnum,to_room,general_description,keyword,exit_info,hidden_level,pick_req,key_vnum,dir"
 					<< " FROM " << tempExitTableName;
 		query4 = queryBuffer.str();
 

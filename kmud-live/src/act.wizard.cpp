@@ -50,6 +50,7 @@
 #include "kuClient.h"
 #include "UserLogoutType.h"
 #include "UserDisabledCommand.h"
+#include "dg_event.h"
 
 /*   external vars  */
 extern GameTime time_info;
@@ -1217,6 +1218,11 @@ extern class Shop *shop_index;
 
 void rebootCountdown();
 
+void SendInvisCharacter( void* data )
+{
+	Character *ch = (Character*)data;
+	ch->Send("\0");
+}
 void AutoSave( void );
 /*** Extra immortal command to perform various, usually one-time test/maintanence routines ***/
 ACMD(do_extra)
@@ -1236,6 +1242,11 @@ ACMD(do_extra)
 			vArgs.erase(vArgs.begin(),vArgs.begin()+1);
 			std::string expression = StringUtil::implode(vArgs, " ");
 			flusspferd::value val = JSManager::get()->executeExpression(expression);
+		}
+		else if( !str_cmp(vArgs.at(0), "invischar"))
+		{
+			add_event( 26, SendInvisCharacter, (void*)ch );
+			ch->Send("\0");
 		}
 		else if( !str_cmp(vArgs.at(0), "forums") )
 		{

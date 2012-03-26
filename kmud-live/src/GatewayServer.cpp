@@ -452,6 +452,9 @@ void GatewayServer::run()
 				setMudStatus(MudStatus::notRunning);
 				this->mudProcessId = 0;
 
+				if(motherConnectionToServer)
+					motherConnectionToServer->disconnect();
+
 				sendToDescriptors("The MUD has finished shutting down.\r\n\r\n");
 			}
 			else
