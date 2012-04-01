@@ -220,6 +220,11 @@ void GatewayServer::bindListener()
 
 		listener->setOpenDescriptorCallback(openDescriptorCallback);
 
+		if(!listener->l_EnableKeepAlive())
+		{
+			std::cout << makeTimestamp() << " Failed to set keepalive on socket." << std::endl;
+		}
+
 		listeners.push_back(listener);
 	}
 }
@@ -451,9 +456,6 @@ void GatewayServer::run()
 			{
 				setMudStatus(MudStatus::notRunning);
 				this->mudProcessId = 0;
-
-				if(motherConnectionToServer)
-					motherConnectionToServer->disconnect();
 
 				sendToDescriptors("The MUD has finished shutting down.\r\n\r\n");
 			}

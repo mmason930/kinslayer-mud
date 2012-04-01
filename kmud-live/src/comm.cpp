@@ -601,6 +601,11 @@ void initiateGame( int port )
 	
 	listener->setAfterSocketWriteCallback(&onAfterSocketWrite);
 
+	if(!(listener->l_EnableKeepAlive()))
+	{
+		Log("Could not enable keepalive on socket.");
+	}
+
 //	listener->setSocketReadCallback(&onSocketRead);
 
 #ifdef WIN32

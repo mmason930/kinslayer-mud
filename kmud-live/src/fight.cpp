@@ -701,6 +701,9 @@ void Character::DeathCry()
 void Character::Die( Character *killer )
 {//TODO: Review
 
+	if(killer == NULL)
+		killer = this;
+
 	if(killer != NULL)
 	{
 		if ( (killer != this) && (IS_NPC(this) || this->desc) && !isInArena(this) && !isInArena(killer) )

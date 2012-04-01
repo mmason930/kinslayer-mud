@@ -75,6 +75,7 @@ public:
 	std::list< kuDescriptor * > l_AcceptNewHosts();
 	void l_Pulse();
 	void l_Close();
+	bool l_EnableKeepAlive();
 private:
 
 	std::map< int, kuDescriptor * > mDescriptors;

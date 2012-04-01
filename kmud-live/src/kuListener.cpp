@@ -86,6 +86,7 @@ int kuListener::l_Listen()
 		l_isListening = false;
 		return -1;
 	}
+
 	l_isListening = true;
 	return i;
 }
@@ -307,6 +308,32 @@ SOCKET kuListener::l_UDPSocket()
 	return sock;
 }
 /****************************************************/
+
+bool kuListener::l_EnableKeepAlive()
+{
+	char optval;
+	socklen_t optlen = sizeof(optval);
+	if(getsockopt(this->l_Sock, SOL_SOCKET, SO_KEEPALIVE, &optval, &optlen) < 0) {
+		return false;
+	}
+
+	if(optval)
+		return true;//Early out. The option has already been enabled.
+
+	optval = 1;
+	optlen = sizeof(optval);
+	if(setsockopt(this->l_Sock, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0) {
+		return false;
+	}
+
+	if(getsockopt(this->l_Sock, SOL_SOCKET, SO_KEEPALIVE, &optval, &optlen) < 0) {
+		return false;
+	}
+
+	if(optval)
+		return true;//The setting succeeded.
+	return false;//The option failed.
+}
 
 kuDescriptor *kuListener::l_GetDesc( const int uid )
 {
