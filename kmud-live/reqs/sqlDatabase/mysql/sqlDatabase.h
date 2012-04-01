@@ -17,6 +17,8 @@ Author: Michael Mason - mikemason930@gmail.com (C) 01-26-2007
 #include <iostream>
 #include <sstream>
 #include <ctime>
+#include <cstdio>
+#include <cstring>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
