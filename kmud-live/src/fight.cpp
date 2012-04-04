@@ -85,7 +85,7 @@ PKManager *PKManager::Self = (NULL);
 PKManager::PKManager()
 {
 	/* We need to determine the current top kill ID */
-	std::string QueryText = "SELECT kill_id FROM player_kills ORDER BY kill_id DESC LIMIT 1;";
+	std::string QueryText = "SELECT kill_id FROM userPlayerKill ORDER BY kill_id DESC LIMIT 1;";
 	sql::Query MyQuery;
 	try {
 		MyQuery = gameDatabase->sendQuery(QueryText);
@@ -113,7 +113,7 @@ void PKManager::RegisterKill( Character *Killer, Character *Victim, const unsign
 {
 	std::stringstream QueryText;
 
-	QueryText << "INSERT INTO player_kills(kill_id,killer_id,victim_id,wp_transfer,time_of_death) VALUES(";
+	QueryText << "INSERT INTO userPlayerKill(kill_id,killer_id,victim_id,wp_transfer,time_of_death) VALUES(";
 	QueryText << SQLVal(kill_id);
 	QueryText << SQLVal(Killer->player.idnum);
 	QueryText << SQLVal(Victim->player.idnum);

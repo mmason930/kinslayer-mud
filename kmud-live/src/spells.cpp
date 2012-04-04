@@ -180,7 +180,7 @@ ASPELL(spell_locate_object)
 
 	//These will hold the display sent to the caster.
 	char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
-	*buf = NULL;//Clear the buffer
+	*buf = '\0';//Clear the buffer
 
 	for( obj = object_list;obj;obj = obj->next )
 	{

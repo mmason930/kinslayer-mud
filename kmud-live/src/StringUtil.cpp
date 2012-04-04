@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <cstring>
 
 #include "StringUtil.h"
 #include "MiscUtil.h"
@@ -48,7 +49,7 @@ void StringUtil::trim(std::string &s)
 {
 	std::string::size_type pos;
 
-	for(pos = 0;pos < s.size() && s[pos] == ' ';++pos);
+	for(pos = 0;pos < s.size() && isspace(s[pos]);++pos);
 	s.erase(0, pos);
 	for(pos = (0 > (int)s.size() ? 0 : (int)s.size());pos && s[pos - 1] == ' ';--pos);
 	s.erase(pos, s.size());

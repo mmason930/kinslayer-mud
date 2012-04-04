@@ -137,7 +137,6 @@
 #include <unordered_map>
 #include <memory>
 #endif
-using std::tr1::shared_ptr;
 using std::tr1::unordered_map;
 #endif
 

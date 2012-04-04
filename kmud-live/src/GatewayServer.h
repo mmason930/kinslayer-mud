@@ -29,6 +29,7 @@ private:
 	int listeningPort;
 	int secondaryPort;
 	unsigned int mudProcessId;
+	bool shutdownOnReboot;
 
 	DateTime lastPingSentToGameServer;
 	DateTime lastPingResponseFromGameServer;
@@ -64,6 +65,7 @@ public:
 	void shutdown();
 	void setupAndRun();
 
+	void disconnectMotherConnectionFromGameServer();
 	void attemptConnectionWithGameServer();
 	void bindListener();
 

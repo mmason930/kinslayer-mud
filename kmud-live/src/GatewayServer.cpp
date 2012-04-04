@@ -9,6 +9,11 @@
 #include "GatewayDescriptorStatus.h"
 #include "StringUtil.h"
 
+#ifndef WIN32
+#include <sys/types.h>
+#include <sys/wait.h>
+#endif
+
 bool debugBoolean = false;
 
 std::vector<std::string> crashReasonVector;
@@ -30,6 +35,7 @@ GatewayServer::GatewayServer()
 	this->statusLastModifiedDatetime = DateTime();
 	this->lastAttemptedMudStartDatetime = DateTime(0);
 	this->lastMudProcessIdCheckDatetime = DateTime(0);
+	this->shutdownOnReboot = false;
 }
 
 GatewayServer::~GatewayServer()
@@ -116,7 +122,7 @@ bool GatewayServer::loadConfiguration()
 	}
 
 
-	this->secondaryPort = NULL;
+	this->secondaryPort = 0;
 	if(resources.find("Secondary Gateway Port") != resources.end())
 	{
 		this->secondaryPort = atoi(resources["Secondary Gateway Port"].c_str());
@@ -162,6 +168,17 @@ void GatewayServer::setup()
 	crashReasonVector.push_back("your mom");
 	crashReasonVector.push_back("Facebook's terrible chat interface");
 	crashReasonVector.push_back("Google's attempts to buy us out");
+}
+
+void GatewayServer::disconnectMotherConnectionFromGameServer()
+{
+	if(motherConnectionToServer != NULL) {
+
+		motherConnectionToServer->disconnect();
+		delete motherConnectionToServer;
+	}
+
+	motherConnectionToServer = NULL;
 }
 
 void GatewayServer::attemptConnectionWithGameServer()
@@ -333,6 +350,18 @@ void GatewayServer::processInputFromMotherConnectionToServer()
 				
 				setMudStatus( MudStatus::running );
 			}
+			else if(command == "ShutdownOnReboot") {
+
+				std::cout << makeTimestamp() << " The MUD has told the Gateway to shut down when the MUD next reboots." << std::endl;
+
+				this->shutdownOnReboot = true;
+			}
+			else if(command == "RestartOnReboot") {
+
+				std::cout << makeTimestamp() << " The MUD has told the Gateway to restart when the MUD next reboots." << std::endl;
+
+				this->shutdownOnReboot = false;
+			}
 			else if(command == "Reboot") {
 
 				std::cout << makeTimestamp() << " Reboot command received. Putting players into awaitingConnection mode." << std::endl;
@@ -414,8 +443,9 @@ void GatewayServer::run()
 	std::list<GatewayDescriptor*>::iterator descriptorIter;
 
 	bindListener();
+	bool isTerminated = false;
 
-	while(true) {
+	while(!isTerminated) {
 
 		for(auto kuListenerIter = listeners.begin();kuListenerIter != listeners.end();++kuListenerIter)
 		{
@@ -457,17 +487,26 @@ void GatewayServer::run()
 				setMudStatus(MudStatus::notRunning);
 				this->mudProcessId = 0;
 
+				this->disconnectMotherConnectionFromGameServer();
 				sendToDescriptors("The MUD has finished shutting down.\r\n\r\n");
+				std::cout << makeTimestamp() << " The MUD process can no longer be found. Assuming MUD has completed with shutdown." << std::endl;
+
+				if(shutdownOnReboot)
+				{
+					std::cout << makeTimestamp() << " The gateway is now preparing to shut down." << std::endl;
+					isTerminated = true;
+				}
 			}
 			else
 			{
+//				std::cout << makeTimestamp() << " MUD process ID `" << this->mudProcessId << "` still exists. Waiting for shutdown to complete..." << std::endl;
 				//MUD is shutting down, but still running.
 			}
 		}
 
 		
 		//We need to reboot the MUD if configured to carry out the task.
-		if(getMudStatus() == MudStatus::notRunning)
+		if(!isTerminated && getMudStatus() == MudStatus::notRunning)
 		{
 			long long secondsSinceLastAttemptedMudStart = (DateTime().getTime() - lastAttemptedMudStartDatetime.getTime());
 
@@ -476,10 +515,12 @@ void GatewayServer::run()
 				sendToDescriptors("Attempting to start the MUD...\r\n\r\n");
 				this->attemptMudStart();
 				lastAttemptedMudStartDatetime = DateTime();
+				
+				std::cout << makeTimestamp() << " Attempting to restart MUD. Current status is `" << getMudStatus()->getStandardName() << "`. Socket connection: " << (isConnectedToGameServer() == true ? "Yes" : "No") << std::endl;
 			}
 		}
 
-		if(getMudStatus() == MudStatus::booting)
+		if(!isTerminated && getMudStatus() == MudStatus::booting)
 		{
 			if(this->mudProcessId != 0 && DateTime().getTime() - lastMudProcessIdCheckDatetime.getTime() > 5)
 			{
@@ -497,7 +538,7 @@ void GatewayServer::run()
 			}
 		}
 		
-		if(getMudStatus() == MudStatus::running)
+		if(!isTerminated && getMudStatus() == MudStatus::running)
 		{
 			__int64 ts = lastPingSentToGameServer.getTime();
 			__int64 tr = lastPingResponseFromGameServer.getTime();
@@ -685,8 +726,50 @@ void GatewayServer::attemptMudStart()
 	std::stringstream commandBuffer;
 #ifdef WIN32
 	commandBuffer << "START CMD /C CALL \"" << this->getMudRootDirectoryPath() << mudExecutablePath << "\"";
-#else
-#error "Need to implement"
-#endif
 	system(commandBuffer.str().c_str());
+#else
+	commandBuffer << this->getMudRootDirectoryPath() << mudExecutablePath;
+
+	pid_t temporaryProcessId, childProcessId;
+
+	temporaryProcessId = fork();
+
+	if(temporaryProcessId == 0)
+	{//This is the child
+		childProcessId = fork();
+		if(childProcessId == 0)
+		{//This is the actual child, which we will use to spawn the MUD process.
+//			std::cout << "**MUD PROCESS** Child process starting MUD..." << std::endl;
+			int retval = execlp(commandBuffer.str().c_str(), commandBuffer.str().c_str(), 0);
+
+//			std::cout << "**MUD PROCESS** Child process finished starting MUD..." << std::endl;
+//			std::cout << "**MUD PROCESS** Return Value: " << retval << std::endl;
+//			std::cout << "**MUD PROCESS** Errno: " << strerror(errno) << std::endl;
+			exit(1);
+		}
+		else if(childProcessId > 0)
+		{//This is the parent process, which we will terminate to assign the MUD process's parent to the "init" process.
+		 //The gateway process which we will keep alive will spawn on the second fork call.
+//			std::cout << "**TEMPORARY PROCESS** Exiting immediately..." << std::endl;
+			exit(0);
+		}
+		else
+		{//Error, could not fork.
+			std::cout << makeTimestamp() << " ERROR: Could not fork!" << std::endl;
+		}
+	}
+	else if(temporaryProcessId > 0)
+	{//Here we have the actual gateway process, which will safely exit out of this function and proceed functioning.
+	 //First we will wait for the temporary process to terminate so that we can reap it, eliminating the dangling zombie process.
+		int status;
+		waitpid(childProcessId, &status, 0);
+	}
+	else
+	{//Error, could not fork.
+		std::cout << makeTimestamp() << " ERROR: Could not fork!" << std::endl;
+	}
+	
+//	std::cout << "**GATEWAY PROCESS** Proceeding..." << std::endl;
+
+#endif
 }

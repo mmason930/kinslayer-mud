@@ -1947,6 +1947,7 @@ ACMD(do_find)
 ACMD(do_countdown)
 {
 	int count;
+	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
 	if( GET_LEVEL(ch) < LVL_GRGOD )
 	{
@@ -1954,9 +1955,27 @@ ACMD(do_countdown)
 		return;
 	}
 
-	OneArgument(argument, ::arg);
+	TwoArguments(argument, arg1, arg2);
 
-	count = atoi(::arg);
+	if(!str_cmp(arg1, "shutdown"))
+	{
+		ch->Send("The Gateway is now set to shut down when the MUD next boots.\r\n");
+
+		gatewayConnection->send("ShutdownOnReboot\n");
+		return;
+	}
+	else if(!str_cmp(arg1, "restart"))
+	{
+		ch->Send("The Gateway is now set to restart when the MUD next boots.\r\n");
+
+		gatewayConnection->send("RestartOnReboot\n");
+		return;
+	}
+	else if(!str_cmp(arg1, "delay"))
+	{
+	}
+
+	count = atoi(arg1);
 
 	if(count <= 0)
 	{
@@ -1972,10 +1991,7 @@ ACMD(do_countdown)
 	rebootNotified15 = rebootNotified10 = rebootNotified5 = rebootNotified1 = false;
 	sendToAll(buf);
 
-	MudLog(NRM, MAX(LVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "Reboot set to %s by %s.",
-	       rebootTime.toString().c_str(), GET_NAME(ch));
-
-	return;
+	MudLog(NRM, MAX(LVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "Reboot set to %s by %s.", rebootTime.toString().c_str(), GET_NAME(ch));
 }
 
 ACMD(do_rank)

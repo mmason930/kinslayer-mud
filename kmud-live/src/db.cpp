@@ -88,7 +88,7 @@ Object *chest_head = NULL;					// Chest Log List
 std::vector<int> ItemCount;
 std::vector<std::string> MySQLTables;
 #ifdef KINSLAYER_JAVASCRIPT
-shared_ptr<std::vector<JSTrigger*> > globalJS_Scripts;
+std::shared_ptr<std::vector<JSTrigger*> > globalJS_Scripts;
 #endif
 class Config *Conf;
 void BootKits();
@@ -146,7 +146,6 @@ void reset_time(void);
 void SetupItemCount();
 void PlayerFileCycle();
 int BootObjects();
-void remove_event(class event_info *event);
 void startGameSession();
 ACMD(do_reboot);
 
@@ -230,7 +229,7 @@ public:
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////
 			//TODO: Redo this.
-			sql::Query aQuery = connection->sendQuery("SELECT ai.* FROM auction_items ai JOIN objects o ON o.id=ai.object_id WHERE ai.owner_id NOT IN(SELECT user_id FROM users);");
+			sql::Query aQuery = connection->sendQuery("SELECT ai.* FROM auctionItem ai JOIN objects o ON o.id=ai.object_id WHERE ai.owner_id NOT IN(SELECT user_id FROM users);");
 
 			while( aQuery->hasNextRow() )
 			{
@@ -240,7 +239,7 @@ public:
 				connection->sendRawQuery( sBuffer.str() );
 
 				sBuffer.str("");
-				sBuffer << "UPDATE auction_items SET active='0' WHERE id='" << MyRow["id"] << "';";
+				sBuffer << "UPDATE auctionItem SET active='0' WHERE id='" << MyRow["id"] << "';";
 				connection->sendRawQuery( sBuffer.str() );
 			}
 			////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -325,7 +324,7 @@ ACMD(do_reboot)
 /*** Galnor 01/24/2010 - Load all global JavaScripts into the MUD ***/
 void BootGlobalScripts()
 {
-	globalJS_Scripts = shared_ptr< std::vector<JSTrigger*> >(new std::vector<JSTrigger*>);
+	globalJS_Scripts = std::shared_ptr< std::vector<JSTrigger*> >(new std::vector<JSTrigger*>);
 	sql::Query MyQuery;
 
 	try {
@@ -995,7 +994,7 @@ Room *Room::Boot(const sql::Row &MyRow,
 	}
 #ifdef KINSLAYER_JAVASCRIPT
 
-    NewRoom->js_scripts = shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
+    NewRoom->js_scripts = std::shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
 	for(std::list< sql::Row >::const_iterator jsIter = MyJS.begin();jsIter != MyJS.end();++jsIter )
 	{
 		int vnum = atoi((*jsIter)["script_vnum"].c_str());
@@ -2027,7 +2026,7 @@ bool Character::LoadAliases()
 }
 bool Character::LoadClans()
 {
-	std::string query = "SELECT * FROM clans WHERE user_id=" + MiscUtil::Convert<std::string>(this->player.idnum);
+	std::string query = "SELECT * FROM userClan WHERE user_id=" + MiscUtil::Convert<std::string>(this->player.idnum);
 	sql::Query MyQuery;
 	sql::Row MyRow;
 	PlayerClan *clan;
@@ -2190,14 +2189,14 @@ bool MySQLLoadRolls(const std::string &playername, const std::string TableName, 
 
 bool Character::LoadHitRolls()
 {
-	bool result = MySQLLoadRolls(this->player.name, "hitrolls", this->LoadData->HitRolls);
+	bool result = MySQLLoadRolls(this->player.name, "userHitRoll", this->LoadData->HitRolls);
 	this->points.HitRolls.insert(this->points.HitRolls.end(),
 		this->LoadData->HitRolls.begin(), this->LoadData->HitRolls.end());
 	return result;
 }
 bool Character::LoadManaRolls()
 {
-	bool result = MySQLLoadRolls(this->player.name, "manarolls", this->LoadData->ManaRolls);
+	bool result = MySQLLoadRolls(this->player.name, "userManaRoll", this->LoadData->ManaRolls);
 	this->points.ManaRolls.insert(this->points.ManaRolls.end(),
 		this->LoadData->ManaRolls.begin(), this->LoadData->ManaRolls.end());
 	return result;
@@ -2272,7 +2271,7 @@ bool Character::SaveClans()
 
 bool Character::SaveTrophies()
 {
-	char query[1024];
+	std::stringstream queryBuffer;
 	std::map<std::string, int>::iterator old_trophy, new_trophy;
 
 	if(!this->LoadData)
@@ -2280,16 +2279,20 @@ bool Character::SaveTrophies()
 
 	for(new_trophy = this->kill_list.begin();new_trophy != this->kill_list.end();++new_trophy)
 	{
+		queryBuffer.str("");
 		if( (old_trophy = this->LoadData->Trophies.find( (*new_trophy).first))
 			!= this->LoadData->Trophies.end() )
 		{
 			//Kill value has changed. Update...
 			if( (*new_trophy).second != (*old_trophy).second)
 			{
-				sprintf(query, "UPDATE trophies SET kill_count = %d WHERE user_id=%d AND victim='%s'\r\n",
-					(*new_trophy).second, this->player.idnum,
-					sql::escapeString((*new_trophy).first).c_str());
-				try { gameDatabase->sendRawQuery(query); }
+				queryBuffer << " UPDATE trophies SET"
+							<< "   kill_count = " << (*new_trophy).second
+							<< " WHERE user_id = " << this->player.idnum
+							<< " AND victim = " << sql::escapeQuoteString((*new_trophy).first);
+				try {
+					gameDatabase->sendRawQuery(queryBuffer.str());
+				}
 				catch( sql::QueryException e )
 				{
 					MudLog(BRF, LVL_APPR, TRUE, "Character::SaveTrophies : %s", e.getMessage().c_str());
@@ -2299,10 +2302,18 @@ bool Character::SaveTrophies()
 		}
 		else
 		{
-			sprintf(query, "INSERT INTO trophies (user_id,victim,kill_count) VALUES (%d,'%s',%d)\r\n",
-				this->player.idnum, sql::escapeString((*new_trophy).first).c_str(),
-				(*new_trophy).second);
-			try { gameDatabase->sendRawQuery(query); }
+			queryBuffer << " INSERT INTO trophies ("
+						<< "   `user_id`,"
+						<< "   `victim`,"
+						<< "   `kill_count`"
+						<< ") VALUES ("
+						<< this->player.idnum << ","
+						<< sql::escapeQuoteString((*new_trophy).first) << ","
+						<< (*new_trophy).second
+						<< ")";
+			try {
+				gameDatabase->sendRawQuery(queryBuffer.str());
+			}
 			catch( sql::QueryException e ) {
 				MudLog(BRF, LVL_APPR, TRUE, "Character::SaveTrophies : %s", e.getMessage().c_str());
 				return false;
@@ -2316,11 +2327,11 @@ bool Character::SaveTrophies()
 }
 bool Character::SaveHitRolls()
 {
-	return (MySQLSaveRolls(this->player.name, "hitrolls", this->LoadData->HitRolls, this->points.HitRolls));
+	return (MySQLSaveRolls(this->player.name, "userHitRoll", this->LoadData->HitRolls, this->points.HitRolls));
 }
 bool Character::SaveManaRolls()
 {
-	return (MySQLSaveRolls(this->player.name, "manarolls", this->LoadData->ManaRolls, this->points.ManaRolls));
+	return (MySQLSaveRolls(this->player.name, "userManaRoll", this->LoadData->ManaRolls, this->points.ManaRolls));
 }
 
 bool playerExists(const std::string &name)
@@ -2371,7 +2382,7 @@ void Room::Zero()
 	this->func				= (NULL);
 
 #ifdef KINSLAYER_JAVASCRIPT
-	this->js_scripts		= shared_ptr<std::vector<JSTrigger*> >( new std::vector< JSTrigger* > );
+	this->js_scripts		= std::shared_ptr<std::vector<JSTrigger*> >( new std::vector< JSTrigger* > );
 #endif
 
 	memset(&this->dir_option,	0, sizeof(dir_option));
@@ -2759,7 +2770,7 @@ Object::Object()
 	this->decayTimerType	= -1;
 
 #ifdef KINSLAYER_JAVASCRIPT
-	this->js_scripts		= shared_ptr<std::vector<JSTrigger*> >( new std::vector< JSTrigger* > );
+	this->js_scripts		= std::shared_ptr<std::vector<JSTrigger*> >( new std::vector< JSTrigger* > );
 #endif
 
 }
@@ -2999,7 +3010,7 @@ void Object::ProtoBoot( sql::Row &MyRow, const int rnum, const std::list<int> &j
 #ifdef KINSLAYER_JAVASCRIPT
 
 	// Find any js scripts that are listed as attached to this mob in the db, and attach them to it
-	this->js_scripts = shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
+	this->js_scripts = std::shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
 	for(auto scriptVnumIter = jsAttachmentList.begin();scriptVnumIter != jsAttachmentList.end();++scriptVnumIter)
 	{
 		JSTrigger* t = JSManager::get()->getTrigger((*scriptVnumIter));
@@ -3174,7 +3185,7 @@ void BootKits()
 	sql::Row MyRow, KR;
 
 	try {
-		gameDatabase->sendRawQuery("DELETE FROM kit_positions WHERE kit_vnum NOT IN(SELECT vnum FROM kits);");
+		gameDatabase->sendRawQuery("DELETE FROM kitItem WHERE kit_vnum NOT IN(SELECT vnum FROM kits);");
 	} catch( sql::QueryException e ) {
 		Log("Could not delete kit item from non existent kit : %s", e.getErrorMessage().c_str());
 	}
@@ -3184,7 +3195,7 @@ void BootKits()
 		MyQuery = gameDatabase->sendQuery(Query.str());
 		Query.str("");//Clear the old query text.
 
-		Query << "SELECT * FROM kit_positions WHERE 1 ORDER BY kit_vnum ASC;";
+		Query << "SELECT * FROM kitItem WHERE 1 ORDER BY kit_vnum ASC;";
 		SecondQuery = gameDatabase->sendQuery(Query.str());
 	}
 	catch (sql::QueryException e) {
@@ -3335,7 +3346,7 @@ void Character::Zero()
 	this->body_structure			=	STRUCT_LIGHT;
 	this->last_tell					=	NOBODY;
 #ifdef KINSLAYER_JAVASCRIPT
-	this->js_scripts				=	shared_ptr<std::vector<JSTrigger*> >( new std::vector< JSTrigger* > );
+	this->js_scripts				=	std::shared_ptr<std::vector<JSTrigger*> >( new std::vector< JSTrigger* > );
 #endif
 	for (int i = 0; i < NUM_WEARS; ++i)
 		this->equipment[i]			=	NULL;

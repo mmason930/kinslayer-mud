@@ -3,10 +3,12 @@
 #
 
 # C compiler to use
+#CC = /usr/local/bin/i686-pc-linux-gnu-g++
 CC = g++
 
+#-std=c++0x
 # Any special flags you want to pass to the compiler
-MYFLAGS =  -O -DXP_UNIX -I/usr/local/include -Wformat-security -Wformat -Wimplicit -Wpointer-arith -Wcast-align -Wredundant-decls \
+MYFLAGS =  -O -std=c++0x -DXP_UNIX -I/usr/local/include -Wformat-security -Wformat -Wpointer-arith -Wcast-align -Wredundant-decls \
  		-L/usr/local/lib -DKINSLAYER_JAVASCRIPT -DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10 \
               -I/usr/local/lib/pkgconfig/../../include -I/usr/local/include
 
@@ -23,7 +25,7 @@ BINDIR = ../bin
 
 CPPFLAGS = -ggdb3 $(MYFLAGS) $(PROFILE)
 
-LIBS = -lmysqlclient -lsqlDatabase -lflusspferd -lcrypt -lstdc++
+LIBS = -lmysqlclient -lsqlDatabase -lflusspferd -lcrypt -lstdc++ -lboost_regex
 
 OBJDIR = obj
 
@@ -38,15 +40,16 @@ OBJFILES = comm.o act.comm.o act.informative.o act.movement.o act.item.o \
 	mobs.o js.o js_interpreter.o js_functions.o jedit.o js_constants.o \
 	JSRoom.o JSObject.o JSQuery.o JSRow.o JSCharacter.o js_utils.o \
 	auction.o kuSockets.o kuListener.o kuDescriptor.o kuClient.o threaded_jobs.o \
-	MiscUtil.o StringUtil.o TimeUtil.o ApplicationInterface.o tinyxml/tinyxmlerror.o \
-	tinyxml/tinyxmlparser.o tinyxml/tinyxml.o tinyxml/tinystr.o DateTime.o UserLogoutType.o \
-	GatewayClient.o GatewayDescriptor.o GatewayDescriptorStatus.o GatewayServer.o Descriptor.o
+	MiscUtil.o StringUtil.o TimeUtil.o DateTime.o UserLogoutType.o \
+	GatewayClient.o GatewayDescriptor.o GatewayDescriptorStatus.o GatewayServer.o Descriptor.o \
+	MudStatus.o SystemUtil.o CharacterUtil.o ForumUtil.o DatabaseUtil.o
 
 OBJFILES := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILES))
 
 
 OBJFILESGATEWAY = DateTime.o GatewayClient.o GatewayDescriptor.o GatewayDescriptorStatus.o \
-	GatewayMain.o GatewayServer.o kuClient.o kuDescriptor.o kuListener.o kuSockets.o MiscUtil.o StringUtil.o
+	GatewayMain.o GatewayServer.o kuClient.o kuDescriptor.o kuListener.o kuSockets.o MiscUtil.o \
+	StringUtil.o MudStatus.o SystemUtil.o
 
 OBJFILESGATEWAY := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILESGATEWAY))
 

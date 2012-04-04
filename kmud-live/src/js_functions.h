@@ -65,6 +65,7 @@ flusspferd::string JS_getWeaveAttribute( int wVnum, flusspferd::string attribute
 flusspferd::string JS_getMobName( int vnum );
 flusspferd::value JS_sendQuery( flusspferd::string qBuffer );
 flusspferd::string JS_sqlEsc( flusspferd::string qBuffer );
+flusspferd::string JS_sqlEscapeQuoteString( flusspferd::value str );
 
 flusspferd::value getObjProto( int vnum );
 flusspferd::value getObjProtoByRnum( int rnum );

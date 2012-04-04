@@ -60,7 +60,7 @@ int	CountObjectsInv(int number, Character *target);
 int	CountObjectsRoom(int number, int room);
 
 #ifdef KINSLAYER_JAVASCRIPT
-extern shared_ptr<std::vector<JSTrigger*> > globalJS_Scripts;
+extern std::shared_ptr<std::vector<JSTrigger*> > globalJS_Scripts;
 void BootGlobalScripts();
 void SaveGlobalScripts();
 #endif

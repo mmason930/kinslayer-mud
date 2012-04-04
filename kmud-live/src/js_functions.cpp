@@ -244,8 +244,8 @@ bool is_allowed_violent(Character * ch, Character * victim, JSTrigger * trig)
 
 void js_speech_test(Character *actor, const char *str, JSBindable *self=0 )
 {
-	shared_ptr<std::vector<JSTrigger*> > js_scripts;
-	shared_ptr<std::vector<JSTrigger*> > js_scripts2;
+	std::shared_ptr<std::vector<JSTrigger*> > js_scripts;
+	std::shared_ptr<std::vector<JSTrigger*> > js_scripts2;
 	js_scripts=globalJS_Scripts;
 	js_scripts2 = js_scripts;
 	if( self ) {
@@ -325,8 +325,8 @@ void js_speech_triggers(Character *actor, const char *str)
 
 void js_tell_test(Character *actor, Character *target, const char *str, JSBindable *self=0 )
 {
-	shared_ptr<std::vector<JSTrigger*> > js_scripts;
-	shared_ptr<std::vector<JSTrigger*> > js_scripts2;
+	std::shared_ptr<std::vector<JSTrigger*> > js_scripts;
+	std::shared_ptr<std::vector<JSTrigger*> > js_scripts2;
 	js_scripts=globalJS_Scripts;
 	js_scripts2 = js_scripts;
 	if( self ) {
@@ -378,7 +378,7 @@ void js_tell_triggers(Character *actor, Character *target, const char *str)
 
 bool js_command_test(Character * actor, const char* cmd, const char* args, bool aliasOverride, JSBindable *self=0)
 {
-	shared_ptr<std::vector<JSTrigger*> > js_scripts;
+	std::shared_ptr<std::vector<JSTrigger*> > js_scripts;
 	if( self ) {
 		if (!self->js_scripts || self->js_scripts->size() == 0)
 			return false;
@@ -451,7 +451,7 @@ bool js_command_triggers(Character * actor, const char* cmd, const char* argumen
     return blocked;
 }
 
-void js_extraction_test( JSBindable *self, shared_ptr< std::vector<JSTrigger*> > js_scripts )
+void js_extraction_test( JSBindable *self, std::shared_ptr< std::vector<JSTrigger*> > js_scripts )
 {
 	JSTrigger *trig;
 	if( !js_scripts || js_scripts->empty() )
@@ -740,7 +740,7 @@ void js_time_triggers()
 
 void js_random_test(JSBindable *self=0)
 {
-	shared_ptr< std::vector<JSTrigger*> > js_scripts;
+	std::shared_ptr< std::vector<JSTrigger*> > js_scripts;
     JSTrigger * trig;
 	if( self )
 		js_scripts = self->js_scripts;
@@ -789,7 +789,7 @@ void js_random_triggers()
 
 bool js_enter_test(Room *room, Character *actor, int dir, JSBindable *self=0)
 {
-	shared_ptr< std::vector<JSTrigger*> > js_scripts;
+	std::shared_ptr< std::vector<JSTrigger*> > js_scripts;
 	if( self ) {
 		if (!self->js_scripts || self->js_scripts->size() == 0)
 			return true;
@@ -846,7 +846,7 @@ bool js_enter_triggers(Room *room, Character *actor, int dir)
 
 bool js_leave_test(Room *room, Character *actor, int dir, JSBindable *self=0)
 {
-	shared_ptr< std::vector<JSTrigger*> > js_scripts;
+	std::shared_ptr< std::vector<JSTrigger*> > js_scripts;
 	if( self ) {
 		if (!self->js_scripts || self->js_scripts->size() == 0)
 			return true;
@@ -940,7 +940,7 @@ void js_bribe_trigger(Character *self, Character *actor, const int amt)
     }
 }
 
-void js_death_test(Character *actor, Character *self, shared_ptr< std::vector<JSTrigger*> > js_scripts)
+void js_death_test(Character *actor, Character *self, std::shared_ptr< std::vector<JSTrigger*> > js_scripts)
 {
 	if (!js_scripts || js_scripts->size() == 0)
 		return;
@@ -964,7 +964,7 @@ void js_death_trigger(Character *self, Character *actor)
 	js_death_test(actor,self,globalJS_Scripts);
 }
 
-void js_enter_game_test(Character *actor, Character *self, shared_ptr< std::vector<JSTrigger*> > js_scripts)
+void js_enter_game_test(Character *actor, Character *self, std::shared_ptr< std::vector<JSTrigger*> > js_scripts)
 {
 	if (!js_scripts || js_scripts->size() == 0)
 		return;
@@ -1217,6 +1217,14 @@ flusspferd::string JS_sqlEsc( flusspferd::string qBuffer )
 {
 	return sql::escapeString( qBuffer.to_string() );
 }
+
+flusspferd::string JS_sqlEscapeQuoteString( flusspferd::value str )
+{
+	if(str.is_undefined_or_null())
+		return "null";
+	return sql::escapeQuoteString(str.to_std_string());
+}
+
 my_ulonglong JS_sqlInsertID()
 {
 	return gameDatabase->lastInsertID();

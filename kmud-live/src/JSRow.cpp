@@ -17,13 +17,25 @@ void JSEnvironment::LoadJSRow()
 int sqlJSRow::numberAllocated = 0;
 int sqlJSRow::numberDeallocated = 0;
 
-flusspferd::string JSRow::get( flusspferd::string propertyName )
+flusspferd::value JSRow::get( flusspferd::string propertyName )
 {
-	return (*(real->MyRow))[ propertyName.to_string() ];
+	if((*(real->MyRow)).isFieldNull(propertyName.to_string()))
+		return flusspferd::value();
+	return flusspferd::string((*(real->MyRow))[ propertyName.to_string() ]);
 }
-flusspferd::string JSRow::getByIndex( int index )
+flusspferd::value JSRow::getByIndex( int index )
 {
-	return (*(real->MyRow))[ index ];
+	if((*(real->MyRow)).isFieldNull(index))
+		return flusspferd::value();
+	return flusspferd::string((*(real->MyRow))[ index ]);
+}
+bool JSRow::getIsFieldNull(flusspferd::string fieldName)
+{
+	return (*(real->MyRow)).isFieldNull(fieldName.to_string());
+}
+bool JSRow::getIsFieldNullByIndex(int fieldIndex)
+{
+	return (*(real->MyRow)).isFieldNull(fieldIndex);
 }
 
 #endif

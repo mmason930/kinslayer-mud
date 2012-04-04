@@ -177,9 +177,9 @@ void AuctionManager::UpdateAuctions()
 	try {
 		//Select all auctions that have expired.
 		QueryBuffer << "SELECT ai.*,"
-			<< " (SELECT ab.bidder_id FROM auction_bids ab WHERE ab.auction_id=ai.auction_id"
+			<< " (SELECT ab.bidder_id FROM auctionBid ab WHERE ab.auction_id=ai.auction_id"
 			<< " ORDER BY ab.bid_amount DESC LIMIT 1) AS winner_id"
-			<< " FROM auction_items ai"
+			<< " FROM auctionItem ai"
 			<< " WHERE ai.end_time <= '" << curTime << "' AND ai.active='1';";
 
 		MyQuery = gameDatabase->sendQuery(QueryBuffer.str());
@@ -216,7 +216,7 @@ void AuctionManager::UpdateAuctions()
 		QueryBuffer.str("");
 
 		//Set auctions to inactive if their time has expired.
-		QueryBuffer << "UPDATE auction_items SET active='0' WHERE end_time <= '" << curTime << "';";
+		QueryBuffer << "UPDATE auctionItem SET active='0' WHERE end_time <= '" << curTime << "';";
 		gameDatabase->sendRawQuery(QueryBuffer.str());
 //		QueryBuffer.str("");
 	} catch( sql::QueryException e ) {
@@ -235,7 +235,7 @@ void AuctionManager::RewardOwner( const int ai_id )
 	long long bid_amount;
 	Character *owner;
 
-	QueryBuffer << "SELECT ai.owner_id,ab.bid_amount FROM auction_items ai JOIN auction_bids ab ON ab.ai_id=ai.id"
+	QueryBuffer << "SELECT ai.owner_id,ab.bid_amount FROM auctionItem ai JOIN auctionBid ab ON ab.ai_id=ai.id"
 		" WHERE ai.id='" << ai_id << "' ORDER BY ab.bid_amount DESC LIMIT 1;";
 	try {
 		MyQuery = gameDatabase->sendQuery(QueryBuffer.str());
@@ -278,7 +278,7 @@ void AuctionManager::ReimburseLosers( const int ai_id, const int winnerID )
 	sql::Row MyRow;
 	try {
 		//We need to reimburse everyone who lost the auction.
-		QueryBuffer << "SELECT ab.* FROM auction_bids ab WHERE ab.ai_id='" << ai_id << "'"
+		QueryBuffer << "SELECT ab.* FROM auctionBid ab WHERE ab.ai_id='" << ai_id << "'"
 			<< " ORDER BY ab.bid_amount DESC;";
 		MyQuery = gameDatabase->sendQuery(QueryBuffer.str());
 
@@ -473,7 +473,7 @@ bool Auction::placeAuction( Character *ch, AuctionData *ad )
 		return false;//Item somehow vanished in the duration of the editor. Stolen & rented? Purged?
 	obj_from_char(obj);
 
-	QueryBuffer << "INSERT INTO auction_items (auction_id,object_id,owner_id,end_time,starting_price,buyout_price,active,timestamp) VALUES(";
+	QueryBuffer << "INSERT INTO auctionItem (auction_id,object_id,owner_id,end_time,starting_price,buyout_price,active,timestamp) VALUES(";
 	QueryBuffer << SQLVal(this->getVnum());
 	QueryBuffer << SQLVal(ToString(obj->objID));
 	QueryBuffer << SQLVal(ch->player.idnum);
@@ -508,7 +508,7 @@ bool Auction::placeBid( Character *bidder, class AuctionData *ad )
 	time_t timestamp = time(0);
 	std::stringstream QueryBuffer;
 
-	QueryBuffer << "INSERT INTO auction_bids (auction_id,object_id,bidder_id,bid_amount,timestamp,ai_id) VALUES (";
+	QueryBuffer << "INSERT INTO auctionBid (auction_id,object_id,bidder_id,bid_amount,timestamp,ai_id) VALUES (";
 	QueryBuffer << SQLVal(auction_id);
 	QueryBuffer << SQLVal(ad->GetSelectedItem()->GetObjID());
 	QueryBuffer << SQLVal(bidder_id);
@@ -532,7 +532,7 @@ bool Auction::placeBid( Character *bidder, class AuctionData *ad )
 	if( ad->GetSelectedItem()->GetBuyout() > 0 && bid >= ad->GetSelectedItem()->GetBuyout() )
 	{
 		QueryBuffer.str("");
-		QueryBuffer << "UPDATE auction_items SET active='0' WHERE id='"
+		QueryBuffer << "UPDATE auctionItem SET active='0' WHERE id='"
 			<< itemID << "';";
 		try {
 			gameDatabase->sendRawQuery(QueryBuffer.str());
@@ -557,7 +557,7 @@ void Auction::retrieveItem(Descriptor *d, class AuctionData *ad )
 
 	//Mark the item as retrieved.
 	std::stringstream QueryBuffer;
-	QueryBuffer << "UPDATE auction_items SET retrieved='1' WHERE id='" << ad->GetSelectedItem()->GetID() << "';";
+	QueryBuffer << "UPDATE auctionItem SET retrieved='1' WHERE id='" << ad->GetSelectedItem()->GetID() << "';";
 	try {
 		gameDatabase->sendRawQuery(QueryBuffer.str());
 	} catch( sql::QueryException e ) {
@@ -579,7 +579,7 @@ std::vector< AuctionItem* > Auction::loadItems( class AuctionData* Filter )
 	sql::Query MyQuery;
 
 	QueryBuffer << "SELECT os.sdesc AS objShortDesc_Special,op.sdesc AS objShortDesc,o.id AS objID,ai.*"
-		<< " FROM objects o JOIN auction_items ai ON ai.object_id=o.id LEFT JOIN obj_protos op ON op.vnum=o.vnum"
+		<< " FROM objects o JOIN auctionItem ai ON ai.object_id=o.id LEFT JOIN obj_protos op ON op.vnum=o.vnum"
 		<< " LEFT JOIN object_specials os ON os.id=o.id"
 		<< " WHERE ai.auction_id='" << this->getVnum() << "' AND ai.active='1' AND ai.end_time > '" << time(0) << "'"
 		<< " ORDER BY ai.end_time ASC;";
@@ -615,8 +615,8 @@ std::vector< AuctionItem* > Auction::loadMyBids(Descriptor *d, class AuctionData
 	sql::Query MyQuery;
 
 	QueryBuffer << "SELECT os.sdesc AS objShortDesc_Special,op.sdesc AS objShortDesc,o.id AS objID,ai.*"
-//		<< " (SELECT ab.bidder_id FROM auction_bids ab WHERE ab.ai_id=ai.id ORDER BY bid_amount DESC LIMIT 1) AS top_bidder"
-		<< " FROM objects o JOIN auction_items ai ON ai.object_id=o.id LEFT JOIN obj_protos op ON op.vnum=o.vnum"
+//		<< " (SELECT ab.bidder_id FROM auctionBid ab WHERE ab.ai_id=ai.id ORDER BY bid_amount DESC LIMIT 1) AS top_bidder"
+		<< " FROM objects o JOIN auctionItem ai ON ai.object_id=o.id LEFT JOIN obj_protos op ON op.vnum=o.vnum"
 		<< " LEFT JOIN object_specials os ON os.id=o.id"
 		<< " WHERE ai.auction_id='" << this->getVnum() << "'"
 		<< " AND ai.retrieved='0'"
@@ -654,8 +654,8 @@ std::vector< AuctionItem* > Auction::loadMyAuctions(Descriptor *d, AuctionData *
 	sql::Query MyQuery;
 
 	QueryBuffer << "SELECT os.sdesc AS objShortDesc_Special,op.sdesc AS objShortDesc,o.id AS objID,ai.*"
-//		<< " (SELECT ab.bidder_id FROM auction_bids ab WHERE ab.ai_id=ai.id ORDER BY bid_amount DESC LIMIT 1) AS top_bidder"
-		<< " FROM objects o JOIN auction_items ai ON ai.object_id=o.id LEFT JOIN obj_protos op ON op.vnum=o.vnum"
+//		<< " (SELECT ab.bidder_id FROM auctionBid ab WHERE ab.ai_id=ai.id ORDER BY bid_amount DESC LIMIT 1) AS top_bidder"
+		<< " FROM objects o JOIN auctionItem ai ON ai.object_id=o.id LEFT JOIN obj_protos op ON op.vnum=o.vnum"
 		<< " LEFT JOIN object_specials os ON os.id=o.id"
 		<< " WHERE ai.auction_id='" << this->getVnum() << "'"
 		<< " AND ai.retrieved='0'"
@@ -707,7 +707,7 @@ AuctionItem::AuctionItem( const sql::Row &MyRow )
 
 	std::stringstream QueryBuffer;
 	sql::Query MyQuery;
-	QueryBuffer << "SELECT ab.*,u.username,u.user_id AS uid FROM auction_bids ab JOIN users u ON u.user_id=ab.bidder_id WHERE ai_id='"
+	QueryBuffer << "SELECT ab.*,u.username,u.user_id AS uid FROM auctionBid ab JOIN users u ON u.user_id=ab.bidder_id WHERE ai_id='"
 		<< MyRow["id"] << "' ORDER BY bid_amount DESC;";
 
 	try {
@@ -765,7 +765,7 @@ void AuctionItem::Refresh()
 	sql::Query MyQuery;
 
 	QueryBuffer << "SELECT os.sdesc AS objShortDesc_Special,op.sdesc AS objShortDesc,o.id AS objID,ai.*"
-		<< " FROM objects o JOIN auction_items ai ON ai.object_id=o.id LEFT JOIN obj_protos op ON op.vnum=o.vnum"
+		<< " FROM objects o JOIN auctionItem ai ON ai.object_id=o.id LEFT JOIN obj_protos op ON op.vnum=o.vnum"
 		<< " LEFT JOIN object_specials os ON os.id=o.id"
 		<< " WHERE ai.id='" << this->GetID() << "' AND ai.active='1' AND ai.end_time > '" << time(0) << "'"
 		<< " ORDER BY ai.end_time ASC;";

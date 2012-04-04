@@ -1,6 +1,7 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include <cstring>
 #include "StringUtil.h"
 #include "MiscUtil.h"
 

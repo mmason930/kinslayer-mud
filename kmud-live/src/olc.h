@@ -245,7 +245,7 @@ class OLC
 
 #ifdef KINSLAYER_JAVASCRIPT
 		class JSTrigger *jsTrig;
-		shared_ptr<std::vector<JSTrigger*> > jsScripts;
+		std::shared_ptr<std::vector<JSTrigger*> > jsScripts;
 #endif
 		class Kit *kit;
 		int trigger_position;

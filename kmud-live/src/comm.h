@@ -49,7 +49,7 @@ typedef RETSIGTYPE sigfunc(int);
 
 extern void *Pointer;
 extern std::list< Character* > WaitingList;
-
+extern class kuDescriptor *gatewayConnection;
 
 
 #define LAG_MONITOR_KJS_HEARTBEAT			 "KJS_HEARTBEAT"

@@ -31,7 +31,6 @@
 #include <unordered_map>
 #include <memory>
 #endif
-using std::tr1::shared_ptr;
 using std::tr1::unordered_map;
 
 #include "structs.h"
@@ -69,9 +68,9 @@ class JSEnvironment
         // Returns the value returned by the script, or 1 is none was returned.
 		int execute(JSTrigger* trig, JSBindable *self, Character * actor, const char* args, flusspferd::object extra, Room * here);
         // Returns the value returned by the script, or 1 is none was returned.
-        int execute(shared_ptr<JSInstance> instance);
+        int execute(std::shared_ptr<JSInstance> instance);
         // used for executing scripts delayed by timers
-        int execute_timer(shared_ptr<JSInstance> instance, bool success);
+        int execute_timer(std::shared_ptr<JSInstance> instance, bool success);
 		flusspferd::value executeExpression( const std::string &expression );
         bool compile(JSTrigger* trig); // true if compile succeeded, false otherwise.
         void gc(); // garbage collect.
@@ -91,7 +90,7 @@ class JSEnvironment
     	flusspferd::current_context_scope context_scope;
         class JSContext* raw_context() const;
         // repeated code factored out
-        int process_yield(shared_ptr<JSInstance> instance, flusspferd::value yielded, bool &bSpecial);
+        int process_yield(std::shared_ptr<JSInstance> instance, flusspferd::value yielded, bool &bSpecial);
 };
 
 

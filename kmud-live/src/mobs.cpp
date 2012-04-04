@@ -234,7 +234,7 @@ Character *MobManager::BootPrototype( sql::Row &MyRow )
 #ifdef KINSLAYER_JAVASCRIPT
 
 // Find any js scripts that are listed as attached to this mob in the db, and attach them to it
-    NewMob->js_scripts = shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
+    NewMob->js_scripts = std::shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
     try {
         sql::Query q = gameDatabase->sendQuery("SELECT * FROM js_attachments WHERE type='M' AND target_vnum='" + MyRow["vnum"] + "'");
         while( q->hasNextRow() )
@@ -834,7 +834,7 @@ void MobManager::CopyPrototype( Character *Destination, Character *Source )
 	Destination->MobData = new MobOnlyData(Source->MobData);
 
 #ifdef KINSLAYER_JAVASCRIPT
-	Destination->js_scripts = shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
+	Destination->js_scripts = std::shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
 	for( unsigned int i = 0;i < Source->js_scripts->size();++i )
 	{
 		Destination->js_scripts->push_back( Source->js_scripts->at( i ) );

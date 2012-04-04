@@ -57,7 +57,7 @@ class JSManager
 		void deleteTrigger(JSTrigger* t);
 		bool triggerExists( const int vnum );
         static JSManager* get();
-		void addDelayed(shared_ptr<JSInstance> env, int seconds);
+		void addDelayed(std::shared_ptr<JSInstance> env, int seconds);
 		void heartbeat();
 		~JSManager();
         // Returns the value returned by the script, or 1 is none was returned.
@@ -78,7 +78,7 @@ class JSManager
 		}
 		flusspferd::value executeExpression(const std::string &expression);
         // Executes a delayed (timer) script
-        int execute_timer(shared_ptr<JSInstance> instance, bool success);
+        int execute_timer(std::shared_ptr<JSInstance> instance, bool success);
         // Trigger the garbage collector for javascript. If this is called regularly, we won't be surprised by
         // an unexcepted gc call caused by the js engine.
 		void handleExtraction( JSBindable *ptr );
@@ -101,7 +101,7 @@ class JSManager
 		std::list< JSTrigger* > triggersInRange( const int lo, const int hi );
     private:
 		unordered_map<int, JSTrigger*> mapper;
-		std::list<std::pair<int, shared_ptr<JSInstance> > > scripts;
+		std::list<std::pair<int, std::shared_ptr<JSInstance> > > scripts;
 		JSEnvironment* env;
 		JSManager();
 		void operator=(JSManager&) {};

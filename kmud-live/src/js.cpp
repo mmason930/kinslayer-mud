@@ -256,7 +256,7 @@ int JSManager::saveTrigger(JSTrigger* t)
 	}
 }
 
-void JSManager::addDelayed(shared_ptr<JSInstance> instance, int pulses)
+void JSManager::addDelayed(std::shared_ptr<JSInstance> instance, int pulses)
 {
 	// if this is called from the heartbeat function, adding it to the
 	// front guarentees that it won't be called twice in the same heartbeat.
@@ -264,7 +264,7 @@ void JSManager::addDelayed(shared_ptr<JSInstance> instance, int pulses)
 	scripts.push_front(make_pair(pulses, instance));
 }
 
-int JSManager::execute_timer(shared_ptr<JSInstance> instance, bool success)
+int JSManager::execute_timer(std::shared_ptr<JSInstance> instance, bool success)
 {
 	return env->execute_timer(instance, success);
 }
@@ -296,7 +296,7 @@ void JSManager::heartbeat()
 	if( !( pulses%(10*PASSES_PER_SEC) ) ) {
 		JSManager::get()->gc();
 	}
-	list<pair<int, shared_ptr<JSInstance> > >::iterator iter = scripts.begin();
+	list<pair<int, std::shared_ptr<JSInstance> > >::iterator iter = scripts.begin();
 	for( ; iter != scripts.end() ; )
 	{
 		--(iter->first);
@@ -348,7 +348,7 @@ std::list< JSTrigger* > JSManager::triggersInRange( const int lo, const int hi )
 
 void JSManager::handleExtraction( JSBindable *ptr )
 {
-	list<pair<int, shared_ptr<JSInstance> > >::iterator iter = scripts.begin();
+	list<pair<int, std::shared_ptr<JSInstance> > >::iterator iter = scripts.begin();
 	Character *c;
 	Object *o;
 	Room *r;
@@ -383,7 +383,7 @@ void JSManager::handleExtraction( JSBindable *ptr )
 
 void JSManager::test( class Character *ch )
 {
-	std::list<std::pair<int, shared_ptr<JSInstance> > >::iterator iter;
+	std::list<std::pair<int, std::shared_ptr<JSInstance> > >::iterator iter;
 
 	for( iter = scripts.begin();iter != scripts.end();++iter )
 	{

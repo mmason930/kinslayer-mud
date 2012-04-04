@@ -1,11 +1,13 @@
 #include "SystemUtil.h"
 #include <cstdio>
+#include <cstdlib>
 
 #ifdef WIN32
 #include <Windows.h>
 #include <TlHelp32.h>
 #else
-
+#include <unistd.h>
+#include <dirent.h>
 #endif
 
 bool SystemUtil::processExists(const unsigned int processId)
@@ -28,7 +30,51 @@ bool SystemUtil::processExists(const unsigned int processId)
 	}
 	return false;
 #else
-	//TODO: Linux code
+	DIR* dir;
+	struct dirent* ent;
+	char* endptr;
+	char buf[512];
+
+	if (!(dir = opendir("/proc"))) {
+		perror("Can't open /proc");
+		return false;
+	}
+
+	while((ent = readdir(dir)) != NULL) {
+		// if endptr is not a null character, the directory is not
+		// entirely numeric, so ignore it
+		long lpid = strtol(ent->d_name, &endptr, 10);
+		if (*endptr != '\0') {
+			continue;
+		}
+
+		// try to open the cmdline file
+		snprintf(buf, sizeof(buf), "/proc/%ld/cmdline", lpid);
+		if(lpid == processId)
+		{
+			closedir(dir);
+			return true;
+		}
+		/***
+		FILE* fp = fopen(buf, "r");
+
+		if (fp) {
+			if (fgets(buf, sizeof(buf), fp) != NULL) {
+				// check the first token in the file, the program name
+				char* first = strtok(buf, " ");
+				if (!strcmp(first, name)) {
+					fclose(fp);
+					closedir(dir);
+					return (pid_t)lpid;
+				}
+			}
+			fclose(fp);
+		}
+		***/
+	}
+	
+	closedir(dir);
+	return false;
 #endif
 }
 

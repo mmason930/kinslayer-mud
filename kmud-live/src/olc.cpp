@@ -1630,7 +1630,7 @@ void AddOlcLog( Character *ch, const std::string &Type, const int tid )
 {
 	try {
 		std::stringstream QueryBuffer;
-		QueryBuffer << "INSERT INTO olc_logs (`uid`,`target_type`,`target_id`,`timestamp`) VALUES(";
+		QueryBuffer << "INSERT INTO olcLog (`uid`,`target_type`,`target_id`,`timestamp`) VALUES(";
 		QueryBuffer << "'" << ch->player.idnum << "',";
 		QueryBuffer << "'" << sql::escapeString( Type ) << "',";
 		QueryBuffer << "'" << tid << "',";

@@ -693,7 +693,7 @@ void Kit::Save()
 	}
 
 //	Query.str("");
-//	Query << "DELETE FROM kit_positions WHERE kit_vnum='" << this->vnum << "';";
+//	Query << "DELETE FROM kitItem WHERE kit_vnum='" << this->vnum << "';";
 	//Delete all pre-existing kit items...
 //	try {
 //		gameDatabase->sendRawQuery(Query.str());
@@ -713,14 +713,14 @@ void Kit::Save()
 			//Self explanitory, really. Different queries depending on whether or not they are in the DB already.
 			if( this->KitItems[i][p].IsInDB() )
 			{
-				Query << "UPDATE kit_positions SET kit_vnum='" << this->vnum << "',body_position='"
+				Query << "UPDATE kitItem SET kit_vnum='" << this->vnum << "',body_position='"
 					<< p << "',obj_vnum='" << this->KitItems[i][p].GetItemVnum()
 					<< "',probability='" << this->KitItems[i][p].GetPercent() << "',hierarchy='" << i
 					<< "' WHERE id='" << this->KitItems[i][p].GetDBID() << "';";
 			}
 			else
 			{
-				Query << "INSERT INTO kit_positions (kit_vnum,body_position,obj_vnum,probability,hierarchy) VALUES('"
+				Query << "INSERT INTO kitItem (kit_vnum,body_position,obj_vnum,probability,hierarchy) VALUES('"
 					<< this->vnum << "','" << p << "','" << this->KitItems[i][p].GetItemVnum() << "','"
 					<< this->KitItems[i][p].GetPercent() << "','" << i << "');";
 			}
@@ -744,14 +744,14 @@ void Kit::Save()
 		//Self explanitory, really. Different queries depending on whether or not they are in the DB already.
 		if( ki.IsInDB() )
 		{
-			Query << "UPDATE kit_positions SET kit_vnum='" << this->vnum << "',body_position='-1',"
+			Query << "UPDATE kitItem SET kit_vnum='" << this->vnum << "',body_position='-1',"
 				<< "obj_vnum='" << ki.GetItemVnum()
 				<< "',probability='" << ki.GetPercent() << "',hierarchy='" << i
 				<< "' WHERE id='" << ki.GetDBID() << "';";
 		}
 		else
 		{
-			Query << "INSERT INTO kit_positions (kit_vnum,body_position,obj_vnum,probability,hierarchy) VALUES('"
+			Query << "INSERT INTO kitItem (kit_vnum,body_position,obj_vnum,probability,hierarchy) VALUES('"
 				<< this->vnum << "','-1','" << ki.GetItemVnum() << "','"
 				<< ki.GetPercent() << "','" << i << "');";
 		}

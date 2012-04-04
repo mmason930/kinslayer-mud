@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <errno.h>
+#include <cstring>
 
 #include "kuClient.h"
 

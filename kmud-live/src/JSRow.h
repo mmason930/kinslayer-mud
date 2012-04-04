@@ -64,6 +64,8 @@ FLUSSPFERD_CLASS_DESCRIPTION(
     (methods,
         ("get", bind, get)
 		("getByIndex", bind, getByIndex)
+		("isFieldNull", bind, getIsFieldNull)
+		("isFieldNullByIndex", bind, getIsFieldNullByIndex)
 		)
     (properties,
 	))
@@ -87,8 +89,10 @@ public:
 	sqlJSRow* toReal() { return real; }
 	void setReal( sqlJSRow *r ) { real = r; }
 
-	flusspferd::string get( flusspferd::string propertyName );
-	flusspferd::string getByIndex( int index );
+	flusspferd::value get( flusspferd::string propertyName );
+	flusspferd::value getByIndex( int index );
+	bool getIsFieldNull(flusspferd::string fieldName);
+	bool getIsFieldNullByIndex(int fieldIndex);
 
 
 private:

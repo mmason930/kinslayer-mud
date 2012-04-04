@@ -716,8 +716,8 @@ class JSBindable
 {
 public:
 #ifdef KINSLAYER_JAVASCRIPT
-	shared_ptr<std::vector<JSTrigger*> > js_scripts;
-	shared_ptr<JSInstance> delayed_script;
+	std::shared_ptr<std::vector<JSTrigger*> > js_scripts;
+	std::shared_ptr<JSInstance> delayed_script;
 #endif
 	virtual class Room *InRoom() = 0;
 	virtual bool IsPurged() = 0;
@@ -1246,7 +1246,7 @@ class Room //That's right! Classroom!
 		class PokerTable *PTable;
 		bool deleted;											// Whether or not the room should be deleted on next zone save.
 		
-		static std::set< int > Room::corpseRooms;
+		static std::set< int > corpseRooms;
 
 
 		//Methods

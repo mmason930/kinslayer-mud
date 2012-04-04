@@ -339,7 +339,7 @@ int main( int argc, char **argv )
 			exit( 1 );
 		}
 	}
-
+	
 	if ( chdir( dir ) < 0 )
 	{
 		int retval = chdir( "../" );
@@ -349,7 +349,7 @@ int main( int argc, char **argv )
 			exit( 1 );
 		}
 	}
-
+	
 	Log( "Using %s as data directory.", dir );
 
 	if ( scheck )
@@ -454,7 +454,13 @@ void waitForGatewayConnection() {
 
 					gatewayConnection = desc;
 					std::stringstream processIdMessage;
-					processIdMessage << "ProcessID " << GetCurrentProcessId() << std::endl;
+					processIdMessage << "ProcessID " <<
+#ifdef WIN32
+						GetCurrentProcessId()
+#else
+						getpid()
+#endif
+					<< std::endl;
 					desc->socketWriteInstant(processIdMessage.str());
 					break;
 				}
@@ -1142,7 +1148,7 @@ void gameLoop()
 			}
 			catch( sql::Exception e ) {
 
-				MudLog(BRF, LVL_APPR, TRUE, "Generic sql::exception uncaught while processing heartbeat(): %s", e.getMessage());
+				MudLog(BRF, LVL_APPR, TRUE, "Generic sql::exception uncaught while processing heartbeat(): %s", e.getMessage().c_str());
 			}
 			catch( flusspferd::exception e) {
 
@@ -1415,8 +1421,6 @@ LagRoutineEntry LagMonitor::getRoutineEntry( const std::string &sRoutineName )
 	return mRoutineTimeCard[ sRoutineName ];
 }
 LagMonitor lagMonitor;
-void process_events( void );
-
 
 void invisiblePing()
 {

@@ -358,12 +358,12 @@ void MySQLSavePlayerClan(const std::string &playername, PlayerClan *clan, bool u
 		return;
 
 	if(update)
-		Query	<< "UPDATE clans SET rank_time = " << clan->GetRankTime() << ", rank = " << clan->GetRank()
+		Query	<< "UPDATE userClan SET rank_time = " << clan->GetRankTime() << ", rank = " << clan->GetRank()
 				<< ", qps = " << clan->GetQuestPoints() << ", council = " << (clan->IsCouncil() ? 1 : 0)
 				<< ", clan_time = " << clan->GetClanTime()
 				<< " WHERE user_id = '" << index->id << "' AND clan = " << clan->GetClanVnum();
 	else
-		Query	<< "INSERT INTO clans (user_id, clan, rank, qps, rank_time, clan_time, council) VALUES ("
+		Query	<< "INSERT INTO userClan (user_id, clan, rank, qps, rank_time, clan_time, council) VALUES ("
 				<< index->id << ", " << clan->GetClanVnum() << ", " << clan->GetRank()
 				<< ", " << clan->GetQuestPoints()
 				<< ", " << clan->GetRankTime() << ", " << clan->GetClanTime()
@@ -386,7 +386,7 @@ void MySQLDeletePlayerClan(const std::string &playername, const int clan)
 	if(index == NULL)
 		return;
 
-	Query << "DELETE FROM clans WHERE user_id = " << index->id << " AND clan = " << clan;
+	Query << "DELETE FROM userClan WHERE user_id = " << index->id << " AND clan = " << clan;
 
 	try {
 		gameDatabase->sendRawQuery(Query.str());
@@ -406,7 +406,7 @@ void MySQLDeletePlayerClan(const std::string &playername)
 	if(index == NULL)
 		return;
 
-	Query << "DELETE FROM clans WHERE user_id = " << index->id;
+	Query << "DELETE FROM userClan WHERE user_id = " << index->id;
 
 	try { MyQuery = gameDatabase->sendQuery(Query.str()); }
 	catch( sql::QueryException e )
@@ -428,7 +428,7 @@ bool MySQLIsPlayerInClan(const std::string &playername, const int clan_vnum)
 	if(index == NULL)
 		return false;
 
-	Query = "SELECT clan FROM clans WHERE user_id = " + MiscUtil::Convert<std::string>(index->id);
+	Query = "SELECT clan FROM userClan WHERE user_id = " + MiscUtil::Convert<std::string>(index->id);
 
 	try {MyQuery = gameDatabase->sendQuery(Query);}
 	catch( sql::QueryException e )
@@ -460,7 +460,7 @@ PlayerClan *MySQLGrabPlayerClans(const std::string &playername)
 	if( !index )
 		return NULL;
 
-	Query = "SELECT * FROM clans WHERE user_id=" + MiscUtil::Convert<std::string>(index->id);
+	Query = "SELECT * FROM userClan WHERE user_id=" + MiscUtil::Convert<std::string>(index->id);
 
 	try {
 		MyQuery = gameDatabase->sendQuery(Query);
@@ -500,14 +500,14 @@ void Clan::GetPlayerList(std::vector< std::list<std::string> > &Players, std::li
 	
 	Query << "SELECT "
 			 " users.username,"
-		     " clans.rank,"
-			 " clans.council,"
-		     " clans.user_id "
-			 "FROM clans "
-			 "LEFT JOIN users ON clans.user_id=users.user_id "
-			 "WHERE clans.clan=" << clanstr << " "
+		     " userClan.rank,"
+			 " userClan.council,"
+		     " userClan.user_id "
+			 "FROM userClan "
+			 "LEFT JOIN users ON userClan.user_id=users.user_id "
+			 "WHERE userClan.clan=" << clanstr << " "
 	    <<   "AND users.username IS NOT NULL "
-		<<	 "ORDER BY clans.rank";
+		<<	 "ORDER BY userClan.rank";
 
 	try {
 		MyQuery = gameDatabase->sendQuery(Query.str());

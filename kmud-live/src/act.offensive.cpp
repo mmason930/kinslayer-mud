@@ -1436,7 +1436,7 @@ ACMD(do_flee)
 	bool room_found = FALSE;
 	char arg1[MAX_INPUT_LENGTH];
 
-	*arg1 = NULL;
+	*arg1 = '\0';
 
 	if(argument)
 		OneArgument(argument, arg1);

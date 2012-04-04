@@ -3,7 +3,7 @@
  *   jedit.cpp - This file should declare variable, classes, *
  *      and functions that support the MUD's combat system.  *
  *                                                           *
- *   Originally Added By: Galnor (Sortak@gmail.com)          *
+ *   Originally Added By: Galnor (mikemason930@gmail.com)    *
  *   (C) July 25th, 2009                                     *
  *                                                           *
  *                                                           *
@@ -11,7 +11,7 @@
  *                                                           *
  *************************************************************/
 
-/* Galnor 07/25/2009 - Handles the player_kills and player_deaths tables(MySQL). */
+/* Galnor 07/25/2009 - Handles the userPlayerKill MySQL table. */
 class PKManager
 {
 private:

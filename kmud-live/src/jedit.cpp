@@ -288,7 +288,7 @@ void JSBindable::attachJS( const int vnum )
 		return;
 	if (!this->js_scripts)
 	{
-		shared_ptr<vector<JSTrigger*> > temp(new vector<JSTrigger*>());
+		std::shared_ptr<vector<JSTrigger*> > temp(new vector<JSTrigger*>());
 		this->js_scripts = temp;
 	}
 		
@@ -310,7 +310,7 @@ void JSBindable::detachJS( const int vnum, const int nr )
 	Character *mob;
 	if ((mob = dynamic_cast<Character*>(this)) && IS_NPC(mob))
 	{
-		shared_ptr<vector<JSTrigger*> > temp(new vector<JSTrigger*>());
+		std::shared_ptr<vector<JSTrigger*> > temp(new vector<JSTrigger*>());
 		*temp = *this->js_scripts;
 		this->js_scripts = temp;
 	}
@@ -375,7 +375,7 @@ ACMD( do_jattach )
 		
 		if (IS_NPC(victim) || !victim->js_scripts)
 		{
-			shared_ptr<vector<JSTrigger*> > temp(new vector<JSTrigger*>());
+			std::shared_ptr<vector<JSTrigger*> > temp(new vector<JSTrigger*>());
 			
 			if (victim->js_scripts)
 			{
@@ -424,7 +424,7 @@ ACMD( do_jattach )
 		
 		if (IS_NPC(victim))
 		{
-			shared_ptr<vector<JSTrigger*> > temp(new vector<JSTrigger*>());
+			std::shared_ptr<vector<JSTrigger*> > temp(new vector<JSTrigger*>());
 			*temp = *victim->js_scripts;
 			victim->js_scripts = temp;
 		}

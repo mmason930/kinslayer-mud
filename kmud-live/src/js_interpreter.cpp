@@ -34,6 +34,10 @@
 
 #include "StringUtil.h"
 
+#if(0)
+#define KJS_USE_TIMEOUT_SIGNALS
+#endif
+
 using namespace flusspferd;
 
 // in microseconds
@@ -79,7 +83,7 @@ void printJSObject( flusspferd::object obj )
 
 JSBool kill_script(JSContext * cx)
 {
-#ifndef WIN32
+#ifdef KJS_USE_TIMEOUT_SIGNALS
 //	std::cout << "kill_script() is running." << std::endl;
 	JSManager *manager = JSManager::get();
 
@@ -184,6 +188,7 @@ JSEnvironment::JSEnvironment()
 	flusspferd::create_native_function(g, "getYear", JS_getYear);
 	flusspferd::create_native_function(g, "sqlQuery", JS_sendQuery);
 	flusspferd::create_native_function(g, "sqlEsc", JS_sqlEsc);
+	flusspferd::create_native_function(g, "sqlEscapeQuoteString", JS_sqlEscapeQuoteString);
 	flusspferd::create_native_function(g, "sqlInsertID", JS_sqlInsertID);
 
 	flusspferd::create_native_function(g, "time", JS_getTime);
@@ -253,7 +258,7 @@ int JSEnvironment::execute(JSTrigger* trig, JSBindable *self, Character * actor,
 
 	// this is for passing special stuff to.
 
-	shared_ptr<JSInstance> instance(new JSInstance());
+	std::shared_ptr<JSInstance> instance(new JSInstance());
 	instance->self = lookupValue(self);
 
 	if (extra.is_null())
@@ -315,7 +320,7 @@ JSContext * JSEnvironment::raw_context() const
 
 void removeTimeoutHandler()
 {
-#ifndef WIN32
+#ifdef KJS_USE_TIMEOUT_SIGNALS
 	struct sigaction sa;
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = SIG_IGN;
@@ -325,7 +330,7 @@ void removeTimeoutHandler()
 
 void removeTimeout()
 {
-#ifndef WIN32
+#ifdef KJS_USE_TIMEOUT_SIGNALS
 	removeTimeoutHandler();
 	end_time = 0;
 #else
@@ -350,7 +355,7 @@ void setupTimeout( bool setScriptEndingTime )
 		scriptRuntimeClock.reset(false);
 		scriptRuntimeClock.turnOn();
 	}
-#ifndef WIN32
+#ifdef KJS_USE_TIMEOUT_SIGNALS
 	static const int MICROSECONDS_TILL_INJECTION = 1000;//Ten times per second.
 	struct sigaction sa;
 	memset(&sa, 0, sizeof(sa));
@@ -384,7 +389,7 @@ void JSEnvironment::cleanup(JSInstance* instance)
 	}
 }
 
-int JSEnvironment::process_yield(shared_ptr<JSInstance> instance, value yielded, bool &bSpecial)
+int JSEnvironment::process_yield(std::shared_ptr<JSInstance> instance, value yielded, bool &bSpecial)
 {
 	JSCharacter *js_ch;
 	JSObject *js_obj;
@@ -439,7 +444,7 @@ int JSEnvironment::process_yield(shared_ptr<JSInstance> instance, value yielded,
 	return 0;
 }
 
-int JSEnvironment::execute_timer(shared_ptr<JSInstance> instance, bool success)
+int JSEnvironment::execute_timer(std::shared_ptr<JSInstance> instance, bool success)
 {
 	assert( instance.use_count() > 0 );
 
@@ -481,7 +486,7 @@ int JSEnvironment::execute_timer(shared_ptr<JSInstance> instance, bool success)
         return 1;
     }
 }
-int JSEnvironment::execute(shared_ptr<JSInstance> instance)
+int JSEnvironment::execute(std::shared_ptr<JSInstance> instance)
 {
 	assert( instance.use_count() > 0 );
 
