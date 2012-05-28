@@ -768,7 +768,7 @@ int Character::RollHealth( int level )
 int Character::RollMana( int level )
 {
 	if ( level > 1 && level <= 30 && this->ChannelingAbility())
-		return MiscUtil::random( GetWis() / 6, GetWis() / 4 );
+		return MiscUtil::random( GetWis() / 6, GetWis() / 4 );
 	else if ( level == 1 )
 		return 100;
 

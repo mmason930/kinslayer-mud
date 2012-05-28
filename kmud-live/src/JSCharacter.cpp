@@ -321,7 +321,7 @@ void JSCharacter::setHps(int x)
 			MudLog(BRF, 0, TRUE, "%s killed by a JS trap at %s", GET_NAME(real),
 				(real->in_room ? real->in_room->name : "<Unknown>"));
 			real->Die();
-		}
+		}
 	}
 }
 

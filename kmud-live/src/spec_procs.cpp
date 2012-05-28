@@ -534,7 +534,7 @@ void PokerAutoComplete( void* Data )
 void PokerPrint( void* Data )
 {
 	PokerTable* Table = (PokerTable*) Data;
-
+
 	Table->PrintBoard( 0, 0 );
 }
 void PokerShowCards( void* Data )

@@ -433,7 +433,7 @@ void CleditParse(Descriptor *d, const std::string &arg)
 		case CLEDIT_RANK_DELETE:
 			num = atoi(arg.c_str());
 			if(num <= 0 || num > (int) OLC_CLAN(d)->RankNames.size())
-			{
+			{
 				d->Send("That rank does not exist!\r\n");
 				return;
 			}

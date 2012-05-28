@@ -754,7 +754,7 @@ void get_from_room( Character *ch, char *arg )
 		else
 			perform_get_from_room( ch, obj, false );
 	}
-	else
+	else
 	{
 		if ( dotmode == FIND_ALLDOT && !*arg )
 		{
@@ -2207,7 +2207,7 @@ ACMD( do_remove )
 			{
 				if ( GET_EQ( ch, i ) && CAN_SEE_OBJ( ch, GET_EQ( ch, i ) ) &&
 				        isname( ::arg, GET_EQ( ch, i ) ->getName() ) )
-				{
+				{
 					perform_remove( ch, i );
 					found = 1;
 				}
