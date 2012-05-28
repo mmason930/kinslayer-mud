@@ -948,7 +948,6 @@ void medit_parse(Descriptor *d, char *arg)
 
 						d->str = &OLC_MOB(d)->player.description;
 						d->max_str = MAX_MOB_DESC;
-						d->mail_to = 0;
 						OLC_VAL(d) = 1;
 						return;
 					case 6:
@@ -1667,7 +1666,6 @@ void medit_parse(Descriptor *d, char *arg)
 					        }
 					        d->str = &OLC_MPROG(d)->comlist;
 					d->max_str = MAX_STRING_LENGTH;
-					d->mail_to = 0;
 					OLC_VAL(d) = 1;
 				}
 				else

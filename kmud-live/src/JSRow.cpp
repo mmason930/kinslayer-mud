@@ -19,15 +19,27 @@ int sqlJSRow::numberDeallocated = 0;
 
 flusspferd::value JSRow::get( flusspferd::string propertyName )
 {
+<<<<<<< .mine
+	if((*(real->MyRow)).isFieldNull(propertyName.to_string()))
+		return flusspferd::object();
+	return flusspferd::string((*(real->MyRow))[ propertyName.to_string() ]);
+=======
 	if((*(real->MyRow)).isFieldNull(propertyName.to_string()))
 		return flusspferd::value();
 	return flusspferd::string((*(real->MyRow))[ propertyName.to_string() ]);
+>>>>>>> .r11
 }
 flusspferd::value JSRow::getByIndex( int index )
 {
+<<<<<<< .mine
+	if((*(real->MyRow)).isFieldNull(index))
+		return flusspferd::object();
+	return flusspferd::string((*(real->MyRow))[ index ]);
+=======
 	if((*(real->MyRow)).isFieldNull(index))
 		return flusspferd::value();
 	return flusspferd::string((*(real->MyRow))[ index ]);
+>>>>>>> .r11
 }
 bool JSRow::getIsFieldNull(flusspferd::string fieldName)
 {

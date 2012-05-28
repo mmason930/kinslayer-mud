@@ -12,6 +12,24 @@ Author: Michael Mason - mikemason930@gmail.com (C) 01-26-2007
 
 void insertLetterBeforeLetter(std::string &str, const char letter_to_find, const char letter_to_lead);
 
+/***
+int main(void)
+{
+	sql::Context context = sql::createContext("localhost", "root", "bday930", "livemud");
+	sql::Connection connection = context->createConnection();
+
+	std::string queryBuffer = "SELECT id,syntax FROM helpFile WHERE id=100";
+	sql::Query query = connection->sendQuery(queryBuffer);
+
+	while(query->hasNextRow())
+	{
+		sql::Row row = query->getRow();
+
+		std::cout << "Syntax: " << (row.isFieldNull(1) ? "NULL" : row[ 1 ]);
+	}
+}
+***/
+
 namespace sql
 {
 
@@ -19,6 +37,7 @@ int _Query::numberOfAllocations=0;
 int _Query::numberOfDeallocations=0;
 int Row::numberOfAllocations=0;
 int Row::numberOfDeallocations=0;
+
 
 Context createContext( const std::string &host, const std::string &user, const std::string &password, const std::string &databaseName )
 {
@@ -99,7 +118,7 @@ bool _Connection::isConnected()
 	return (server && mysql_ping(server) == 0);
 }
 
-boost::shared_ptr<_Query> _Connection::sendQuery( const std::string &queryBuffer )
+std::shared_ptr<_Query> _Connection::sendQuery( const std::string &queryBuffer )
 {
 	_Query *query = new _Query( queryBuffer, this );
 	Query wrappedQuery;
@@ -252,7 +271,7 @@ void _Query::setupFields()
 Query _Query::send()
 {
 	Query query( this );
-	this->sPtr = boost::weak_ptr< _Query >( query );
+	this->sPtr = std::weak_ptr< _Query >( query );
 
 	if(this->server) server->sendQuery( query );
 

@@ -11,29 +11,28 @@ public:
 	Descriptor();
 	~Descriptor();
 
-	bool loggedIn;					/* Has this descriptor successfully logged in during this session ? */
+	bool loggedIn;					//Has this descriptor successfully logged in during this session?
 	class kuDescriptor *descriptor;
-	char	host[ 31 ];/* hostname				*/
-	byte	bad_pws;				/* number of bad pw attemps this login	*/
-	byte	idle_tics;				/* tics idle at password prompt		*/
-	int	connected;					/* mode of 'connectedness'		*/
-	sh_int	wait;			/* wait for how many loops		*/
-	int	desc_num;		/* unique num assigned to desc		*/
-	DateTime	loginTime;		/* when the person connected		*/
-	char	*showstr_head;		/* for keeping track of an internal str	*/
-	char	**showstr_vector;	/* for paging through texts		*/
-	int	showstr_count;		/* number of pages to page through	*/
-	int	showstr_page;		/* which page are we currently showing?	*/
-	char	**str;			/* for the modify-str system		*/
-	size_t	max_str;	        /*		-			*/
-	char	*backstr;		/* added for handling abort buffers	*/
-	long	mail_to;		/* name for mail system			*/
-	class Character *character;	/* linked to char			*/
-	class Character *original;	/* original char if switched		*/
-	class Descriptor *snooping; /* Who is this char snooping	*/
-	class Descriptor *snoop_by; /* And who is snooping this char	*/
-	class Descriptor *next; /* link to next descriptor		*/
-	class OLC *olc;	     /*. OLC info - defined in olc.h   .*/
+	char	host[ 31 ];				// Hostname
+	byte	bad_pws;				// Number of bad pw attemps this login
+	byte	idle_tics;				// Tics idle at password prompt
+	int	connected;					// Mode of 'connectedness'
+	sh_int	wait;					// Wait for how many loops
+	int	desc_num;					// Unique num assigned to desc
+	DateTime	loginTime;			// When the player connected
+	char	*showstr_head;			// For keeping track of an internal str
+	char	**showstr_vector;		// For paging through texts
+	int	showstr_count;				// Number of pages to page through
+	int	showstr_page;				// Which page are we currently showing?
+	char	**str;					// For the modify-str system
+	size_t	max_str;
+	char	*backstr;				// Added for handling abort buffers
+	class Character *character;		// linked to char
+	class Character *original;		// original char if switched
+	class Descriptor *snooping;		// Who is this char snooping
+	class Descriptor *snoop_by;		// And who is snooping this char
+	class Descriptor *next;			// Link to next descriptor
+	class OLC *olc;					// OLC info - defined in olc.h
 	bool hadInput;
 	bool hadOutput;
 
@@ -47,8 +46,6 @@ public:
 	void Nanny( char* arg);
 	bool AddToString( const char *txt );
 	bool HasPermissionToSnoop();
-
-	int ProcessOutput();
 
 	void disconnect();
 	void persistentDisconnect();

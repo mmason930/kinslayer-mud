@@ -56,7 +56,6 @@ void zedit_disp_arg6(Descriptor *d);
 void zedit_disp_arg7(Descriptor *d);
 void sedit_save_to_disk();
 void zedit_save_internally(Descriptor *d);
-void AddIndex(int znum, const char *type);
 void zedit_new_zone(Character *ch, int vzone_num);
 
 /*-------------------------------------------------------------------*/
@@ -141,11 +140,6 @@ void zedit_new_zone(Character *ch, int vzone_num)
 		return;
 	}
 
-	/*
-	 * Update index files.
-	 */
-	AddIndex(vzone_num, "shp");
-
 	Zone *zone = ZoneManager::GetManager().AddNewZone( vzone_num );
 
 	zone->setName("New Zone");
@@ -166,168 +160,6 @@ void zedit_new_zone(Character *ch, int vzone_num)
 
 	return;
 }
-
-/*-------------------------------------------------------------------*/
-
-void RemoveIndex(int znum, char *type)
-{
-	std::ofstream newfile;
-	std::ifstream oldfile;
-	char new_name[300], old_name[300];
-	std::string prefix, num, str;
-	int i = 0;
-
-	switch (*type)
-	{
-		case 's':
-			prefix = SHP_PREFIX;
-			break;
-		default:
-			/*
-			* Caller messed up
-			*/
-			return;
-	}
-
-	sprintf(old_name, "%sindex", prefix.c_str());
-	sprintf(new_name, "%snewindex", prefix.c_str());
-
-	oldfile.open(old_name);
-	newfile.open(new_name);
-
-	if (!(oldfile.is_open()))
-	{
-		MudLog(BRF, LVL_IMPL, TRUE, "SYSERR: OLC: Failed to open %s", old_name);
-		return;
-	}
-	if (!(newfile.is_open()))
-	{
-		MudLog(BRF, LVL_IMPL, TRUE, "SYSERR: OLC: Failed to open %s", new_name);
-		return;
-	}
-
-	/*
-	 * Index contents must be in order: search through the old file for the
-	 * right place, insert the new file, then copy the rest over.
-	 */
-
-	while(!(oldfile.eof()))
-	{
-		str.erase();
-		num.erase();
-		eatwhite(oldfile);
-		oldfile >> str;
-
-		if(!str[0] || str[0] == '$')
-			continue;
-
-		for(i = 0;i < (int) str.size() && str[i] != '.';++i)
-		{
-			num += str[i];
-		}
-
-		if(atoi(num.c_str()) != znum)
-		{
-			newfile << num << "." << type << std::endl;
-		}
-	}
-	newfile << "$";
-
-	newfile.close();
-	oldfile.close();
-	/*
-	 * Out with the old, in with the new.
-	 */
-	remove
-		(old_name);
-	rename(new_name, old_name);
-
-	//Get rid of the Actual file.
-	sprintf(old_name, "%s%d.%s", prefix.c_str(), znum, type);
-	remove
-		(old_name);
-}
-
-void AddIndex(int znum, const char *type)
-{
-	std::ifstream oldfile;
-	std::ofstream newfile;
-	char new_name[256], old_name[256], prefix[256];
-	int num = 0, found = FALSE;
-
-	switch (*type)
-	{
-		case 's':
-			strcpy(prefix, SHP_PREFIX);
-			break;
-		default:
-			/*
-			* Caller messed up
-			*/
-			return;
-	}
-
-	//Names for the new files
-	sprintf(old_name, "%sindex", prefix);
-	sprintf(new_name, "%stnewindex", prefix);
-
-	//Open both new and old files.
-	oldfile.open(old_name);
-	newfile.open(new_name);
-
-	//Make sure they both opened. If not, send an error and exit.
-	if(!oldfile.is_open())
-	{
-		MudLog(BRF, LVL_APPR, TRUE, "Error opening print file in AddIndex().");
-		return;
-	}
-	if(!newfile.is_open())
-	{
-		MudLog(BRF, LVL_APPR, TRUE, "Error opening print file in AddIndex().");
-		return;
-	}
-
-	//Loop through the old file's data...
-	while(oldfile.getline(buf, 1024))
-	{
-		//Grab the number of the zone.
-		sscanf(buf, "%d.", &num);
-
-		//If we get a $ we know we're done reading.
-		if(*buf == '$')
-		{
-			//If the NEW zone was not yet put in, do that here.
-			if(!found)
-			{
-				newfile << znum << "." << type << std::endl;
-			}
-			break;
-		}
-		else if(znum <= num && !found)
-		{
-			//If this returns false, then that's just wrong.
-			if(znum != num)
-			{
-				newfile << znum << "." << type << std::endl;
-			}
-			found = TRUE;
-		}
-		newfile << buf << std::endl;
-	}
-	//And put a $ of our own.
-	newfile << "$" << std::endl;
-
-	//Close both files.
-	newfile.close();
-	oldfile.close();
-
-	//Remove the old file and replace with the new one.
-	remove
-		(old_name);
-	rename(new_name, old_name);
-}
-
-/*-------------------------------------------------------------------*/
 
 /*
  * Save all the information in the player's temporary buffer back into

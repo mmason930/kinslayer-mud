@@ -29,7 +29,6 @@ Descriptor::Descriptor()
 	str = 0;
 	max_str = 0;
 	backstr = 0;
-	mail_to = 0;
 	character = 0;
 	original = 0;
 	snooping = 0;

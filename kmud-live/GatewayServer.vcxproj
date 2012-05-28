@@ -43,8 +43,8 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\ReleaseGateway\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\ReleaseGateway\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost\boost_1_44;C:\dev\kmud-live\reqs\sqlDatabase;C:\dev\kmud-live\reqs\mysql\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\kmud-live\reqs\sqlDatabase\Debug;C:\dev\kmud-live\reqs\mysql\lib\debug;C:\dev\boost\boost_1_44\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost\boost_1_44;Z:\dev\kmud-live\reqs\sqlDatabase;Z:\dev\kmud-live\reqs\mysql\include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Z:\dev\kmud-live\reqs\sqlDatabase\Debug;Z:\dev\kmud-live\reqs\mysql\lib\debug;C:\dev\boost\boost_1_44\lib;$(LibraryPath)</LibraryPath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\dev\boost\boost_1_44;$(IncludePath)</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\dev\boost\boost_1_44\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -62,7 +62,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalOptions>wsock32.lib sqldatabase.lib dbug.lib libmysql.lib mysqlclient.lib mysys.lib regex.lib strings.lib vio.lib yassl.lib zlib.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>wsock32.lib sqlDatabase.lib dbug.lib libmysql.lib mysqlclient.lib mysys.lib regex.lib strings.lib vio.lib yassl.lib zlib.lib %(AdditionalOptions)</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>

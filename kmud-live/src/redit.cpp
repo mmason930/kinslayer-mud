@@ -841,7 +841,6 @@ void redit_parse(Descriptor *d, char *arg)
 					}
 					d->str = &OLC_ROOM(d)->description;
 					d->max_str = MAX_ROOM_DESC;
-					d->mail_to = 0;
 					OLC_VAL(d) = 1;
 					break;
 				case '3':
@@ -996,7 +995,6 @@ void redit_parse(Descriptor *d, char *arg)
 					}
 					d->str = &OLC_EXIT(d)->general_description;
 					d->max_str = MAX_EXIT_DESC;
-					d->mail_to = 0;
 					return;
 				case '3':
 					OLC_MODE(d) = REDIT_EXIT_KEYWORD;
@@ -1160,7 +1158,6 @@ void redit_parse(Descriptor *d, char *arg)
 					}
 					d->str = &OLC_DESC(d)->description;
 					d->max_str = MAX_MESSAGE_LENGTH;
-					d->mail_to = 0;
 					return;
 
 				case 3:

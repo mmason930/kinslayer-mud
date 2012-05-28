@@ -43,8 +43,8 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost\boost_1_44;C:\dev\js\src\dist;C:\dev\kmud-live\reqs\iconv\include;C:\dev\kmud-live\reqs\sqlDatabase;C:\dev\kmud-live\reqs\mysql\include;C:\dev\kmud-live\reqs\flusspferd\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost\boost_1_44\lib;C:\dev\js\src\build-debug\dist\lib;C:\dev\kmud-live\reqs\flusspferd\lib\Debug;C:\dev\kmud-live\reqs\mysql\lib\debug;C:\dev\kmud-live\reqs\sqlDatabase\lib\Debug;C:\dev\kmud-live\reqs\iconv\lib\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost\boost_1_44;C:\dev\js\src\dist;Z:\dev\kmud-live\reqs\iconv\include;Z:\dev\kmud-live\reqs\sqlDatabase\include;Z:\dev\kmud-live\reqs\mysql\include;Z:\dev\kmud-live\reqs\flusspferd\include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost\boost_1_44\lib;C:\dev\js\src\build-debug\dist\lib;Z:\dev\kmud-live\reqs\flusspferd\lib\Debug;Z:\dev\kmud-live\reqs\mysql\lib\debug;Z:\dev\kmud-live\reqs\sqlDatabase\lib\Debug;Z:\dev\kmud-live\reqs\iconv\lib\Debug;$(LibraryPath)</LibraryPath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\dev\boost\boost_1_44;C:\dev\js\src\dist;Z:\dev\kmud-live\reqs\iconv\include;Z:\dev\kmud-live\reqs\sqlDatabase;Z:\dev\kmud-live\reqs\mysql\include;Z:\dev\kmud-live\reqs\flusspferd\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include</IncludePath>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Z:\dev\kmud-live\reqs\sqlDatabase\lib\Release;Z:\dev\kmud-live\reqs\mysql\lib\release;Z:\dev\kmud-live\reqs\flusspferd\lib\Release;Z:\dev\kmud-live\reqs\iconv\lib\Release;C:\dev\js\src\build-release\dist\lib;C:\dev\boost\boost_1_44\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -63,7 +63,7 @@
       <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
     <Link>
-      <AdditionalOptions>flusspferd-0.8.lib wsock32.lib sqldatabase.lib dbug.lib libmysql.lib mysqlclient.lib mysys.lib regex.lib strings.lib vio.lib yassl.lib zlib.lib iconv.lib mozjs.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>flusspferd-0.8.lib wsock32.lib sqlDatabase.lib dbug.lib libmysql.lib mysqlclient.lib mysys.lib regex.lib strings.lib vio.lib yassl.lib zlib.lib iconv.lib mozjs.lib %(AdditionalOptions)</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>

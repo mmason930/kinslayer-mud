@@ -1360,7 +1360,6 @@ void oedit_parse(Descriptor *d, char *arg)
 					}
 					d->str = &OLC_OBJ(d)->action_description;
 					d->max_str = MAX_MESSAGE_LENGTH;
-					d->mail_to = 0;
 					OLC_VAL(d) = 1;
 					break;
 				case '5':
@@ -2047,7 +2046,6 @@ void oedit_parse(Descriptor *d, char *arg)
 					}
 					d->str = &OLC_DESC(d)->description;
 					d->max_str = MAX_MESSAGE_LENGTH;
-					d->mail_to = 0;
 					OLC_VAL(d) = 1;
 					return;
 

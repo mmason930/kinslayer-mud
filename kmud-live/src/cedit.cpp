@@ -1676,7 +1676,6 @@ void cedit_parse(Descriptor *d, char *arg)
 
 					d->str = &OLC_CONFIG(d)->play.OK;
 					d->max_str = 500;
-					d->mail_to = 0;
 
 					return;
 
@@ -1692,7 +1691,6 @@ void cedit_parse(Descriptor *d, char *arg)
 
 					d->str = &OLC_CONFIG(d)->play.NOPERSON;
 					d->max_str = 500;
-					d->mail_to = 0;
 
 					return;
 
@@ -1708,7 +1706,6 @@ void cedit_parse(Descriptor *d, char *arg)
 
 					d->str = &OLC_CONFIG(d)->play.NOEFFECT;
 					d->max_str = 500;
-					d->mail_to = 0;
 
 					return;
 				case 'D':
@@ -1894,7 +1891,6 @@ void cedit_parse(Descriptor *d, char *arg)
 
 					d->str = &OLC_CONFIG(d)->operation.WELC_MESSG;
 					d->max_str = 500;
-					d->mail_to = 0;
 					return;
 				case 'H':
 					//OLC_MODE(d) = CEDIT_START_MESSG;
@@ -1908,7 +1904,6 @@ void cedit_parse(Descriptor *d, char *arg)
 
 					d->str = &OLC_CONFIG(d)->operation.START_MESSG;
 					d->max_str = 500;
-					d->mail_to = 0;
 					return;
 				case 'n':
 				case 'N':
@@ -1923,7 +1918,6 @@ void cedit_parse(Descriptor *d, char *arg)
 
 					d->str = &OLC_CONFIG(d)->operation.NEWBIE_MSG;
 					d->max_str = 1024;
-					d->mail_to = 0;
 					return;
 				case 't':
 				case 'T':

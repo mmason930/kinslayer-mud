@@ -17,11 +17,8 @@ Author: Michael Mason - mikemason930@gmail.com (C) 01-26-2007
 #include <iostream>
 #include <sstream>
 #include <ctime>
-#include <cstdio>
+#include <memory>
 #include <cstring>
-
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 
 namespace sql
 {
@@ -30,9 +27,9 @@ class _Connection;
 class _Query;
 class _Context;
 class Row;
-typedef boost::shared_ptr< _Query > Query;
-typedef boost::shared_ptr< _Context > Context;
-typedef boost::shared_ptr< _Connection > Connection;
+typedef std::shared_ptr< _Query > Query;
+typedef std::shared_ptr< _Context > Context;
+typedef std::shared_ptr< _Connection > Connection;
 
 std::string escapeString( const std::string &str );
 std::string escapeQuoteString( const std::string &str );
@@ -161,7 +158,7 @@ private:
 	std::list< MYSQL_ROW >::iterator rowPosition;
 
 	std::string request;
-	boost::weak_ptr< _Query > sPtr;
+	std::weak_ptr< _Query > sPtr;
 	
 	MYSQL_RES* getResultSet();
 
@@ -202,7 +199,7 @@ class Row
 {
 private:
 	MYSQL_ROW row;
-	boost::shared_ptr<_Query> query;
+	std::shared_ptr<_Query> query;
 	static int numberOfAllocations;
 	static int numberOfDeallocations;
 public:
@@ -228,7 +225,7 @@ public:
 		this->row = original.row;
 		this->query = original.query;
 	}
-	Row( boost::weak_ptr<_Query> query, MYSQL_ROW row )
+	Row( std::weak_ptr<_Query> query, MYSQL_ROW row )
 	{
 		++numberOfAllocations;
 		this->query = query.lock();
@@ -239,24 +236,35 @@ public:
 		++numberOfDeallocations;
 	}
 
-	std::string operator [] ( const int i ) const
+	bool isFieldNull(int fieldIndex) const
 	{
-		return row[ i ];
+		return row[ fieldIndex ] == NULL;
 	}
-	std::string operator [] ( const std::string &field ) const
+
+	bool isFieldNull(const std::string &fieldName) const
 	{
-		int index = query->getIndexByField( field );
+		int fieldIndex = query->getIndexByField( fieldName );
+		return isFieldNull(fieldIndex);
+	}
+
+	std::string operator [] ( const int fieldIndex ) const
+	{
+		return row[ fieldIndex ];
+	}
+	std::string operator [] ( const std::string &fieldName ) const
+	{
+		int index = query->getIndexByField( fieldName );
 		return (row[ index ] ? row[ index ] : (""));
 	}
-	const int getIndexByField( const std::string &field ) const
+	const int getIndexByField( const std::string &fieldName ) const
 	{
-		return query->getIndexByField( field );
+		return query->getIndexByField( fieldName );
 	}
-	std::string getFieldByIndex( const int index ) const
+	std::string getFieldByIndex( const int fieldIndex ) const
 	{
-		if(row[index] == NULL)
+		if(row[fieldIndex] == NULL)
 			return "NULL";
-		return query->getFieldByIndex( index );
+		return query->getFieldByIndex( fieldIndex );
 	}
 
 	const int getInt( const std::string &field ) const
