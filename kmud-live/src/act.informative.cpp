@@ -29,6 +29,7 @@
 #include "MiscUtil.h"
 #include "StringUtil.h"
 #include "CharacterUtil.h"
+#include "ClanUtil.h"
 #include "Descriptor.h"
 #include "zones.h"
 
@@ -160,7 +161,7 @@ int level_timer(Character *ch, int level)
 
 bool Character::CanViewClan(sh_int clannum)
 {
-	Clan *c = GetRealClan(clannum);
+	Clan *c = ClanUtil::getClan(clannum);
 
 	//Non existing?!
 	if(clannum < 0 || !c)
@@ -462,9 +463,9 @@ ACMD(do_view)
 		}
 
 		if(!*buf2)
-			c = GetRealClan(ch->clans->GetClanVnum());
+			c = ClanUtil::getClan(ch->clans->GetClanVnum());
 		else
-			c = GetRealClan(clan_num);
+			c = ClanUtil::getClan(clan_num);
 
 		if(c == NULL || c->hidden_level > GET_LEVEL(ch))
 			ch->Send("There is no such clan.\r\n");

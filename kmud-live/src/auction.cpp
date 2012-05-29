@@ -20,6 +20,7 @@
 
 #include "MiscUtil.h"
 #include "StringUtil.h"
+#include "CharacterUtil.h"
 #include "Descriptor.h"
 
 std::vector<int> Auction::DurationList;
@@ -193,7 +194,7 @@ void AuctionManager::UpdateAuctions()
 			if( winnerID != -1 )
 			{//The auction has a winner.
 				Character *winner;
-				if( (winner = get_char_by_id(winnerID)) != 0 )
+				if( (winner = CharacterUtil::getOnlineCharacterById(winnerID)) != 0 )
 				{//Notify the winner(they are logged in)
 					winner->Send("You have won an auction that has recently ended.\r\n");
 				}
@@ -204,7 +205,7 @@ void AuctionManager::UpdateAuctions()
 			{//The auction does not have a winner.
 				int ownerID = atoi(MyRow["owner_id"].c_str());
 				Character *owner;
-				if( (owner = get_char_by_id(ownerID)) != 0 )
+				if( (owner = CharacterUtil::getOnlineCharacterById(ownerID)) != 0 )
 				{//Notify the owner if they are loged in.
 					owner->Send("%s%sOne of your auctions has ended without any bidders\r\n"
 						"You may retrieve your item at the auction house.%s\r\n",
@@ -254,7 +255,7 @@ void AuctionManager::RewardOwner( const int ai_id )
 
 	QueryBuffer.str("");
 
-	owner = get_char_by_id(owner_id);
+	owner = CharacterUtil::getOnlineCharacterById(owner_id);
 
 	if( owner == 0 )
 	{//Owner is not online.
@@ -294,7 +295,7 @@ void AuctionManager::ReimburseLosers( const int ai_id, const int winnerID )
 				continue;
 			AlreadyReimbursed.push_back(bidderID);
 
-			Character *bidder = get_char_by_id(bidderID);
+			Character *bidder = CharacterUtil::getOnlineCharacterById(bidderID);
 
 			if( bidder == 0 )
 			{//They are offline. Update their bank account in the DB.

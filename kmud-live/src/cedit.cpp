@@ -21,6 +21,7 @@
 
 #include "MiscUtil.h"
 #include "StringUtil.h"
+#include "ClanUtil.h"
 #include "Descriptor.h"
 
 extern int circle_restrict;
@@ -1571,7 +1572,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				CeditAuctionEditMenu( d );
 				return;
 			}
-			Clan *clan = GetRealClan( atoi(arg) );
+			Clan *clan = ClanUtil::getClan( atoi(arg) );
 			if( clan == NULL )
 			{
 				d->Send("That clan does not exist.\r\nTry again: ");

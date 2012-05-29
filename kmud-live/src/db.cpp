@@ -39,6 +39,8 @@
 #include "DatabaseUtil.h"
 #include "Descriptor.h"
 #include "UserDisabledCommand.h"
+#include "UserType.h"
+#include "CharacterUtil.h"
 
 #ifdef KINSLAYER_JAVASCRIPT
 #include "js.h"
@@ -1504,45 +1506,23 @@ int is_zone_empty(int zone_nr)
 *  stuff related to the save/load player system				 *
 *************************************************************************/
 
-PlayerIndex *getPlayerIndexByName(const std::string &name)
-{
-	std::list<PlayerIndex *>::iterator entry;
-
-	if(name.empty())
-		return NULL;
-	for(entry = PlayerTable.begin();entry != PlayerTable.end();++entry)
-	{
-		if(!str_cmp((*entry)->name, name))
-			return (*entry);
-	}
-	return NULL;
-}
-
 long GetPlayerIdByName(const std::string &name)
 {
-	std::list<PlayerIndex *>::iterator entry;
+	PlayerIndex *playerIndex = CharacterUtil::getPlayerIndexByUserName(name);
 
-	for(entry = PlayerTable.begin();entry != PlayerTable.end();++entry)
-	{
-		if (!name.compare((*entry)->name))
-		{
-			return ((*entry)->id);
-		}
-	}
+	if(playerIndex)
+		return playerIndex->id;
+
 	return -1;
 }
 
 std::string getNameById(const long id)
 {
-	std::list<PlayerIndex *>::iterator entry;
+	PlayerIndex *playerIndex = CharacterUtil::getPlayerIndexByUserId(id);
 
-	for(entry = PlayerTable.begin();entry != PlayerTable.end();++entry)
-	{
-		if ((*entry)->id == id)
-		{
-			return (*entry)->name;
-		}
-	}
+	if(playerIndex)
+		return playerIndex->name;
+
 	return "";
 }
 
@@ -1566,7 +1546,7 @@ bool Character::LoadLogins(std::list<pLogin> &Logins, std::string &Name,
 	std::stringstream Query;
 	sql::Query MyQuery;
 
-	PlayerIndex *index = getPlayerIndexByName(Name);
+	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(Name);
 
 	Query << "SELECT userLogin.* "
 		  << (Name.empty()==false?"":",users.username ")
@@ -1977,7 +1957,7 @@ void MySQLSaveAlias(const std::string &playername, std::map<std::string,std::str
 {
 	std::stringstream Query;
 
-	PlayerIndex *index = getPlayerIndexByName(playername);
+	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
 
 	if(index == NULL)
 		return;
@@ -1998,7 +1978,7 @@ void MySQLDeleteAlias(const std::string &playername, const std::string &command)
 {
 	std::stringstream Query;
 
-	PlayerIndex *index = getPlayerIndexByName(playername);
+	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
 
 	if(index == NULL)
 		return;
@@ -2093,7 +2073,7 @@ bool MySQLSaveRolls(const std::string &playername, const std::string &TableName,
 	char roll[16], level[16];
 	unsigned int i;
 
-	PlayerIndex *index = getPlayerIndexByName(playername);
+	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
 
 	if( index == NULL )
 		return false;
@@ -2158,7 +2138,7 @@ bool MySQLSaveRolls(const std::string &playername, const std::string &TableName,
 //This function can be used for either hitrolls or manarolls, just supply the correct table name.
 bool MySQLLoadRolls(const std::string &playername, const std::string TableName, std::vector<int> &Rolls)
 {
-	PlayerIndex *index = getPlayerIndexByName(playername);
+	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
 	if(index == NULL)
 		return false;
 	std::string query = "SELECT level, roll FROM " + TableName + " WHERE user_id="
@@ -2347,7 +2327,7 @@ bool Character::SaveManaRolls()
 
 bool playerExists(const std::string &name)
 {
-	if(getPlayerIndexByName(name))
+	if(CharacterUtil::getPlayerIndexByUserName(name))
 		return true;
 	return false;
 }
@@ -4176,4 +4156,19 @@ void PlayerFileCycle(void)
 	}
 
 	delete ch;
+}
+
+UserType *Character::getUserType()
+{
+	if(IS_NPC(this))
+		return UserType::mob;
+	return UserType::player;
+}
+
+int Character::getUserId()
+{
+	UserType *userType = getUserType();
+	if(userType == UserType::mob)
+		return this->getVnum();
+	return this->player.idnum;
 }

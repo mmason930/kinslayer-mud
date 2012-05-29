@@ -9,11 +9,8 @@ private:
 
 	static std::list<GatewayDescriptorStatus*> enums;
 
-	GatewayDescriptorStatus(int value, const std::string &standardName) {
-
-		this->value = value;
-		this->standardName = standardName;
-
+	GatewayDescriptorStatus(int value, const std::string &standardName) : Enum(value, standardName)
+	{
 		enums.push_back(this);
 	}
 

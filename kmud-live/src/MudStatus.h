@@ -9,11 +9,8 @@ private:
 
 	static std::list<MudStatus*> enums;
 
-	MudStatus(int value, const std::string &standardName) {
-
-		this->value = value;
-		this->standardName = standardName;
-
+	MudStatus(int value, const std::string &standardName) : Enum(value, standardName)
+	{
 		enums.push_back(this);
 	}
 

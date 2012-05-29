@@ -139,3 +139,14 @@ void ForumUtil::addUsersToForum(sql::Connection connection)
 		ForumUtil::addForumUser(userId);
 	}
 }
+
+void ForumUtil::changeUserPassword(sql::Connection connection, const int userId, const std::string &userPassword)
+{
+	std::stringstream sql;
+
+	sql << " UPDATE phpbb_users"
+		<< " SET user_password = " << sql::escapeQuoteString(userPassword)
+		<< " WHERE user_id = " << userId;
+
+	connection->sendRawQuery(sql.str());
+}

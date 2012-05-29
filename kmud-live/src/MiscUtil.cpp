@@ -130,6 +130,11 @@ std::list<int> MiscUtil::splitToIntList(const std::string &s, const char sep_cha
 
 std::string MiscUtil::encodeDateTime(const DateTime &dateTime)
 {
+	return MiscUtil::formatDateYYYYdmmdddHHcMMcSS(dateTime);
+}
+
+std::string MiscUtil::formatDateYYYYdmmdddHHcMMcSS(const DateTime &dateTime)
+{
 	return DateTime::parse("%Y-%m-%d %H:%M:%S", dateTime);
 }
 

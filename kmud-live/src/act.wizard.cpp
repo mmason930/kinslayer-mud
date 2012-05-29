@@ -42,6 +42,7 @@
 #include "CharacterUtil.h"
 #include "StringUtil.h"
 #include "ForumUtil.h"
+#include "ClanUtil.h"
 
 #include "kuSockets.h"
 #include "kuListener.h"
@@ -50,6 +51,7 @@
 #include "kuClient.h"
 #include "UserLogoutType.h"
 #include "UserDisabledCommand.h"
+#include "ClanQuestPointTransaction.h"
 #include "dg_event.h"
 
 /*   external vars  */
@@ -1077,7 +1079,7 @@ ACMD(do_ipfind)
 		return;
 	}
 
-	PlayerIndex *index = getPlayerIndexByName(namestr);
+	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(namestr);
 
 	if(index == NULL)
 	{
@@ -1410,7 +1412,7 @@ ACMD(do_disable)
 
 				if(!(target = get_char_vis(ch, username.c_str()))) {
 
-					playerIndex = getPlayerIndexByName(username);
+					playerIndex = CharacterUtil::getPlayerIndexByUserName(username);
 
 					if(playerIndex == NULL)
 					{
@@ -1530,7 +1532,7 @@ ACMD(do_enable)
 
 			if(!(target = get_char_vis(ch, username.c_str()))) {
 
-				playerIndex = getPlayerIndexByName(username);
+				playerIndex = CharacterUtil::getPlayerIndexByUserName(username);
 
 				if(playerIndex == NULL)
 				{
@@ -1695,7 +1697,7 @@ ACMD(do_warrant)
 		else
 			victim->SetWarrant(ch, count, false);
 
-		if(!(c = GetRealClan(count)) || !c->GetWarrant())
+		if(!(c = ClanUtil::getClan(count)) || !c->GetWarrant())
 		{
 			ch->Send("There is no warrant set for this clan.\r\n");
 			return;
@@ -2229,7 +2231,7 @@ ACMD(do_council)
 		cl->IsCouncil() ? "added" : "removed");
 	MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE,
 		"%s %s %s's council flag for clan %s.%s", GET_NAME(ch), (cl->IsCouncil() ? "added" : "removed"),
-	       GET_NAME(victim), GetRealClan(clan_num)->Name.c_str(), load ? " (Offline)" : "");
+	       GET_NAME(victim), ClanUtil::getClan(clan_num)->Name.c_str(), load ? " (Offline)" : "");
 
 	if(load)
 		victim->SaveClans();
@@ -2262,7 +2264,7 @@ ACMD(do_clan)
 
 	int clan_vnum = 0;
 	Clan *clan = 0;
-	if(!(clan_vnum = GetClanByString(clanstr)) || !(clan = GetRealClan(clan_vnum)))
+	if(!(clan_vnum = GetClanByString(clanstr)) || !(clan = ClanUtil::getClan(clan_vnum)))
 	{
 		ch->Send("Invalid clan.\r\n");
 		return;
@@ -2319,7 +2321,7 @@ ACMD(do_declan)
 		return;
 	}
 
-	if((!(clan_vnum = GetClanByString(clanstr)) || !(clan = GetRealClan(clan_vnum))) && str_cmp(clanstr, "all"))
+	if((!(clan_vnum = GetClanByString(clanstr)) || !(clan = ClanUtil::getClan(clan_vnum))) && str_cmp(clanstr, "all"))
 	{
 		ch->Send("Invalid clan.\r\n");
 		return;
@@ -2569,16 +2571,16 @@ ACMD(do_echo)
 
 ACMD(do_award)
 {
+	PlayerIndex *targetUserPlayerIndex;
+	char targetUserName[MAX_INPUT_LENGTH], clanName[MAX_INPUT_LENGTH], questPointAmountString[MAX_INPUT_LENGTH];
+	short int questPointAmount, clanId;
+	int targetUserId;
+	ClanQuestPointTransaction *clanQuestPointTransaction = NULL;
 
-	Character *victim;
-	char *name = ::arg, *questpoints = buf2, clan_name[MAX_INPUT_LENGTH];
-	int qp, clan_num;
-	bool load = false;
-	PlayerClan *cl;
-
-
-	HalfChop(argument, name, argument);
-	TwoArguments(argument, clan_name, questpoints);
+	HalfChop(argument, targetUserName, argument);
+	HalfChop(argument, clanName, argument);
+	HalfChop(argument, questPointAmountString, argument);
+	skip_spaces(&argument);
 
 	if(GET_LEVEL(ch) < LVL_GOD && !IS_NPC(ch))
 	{
@@ -2586,69 +2588,57 @@ ACMD(do_award)
 		return;
 	}
 
-	if(!*name)
+	if(!*targetUserName || !*clanName || !*questPointAmountString || !*argument)
 	{
-		ch->Send("Syntax: <Player Name> <Clan Name> <Quest Points>\r\n");
+		ch->Send("Syntax: <Player Name> <Clan Name> <Quest Points> <Reason>\r\n");
 		return;
 	}
 
-	if(!(victim = get_char_vis(ch, name)))
+	if(!(targetUserPlayerIndex = CharacterUtil::getPlayerIndexByUserName(targetUserName)))
 	{
-		if( (victim = CharacterUtil::loadCharacter(name)) == NULL )
-		{
-			ch->Send(NOPERSON);
-			return;
-		}
-		else
-		{
-			victim->LoadClans();
-			load = true;
-		}
+		ch->Send("The target you have selected does not exist.\r\n");
+		return;
 	}
 
-	if(!(clan_num = GetClanByString(clan_name)))
+	targetUserId = targetUserPlayerIndex->id;
+
+	if(!(clanId = GetClanByString(clanName)))
 	{
 		ch->Send("There is no such clan.\r\n");
-
-		if(load)
-			delete victim;
 		return;
 	}
 
-	if(!(cl = victim->GetClan(clan_num)))
+	if(!MiscUtil::isInt(questPointAmountString))
 	{
-		ch->Send("%s is not a member of that clan.\r\n", GET_NAME(victim));
-
-		if(load)
-			delete victim;
+		ch->Send("The number of quest points you specify must be an integer.\r\n");
 		return;
 	}
 
-	if((qp = atoi(questpoints)) == 0)
+	questPointAmount = atoi(questPointAmountString);
+
+	try
 	{
-		ch->Send("You cannot award zero questpoints.\r\n");
-
-		if(load)
-			delete victim;
-		return;
+		clanQuestPointTransaction = ClanUtil::performQuestPointTransaction(gameDatabase, targetUserId, clanId, questPointAmount, ch->getUserType(), ch->getUserId(), argument); //'argument' is the reason.
+	}
+	catch(std::exception e)
+	{
+		ch->Send("Could not award quest points.\r\n%s\r\n", e.what());
 	}
 
-	//By this point, everything should be good
-	cl->SetQuestPoints(cl->GetQuestPoints() + qp);
-	ch->Send("You award %s %d quest points.\r\n", GET_NAME(victim), qp);
+	if(clanQuestPointTransaction != NULL)
+	{//The operation succeeded.
+		ch->Send("You award %s %d quest points. Transaction ID: %d\r\n", targetUserPlayerIndex->name.c_str(), clanQuestPointTransaction->getAmount(), clanQuestPointTransaction->getId());
+		MudLog(BRF, MAX(GET_LEVEL(ch), LVL_APPR), TRUE, "%s has awarded %s %d quest points. Transaction ID: %d Reason given: `%s`", GET_NAME(ch), targetUserPlayerIndex->name.c_str(), clanQuestPointTransaction->getAmount(), clanQuestPointTransaction->getId(), clanQuestPointTransaction->getReason().c_str());
 
-	if(qp > 0)
-		victim->Send("You gain some quest points.\r\n");
-	else
-		victim->Send("You lose some quest points.\r\n");
+		Character *targetUser = CharacterUtil::getOnlineCharacterById(targetUserId);
+		if(targetUser != NULL)
+		{
+			Clan *clan = ClanUtil::getClan(clanId);
+			targetUser->Send("You have been awarded %d quest points in %s.\r\n", clanQuestPointTransaction->getAmount(), clan->Name.c_str());
+		}
 
-	MudLog(NRM, MAX(LVL_BLDER, GET_INVIS_LEV(ch)), TRUE,
-	       "%s awarded %s %d quest points.%s", GET_NAME(ch), GET_NAME(victim), qp, load ? " (Offline)" : "");
-
-	victim->SaveClans();
-
-	if(load)
-		delete victim;
+		delete clanQuestPointTransaction;
+	}
 }
 
 ACMD(do_send)
@@ -3474,7 +3464,7 @@ void do_stat_character(Character * ch, Character * k)
 	{
 		for(cl = k->clans;cl;cl = cl->next)
 		{
-			if(!GetRealClan(cl->GetClanVnum()))
+			if(!ClanUtil::getClan(cl->GetClanVnum()))
 			{
 				ch->Send("Invalid clan: [%s%d%s]", COLOR_GREEN(ch, CL_NORMAL),
 					cl->GetClanVnum(), COLOR_NORMAL(ch, CL_NORMAL));
@@ -3482,7 +3472,7 @@ void do_stat_character(Character * ch, Character * k)
 			}
 			time_t rt = cl->GetRankTime(), ct = cl->GetClanTime();
 			ch->Send("Clan [%s%s%s], Rank [%s%d%s], Clanned [%s%s%s], Ranked [%s%s%s], Quest Points [%s%d%s], To Rank [%s%d%s]\r\n",
-			         COLOR_GREEN(ch, CL_NORMAL), GetRealClan(cl->GetClanVnum())->Name.c_str(), COLOR_NORMAL(ch, CL_NORMAL),
+			         COLOR_GREEN(ch, CL_NORMAL), ClanUtil::getClan(cl->GetClanVnum())->Name.c_str(), COLOR_NORMAL(ch, CL_NORMAL),
 			         COLOR_GREEN(ch, CL_NORMAL), cl->GetRank(), COLOR_NORMAL(ch, CL_NORMAL),
 					 COLOR_GREEN(ch, CL_NORMAL), Time::FormatDate("%m-%d-%Y",ct).c_str(), COLOR_NORMAL(ch, CL_NORMAL),
 					 COLOR_GREEN(ch, CL_NORMAL), Time::FormatDate("%m-%d-%Y",rt).c_str(), COLOR_NORMAL(ch, CL_NORMAL),
@@ -5430,7 +5420,8 @@ ACMD(do_wshow)
 			{ "switches",		LVL_GRGOD	},			// 20
 			{ "lag",			LVL_GRGOD	},
 			{ "userdeletions",	LVL_GRGOD	},
-			{ "userrestores",	LVL_GRGOD	},			// 23
+			{ "userrestores",	LVL_GRGOD	},
+			{ "qptransactions",	LVL_GOD		},			// 24
 		    { "\n",				0			}
 	    };
 
@@ -6041,6 +6032,71 @@ ACMD(do_wshow)
 			delete[] outputBufferCString;
 			break;
 		}
+		case 24:
+		{
+			std::stringstream outputBuffer;
+			std::list<ClanQuestPointTransaction *> clanQuestPointTransactions = ClanUtil::getAllClanQuestPointTransactions(gameDatabase);
+
+			outputBuffer << "ID      User Name         Clan Name          Time                   QP  Type    Iss. Name    Reason\r\n";
+			outputBuffer << "------------------------------------------------------------------------------------------------------------------\r\n";
+
+			for(auto iter = clanQuestPointTransactions.begin();iter != clanQuestPointTransactions.end();++iter)
+			{
+				ClanQuestPointTransaction *clanQuestPointTransaction = (*iter);
+				std::string issuedByUserName, userName, clanName;
+				Character *user;
+				Clan *clan;
+				PlayerIndex *userPlayerIndex;
+
+				userPlayerIndex = CharacterUtil::getPlayerIndexByUserId(clanQuestPointTransaction->getUserId());
+				if(userPlayerIndex != NULL)
+					userName = userPlayerIndex->name;
+				else
+					userName = "<Unknown>";
+
+				clan = ClanUtil::getClan(clanQuestPointTransaction->getClanId());
+
+				if(clan)
+					clanName = clan->Name;
+				else
+					clanName = "<Unknown>";
+
+				if(clanQuestPointTransaction->getIssuedByUserType() == UserType::player)
+				{
+					PlayerIndex *issuedByUserIndex = CharacterUtil::getPlayerIndexByUserId(clanQuestPointTransaction->getIssuedByUserId());
+					if(issuedByUserIndex)
+						issuedByUserName = issuedByUserIndex->name;
+					else
+						issuedByUserName = "<Unknown>";
+				}
+				else
+				{//Issued by a mob.
+					Character *issuedByUserCharacter = MobManager::GetManager().GetPrototypeByVnum(clanQuestPointTransaction->getIssuedByUserId());
+					if(issuedByUserCharacter != NULL)
+						issuedByUserName = GET_NAME(issuedByUserCharacter);
+					else
+						issuedByUserName = "<Unknown>";
+				}
+
+				outputBuffer << std::right << std::setw(6) << clanQuestPointTransaction->getId() << "  ";
+				outputBuffer << std::left << std::setw(MAX_NAME_LENGTH) << StringUtil::truncateWithEllipses(userName, MAX_NAME_LENGTH) << "  ";
+				outputBuffer << std::left << std::setw(17) << StringUtil::truncateWithEllipses(clanName, 17) << "  ";
+				outputBuffer << MiscUtil::formatDateYYYYdmmdddHHcMMcSS(clanQuestPointTransaction->getCreatedDatetime()) << "  ";
+				outputBuffer << std::right << std::setw(4) << clanQuestPointTransaction->getAmount() << "  ";
+				outputBuffer << std::left << std::setw(6) << clanQuestPointTransaction->getIssuedByUserType()->getStandardName() << "  ";
+				outputBuffer << std::left << std::setw(11) << StringUtil::truncateWithEllipses(issuedByUserName, 11) << "  ";
+				outputBuffer << std::left << clanQuestPointTransaction->getReason() << "\r\n";
+
+				delete clanQuestPointTransaction;
+			}
+
+			char *outputBufferCString = new char[ outputBuffer.str().size() + 1 ];
+			strcpy(outputBufferCString, outputBuffer.str().c_str());
+			page_string(ch->desc, outputBufferCString, TRUE);
+			delete[] outputBufferCString;
+
+			break;
+		}
 		default:
 			ch->Send("Sorry, I don't understand that.\r\n");
 			break;
@@ -6094,7 +6150,7 @@ public:
 	}
 	void performPostJobRoutine()
 	{
-		Character *ch = get_char_by_id( (int)llUserID );
+		Character *ch = CharacterUtil::getOnlineCharacterById( (int)llUserID );
 
 		if( ch ) {
 			ch->Send("%s\r\n", sMessage.c_str());
@@ -7009,7 +7065,7 @@ public:
 
 	void performPostJobRoutine() {
 
-		Character *ch = get_char_by_id(userId);
+		Character *ch = CharacterUtil::getOnlineCharacterById(userId);
 
 		std::string upOrDown = isUp ? "online" : "offline";
 

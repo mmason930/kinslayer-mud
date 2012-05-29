@@ -1626,14 +1626,14 @@ ACMD( do_olist )
 	}
 }
 
-void AddOlcLog( Character *ch, const std::string &Type, const int tid )
+void AddOlcLog( Character *ch, const std::string &Type, const int targetId )
 {
 	try {
 		std::stringstream QueryBuffer;
 		QueryBuffer << "INSERT INTO olcLog (`uid`,`target_type`,`target_id`,`timestamp`) VALUES(";
 		QueryBuffer << "'" << ch->player.idnum << "',";
 		QueryBuffer << "'" << sql::escapeString( Type ) << "',";
-		QueryBuffer << "'" << tid << "',";
+		QueryBuffer << "'" << targetId << "',";
 		QueryBuffer << "'" << time(0) << "');";
 
 		gameDatabase->sendRawQuery( QueryBuffer.str() );

@@ -16,6 +16,7 @@
 
 #include "DateTime.h"
 
+class UserType;
 class Quest;
 class Zone;
 char	*str_dup(const char *source);
@@ -696,7 +697,7 @@ const size_t MAX_STRING_LENGTH = 15360;
 const size_t MAX_INPUT_LENGTH = 512; // Max length per *line* of input
 const size_t MAX_MESSAGE_LENGTH = 2048;
 const size_t MAX_MESSAGES = 60;
-const size_t MAX_NAME_LENGTH = 20;
+const size_t MAX_NAME_LENGTH = 16;
 const size_t MAX_PWD_LENGTH = 128;
 const size_t MAX_TITLE_LENGTH = 80;
 const size_t HOST_LENGTH = 30;
@@ -2289,6 +2290,9 @@ public:
 	void StopEavesdropping();
 	void StopWarding();
 	void SetBashState( const int nrPulses, bool cancelTimer=true, bool makeSit=true );
+
+	int getUserId();
+	UserType *getUserType();
 
 	Character& operator<< ( const std::string &s );
 	Character& operator<< ( const int );

@@ -26,6 +26,7 @@
 #include "js_functions.h"
 #include "StringUtil.h"
 #include "MiscUtil.h"
+#include "ClanUtil.h"
 #include "Descriptor.h"
 
 class Descriptor;
@@ -149,7 +150,7 @@ void Character::SetSkillDefaults()
 		Clan *clan;
 		for(PlayerClan *cl = this->clans; cl; cl = cl->next)
 		{
-			clan = GetRealClan(cl->GetClanVnum());
+			clan = ClanUtil::getClan(cl->GetClanVnum());
 			if(cl->GetRank() >= clan->bonus_skill_rank)
 				SET_SKILL(this, clan->bonus_skill, clan->bonus_skill_val);
 		}

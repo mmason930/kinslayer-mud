@@ -28,6 +28,7 @@
 #include "js.h"
 
 #include "MiscUtil.h"
+#include "ClanUtil.h"
 
 /* Structures */
 Character *combat_list = NULL;	/* head of l-list of fighting chars */
@@ -1619,8 +1620,8 @@ int hit( Character * ch, Character * victim, int type )
 	{
 		for ( PlayerClan * cl = victim->clans;cl;cl = cl->next )
 		{
-			if ( GetRealClan( cl->GetClanVnum() ) )
-				SET_BIT_AR( GET_WARRANTS( ch ), GetRealClan( cl->GetClanVnum() )->warrant );
+			if ( ClanUtil::getClan( cl->GetClanVnum() ) )
+				SET_BIT_AR( GET_WARRANTS( ch ), ClanUtil::getClan( cl->GetClanVnum() )->warrant );
 		}
 	}
 

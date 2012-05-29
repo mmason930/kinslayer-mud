@@ -106,7 +106,9 @@
     <ClCompile Include="src\ban.cpp" />
     <ClCompile Include="src\cedit.cpp" />
     <ClCompile Include="src\CharacterUtil.cpp" />
+    <ClCompile Include="src\ClanQuestPointTransaction.cpp" />
     <ClCompile Include="src\clans.cpp" />
+    <ClCompile Include="src\ClanUtil.cpp" />
     <ClCompile Include="src\class.cpp" />
     <ClCompile Include="src\cledit.cpp" />
     <ClCompile Include="src\comm.cpp" />
@@ -148,6 +150,7 @@
     <ClCompile Include="src\SystemUtil.cpp" />
     <ClCompile Include="src\threaded_jobs.cpp" />
     <ClCompile Include="src\UserLogoutType.cpp" />
+    <ClCompile Include="src\UserType.cpp" />
     <ClCompile Include="src\weather.cpp" />
     <ClCompile Include="src\weave.cpp" />
     <ClCompile Include="src\wedit.cpp" />
@@ -180,7 +183,9 @@
     <ClInclude Include="src\accounts.h" />
     <ClInclude Include="src\auction.h" />
     <ClInclude Include="src\CharacterUtil.h" />
+    <ClInclude Include="src\ClanQuestPointTransaction.h" />
     <ClInclude Include="src\clans.h" />
+    <ClInclude Include="src\ClanUtil.h" />
     <ClInclude Include="src\comm.h" />
     <ClInclude Include="src\conf.h" />
     <ClInclude Include="src\constants.h" />
@@ -212,6 +217,7 @@
     <ClInclude Include="src\threaded_jobs.h" />
     <ClInclude Include="src\UserDisabledCommand.h" />
     <ClInclude Include="src\UserLogoutType.h" />
+    <ClInclude Include="src\UserType.h" />
     <ClInclude Include="src\weather.h" />
     <ClInclude Include="src\weaves.h" />
     <ClInclude Include="src\zones.h" />

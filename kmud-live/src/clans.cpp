@@ -23,6 +23,9 @@
 #include "olc.h"
 #include "clans.h"
 
+#include "ClanUtil.h"
+#include "CharacterUtil.h"
+
 Clan *ClanList = NULL, *ClanEnd = NULL;
 
 void affect_modify_ar(Character *ch, byte loc, sbyte mod, int bitv[], bool add);
@@ -158,7 +161,7 @@ bool Character::WantedByPlayer(Character *ch)
 
 	for(cl = ch->clans;cl;cl = cl->next)
 	{
-		if( (c = GetRealClan(cl->GetClanVnum())) && c->GetWarrant() &&
+		if( (c = ClanUtil::getClan(cl->GetClanVnum())) && c->GetWarrant() &&
 		IS_SET_AR(GET_WARRANTS(this), c->GetWarrant()->vnum))
 			return true;
 	}
@@ -170,25 +173,12 @@ bool Character::WantedByClan(int vnum)
 {
 	Clan *c;
 
-	if(!(c = GetRealClan(vnum)) || !(c->GetWarrant()))
+	if(!(c = ClanUtil::getClan(vnum)) || !(c->GetWarrant()))
 		return false;
 
 	if(IS_SET_AR(GET_WARRANTS(this), c->GetWarrant()->vnum))
 		return true;
 	return false;
-}
-
-Clan *GetRealClan(sh_int vnum)
-{
-	Clan *c;
-
-	for(c = ClanList;c;c = c->Next)
-	{
-		if(c->vnum == vnum)
-			return c;
-	}
-
-	return NULL;
 }
 
 const std::string PlayerClan::GetClanName()
@@ -269,7 +259,7 @@ Clan::~Clan()
 void Character::SetWarrant(Character *warranter, int clan, bool hide)
 {
 	Clan *c;
-	if(!(c = GetRealClan(clan)) || !c->GetWarrant())
+	if(!(c = ClanUtil::getClan(clan)) || !c->GetWarrant())
 		return;
 
 	SET_BIT_AR(GET_WARRANTS(this), c->GetWarrant()->vnum);
@@ -281,7 +271,7 @@ void Character::SetWarrant(Character *warranter, int clan, bool hide)
 void Character::RemoveWarrant(Character *pardoner, int num)
 {
 	Clan *c;
-	if(!(c = GetRealClan(num)) || !c->GetWarrant())
+	if(!(c = ClanUtil::getClan(num)) || !c->GetWarrant())
 		return;
 
 	REMOVE_BIT_AR(GET_WARRANTS(this), c->GetWarrant()->vnum);
@@ -294,7 +284,7 @@ void MySQLSaveQuest(const std::string &playername, const Quest *quest, bool upda
 	std::stringstream Query;
 	sql::Query MyQuery;
 
-	PlayerIndex *index = getPlayerIndexByName(playername);
+	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
 
 	if(index == NULL)
 		return;
@@ -323,7 +313,7 @@ Quest *MySQLGrabQuest(const std::string &playername, const std::string &questnam
 	sql::Query MyQuery;
 	sql::Row MyRow;
 
-	PlayerIndex *index = getPlayerIndexByName(playername);
+	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
 
 	if(index == NULL)
 		return NULL;
@@ -352,7 +342,7 @@ void MySQLSavePlayerClan(const std::string &playername, PlayerClan *clan, bool u
 	std::stringstream Query;
 	sql::Query MyQuery;
 
-	PlayerIndex *index = getPlayerIndexByName(playername);
+	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
 
 	if(index == NULL)
 		return;
@@ -381,7 +371,7 @@ void MySQLSavePlayerClan(const std::string &playername, PlayerClan *clan, bool u
 void MySQLDeletePlayerClan(const std::string &playername, const int clan)
 {
 	std::stringstream Query;
-	PlayerIndex *index = getPlayerIndexByName(playername);
+	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
 
 	if(index == NULL)
 		return;
@@ -401,7 +391,7 @@ void MySQLDeletePlayerClan(const std::string &playername)
 	std::stringstream Query;
 	sql::Query MyQuery;
 
-	PlayerIndex *index = getPlayerIndexByName(playername);
+	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
 
 	if(index == NULL)
 		return;
@@ -423,7 +413,7 @@ bool MySQLIsPlayerInClan(const std::string &playername, const int clan_vnum)
 	sql::Query MyQuery;
 	sql::Row MyRow;
 
-	PlayerIndex *index = getPlayerIndexByName(playername);
+	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
 
 	if(index == NULL)
 		return false;
@@ -455,7 +445,7 @@ PlayerClan *MySQLGrabPlayerClans(const std::string &playername)
 	sql::Query MyQuery;
 	sql::Row MyRow;
 
-	PlayerIndex *index = getPlayerIndexByName(playername);
+	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
 
 	if( !index )
 		return NULL;

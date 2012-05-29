@@ -16,6 +16,7 @@
 #include "js_functions.h"
 
 #include "StringUtil.h"
+#include "ClanUtil.h"
 #include "UserLogoutType.h"
 #include "Descriptor.h"
 
@@ -134,7 +135,7 @@ void JSCharacter::warrantByClan( int iClan )
 	if( !real || real->IsPurged() ) return;
 	Clan *pClan;
 	Warrant *pWarrant;
-	if( !( pClan = GetRealClan( iClan ) ) ) return;
+	if( !( pClan = ClanUtil::getClan( iClan ) ) ) return;
 	if( !( pWarrant = pClan->GetWarrant() ) ) return;
 	SET_BIT_AR(GET_WARRANTS(real), pWarrant->vnum);
 }
@@ -143,7 +144,7 @@ void JSCharacter::pardonByClan( int iClan )
 	if( !real || real->IsPurged() ) return;
 	Clan *pClan;
 	Warrant *pWarrant;
-	if( !( pClan = GetRealClan( iClan ) ) ) return;
+	if( !( pClan = ClanUtil::getClan( iClan ) ) ) return;
 	if( !( pWarrant = pClan->GetWarrant() ) ) return;
 	REMOVE_BIT_AR(GET_WARRANTS(real), pWarrant->vnum);
 
@@ -456,7 +457,7 @@ int JSCharacter::getQP(const int cvnum)
 {
 	if( !real )
 		return 0;
-	Clan *c = GetRealClan(cvnum);
+	Clan *c = ClanUtil::getClan(cvnum);
 	if(c && real->GetClan(cvnum))
 		return real->GetClan(cvnum)->GetQuestPoints();
 	return 0;

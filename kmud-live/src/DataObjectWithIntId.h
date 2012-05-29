@@ -11,6 +11,16 @@ public:
 	{
 		return id == -1;
 	}
+
+	int getId()
+	{
+		return id;
+	}
+
+	void setId(const int id)
+	{
+		this->id = id;
+	}
 };
 
 #endif

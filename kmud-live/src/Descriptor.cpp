@@ -167,3 +167,12 @@ void Descriptor::cleanup()
 
 	delete ( this );
 }
+
+void Descriptor::socketWriteInstant( const std::string &str )
+{
+	this->descriptor->socketWriteInstant( str );
+	if(this->character && PLR_FLAGGED(this->character, PLR_LOGGER))
+	{
+		this->character->LogOutput(str);
+	}
+}

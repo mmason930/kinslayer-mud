@@ -46,7 +46,6 @@ void	boot_db(void);
 void	zone_update(void);
 int		real_room(unsigned int vnum);
 std::string	getNameById(const long id);
-class PlayerIndex *getPlayerIndexByName(const std::string &name);
 
 bool	playerExists(const std::string &name);
 

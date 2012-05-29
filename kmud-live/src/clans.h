@@ -16,7 +16,6 @@ void BootClans();
 int NumClans();
 int GetClanByString(std::string name);
 bool IsTowerClan(int clan);
-Clan *GetRealClan(sh_int vnum);
 Warrant *WarrantByVnum(int vnum);
 Warrant *WarrantByVnum(std::list<Warrant *> List, int vnum);
 

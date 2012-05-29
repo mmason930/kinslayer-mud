@@ -18,6 +18,7 @@
 #include "shop.h"
 
 #include "MiscUtil.h"
+#include "ClanUtil.h"
 #include "Descriptor.h"
 
 #ifdef KINSLAYER_JAVASCRIPT
@@ -190,7 +191,7 @@ Character *MobManager::BootPrototype( sql::Row &MyRow )
 	NewMob->player.height			= (198);
 
 	//check to see if this mob is in a clan
-	if( GetRealClan(atoi(MyRow["clan"].c_str())) != NULL )
+	if( ClanUtil::getClan(atoi(MyRow["clan"].c_str())) != NULL )
 	{
 		NewMob->AddToClan(new PlayerClan(atoi(MyRow["clan"].c_str()),0,0,0,(int)atoi(MyRow["rank"].c_str()),false));
 	}

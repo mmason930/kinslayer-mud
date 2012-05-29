@@ -1513,6 +1513,7 @@ void Character::Extract( UserLogoutType *userLogoutType, bool full_delete )
 	Descriptor *t_desc;
 	Object *obj;
 	int i = 0, freed = 0;
+	int playerRoomVnum = this->in_room ? this->in_room->vnum : -1;
 
 	if( purged == true )
 		return;
@@ -1640,7 +1641,7 @@ void Character::Extract( UserLogoutType *userLogoutType, bool full_delete )
 	if (!IS_NPC(this))
 	{
 		MudLog(CMP, MAX(GET_INVIS_LEV(this), LVL_IMMORT), TRUE,
-		       "%s extracted at room %d.", GET_NAME(this), this->PlayerData->load_room);
+		       "%s extracted at room %d.", GET_NAME(this), playerRoomVnum);
 	}
 	else
 	{
@@ -1754,20 +1755,6 @@ Character *get_char_by_name(const char *name, int npc)
 	}
 
 	return NULL;
-}
-
-Character *get_char_by_id(int id)
-{
-	Character *i = 0;
-
-	for(i = character_list;i;i = i->next)
-	{
-		if( i->IsPurged() ) continue;
-		if(i->player.idnum == id)
-			return i;
-	}
-
-	return 0;
 }
 
 Character *get_char_vis(Character * ch, const char *name)

@@ -34,6 +34,7 @@
 
 #include "StringUtil.h"
 #include "MiscUtil.h"
+#include "ClanUtil.h"
 #include "Descriptor.h"
 
 extern const int rev_dir[];
@@ -1286,13 +1287,13 @@ flusspferd::string JS_md5( flusspferd::string key )
 }
 flusspferd::string JS_clanNumToText( int iClanNum )
 {
-	Clan *c = GetRealClan(iClanNum);
+	Clan *c = ClanUtil::getClan(iClanNum);
 	if( !c ) return "";
 	return c->Name;
 }
 flusspferd::string JS_getClanRankName( int iClanNum, int iRankNum )
 {
-	Clan *c = GetRealClan(iClanNum);
+	Clan *c = ClanUtil::getClan(iClanNum);
 	if( !c ) return "";
 	return c->GetRankName(iRankNum);
 }
@@ -1302,7 +1303,7 @@ int JS_numberOfRooms()
 }
 bool JS_isClanSecret( int iClanVnum )
 {
-	Clan *c = GetRealClan( iClanVnum );
+	Clan *c = ClanUtil::getClan( iClanVnum );
 	if( c && c->secret )
 		return true;
 	return false;

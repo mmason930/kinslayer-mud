@@ -16,6 +16,8 @@
 #include "weaves.h"
 #include "Descriptor.h"
 
+#include "ClanUtil.h"
+
 extern Descriptor *descriptor_list;
 extern Clan *ClanList, *ClanEnd;
 
@@ -49,7 +51,7 @@ ACMD(do_cledit)
 		d->olc = new OLC();
 		OLC_ZONE(d) = 0;
 
-		if(!GetRealClan(atoi(buf1)))
+		if(!ClanUtil::getClan(atoi(buf1)))
 			CleditSetupNew(d, atoi(buf1));
 		else
 			CleditSetupExisting(d, atoi(buf1));
@@ -77,7 +79,7 @@ void CleditSetupExisting(Descriptor *d, int vnum)
 {
 	Clan *c;
 
-	if(!(c = GetRealClan(vnum)))
+	if(!(c = ClanUtil::getClan(vnum)))
 	{
 		MudLog(BRF, LVL_APPR, TRUE,
 		       "SYSERR: CleditSetupExisting() : Clan with virtual number of %d does not exist.", vnum);
@@ -104,7 +106,7 @@ void CleditSaveInternally(Descriptor *d)
 {
 	Clan *c, *tmpNext, *tmpPrev;
 
-	if(!(c = GetRealClan(OLC_CLAN(d)->vnum)))
+	if(!(c = ClanUtil::getClan(OLC_CLAN(d)->vnum)))
 	{
 		c = new Clan(true);
 	}
@@ -354,7 +356,7 @@ void CleditParse(Descriptor *d, const std::string &arg)
 			switch(toupper(arg[0]))
 			{
 				case 'Y':
-					if((c = GetRealClan(OLC_CLAN(d)->vnum)))
+					if((c = ClanUtil::getClan(OLC_CLAN(d)->vnum)))
 					{
 						REMOVE_NODE(ClanList, ClanEnd, c, Prev, Next);
 						delete c;

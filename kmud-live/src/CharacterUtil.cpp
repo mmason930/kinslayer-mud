@@ -9,6 +9,8 @@
 #include "db.h"
 #include "utils.h"
 
+extern Character *character_list;
+
 Character *CharacterUtil::loadCharacter(const int userId)
 {
 	Character *character = NULL;
@@ -212,10 +214,55 @@ Character *CharacterUtil::loadCharacter(const int userId)
 
 Character *CharacterUtil::loadCharacter(const std::string &username)
 {
-	PlayerIndex *playerIndex = getPlayerIndexByName(username);
+	PlayerIndex *playerIndex = CharacterUtil::getPlayerIndexByUserName(username);
 	if(playerIndex != NULL)
 	{
 		return loadCharacter(playerIndex->id);
+	}
+	return NULL;
+}
+
+void CharacterUtil::changeUserPassword(sql::Connection connection, const int userId, const std::string &userPassword)
+{
+	std::stringstream sql;
+
+	sql << " UPDATE users"
+		<< " SET user_password = " << sql::escapeQuoteString(userPassword)
+		<< " WHERE user_id = " << userId;
+
+	connection->sendRawQuery(sql.str());
+}
+
+Character *CharacterUtil::getOnlineCharacterById(const int userId)
+{
+	Character *character = NULL;
+
+	for(character = character_list;character;character = character->next)
+	{
+		if(!character->IsPurged() && character->player.idnum == userId)
+			return character;
+	}
+
+	return NULL;
+}
+
+
+PlayerIndex *CharacterUtil::getPlayerIndexByUserName(const std::string &userName)
+{
+	for(auto iter = PlayerTable.begin();iter != PlayerTable.end();++iter)
+	{
+		if(!str_cmp((*iter)->name, userName))
+			return (*iter);
+	}
+	return NULL;
+}
+
+PlayerIndex *CharacterUtil::getPlayerIndexByUserId(const int userId)
+{
+	for(auto iter = PlayerTable.begin();iter != PlayerTable.end();++iter)
+	{
+		if((*iter)->id == userId)
+			return (*iter);
 	}
 	return NULL;
 }

@@ -40,6 +40,7 @@ public:
 	void Send( const char *messg, ... );
 	void Send( const std::string s );
 	void SendRaw( const char *messg );
+	void socketWriteInstant( const std::string &str );
 	void NewbieMenuFinish();
 	void EchoOn();
 	void EchoOff();

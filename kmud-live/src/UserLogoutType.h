@@ -10,11 +10,8 @@ private:
 
 	static std::list<UserLogoutType*> enums;
 
-	UserLogoutType(int value, const std::string &standardName) {
-
-		this->value = value;
-		this->standardName = standardName;
-
+	UserLogoutType(int value, const std::string &standardName) : Enum(value, standardName)
+	{
 		enums.push_back(this);
 	}
 

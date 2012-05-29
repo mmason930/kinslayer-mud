@@ -27,6 +27,7 @@
 
 #include "MiscUtil.h"
 #include "StringUtil.h"
+#include "ClanUtil.h"
 
 /*   external vars  */
 
@@ -483,7 +484,7 @@ SPECIAL(guild)
 		Clan *clan;
 		for(PlayerClan *cl = ch->clans; cl; cl = cl->next)
 		{
-			clan = GetRealClan(cl->GetClanVnum());
+			clan = ClanUtil::getClan(cl->GetClanVnum());
 			if(cl->GetRank() >= clan->bonus_skill_rank && weave->getVnum() == clan->bonus_skill)
 				SET_SKILL(ch, weave->getVnum(), GET_SKILL(ch, weave->getVnum()) - clan->bonus_skill_val);
 		}
@@ -496,7 +497,7 @@ SPECIAL(guild)
 		Clan *clan;
 		for(PlayerClan *cl = ch->clans; cl; cl = cl->next)
 		{
-			clan = GetRealClan(cl->GetClanVnum());
+			clan = ClanUtil::getClan(cl->GetClanVnum());
 			if(cl->GetRank() >= clan->bonus_skill_rank && weave->getVnum() == clan->bonus_skill)
 				SET_SKILL(ch, weave->getVnum(), GET_SKILL(ch, weave->getVnum()) + clan->bonus_skill_val);
 		}

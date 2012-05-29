@@ -18,6 +18,8 @@
 #include "zones.h"
 #include "Descriptor.h"
 
+#include "ClanUtil.h"
+
 /*
  * Set this to 1 for debugging logs in medit_save_internally.
  */
@@ -832,7 +834,7 @@ void medit_disp_menu(Descriptor *d)
 	    grn, nrm, cyn, mob->player.LeaveMessage ? mob->player.LeaveMessage : "Default Message",
 	    grn, nrm, cyn, pc_race_types[(int) GET_RACE(mob)],
 	    grn, nrm, cyn, (int)GET_MAX_MOVE(mob),
-	    grn, nrm, cyn, mob->clans ? GetRealClan(mob->clans->GetClanVnum())->Name.c_str() : "NONE",
+	    grn, nrm, cyn, mob->clans ? ClanUtil::getClan(mob->clans->GetClanVnum())->Name.c_str() : "NONE",
 	    grn, nrm, cyn, mob->clans ? mob->clans->GetRank() : 0,
 	    grn, nrm, cyn, *aggro_list ? aggro_list : "NONE",
 	    grn, nrm, cyn, class_types[(int) GET_CLASS(mob)],
@@ -1423,7 +1425,7 @@ void medit_parse(Descriptor *d, char *arg)
 			}
 			else
 			{
-				if(!GetRealClan(i))
+				if(!ClanUtil::getClan(i))
 				{
 					d->Send("That clan does not exit.\r\n");
 					return;

@@ -396,9 +396,9 @@ void onDescriptorOpen(void *data, kuDescriptor *descriptor)
 	newd->next = descriptor_list;
 	descriptor_list = newd;
 
-	newd->descriptor->socketWriteInstant(startup);
+	newd->socketWriteInstant(startup);
 
-	newd->descriptor->socketWriteInstant("By what name do you wish to be known? ");
+	newd->socketWriteInstant("By what name do you wish to be known? ");
 }
 
 void onDescriptorClose(void *data, kuDescriptor *descriptor)
@@ -1024,7 +1024,7 @@ void gameLoop()
 
 			if(d->snoop_by && d->snoop_by->descriptor) {
 
-				d->snoop_by->descriptor->socketWriteInstant(std::string("% ") + command + std::string("\n"));
+				d->snoop_by->socketWriteInstant(std::string("% ") + command + std::string("\n"));
 			}
 
 			char comm[MAX_INPUT_LENGTH+1];//Keeping this way for legacy reasons... Will change someday. 2011-04-10
@@ -1117,11 +1117,11 @@ void gameLoop()
 
 			if(d->hadOutput) {
 
-				d->descriptor->socketWriteInstant("\r\n");
+				d->socketWriteInstant("\r\n");
 			}
 			if(d->hadInput || d->hadOutput) {
 
-				d->descriptor->socketWriteInstant(d->MakePrompt());
+				d->socketWriteInstant(d->MakePrompt());
 			}
 
 			d->hadInput = false;
@@ -1305,7 +1305,7 @@ void AutoSave( void )
 		if( STATE( d ) == CON_PLAYING )
 		{
 			strcpy(tmpBuf, d->MakePrompt());
-			d->descriptor->socketWriteInstant(d->MakePrompt());
+			d->socketWriteInstant(d->MakePrompt());
 		}
 	}
 }
@@ -1952,21 +1952,21 @@ void Character::ShowTimer()
 		return ;
 
 	if ( !( timer % 40 ) )
-		desc->descriptor->socketWriteInstant("\r\n * ");
+		desc->socketWriteInstant("\r\n * ");
 	else if ( !( timer % 35 ) )
-		desc->descriptor->socketWriteInstant(" + ");
+		desc->socketWriteInstant(" + ");
 	else if ( !( timer % 30 ) )
-		desc->descriptor->socketWriteInstant(" - ");
+		desc->socketWriteInstant(" - ");
 	else if ( !( timer % 25 ) )
-		desc->descriptor->socketWriteInstant(" = ");
+		desc->socketWriteInstant(" = ");
 	else if ( !( timer % 20 ) )
-		desc->descriptor->socketWriteInstant(" % ");
+		desc->socketWriteInstant(" % ");
 	else if ( !( timer % 15 ) )
-		desc->descriptor->socketWriteInstant(" = ");
+		desc->socketWriteInstant(" = ");
 	else if ( !( timer % 10 ) )
-		desc->descriptor->socketWriteInstant(" - ");
+		desc->socketWriteInstant(" - ");
 	else if ( !( timer % 5 ) )
-		desc->descriptor->socketWriteInstant(" + ");
+		desc->socketWriteInstant(" + ");
 }
 
 void checkTimers()
@@ -2395,7 +2395,7 @@ void sendToAll( const char* messg, bool instant )
 		if ( STATE( i ) == CON_PLAYING )
 		{
 			if( instant == true )
-				i->descriptor->socketWriteInstant(messg);
+				i->socketWriteInstant(messg);
 			else
 				SEND_TO_Q( messg, i );
 		}

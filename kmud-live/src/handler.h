@@ -82,7 +82,6 @@ void	move_char_random(Character *ch, int bottom, int top, int inside_allowed);
 Character *get_char_room_vis(Character *ch, const char *name);
 Character *get_player_vis(Character *ch, char *name, int inroom);
 Character *get_char_vis(Character *ch, const char *name);
-Character *get_char_by_id(int id);
 Object *get_obj_in_list_vis(Character *ch, char *name,
                             Object *listy);
 Object *get_obj_vis(Character *ch, char *name);

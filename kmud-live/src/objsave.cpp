@@ -1290,7 +1290,7 @@ ACMD( do_insert )
 	//Try to locate the holder in the game, first.
 	if( holderType == 'P' )
 	{
-		if( (cHolder = get_char_by_id( atoi(arg3) )) )
+		if( (cHolder = CharacterUtil::getOnlineCharacterById( atoi(arg3) )) )
 		{//Found.
 			obj_from_char(obj);
 			obj_to_char(obj, cHolder);

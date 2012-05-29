@@ -12,15 +12,21 @@ protected:
 
 	static std::list<Enum*> enums;
 
+	Enum(int value, const std::string &standardName)
+	{
+		this->value = value;
+		this->standardName = standardName;
+	}
+
 public:
 
-	static Enum *getEnumByValue(int v) {
-
-		for(std::list<Enum*>::iterator iter = enums.begin();iter != enums.end();++iter) {
-
+	static Enum *getEnumByValue(int v)
+	{
+		for(std::list<Enum*>::iterator iter = enums.begin();iter != enums.end();++iter)
+		{
 			Enum *e = (*iter);
-			if( e->getValue() == v ) {
-
+			if( e->getValue() == v )
+			{
 				return e;
 			}
 		}
@@ -28,11 +34,11 @@ public:
 		return NULL;
 	}
 
-	std::string getStandardName() {
+	std::string getStandardName() const {
 		
 		return standardName;
 	}
-	int getValue() {
+	int getValue() const {
 
 		return value;
 	}

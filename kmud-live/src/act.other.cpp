@@ -34,6 +34,8 @@
 #endif
 
 #include "StringUtil.h"
+#include "ForumUtil.h"
+#include "CharacterUtil.h"
 
 /* extern variables */
 
@@ -1537,7 +1539,8 @@ ACMD( do_change )
 			return;
 		}
 		ch->player.passwd = MD5::getHashFromString( sNewPassword.c_str() );
-		ch->PasswordUpdated( true );
+		CharacterUtil::changeUserPassword(gameDatabase, ch->player.idnum, sNewPassword);
+		ForumUtil::changeUserPassword(gameDatabase, ch->player.idnum, sNewPassword);
 		ch->Send( "Your password has been changed to: %s.\r\n", sNewPassword.c_str() );
 	}
 	else if ( !strn_cmp( arg1, "spam", strlen( arg1 ) ) )
