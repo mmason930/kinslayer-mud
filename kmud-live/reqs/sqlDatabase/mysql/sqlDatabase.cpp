@@ -532,10 +532,19 @@ std::string encodeDate(const time_t unix_timestamp)
 {
 	struct tm *timeInfo;
 	static char buffer[32];
+
+	if(unix_timestamp == 0)
+		return "NULL";
+
 	timeInfo = localtime(&unix_timestamp);
 	strftime(buffer, 32, "%Y-%m-%d %H:%M:%S", timeInfo);
 
 	return std::string(buffer);
+}
+
+int encodeBooleanInt(bool boolean)
+{
+	return boolean ? 1 : 0;
 }
 
 }//Namespace

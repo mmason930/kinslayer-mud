@@ -36,6 +36,7 @@ std::string escapeQuoteString( const std::string &str );
 Context createContext( const std::string &Host, const std::string &User, const std::string &Password, const std::string &DatabaseName );
 std::string encodeDate(const time_t unix_timestamp);
 std::string encodeQuoteDate(const time_t unix_timestamp);
+int encodeBooleanInt(bool boolean);
 
 //Define an Row as an std::map . The index is the field name,
 //	the resulting element is the data from the row.
