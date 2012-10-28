@@ -42,14 +42,19 @@ OBJFILES = comm.o act.comm.o act.informative.o act.movement.o act.item.o \
 	auction.o kuSockets.o kuListener.o kuDescriptor.o kuClient.o threaded_jobs.o \
 	MiscUtil.o StringUtil.o TimeUtil.o DateTime.o UserLogoutType.o \
 	GatewayClient.o GatewayDescriptor.o GatewayDescriptorStatus.o GatewayServer.o Descriptor.o \
-	MudStatus.o SystemUtil.o CharacterUtil.o ForumUtil.o DatabaseUtil.o
-
+	MudStatus.o SystemUtil.o CharacterUtil.o ForumUtil.o DatabaseUtil.o UserType.o ClanUtil.o \
+	ClanQuestPointTransaction.o OLCUtil.o UserClan.o OlcEditType.o UserEmailEditor.o MailUtil.o \
+	GatewayListener.o WebSocketDataFrame.o WebSocketClientHeaderIETF_HYBI17.o WebSocketClientHeader.o \
+	HttpServer.o WebSocketClientHeaderHixie76.o sha1.o TestResource.o HttpResponse.o HttpQueue.o \
+	HttpProtocol.o HttpUtil.o HttpDescriptor.o HttpRequest.o GatewayDescriptorType.o
 OBJFILES := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILES))
 
 
 OBJFILESGATEWAY = DateTime.o GatewayClient.o GatewayDescriptor.o GatewayDescriptorStatus.o \
 	GatewayMain.o GatewayServer.o kuClient.o kuDescriptor.o kuListener.o kuSockets.o MiscUtil.o \
-	StringUtil.o MudStatus.o SystemUtil.o
+	StringUtil.o MudStatus.o SystemUtil.o sha1.o GatewayDescriptorType.o WebSocketDataFrame.o \
+	WebSocketClientHeaderIETF_HYBI17.o WebSocketClientHeader.o WebSocketClientHeaderHixie76.o \
+	GatewayListener.o
 
 OBJFILESGATEWAY := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILESGATEWAY))
 

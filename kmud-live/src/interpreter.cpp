@@ -32,10 +32,13 @@
 #include "js_functions.h"
 #include "js.h"
 
+#include "UserEmailAddress.h"
+
 #include "StringUtil.h"
 #include "UserLogoutType.h"
 #include "CharacterUtil.h"
 #include "Descriptor.h"
+#include "GatewayDescriptorType.h"
 
 extern const char *human_class_menu;
 extern const char *other_class_menu;
@@ -58,6 +61,7 @@ public:
 	std::string sessionKey;
 	DateTime createdDatetime;
 	std::string host;
+	GatewayDescriptorType *gatewayDescriptorType;
 };
 
 std::list<PendingSession> pendingSessions;
@@ -74,6 +78,7 @@ void sedit_parse( Descriptor *d, char *arg );
 void kedit_parse( Descriptor *d, char *arg );
 void aedit_parse( Descriptor *d, char *arg );
 void cedit_parse( Descriptor *d, char *arg );
+void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg);
 void StateditParse( Descriptor *d, const std::string &arg );
 void AuctionParse( Descriptor *d, const std::string &arg );
 #ifdef KINSLAYER_JAVASCRIPT
@@ -142,6 +147,7 @@ ACMD( do_drop );
 ACMD( do_eat );
 ACMD( do_echo );
 ACMD( do_effuse );
+ACMD( do_email );
 ACMD( do_enable );
 ACMD( do_enter );
 ACMD( do_equipment );
@@ -469,8 +475,9 @@ class CommandInfo cmd_info[] =
 	    {	"eat"		, "ea"	, POS_RESTING	, do_eat			, 0			, SCMD_EAT			, 0.0	,  0 	},
 	    {	"echo"		, "echo", POS_SLEEPING	, do_echo			, LVL_GOD	, SCMD_ECHO			, 0.0	,  0 	},
 	    {	"effuse"	, "ef"	, POS_STANDING	, do_effuse			, 0			, 0					, 0.0	,  0 	},
+		{	"email"		, "ema"	, POS_DEAD		, do_email			, 0			, 0					, 0.0	,  0	},
 	    {	"embrace"	, "emb"	, POS_RESTING	, do_source			, 0			, SCMD_EMBRACE		, 0.0	,  0 	},
-	    {	"enable"	, "ena"	, POS_DEAD		, do_enable			, LVL_GOD	, 0					, 0.0	,  0 	},
+		{	"enable"	, "ena"	, POS_DEAD		, do_enable			, LVL_GOD	, 0					, 0.0	,  0 	},
 	    {	"enter"		, "en"	, POS_STANDING	, do_enter			, 0			, 0					, 0.0	,  0 	},
 	    {	"equipment"	, "eq"	, POS_SLEEPING	, do_equipment		, 0			, 0					, 0.0	,  0 	},
 	    {	"exits"		, "exi"	, POS_RESTING	, do_exits			, 0			, 0					, 0.0	,  0 	},
@@ -1699,6 +1706,9 @@ void Descriptor::Nanny( char* arg )
 	case CON_AUCTION:
 		AuctionParse( this, arg );
 		break;
+	case CON_EMAIL:
+		parseUserEmailAddressEditor( this, arg );
+		break;
 #ifdef KINSLAYER_JAVASCRIPT
 	case CON_JEDIT:
 		JeditParse( this, arg );
@@ -1729,6 +1739,8 @@ void Descriptor::Nanny( char* arg )
 						strcpy(this->host, pendingSession.host.c_str());
 
 						STATE(this) = CON_GET_NAME;
+
+						this->setGatewayDescriptorType(pendingSession.gatewayDescriptorType);
 
 						pendingSessions.erase(iter);
 
@@ -1922,6 +1934,11 @@ void Descriptor::Nanny( char* arg )
 				}
 
 				return ;
+			}
+
+			if(this->getGatewayDescriptorType() == GatewayDescriptorType::websocket)
+			{
+				this->sendWebSocketUsernameCommand(GET_NAME(this->character));
 			}
 
 			/* Password was correct. */
@@ -2307,7 +2324,7 @@ void Descriptor::Nanny( char* arg )
 		{//Notification?
 		}
 
-		this->character->AddLogin(this->host, time(0));
+		this->character->AddLogin(this->host, DateTime(), this->getGatewayDescriptorType());
 		Character *mount = NULL;
 
 		if ( this->character->PlayerData->mount_save > 0 )
@@ -2341,6 +2358,31 @@ void Descriptor::Nanny( char* arg )
 #ifdef KINSLAYER_JAVASCRIPT
 		js_enter_game_trigger(character,character);
 #endif
+		//If the user has been registered for over seven days, display a reminder to register their email if they haven't already done so.
+		if( (DateTime().getTime() - this->character->player.time.birth.getTime()) / (60 * 60 * 24) >= 7)
+		{
+			//Check to see that the user has at least one confirmed email address.
+			std::list<UserEmailAddress *> userEmailAddresses = CharacterUtil::getUserEmailAddresses(gameDatabase, this->character->getUserId());
+			bool hasConfirmedEmail = false;
+
+			for(auto iter = userEmailAddresses.begin();iter != userEmailAddresses.end();++iter)
+			{
+				UserEmailAddress *userEmailAddress = (*iter);
+				if(userEmailAddress->getConfirmed())
+				{
+					hasConfirmedEmail = true;
+					break;
+				}
+			}
+
+			CharacterUtil::freeUserEmailAddresses(userEmailAddresses);
+
+			if(!hasConfirmedEmail)
+			{
+				this->Send("\r\n%s%s ** You have not registered and confirmed an email address. Please type `email` to do so.\r\n"
+						   " ** Registering an email will allow you to retrieve your password if you ever forget it.%s\r\n", COLOR_BOLD(this->character, CL_NORMAL), COLOR_RED(this->character, CL_NORMAL), COLOR_NORMAL(this->character, CL_NORMAL));
+			}
+		}
 
 		break;
 	}

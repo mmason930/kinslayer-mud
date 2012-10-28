@@ -732,7 +732,7 @@ ACMD( do_ride )
 			Act( "You can't ride $M!", FALSE, ch, 0, victim, TO_CHAR );
 		else if ( ( MOB_FLAGGED( victim, MOB_MOUNT ) && IS_TROLLOC( ch ) ) || ( MOB_FLAGGED( victim, MOB_SHADOW_MOUNT ) && !IS_TROLLOC( ch ) ) || ( MOB_FLAGGED( victim, MOB_OGIER_MOUNT ) && !IS_OGIER(ch) ) )
 			Act( "$E would not like having your type on $M.", FALSE, ch, 0, victim, TO_CHAR );
-		else if ( ch->GetClan( CLAN_WOLFBROTHER ) )
+		else if ( ch->getUserClan( CLAN_WOLFBROTHER ) )
 			ch->Send( "You wouldn't even think about getting up on that thing!\r\n" );
 		else if ( SECT( ch->in_room ) == SECT_INSIDE )
 			ch->Send( "You can't ride inside!\r\n" );
@@ -1539,8 +1539,8 @@ ACMD( do_change )
 			return;
 		}
 		ch->player.passwd = MD5::getHashFromString( sNewPassword.c_str() );
-		CharacterUtil::changeUserPassword(gameDatabase, ch->player.idnum, sNewPassword);
-		ForumUtil::changeUserPassword(gameDatabase, ch->player.idnum, sNewPassword);
+		CharacterUtil::changeUserPassword(gameDatabase, ch->player.idnum, ch->player.passwd);
+		ForumUtil::changeUserPassword(gameDatabase, ch->player.idnum, ch->player.passwd);
 		ch->Send( "Your password has been changed to: %s.\r\n", sNewPassword.c_str() );
 	}
 	else if ( !strn_cmp( arg1, "spam", strlen( arg1 ) ) )

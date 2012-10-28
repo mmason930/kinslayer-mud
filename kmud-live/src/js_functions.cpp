@@ -31,11 +31,15 @@
 #include "JSQuery.h"
 #include "JSRow.h"
 #include "md5.h"
+#include "db.h"
+#include "zones.h"
 
 #include "StringUtil.h"
 #include "MiscUtil.h"
 #include "ClanUtil.h"
 #include "Descriptor.h"
+#include "CharacterUtil.h"
+
 
 extern const int rev_dir[];
 extern std::vector<Object*> obj_proto;
@@ -1214,6 +1218,17 @@ flusspferd::value JS_sendQuery( flusspferd::string qBuffer )
 	JSBindable *b = new sqlJSQuery( MyQuery );
 	return lookupValue( b );
 }
+
+
+flusspferd::string JS_sqlEncodeQuoteDate(flusspferd::object dateTime)
+{
+	flusspferd::value timeMillisecondsVal = dateTime.call("getTime");
+	long long timeMilliseconds = (long long)timeMillisecondsVal.get_double();
+
+	return std::string("'") + MiscUtil::formatDateYYYYdmmdddHHcMMcSS(DateTime(timeMilliseconds / 1000)) + std::string("'");
+	
+}
+
 flusspferd::string JS_sqlEsc( flusspferd::string qBuffer )
 {
 	return sql::escapeString( qBuffer.to_string() );
@@ -1237,6 +1252,18 @@ flusspferd::value getObjProto( int vnum )
 	if( rnum == -1 )
 		return lookupValue( 0 );
 	return lookupValue( obj_proto[rnum] );
+}
+flusspferd::value JS_getAllRoomsInZone( int zoneId )
+{
+	Zone *zone = ZoneManager::GetManager().GetZoneByVnum(zoneId);
+
+	if(!zone)
+		return flusspferd::object();
+
+	unsigned int bottomRoomVnum = zone->GetBottom();
+	unsigned int topRoomVnum = zone->GetTop();
+
+	
 }
 flusspferd::value getObjProtoByRnum( int rnum )
 {
@@ -1461,8 +1488,54 @@ bool JS_isArenaInFFAMode()
 	catch(flusspferd::exception e) {
 		MudLog(BRF, LVL_APPR, TRUE, "Generic Exception: %s", e.what());
 	}
-
+	
 	return false;
+}
+
+flusspferd::string JS_getUserNameByUserId(int userId)
+{
+	PlayerIndex *playerIndex = CharacterUtil::getPlayerIndexByUserId(userId);
+
+	if(playerIndex == NULL)
+		return "";
+	return playerIndex->name;
+}
+
+flusspferd::value JS_getUserIdByUserName(flusspferd::string userName)
+{
+	PlayerIndex *playerIndex = CharacterUtil::getPlayerIndexByUserName(userName.to_string());
+
+	if(playerIndex == NULL)
+		return flusspferd::object();
+	return flusspferd::value(playerIndex->id);
+}
+
+flusspferd::object JS_parseJson(std::string jsonText)
+{
+	flusspferd::object global = flusspferd::global();
+
+	flusspferd::object jsonObject = global.get_property("JSON").to_object();
+	flusspferd::string str(jsonText);
+	flusspferd::object resultObject = jsonObject.call("parse", str).to_object();
+
+	return resultObject;
+}
+
+std::string JS_stringifyJson(flusspferd::object obj)
+{
+	flusspferd::object global = flusspferd::global();
+
+	flusspferd::object jsonObject = global.get_property("JSON").to_object();
+	flusspferd::string jsonString = jsonObject.call("stringify", obj).to_string();
+	
+	return jsonString.to_string();
+}
+
+void JS_sendToZone(int zoneNumber, flusspferd::string message)
+{
+	Zone *zone = ZoneManager::GetManager().GetZoneByVnum( zoneNumber );
+	if( !zone ) return;
+	sendToZone(message.c_str(), zone->GetRnum());
 }
 
 #endif

@@ -43,6 +43,7 @@ public:
 
 	bool hasHost();
 	void clearInput();
+	void eraseInput(std::string::size_type offset, std::string::size_type length);
 
 	bool socketIsClosed();
 

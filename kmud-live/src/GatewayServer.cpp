@@ -6,8 +6,13 @@
 #include "SystemUtil.h"
 
 #include "GatewayServer.h"
+#include "GatewayListener.h"
 #include "GatewayDescriptorStatus.h"
+#include "GatewayDescriptorType.h"
 #include "StringUtil.h"
+
+#include "WebSocketClientHeader.h"
+#include "WebSocketException.h"
 
 #ifndef WIN32
 #include <sys/types.h>
@@ -52,7 +57,19 @@ int GatewayServer::getServerPort()
 	return serverPort;
 }
 
-void closeDescriptorCallback(void *data, kuDescriptor *descriptor)
+GatewayListener *GatewayServer::getGatewayListener(kuListener *listener)
+{
+	for(auto iter = listeners.begin();iter != listeners.end();++iter)
+	{
+		GatewayListener *gatewayListener = (*iter);
+		if(gatewayListener->getListener() == listener)
+			return gatewayListener;
+	}
+
+	return NULL;
+}
+
+void closeDescriptorCallback(void *data, kuListener *listener, kuDescriptor *descriptor)
 {
 	GatewayServer *gatewayServer = static_cast<GatewayServer*>(data);
 
@@ -62,15 +79,26 @@ void closeDescriptorCallback(void *data, kuDescriptor *descriptor)
 }
 
 //descriptor is the connection from the player to the gateway server.
-void openDescriptorCallback(void *data, kuDescriptor *descriptor)
+void openDescriptorCallback(void *data, kuListener *listener, kuDescriptor *descriptor)
 {
 	GatewayServer *gatewayServer = static_cast<GatewayServer*>(data);
-
 	GatewayDescriptor *gatewayDescriptor = new GatewayDescriptor();
+	GatewayListener *gatewayListener = gatewayServer->getGatewayListener(listener);
 	
 	gatewayDescriptor->setClientConnection(descriptor);
-	gatewayDescriptor->setStatus(GatewayDescriptorStatus::awaitingConnection);
 	gatewayDescriptor->setRandomId(StringUtil::getRandomString(40));
+	gatewayDescriptor->setGatewayListener(gatewayListener);
+
+	if(gatewayListener->getType() == GATEWAY_LISTENER_TYPE_WEBSOCKET)
+	{
+		gatewayDescriptor->setStatus(GatewayDescriptorStatus::handshaking);
+		gatewayDescriptor->setType(GatewayDescriptorType::websocket);
+	}
+	else
+	{
+		gatewayDescriptor->setStatus(GatewayDescriptorStatus::awaitingConnection);
+		gatewayDescriptor->setType(GatewayDescriptorType::rawTCP);
+	}
 
 	gatewayServer->getDescriptors().push_back(gatewayDescriptor);
 
@@ -121,12 +149,29 @@ bool GatewayServer::loadConfiguration()
 		return false;
 	}
 
-
 	this->secondaryPort = 0;
 	if(resources.find("Secondary Gateway Port") != resources.end())
 	{
 		this->secondaryPort = atoi(resources["Secondary Gateway Port"].c_str());
 	}
+
+	if(resources.find("Websocket Ports") != resources.end())
+	{
+		std::list<std::string> websocketPortsStringList = StringUtil::SplitToList<std::string>(resources["Websocket Ports"], ',');
+		for(auto iter = websocketPortsStringList.begin();iter != websocketPortsStringList.end();++iter)
+		{
+			std::string portString = (*iter);
+			if(!MiscUtil::isInt(portString))
+			{
+				std::cout << "Invalid Websocket Port specified: `" << portString << "`: Not a valid integer." << std::endl;
+			}
+			else
+			{
+				this->websocketPorts.push_back(atoi(portString.c_str()));
+			}
+		}
+	}
+
 	this->serverPort = atoi(resources["MUD Port"].c_str());
 	this->serverHost = resources["MUD Host"];
 	this->listeningPort = atoi(resources["Gateway Port"].c_str());
@@ -168,6 +213,14 @@ void GatewayServer::setup()
 	crashReasonVector.push_back("your mom");
 	crashReasonVector.push_back("Facebook's terrible chat interface");
 	crashReasonVector.push_back("Google's attempts to buy us out");
+	crashReasonVector.push_back("rampant abuse of loopholes");
+	crashReasonVector.push_back("Lamgwin's political aspirations");
+	crashReasonVector.push_back("Jonlin's unexpected return");
+	crashReasonVector.push_back("the long overdue meltdown of the Valon Guard");
+	crashReasonVector.push_back("Kno'mon clan leaders");
+	crashReasonVector.push_back("something Evilina did");
+	crashReasonVector.push_back("the MMORPG takeover");
+	crashReasonVector.push_back("you. Yes, you,");
 }
 
 void GatewayServer::disconnectMotherConnectionFromGameServer()
@@ -224,10 +277,13 @@ void GatewayServer::bindListener()
 	for(auto iter = portsToListenTo.begin();iter != portsToListenTo.end();++iter)
 	{
 		int port = (*iter);
-		std::cout << makeTimestamp() << " Setting up gateway listener on port " << port << "." << std::endl;
+		std::cout << makeTimestamp() << " Setting up gateway listener(normal) on port " << port << "." << std::endl;
 		kuListener * listener;
 
+		GatewayListener *gatewayListener = new GatewayListener();
 		listener = new kuListener(port, TCP);
+		gatewayListener->setListener(listener);
+		gatewayListener->setType(GATEWAY_LISTENER_TYPE_NORMAL);
 
 		listener->setDataForCloseDescriptorCallback( static_cast<void*>(this) );
 
@@ -242,7 +298,33 @@ void GatewayServer::bindListener()
 			std::cout << makeTimestamp() << " Failed to set keepalive on socket." << std::endl;
 		}
 
-		listeners.push_back(listener);
+		listeners.push_back(gatewayListener);
+	}
+	for(auto iter = websocketPorts.begin();iter != websocketPorts.end();++iter)
+	{
+		int port = (*iter);
+		std::cout << makeTimestamp() << " Setting up gateway listener(websocket) on port " << port << "." << std::endl;
+		kuListener * listener;
+
+		GatewayListener *gatewayListener = new GatewayListener();
+		listener = new kuListener(port, TCP);
+		gatewayListener->setListener(listener);
+		gatewayListener->setType(GATEWAY_LISTENER_TYPE_WEBSOCKET);
+
+		listener->setDataForCloseDescriptorCallback( static_cast<void*>(this) );
+
+		listener->setCloseDescriptorCallback(closeDescriptorCallback);
+	
+		listener->setDataForOpenDescriptorCallback( static_cast<void*>(this) );
+
+		listener->setOpenDescriptorCallback(openDescriptorCallback);
+
+		if(!listener->l_EnableKeepAlive())
+		{
+			std::cout << makeTimestamp() << " Failed to set keepalive on socket." << std::endl;
+		}
+
+		listeners.push_back(gatewayListener);
 	}
 }
 
@@ -447,10 +529,10 @@ void GatewayServer::run()
 
 	while(!isTerminated) {
 
-		for(auto kuListenerIter = listeners.begin();kuListenerIter != listeners.end();++kuListenerIter)
+		for(auto gatewayListenerIter = listeners.begin();gatewayListenerIter != listeners.end();++gatewayListenerIter)
 		{
-			(*kuListenerIter)->l_AcceptNewHosts();
-			(*kuListenerIter)->l_Pulse();
+			(*gatewayListenerIter)->getListener()->l_AcceptNewHosts();
+			(*gatewayListenerIter)->getListener()->l_Pulse();
 		}
 
 		if(!isConnectedToGameServer())
@@ -585,11 +667,42 @@ void GatewayServer::run()
 
 				std::stringstream buffer;
 
-				buffer << "Host " << descriptor->getRandomId() << " " << descriptor->getClientConnection()->getIp() << "\r\n";
+				buffer << "Host " << descriptor->getRandomId() << " " << descriptor->getClientConnection()->getIp()
+					   << " " << descriptor->getType()->getValue() << "\r\n";
 
 				gameClient->send(buffer.str());
 
 				descriptor->setStatus(GatewayDescriptorStatus::retrievingSession);
+			}
+//			else if(descriptor->getStatus() == GatewayDescriptorStatus::handshaking) {
+			else if(descriptor->getStatus() == GatewayDescriptorStatus::handshaking && getMotherConnectionToServer() != NULL && !this->mudIsDown()) {
+
+				try {
+					std::string dataFromWebSocketClient = descriptor->pullFromClient();
+
+					descriptor->appendToCurrentInputBuffer(dataFromWebSocketClient);
+
+					if(!WebSocketClientHeader::isComplete(descriptor->getCurrentInputBuffer()))
+					{
+						continue;
+					}
+
+					dataFromWebSocketClient = descriptor->getCurrentInputBuffer();
+
+					std::auto_ptr<WebSocketClientHeader> webSocketClientHeader(WebSocketClientHeader::allocateByInitialClientPacket(dataFromWebSocketClient));
+					webSocketClientHeader->read(dataFromWebSocketClient);
+					std::string response = webSocketClientHeader->generateResponse(descriptor->getGatewayListener()->getListener()->l_GetPort(), "mud-protocol");
+
+					descriptor->sendToClient(response);
+					descriptor->setStatus(GatewayDescriptorStatus::awaitingConnection);
+
+					std::cout << makeTimestamp() << " Client `" << descriptor->getSession() << "` is being put into awaitingConnection status." << std::endl;
+				}
+				catch(WebSocketException webSocketException)
+				{
+					descriptor->setStatus(GatewayDescriptorStatus::disconnected);
+					std::cout << "ERROR : WebSocketException caught while handshaking: " << webSocketException.what() << std::endl;
+				}
 			}
 		}
 

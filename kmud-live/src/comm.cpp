@@ -72,7 +72,13 @@
 #include "UserLogoutType.h"
 #include "GatewayServer.h"
 #include "Descriptor.h"
+#include "GatewayDescriptorType.h"
 
+#include "HttpUtil.h"
+#include "HttpException.h"
+#include "HttpServer.h"
+
+extern HttpServer httpServer;
 
 #ifdef HAVE_ARPA_TELNET_H
 #include <arpa/telnet.h>
@@ -85,6 +91,7 @@
 #endif
 
 bool rebootNotified15=false, rebootNotified10=false, rebootNotified5=false, rebootNotified1=false;
+void setupFilesystem();
 
 /* externs */
 extern struct legend_data legend[ 8 ];
@@ -114,12 +121,15 @@ extern char *handbook;
 extern char *policies;
 extern char *startup;
 
+extern std::map<std::string, std::string> basicConfiguration;
+
 struct PendingSession
 {
 public:
 	std::string sessionKey;
 	DateTime createdDatetime;
 	std::string host;
+	GatewayDescriptorType *gatewayDescriptorType;
 };
 
 extern std::list<PendingSession> pendingSessions;
@@ -259,11 +269,10 @@ int main( int argc, char **argv )
 #if (defined WIN32 && defined _DEBUG && defined _MEM_LEAKS )
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 #endif
-	int port;
+	int port = 0;
 	int pos = 1;
 	char *dir;
 
-	port = DFLT_PORT;
 	dir = ( char * ) DFLT_DIR;
 
 	/*
@@ -352,6 +361,17 @@ int main( int argc, char **argv )
 	
 	Log( "Using %s as data directory.", dir );
 
+	Log("Setting up filesystem...");
+	setupFilesystem();
+
+	Log("Loading Basic Configuration...");
+	basicConfiguration = MiscUtil::loadResourcesFromFile(BASIC_CONFIG_FILE);
+
+	if(!port && basicConfiguration.find("MUD Port") != basicConfiguration.end())
+		port = atoi(basicConfiguration["MUD Port"].c_str());
+	else if(!port)
+		port = DFLT_PORT;
+
 	if ( scheck )
 	{
 		bootWorld();
@@ -367,7 +387,7 @@ int main( int argc, char **argv )
 	return 0;
 }
 
-void onDescriptorOpen(void *data, kuDescriptor *descriptor)
+void onDescriptorOpen(void *data, kuListener *listener, kuDescriptor *descriptor)
 {
 	if(gatewayConnection == NULL) {
 
@@ -383,6 +403,7 @@ void onDescriptorOpen(void *data, kuDescriptor *descriptor)
 
 	strcpy(newd->host, descriptor->getHost().c_str());
 
+	newd->setGatewayDescriptorType(GatewayDescriptorType::unknown);
 	newd->connected = CON_GATEWAY;
 	newd->idle_tics = 0;
 	newd->wait = 0;
@@ -401,7 +422,7 @@ void onDescriptorOpen(void *data, kuDescriptor *descriptor)
 	newd->socketWriteInstant("By what name do you wish to be known? ");
 }
 
-void onDescriptorClose(void *data, kuDescriptor *descriptor)
+void onDescriptorClose(void *data, kuListener *listener, kuDescriptor *descriptor)
 {
 	if(descriptor == gatewayConnection) {
 
@@ -500,12 +521,14 @@ void processGatewayCommand(const std::string &input)
 		{
 			std::string clientId = vArgs.at(1);
 			std::string host = vArgs.at(2);
+			GatewayDescriptorType *gatewayDescriptorType = (GatewayDescriptorType*)GatewayDescriptorType::getEnumByValue(atoi(vArgs.at(3).c_str()));
 
 			PendingSession pendingSession;
 
 			pendingSession.createdDatetime = DateTime();
 			pendingSession.host = host;
 			pendingSession.sessionKey = StringUtil::getRandomString(40);
+			pendingSession.gatewayDescriptorType = gatewayDescriptorType;
 
 			pendingSessions.push_back(pendingSession);
 
@@ -526,11 +549,11 @@ void processGatewayCommand(const std::string &input)
 	}
 }
 
-void onBeforeSocketWrite(void *data, kuDescriptor *descriptor, const std::string &output)
+void onBeforeSocketWrite(void *data, kuListener *listener, kuDescriptor *descriptor, const std::string &output)
 {
 }
 
-void onAfterSocketWrite(void *data, kuDescriptor *descriptor, const std::string &output)
+void onAfterSocketWrite(void *data, kuListener *listener, kuDescriptor *descriptor, const std::string &output)
 {
 	Descriptor *d;
 
@@ -1426,12 +1449,37 @@ void invisiblePing()
 {
 	for(Descriptor *descriptor = descriptor_list;descriptor;descriptor = descriptor->next)
 	{
-		descriptor->SendRaw("\0");
+		descriptor->socketWriteInstant(std::string("\r\n") + std::string(descriptor->MakePrompt()));
+//		descriptor->SendRaw("\0");
+	}
+}
+
+void processHttpRequests()
+{
+	HttpRequest *httpRequest;
+	HttpQueue *httpQueue = httpServer.getQueue();
+	while( (httpRequest = httpQueue->getNextRequest()) != NULL )
+	{
+		std::cout << "REQUEST #" << httpRequest->getId() << " Found in Main Thread." << std::endl;
+
+		if(!httpServer.hasResource(httpRequest->getResource()))
+		{
+			std::cout << "NO RESOURCE FOUND: " << httpRequest->getResource() << std::endl;
+		}
+		else
+		{
+			HttpResource *httpResource = httpServer.getResource(httpRequest->getResource());
+			HttpResponse *httpResponse = httpResource->handleRequest(&httpServer, httpRequest);
+			httpQueue->putResponse(httpResponse);
+		}
 	}
 }
 
 void heartbeat( int pulse )
 {
+
+	processHttpRequests();
+
 	lagMonitor.startClock();
 	process_events();
 	lagMonitor.stopClock( LAG_MONITOR_PROCESS_EVENTS );
@@ -1509,7 +1557,7 @@ void heartbeat( int pulse )
 		AutoSave();
 		lagMonitor.stopClock( LAG_MONITOR_AUTO_SAVE );
 	}
-	if ( !( pulse % ( 60 * PASSES_PER_SEC ) ) ) {
+	if ( !( pulse % ( 60 * PASSES_PER_SEC * 5 ) ) ) {
 		lagMonitor.startClock();
 		checkIdlePasswords();
 		lagMonitor.stopClock( LAG_MONITOR_CHECK_IDLE_PASSWORDS );
@@ -1576,6 +1624,11 @@ void heartbeat( int pulse )
 //		Room::saveCorpseRooms();
 //		lagMonitor.stopClock( LAG_MONITOR_SAVE_CORPSE_ROOMS );
 	}
+
+
+	lagMonitor.startClock();
+	Descriptor::sendWebSocketCommands(pulse);
+	lagMonitor.stopClock( LAG_MONITOR_WEBSOCKET_COMMANDS );
 	
 	lagMonitor.startClock();
 	rebootCountdown();
@@ -1846,7 +1899,7 @@ const char *Descriptor::MakePrompt()
 			         COLOR_GREEN( character, CL_COMPLETE ), GET_NAME( this->character ), COLOR_NORMAL( character, CL_COMPLETE ) );
 		}
 
-		strcat( prompt, ">\n\r" );
+		strcat( prompt, ">\r\n" );
 	}
 
 	else if ( STATE( this ) == CON_PLAYING && IS_NPC( character ) )

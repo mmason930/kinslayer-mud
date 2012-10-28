@@ -42,7 +42,7 @@ const int NUM_ROOM_SECTORS = 11;
 
 const int NUM_MOB_FLAGS = 28;
 const int NUM_AFF_FLAGS = 36;
-const int NUM_ATTACK_TYPES = 21;
+const int NUM_ATTACK_TYPES = 35;
 
 const int NUM_ITEM_TYPES = 20;
 const int NUM_ITEM_FLAGS = 17;
@@ -234,6 +234,8 @@ class OLC
 		class Weave *weave;
 		class Auction *auction;
 		struct AuctionData *auction_data;
+		class UserEmailAddress *userEmailAddress;
+		std::list<class UserEmailAddress *> userEmailAddresses;
 
 
 #if defined(OASIS_MPROG)
@@ -282,13 +284,8 @@ struct olc_save_info
 /*
  * Exported globals.
  */
-#ifdef _OASIS_OLC_
-char *nrm, *grn, *cyn, *yel, *bld, *mag;
-struct olc_save_info *olc_save_list = NULL;
-#else
-extern char *nrm, *grn, *cyn, *yel, *bld, *mag;
+extern char *nrm, *grn, *cyn, *yel, *bld, *mag, *red, *blu;
 extern struct olc_save_info *olc_save_list;
-#endif
 
 /*
  * Descriptor access macros.
@@ -877,6 +874,13 @@ const int AUCTION_PLACE_BID					= 17;
 const int AUCTION_CONFIRM_BID				= 18;
 const int AUCTION_PLACE_NEW_BID_DIALOG		= 19;
 const int AUCTION_AUCTION_OVER_DIALOG		= 20;
+
+const int USER_EMAIL_EDITOR_MAIN						= 0;
+const int USER_EMAIL_EDITOR_ADD_EMAIL					= 1;
+const int USER_EMAIL_EDITOR_ADD_EMAIL_CONFIRM			= 2;
+const int USER_EMAIL_EDITOR_CONFIRM_EMAIL_SELECT		= 3;
+const int USER_EMAIL_EDITOR_CONFIRM_EMAIL_CODE			= 4;
+const int USER_EMAIL_EDITOR_RESEND_CONFIRMATION_SELECT	= 5;
 
 #ifdef KINSLAYER_JAVASCRIPT
 /* Javascript Editor States */

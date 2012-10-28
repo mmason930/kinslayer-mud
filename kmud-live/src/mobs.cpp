@@ -20,6 +20,7 @@
 #include "MiscUtil.h"
 #include "ClanUtil.h"
 #include "Descriptor.h"
+#include "ClanUtil.h"
 
 #ifdef KINSLAYER_JAVASCRIPT
 #include "js.h"
@@ -193,7 +194,9 @@ Character *MobManager::BootPrototype( sql::Row &MyRow )
 	//check to see if this mob is in a clan
 	if( ClanUtil::getClan(atoi(MyRow["clan"].c_str())) != NULL )
 	{
-		NewMob->AddToClan(new PlayerClan(atoi(MyRow["clan"].c_str()),0,0,0,(int)atoi(MyRow["rank"].c_str()),false));
+		UserClan *userClan = UserClan::setupNewInstance(NewMob->getUserId(), MyRow.getInt("clan"));
+		userClan->setRank(MyRow.getInt("rank"));
+		NewMob->addToClan(userClan);
 	}
 	NewMob->player.chclass			= atoi(MyRow["class"].c_str());
 
@@ -384,6 +387,7 @@ std::list<std::string> MobManager::GrabSaveQuery( const unsigned int mob_rnum )
 	std::stringstream AssistsBuffer;
 
 	Character *m = MyMobProto[mob_rnum];
+	UserClan *userClan = m->userClans.empty() ? NULL : m->userClans.front();
 
 	for(std::list<int>::iterator aIter = m->MobData->assists.begin();aIter != m->MobData->assists.end();++aIter)
 	{
@@ -430,8 +434,8 @@ std::list<std::string> MobManager::GrabSaveQuery( const unsigned int mob_rnum )
 			QueryBuffer << SQLVal(GET_OB(m));
 			QueryBuffer << SQLVal(GET_DB(m));
 			QueryBuffer << SQLVal(GET_PB(m));
-			QueryBuffer << SQLVal(m->clans ? m->clans->GetClanVnum():-1);
-			QueryBuffer << SQLVal(m->clans?m->clans->GetRank():-1);
+			QueryBuffer << SQLVal(userClan ? userClan->getClanId() : -1);
+			QueryBuffer << SQLVal(userClan ? ((int)userClan->getRank()) : -1);
 			QueryBuffer << SQLVal((int)GET_CLASS(m));
 			QueryBuffer << SQLVal(m->MobData->primary_kit?m->MobData->primary_kit->vnum:-1);
 			QueryBuffer << SQLVal(m->MobData->Food?m->MobData->Food->vnum:-1);
@@ -486,8 +490,8 @@ std::list<std::string> MobManager::GrabSaveQuery( const unsigned int mob_rnum )
 		QueryBuffer <<	"ob='"				<< GET_OB(m)													<< "',";
 		QueryBuffer <<	"db='"				<< GET_DB(m)													<< "',";
 		QueryBuffer <<	"pb='"				<< GET_PB(m)													<< "',";
-		QueryBuffer <<	"clan='"			<< (m->clans?m->clans->GetClanVnum():-1)						<< "',";
-		QueryBuffer <<	"rank='"			<< (m->clans?m->clans->GetRank():-1)							<< "',";
+		QueryBuffer <<	"clan='"			<< (userClan ? userClan->getClanId() : -1)						<< "',";
+		QueryBuffer <<	"rank='"			<< (userClan ? ((int)userClan->getRank()) : -1)					<< "',";
 		QueryBuffer <<	"class='"			<< (int)m->player.chclass										<< "',";
 		QueryBuffer <<	"primary_kit='"		<< (m->MobData->primary_kit?m->MobData->primary_kit->vnum:-1)	<< "',";
 		QueryBuffer <<	"food_vnum='"		<< (m->MobData->Food?m->MobData->Food->vnum:-1)					<< "',";
@@ -514,8 +518,7 @@ std::list<std::string> MobManager::GrabSaveQuery( const unsigned int mob_rnum )
 
 		//Now produce a query to clear the script from the database.
 #ifdef KINSLAYER_JAVASCRIPT
-		RemoveBuffer2 << "DELETE FROM js_attachments WHERE type='M' AND target_vnum='"
-			<<  VirtualMobile((u_int)m->nr) << "';" << std::endl;
+		RemoveBuffer2 << "DELETE FROM js_attachments WHERE type='M' AND target_vnum='" <<  VirtualMobile((u_int)m->nr) << "';" << std::endl;
 #endif
 	}
 	MyQueries.push_back(QueryBuffer.str());
@@ -782,12 +785,7 @@ void MobManager::UpdateLiveMobile( Character *Live, Character *Prototype )
 	Live->player.LeaveMessage		= Prototype->player.LeaveMessage;
 
 	Live->DeleteClans();
-	for(PlayerClan *pc = Prototype->clans;pc;pc = pc->next) {
-		PlayerClan *newPC = new PlayerClan(Prototype->clans);
-		newPC->next = Live->clans;
-		Live->clans = newPC;
-	}
-	//			Live->clans 					= Prototype->clans;
+	Live->userClans = ClanUtil::cloneUserClansFromMobPrototype(Prototype);
 }
 
 Character *MobManager::AllocateRawMobile() {

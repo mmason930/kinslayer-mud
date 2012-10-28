@@ -30,29 +30,29 @@ private:
 	void *dataForBeforeSocketWriteCallback;
 	void *dataForAfterSocketWriteCallback;
 	void *dataForSocketReadCallback;
-	void (*openDescriptorCallback)(void*, kuDescriptor*);
-	void (*closeDescriptorCallback)(void*, kuDescriptor*);
-	void (*beforeSocketWriteCallback)(void *, kuDescriptor*, const std::string &output);
-	void (*afterSocketWriteCallback)(void *, kuDescriptor*, const std::string &output);
-	void (*socketReadCallback)(void *, kuDescriptor*, const std::string &input);
+	void (*openDescriptorCallback)(void*, kuListener *, kuDescriptor*);
+	void (*closeDescriptorCallback)(void*, kuListener *, kuDescriptor*);
+	void (*beforeSocketWriteCallback)(void *, kuListener *, kuDescriptor*, const std::string &output);
+	void (*afterSocketWriteCallback)(void *, kuListener *, kuDescriptor*, const std::string &output);
+	void (*socketReadCallback)(void *, kuListener *, kuDescriptor*, const std::string &input);
 
 public:
 	kuListener(const int port, e_SocketType t);
 	~kuListener(void);
 
-	void setCloseDescriptorCallback( void (*closeDescriptorCallback)(void*, kuDescriptor*) );
+	void setCloseDescriptorCallback( void (*closeDescriptorCallback)(void*, kuListener*, kuDescriptor*) );
 	void setDataForCloseDescriptorCallback( void *data );
 
-	void setOpenDescriptorCallback( void (*openDescriptorCallback)(void*, kuDescriptor*) );
+	void setOpenDescriptorCallback( void (*openDescriptorCallback)(void*, kuListener*, kuDescriptor*) );
 	void setDataForOpenDescriptorCallback( void *data );
 	
-	void setBeforeSocketWriteCallback( void (*socketWriteCallback)(void*, kuDescriptor*, const std::string &output) );
+	void setBeforeSocketWriteCallback( void (*socketWriteCallback)(void*, kuListener*, kuDescriptor*, const std::string &output) );
 	void setDataForBeforeSocketWriteCallback( void *data );
 
-	void setAfterSocketWriteCallback( void (*socketWriteCallback)(void*, kuDescriptor*, const std::string &output) );
+	void setAfterSocketWriteCallback( void (*socketWriteCallback)(void*, kuListener*, kuDescriptor*, const std::string &output) );
 	void setDataForAfterSocketWriteCallback( void *data );
 	
-	void setSocketReadCallback( void (*socketReadCallback)(void*, kuDescriptor*, const std::string &output) );
+	void setSocketReadCallback( void (*socketReadCallback)(void*, kuListener*, kuDescriptor*, const std::string &output) );
 	void setDataForSocketReadCallback( void *data );
 
 	void handleCloseDescriptor(kuDescriptor *descriptor);

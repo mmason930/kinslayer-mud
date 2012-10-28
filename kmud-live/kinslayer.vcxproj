@@ -43,10 +43,8 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost\boost_1_44;C:\dev\js\src\dist;Z:\dev\kmud-live\reqs\iconv\include;Z:\dev\kmud-live\reqs\sqlDatabase\include;Z:\dev\kmud-live\reqs\mysql\include;Z:\dev\kmud-live\reqs\flusspferd\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost\boost_1_44\lib;C:\dev\js\src\build-debug\dist\lib;Z:\dev\kmud-live\reqs\flusspferd\lib\Debug;Z:\dev\kmud-live\reqs\mysql\lib\debug;Z:\dev\kmud-live\reqs\sqlDatabase\lib\Debug;Z:\dev\kmud-live\reqs\iconv\lib\Debug;$(LibraryPath)</LibraryPath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\dev\boost\boost_1_44;C:\dev\js\src\dist;Z:\dev\kmud-live\reqs\iconv\include;Z:\dev\kmud-live\reqs\sqlDatabase;Z:\dev\kmud-live\reqs\mysql\include;Z:\dev\kmud-live\reqs\flusspferd\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Z:\dev\kmud-live\reqs\sqlDatabase\lib\Release;Z:\dev\kmud-live\reqs\mysql\lib\release;Z:\dev\kmud-live\reqs\flusspferd\lib\Release;Z:\dev\kmud-live\reqs\iconv\lib\Release;C:\dev\js\src\build-release\dist\lib;C:\dev\boost\boost_1_44\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost\boost_1_44;C:\dev\kmud-live\reqs\mysql\include;C:\dev\js\src\dist;C:\dev\kmud-live\reqs\sqlDatabase;C:\dev\kmud-live\reqs\flusspferd\include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost\boost_1_44\lib;C:\dev\kmud-live\reqs\mysql\lib\debug;C:\dev\js\src\dist\lib;C:\dev\kmud-live\reqs\sqlDatabase\Debug;C:\dev\kmud-live\reqs\flusspferd\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -59,11 +57,11 @@
       </PrecompiledHeader>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <CompileAsManaged>false</CompileAsManaged>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalOptions>flusspferd-0.8.lib wsock32.lib sqlDatabase.lib dbug.lib libmysql.lib mysqlclient.lib mysys.lib regex.lib strings.lib vio.lib yassl.lib zlib.lib iconv.lib mozjs.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>flusspferd-0.8.lib wsock32.lib sqldatabase.lib dbug.lib libmysql.lib mysqlclient.lib mysys.lib regex.lib strings.lib vio.lib yassl.lib zlib.lib iconv.lib mozjs.lib %(AdditionalOptions)</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -73,17 +71,16 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;XP_WIN;BOOST_PARAMETER_MAX_ARITY=10;KINSLAYER_JAVASCRIPT;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <WarningLevel>Level1</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalOptions>flusspferd-0.8.lib wsock32.lib sqldatabase.lib libmysql.lib mysqlclient.lib mysys.lib regex.lib strings.lib zlib.lib iconv.lib SOIL.lib mysys-max.lib mozjs.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>wsock32.lib sqldatabase.lib libmysql.lib mysqlclient.lib mysys.lib regex.lib strings.lib zlib.lib %(AdditionalOptions)</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -121,13 +118,23 @@
     <ClCompile Include="src\dg_event.cpp" />
     <ClCompile Include="src\fight.cpp" />
     <ClCompile Include="src\ForumUtil.cpp" />
+    <ClCompile Include="src\GatewayDescriptorType.cpp" />
+    <ClCompile Include="src\GatewayListener.cpp" />
     <ClCompile Include="src\graph.cpp" />
     <ClCompile Include="src\handler.cpp" />
+    <ClCompile Include="src\HttpDescriptor.cpp" />
+    <ClCompile Include="src\HttpProtocol.cpp" />
+    <ClCompile Include="src\HttpQueue.cpp" />
+    <ClCompile Include="src\HttpRequest.cpp" />
+    <ClCompile Include="src\HttpResponse.cpp" />
+    <ClCompile Include="src\HttpServer.cpp" />
+    <ClCompile Include="src\HttpUtil.cpp" />
     <ClCompile Include="src\interpreter.cpp" />
     <ClCompile Include="src\jedit.cpp" />
     <ClCompile Include="src\kedit.cpp" />
     <ClCompile Include="src\limits.cpp" />
     <ClCompile Include="src\magic.cpp" />
+    <ClCompile Include="src\MailUtil.cpp" />
     <ClCompile Include="src\md5.cpp" />
     <ClCompile Include="src\medit.cpp" />
     <ClCompile Include="src\mobact.cpp" />
@@ -137,9 +144,12 @@
     <ClCompile Include="src\objsave.cpp" />
     <ClCompile Include="src\oedit.cpp" />
     <ClCompile Include="src\olc.cpp" />
+    <ClCompile Include="src\OlcEditType.cpp" />
+    <ClCompile Include="src\OLCUtil.cpp" />
     <ClCompile Include="src\poker.cpp" />
     <ClCompile Include="src\redit.cpp" />
     <ClCompile Include="src\sedit.cpp" />
+    <ClCompile Include="src\sha1.cpp" />
     <ClCompile Include="src\shop.cpp" />
     <ClCompile Include="src\spec_assign.cpp" />
     <ClCompile Include="src\spec_procs.cpp" />
@@ -148,11 +158,18 @@
     <ClCompile Include="src\statedit.cpp" />
     <ClCompile Include="src\stats.cpp" />
     <ClCompile Include="src\SystemUtil.cpp" />
+    <ClCompile Include="src\TestResource.cpp" />
     <ClCompile Include="src\threaded_jobs.cpp" />
+    <ClCompile Include="src\UserClan.cpp" />
+    <ClCompile Include="src\UserEmailEditor.cpp" />
     <ClCompile Include="src\UserLogoutType.cpp" />
     <ClCompile Include="src\UserType.cpp" />
     <ClCompile Include="src\weather.cpp" />
     <ClCompile Include="src\weave.cpp" />
+    <ClCompile Include="src\WebSocketClientHeader.cpp" />
+    <ClCompile Include="src\WebSocketClientHeaderHixie76.cpp" />
+    <ClCompile Include="src\WebSocketClientHeaderIETF_HYBI17.cpp" />
+    <ClCompile Include="src\WebSocketDataFrame.cpp" />
     <ClCompile Include="src\wedit.cpp" />
     <ClCompile Include="src\zedit.cpp" />
     <ClCompile Include="src\zones.cpp" />
@@ -197,16 +214,37 @@
     <ClInclude Include="src\Descriptor.h" />
     <ClInclude Include="src\dg_event.h" />
     <ClInclude Include="src\Enum.h" />
+    <ClInclude Include="src\Exception.h" />
     <ClInclude Include="src\fight.h" />
     <ClInclude Include="src\ForumUtil.h" />
+    <ClInclude Include="src\GatewayDescriptorType.h" />
+    <ClInclude Include="src\GatewayListener.h" />
     <ClInclude Include="src\handler.h" />
+    <ClInclude Include="src\HttpDescriptor.h" />
+    <ClInclude Include="src\HttpException.h" />
+    <ClInclude Include="src\HttpProtocol.h" />
+    <ClInclude Include="src\HttpQueue.h" />
+    <ClInclude Include="src\HttpRequest.h" />
+    <ClInclude Include="src\HttpResource.h" />
+    <ClInclude Include="src\HttpResponse.h" />
+    <ClInclude Include="src\HttpServer.h" />
+    <ClInclude Include="src\HttpUtil.h" />
     <ClInclude Include="src\interpreter.h" />
+    <ClInclude Include="src\MailUtil.h" />
     <ClInclude Include="src\md5.h" />
     <ClInclude Include="src\mobs.h" />
     <ClInclude Include="src\MudStatus.h" />
     <ClInclude Include="src\olc.h" />
+    <ClInclude Include="src\OlcEdit.h" />
+    <ClInclude Include="src\OlcEditMobile.h" />
+    <ClInclude Include="src\OlcEditObject.h" />
+    <ClInclude Include="src\OlcEditRoom.h" />
+    <ClInclude Include="src\OlcEditType.h" />
+    <ClInclude Include="src\OlcEditZone.h" />
+    <ClInclude Include="src\OLCUtil.h" />
     <ClInclude Include="src\poker.h" />
     <ClInclude Include="src\screen.h" />
+    <ClInclude Include="src\sha1.h" />
     <ClInclude Include="src\shop.h" />
     <ClInclude Include="src\spells.h" />
     <ClInclude Include="src\stats.h" />
@@ -214,12 +252,21 @@
     <ClInclude Include="src\sysdep.h" />
     <ClInclude Include="src\SystemUtil.h" />
     <ClInclude Include="src\telnet.h" />
+    <ClInclude Include="src\TestResource.h" />
     <ClInclude Include="src\threaded_jobs.h" />
+    <ClInclude Include="src\UserClan.h" />
     <ClInclude Include="src\UserDisabledCommand.h" />
+    <ClInclude Include="src\UserEmailAddress.h" />
+    <ClInclude Include="src\UserEmailAddressConfirmation.h" />
     <ClInclude Include="src\UserLogoutType.h" />
     <ClInclude Include="src\UserType.h" />
     <ClInclude Include="src\weather.h" />
     <ClInclude Include="src\weaves.h" />
+    <ClInclude Include="src\WebSocketClientHeader.h" />
+    <ClInclude Include="src\WebSocketClientHeaderHixie76.h" />
+    <ClInclude Include="src\WebSocketClientHeaderIETF_HYBI17.h" />
+    <ClInclude Include="src\WebSocketDataFrame.h" />
+    <ClInclude Include="src\WebSocketException.h" />
     <ClInclude Include="src\zones.h" />
     <ClInclude Include="src\MiscUtil.h" />
     <ClInclude Include="src\StringUtil.h" />

@@ -35,11 +35,11 @@ BanManager &BanManager::GetManager()
 BanManager::BanManager()
 {
 	BanTypes.push_back("no");
-	BanTypes.push_back("switch");
 	BanTypes.push_back("new");
 	BanTypes.push_back("select");
 	BanTypes.push_back("all");
 	BanTypes.push_back("name");
+	BanTypes.push_back("switch");
 }
 std::string BanManager::GetStringByType(const BanType Type)
 {

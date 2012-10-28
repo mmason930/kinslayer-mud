@@ -152,20 +152,20 @@ void JSCharacter::pardonByClan( int iClan )
 int JSCharacter::getRank( int iClan )
 {
 	if( !real || real->IsPurged() ) return 0;
-	PlayerClan *pClan = real->GetClan( iClan );
+	UserClan *userClan = real->getUserClan( iClan );
 
-	if( !pClan ) return false;
+	if( !userClan ) return false;
 
-	return (int)pClan->GetRank();
+	return (int)userClan->getRank();
 }
 bool JSCharacter::getIsCouncil( int iClan )
 {
 	if( !real || real->IsPurged() ) return false;
-	PlayerClan *pClan = real->GetClan( iClan );
+	UserClan *userClan = real->getUserClan( iClan );
 
-	if( !pClan ) return false;
+	if( !userClan ) return false;
 
-	return pClan->IsCouncil();
+	return userClan->getIsCouncil();
 }
 
 void JSCharacter::affect( int effect, int duration, int skill, int modifier )
@@ -322,7 +322,7 @@ void JSCharacter::setHps(int x)
 			MudLog(BRF, 0, TRUE, "%s killed by a JS trap at %s", GET_NAME(real),
 				(real->in_room ? real->in_room->name : "<Unknown>"));
 			real->Die();
-		}
+		}
 	}
 }
 
@@ -388,7 +388,7 @@ flusspferd::value JSCharacter::load_obj( const int vnum )
 }
 bool JSCharacter::in_clan( const int clan )
 {
-	return (real && real->IsInClan( clan ) ? true : false);
+	return (real && real->isInClan( clan ) ? true : false);
 }
 
 int JSCharacter::getQuest(flusspferd::string qName)
@@ -458,8 +458,8 @@ int JSCharacter::getQP(const int cvnum)
 	if( !real )
 		return 0;
 	Clan *c = ClanUtil::getClan(cvnum);
-	if(c && real->GetClan(cvnum))
-		return real->GetClan(cvnum)->GetQuestPoints();
+	if(c && real->getUserClan(cvnum))
+		return real->getUserClan(cvnum)->getQuestPoints();
 	return 0;
 }
 
@@ -518,7 +518,7 @@ bool JSCharacter::wantedBy( int cNum )
 {
 	if( !real || real->IsPurged() )
 		return false;
-	return real->WantedByClan( cNum );
+	return real->wantedByClan( cNum );
 }
 bool JSCharacter::canSee( flusspferd::value t )
 {

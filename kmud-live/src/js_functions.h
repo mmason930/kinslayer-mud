@@ -84,8 +84,14 @@ flusspferd::string JS_getClanRankName( int iClanNum, int iRankNum );
 int JS_numberOfRooms();
 bool JS_isClanSecret( int iClanVnum );
 flusspferd::object JS_getGlobalObject();
+flusspferd::string JS_getUserNameByUserId(int userId);
+flusspferd::value JS_getUserIdByUserName(flusspferd::string userName);
 
 int JS_getRankRequirement(int rankTo);
+
+flusspferd::string JS_sqlEncodeQuoteDate(flusspferd::object dateTime);
+
+void JS_sendToZone(int zoneNumber, flusspferd::string message);
 
 
 #endif

@@ -76,69 +76,72 @@ bool IsTowerClan(int clan)
 }
 
 //Delete all of the player's clans.
-void Character::RemoveFromClan()
+void Character::removeFromClan()
 {
-	while(this->clans)
+	while(!userClans.empty())
 	{
-		PlayerClan *clan = this->clans->next;
-		delete this->clans;
-		this->clans = clan;
+		delete userClans.front();
+		userClans.pop_front();
 	}
 }
 
 //Delete the clan by certain vnum.
-void Character::RemoveFromClan(const int vnum)
+void Character::removeFromClan(const int clanId)
 {
 	Object *obj = 0;
 
-	for(PlayerClan *clan = this->clans, *next;clan;clan = next)
+	for(auto userClanIter = userClans.begin();userClanIter != userClans.end();++userClanIter)
 	{
-		next = clan->next;
-		if(clan->GetClanVnum() == vnum)
+		UserClan *userClan = (*userClanIter);
+		if(userClan->getClanId() == clanId)
 		{
-			for ( int i = 0; i < NUM_WEARS; i++)
+			for(int i = 0; i < NUM_WEARS; ++i)
 			{
 				obj = GET_EQ(this, i);
-				if ( obj && GET_OBJ_CLAN( obj ) == vnum)
+				if ( obj && GET_OBJ_CLAN( obj ) == clanId)
 				{
 					affect_modify_ar(this, APPLY_MOVE, GET_OBJ_CL_MVS(obj), (int *) obj->obj_flags.bitvector, FALSE);
 					affect_modify_ar(this, APPLY_HIT, GET_OBJ_CL_HPS(obj), (int *) obj->obj_flags.bitvector, FALSE);
 				}
 			}
-			this->RemoveFromClan(clan);
+			
+			delete userClan;
+			userClans.erase(userClanIter);
+			break;
 		}
 	}
 }
-//Delete clan given certain PlayerClan reference.
-void Character::RemoveFromClan(class PlayerClan *clan)
-{
-	PlayerClan *temp;
-	REMOVE_FROM_LIST(clan, this->clans, next);
-	delete clan;
-}
 //Add to clan with certain vnum.
-void Character::AddToClan(const int vnum)
+void Character::addToClan(const int clanId)
 {
-	PlayerClan *clan = new PlayerClan(vnum);
-	this->AddToClan(clan);
+	UserClan *userClan = new UserClan();
+	
+	userClan->setClanId(clanId);
+	userClan->setClannedDatetime(DateTime());
+	userClan->setLastRankedDatetime(DateTime());
+	userClan->setRank(1);
+	userClan->setQuestPoints(0);
+	userClan->setIsCouncil(false);
+	userClan->setUserId(this->getUserId());
+
+	this->addToClan(userClan);
 }
-//Add to clan given certain PlayerClan reference.
-void Character::AddToClan(class PlayerClan *clan)
+
+void Character::addToClan(UserClan *userClan)
 {
 	Object *obj = 0;
 
-	for ( int i = 0; i < NUM_WEARS; i++)
+	for(int i = 0; i < NUM_WEARS; ++i)
 	{
 		obj = GET_EQ(this, i);
-		if ( obj && GET_OBJ_CLAN( obj ) == clan->GetClanVnum())
+		if ( obj && GET_OBJ_CLAN( obj ) == userClan->getClanId())
 		{
 			affect_modify_ar(this, APPLY_MOVE, GET_OBJ_CL_MVS(obj), (int *) obj->obj_flags.bitvector, TRUE);
 			affect_modify_ar(this, APPLY_HIT, GET_OBJ_CL_HPS(obj), (int *) obj->obj_flags.bitvector, TRUE);
 		}
 	}
 
-	clan->next = this->clans;
-	this->clans = clan;
+	userClans.push_back(userClan);
 }
 
 //Return true if player has a warrant for any tower clan
@@ -154,44 +157,32 @@ bool Character::HasTowerWarrant()
 }
 
 /* This checks to see if this is wanted by ch's clan */
-bool Character::WantedByPlayer(Character *ch)
+bool Character::wantedByPlayer(Character *ch)
 {
-	PlayerClan *cl;
-	Clan *c;
+	UserClan *userClan;
+	Clan *clan;
 
-	for(cl = ch->clans;cl;cl = cl->next)
+	for(auto userClanIter = ch->userClans.begin();userClanIter != ch->userClans.end();++userClanIter)
 	{
-		if( (c = ClanUtil::getClan(cl->GetClanVnum())) && c->GetWarrant() &&
-		IS_SET_AR(GET_WARRANTS(this), c->GetWarrant()->vnum))
+		userClan = (*userClanIter);
+		if( (clan = ClanUtil::getClan(userClan->getClanId())) && clan->GetWarrant() &&
+		IS_SET_AR(GET_WARRANTS(this), clan->GetWarrant()->vnum))
 			return true;
 	}
 
 	return false;
 }
 
-bool Character::WantedByClan(int vnum)
+bool Character::wantedByClan(short clanId)
 {
-	Clan *c;
+	Clan *clan;
 
-	if(!(c = ClanUtil::getClan(vnum)) || !(c->GetWarrant()))
+	if(!(clan = ClanUtil::getClan(clanId)) || !(clan->GetWarrant()))
 		return false;
 
-	if(IS_SET_AR(GET_WARRANTS(this), c->GetWarrant()->vnum))
+	if(IS_SET_AR(GET_WARRANTS(this), clan->GetWarrant()->vnum))
 		return true;
 	return false;
-}
-
-const std::string PlayerClan::GetClanName()
-{
-	Clan *c;
-
-	for(c = ClanList;c;c = c->Next)
-	{
-		if(c->vnum == clan)
-			return c->Name;
-	}
-
-	return "Invalid Clan";
 }
 
 Clan::Clan()
@@ -337,141 +328,6 @@ Quest *MySQLGrabQuest(const std::string &playername, const std::string &questnam
 	return quest;
 }
 
-void MySQLSavePlayerClan(const std::string &playername, PlayerClan *clan, bool update)
-{
-	std::stringstream Query;
-	sql::Query MyQuery;
-
-	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
-
-	if(index == NULL)
-		return;
-
-	if(update)
-		Query	<< "UPDATE userClan SET rank_time = " << clan->GetRankTime() << ", rank = " << clan->GetRank()
-				<< ", qps = " << clan->GetQuestPoints() << ", council = " << (clan->IsCouncil() ? 1 : 0)
-				<< ", clan_time = " << clan->GetClanTime()
-				<< " WHERE user_id = '" << index->id << "' AND clan = " << clan->GetClanVnum();
-	else
-		Query	<< "INSERT INTO userClan (user_id, clan, rank, qps, rank_time, clan_time, council) VALUES ("
-				<< index->id << ", " << clan->GetClanVnum() << ", " << clan->GetRank()
-				<< ", " << clan->GetQuestPoints()
-				<< ", " << clan->GetRankTime() << ", " << clan->GetClanTime()
-				<< ", " << (clan->IsCouncil() ? 1 : 0)
-				<< ")";
-
-	try {
-		MyQuery = gameDatabase->sendQuery(Query.str());
-	}
-	catch( sql::QueryException e ) {
-		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
-	}
-}
-
-void MySQLDeletePlayerClan(const std::string &playername, const int clan)
-{
-	std::stringstream Query;
-	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
-
-	if(index == NULL)
-		return;
-
-	Query << "DELETE FROM userClan WHERE user_id = " << index->id << " AND clan = " << clan;
-
-	try {
-		gameDatabase->sendRawQuery(Query.str());
-	}
-	catch( sql::QueryException e ) {
-		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
-	}
-}
-
-void MySQLDeletePlayerClan(const std::string &playername)
-{
-	std::stringstream Query;
-	sql::Query MyQuery;
-
-	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
-
-	if(index == NULL)
-		return;
-
-	Query << "DELETE FROM userClan WHERE user_id = " << index->id;
-
-	try { MyQuery = gameDatabase->sendQuery(Query.str()); }
-	catch( sql::QueryException e )
-	{
-		e.report();
-		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
-		return;
-	}
-}
-
-bool MySQLIsPlayerInClan(const std::string &playername, const int clan_vnum)
-{
-	std::string Query;
-	sql::Query MyQuery;
-	sql::Row MyRow;
-
-	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
-
-	if(index == NULL)
-		return false;
-
-	Query = "SELECT clan FROM userClan WHERE user_id = " + MiscUtil::Convert<std::string>(index->id);
-
-	try {MyQuery = gameDatabase->sendQuery(Query);}
-	catch( sql::QueryException e )
-	{
-		e.report();
-		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
-		return false;
-	}
-	for(unsigned int i = 0;i < MyQuery->numRows();++i)
-	{
-		MyRow = MyQuery->getRow();
-		if(atoi(MyRow[0].c_str()) == clan_vnum)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
-PlayerClan *MySQLGrabPlayerClans(const std::string &playername)
-{
-	PlayerClan *ClanList = 0, *Clan = 0;
-	std::string Query;
-	sql::Query MyQuery;
-	sql::Row MyRow;
-
-	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
-
-	if( !index )
-		return NULL;
-
-	Query = "SELECT * FROM userClan WHERE user_id=" + MiscUtil::Convert<std::string>(index->id);
-
-	try {
-		MyQuery = gameDatabase->sendQuery(Query);
-	}
-	catch( sql::QueryException e ) {
-		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
-		return NULL;
-	}
-	for(unsigned int i = 0;i < MyQuery->numRows();++i)
-	{
-		MyRow = MyQuery->getRow();
-
-		Clan = new PlayerClan(atoi(MyRow[3].c_str()), atol(MyRow[1].c_str()), atol(MyRow[2].c_str()),
-			atoi(MyRow[4].c_str()), atoi(MyRow[5].c_str()), atoi(MyRow[6].c_str()));
-
-		Clan->next = ClanList;
-		ClanList = Clan;
-	}
-	return ClanList;
-}
-
 void Clan::RemoveRank(int Rank)
 {
 	std::vector<std::string>::iterator iter;
@@ -488,16 +344,16 @@ void Clan::GetPlayerList(std::vector< std::list<std::string> > &Players, std::li
 
 	std::stringstream Query;
 	
-	Query << "SELECT "
-			 " users.username,"
-		     " userClan.rank,"
-			 " userClan.council,"
-		     " userClan.user_id "
-			 "FROM userClan "
-			 "LEFT JOIN users ON userClan.user_id=users.user_id "
-			 "WHERE userClan.clan=" << clanstr << " "
-	    <<   "AND users.username IS NOT NULL "
-		<<	 "ORDER BY userClan.rank";
+	Query << " SELECT "
+			 "   users.username,"
+		     "   userClan.rank,"
+			 "   userClan.is_council,"
+		     "   userClan.user_id "
+			 " FROM userClan "
+			 " LEFT JOIN users ON userClan.user_id=users.user_id "
+			 " WHERE userClan.clan_id=" << clanstr << " "
+	    <<   " AND users.username IS NOT NULL "
+		<<	 " ORDER BY userClan.rank";
 
 	try {
 		MyQuery = gameDatabase->sendQuery(Query.str());
@@ -630,7 +486,7 @@ void BootClans()
 bool Character::TOWER_MEMBER()
 {
 
-	if ( this->GetClan( 17 ) )
+	if ( this->getUserClan( 17 ) )
 		return true;
 
 	return false;
@@ -639,12 +495,11 @@ bool Character::TOWER_MEMBER()
 /* Returns the total questpoints from every clan that a person has earned */
 int Character::TotalQP()
 {
-	int total;
-	PlayerClan *cl;
+	int total = 0;
 
-	for ( total = 0, cl = this->clans;cl;cl = cl->next )
+	for(auto userClanIter = userClans.begin();userClanIter != userClans.end();++userClanIter)
 	{
-		total += cl->GetQuestPoints();
+		total += (*userClanIter)->getQuestPoints();
 	}
 
 	return total;
@@ -655,9 +510,9 @@ int GetSharedClan( Character *p1, Character *p2 )
 {
 	Clan * clan;
 
-	for ( clan = ClanList;clan;clan = clan->Next )
+	for(clan = ClanList;clan;clan = clan->Next)
 	{
-		if ( p1->GetClan( clan->vnum ) && p2->GetClan( clan->vnum ) )
+		if ( p1->getUserClan( clan->vnum ) && p2->getUserClan( clan->vnum ) )
 			return clan->vnum;
 	}
 	return 0;
@@ -692,119 +547,12 @@ Quest::Quest(Character *ch, const std::string &QuestName, const short value)
 		ch->quests.push_back(this);
 }
 
-PlayerClan::PlayerClan()
+bool Character::isInClan(const int clanId)
 {
-	this->SetClanVnum(0);
-	this->SetRank(1);
-	this->SetQuestPoints(0);
-	this->SetCouncil(false);
-	this->next = 0;
-	this->altered = false;
-}
-PlayerClan::PlayerClan(const int vnum)
-{
-	this->SetClanVnum(vnum);
-	this->SetRank(1);
-	this->SetQuestPoints(0);
-	this->SetCouncil(false);
-	this->next = 0;
-	this->altered = false;
+	return getUserClan(clanId) != NULL;
 }
 
-PlayerClan::PlayerClan( PlayerClan *Source )
+UserClan *Character::getUserClan(short clanId)
 {
-	if( Source == (NULL) ) return;
-	this->SetClanVnum( Source->GetClanVnum() );
-	this->SetRank( (byte)Source->GetRank() );
-	this->SetQuestPoints( Source->GetQuestPoints() );
-	this->SetCouncil( Source->IsCouncil() );
-	this->next = (NULL);
-	this->altered = (false);
-}
-PlayerClan::PlayerClan(const sh_int vnum, const time_t rt, const time_t ct, const sh_int qps,
-	const byte r, const bool c)
-{
-	this->clan = vnum;
-	this->rank_time = rt;
-	this->clan_time = ct;
-	this->quest_points = qps;
-	this->rank = r;
-	this->council = c;
-	this->altered = false;
-}
-time_t PlayerClan::GetRankTime()
-{
-	return this->rank_time;
-}
-time_t PlayerClan::GetClanTime()
-{
-	return this->clan_time;
-}
-sh_int PlayerClan::GetClanVnum()
-{
-	return this->clan;
-}
-sh_int PlayerClan::GetQuestPoints()
-{
-	return this->quest_points;
-}
-sh_int PlayerClan::GetRank()
-{
-	return this->rank;
-}
-bool PlayerClan::IsCouncil()
-{
-	return this->council;
-}
-bool PlayerClan::IsAltered()
-{
-	return this->altered;
-}
-
-/*****
-void PlayerClan::SetRankTime(const time_t rt)
-{
-	this->rank_time = rt;
-	this->altered = true;
-}
-void PlayerClan::SetClanTime(const time_t ct)
-{
-	this->clan_time = ct;
-	this->altered = true;
-}
-*****/
-void PlayerClan::SetClanVnum(const int vnum)
-{
-	this->clan = vnum;
-	this->clan_time = time(0); //Clan is changing, so we need to set clan time.
-	this->altered = true;
-}
-void PlayerClan::SetQuestPoints(const int qps)
-{
-	this->quest_points = qps;
-	this->altered = true;
-}
-void PlayerClan::SetRank(const byte r)
-{
-	this->rank = r;
-	this->rank_time = time(0);
-	this->altered = true;
-}
-void PlayerClan::SetCouncil(const bool c)
-{
-	this->council = c;
-	this->altered = true;
-}
-void PlayerClan::SetAltered(const bool a)
-{
-	this->altered = a;
-}
-bool Character::IsInClan(const int vnum)
-{
-	for (PlayerClan * cl = this->clans; cl ; cl = cl->next)
-	{
-		if (cl->GetClanVnum() == vnum)
-			return true;
-	}
-	return false;
+	return ClanUtil::getUserClanFromList(userClans, clanId);
 }

@@ -242,6 +242,7 @@ void StateditParse(Descriptor *d, const std::string &arg)
 void StateditDisplayRollMenu(Descriptor *d)
 {
     int total = 0;
+	get_char_cols(d->character);
 
     for(int i = 0;i < (int)d->olc->sgRolls.size();++i)
     {

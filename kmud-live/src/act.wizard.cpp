@@ -43,6 +43,7 @@
 #include "StringUtil.h"
 #include "ForumUtil.h"
 #include "ClanUtil.h"
+#include "MailUtil.h"
 
 #include "kuSockets.h"
 #include "kuListener.h"
@@ -53,6 +54,9 @@
 #include "UserDisabledCommand.h"
 #include "ClanQuestPointTransaction.h"
 #include "dg_event.h"
+
+#include "TestResource.h"
+#include "HttpServer.h"
 
 /*   external vars  */
 extern GameTime time_info;
@@ -111,6 +115,8 @@ extern unsigned long int bandwidth;
 #ifdef KINSLAYER_JAVASCRIPT
 extern std::tr1::unordered_map<void*, pair<std::string, flusspferd::value> > mapper;
 #endif
+
+extern HttpServer httpServer;
 
 /* local functions */
 ACMD(do_advance);
@@ -1226,6 +1232,13 @@ void SendInvisCharacter( void* data )
 	ch->Send("\0");
 }
 void AutoSave( void );
+
+
+
+
+flusspferd::object JS_parseJson(std::string jsonText);
+std::string JS_stringifyJson(flusspferd::object obj);
+
 /*** Extra immortal command to perform various, usually one-time test/maintanence routines ***/
 ACMD(do_extra)
 {
@@ -1238,6 +1251,18 @@ ACMD(do_extra)
 	try {
 		if(false);
 #ifdef KINSLAYER_JAVASCRIPT
+		else if( !str_cmp(vArgs.at(0), "websocket") )
+		{
+			std::string username = vArgs.at(1);
+			
+			flusspferd::object commandObject = create_object(flusspferd::object());
+			commandObject.set_property("method", "Username");
+			commandObject.set_property("username", username);
+
+			std::string jsonStr = JS_stringifyJson(commandObject);
+
+			ch->desc->sendWebSocketCommand(jsonStr);
+		}
 		else if( !str_cmp(vArgs.at(0), "eval") )
 		{
 			std::vector<std::string> vArgs = StringUtil::SplitToVector<std::string>(argument, ' ');
@@ -1245,10 +1270,36 @@ ACMD(do_extra)
 			std::string expression = StringUtil::implode(vArgs, " ");
 			flusspferd::value val = JSManager::get()->executeExpression(expression);
 		}
+		else if( !str_cmp(vArgs.at(0), "jsonparse") )
+		{
+			std::string jsonText = "{\"g\":173}";
+			flusspferd::object jsonObject = JS_parseJson(jsonText);
+
+			flusspferd::value gVal = jsonObject.get_property("g");
+			std::cout << "Value of 'g': " << gVal.to_number() << std::endl;
+		}
+		else if( !str_cmp(vArgs.at(0), "jsonstringify") )
+		{
+			flusspferd::object obj = flusspferd::object(global());
+			obj.set_property("g", 173);
+
+			std::string jsonStr = JS_stringifyJson(obj);
+
+			std::cout << "JSON String: " << jsonStr << std::endl;
+		}
+		else if( !str_cmp(vArgs.at(0), "httpserver") )
+		{
+			httpServer.deploy(5000);
+			httpServer.addResource(new TestResource());
+		}
 		else if( !str_cmp(vArgs.at(0), "invischar"))
 		{
 			add_event( 26, SendInvisCharacter, (void*)ch );
 			ch->Send("\0");
+		}
+		else if( !str_cmp(vArgs.at(0), "email"))
+		{
+			MailUtil::sendEmail("admin@kinslayermud.org", "KinslayerMUD Staff", "mikemason930@gmail.com", "Test Email!", "This is a test. Hope you got it!");
 		}
 		else if( !str_cmp(vArgs.at(0), "forums") )
 		{
@@ -1977,6 +2028,7 @@ ACMD(do_countdown)
 	else if(MiscUtil::isInt(arg1) && atoi(arg1) > 0)
 	{
 		DateTime timeNow;
+		count = atoi(arg1);
 		rebootTime.setTime( timeNow.getTime() + count*60 );
 		int ticksBetween = (int)(rebootTime.getTime()-timeNow.getTime())/60;
 
@@ -2000,7 +2052,7 @@ ACMD(do_countdown)
 ACMD(do_rank)
 {
 	Character *victim;
-	PlayerClan *cl;
+	UserClan *userClan;
 	int i = 0;
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 	bool load = false;
@@ -2048,7 +2100,7 @@ ACMD(do_rank)
 		return;
 	}
 
-	if(!(cl = victim->GetClan(i)))
+	if(!(userClan = victim->getUserClan(i)))
 	{
 		ch->Send("%s is not a member of that clan.\r\n", GET_NAME(victim));
 
@@ -2057,7 +2109,7 @@ ACMD(do_rank)
 		return;
 	}
 
-	if(cl->GetQuestPoints() < rank_req[cl->GetRank()])
+	if(userClan->getQuestPoints() < rank_req[userClan->getRank()])
 	{
 		ch->Send("They do not have enough quest points to rank.\r\n");
 
@@ -2066,14 +2118,13 @@ ACMD(do_rank)
 		return;
 	}
 
-	cl->SetRank(cl->GetRank() + 1);
-	MudLog(NRM, MAX(LVL_GRGOD, GET_INVIS_LEV(ch)), TRUE,
-	       "%s raised %s's rank to %d.%s", GET_NAME(ch), GET_NAME(victim), cl->GetRank(), load ? " (Offline)" : "");
+	userClan->setRank(userClan->getRank() + 1);
+	MudLog(NRM, MAX(LVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "%s raised %s's rank to %d.%s", GET_NAME(ch), GET_NAME(victim), (int)userClan->getRank(), load ? " (Offline)" : "");
 
 	ch->Send("Ok.\r\n");
+	ClanUtil::putUserClan(gameDatabase, userClan);
 	if(load)
 	{
-		victim->SaveClans();
 		delete victim;
 	}
 }
@@ -2084,7 +2135,7 @@ ACMD(do_demote)
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 	int i = 0;
 	Character *victim;
-	PlayerClan *cl;
+	UserClan *userClan;
 	bool load = false;
 
 	TwoArguments(argument, arg1, arg2);
@@ -2130,7 +2181,7 @@ ACMD(do_demote)
 		return;
 	}
 
-	if(!(cl = victim->GetClan(i)))
+	if(!(userClan = victim->getUserClan(i)))
 	{
 		ch->Send("%s is no in that clan.\r\n", GET_NAME(victim));
 
@@ -2139,7 +2190,7 @@ ACMD(do_demote)
 		return;
 	}
 
-	if(cl->GetRank() <= 0)
+	if(userClan->getRank() <= 0)
 	{
 		ch->Send("You cannot lower someone's rank any lower than zero.\r\n");
 
@@ -2148,13 +2199,13 @@ ACMD(do_demote)
 		return;
 	}
 
-	cl->SetRank(cl->GetRank() - 1);
+	userClan->setRank(userClan->getRank() - 1);
 	if(load)
 		victim->SaveClans();
 
 	MudLog(NRM, MAX(LVL_GRGOD, GET_INVIS_LEV(ch)), TRUE,
 	       "%s lowered %s's rank to %d.%s",
-	       GET_NAME(ch), GET_NAME(victim), cl->GetRank(), load ? " (Offline)" : "");
+	       GET_NAME(ch), GET_NAME(victim), (int)userClan->getRank(), load ? " (Offline)" : "");
 	ch->Send(OK);
 
 	if(load)
@@ -2165,7 +2216,7 @@ ACMD(do_demote)
 ACMD(do_council)
 {
 	Character *victim;
-	PlayerClan *cl;
+	UserClan *userClan;
 	std::string type;
 	char player_name[MAX_INPUT_LENGTH], clan_name[MAX_INPUT_LENGTH];
 	int clan_num;
@@ -2216,7 +2267,7 @@ ACMD(do_council)
 		return;
 	}
 
-	if(!(cl = victim->GetClan(clan_num)))
+	if(!(userClan = victim->getUserClan(clan_num)))
 	{
 		ch->Send("%s is not a member of that clan.\r\n", GET_NAME(victim));
 
@@ -2225,12 +2276,12 @@ ACMD(do_council)
 		return;
 	}
 
-	cl->SetCouncil(!cl->IsCouncil());
+	userClan->setIsCouncil(!userClan->getIsCouncil());
 
 	ch->Send("%s has been %s from the Council.\r\n", GET_NAME(victim),
-		cl->IsCouncil() ? "added" : "removed");
+		userClan->getIsCouncil() ? "added" : "removed");
 	MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE,
-		"%s %s %s's council flag for clan %s.%s", GET_NAME(ch), (cl->IsCouncil() ? "added" : "removed"),
+		"%s %s %s's council flag for clan %s.%s", GET_NAME(ch), (userClan->getIsCouncil() ? "added" : "removed"),
 	       GET_NAME(victim), ClanUtil::getClan(clan_num)->Name.c_str(), load ? " (Offline)" : "");
 
 	if(load)
@@ -2240,8 +2291,9 @@ ACMD(do_council)
 ACMD(do_clan)
 {
 	char playername[MAX_INPUT_LENGTH], clanstr[MAX_INPUT_LENGTH];
-	Character *victim = 0;
-	PlayerClan *PC;
+	Character *victim = NULL;
+	UserClan *userClan;
+	bool loaded = false;
 
 	if(GET_LEVEL(ch) < LVL_APPR && !IS_NPC(ch))
 	{
@@ -2262,45 +2314,54 @@ ACMD(do_clan)
 		return;
 	}
 
-	int clan_vnum = 0;
-	Clan *clan = 0;
-	if(!(clan_vnum = GetClanByString(clanstr)) || !(clan = ClanUtil::getClan(clan_vnum)))
+	int clanId = 0;
+	Clan *clan = NULL;
+	if(!(clanId = GetClanByString(clanstr)) || !(clan = ClanUtil::getClan(clanId)))
 	{
 		ch->Send("Invalid clan.\r\n");
 		return;
 	}
 
 	StringUtil::formatPlayername(playername);
-	if(!(victim = get_char_vis(ch, playername)) && !playerExists(playername))
+	if(!(victim = get_char_vis(ch, playername)))
 	{
-		ch->Send(NOPERSON);
-		return;
+		if(!playerExists(playername) || !(victim = CharacterUtil::loadCharacter(playername)))
+		{
+			ch->Send(NOPERSON);
+			return;
+		}
+		else
+			loaded = true;
 	}
-	if( (victim && victim->GetClan(clan_vnum)) || MySQLIsPlayerInClan(playername, clan_vnum))
+
+	if( (victim && victim->getUserClan(clanId)))
 	{
 		ch->Send("%s is already in that clan.\r\n", playername);
 		return;
 	}
-	PC = new PlayerClan(clan_vnum);
 
-	if( !victim || !IS_NPC(victim) )
-		MySQLSavePlayerClan(playername, PC, false);
+	userClan = UserClan::setupNewInstance(victim->player.idnum, clan->vnum);
+
+	if(!IS_NPC(victim))
+		ClanUtil::putUserClan(gameDatabase, userClan);
 
 	ch->Send("%s has been added to clan %s.\r\n", StringUtil::cap(StringUtil::allLower(playername)), clan->Name.c_str());
-	MudLog(NRM, MAX(GET_INVIS_LEV(ch), LVL_GOD), TRUE, "%s clanned %s into clan %s.",
-		ch->player.name.c_str(), StringUtil::cap(StringUtil::allLower(playername)), clan->Name.c_str());
+	MudLog(NRM, MAX(GET_INVIS_LEV(ch), LVL_GOD), TRUE, "%s clanned %s into clan %s.", ch->player.name.c_str(), StringUtil::cap(StringUtil::allLower(playername)), clan->Name.c_str());
+
 	if(victim)
-		victim->AddToClan(PC);
-	else
-		delete PC;
+		victim->addToClan(userClan);
+
+	if(loaded)
+		delete victim;
 }
 
 ACMD(do_declan)
 {
 	char playername[MAX_INPUT_LENGTH], clanstr[MAX_INPUT_LENGTH];
-	Character *victim = 0;
-	int clan_vnum;
-	Clan *clan = 0;
+	int clanId;
+	bool loaded = false;
+	Character *victim = NULL;
+	Clan *clan = NULL;
 
 	if(GET_LEVEL(ch) < LVL_APPR && !IS_NPC(ch))
 	{
@@ -2321,44 +2382,49 @@ ACMD(do_declan)
 		return;
 	}
 
-	if((!(clan_vnum = GetClanByString(clanstr)) || !(clan = ClanUtil::getClan(clan_vnum))) && str_cmp(clanstr, "all"))
+	if((!(clanId = GetClanByString(clanstr)) || !(clan = ClanUtil::getClan(clanId))) && str_cmp(clanstr, "all"))
 	{
 		ch->Send("Invalid clan.\r\n");
 		return;
 	}
 
 	StringUtil::formatPlayername(playername);
-	if(!(victim = get_char_vis(ch, playername)) && !playerExists(playername))
+	if(!(victim = get_char_vis(ch, playername)))
 	{
-		ch->Send(NOPERSON);
-		return;
+		if(!playerExists(playername) && !(victim = CharacterUtil::loadCharacter(playername)))
+		{
+			ch->Send(NOPERSON);
+			return;
+		}
+		else
+			loaded = true;
 	}
-	if(clan_vnum && ((victim && !victim->GetClan(clan_vnum))||!MySQLIsPlayerInClan(playername,clan_vnum)))
+	if(clanId && (victim && !victim->getUserClan(clanId)))
 	{
 		ch->Send("That player is not in that clan.\r\n");
 		return;
 	}
 
-	//Only way clan_vnum can be 0 is if GetClanByString() returned 0 and clanstr was set to "all"
+	//Only way clanId can be 0 is if GetClanByString() returned 0 and clanstr was set to "all"
 	//Therefore we are removing all of the player's clans.
-	if(clan_vnum)
+	if(clanId)
 	{
-		MySQLDeletePlayerClan(playername, clan_vnum);
 		ch->Send("You have removed %s from clan %s.\r\n", playername, clan->Name.c_str());
-		MudLog(NRM, MAX(GET_INVIS_LEV(ch), LVL_GOD), TRUE, "%s removed %s from clan %s.",
-			ch->player.name.c_str(), playername, clan->Name.c_str());
+		MudLog(NRM, MAX(GET_INVIS_LEV(ch), LVL_GOD), TRUE, "%s removed %s from clan %s.", ch->player.name.c_str(), playername, clan->Name.c_str());
 		if(victim)
-			victim->RemoveFromClan(clan_vnum);
+			victim->removeFromClan(clanId);
 	}
 	else
 	{
-		MySQLDeletePlayerClan(playername);
+		ClanUtil::removeUserClansFromDatabase(gameDatabase, victim->userClans);
 		ch->Send("You have removed %s from all clans.\r\n", playername);
-		MudLog(NRM, MAX(GET_INVIS_LEV(ch), LVL_GOD), TRUE, "%s removed %s from all clans.",
-			ch->player.name.c_str(), playername);
+		MudLog(NRM, MAX(GET_INVIS_LEV(ch), LVL_GOD), TRUE, "%s removed %s from all clans.", ch->player.name.c_str(), playername);
 		if(victim)
-			victim->RemoveFromClan();
+			victim->removeFromClan();
 	}
+
+	if(loaded)
+		delete victim;
 }
 
 ACMD(do_reset)
@@ -3353,7 +3419,7 @@ void do_stat_character(Character * ch, Character * k)
 	Object *j;
 	Follower *fol;
 	affected_type *aff;
-	PlayerClan *cl;
+	UserClan *userClan;
 	std::list<Warrant *>::iterator w;
 	bool passed = false;
 
@@ -3460,24 +3526,24 @@ void do_stat_character(Character * ch, Character * k)
 	/*
 	 *	This section of the code will list the clans to the immortal doing the statfind. -Galnor
 	 */
-	if(k->clans)
+	if(k->userClans.empty() == false)
 	{
-		for(cl = k->clans;cl;cl = cl->next)
+		for(auto userClanIter = k->userClans.begin();userClanIter != k->userClans.end();++userClanIter)
 		{
-			if(!ClanUtil::getClan(cl->GetClanVnum()))
+			UserClan *userClan = (*userClanIter);
+			if(!ClanUtil::getClan(userClan->getClanId()))
 			{
-				ch->Send("Invalid clan: [%s%d%s]", COLOR_GREEN(ch, CL_NORMAL),
-					cl->GetClanVnum(), COLOR_NORMAL(ch, CL_NORMAL));
+				ch->Send("Invalid clan: [%s%d%s]", COLOR_GREEN(ch, CL_NORMAL), userClan->getClanId(), COLOR_NORMAL(ch, CL_NORMAL));
 				return;
 			}
-			time_t rt = cl->GetRankTime(), ct = cl->GetClanTime();
+			time_t rt = userClan->getLastRankedDatetime().getTime(), ct = userClan->getClannedDatetime().getTime();
 			ch->Send("Clan [%s%s%s], Rank [%s%d%s], Clanned [%s%s%s], Ranked [%s%s%s], Quest Points [%s%d%s], To Rank [%s%d%s]\r\n",
-			         COLOR_GREEN(ch, CL_NORMAL), ClanUtil::getClan(cl->GetClanVnum())->Name.c_str(), COLOR_NORMAL(ch, CL_NORMAL),
-			         COLOR_GREEN(ch, CL_NORMAL), cl->GetRank(), COLOR_NORMAL(ch, CL_NORMAL),
+			         COLOR_GREEN(ch, CL_NORMAL), ClanUtil::getClan(userClan->getClanId())->Name.c_str(), COLOR_NORMAL(ch, CL_NORMAL),
+			         COLOR_GREEN(ch, CL_NORMAL), (int)userClan->getRank(), COLOR_NORMAL(ch, CL_NORMAL),
 					 COLOR_GREEN(ch, CL_NORMAL), Time::FormatDate("%m-%d-%Y",ct).c_str(), COLOR_NORMAL(ch, CL_NORMAL),
 					 COLOR_GREEN(ch, CL_NORMAL), Time::FormatDate("%m-%d-%Y",rt).c_str(), COLOR_NORMAL(ch, CL_NORMAL),
-			         COLOR_GREEN(ch, CL_NORMAL), cl->GetQuestPoints(), COLOR_NORMAL(ch, CL_NORMAL),
-			         COLOR_GREEN(ch, CL_NORMAL), (rank_req[cl->GetRank()] - cl->GetQuestPoints()), COLOR_NORMAL(ch, CL_NORMAL));
+			         COLOR_GREEN(ch, CL_NORMAL), userClan->getQuestPoints(), COLOR_NORMAL(ch, CL_NORMAL),
+			         COLOR_GREEN(ch, CL_NORMAL), (rank_req[userClan->getRank()] - userClan->getQuestPoints()), COLOR_NORMAL(ch, CL_NORMAL));
 		}
 	}
 
@@ -4672,8 +4738,9 @@ ACMD(do_last)
 	}
 	else
 	{
-		ch->Send("[%5ld] %-12s : %-18s : %-20s\r\n", vict->player.idnum, GET_NAME(vict),
-			GET_LEVEL(ch) >= LVL_GRGOD ? Logins.front().Host.c_str() : "", Logins.front().time.toString().c_str() );
+		ch->Send("[%5ld] %-12s : %-18s : %-12s : %-20s\r\n", vict->player.idnum, GET_NAME(vict),
+			GET_LEVEL(ch) >= LVL_GRGOD ? Logins.front().Host.c_str() : "", Logins.front().gatewayDescriptorType->getStandardName().c_str(),
+			Logins.front().time.toString().c_str() );
 		MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE, "%s checked %s's last login.",
 			GET_NAME(ch), GET_NAME(vict));
 	}
@@ -5782,7 +5849,8 @@ ACMD(do_wshow)
 				ch->Send("Usage: show logins <playername(?)> <last|during|range> <arguments>\r\n");
 				return;
 			}
-			ch->Send("      Login Time                Host        Player Name\r\n");
+			ch->Send("      Login Time                Host        Socket Type    Player Name\r\n");
+			ch->Send("----------------------------------------------------------------------\r\n");
 			//We should have all the parameters at this point. Now grab the logins.
 			Character::LoadLogins(Logins, PlayerName, iLimit, tLow, tHigh);
 

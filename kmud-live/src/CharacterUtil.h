@@ -2,9 +2,12 @@
 #define CHARACTER_UTIL_UTIL_H
 
 #include <mysql/sqlDatabase.h>
+#include <list>
 
 class PlayerIndex;
 class Character;
+class UserEmailAddress;
+class UserEmailAddressConfirmation;
 
 class CharacterUtil
 {
@@ -17,6 +20,16 @@ public:
 	static Character *getOnlineCharacterById(const int userId);
 	static PlayerIndex *getPlayerIndexByUserName(const std::string &userName);
 	static PlayerIndex *getPlayerIndexByUserId(const int userId);
+	static UserEmailAddress *getUserEmailAddress(sql::Connection connection, const int userEmailAddressId);
+	static UserEmailAddress *getUserEmailAddress(sql::Row &row);
+	static std::list<UserEmailAddress *> getUserEmailAddresses(sql::Connection connection, const int userId);
+	static void putUserEmailAddress(sql::Connection connection, UserEmailAddress *userEmailAddress);
+	static UserEmailAddressConfirmation *getUserEmailAddressConfirmation(sql::Connection connection, const std::string confirmationKey);
+	static UserEmailAddressConfirmation *getUserEmailAddressConfirmationByUserEmailAddressId(sql::Connection connection, const int userEmailAddressId);
+	static UserEmailAddressConfirmation *getUserEmailAddressConfirmation(sql::Row row);
+	static void putUserEmailAddressConfirmation(sql::Connection connection, UserEmailAddressConfirmation *userEmailAddressConfirmation);
+	static void sendUserEmailAddressConfirmationEmail(sql::Connection connection, Character *character, const UserEmailAddress *userEmailAddress, const UserEmailAddressConfirmation *userEmailAddressConfirmation);
+	static void freeUserEmailAddresses(std::list<UserEmailAddress*> userEmailAddresses);
 };
 
 #endif

@@ -8,7 +8,12 @@
 #include "comm.h"
 #include "kuDescriptor.h"
 
+#include <flusspferd.hpp>
+
 #include "Descriptor.h"
+
+flusspferd::object JS_parseJson(std::string jsonText);
+std::string JS_stringifyJson(flusspferd::object obj);
 
 extern kuDescriptor *gatewayConnection;
 extern Descriptor *descriptor_list;
@@ -175,4 +180,73 @@ void Descriptor::socketWriteInstant( const std::string &str )
 	{
 		this->character->LogOutput(str);
 	}
+}
+
+GatewayDescriptorType *Descriptor::getGatewayDescriptorType() const
+{
+	return gatewayDescriptorType;
+}
+
+void Descriptor::setGatewayDescriptorType(GatewayDescriptorType *gatewayDescriptorType)
+{
+	this->gatewayDescriptorType = gatewayDescriptorType;
+}
+
+void Descriptor::sendWebSocketCommands(const int pulse)
+{
+	if(pulse % (PASSES_PER_SEC * 5) == 0)
+	{
+		int playersOnline = 0;
+
+		for(auto descriptor = descriptor_list;descriptor;descriptor = descriptor->next)
+		{
+			if(descriptor->character)
+				++playersOnline;
+		}
+
+		for(auto descriptor = descriptor_list;descriptor;descriptor = descriptor->next)
+		{
+			if(descriptor->getGatewayDescriptorType() != GatewayDescriptorType::websocket)
+				continue;
+			if(!descriptor->loggedIn)
+				continue;
+
+			descriptor->sendWebSocketPlayersOnlineCommand(playersOnline);
+		}
+	}
+}
+
+void Descriptor::sendWebSocketUsernameCommand(const std::string &username)
+{
+	flusspferd::object commandObject = flusspferd::create_object(flusspferd::object());
+
+	commandObject.set_property("method", "Username");
+	commandObject.set_property("username", username);
+
+	sendWebSocketCommand(JS_stringifyJson(commandObject));
+}
+
+void Descriptor::sendWebSocketPlayersOnlineCommand(const int playersOnline)
+{
+	flusspferd::object commandObject = flusspferd::create_object(flusspferd::object());
+
+	commandObject.set_property("method", "Players Online");
+	commandObject.set_property("numberOfPlayers", playersOnline);
+
+	sendWebSocketCommand(JS_stringifyJson(commandObject));
+}
+
+void Descriptor::sendWebSocketCommand(const std::string &command)
+{
+	std::stringstream buffer;
+
+	buffer << (unsigned char)0x1B
+		   << (unsigned char)0x06
+		   << (unsigned char)0x1B
+		   << command
+		   << (unsigned char)0x06
+		   << (unsigned char)0x1B
+		   << (unsigned char)0x06;
+
+	this->socketWriteInstant(buffer.str().c_str());
 }

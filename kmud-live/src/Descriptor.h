@@ -2,11 +2,15 @@
 #define DESCRIPTOR_H
 
 #include "DateTime.h"
+#include "GatewayDescriptorType.h"
 
 class Descriptor
 {
-private:
+protected:
 	void cleanup();
+
+	GatewayDescriptorType *gatewayDescriptorType;
+
 public:
 	Descriptor();
 	~Descriptor();
@@ -53,6 +57,15 @@ public:
 	void closeSocketClean();
 
 	std::string session;
+
+	GatewayDescriptorType *getGatewayDescriptorType() const;
+	void setGatewayDescriptorType(GatewayDescriptorType *gatewayDescriptorType);
+
+	static void sendWebSocketCommands(const int pulse);
+	void sendWebSocketCommand(const std::string &command);
+
+	void sendWebSocketUsernameCommand(const std::string &username);
+	void sendWebSocketPlayersOnlineCommand(const int playersOnline);
 
 	Descriptor& operator<< ( const std::string &s );
 	Descriptor& operator<< ( const int );

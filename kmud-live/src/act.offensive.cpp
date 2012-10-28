@@ -738,7 +738,7 @@ ACMD(do_charge)
 		return;
 	}
 
-	if(((!IS_TROLLOC(ch) && !ch->GetClan(CLAN_WOLFBROTHER)) || (IS_FADE(ch) || IS_DREADLORD(ch))) && (subcmd == SCMD_SKEWER))
+	if(((!IS_TROLLOC(ch) && !ch->getUserClan(CLAN_WOLFBROTHER)) || IS_FADE(ch)) && (subcmd == SCMD_SKEWER))
 	{
 		ch->Send("You can't run fast enough to do that.\r\n");
 		return;
@@ -2653,7 +2653,7 @@ int Character::Dodge()
 	{
 		if(GET_EQ(this, i))
 		{
-			if( this->IsInClan( GET_OBJ_CLAN( GET_EQ(this, i) ) ) )
+			if( this->isInClan( GET_OBJ_CLAN( GET_EQ(this, i) ) ) )
 				dodge += GET_OBJ_CL_DB(GET_EQ(this, i));
 			//Galnor 11/16/2009 - Requested by Koridin. Prevent weapons from providing bonuses to non-wielded slots.
 			if( GET_OBJ_TYPE(GET_EQ(this, i)) == ITEM_WEAPON && i != WEAR_WIELD )
@@ -2736,7 +2736,7 @@ int Character::Offense()
 			if( GET_OBJ_TYPE(GET_EQ(this, i)) == ITEM_WEAPON && i != WEAR_WIELD )
 				continue;
 			offense += GET_EQ(this, i)->GetTotalOffense();
-			if( this->IsInClan( GET_OBJ_CLAN( GET_EQ(this, i) ) ) )
+			if( this->isInClan( GET_OBJ_CLAN( GET_EQ(this, i) ) ) )
 				offense += GET_OBJ_CL_OB(GET_EQ(this, i));
 		}
 	}
@@ -2887,7 +2887,7 @@ int Character::MoodOffense()
 		}
 	}
 
-	if(this->player.mount || this->GetClan( CLAN_WOLFBROTHER ))
+	if(this->player.mount || this->getUserClan( CLAN_WOLFBROTHER ))
 		a += OB_RIDING_BONUS;
 
 	if(IS_TROLLOC(this) && !IS_FADE(this))
@@ -2921,7 +2921,7 @@ int Character::Parry()
 			//Galnor 11/16/2009 - Requested by Koradin. Prevent weapons from providing bonuses to non-wielded slots.
 			if( GET_OBJ_TYPE(GET_EQ(this, i)) == ITEM_WEAPON && i != WEAR_WIELD )
 				continue;
-			if( this->IsInClan( GET_OBJ_CLAN( GET_EQ(this, i) ) ) )
+			if( this->isInClan( GET_OBJ_CLAN( GET_EQ(this, i) ) ) )
 				parry += GET_OBJ_CL_PB(GET_EQ(this, i));
 			if(i == WEAR_WIELD)
 				parry += (item->GetTotalParry() * ((float) weapon_skill(this, GET_OBJ_VAL(item, 0)) / 100));
@@ -2966,7 +2966,7 @@ int Character::Parry()
 float Object::AverageAbsorb(int i, Character *ch)
 {
 	float abs = (float)GetTotalAbsorb();
-	if (ch->IsInClan(GET_OBJ_CLAN(this)))
+	if (ch->isInClan(GET_OBJ_CLAN(this)))
 	{
 		abs += GET_OBJ_CL_ABS(this);
 	}

@@ -46,6 +46,7 @@ public:
 	static std::string encodeDateTime(const DateTime &dateTime);
 	static std::map<std::string, std::string> loadResourcesFromFile(const std::string &fileName);
 	static std::string formatDateYYYYdmmdddHHcMMcSS(const DateTime &dateTime);
+	static bool isValidEmailAddress(const std::string &emailAddress);
 
 	template<typename T>
 	static std::string toString(T convertible)
@@ -54,6 +55,14 @@ public:
 		buffer.str("");
 		buffer << convertible;
 		return buffer.str();
+	}
+
+	template<typename T>
+	static std::list<T> makeSingleObjectList(T element)
+	{
+		std::list<T> singleObjectList;
+		singleObjectList.push_back(element);
+		return singleObjectList;
 	}
 };
 

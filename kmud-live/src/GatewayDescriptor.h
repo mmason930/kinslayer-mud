@@ -4,7 +4,9 @@
 #include "kuDescriptor.h"
 #include "kuClient.h"
 
+#include "GatewayListener.h"
 #include "GatewayDescriptorStatus.h"
+#include "GatewayDescriptorType.h"
 
 class GatewayDescriptor
 {
@@ -13,8 +15,11 @@ private:
 	std::string session;
 	kuDescriptor *clientConnection;
 	kuClient *serverConnection;
+	GatewayListener *gatewayListener;
 	GatewayDescriptorStatus *status;
+	GatewayDescriptorType *type;
 	std::string randomId;
+	std::string currentInputBuffer;
 
 public:
 
@@ -43,6 +48,16 @@ public:
 
 	std::string getRandomId();
 	void setRandomId(const std::string &randomId);
+
+	GatewayListener *getGatewayListener();
+	void setGatewayListener(GatewayListener *gatewayListener);
+
+	std::string getCurrentInputBuffer() const;
+	void clearCurrentInputBuffer();
+	void appendToCurrentInputBuffer(const std::string &buffer);
+
+	GatewayDescriptorType *getType() const;
+	void setType(GatewayDescriptorType *type);
 };
 
 #endif

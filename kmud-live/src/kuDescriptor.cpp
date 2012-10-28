@@ -68,20 +68,19 @@ std::string kuDescriptor::getCommand()
 
 int kuDescriptor::socketRead()
 {
-	char Data[2048];
-	int total = 0, ret_val = 0;
+	char dataReadFromSocket[2048];
+	int total = 0, recvReturnValue = 0;
+	memset(dataReadFromSocket, 0, sizeof(dataReadFromSocket));
 
-	*Data = '\0';
+	recvReturnValue = ::recv(this->sock, dataReadFromSocket, sizeof(dataReadFromSocket), 0);
 
-	ret_val = recv(this->sock, Data, sizeof(Data) - total - 1, 0);
-
-	if(ret_val > 0)
+	if(recvReturnValue > 0)
 	{
-		total += ret_val;
-		Data[ret_val] = '\0';
-		this->input +=  std::string(Data);
+//		std::cout << "[READ]: " << std::endl << std::endl << "`" << dataReadFromSocket << "`" << std::endl << std::endl;
+		total += recvReturnValue;
+		this->input.append(dataReadFromSocket, recvReturnValue);
 	}
-	else if(ret_val == 0)
+	else if(recvReturnValue == 0)
 		return -1;
 #ifdef WIN32
 	else if(WSAGetLastError() == WSAEWOULDBLOCK || errno == EAGAIN)
@@ -94,7 +93,12 @@ int kuDescriptor::socketRead()
 	{
 		return -1;
 	}
-	return ret_val;
+	return recvReturnValue;
+}
+
+void kuDescriptor::eraseInput(std::string::size_type offset, std::string::size_type length)
+{
+	this->input.erase(offset, length);
 }
 
 int kuDescriptor::socketClose()
@@ -130,11 +134,13 @@ int kuDescriptor::socketWrite()
 
 		server->handleBeforeSocketWriteCallback(this, substr);
 
-		if((i = ::send(this->sock, substr.c_str(), substr.size(), 0) < 0))
+		if((i = ::send(this->sock, substr.c_str(), substr.size(), 0)) < 0)
 		{
 			this->socketClose();
 			return -1;
 		}
+
+//		std::cout << "[WRITE]: " << std::endl << std::endl << "`" << substr << "`" << std::endl << std::endl;
 
 		server->handleAfterSocketWriteCallback(this, substr);
 

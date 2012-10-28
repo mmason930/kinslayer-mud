@@ -6,6 +6,7 @@
 #include "DateTime.h"
 
 #include "GatewayDescriptor.h"
+#include "GatewayListener.h"
 #include "MudStatus.h"
 
 #define BASIC_CONFIG_PATH		"lib/misc/BasicConfig"
@@ -15,7 +16,7 @@ class GatewayServer
 private:
 
 	std::list<GatewayDescriptor*> descriptors;
-	std::list<kuListener *> listeners;
+	std::list<GatewayListener *> listeners;
 //	kuListener *listener;
 
 	kuClient *motherConnectionToServer;
@@ -30,6 +31,7 @@ private:
 	int secondaryPort;
 	unsigned int mudProcessId;
 	bool shutdownOnReboot;
+	std::list<int> websocketPorts;
 
 	DateTime lastPingSentToGameServer;
 	DateTime lastPingResponseFromGameServer;
@@ -64,6 +66,8 @@ public:
 	void run();
 	void shutdown();
 	void setupAndRun();
+
+	GatewayListener *getGatewayListener(kuListener *listener);
 
 	void disconnectMotherConnectionFromGameServer();
 	void attemptConnectionWithGameServer();

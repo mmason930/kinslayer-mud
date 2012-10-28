@@ -40,29 +40,26 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\DebugGateway\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\DebugGateway\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\ReleaseGateway\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\ReleaseGateway\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost\boost_1_44;Z:\dev\kmud-live\reqs\sqlDatabase;Z:\dev\kmud-live\reqs\mysql\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Z:\dev\kmud-live\reqs\sqlDatabase\Debug;Z:\dev\kmud-live\reqs\mysql\lib\debug;C:\dev\boost\boost_1_44\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\dev\boost\boost_1_44;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\dev\boost\boost_1_44\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost\boost_1_44;C:\dev\kmud-live\reqs\sqlDatabase;C:\dev\kmud-live\reqs\mysql\include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\kmud-live\reqs\sqlDatabase\Debug\vs2010;C:\dev\kmud-live\reqs\mysql\lib\debug;C:\dev\boost\boost_1_44\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>false</MinimalRebuild>
+      <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalOptions>wsock32.lib sqlDatabase.lib dbug.lib libmysql.lib mysqlclient.lib mysys.lib regex.lib strings.lib vio.lib yassl.lib zlib.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>wsock32.lib sqldatabase.lib dbug.lib libmysql.lib mysqlclient.lib mysys.lib regex.lib strings.lib vio.lib yassl.lib zlib.lib %(AdditionalOptions)</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -72,14 +69,13 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -87,7 +83,6 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalOptions>wsock32.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -95,6 +90,8 @@
     <ClCompile Include="src\GatewayClient.cpp" />
     <ClCompile Include="src\GatewayDescriptor.cpp" />
     <ClCompile Include="src\GatewayDescriptorStatus.cpp" />
+    <ClCompile Include="src\GatewayDescriptorType.cpp" />
+    <ClCompile Include="src\GatewayListener.cpp" />
     <ClCompile Include="src\GatewayMain.cpp" />
     <ClCompile Include="src\GatewayServer.cpp" />
     <ClCompile Include="src\kuClient.cpp" />
@@ -103,8 +100,13 @@
     <ClCompile Include="src\kuSockets.cpp" />
     <ClCompile Include="src\MiscUtil.cpp" />
     <ClCompile Include="src\MudStatus.cpp" />
+    <ClCompile Include="src\sha1.cpp" />
     <ClCompile Include="src\StringUtil.cpp" />
     <ClCompile Include="src\SystemUtil.cpp" />
+    <ClCompile Include="src\WebSocketClientHeader.cpp" />
+    <ClCompile Include="src\WebSocketClientHeaderHixie76.cpp" />
+    <ClCompile Include="src\WebSocketClientHeaderIETF_HYBI17.cpp" />
+    <ClCompile Include="src\WebSocketDataFrame.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DateTime.h" />
@@ -112,6 +114,8 @@
     <ClInclude Include="src\GatewayClient.h" />
     <ClInclude Include="src\GatewayDescriptor.h" />
     <ClInclude Include="src\GatewayDescriptorStatus.h" />
+    <ClInclude Include="src\GatewayDescriptorType.h" />
+    <ClInclude Include="src\GatewayListener.h" />
     <ClInclude Include="src\GatewayServer.h" />
     <ClInclude Include="src\kuClient.h" />
     <ClInclude Include="src\kuDescriptor.h" />
@@ -119,8 +123,14 @@
     <ClInclude Include="src\kuSockets.h" />
     <ClInclude Include="src\MiscUtil.h" />
     <ClInclude Include="src\MudStatus.h" />
+    <ClInclude Include="src\sha1.h" />
     <ClInclude Include="src\StringUtil.h" />
     <ClInclude Include="src\SystemUtil.h" />
+    <ClInclude Include="src\WebSocketClientHeader.h" />
+    <ClInclude Include="src\WebSocketClientHeaderHixie76.h" />
+    <ClInclude Include="src\WebSocketClientHeaderIETF_HYBI17.h" />
+    <ClInclude Include="src\WebSocketDataFrame.h" />
+    <ClInclude Include="src\WebSocketException.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

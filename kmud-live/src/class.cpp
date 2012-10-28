@@ -768,7 +768,7 @@ int Character::RollHealth( int level )
 int Character::RollMana( int level )
 {
 	if ( level > 1 && level <= 30 && this->ChannelingAbility())
-		return MiscUtil::random( GetWis() / 6, GetWis() / 4 );
+		return MiscUtil::random( GetWis() / 6, GetWis() / 4 );
 	else if ( level == 1 )
 		return 100;
 
@@ -1074,26 +1074,11 @@ int level_exp( int level )
 	return 123456;
 }
 
-/*	Return a pointer to a player's clan data if they are in clan for "clan_num"
- *	otherwise, return null
- */
-PlayerClan *Character::GetClan( int clan_num )
-{
-	PlayerClan * cl;
-
-	for ( cl = this->clans;cl;cl = cl->next )
-	{
-		if ( cl->GetClanVnum() == clan_num )
-			return cl;
-	}
-	return NULL;
-}
-
 /* If this person is in an Aes Sedai clan, return true */
 bool Character::AES_SEDAI()
 {
-	if ( this->GetClan( 17 ) || this->GetClan( 18 ) || this->GetClan( 19 ) || this->GetClan( 20 ) || this->GetClan( 21 ) ||
-	        this->GetClan( 22 ) || this->GetClan( 23 ) )
+	if ( this->getUserClan( 17 ) || this->getUserClan( 18 ) || this->getUserClan( 19 ) || this->getUserClan( 20 ) || this->getUserClan( 21 ) ||
+	        this->getUserClan( 22 ) || this->getUserClan( 23 ) )
 		return true;
 
 	return false;

@@ -25,6 +25,7 @@
 #include "js.h"
 #include "js_interpreter.h"
 #include "Descriptor.h"
+#include "UserClan.h"
 
 extern Character *character_list;
 
@@ -87,7 +88,7 @@ int Character::FindAssistPriority(Character *test)
 	//Clan member mobs assist clan members based on rank, as long as opponent is a PC or normal aggro.
 	if((clannum = GetSharedClan(this, test)) && (CanAggro || !IS_NPC(FIGHTING(test))) )
 	{
-		level = 6 + test->GetClan(clannum)->GetRank();
+		level = 6 + test->getUserClan(clannum)->getRank();
 	}
 
 	//Doing this makes same rank NPCs assist eachother when fighting same ranked PC... In other words, NPC is priority.
@@ -132,7 +133,7 @@ bool Character::CanAggro(Character *victim)
 	if(IS_NPC(victim)
 	&& std::find(MobData->assists.begin(), MobData->assists.end(), victim->getVnum()) != MobData->assists.end() )
 		return false;//Prospective target is in this mob's assist list.
-	if(victim->WantedByPlayer(this))
+	if(victim->wantedByPlayer(this))
 		return true;
 	if(GET_AGGRO(this, AGGRO_ALL))
 		return true;

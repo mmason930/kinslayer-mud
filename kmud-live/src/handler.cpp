@@ -30,6 +30,7 @@
 #include "StringUtil.h"
 #include "UserLogoutType.h"
 #include "Descriptor.h"
+#include "UserClan.h"
 
 #include "js.h"
 
@@ -246,9 +247,10 @@ int Character::GetLegend()
 /* Is this person a master? -- Galnor */
 bool Character::IsMaster()
 {
-	for(PlayerClan *cl = this->clans;cl;cl = cl->next)
+	for(auto iter = userClans.begin();iter != userClans.end();++iter)
 	{
-		if(cl->GetRank() >= 8)
+		UserClan *userClan = (*iter);
+		if(userClan->getRank() >= 8)
 			return true;
 
 		if(IS_FADE(this) || IS_DREADLORD(this) || IS_GREYMAN(this) || IS_BLADEMASTER(this) || IS_OGIER(this))
@@ -1036,7 +1038,7 @@ float Object::Weight()
 		weight += j->Weight();
 	}
 
-	if ( ( this->carried_by && this->carried_by->IsInClan(GET_OBJ_CLAN(this)) ) || ( this->worn_by && this->worn_by->IsInClan(GET_OBJ_CLAN(this)) ) )
+	if ( ( this->carried_by && this->carried_by->isInClan(GET_OBJ_CLAN(this)) ) || ( this->worn_by && this->worn_by->isInClan(GET_OBJ_CLAN(this)) ) )
 		weight += GET_OBJ_CL_WEIGHT(this);
 
 	return weight;
@@ -1111,7 +1113,7 @@ void equip_char(Character * ch, Object * obj, int pos)
 		                 obj->affected[j].modifier,
 		                 (int *) obj->obj_flags.bitvector, TRUE);
 
-	if ( ch->IsInClan( GET_OBJ_CLAN( obj ) ) )
+	if ( ch->isInClan( GET_OBJ_CLAN( obj ) ) )
 	{
 		affect_modify_ar(ch, APPLY_MOVE, GET_OBJ_CL_MVS(obj), (int *) obj->obj_flags.bitvector, TRUE);
 		affect_modify_ar(ch, APPLY_HIT, GET_OBJ_CL_HPS(obj), (int *) obj->obj_flags.bitvector, TRUE);
@@ -1154,7 +1156,7 @@ Object *unequip_char(Character * ch, int pos)
 		                 (int *) obj->obj_flags.bitvector, FALSE);
 	}
 
-	if ( ch->IsInClan( GET_OBJ_CLAN( obj ) ) )
+	if ( ch->isInClan( GET_OBJ_CLAN( obj ) ) )
 	{
 		affect_modify_ar(ch, APPLY_MOVE, GET_OBJ_CL_MVS(obj), (int *) obj->obj_flags.bitvector, FALSE);
 		affect_modify_ar(ch, APPLY_HIT, GET_OBJ_CL_HPS(obj), (int *) obj->obj_flags.bitvector, FALSE);

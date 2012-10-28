@@ -5,6 +5,8 @@
 #include "StringUtil.h"
 #include "MiscUtil.h"
 
+#include <boost/regex.hpp>
+
 /*** Galnor - 01/14/2010 - Get the current string's color, if there is one set ***/
 void MiscUtil::findBufferColor( const char *buf, char *destBuffer )
 {
@@ -34,6 +36,12 @@ void MiscUtil::findBufferColor( const char *buf, char *destBuffer )
 		}
 	}
 }
+
+bool MiscUtil::isValidEmailAddress(const std::string &emailAddress)
+{
+	return boost::regex_match(emailAddress, boost::regex("[^\\@\\s]+\\@[^\\@\\s\\.]+\\.[^\\@\\s]+"));
+}
+
 bool MiscUtil::isNewLine(char c)
 {
 	if(c == '\n' || (c) == '\r')
@@ -56,8 +64,8 @@ bool MiscUtil::isNumber(const char *str)
 
 bool MiscUtil::isInt(const char *str)
 {
-	if( *str != '-' && !isdigit(*str) )
-		return false;
+	if( *str == '-' )
+		++str;
 	unsigned int len = strlen(str);
 	for(unsigned int i = 0;i < len;++i)
 	{

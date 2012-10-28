@@ -409,7 +409,7 @@ void WeaveManager::AddWeave( Weave* w )
 	if(w->getVnum())
 	for(std::vector<Weave*>::iterator weaveIter = WeaveVector.begin();weaveIter != WeaveVector.end();++weaveIter)
 	{
-		if( w->getVnum() < (*weaveIter)->getVnum() ) {
+		if( w->getVnum() < (*weaveIter)->getVnum() ) {
 			WeaveVector.insert(weaveIter,w);
 			return;
 		}

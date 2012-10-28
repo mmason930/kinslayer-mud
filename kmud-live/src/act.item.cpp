@@ -29,6 +29,7 @@
 #include "StringUtil.h"
 #include "MiscUtil.h"
 #include "Descriptor.h"
+#include "ClanUtil.h"
 
 #ifdef KINSLAYER_JAVASCRIPT
 #include "js.h"
@@ -334,7 +335,7 @@ void perform_give_extra( Character *giver, Character *receiver, Object *obj )
 
 	for ( Clan* C = ClanList;C;C = C->Next )
 	{
-		if ( giver->GetClan( C->vnum ) && receiver->GetClan( C->vnum ) )
+		if ( giver->getUserClan( C->vnum ) && receiver->getUserClan( C->vnum ) )
 		{
 			sim_clan = true;
 			i=C->vnum;
@@ -348,25 +349,18 @@ void perform_give_extra( Character *giver, Character *receiver, Object *obj )
 
 	if ( obj->scalp && MOB_FLAGGED( receiver, MOB_AWARD ) && obj->scalp->is_scalp && obj->scalp->player_scalp && !IS_CORPSE( obj ) && GET_RACE( giver ) != obj->scalp->race )
 	{
-		PlayerClan *pc = giver->GetClan( CLAN_WHITE_TOWER );
-		if( pc && pc->GetRank() < 3 )
-			sprintf( buf, "award %s %d 1", GET_NAME( giver ), i );
+		std::stringstream reasonBuffer;
+		reasonBuffer << "Scalp `" << obj->short_description << "` turned in";
+
+		UserClan *userClan = giver->getUserClan( CLAN_WHITE_TOWER );
+		if( userClan && userClan->getRank() < 3 )
+			sprintf( buf, "award %s %d 1 %s", GET_NAME( giver ), i, reasonBuffer.str().c_str() );
 		else
-			sprintf( buf, "award %s %d 5", GET_NAME( giver ), i );
+			sprintf( buf, "award %s %d 5 %s", GET_NAME( giver ), i, reasonBuffer.str().c_str() );
 		CommandInterpreter( receiver, buf );
 		obj_from_char( obj );
 		obj ->Extract();
-		return ;
-	}
-
-	if ( MOB_FLAGGED( receiver, MOB_AWARD ) && isname( "master", obj->getName() )
-	        && CAN_WEAR( obj, ITEM_WEAR_WIELD ) && GET_MASTER_WEAPON( giver ) != GET_OBJ_VNUM( obj ) )
-	{
-		sprintf( buf, "award %s %d 2", GET_NAME( giver ), i );
-		CommandInterpreter( receiver, buf );
-		obj_from_char( obj );
-		obj->Extract(true);
-		return ;
+		return;
 	}
 }
 
@@ -754,7 +748,7 @@ void get_from_room( Character *ch, char *arg )
 		else
 			perform_get_from_room( ch, obj, false );
 	}
-	else
+	else
 	{
 		if ( dotmode == FIND_ALLDOT && !*arg )
 		{
@@ -1118,6 +1112,11 @@ ACMD( do_give )
 		if ( ch->points.gold < amount )
 		{
 			ch->Send( "You do not have that %s %s!\r\n", ( type[ strlen( type ) - 1 ] == 's' ) ? "many" : "much", type );
+			return ;
+		}
+		if( amount <= 0 )
+		{
+			ch->Send( "You can't give a negative amount of money!\r\n" );
 			return ;
 		}
 		ch->Send( "You give %s%d%s %s to %s.\r\n", col, atoi( amt ), COLOR_NORMAL( ch, CL_COMPLETE ), type,
@@ -2207,7 +2206,7 @@ ACMD( do_remove )
 			{
 				if ( GET_EQ( ch, i ) && CAN_SEE_OBJ( ch, GET_EQ( ch, i ) ) &&
 				        isname( ::arg, GET_EQ( ch, i ) ->getName() ) )
-				{
+				{
 					perform_remove( ch, i );
 					found = 1;
 				}

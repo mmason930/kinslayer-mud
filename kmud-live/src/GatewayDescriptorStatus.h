@@ -21,6 +21,7 @@ public:
 	static GatewayDescriptorStatus *retrievingSession;
 	static GatewayDescriptorStatus *connected;
 	static GatewayDescriptorStatus *disconnected;
+	static GatewayDescriptorStatus *handshaking;
 };
 
 

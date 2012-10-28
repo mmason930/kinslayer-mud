@@ -157,20 +157,3 @@ CREATE TABLE `shopRoom` (
   PRIMARY KEY(`id`),
   KEY `shop_id`(`shop_id`)
 ) ENGINE=MyISAM;
-
-
-### May 28 2012 ###
-CREATE TABLE clanQuestPointTransaction(
-  `id` int(11) unsigned not null auto_increment,
-  `clan_id` smallint(6) unsigned not null,
-  `user_id` mediumint(9) unsigned not null,
-  `amount` smallint(6) not null,
-  `created_datetime` datetime not null,
-  `issued_by_user_type` tinyint(3) unsigned not null,
-  `issued_by_user_id` tinyint(3) unsigned not null,
-  `reason` varchar(120) not null,
-  PRIMARY KEY(`id`),
-  KEY `clan_id`(`clan_id`),
-  KEY `user_id`(`user_id`),
-  KEY `issued_by_user_id`(`issued_by_user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;

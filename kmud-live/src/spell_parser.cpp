@@ -25,6 +25,8 @@
 #include "MiscUtil.h"
 #include "Descriptor.h"
 
+#include "ClanUtil.h"
+
 /* local functions */
 int mag_manacost( Character * ch, int spellnum );
 //int mag_damage(int level, Character *ch, Character *victim, int spellnum, int savetype);
@@ -497,7 +499,7 @@ void Character::AddChannelingStrain( bool Failure, int spell )
 		if ( this->PlayerData->conditions[ DRUNK ] >= 12 )
 			strain += TaintData.HungerThirstCost;
 
-		if ( this->GetClan( CLAN_BLACK_TOWER ) )
+		if ( this->getUserClan( CLAN_BLACK_TOWER ) )
 			strain = int( float( strain ) * TaintData.BlackTowerBonus );
 
 		this->AddStrain( strain );
@@ -506,18 +508,18 @@ void Character::AddChannelingStrain( bool Failure, int spell )
 
 void Character::SetGateTimer()
 {
-	PlayerClan *pc;
+	UserClan *userClan;
 
-	if( !this->clans )
+	if(userClans.empty())
 		this->timer += 20;
-	else if( pc = this->GetClan( CLAN_WHITE_TOWER ) )
-		this->timer += MAX(((5 - pc->GetRank()) * 4), 0);
-	else if( pc = this->GetClan( CLAN_BLACK_TOWER ) )
-		this->timer += MAX(((6 - pc->GetRank()) * 4), 0);
-	else if( pc = this->GetClan( CLAN_DREADGUARDS ) )
-		this->timer += MAX(((6 - pc->GetRank()) * 4), 0);
-	else if( pc = this->GetClan( CLAN_ALGHOL ) )
-		this->timer += MAX(((8 - pc->GetRank()) * 4), 0);
+	else if( userClan = this->getUserClan( CLAN_WHITE_TOWER ) )
+		this->timer += MAX(((5 - userClan->getRank()) * 4), 0);
+	else if( userClan = this->getUserClan( CLAN_BLACK_TOWER ) )
+		this->timer += MAX(((6 - userClan->getRank()) * 4), 0);
+	else if( userClan = this->getUserClan( CLAN_DREADGUARDS ) )
+		this->timer += MAX(((6 - userClan->getRank()) * 4), 0);
+	else if( userClan = this->getUserClan( CLAN_ALGHOL ) )
+		this->timer += MAX(((8 - userClan->getRank()) * 4), 0);
 	else
 		this->timer += 20;
 

@@ -30,6 +30,11 @@ public:
 		return sBuffer;
 	}
 
+	static bool startsWith(const std::string &stringBuffer, const std::string &str);
+	static std::string SHA1(const std::string &inputBuffer);
+	static std::string SHA1Hex(const std::string &inputBuffer);
+	static std::string base64Encode(const std::string &inputBuffer);
+	static std::string base64Decode(const std::string &inputBuffer);
 	static void addSlashes( std::string &sBuffer, const std::string &EscChars );
 	static void formatPlayername(char *name);
 	static const std::string vaEscape( const std::string &str );
@@ -47,6 +52,7 @@ public:
 	static bool parseBoolean( const std::string &boolString );
 	static void replace(std::string &input, const std::string &toFind, const std::string &replaceWith);
 	static std::string getRandomString(const int size);
+	static std::string getLine(std::string &inputBuffer, const std::string &delim);
 
 	//Galnor: 2006-12-11
 	//Re-wrote the split_to_vector and split_to_list to allow for all std containers

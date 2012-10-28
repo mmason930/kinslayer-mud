@@ -189,8 +189,9 @@ JSEnvironment::JSEnvironment()
 	flusspferd::create_native_function(g, "sqlQuery", JS_sendQuery);
 	flusspferd::create_native_function(g, "sqlEsc", JS_sqlEsc);
 	flusspferd::create_native_function(g, "sqlEscapeQuoteString", JS_sqlEscapeQuoteString);
+	flusspferd::create_native_function(g, "sqlEncodeQuoteDate", JS_sqlEncodeQuoteDate);
 	flusspferd::create_native_function(g, "sqlInsertID", JS_sqlInsertID);
-
+	
 	flusspferd::create_native_function(g, "time", JS_getTime);
 	flusspferd::create_native_function(g, "getConnectedPlayers", getConnectedPlayers);
 
@@ -219,6 +220,9 @@ JSEnvironment::JSEnvironment()
 	flusspferd::create_native_function(g, "saveSingleObjectToDatabase", JS_saveSingleObjectToDatabase);
 	flusspferd::create_native_function(g, "loadSingleObjectFromDatabase", JS_loadSingleObjectFromDatabase);
 	flusspferd::create_native_function(g, "loadObjectsByHolderFromDatabase", JS_loadObjectsByHolderFromDatabase);
+	flusspferd::create_native_function(g, "getUserNameByUserId", JS_getUserNameByUserId);
+	flusspferd::create_native_function(g, "getUserIdByUserName", JS_getUserIdByUserName);
+	flusspferd::create_native_function(g, "sendToZone", JS_sendToZone);
 
 //	flusspferd::create<flusspferd::function>("setTimeout", &JS_SetTimeout, flusspferd::param::_container = g);
 

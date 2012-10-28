@@ -374,7 +374,8 @@ const int CON_CLEDIT = 32;			// OLC mode - Clan Edit
 const int CON_WEDIT = 33;			// OLC mode - Warrant Edit
 const int CON_SGEDIT = 34;			// OLC mode - SG edit
 const int CON_JEDIT = 35;			// OLC mode - Javascript Edit
-const int CON_GATEWAY = 36;		
+const int CON_GATEWAY = 36;
+const int CON_EMAIL = 37;			// User is editing their email settings.
 
 
 /* Character equipment positions: used as index for class Character.equipment[] */
@@ -1820,9 +1821,10 @@ class pLogin
 		std::string Host;
 		std::string PlayerName;
 		DateTime time;
+		class GatewayDescriptorType *gatewayDescriptorType;
 
 		std::string Print();
-		pLogin( const std::string &h, time_t t );
+		pLogin( const std::string &h, time_t t, class GatewayDescriptorType *gatewayDescriptorType );
 };
 
 class Legend
@@ -1897,7 +1899,7 @@ public:
 	struct PlayerOnlyData	*PlayerData;
 	struct MobOnlyData		*MobData;
 	struct LoadOnlyData		*LoadData;
-	class  PlayerClan		*clans;
+	std::list<class UserClan *>	userClans;
 
 	struct affected_type	*affected;					/* Affected by what spells			*/
 	struct affect_type_not_saved*affection_list;
@@ -2087,8 +2089,8 @@ public:
 	bool CanViewClan( sh_int clannum );
 	bool AES_SEDAI();
 	bool TOWER_MEMBER();
-	bool WantedByClan( int vnum );
-	bool WantedByPlayer( Character *ch );
+	bool wantedByClan( short clanId );
+	bool wantedByPlayer( Character *ch );
 	bool IsIgnoring( const std::string &person );
 	bool HasTowerWarrant();
 	bool CanTaint();
@@ -2106,7 +2108,7 @@ public:
 	bool CanWearRemortGear(Object *obj);
 	bool CreateDatabaseEntry();
 	bool CanAggro(Character *victim);
-	bool IsInClan(const int vnum);
+	bool isInClan(const int clanId);
 	bool CanTrack(Room *room);
 	bool CanGainWeave( Character* victim );
 	bool CanPractice( class Weave* weave );
@@ -2150,7 +2152,7 @@ public:
 
 	static bool ProperNameFormat( const std::string &Name );
 
-	class PlayerClan *GetClan( int clan_num );
+	class UserClan *getUserClan( short clanId );
 	Quest *GetQuest(const std::string &QuestName );
 
 	std::string GoldString( int amount, bool colors=true, bool abbrev=false );
@@ -2267,12 +2269,11 @@ public:
 	void RollStats();
 	void AddIgnore(const std::string &name);
 	void RemoveIgnore(const std::string &name);
-	void RemoveFromClan();
-	void RemoveFromClan(const int vnum);
-	void RemoveFromClan(class PlayerClan *clan);
-	void AddToClan(const int vnum);
-	void AddToClan(class PlayerClan *clan);
-	void AddLogin(const std::string &host, const time_t t);
+	void removeFromClan();
+	void removeFromClan(const int clanId);
+	void addToClan(const int clanId);
+	void addToClan(class UserClan *userClan);
+	void AddLogin(const std::string &host, const DateTime &loginDatetime, class GatewayDescriptorType *gatewayDescriptorType);
 	void HuntVictim();
 	void Remember(Character *victim);
 	void Forget(Character *victim);

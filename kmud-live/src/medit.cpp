@@ -753,6 +753,15 @@ void medit_disp_menu(Descriptor *d)
 		}
 	}
 
+	std::string clanName = "<None>";
+	UserClan *userClan = mob->userClans.empty() ? NULL : mob->userClans.front();
+	if(mob->userClans.empty() == false)
+	{
+		Clan *clan = ClanUtil::getClan(userClan->getClanId());
+		if(clan != NULL)
+			clanName = clan->Name;
+	}
+
 	d->Send(
 
 #if defined(CLEAR_SCREEN)
@@ -834,8 +843,8 @@ void medit_disp_menu(Descriptor *d)
 	    grn, nrm, cyn, mob->player.LeaveMessage ? mob->player.LeaveMessage : "Default Message",
 	    grn, nrm, cyn, pc_race_types[(int) GET_RACE(mob)],
 	    grn, nrm, cyn, (int)GET_MAX_MOVE(mob),
-	    grn, nrm, cyn, mob->clans ? ClanUtil::getClan(mob->clans->GetClanVnum())->Name.c_str() : "NONE",
-	    grn, nrm, cyn, mob->clans ? mob->clans->GetRank() : 0,
+	    grn, nrm, cyn, clanName.c_str(),
+	    grn, nrm, cyn, userClan ? ((int)userClan->getRank()) : 0,
 	    grn, nrm, cyn, *aggro_list ? aggro_list : "NONE",
 	    grn, nrm, cyn, class_types[(int) GET_CLASS(mob)],
 	    grn, nrm, cyn, mob->MobData->deleted ? "Yes" : "No",
@@ -1414,9 +1423,7 @@ void medit_parse(Descriptor *d, char *arg)
 			else if(i == 0)
 			{
 				write_to_output(d, "No clan assigned.\r\n");
-				if(OLC_MOB(d)->clans)
-					delete OLC_MOB(d)->clans;
-				OLC_MOB(d)->clans = 0;
+				ClanUtil::freeUserClans(OLC_MOB(d)->userClans);
 				break;
 			}
 			else if(toupper(*arg) == 'Q')
@@ -1430,16 +1437,14 @@ void medit_parse(Descriptor *d, char *arg)
 					d->Send("That clan does not exit.\r\n");
 					return;
 				}
-				else if(OLC_MOB(d)->clans)
+				else if(OLC_MOB(d)->userClans.empty() == false)
 				{
-					OLC_MOB(d)->clans->SetClanVnum(i);
+					OLC_MOB(d)->userClans.front()->setClanId(i);
 				}
 				else
 				{
-					OLC_MOB(d)->clans = new PlayerClan(i);
-
-					/* Mobs should NOT have their clans->next allocated */
-					OLC_MOB(d)->clans->next = NULL;
+					UserClan *userClan = UserClan::setupNewInstance(OLC_MOB(d)->getUserId(), i);
+					OLC_MOB(d)->userClans.push_back(userClan);
 				}
 				break;
 			}

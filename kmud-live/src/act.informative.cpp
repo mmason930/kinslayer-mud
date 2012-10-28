@@ -168,7 +168,7 @@ bool Character::CanViewClan(sh_int clannum)
 		return false;
 
 	//Is this person part of the clan?
-	if(this->GetClan(clannum))
+	if(this->getUserClan(clannum))
 		return true;
 
 	//Hidden level at or below player's level
@@ -444,7 +444,7 @@ ACMD(do_view)
 
 	if( !str_cmp(buf1, "clan") )
 	{
-		if(!*buf2 && !ch->clans)
+		if(!*buf2 && ch->userClans.empty())
 		{
 			ch->Send("But which clan?\r\n");
 			return;
@@ -463,7 +463,7 @@ ACMD(do_view)
 		}
 
 		if(!*buf2)
-			c = ClanUtil::getClan(ch->clans->GetClanVnum());
+			c = ClanUtil::getClan(ch->userClans.front()->getClanId());
 		else
 			c = ClanUtil::getClan(clan_num);
 
@@ -1712,7 +1712,7 @@ void lookInObject(Character * ch, char *arg, Object *obj)
 			ch->Send("It is closed.\r\n");
 		else
 		{
-			ch->Send(fname(obj->getName()));
+			ch->Send(obj->GetSDesc());
 			if( obj->carried_by )
 				ch->Send(" (carried): \r\n");
 			else if( obj->in_room )
@@ -2281,8 +2281,8 @@ ACMD(do_users)
 	int idle;
 	std::string name, state, timestamp, host;
 
-	ch->Send("Num   Name         State        Idl  Login@             Site\r\n");
-	ch->Send("--- -------     ------------    --- --------    ------------------------\r\n");
+	ch->Send("Num   Name         State         Type        Idl  Login@             Site\r\n");
+	ch->Send("--- -------     ------------ ------------    --- --------    ------------------------\r\n");
 
 	for (d = descriptor_list; d; d = d->next)
 	{
@@ -2317,9 +2317,9 @@ ACMD(do_users)
 
 		if(d->character ? (CAN_SEE(ch, d->character)) : (1))
 		{
-			ch->Send("%s%3d  %-12s %-14s %-3d %-8s       %-14s%s\r\n",
+			ch->Send("%s%3d  %-12s %-10s %-15s %3d %-8s       %-14s%s\r\n",
 				(STATE(d) != CON_PLAYING) ? COLOR_GREEN(ch, CL_SPARSE) : "",
-				d->desc_num, name.c_str(), state.c_str(),
+				d->desc_num, name.c_str(), state.c_str(), d->getGatewayDescriptorType()->getStandardName().c_str(),
 				idle, timestamp.c_str(), host.c_str(),
 				(STATE(d) != CON_PLAYING) ? COLOR_NORMAL(ch, CL_SPARSE) : "");
 			num_can_see++;
@@ -2456,7 +2456,7 @@ void performMortalWhere(Character * ch, char *arg)
 	bool channeler = false;
 	int num_trolls = 0, num_horses = 0, counter;
 
-	PlayerClan *cl;
+	UserClan *userClan;
 
 	if (!*arg)
 	{
@@ -2531,7 +2531,7 @@ void performMortalWhere(Character * ch, char *arg)
 		ch->Send("You hear and smell horses in the surrounding area.\r\n");
 
 	//DHA'VOL SMELL BONUS
-	if(ch->GetClan(CLAN_DHAVOL) && GET_LEVEL(ch) < LVL_IMMORT)
+	if(ch->getUserClan(CLAN_DHAVOL) && GET_LEVEL(ch) < LVL_IMMORT)
 	{
 		for(counter = 0;counter < num_horses;++counter)
 			ch->Send("a horse			- Nearby\r\n");
@@ -2542,7 +2542,7 @@ void performMortalWhere(Character * ch, char *arg)
 		ch->Send("You catch a fleeting whiff of the stench of shadowspawn.\r\n");
 
 	//WOLFBROTHER SENSING BONUS
-	if(ch->GetClan(CLAN_WOLFBROTHER) && GET_LEVEL(ch) < LVL_IMMORT)
+	if(ch->getUserClan(CLAN_WOLFBROTHER) && GET_LEVEL(ch) < LVL_IMMORT)
 	{
 		for(counter = 0;counter < num_trolls;counter++)
 		{
@@ -2558,7 +2558,7 @@ void performMortalWhere(Character * ch, char *arg)
 			int distance = GET_MARKED(ch)->in_room->GetZone()->Distance(ch->in_room->GetZone());
 			int slope = find_zone_slope(GET_MARKED(ch)->in_room->zone, ch->in_room->zone);
 
-			if(distance <= MAX(4, ( (cl = ch->GetClan(CLAN_SOULLESS)) ? cl->GetRank() / 2 : 1)))
+			if(distance <= MAX(4, ( (userClan = ch->getUserClan(CLAN_SOULLESS)) ? userClan->getRank() / 2 : 1)))
 			{
 				ch->Send("%s%s%-25s - %s %s%s\r\n", COLOR_BOLD(ch, CL_COMPLETE), COLOR_RED(ch, CL_COMPLETE),
 				         GET_NAME(GET_MARKED(ch)), DistanceString(distance).c_str(), loc[slope], COLOR_NORMAL(ch, CL_COMPLETE));

@@ -145,13 +145,14 @@ void Character::SetSkillDefaults()
 		SET_SKILL(this, SKILL_TROLL_TONGUE, 100);
 	SET_SKILL(this, SKILL_BAREHANDS, 100);
 
-	if( !IS_NPC(this) && this->clans )
+	if( !IS_NPC(this) && !this->userClans.empty() )
 	{
 		Clan *clan;
-		for(PlayerClan *cl = this->clans; cl; cl = cl->next)
+		for(auto userClanIter = userClans.begin();userClanIter != userClans.end();++userClanIter)
 		{
-			clan = ClanUtil::getClan(cl->GetClanVnum());
-			if(cl->GetRank() >= clan->bonus_skill_rank)
+			UserClan *userClan = (*userClanIter);
+			clan = ClanUtil::getClan(userClan->getClanId());
+			if(userClan->getRank() >= clan->bonus_skill_rank)
 				SET_SKILL(this, clan->bonus_skill, clan->bonus_skill_val);
 		}
 	}

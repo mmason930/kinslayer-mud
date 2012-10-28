@@ -12,6 +12,7 @@ public:
 	static void archiveAndRemoveDeletedForumUsers(sql::Connection connection);
 	static void addUsersToForum(sql::Connection connection);
 	static void changeUserPassword(sql::Connection connection, const int userId, const std::string &userPassword);
+	static void synchronizeUserConfigurationValues(sql::Connection connection);
 };
 
 #endif

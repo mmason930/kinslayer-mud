@@ -211,7 +211,7 @@ Object *Object::loadSingleItem(const boost::uuids::uuid &oID, bool recursive)
 	} catch( sql::QueryException e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Unable to load single item #%d: %s",
 			ToString(oID).c_str(), e.getMessage().c_str());
-		return (0);
+		return NULL;
 	}
 	if( MyQuery->hasNextRow() )
 		obj = Object::bootLiveObject( MyQuery->getRow(), (false) );

@@ -7,6 +7,8 @@
 #include "UserType.h"
 #include "mobs.h"
 #include "clans.h"
+#include "Exception.h"
+#include "DatabaseUtil.h"
 
 ClanQuestPointTransaction *ClanUtil::getClanQuestPointTransaction(sql::Connection connection, const int clanQuestPointTransactionId)
 {
@@ -27,7 +29,7 @@ ClanQuestPointTransaction *ClanUtil::getClanQuestPointTransaction(sql::Connectio
 	return NULL;
 }
 
-ClanQuestPointTransaction *ClanUtil::getClanQuestPointTransaction(sql::Row row)
+ClanQuestPointTransaction *ClanUtil::getClanQuestPointTransaction(const sql::Row &row)
 {
 	ClanQuestPointTransaction *clanQuestPointTransaction = new ClanQuestPointTransaction();
 
@@ -94,13 +96,13 @@ ClanQuestPointTransaction *ClanUtil::performQuestPointTransaction(sql::Connectio
 	//Attempt to perform the transaction to a user who is online.
 	Character *character = CharacterUtil::getOnlineCharacterById(userId);
 	Character *issuedByUser = NULL;
-	PlayerClan *userClan = NULL;
+	UserClan *userClan = NULL;
 
 	bool characterLoadedFromDatabase = false;
 
 	if(amount == 0)
 	{
-		throw std::exception("A clan quest point transaction with an amount of zero is not allowed.");
+		throw Exception("A clan quest point transaction with an amount of zero is not allowed.");
 	}
 
 	if(character == NULL)
@@ -113,7 +115,7 @@ ClanQuestPointTransaction *ClanUtil::performQuestPointTransaction(sql::Connectio
 	if(character == NULL)
 	{//If we do not have a valid pointer to the character, then they simply do not exist.
 
-		throw std::exception( std::string("The target character(userId = `" + MiscUtil::toString(userId) + "`) does not exist").c_str() );
+		throw Exception( std::string("The target character(userId = `" + MiscUtil::toString(userId) + "`) does not exist").c_str() );
 	}
 
 	//Load the issuer.
@@ -131,21 +133,21 @@ ClanQuestPointTransaction *ClanUtil::performQuestPointTransaction(sql::Connectio
 		if(characterLoadedFromDatabase)
 			delete character;
 
-		throw std::exception( std::string("The issuer(type = `" + issuedByUserType->getStandardName() + "`, ID = `" + MiscUtil::toString(issuedByUserId) + "`) could not be found.").c_str() );
+		throw Exception( std::string("The issuer(type = `" + issuedByUserType->getStandardName() + "`, ID = `" + MiscUtil::toString(issuedByUserId) + "`) could not be found.").c_str() );
 	}
 
-	userClan = character->GetClan( clanId );
+	userClan = character->getUserClan( clanId );
 
 	if(userClan == NULL)
 	{
 		if(characterLoadedFromDatabase)
 			delete character;
 
-		throw std::exception( std::string("The user is not a member of the specified clan(clanId = `" + MiscUtil::toString(clanId) + "`)").c_str() );
+		throw Exception( std::string("The user is not a member of the specified clan(clanId = `" + MiscUtil::toString(clanId) + "`)").c_str() );
 	}
 
 	//Perform the transaction.
-	userClan->SetQuestPoints( userClan->GetQuestPoints() + amount );
+	userClan->setQuestPoints( userClan->getQuestPoints() + amount );
 
 	//Create the transaction record.
 	clanQuestPointTransaction->setUserId(userId);
@@ -198,4 +200,140 @@ Clan *ClanUtil::getClan(const int clanId)
 	}
 
 	return NULL;
+}
+
+std::list<UserClan *> ClanUtil::getUserClans(sql::Connection connection, int userId)
+{
+	std::stringstream sql;
+	std::list<UserClan *> userClans;
+	sql::Query query;
+
+	sql << " SELECT *"
+		<< " FROM userClan"
+		<< " WHERE user_id = " << userId
+		<< " ORDER BY id";
+
+	query = connection->sendQuery(sql.str());
+
+	while(query->hasNextRow())
+	{
+		userClans.push_back(getUserClan(query->getRow()));
+	}
+
+	return userClans;
+}
+
+UserClan *ClanUtil::getUserClan(const sql::Row &row)
+{
+	UserClan *userClan = new UserClan();
+
+	userClan->setId(row.getInt("id"));
+	userClan->setUserId(row.getInt("user_id"));
+	userClan->setClanId(row.getInt("clan_id"));
+	userClan->setRank(row.getInt("rank"));
+	userClan->setClannedDatetime(row.getTimestamp("clanned_datetime"));
+	userClan->setLastRankedDatetime(row.getTimestamp("last_ranked_datetime"));
+	userClan->setQuestPoints(row.getInt("quest_points"));
+	userClan->setIsCouncil(row.getInt("is_council"));
+
+	return userClan;
+}
+
+void ClanUtil::putUserClan(sql::Connection connection, UserClan *userClan)
+{
+	std::stringstream sql;
+
+	if(userClan->isNew())
+	{
+		sql << " INSERT INTO userClan("
+			<< "   `user_id`,"
+			<< "   `clan_id`,"
+			<< "   `rank`,"
+			<< "   `clanned_datetime`,"
+			<< "   `last_ranked_datetime`,"
+			<< "   `quest_points`,"
+			<< "   `is_council`"
+			<< " ) VALUES("
+			<< userClan->getUserId() << ","
+			<< userClan->getClanId() << ","
+			<< ((int)userClan->getRank()) << ","
+			<< sql::encodeQuoteDate(userClan->getClannedDatetime().getTime()) << ","
+			<< sql::encodeQuoteDate(userClan->getLastRankedDatetime().getTime()) << ","
+			<< userClan->getQuestPoints() << ","
+			<< (userClan->getIsCouncil() ? 1 : 0)
+			<< ")";
+
+		connection->sendRawQuery(sql.str());
+
+		userClan->setId(connection->lastInsertID());
+	}
+	else
+	{
+		sql << " UPDATE userClan SET"
+			<< "   user_id = " << userClan->getUserId() << ","
+			<< "   clan_id = " << userClan->getClanId() << ","
+			<< "   rank = " << ((int)userClan->getRank()) << ","
+			<< "   clanned_datetime = " << sql::encodeQuoteDate(userClan->getClannedDatetime().getTime()) << ","
+			<< "   last_ranked_datetime = " << sql::encodeQuoteDate(userClan->getLastRankedDatetime().getTime()) << ","
+			<< "   quest_points = " << userClan->getQuestPoints() << ","
+			<< "   is_council = " << (userClan->getIsCouncil() ? 1 : 0)
+			<< " WHERE id = " << userClan->getId();
+
+		connection->sendRawQuery(sql.str());
+	}
+}
+
+UserClan *ClanUtil::getUserClanFromList(const std::list<UserClan *> &userClans, short clanId)
+{
+	for(auto userClanIter = userClans.begin();userClanIter != userClans.end();++userClanIter)
+	{
+		if((*userClanIter)->getClanId() == clanId)
+			return (*userClanIter);
+	}
+	return NULL;
+}
+
+void ClanUtil::removeUserClansFromDatabase(sql::Connection connection, std::list<int> userClanIdList)
+{
+	std::stringstream sql;
+
+	sql << " DELETE FROM userClan"
+		<< " WHERE id IN" << DatabaseUtil::buildListSQL(userClanIdList, false, false);
+
+	connection->sendRawQuery(sql.str());
+}
+
+void ClanUtil::removeUserClansFromDatabase(sql::Connection connection, std::list<UserClan *> userClanList)
+{
+	std::list<int> userClanIdList;
+
+	for(auto iter = userClanList.begin();iter != userClanList.end();++iter)
+	{
+		UserClan *userClan = (*iter);
+		userClanIdList.push_back(userClan->getId());
+	}
+
+	removeUserClansFromDatabase(connection, userClanIdList);
+}
+
+void ClanUtil::freeUserClans(std::list<UserClan *> &userClans)
+{
+	while(userClans.empty() == false)
+	{
+		delete userClans.front();
+		userClans.pop_front();
+	}
+}
+
+std::list<UserClan *> ClanUtil::cloneUserClansFromMobPrototype(Character *mobPrototype)
+{
+	std::list<UserClan *> userClanList;
+
+	for(auto iter = mobPrototype->userClans.begin();iter != mobPrototype->userClans.end();++iter)
+	{
+		UserClan *userClan = UserClan::copyFromMobPrototype( (*iter) );
+		userClanList.push_back(userClan);
+	}
+
+	return userClanList;
 }

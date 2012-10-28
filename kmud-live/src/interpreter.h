@@ -265,6 +265,7 @@ const int SCMD_OLC_AEDIT = 5;
 const int SCMD_OLC_KEDIT = 6;
 const int SCMD_OLC_SAVEINFO = 7;
 const int SCMD_OLC_SGEDIT = 8;
+const int SCMD_OLC_EMAILS = 9;
 
 /* do_charge */
 const int SCMD_CHARGE = 0;

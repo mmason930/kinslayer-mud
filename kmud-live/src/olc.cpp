@@ -27,6 +27,7 @@
 #include "MiscUtil.h"
 #include "StringUtil.h"
 #include "Descriptor.h"
+#include "UserEmailAddress.h"
 
 #include <boost/regex.hpp>
 
@@ -60,6 +61,9 @@ void aedit_save_to_disk();
 extern int find_action( int cmd );
 extern int real_shop( int vnum );
 FILE *file;
+
+struct olc_save_info *olc_save_list = NULL;
+char *nrm, *grn, *cyn, *yel, *bld, *mag, *red, *blu;
 
 //Internal function prototypes.
 int can_edit_zone( Character *ch, int number );
@@ -266,6 +270,7 @@ OLC::OLC()
 	this->buf				= (NULL);
 	this->auction			= (NULL);
 	this->auction_data		= (NULL);
+	this->userEmailAddress	= NULL;
 
 #ifdef KINSLAYER_JAVASCRIPT
 	this->jsTrig			= (NULL);
@@ -732,6 +737,8 @@ void get_char_cols( Character *ch )
 	yel = const_cast< char * > COLOR_YELLOW  ( ch, CL_NORMAL );
 	bld = const_cast< char * > COLOR_BOLD    ( ch, CL_NORMAL );
 	mag = const_cast< char * > COLOR_MAGENTA ( ch, CL_NORMAL );
+	red = const_cast< char * > COLOR_RED     ( ch, CL_NORMAL );
+	blu = const_cast< char * > COLOR_BLUE    ( ch, CL_NORMAL );
 }
 
 /*
@@ -796,6 +803,14 @@ void cleanup_olc( Descriptor *d, byte cleanup_type )
 		}
 		if( d->olc->auction_data )
 			delete (d->olc->auction_data);
+		if( d->olc->userEmailAddress )
+			delete d->olc->userEmailAddress;
+		while(d->olc->userEmailAddresses.empty() == false)
+		{
+			UserEmailAddress *userEmailAddress = d->olc->userEmailAddresses.front();
+			delete userEmailAddress;
+			d->olc->userEmailAddresses.pop_front();
+		}
 		//Check for an object.
 		if ( OLC_OBJ( d ) )
 		{
@@ -1630,11 +1645,17 @@ void AddOlcLog( Character *ch, const std::string &Type, const int targetId )
 {
 	try {
 		std::stringstream QueryBuffer;
-		QueryBuffer << "INSERT INTO olcLog (`uid`,`target_type`,`target_id`,`timestamp`) VALUES(";
-		QueryBuffer << "'" << ch->player.idnum << "',";
-		QueryBuffer << "'" << sql::escapeString( Type ) << "',";
-		QueryBuffer << "'" << targetId << "',";
-		QueryBuffer << "'" << time(0) << "');";
+		QueryBuffer << " INSERT INTO olcLog("
+					<< "   `user_id`,"
+					<< "   `target_type`,"
+					<< "   `target_id`,"
+					<< "   `created_datetime`"
+					<< " ) VALUES("
+					<< ch->player.idnum << ","
+					<< sql::escapeQuoteString(Type) << ","
+					<< targetId << ","
+					<< sql::encodeQuoteDate(time(0))
+					<< ")";
 
 		gameDatabase->sendRawQuery( QueryBuffer.str() );
 	} catch( sql::QueryException e ) {

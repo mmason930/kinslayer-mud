@@ -150,3 +150,81 @@ void ForumUtil::changeUserPassword(sql::Connection connection, const int userId,
 
 	connection->sendRawQuery(sql.str());
 }
+
+void ForumUtil::synchronizeUserConfigurationValues(sql::Connection connection)
+{
+	std::stringstream sql;
+	sql::Query query;
+	sql::Row row;
+	bool hasAtLeastOneUser = false;
+
+	int newestUserId;
+	int numberOfUsers;
+	std::string newestUsername;
+	std::string newestUserColor;
+
+	sql << " SELECT"
+		<< "   `user_id``"
+		<< "   `username`,"
+		<< "   `user_colour`"
+		<< " FROM phpbb_users"
+		<< " ORDER BY user_regdate"
+		<< " DESC LIMIT 1";
+
+	query = connection->sendQuery(sql.str());
+
+	if(query->hasNextRow())
+	{
+		row = query->getRow();
+		newestUsername = row["username"];
+		newestUserColor = row["user_colour"];
+		newestUserId = row.getInt("user_id");
+
+		hasAtLeastOneUser = true;
+	}
+
+	sql.str("");
+	sql << " SELECT COUNT(*) AS num_users FROM phpbb_users";
+
+	query = connection->sendQuery(sql.str());
+	if(query->hasNextRow())
+	{
+		numberOfUsers = query->getRow().getInt("num_users");
+	}
+
+	
+	if(hasAtLeastOneUser)
+	{
+		//Update the newest user ID
+		sql.str("");
+		sql << " UPDATE phpbb_config"
+			<< " SET config_value = " << newestUserId
+			<< " WHERE config_name = 'newest_user_id'";
+
+		connection->sendRawQuery(sql.str());
+
+		//Update the newest username
+		sql.str("");
+		sql << " UPDATE phpbb_config"
+			<< " SET config_value = " << sql::escapeQuoteString(newestUsername)
+			<< " WHERE config_name = 'newest_username'";
+
+		connection->sendRawQuery(sql.str());
+
+		//Update the newest user color.
+		sql.str("");
+		sql << " UPDATE phpbb_config"
+			<< " SET config_value = " << sql::escapeQuoteString(newestUserColor)
+			<< " WHERE config_name = 'newest_user_colour'";
+
+		connection->sendRawQuery(sql.str());
+
+		//Update the number of users.
+		sql.str("");
+		sql << " UPDATE phpbb_config"
+			<< " SET config_value = " << numberOfUsers
+			<< " WHERE config_name = 'num_users'";
+
+		connection->sendRawQuery(sql.str());
+	}
+}

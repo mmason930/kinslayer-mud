@@ -1,11 +1,12 @@
 #include <sstream>
 #include "GatewayDescriptor.h"
-
+#include "WebSocketDataFrame.h"
 
 GatewayDescriptor::GatewayDescriptor()
 {
 	serverConnection = NULL;
 	clientConnection = NULL;
+	gatewayListener = NULL;
 }
 GatewayDescriptor::~GatewayDescriptor()
 {
@@ -31,7 +32,44 @@ std::string GatewayDescriptor::getSession()
 
 void GatewayDescriptor::sendToClient(const std::string &packet)
 {
-	clientConnection->send(packet.c_str());
+	if(this->getGatewayListener()->getType() == GATEWAY_LISTENER_TYPE_WEBSOCKET && this->getStatus() != GatewayDescriptorStatus::handshaking)
+	{
+		WebSocketDataFrame dataFrame;
+
+		dataFrame.setFin(true);
+		dataFrame.setIsMasked(false);
+		dataFrame.setRsv1(false);
+		dataFrame.setRsv2(false);
+		dataFrame.setRsv3(false);
+		dataFrame.setOpCode(0x01);
+
+		
+		char *cleansedPacket = new char[ packet.size() + 1 ];
+		std::string::size_type writeIndex = 0;
+		std::string::size_type readIndex = 0;
+		for(std::string::size_type readIndex = 0;readIndex < packet.size();++readIndex)
+		{
+			if( ((int)(packet[ readIndex ])) > 0 )
+			{
+				cleansedPacket[ writeIndex ] = packet[ readIndex ];
+				++writeIndex;
+			}
+		}
+		cleansedPacket[ writeIndex ] = '\0';
+		dataFrame.setPayloadData(cleansedPacket);
+
+		delete[] cleansedPacket;
+
+		clientConnection->socketWriteInstant(dataFrame.prepareNetworkPacket());
+	}
+	else if(this->getGatewayListener()->getType() == GATEWAY_LISTENER_TYPE_WEBSOCKET)
+	{
+		clientConnection->socketWriteInstant(packet);
+	}
+	else
+	{
+		clientConnection->send(packet.c_str());
+	}
 }
 void GatewayDescriptor::sendToServer(const std::string &packet)
 {
@@ -40,11 +78,32 @@ void GatewayDescriptor::sendToServer(const std::string &packet)
 
 std::string GatewayDescriptor::pullFromClient()
 {
-	std::string input = clientConnection->getInputBuffer();
+	std::string input;
+	if(this->getGatewayListener()->getType() == GATEWAY_LISTENER_TYPE_WEBSOCKET && getStatus() != GatewayDescriptorStatus::handshaking)
+	{
+		input = clientConnection->getInputBuffer();
+		if(input.size() > 0)
+		{
+			unsigned int bytesRead = 0;
+			WebSocketDataFrame *webSocketDataFrame = WebSocketDataFrame::parse(input, bytesRead);
 
-	clientConnection->clearInput();
+			if(webSocketDataFrame != NULL)
+			{
+				clientConnection->eraseInput(0, bytesRead);
+				return webSocketDataFrame->getPayloadData();
+			}
+		}
+	}
+	else
+	{
+		input = clientConnection->getInputBuffer();
 
-	return input;
+		clientConnection->clearInput();
+
+		return input;
+	}
+
+	return "";
 }
 
 std::string GatewayDescriptor::pullFromServer()
@@ -97,4 +156,39 @@ std::string GatewayDescriptor::getRandomId()
 void GatewayDescriptor::setRandomId(const std::string &randomId)
 {
 	this->randomId = randomId;
+}
+
+GatewayListener *GatewayDescriptor::getGatewayListener()
+{
+	return gatewayListener;
+}
+
+void GatewayDescriptor::setGatewayListener(GatewayListener *gatewayListener)
+{
+	this->gatewayListener = gatewayListener;
+}
+
+std::string GatewayDescriptor::getCurrentInputBuffer() const
+{
+	return currentInputBuffer;
+}
+
+void GatewayDescriptor::clearCurrentInputBuffer()
+{
+	this->currentInputBuffer.clear();
+}
+
+void GatewayDescriptor::appendToCurrentInputBuffer(const std::string &buffer)
+{
+	this->currentInputBuffer += buffer;
+}
+
+GatewayDescriptorType *GatewayDescriptor::getType() const
+{
+	return type;
+}
+
+void GatewayDescriptor::setType(GatewayDescriptorType *type)
+{
+	this->type = type;
 }

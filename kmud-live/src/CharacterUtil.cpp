@@ -2,9 +2,12 @@
 #include <vector>
 #include <list>
 
+#include "UserEmailAddress.h"
+#include "UserEmailAddressConfirmation.h"
 #include "CharacterUtil.h"
 #include "StringUtil.h"
 #include "MiscUtil.h"
+#include "MailUtil.h"
 #include "structs.h"
 #include "db.h"
 #include "utils.h"
@@ -265,4 +268,184 @@ PlayerIndex *CharacterUtil::getPlayerIndexByUserId(const int userId)
 			return (*iter);
 	}
 	return NULL;
+}
+
+UserEmailAddress *CharacterUtil::getUserEmailAddress(sql::Connection connection, const int userEmailAddressId)
+{
+	std::stringstream sql;
+	sql::Query query;
+	sql << " SELECT *"
+		<< " FROM userEmailAddress"
+		<< " WHERE id = " << userEmailAddressId;
+
+	query = connection->sendQuery(sql.str());
+	while(query->hasNextRow())
+	{
+		sql::Row row = query->getRow();
+		return getUserEmailAddress(row);
+	}
+
+	return NULL;
+}
+
+UserEmailAddress *CharacterUtil::getUserEmailAddress(sql::Row &row)
+{
+	UserEmailAddress *userEmailAddress = new UserEmailAddress();
+
+	userEmailAddress->setId(row.getInt("id"));
+	userEmailAddress->setUserId(row.getInt("user_id"));
+	userEmailAddress->setEmailAddress(row.getString("email_address"));
+	userEmailAddress->setConfirmed(row.getInt("confirmed"));
+	userEmailAddress->setCreatedDatetime(row.getTimestamp("created_datetime"));
+	userEmailAddress->setConfirmedDatetime(row.getTimestamp("confirmed_datetime"));
+
+	return userEmailAddress;
+}
+
+std::list<UserEmailAddress *> CharacterUtil::getUserEmailAddresses(sql::Connection connection, const int userId)
+{
+	std::list<UserEmailAddress *> userEmailAddresses;
+	std::stringstream sql;
+	sql::Query query;
+
+	sql << " SELECT *"
+		<< " FROM userEmailAddress"
+		<< " WHERE user_id = " << userId;
+
+	query = connection->sendQuery(sql.str());
+	while(query->hasNextRow())
+	{
+		sql::Row row = query->getRow();
+		userEmailAddresses.push_back(getUserEmailAddress(row));
+	}
+
+	return userEmailAddresses;
+}
+
+void CharacterUtil::putUserEmailAddress(sql::Connection connection, UserEmailAddress *userEmailAddress)
+{
+	std::stringstream sql;
+
+	if(userEmailAddress->isNew())
+	{
+		sql << " INSERT INTO userEmailAddress("
+			<< "   user_id,"
+			<< "   email_address,"
+			<< "   confirmed,"
+			<< "   created_datetime,"
+			<< "   confirmed_datetime"
+			<< " ) VALUES ("
+			<< userEmailAddress->getUserId() << ","
+			<< sql::escapeQuoteString(userEmailAddress->getEmailAddress()) << ","
+			<< sql::encodeBooleanInt(userEmailAddress->getConfirmed()) << ","
+			<< sql::encodeQuoteDate(userEmailAddress->getCreatedDatetime().getTime()) << ","
+			<< sql::encodeQuoteDate(userEmailAddress->getConfirmedDatetime().getTime()) << ")";
+
+		connection->sendRawQuery(sql.str());
+		userEmailAddress->setId(connection->lastInsertID());
+	}
+	else
+	{
+		sql << " UPDATE userEmailAddress SET"
+			<< "   user_id = " << userEmailAddress->getUserId() << ","
+			<< "   email_address = " << sql::escapeQuoteString(userEmailAddress->getEmailAddress()) << ","
+			<< "   confirmed = " << sql::encodeBooleanInt(userEmailAddress->getConfirmed()) << ","
+			<< "   created_datetime = " << sql::encodeQuoteDate(userEmailAddress->getCreatedDatetime().getTime()) << ","
+			<< "   confirmed_datetime = " << sql::encodeQuoteDate(userEmailAddress->getConfirmedDatetime().getTime())
+			<< " WHERE id = " << userEmailAddress->getId();
+
+		connection->sendRawQuery(sql.str());
+	}
+}
+
+UserEmailAddressConfirmation *CharacterUtil::getUserEmailAddressConfirmation(sql::Connection connection, const std::string confirmationKey)
+{
+	std::stringstream sql;
+	sql::Query query;
+
+	sql << " SELECT *"
+		<< " FROM userEmailAddressConfirmation"
+		<< " WHERE confirmation_key = " << sql::escapeQuoteString(confirmationKey);
+
+	query = connection->sendQuery(sql.str());
+	while(query->hasNextRow())
+	{
+		sql::Row row = query->getRow();
+		return getUserEmailAddressConfirmation(row);
+	}
+
+	return NULL;
+}
+
+UserEmailAddressConfirmation *CharacterUtil::getUserEmailAddressConfirmation(sql::Row row)
+{
+	UserEmailAddressConfirmation *userEmailAddressConfirmation = new UserEmailAddressConfirmation();
+
+	userEmailAddressConfirmation->setId(row.getInt("id"));
+	userEmailAddressConfirmation->setConfirmationKey(row.getString("confirmation_key"));
+	userEmailAddressConfirmation->setUserEmailAddressId(row.getInt("user_email_address_id"));
+
+	return userEmailAddressConfirmation;
+}
+
+void CharacterUtil::putUserEmailAddressConfirmation(sql::Connection connection, UserEmailAddressConfirmation *userEmailAddressConfirmation)
+{
+	std::stringstream sql;
+
+	if(userEmailAddressConfirmation->isNew())
+	{
+		sql << " INSERT INTO userEmailAddressConfirmation("
+			<< "   `confirmation_key`,"
+			<< "   `user_email_address_id`"
+			<< ") VALUES ("
+			<< sql::escapeQuoteString(userEmailAddressConfirmation->getConfirmationKey()) << ","
+			<< userEmailAddressConfirmation->getUserEmailAddressId() << ")";
+
+		connection->sendRawQuery(sql.str());
+		userEmailAddressConfirmation->setId(connection->lastInsertID());
+	}
+	else
+	{
+		sql << " UPDATE userEmailAddressConfirmation SET"
+			<< "   confirmation_key = " << sql::escapeQuoteString(userEmailAddressConfirmation->getConfirmationKey()) << ","
+			<< "   user_email_address_id = " << userEmailAddressConfirmation->getUserEmailAddressId()
+			<< " WHERE id = " << userEmailAddressConfirmation->getId();
+
+		connection->sendRawQuery(sql.str());
+	}
+}
+
+UserEmailAddressConfirmation *CharacterUtil::getUserEmailAddressConfirmationByUserEmailAddressId(sql::Connection connection, const int userEmailAddressId)
+{
+	std::stringstream sql;
+	sql::Query query;
+
+	sql << " SELECT *"
+		<< " FROM userEmailAddressConfirmation"
+		<< " WHERE user_email_address_id = " << userEmailAddressId;
+
+	query = connection->sendQuery(sql.str());
+	while(query->hasNextRow())
+	{
+		sql::Row row = query->getRow();
+		return getUserEmailAddressConfirmation(row);
+	}
+
+	return NULL;
+}
+
+void CharacterUtil::sendUserEmailAddressConfirmationEmail(sql::Connection connection, Character *character, const UserEmailAddress *userEmailAddress, const UserEmailAddressConfirmation *userEmailAddressConfirmation)
+{
+	std::string subject = "Email Verification";
+	std::string message = "Thank you for registering your email address. You can confirm your email with the following verification code: <span style='font-weight:bold;'>" + userEmailAddressConfirmation->getConfirmationKey() + "</span>";
+	MailUtil::sendEmail("noreply@kinslayermud.org", "KinslayerMUD", userEmailAddress->getEmailAddress(), subject, message);
+}
+
+void CharacterUtil::freeUserEmailAddresses(std::list<UserEmailAddress*> userEmailAddresses)
+{
+	while(userEmailAddresses.empty() == false)
+	{
+		delete userEmailAddresses.front();
+		userEmailAddresses.pop_front();
+	}
 }

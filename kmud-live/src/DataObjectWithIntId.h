@@ -7,12 +7,12 @@ protected:
 	int id;
 public:
 
-	bool isNew()
+	bool isNew() const
 	{
 		return id == -1;
 	}
 
-	int getId()
+	int getId() const
 	{
 		return id;
 	}

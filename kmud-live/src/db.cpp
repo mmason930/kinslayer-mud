@@ -41,6 +41,9 @@
 #include "UserDisabledCommand.h"
 #include "UserType.h"
 #include "CharacterUtil.h"
+#include "ClanUtil.h"
+#include "HttpServer.h"
+#include "GatewayDescriptorType.h"
 
 #ifdef KINSLAYER_JAVASCRIPT
 #include "js.h"
@@ -108,6 +111,7 @@ int Room::nr_dealloc = 0;
 
 sql::Context dbContext;
 sql::Connection gameDatabase;
+HttpServer httpServer;
 
 /***** Configuration Combat *****/
 Bash	BashData;
@@ -163,7 +167,6 @@ void boot_the_shops();
 extern Descriptor *descriptor_list;
 
 const int READ_SIZE = 256;
-
 
 /*************************************************************************
 *  routines for booting the system                                       *
@@ -427,7 +430,6 @@ void bootWorld(void)
 }
 void SetupMySQL( bool crash_on_failure )
 {
-	basicConfiguration = MiscUtil::loadResourcesFromFile(BASIC_CONFIG_FILE);
 	std::string username, password, dbname, hostname;
 
 	username = basicConfiguration["MySQL Username"];
@@ -549,22 +551,19 @@ void boot_db(void)
 
 	Log("Boot db -- BEGIN.");
 
-	Log("Setting up filesystem...");
-	setupFilesystem();
-
 	Log("Connecting to game database...");
 	SetupMySQL( true );
+	
+	Log("Booting the Configuration.");
+	Conf = new Config();
+	Conf->Load();
+	Conf->Save(); //Need to update the reboot count.
 
 	Log("Running Boot Maintenance Queries...");
 	miscBootMaintenance();
 
 	Log("Starting game session...");
 	startGameSession();
-
-	Log("Booting the Configuration.");
-	Conf = new Config();
-	Conf->Load();
-	Conf->Save(); //Need to update the reboot count.
 
 #ifdef KINSLAYER_JAVASCRIPT
     Log("Booting JS Triggers");
@@ -636,7 +635,7 @@ void boot_db(void)
 
 	//TheClock.Reset(true);
 	Zone *zone;
-	if( Conf->empty_world == false )
+	if( Conf->empty_world == false && basicConfiguration["Dev Mode"] == "0" )
 	{
 		for (i = 0; (zone = ZoneManager::GetManager().GetZoneByRnum(i)) != NULL; ++i)
 		{
@@ -1526,12 +1525,22 @@ std::string getNameById(const long id)
 	return "";
 }
 
-void Character::AddLogin(const std::string &host, time_t t)
+void Character::AddLogin(const std::string &host, const DateTime &loginDatetime, GatewayDescriptorType *gatewayDescriptorType)
 {
 	std::stringstream Buffer;
 
-	Buffer	<< "INSERT INTO userLogin (user_id, login_datetime, host) VALUES ('" << this->player.idnum
-		<< "', FROM_UNIXTIME(" << t << "), '" << host << "')";
+	Buffer
+		<< " INSERT INTO userLogin("
+		<< "   `user_id`,"
+		<< "   `login_datetime`,"
+		<< "   `host`,"
+		<< "   `gateway_descriptor_type`"
+		<< " ) VALUES ("
+		<< this->player.idnum << ","
+		<< sql::encodeQuoteDate(loginDatetime.getTime()) << ","
+		<< sql::escapeQuoteString(host) << ","
+		<< gatewayDescriptorType->getValue() << ")";
+
 	try {gameDatabase->sendRawQuery(Buffer.str());}
 	catch (sql::QueryException e)
 	{
@@ -1596,6 +1605,7 @@ bool Character::LoadLogins(std::list<pLogin> &Logins, std::string &Name,
 		login.Host = Row["host"];
 		login.time = Row.getTimestamp("login_datetime");
 		login.PlayerName = Name.empty() ? Row["username"] : StringUtil::cap(StringUtil::allLower(Name));
+		login.gatewayDescriptorType = (GatewayDescriptorType*)GatewayDescriptorType::getEnumByValue(Row.getInt("gateway_descriptor_type"));
 
 		Logins.push_back(login);
 	}
@@ -1603,16 +1613,20 @@ bool Character::LoadLogins(std::list<pLogin> &Logins, std::string &Name,
 	return true;
 }
 
-pLogin::pLogin( const std::string &h, time_t t )
+pLogin::pLogin( const std::string &h, time_t t, GatewayDescriptorType *gatewayDescriptorType )
 {
 	this->Host = h;
 	this->time = t;
+	this->gatewayDescriptorType = gatewayDescriptorType;
 }
 
 std::string pLogin::Print()
 {
 	std::stringstream buffer;
-	buffer << time.toString() << "     " << std::setw(14) << std::left << this->Host << "    " << PlayerName.c_str() << std::endl;
+	buffer << time.toString() << "     "
+		   << std::setw(15) << std::left << this->Host
+		   << std::setw(12) << std::left << this->gatewayDescriptorType->getStandardName()
+		   << "   " << PlayerName.c_str() << std::endl;
 
 	return buffer.str();
 }
@@ -2017,24 +2031,31 @@ bool Character::LoadAliases()
 }
 bool Character::LoadClans()
 {
-	std::string query = "SELECT * FROM userClan WHERE user_id=" + MiscUtil::Convert<std::string>(this->player.idnum);
-	sql::Query MyQuery;
-	sql::Row MyRow;
-	PlayerClan *clan;
+	std::stringstream sql;
+	
+	sql << " SELECT *"
+		<< " FROM userClan"
+		<< " WHERE user_id = " << this->getUserId();
 
-	try { MyQuery = gameDatabase->sendQuery(query); }
+	sql::Query query;
+	sql::Row row;
+	UserClan *userClan;
+
+	try
+	{
+		query = gameDatabase->sendQuery(sql.str());
+	}
 	catch( sql::QueryException e )
 	{
 		MudLog(BRF, LVL_APPR, TRUE, "Character::LoadClans : %s", e.getMessage().c_str());
 		return false;
 	}
-	for(unsigned int i = 0;i < MyQuery->numRows();++i)
+	
+	while(query->hasNextRow())
 	{
-		MyRow = MyQuery->getRow();
-		clan = new PlayerClan(atoi(MyRow[3].c_str()), atol(MyRow[2].c_str()), atol(MyRow[1].c_str()),
-			atoi(MyRow[4].c_str()), atoi(MyRow[5].c_str()), atoi(MyRow[6].c_str()));
-		clan->next = this->clans;
-		this->clans = clan;
+		row = query->getRow();
+		userClan = ClanUtil::getUserClan(row);
+		userClans.push_back(userClan);
 	}
 	return true;
 }
@@ -2252,10 +2273,9 @@ bool Character::SaveSkills()
 
 bool Character::SaveClans()
 {
-	for(PlayerClan *clan = this->clans;clan;clan = clan->next)
+	for(auto iter = userClans.begin();iter != userClans.end();++iter)
 	{
-		if(clan->IsAltered())
-			MySQLSavePlayerClan(this->player.name, clan, true);
+		ClanUtil::putUserClan( gameDatabase, (*iter) );
 	}
 	return true;
 }
@@ -3313,7 +3333,6 @@ void Character::Zero()
 	memset(&(this->aff_abils), 0, sizeof(this->aff_abils));
 	// struct CharPointData points
 
-	this->clans						=	NULL;
 	this->affected					=	NULL;
 	this->affection_list			=	NULL;
 	this->carrying					=	NULL;
@@ -3411,7 +3430,7 @@ Character::Character(const int nr, const int type, bool full_copy)
 	this->proto = false;
 	this->ignoreCommandTrigger = false;
 	this->pw_updated = false;
-	this->clans = (source->clans) ? (new PlayerClan(source->clans)) : (NULL);
+	this->userClans = ClanUtil::cloneUserClansFromMobPrototype(source);
 	this->points = source->points;
 	this->real_abils = source->real_abils;
 	this->aff_abils = source->aff_abils;
@@ -3598,11 +3617,7 @@ void Character::DeleteQuests()
 
 void Character::DeleteClans()
 {
-	for(PlayerClan *c = clans; c; c = clans)
-	{
-		clans = clans->next;
-		delete c;
-	}
+	ClanUtil::freeUserClans(userClans);
 }
 
 void Character::DeleteAffections()
@@ -3623,7 +3638,6 @@ MobOnlyData::~MobOnlyData()
 
 void Character::UnsetMobPrototypeSpecifics()
 {
-	this->clans = NULL;
 	this->wards.clear();
 	this->quests.clear();
 	this->ignores.clear();

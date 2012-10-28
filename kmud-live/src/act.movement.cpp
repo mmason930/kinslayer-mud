@@ -542,12 +542,12 @@ int can_move(Character *ch, int dir, int need_specials_check, bool flee)
 	need_movement = (movement_loss[SECT(ch->in_room)] +
 	                 movement_loss[SECT(EXIT(ch, dir)->to_room)]) / 2;
 
-	if(IS_TROLLOC(ch) || ch->GetClan(CLAN_WOLFBROTHER))
+	if(IS_TROLLOC(ch) || ch->getUserClan(CLAN_WOLFBROTHER))
 		need_movement = 2;
 	else
 		need_movement = MIN(need_movement,5);
 
-	//if(AFF_FLAGGED(ch, AFF_NOTICE) && !IS_TROLLOC(ch) && !ch->GetClan(CLAN_WOLFBROTHER) && !IS_BLADEMASTER(ch) && !IS_THIEF(ch))
+	//if(AFF_FLAGGED(ch, AFF_NOTICE) && !IS_TROLLOC(ch) && !ch->getUserClan(CLAN_WOLFBROTHER) && !IS_BLADEMASTER(ch) && !IS_THIEF(ch))
 		//need_movement += 1;
 
 	if(MOUNT(ch))
@@ -620,7 +620,7 @@ int Character::NeededToMove(Room* OtherRoom)
 	{
 		if(IS_WARDER(this) || IS_BLADEMASTER(this) || IS_FADE(this) || IS_GREYMAN(this) || IS_DREADLORD(this) || IS_OGIER(this))
 			need_movement = 2;
-		else if(this->GetClan(CLAN_WOLFBROTHER))
+		else if(this->getUserClan(CLAN_WOLFBROTHER))
 			need_movement = 2;
 		else
 		{
@@ -653,7 +653,7 @@ bool Character::SnuckIn()
 {
 	if( MOUNT(this) ) return false;
 	return	(	(AFF_FLAGGED(this, AFF_SNEAK) && MiscUtil::random(1, 125) <= GET_SKILL(this, SKILL_SNEAK)) || 
-				(IS_GREYMAN(this)) /*|| (this->GetClan(CLAN_WOLFBROTHER))*/		);
+				(IS_GREYMAN(this)) /*|| (this->getUserClan(CLAN_WOLFBROTHER))*/		);
 }
 bool Character::ShouldLayTrack()
 {
@@ -1114,7 +1114,7 @@ bool Object::CanLock()
 }
 bool Object::CanPick(Character *ch)
 {
-	return (GET_SKILL(ch, SKILL_PICK_LOCK) >= this->PickReq());
+	return (GET_OBJ_VAL(this, 3) != -1 && GET_SKILL(ch, SKILL_PICK_LOCK) >= this->PickReq());
 }
 int Object::PickReq()
 {
@@ -1255,8 +1255,9 @@ ACMD(do_gen_door)
 						/* equal after a -- operation. */
 						if (GET_OBJ_VAL(key, 0) == 0)
 						{
+							Act("$p breaks as you attempt to remove it from the lock...", FALSE, ch, key, NULL, TO_CHAR);
+							Act("$p breaks as $n attempts to remove it from the lock...", FALSE, ch, key, NULL, TO_ROOM);
 							key->Extract();
-							ch->Send("The key breaks as you attempt to remove it from the lock...\r\n");
 						}
 					}
 					else
@@ -1267,8 +1268,9 @@ ACMD(do_gen_door)
 							--GET_OBJ_VAL(key, 0);
 							if (GET_OBJ_VAL(key, 0) == 0)
 							{
+								Act("$p breaks as you attempt to remove it from the lock...", FALSE, ch, key, NULL, TO_CHAR);
+								Act("$p breaks as $n attempts to remove it from the lock...", FALSE, ch, key, NULL, TO_ROOM);
 								key->Extract();
-								ch->Send("The key breaks as you attempt to remove it from the lock...\r\n");
 							}
 						}
 					}
@@ -1362,6 +1364,7 @@ ACMD(do_gen_door)
 				TOGGLE_BIT(GET_OBJ_VAL(obj, 1), CONT_LOCKED);
 				break;
 			case SCMD_UNLOCK:
+			{
 				if(!obj->CanLock())
 				{
 					ch->Send("You can't seem to find a keyhole.\r\n");
@@ -1382,14 +1385,29 @@ ACMD(do_gen_door)
 					ch->Send("You don't have the proper key.\r\n");
 					return;
 				}
+
+				//At this point, the unlock succeeded.
+				Object *key = GET_EQ(ch, WEAR_HOLD);
+
+				if(key == NULL || GET_OBJ_VNUM(key) != obj->KeyNum())
+					key = ch->GetObjectFromInventory(obj->KeyNum());
+
+				if(key)
+				{
+					--GET_OBJ_VAL(key, 0);
+					if(GET_OBJ_VAL(key, 0) <= 0)
+					{
+						Act("$p breaks as you attempt to remove it from the lock...", FALSE, ch, key, NULL, TO_CHAR);
+						Act("$p breaks as $n attempts to remove it from the lock...", FALSE, ch, key, NULL, TO_ROOM);
+						key->Extract();
+					}
+				}
+
 				TOGGLE_BIT(GET_OBJ_VAL(obj, 1), CONT_LOCKED);
 				break;
+			}
 			case SCMD_PICK:
-//				if(!obj->CanLock())
-//				{
-//					ch->Send("You can't seem to find a keyhole.\r\n");
-//					return;
-//				}
+			{
 				if(obj->IsOpen())
 				{
 					ch->Send("But it's open!\r\n");
@@ -1407,6 +1425,7 @@ ACMD(do_gen_door)
 				}
 				TOGGLE_BIT(GET_OBJ_VAL(obj, 1), CONT_LOCKED);
 				break;
+			}
 			default:
 				ch->Send("Do what now?\r\n");
 				return;

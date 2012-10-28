@@ -29,6 +29,8 @@
 
 #include "MiscUtil.h"
 #include "ClanUtil.h"
+#include "DatabaseUtil.h"
+#include "MiscUtil.h"
 
 /* Structures */
 Character *combat_list = NULL;	/* head of l-list of fighting chars */
@@ -85,17 +87,24 @@ PKManager *PKManager::Self = (NULL);
 
 PKManager::PKManager()
 {
-	/* We need to determine the current top kill ID */
-	std::string QueryText = "SELECT kill_id FROM userPlayerKill ORDER BY kill_id DESC LIMIT 1;";
-	sql::Query MyQuery;
-	try {
-		MyQuery = gameDatabase->sendQuery(QueryText);
-	} catch(sql::QueryException e) {
+	// We need to determine the current top kill ID
+	sql::Query query;
+	std::string topKillIdString;
+	try
+	{
+		topKillIdString = DatabaseUtil::getSingleResultFromQuery(gameDatabase, "SELECT MAX(kill_id) FROM userPlayerKill");
+	}
+	catch(sql::QueryException e)
+	{
 		e.report();
 		MudLog(BRF, TRUE, LVL_APPR, "Unable to grab top kill ID upon PKManager construction.");
 		return;
 	}
-	this->nextKillID = ( MyQuery->numRows() == (0) ) ? (0) : (atoi(MyQuery->getRow()["kill_id"].c_str()));
+	
+	if(topKillIdString == "NULL")
+		this->nextKillID = 0;
+	else
+		this->nextKillID = MiscUtil::Convert<int>(topKillIdString);
 }
 PKManager::~PKManager() {}
 
@@ -109,18 +118,23 @@ void PKManager::Free()
 	if( Self != NULL ) delete (Self);
 }
 
-void PKManager::RegisterKill( Character *Killer, Character *Victim, const unsigned int &wtrans, const time_t &when,
-							  const int kill_id )
+void PKManager::RegisterKill( Character *Killer, Character *Victim, const unsigned int &wtrans, const time_t &when, const int kill_id )
 {
 	std::stringstream QueryText;
 
-	QueryText << "INSERT INTO userPlayerKill(kill_id,killer_id,victim_id,wp_transfer,time_of_death) VALUES(";
-	QueryText << SQLVal(kill_id);
-	QueryText << SQLVal(Killer->player.idnum);
-	QueryText << SQLVal(Victim->player.idnum);
-	QueryText << SQLVal(wtrans);
-	QueryText << "FROM_UNIXTIME(" << when << ")";
-	QueryText << ");";
+	QueryText	<< " INSERT INTO userPlayerKill("
+				<< "   `kill_id`,"
+				<< "   `killer_id`,"
+				<< "   `victim_id`,"
+				<< "   `wp_transfer`,"
+				<< "   `time_of_death`"
+				<< " ) VALUES ("
+				<< kill_id << ","
+				<< Killer->player.idnum << ","
+				<< Victim->player.idnum << ","
+				<< wtrans << ","
+				<< sql::encodeQuoteDate(when)
+				<< ")";
 
 	try {
 		gameDatabase->sendRawQuery( QueryText.str() );
@@ -403,15 +417,15 @@ struct attack_hit_type attack_hit_text[] =
 	    {"flail", "flails"},
 	    {"clobber", "clobbers"},
 	    {"clout", "clouts"}, 			/* 25 */
-	    {"pound", "pounds"},
 	    {"swat", "swats"},
 	    {"thump", "thumps"},
 	    {"whack", "whacks"},
-	    {"glance", "glances"}, 			/* 30 */
-	    {"jab", "jabs"},
+	    {"glance", "glances"},
+	    {"jab", "jabs"}, 			/* 30 */
 	    {"prick", "pricks"},
 	    {"penetrate", "penetrates"},
 	    {"lacerate", "lacerates"},
+		{"slit","slits"}				/* 34 */
     };
 
 #define IS_WEAPON(type) (((type) >= TYPE_HIT) && ((type) < TYPE_SUFFERING))
@@ -1482,7 +1496,7 @@ int Character::CalculateDamage( Character *victim, int Type, int BodyPart )
 			int min = wielded->GetTotalVal1();
 			int max = wielded->GetTotalVal2();
 
-			if ( this->IsInClan( GET_OBJ_CLAN( wielded ) ) )
+			if ( this->isInClan( GET_OBJ_CLAN( wielded ) ) )
 			{
 				min += GET_OBJ_CL_DMG1( wielded );
 				max += GET_OBJ_CL_DMG2( wielded );
@@ -1618,10 +1632,11 @@ int hit( Character * ch, Character * victim, int type )
 
 	if ( IS_NPC( victim ) && GET_RACE( victim ) == GET_RACE( ch ) )
 	{
-		for ( PlayerClan * cl = victim->clans;cl;cl = cl->next )
+		for(auto userClanIter = victim->userClans.begin();userClanIter != victim->userClans.end();++userClanIter)
 		{
-			if ( ClanUtil::getClan( cl->GetClanVnum() ) )
-				SET_BIT_AR( GET_WARRANTS( ch ), ClanUtil::getClan( cl->GetClanVnum() )->warrant );
+			UserClan *userClan = (*userClanIter);
+			if ( ClanUtil::getClan( userClan->getClanId() ) )
+				SET_BIT_AR( GET_WARRANTS( ch ), ClanUtil::getClan( userClan->getClanId() )->warrant );
 		}
 	}
 
@@ -1726,7 +1741,7 @@ void Character::PerformFear( Character *victim )
 	if ( victim == NULL )
 		return ;
 
-	if ( AFF_FLAGGED( victim, AFF_PARANOIA ) || victim->GetClan( CLAN_BLADEMASTERS ) )
+	if ( AFF_FLAGGED( victim, AFF_PARANOIA ) || victim->getUserClan( CLAN_BLADEMASTERS ) )
 		return ;
 
 	Act( "You stare into $n's eyeless face, unable to pull your eyes away as you feel your bones freeze.",
@@ -1840,7 +1855,7 @@ void perform_violence( void )
 
 		if ( wielded && FIGHTING( ch ) )
 		{
-			if ( GET_OBJ_VAL( wielded, 0 ) == WEAPON_SHORT_BLADE || AFF_FLAGGED( ch, AFF_HASTE ) /*|| IS_FADE( ch ) || ch->GetClan( CLAN_BLADEMASTERS )
+			if ( GET_OBJ_VAL( wielded, 0 ) == WEAPON_SHORT_BLADE || AFF_FLAGGED( ch, AFF_HASTE ) /*|| IS_FADE( ch ) || ch->getUserClan( CLAN_BLADEMASTERS )
 			        || IS_WARDER( ch ) */)
 			{
 				percent = MiscUtil::random( 1, 150 );	/* random for attack */

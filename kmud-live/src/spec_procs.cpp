@@ -389,21 +389,6 @@ bool Character::CanPractice( Weave* weave )
 		return false;
 	if( !this->AES_SEDAI() && weave->getName() == "Bond" )
 		return false;
-//	if( (!(this->AES_SEDAI() && this->clans->GetRank() >= 5 && this->clans->next && this->clans->next->GetRank() >= 5) && !((IS_DREADGUARD(this) || this->GetClan(CLAN_BLACK_TOWER)) && this->clans->GetRank() >= 6)) && weave->getName() == "Gate")
-	//Galnor 08/01/2009 - Rewritten to resolve instability.
-/*	if( weave->getName() == "Gate" ) {
-		PlayerClan *pc;
-		if( (pc = this->GetClan(CLAN_WHITE_AJAH)) && pc->GetRank() >= 5 ) return true;
-		if( (pc = this->GetClan(CLAN_GREEN_AJAH)) && pc->GetRank() >= 5 ) return true;
-		if( (pc = this->GetClan(CLAN_YELLOW_AJAH))&& pc->GetRank() >= 5 ) return true;
-		if( (pc = this->GetClan(CLAN_RED_AJAH))   && pc->GetRank() >= 5 ) return true;
-		if( (pc = this->GetClan(CLAN_YELLOW_AJAH))&& pc->GetRank() >= 5 ) return true;
-		if( (pc = this->GetClan(CLAN_BROWN_AJAH)) && pc->GetRank() >= 5 ) return true;
-		if( (pc = this->GetClan(CLAN_BLUE_AJAH))  && pc->GetRank() >= 5 ) return true;
-		if( (pc = this->GetClan(CLAN_BLACK_TOWER))&& pc->GetRank() >= 6 ) return true;
-		if( (pc = this->GetClan(CLAN_DREADGUARDS))&& pc->GetRank() >= 6 ) return true;
-		return false;//Conditions all fail.
-	}*/
 	return true;
 }
 
@@ -479,26 +464,28 @@ SPECIAL(guild)
 
 	percent = GET_SKILL(ch, weave->getVnum());
 
-	if( !IS_NPC(ch) && ch->clans )
+	if( !IS_NPC(ch) && ch->userClans.empty() == false )
 	{
 		Clan *clan;
-		for(PlayerClan *cl = ch->clans; cl; cl = cl->next)
+		for(auto userClanIter = ch->userClans.begin();userClanIter != ch->userClans.end();++userClanIter)
 		{
-			clan = ClanUtil::getClan(cl->GetClanVnum());
-			if(cl->GetRank() >= clan->bonus_skill_rank && weave->getVnum() == clan->bonus_skill)
+			UserClan *userClan = (*userClanIter);
+			clan = ClanUtil::getClan(userClan->getClanId());
+			if(userClan->getRank() >= clan->bonus_skill_rank && weave->getVnum() == clan->bonus_skill)
 				SET_SKILL(ch, weave->getVnum(), GET_SKILL(ch, weave->getVnum()) - clan->bonus_skill_val);
 		}
 	}
 	
 	percent += ch->SkillAdd(weave->getVnum());
 
-	if( !IS_NPC(ch) && ch->clans )
+	if( !IS_NPC(ch) && ch->userClans.empty() == false )
 	{
 		Clan *clan;
-		for(PlayerClan *cl = ch->clans; cl; cl = cl->next)
+		for(auto userClanIter = ch->userClans.begin();userClanIter != ch->userClans.end();++userClanIter)
 		{
-			clan = ClanUtil::getClan(cl->GetClanVnum());
-			if(cl->GetRank() >= clan->bonus_skill_rank && weave->getVnum() == clan->bonus_skill)
+			UserClan *userClan = (*userClanIter);
+			clan = ClanUtil::getClan(userClan->getClanId());
+			if(userClan->getRank() >= clan->bonus_skill_rank && weave->getVnum() == clan->bonus_skill)
 				SET_SKILL(ch, weave->getVnum(), GET_SKILL(ch, weave->getVnum()) + clan->bonus_skill_val);
 		}
 	}
@@ -535,7 +522,7 @@ void PokerAutoComplete( void* Data )
 void PokerPrint( void* Data )
 {
 	PokerTable* Table = (PokerTable*) Data;
-
+
 	Table->PrintBoard( 0, 0 );
 }
 void PokerShowCards( void* Data )
@@ -932,7 +919,7 @@ SPECIAL(bank)
 	Character *banker = (Character *)me;
 	int amount;
 
-	if(GET_RACE(banker) != GET_RACE(ch) || ch->WantedByPlayer(banker))
+	if(GET_RACE(banker) != GET_RACE(ch) || ch->wantedByPlayer(banker))
 		return 0;
 
 	if (CMD_IS(ch, "balance"))
