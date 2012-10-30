@@ -1242,7 +1242,7 @@ int Character::VnumMobile(std::string SearchName)
 	{
 		if(jsScriptVnum != 0)
 		{
-			boolean scriptFound = false;
+			bool scriptFound = false;
 			for(auto iter = Mob->js_scripts->begin();iter != Mob->js_scripts->end();++iter)
 			{
 				if((*iter)->vnum == jsScriptVnum)
