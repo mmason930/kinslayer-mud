@@ -488,10 +488,10 @@ void JSCharacter::detach( int tVnum, int nr )
 	if( !real || real->IsProto() ) return;
 	real->detachJS( tVnum, nr );
 }
-int JSCharacter::countJS( int tVnum )
+int JSCharacter::countJS( flusspferd::value tVnum )
 {
 	if( !real ) return 0;
-	return real->countJS( tVnum );
+	return real->countJS( tVnum.is_undefined() ? 0 : (int)tVnum.to_number() );
 }
 
 void JSCharacter::setPosition( int x )

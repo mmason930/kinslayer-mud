@@ -171,7 +171,7 @@ public:
 	bool doorIsRammable( const int dir );
 	void attach( int tVnum );
 	void detach( int tVnum, int nr );
-	int countJS( int tVnum );
+	int countJS( flusspferd::value tVnum );
 	int distanceTo( JSRoom *d );
 	int firstStep( JSRoom *d);
 	void digTo( int dir, JSRoom *d, bool bothSides, bool temporary );

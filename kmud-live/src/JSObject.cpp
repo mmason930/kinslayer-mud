@@ -32,10 +32,10 @@ void JSObject::detach( int tVnum, int nr )
 	if( !real || real->IsProto() ) return;
 	real->detachJS( tVnum, nr );
 }
-int JSObject::countJS( int tVnum )
+int JSObject::countJS( flusspferd::value tVnum )
 {
 	if( !real ) return 0;
-	return real->countJS( tVnum );
+	return real->countJS( tVnum.is_undefined() ? 0 : (int)tVnum.to_number() );
 }
 flusspferd::array JSObject::contents()
 {

@@ -89,10 +89,10 @@ void JSRoom::enableExit( int dir, bool bothSides )
 		real->GetNeighbor( dir )->dir_option[ rev_dir[ dir ] ]->Enable();
 }
 
-int JSRoom::countJS( int tVnum )
+int JSRoom::countJS( flusspferd::value tVnum )
 {
 	if( !real ) return 0;
-	return real->countJS( tVnum );
+	return real->countJS( tVnum.is_undefined() ? 0 : (int)tVnum.to_number() );
 }
 flusspferd::array JSRoom::people()
 {

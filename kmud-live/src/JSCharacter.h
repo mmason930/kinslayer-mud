@@ -349,7 +349,7 @@ public:
 	void setSkill( int s, int v );
 	void attach( int tVnum );
 	void detach( int tVnum, int nr );
-	int countJS( int tVnum );
+	int countJS( flusspferd::value tVnum );
 	bool in_clan( const int clan );
 	bool wantedBy( int cNum );
 	bool canSee( flusspferd::value t );

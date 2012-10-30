@@ -213,7 +213,7 @@ public:
 	void unlock();
 	void attach( int tVnum );
 	void detach( int tVnum, int nr );
-	int countJS( int tVnum );
+	int countJS( flusspferd::value tVnum );
 
 	void setObjVal( int x, int v );
 	int getObjVal( int x );

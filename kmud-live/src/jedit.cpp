@@ -330,7 +330,7 @@ int JSBindable::countJS( const int vnum )
 		return 0;
 	int cnt = 0;;
 	for(int i = 0;i < this->js_scripts->size();++i) {
-		if( this->js_scripts->at( i )->vnum == vnum )
+		if( vnum == 0 || this->js_scripts->at( i )->vnum == vnum )
 			++cnt;
 	}
 	return cnt;
