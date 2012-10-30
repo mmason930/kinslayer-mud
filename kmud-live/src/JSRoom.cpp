@@ -221,7 +221,7 @@ flusspferd::value JSRoom::load_obj( const int vnum )
 	}
 
 	obj = read_object(r_num, REAL, true);
-	sprintf(obj->creator, "Loaded by Javascript");
+	sprintf(obj->creator, "Loaded by Javascript. JSRoom #%d.", this->real->vnum);
 
 	obj->MoveToRoom(real);
 #ifdef KINSLAYER_JAVASCRIPT

@@ -134,48 +134,12 @@ void medit_setup_new(Descriptor *d)
 void medit_setup_existing(Descriptor *d, int rmob_num)
 {
 	Character *mob;
-#if defined(OASIS_MPROG)
 
-	MPROG_DATA *temp;
-	MPROG_DATA *head;
-#endif
-
-	/*
-	 * Allocate a scratch mobile structure.
-	 */
+	//Allocate a scratch mobile structure.
 
 	mob = new Character(CharMob);
 
 	MobManager::GetManager().CopyPrototype(mob, MobManager::GetManager().GetPrototype(rmob_num));
-
-#if defined(OASIS_MPROG)
-	/*
-	 * I think there needs to be a brace from the if statement to the #endif
-	 * according to the way the original patch was indented.  If this crashes,
-	 * try it with the braces and report to greerga@van.ml.org on if that works.
-	 */
-
-	if (GET_MPROG(mob))
-		CREATE(OLC_MPROGL(d), MPROG_DATA, 1);
-
-	head = OLC_MPROGL(d);
-
-	for (temp = GET_MPROG(mob); temp;temp = temp->next)
-	{
-		OLC_MPROGL(d)->type = temp->type;
-		OLC_MPROGL(d)->arglist = str_dup(temp->arglist);
-		OLC_MPROGL(d)->comlist = str_dup(temp->comlist);
-
-		if (temp->next)
-		{
-			CREATE(OLC_MPROGL(d)->next, MPROG_DATA, 1);
-			OLC_MPROGL(d) = OLC_MPROGL(d)->next;
-		}
-	}
-
-	OLC_MPROGL(d) = head;
-	OLC_MPROG(d) = OLC_MPROGL(d);
-#endif
 
 	OLC_MOB(d) = mob;
 	medit_disp_menu(d);

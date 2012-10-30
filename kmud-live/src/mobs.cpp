@@ -827,6 +827,9 @@ void MobManager::CopyPrototype( Character *Destination, Character *Source )
 
 	if(Destination->MobData)
 		delete Destination->MobData;
+
+	Destination->DeleteClans();
+
 	// Copy mob over.
 	*Destination = *Source;
 
@@ -839,6 +842,9 @@ void MobManager::CopyPrototype( Character *Destination, Character *Source )
 		Destination->js_scripts->push_back( Source->js_scripts->at( i ) );
 	}
 #endif
+	
+	//Create a deep copy of the clans.
+	Destination->userClans = ClanUtil::cloneUserClansFromMobPrototype(Source);
 }
 
 /* The following do not belong to the MobManager class, but are methods specific to dealing with MOBs */

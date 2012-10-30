@@ -110,7 +110,8 @@ flusspferd::value JSObject::load_obj( const int vnum )
 	}
 
 	obj = read_object(r_num, REAL, true);
-	sprintf(obj->creator, "Loaded by Javascript");
+	Room *inRoom = this->real->InRoom();
+	sprintf(obj->creator, "Loaded by Javascript. JSObject #%d. Room #%d.", this->real->getVnum(), (inRoom ? inRoom->vnum : -1));
 
 	obj_to_obj(obj,real);
 

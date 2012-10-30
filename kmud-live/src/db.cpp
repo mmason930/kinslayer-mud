@@ -1230,12 +1230,32 @@ void Kit::AppendBlankKit()
 
 int Character::VnumMobile(std::string SearchName)
 {
-	int found = 0;
+	int found = 0, jsScriptVnum = 0;
 	Character *Mob;
+
+	if( HasParameter(SearchName, "js") )
+	{
+		jsScriptVnum = atoi(ParamValue(SearchName, "js").c_str());
+	}
 
 	for(unsigned int i = 0;(Mob = MobManager::GetManager().GetPrototype(i)) != NULL;++i)
 	{
-		if( !isname(SearchName, Mob->player.name) )
+		if(jsScriptVnum != 0)
+		{
+			boolean scriptFound = false;
+			for(auto iter = Mob->js_scripts->begin();iter != Mob->js_scripts->end();++iter)
+			{
+				if((*iter)->vnum == jsScriptVnum)
+				{
+					scriptFound = true;
+					break;
+				}
+			}
+
+			if(!scriptFound)
+				continue;
+		}
+		else if( !isname(SearchName, Mob->player.name) )
 			continue;
 		Send("%3d. [%5d] %s\r\n", found++, MobManager::GetManager().GetIndex(i)->vnum, Mob->player.short_descr);
 	}

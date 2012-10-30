@@ -374,7 +374,8 @@ flusspferd::value JSCharacter::load_obj( const int vnum )
 	}
 
 	obj = read_object(r_num, REAL, true);
-	sprintf(obj->creator, "Loaded by Javascript");
+	Room *inRoom = this->real->InRoom();
+	sprintf(obj->creator, "Loaded by Javascript. Type: JSCharacter, ID: %ld, Vnum: %d, Room: %d.", this->real->player.idnum, this->real->getVnum(), (inRoom ? inRoom->vnum : -1));
 
 	obj_to_char(obj,real);
 
