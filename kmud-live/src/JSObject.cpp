@@ -320,15 +320,16 @@ void JSObject::move_to_obj(JSObject *dest)
 
 flusspferd::string JSObject::getExtraDescription()
 {
+	flusspferd::value v;
 	if(!real || real->IsPurged())
-		return flusspferd::object();
+		return v.to_string();
 	extra_descr_data *extraDescription = real->GetExDesc();
 	if(extraDescription)
 	{
-		flusspferd::value v = extraDescription->description;
+		v = extraDescription->description;
 		return v.to_string();
 	}
-	return flusspferd::object();
+	return v.to_string();
 }
 
 flusspferd::array JSObject::getAffects()
