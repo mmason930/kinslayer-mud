@@ -326,8 +326,7 @@ flusspferd::string JSObject::getExtraDescription()
 	extra_descr_data *extraDescription = real->GetExDesc();
 	if(extraDescription)
 	{
-		v = extraDescription->description;
-		return v.to_string();
+		flusspferd::string(extraDescription->description);
 	}
 	return v.to_string();
 }
