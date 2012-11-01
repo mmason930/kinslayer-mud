@@ -323,11 +323,11 @@ flusspferd::string JSObject::getExtraDescription()
 	flusspferd::value v;
 	if(!real || real->IsPurged())
 		return v.to_string();
+	
 	extra_descr_data *extraDescription = real->GetExDesc();
 	if(extraDescription)
-	{
-		flusspferd::string(extraDescription->description);
-	}
+		return flusspferd::string(extraDescription->description);
+
 	return v.to_string();
 }
 
