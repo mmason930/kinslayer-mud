@@ -102,6 +102,8 @@ FLUSSPFERD_CLASS_DESCRIPTION(
 		("scalpRace", getter, getScalpRace)
 		("isScalp", getter, getIsScalp)
 		("isPlayerScalp", getter, getIsPlayerScalp)
+		("extraDescription", getter, getExtraDescription)
+		("affects", getter, getAffects)
 		))
 {
 public:
@@ -175,6 +177,8 @@ public:
     {
 		return flusspferd::string( (real ? ( real->retool_sdesc ? real->retool_sdesc : real->short_description ) : "Invalid") );
     }
+	flusspferd::string getExtraDescription();
+	flusspferd::array getAffects();
 
 	int cost()			{ return (real ? real->obj_flags.cost : 0); }
 	int cost_per_day()	{ return (real ? real->obj_flags.cost_per_day : 0); }

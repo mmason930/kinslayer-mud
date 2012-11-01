@@ -318,4 +318,34 @@ void JSObject::move_to_obj(JSObject *dest)
 	obj_to_obj(real,dest->toReal());
 }
 
+flusspferd::string JSObject::getExtraDescription()
+{
+	if(!real || real->IsPurged())
+		return flusspferd::object();
+	extra_descr_data *extraDescription = real->GetExDesc();
+	if(extraDescription)
+		return flusspferd::string(extraDescription->description);
+	return flusspferd::object();
+}
+
+flusspferd::array JSObject::getAffects()
+{
+	flusspferd::array a = flusspferd::create_array();
+	if(!real || real->IsPurged())
+		return a;
+	
+	for(int counter = 0; counter < MAX_OBJ_AFFECT; ++counter)
+	{
+		if(real->affected[counter].modifier)
+		{
+			flusspferd::object objectAffect = flusspferd::create_object();
+			objectAffect.set_property("location", (int)real->affected[counter].location);
+			objectAffect.set_property("modifier", (int)real->affected[counter].modifier);
+			a.call("push", objectAffect);
+		}
+	}
+
+	return a;
+}
+
 #endif

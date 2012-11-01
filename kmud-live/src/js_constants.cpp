@@ -417,6 +417,28 @@ flusspferd::object makeConstants()
 	o.set_property("ARENA_YELLOW", flusspferd::value(ARENA_YELLOW));
 	o.set_property("ARENA_GREEN", flusspferd::value(ARENA_GREEN));
 
+	o.set_property("APPLY_NONE", flusspferd::value(APPLY_NONE));
+	o.set_property("APPLY_STR", flusspferd::value(APPLY_STR));
+	o.set_property("APPLY_DEX", flusspferd::value(APPLY_DEX));
+	o.set_property("APPLY_INT", flusspferd::value(APPLY_INT));
+	o.set_property("APPLY_WIS", flusspferd::value(APPLY_WIS));
+	o.set_property("APPLY_CON", flusspferd::value(APPLY_CON));
+	o.set_property("APPLY_CHA", flusspferd::value(APPLY_CHA));
+	o.set_property("APPLY_CLASS", flusspferd::value(APPLY_CLASS));
+	o.set_property("APPLY_LEVEL", flusspferd::value(APPLY_LEVEL));
+	o.set_property("APPLY_AGE", flusspferd::value(APPLY_AGE));
+	o.set_property("APPLY_CHAR_WEIGHT", flusspferd::value(APPLY_CHAR_WEIGHT));
+	o.set_property("APPLY_CHAR_HEIGHT", flusspferd::value(APPLY_CHAR_HEIGHT));
+	o.set_property("APPLY_MANA", flusspferd::value(APPLY_MANA));
+	o.set_property("APPLY_HIT", flusspferd::value(APPLY_HIT));
+	o.set_property("APPLY_MOVE", flusspferd::value(APPLY_MOVE));
+	o.set_property("APPLY_GOLD", flusspferd::value(APPLY_GOLD));
+	o.set_property("APPLY_EXP", flusspferd::value(APPLY_EXP));
+	o.set_property("APPLY_DB", flusspferd::value(APPLY_DB));
+	o.set_property("APPLY_HITROLL", flusspferd::value(APPLY_HITROLL));
+	o.set_property("APPLY_DAMROLL", flusspferd::value(APPLY_DAMROLL));
+	o.set_property("APPLY_RACE", flusspferd::value(APPLY_RACE));
+
 	return o;
 }
 
