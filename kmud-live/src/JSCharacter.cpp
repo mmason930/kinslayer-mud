@@ -201,7 +201,7 @@ flusspferd::array JSCharacter::inventory()
 	{
 		Object *o;
 		for (o = real->carrying; o; o = o->next_content)
-			a.call("push", lookupValue( o ) );
+			a.push(lookupValue(0));
 	}
 	return a;
 }
@@ -774,6 +774,14 @@ int JSCharacter::getAge()
 	if( real && !real->IsPurged() )
 		return GET_AGE(real);
 	return 0;
+}
+
+flusspferd::object JSCharacter::getCreatedDatetime()
+{
+	if(!real || real->IsPurged())
+		return flusspferd::object();
+
+	return JS_createDatetime(real->player.time.birth);
 }
 
 

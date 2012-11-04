@@ -40,6 +40,8 @@ public:
 	void setMonth(int month);
 	void setYear(int year);
 
+	bool sameDay(const DateTime &datetime) const;
+
 	void moveDayForward();
 	void moveDayBackward();
 	void moveMonthForward();

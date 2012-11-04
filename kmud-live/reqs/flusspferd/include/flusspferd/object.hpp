@@ -149,6 +149,7 @@ public:
    */
   value apply(object const &fn, arguments const &arg);
 
+  object object::constructor() const;
   /**
    * Call an object method.
    *

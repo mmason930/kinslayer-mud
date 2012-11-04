@@ -407,3 +407,8 @@ void DateTime::_setSecond(const unsigned char second)
 {
 	this->second = second;
 }
+
+bool DateTime::sameDay(const DateTime &datetime) const
+{
+	return datetime.getYear() == getYear() && datetime.getMonth() == getMonth() && datetime.getDay() == getDay();
+}

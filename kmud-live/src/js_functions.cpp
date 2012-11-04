@@ -1538,4 +1538,11 @@ void JS_sendToZone(int zoneNumber, flusspferd::string message)
 	sendToZone(message.c_str(), zone->GetRnum());
 }
 
+flusspferd::object JS_createDatetime(const DateTime &dateTime)
+{
+	std::stringstream buffer;
+	buffer << "new Date(" << (dateTime.getTime() * 1000) << ");";
+	return flusspferd::evaluate(buffer.str()).to_object();
+}
+
 #endif

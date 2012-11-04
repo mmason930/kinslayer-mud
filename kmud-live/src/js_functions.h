@@ -92,7 +92,7 @@ int JS_getRankRequirement(int rankTo);
 flusspferd::string JS_sqlEncodeQuoteDate(flusspferd::object dateTime);
 
 void JS_sendToZone(int zoneNumber, flusspferd::string message);
-
+flusspferd::object JS_createDatetime(const DateTime &dateTime);
 
 #endif
 #endif

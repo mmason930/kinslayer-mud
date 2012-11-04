@@ -26,6 +26,7 @@
 
 extern Descriptor *descriptor_list;
 extern struct TimeData time_info;
+extern std::string subroutine;
 
 /* local functions */
 struct GameTime *real_time_passed(time_t t2, time_t t1);
@@ -632,8 +633,12 @@ void MudLog(int type, int level, int file, const char *str, ...)
 	if (file)
 	{
 		Log("%s", format);
+		
+		std::string fileName = STDERR;
+		if(subroutine.empty() == false)
+			fileName = std::string("misc/") + subroutine;
 
-		if(!(logger = fopen(STDERR, "a+")))
+		if(!(logger = fopen(fileName.c_str(), "a+")))
 		{
 			Log("ERROR OPENING MudLog FILE!");
 			return;
@@ -837,48 +842,7 @@ int get_filename(const std::string &orig_name, char *filename, int mode)
 	for (ptr = name; *ptr;++ptr)
 		*ptr = tolower(*ptr);
 
-	switch (LOWER(orig_name[0]))
-	{
-		case 'a':
-		case 'b':
-		case 'c':
-		case 'd':
-		case 'e':
-			middle = "A-E";
-			break;
-		case 'f':
-		case 'g':
-		case 'h':
-		case 'i':
-		case 'j':
-			middle = "F-J";
-			break;
-		case 'k':
-		case 'l':
-		case 'm':
-		case 'n':
-		case 'o':
-			middle = "K-O";
-			break;
-		case 'p':
-		case 'q':
-		case 'r':
-		case 's':
-		case 't':
-			middle = "P-T";
-			break;
-		case 'u':
-		case 'v':
-		case 'w':
-		case 'x':
-		case 'y':
-		case 'z':
-			middle = "U-Z";
-			break;
-		default:
-			middle = "ZZZ";
-			break;
-	}
+
 
 	sprintf(filename, "%s%s"SLASH"%s.%s", prefix, middle, name, suffix);
 	return 1;

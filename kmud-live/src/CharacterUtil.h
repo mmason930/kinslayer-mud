@@ -30,6 +30,9 @@ public:
 	static void putUserEmailAddressConfirmation(sql::Connection connection, UserEmailAddressConfirmation *userEmailAddressConfirmation);
 	static void sendUserEmailAddressConfirmationEmail(sql::Connection connection, Character *character, const UserEmailAddress *userEmailAddress, const UserEmailAddressConfirmation *userEmailAddressConfirmation);
 	static void freeUserEmailAddresses(std::list<UserEmailAddress*> userEmailAddresses);
+	static std::list<class UserMacro *> getUserMacros(sql::Connection connection, const unsigned int userId);
+	static class UserMacro *getUserMacro(sql::Row row);
+	static void putUserMacro(sql::Connection connection, class UserMacro *);
 };
 
 #endif

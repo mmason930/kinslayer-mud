@@ -77,6 +77,7 @@
 #include "HttpUtil.h"
 #include "HttpException.h"
 #include "HttpServer.h"
+#include <boost/regex.hpp>
 
 extern HttpServer httpServer;
 
@@ -111,6 +112,7 @@ extern time_t time_of_boot_high;
 extern int top_of_objt;
 extern reset_q_type reset_q;
 kuDescriptor *gatewayConnection;
+std::string subroutine;
 
 extern char *credits;
 extern char *news;
@@ -298,6 +300,12 @@ int main( int argc, char **argv )
 
 		switch ( *( argv[ pos ] + 1 ) )
 		{
+		case '-':
+		{//Sub Routine.
+
+			subroutine = argv[pos] + 2;
+			break;
+		}
 		case 'd':
 			if ( *( argv[ pos ] + 2 ) )
 				dir = argv[ pos ] + 2;
@@ -371,6 +379,99 @@ int main( int argc, char **argv )
 		port = atoi(basicConfiguration["MUD Port"].c_str());
 	else if(!port)
 		port = DFLT_PORT;
+
+
+	//Check to see if we need to perform a subroutine.
+	if(subroutine.empty() == false)
+	{
+		Log("Establishing database connection...");
+		SetupMySQL(true);
+
+		if(!strcmp(subroutine, "ImportPlayerLogs"))
+		{
+			try
+			{
+				MudLog(BRF, 100, TRUE, "Importing player logs.");
+				DateTime currentDatetime;
+				std::stringstream sqlBuffer;
+
+				boost::filesystem::path playerLogDirectoryPath(LIB_PLRLOGS);
+				boost::filesystem::directory_iterator end;
+				for( boost::filesystem::directory_iterator iter(playerLogDirectoryPath) ; iter != end ; ++iter )
+				{
+					std::string fileName = (*iter).filename();
+					std::string::size_type pos;
+
+					pos = fileName.find('_');
+
+					int userId, year, month, day;
+
+					userId = atoi(fileName.substr(0, pos).c_str());
+					year = atoi(fileName.substr(pos+1, 4).c_str());
+					month = atoi(fileName.substr(pos+5, 2).c_str());
+					day = atoi(fileName.substr(pos+7, 2).c_str());
+
+					DateTime fileDatetime;
+				
+					fileDatetime.setYear(year);
+					fileDatetime.setMonth(month);
+					fileDatetime.setDay(day);
+
+					if(!currentDatetime.sameDay(fileDatetime))
+					{
+						try {
+							MudLog(BRF, 100, TRUE, "Processing `%s`...", (*iter).path().string().c_str());
+							std::ifstream fileStream((*iter).path().string());
+							std::string logBuffer;
+
+							fileStream.seekg(0, std::ios::end);   
+							logBuffer.reserve(fileStream.tellg());
+							fileStream.seekg(0, std::ios::beg);
+
+							logBuffer.assign((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
+
+							fileStream.close();
+							sqlBuffer.str("");
+							sqlBuffer
+								<< " INSERT INTO userLog("
+								<< "   `user_id`,"
+								<< "   `console_output`,"
+								<< "   `record_date`"
+								<< " ) VALUES ("
+								<< userId << ","
+								<< sql::escapeQuoteString(logBuffer) << ","
+								<< sql::encodeQuoteDate(fileDatetime.getTime()) << ")";
+
+							gameDatabase->sendRawQuery(sqlBuffer.str());
+
+							remove((*iter).path().string().c_str());
+						}
+						catch(sql::QueryException exception)
+						{
+							MudLog(BRF, 100, TRUE, "Could not store log. Error: %s", exception.getMessage().c_str());
+						}
+					}
+					else
+					{
+						MudLog(BRF, 100, TRUE, "Skipping `%s`.", (*iter).path().string().c_str());
+					}
+				}
+			}
+			catch(std::exception e)
+			{
+				MudLog(BRF, 100, TRUE, "Error while importing: %s", e.what());
+			}
+
+			MudLog(BRF, 100, TRUE, "Finished processing player logs.");
+		}
+		else
+		{
+			Log("Unknown subroutine `%s`.", subroutine.c_str());
+		}
+
+		return 0;
+	}
+
 
 	if ( scheck )
 	{
@@ -1952,8 +2053,7 @@ void vwrite_to_output( Descriptor *t, int swap_args, const char *format, va_list
 	if ( t->descriptor->getOutputBufferSize() < LARGE_BUFSIZE )
 	{
 		t->descriptor->send(EndString);
-		if ( t->character && PLR_FLAGGED( t->character, PLR_LOGGER ) )
-			t->character->LogOutput( EndString );
+		t->character->LogOutput( EndString );
 	}
 	else
 	{
@@ -2232,34 +2332,27 @@ clock_t GetClockDifference()
 *       Public routines for system-to-player-communication        *
 **************************************************************** */
 
-void Character::LogOutput( std::string buffer )
+void Character::LogOutput( const std::string &buffer )
 {
-	std::string::size_type front, back, pos, size;
-	char filename[ 256 ];
+	char timestamp[16];
+	time_t timeNow = time(0);
+	tm *tmNow = localtime(&timeNow);
+	std::stringstream filePathBuffer;
+	std::string filePath;
 
-	for ( size = buffer.size(), front = buffer.find( "\x1B[", 0 );front <= size;front = buffer.find( "\x1B[", 0 ) )
-	{
-		for ( back = front;back <= size && buffer[ back ] != 'm';++back )
-			;
-		buffer.erase( front, ( back - front ) + 1 );
-		size = buffer.size();
-	}
-
-	get_filename( this->player.name.c_str(), filename, PLOG_FILE );
-
+	strftime(timestamp, sizeof(timestamp) - 1, "%Y%m%d", tmNow);
+	filePathBuffer << LIB_PLRLOGS << this->player.idnum << "_" << timestamp << ".plog";
+	filePath = filePathBuffer.str();
+	
 	FILE *outfile;
 
-	if ( !( outfile = fopen( filename, "a+" ) ) )
+	if ( !( outfile = fopen( filePath.c_str(), "a+" ) ) )
 	{
 		Log( "Unable to open log file for %s.", GET_NAME( this ) );
-		return ;
+		return;
 	}
 
-	for ( pos = buffer.find( "\r", 0 );pos != std::string::npos;pos = buffer.find( "\r", 0 ) )
-	{
-		buffer.erase( pos, 1 );
-	}
-	fputs( buffer.data(), outfile );
+	fputs(buffer.data(), outfile);
 	fclose( outfile );
 }
 

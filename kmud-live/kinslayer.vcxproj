@@ -259,6 +259,7 @@
     <ClInclude Include="src\UserEmailAddress.h" />
     <ClInclude Include="src\UserEmailAddressConfirmation.h" />
     <ClInclude Include="src\UserLogoutType.h" />
+    <ClInclude Include="src\UserMacro.h" />
     <ClInclude Include="src\UserType.h" />
     <ClInclude Include="src\weather.h" />
     <ClInclude Include="src\weaves.h" />

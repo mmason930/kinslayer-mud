@@ -496,40 +496,10 @@ void setupFilesystem()
 		boost::filesystem::create_directory("misc");
 	}
 
-	if(!boost::filesystem::exists("plrlogs")) {
+	if(!boost::filesystem::exists(LIB_PLRLOGS)) {
 
 		Log("Creating lib/plrlogs...");
 		boost::filesystem::create_directory("plrlogs");
-	}
-
-	if(!boost::filesystem::exists("plrlogs/A-E")) {
-
-		Log("Creating lib/plrlogs/A-E...");
-		boost::filesystem::create_directory("plrlogs/A-E");
-	}
-
-	if(!boost::filesystem::exists("plrlogs/F-J")) {
-
-		Log("Creating lib/plrlogs/F-J...");
-		boost::filesystem::create_directory("plrlogs/F-J");
-	}
-
-	if(!boost::filesystem::exists("plrlogs/K-O")) {
-
-		Log("Creating lib/plrlogs/K-O...");
-		boost::filesystem::create_directory("plrlogs/K-O");
-	}
-
-	if(!boost::filesystem::exists("plrlogs/P-T")) {
-
-		Log("Creating lib/plrlogs/P-T...");
-		boost::filesystem::create_directory("plrlogs/P-T");
-	}
-
-	if(!boost::filesystem::exists("plrlogs/U-Z")) {
-
-		Log("Creating lib/plrlogs/U-Z...");
-		boost::filesystem::create_directory("plrlogs/U-Z");
 	}
 
 	if(!boost::filesystem::exists("misc/BasicConfig")) {
@@ -838,9 +808,25 @@ void Room::BootWorld()
 	Clock clock1;
 	clock1.turnOn();
 	try {
-		RoomQuery = gameDatabase->sendQuery( "SELECT * FROM rooms ORDER BY vnum ASC;" );
-		ExitQuery = gameDatabase->sendQuery( "SELECT * FROM roomExit ORDER BY room_vnum ASC;" );
-		ObjectQuery=gameDatabase->sendQuery( "SELECT id,holder_id FROM objects WHERE holder_type='R' AND holder_id IN(SELECT vnum FROM rooms) ORDER BY (holder_id+0) ASC;" );
+		std::stringstream roomQueryBuffer, exitQueryBuffer, objectQueryBuffer;
+
+		roomQueryBuffer << " SELECT *"
+						<< " FROM rooms"
+						<< " ORDER BY vnum ASC";
+
+		exitQueryBuffer << " SELECT *"
+						<< " FROM roomExit"
+						<< " ORDER BY room_vnum ASC";
+
+		objectQueryBuffer << " SELECT id, holder_id"
+						  << " FROM objects"
+						  << " WHERE holder_type='R'"
+						  << " AND holder_id IN(SELECT vnum FROM rooms)"
+						  << " ORDER BY (holder_id+0) ASC";
+
+		RoomQuery = gameDatabase->sendQuery( roomQueryBuffer.str() );
+		ExitQuery = gameDatabase->sendQuery( exitQueryBuffer.str() );
+		ObjectQuery=gameDatabase->sendQuery( objectQueryBuffer.str() );
 #ifdef KINSLAYER_JAVASCRIPT
 		jsQuery    =gameDatabase->sendQuery( "SELECT * FROM js_attachments WHERE type='R' ORDER BY target_vnum ASC,id ASC;" );
 #endif

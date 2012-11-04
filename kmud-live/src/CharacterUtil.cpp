@@ -5,6 +5,7 @@
 #include "UserEmailAddress.h"
 #include "UserEmailAddressConfirmation.h"
 #include "CharacterUtil.h"
+#include "UserMacro.h"
 #include "StringUtil.h"
 #include "MiscUtil.h"
 #include "MailUtil.h"
@@ -447,5 +448,72 @@ void CharacterUtil::freeUserEmailAddresses(std::list<UserEmailAddress*> userEmai
 	{
 		delete userEmailAddresses.front();
 		userEmailAddresses.pop_front();
+	}
+}
+
+std::list<UserMacro *> CharacterUtil::getUserMacros(sql::Connection connection, const unsigned int userId)
+{
+	std::list<UserMacro *> userMacros;
+	std::stringstream sqlBuffer;
+	sql::Query query;
+	sql::Row row;
+
+	sqlBuffer	<< " SELECT *"
+				<< " FROM userMacro"
+				<< " WHERE user_id = " << userId;
+
+	query = connection->sendQuery(sqlBuffer.str());
+	while(query->hasNextRow())
+	{
+		userMacros.push_back(CharacterUtil::getUserMacro(query->getRow()));
+	}
+
+	return userMacros;
+}
+
+UserMacro *CharacterUtil::getUserMacro(sql::Row row)
+{
+	UserMacro *userMacro = new UserMacro();
+
+	userMacro->setId(row.getInt("id"));
+	userMacro->setUserId(row.getInt("user_id"));
+	userMacro->setKeyCode(row.getInt("key_code"));
+	userMacro->setReplacement(row.getString("replacement"));
+	userMacro->setCreatedDatetime(DateTime(row.getTimestamp("created_datetime")));
+	
+	return userMacro;
+}
+
+void CharacterUtil::putUserMacro(sql::Connection connection, UserMacro *userMacro)
+{
+	std::stringstream sqlBuffer;
+
+	if(userMacro->isNew())
+	{
+		sqlBuffer	<< " INSERT INTO userMacro("
+					<< "   `user_id`,"
+					<< "   `key_code`,"
+					<< "   `replacement`,"
+					<< "   `created_datetime`"
+					<< " ) VALUES ("
+					<< userMacro->getUserId() << ","
+					<< userMacro->getKeyCode() << ","
+					<< sql::escapeQuoteString(userMacro->getReplacement()) << ","
+					<< sql::encodeQuoteDate(userMacro->getCreatedDatetime().getTime()) << ")";
+
+		connection->sendRawQuery(sqlBuffer.str());
+		userMacro->setId(connection->lastInsertID());
+	}
+	else
+	{
+
+		sqlBuffer	<< " UPDATE userMacro SET"
+					<< "   user_id = " << userMacro->getUserId() << ","
+					<< "   key_code = " << userMacro->getKeyCode() << ","
+					<< "   replacement = " << sql::escapeQuoteString(userMacro->getReplacement()) << ","
+					<< "   created_datetime = " << sql::encodeQuoteDate(userMacro->getCreatedDatetime().getTime())
+					<< " WHERE id = " << userMacro->getId();
+
+		connection->sendRawQuery(sqlBuffer.str());
 	}
 }

@@ -126,6 +126,7 @@ FLUSSPFERD_CLASS_DESCRIPTION(
 		("idle", getter, getIdle)
 		("linkless", getter, getLinkless)
 		("age", getter, getAge)
+		("createdDatetime", getter, getCreatedDatetime)
 
         // read-write properties
 	("invis", getter_setter, (getInvis, setInvis))
@@ -212,7 +213,8 @@ public:
 	void resetTrades() { if( !real || real->IsPurged() ) return; real->ResetTrades(); }
     flusspferd::value eq(int pos);
 
-
+	
+	flusspferd::object getCreatedDatetime();
 	flusspferd::string getName() { return ( (real && !real->IsPurged()) ? GET_NAME(real) : "Invalid" ); }
 	flusspferd::string getNameList()
 	{

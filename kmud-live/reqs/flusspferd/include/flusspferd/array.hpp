@@ -63,6 +63,8 @@ public:
   /// Get an array element.
   value get_element(std::size_t n) const;
 
+  void push(value val);
+
   /// Set an array element.
   void set_element(std::size_t n, value const &x);
 

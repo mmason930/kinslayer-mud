@@ -2262,7 +2262,7 @@ public:
 	void SetSkillDefaults();
 	void extractUnrentables();
 	void StatSelectionMenu( bool notify );
-	void LogOutput( std::string buffer );
+	void LogOutput( const std::string &buffer );
 	void ReadWeaves();
 	void WriteWeaves();
 	void SendTell( Character *target, char *arg );

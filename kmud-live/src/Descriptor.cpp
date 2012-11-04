@@ -223,6 +223,9 @@ void Descriptor::sendWebSocketUsernameCommand(const std::string &username)
 	commandObject.set_property("method", "Username");
 	commandObject.set_property("username", username);
 
+	flusspferd::array macroArray = flusspferd::create_array();
+
+
 	sendWebSocketCommand(JS_stringifyJson(commandObject));
 }
 

@@ -495,7 +495,10 @@ ACMD(do_view)
 			{
 				if( i == c->RankNames.size() && n == 1 )
 				{
-					ch->Send("\r\nThe Council\r\n");
+					if(IsTowerClan(c->vnum))
+						ch->Send("\r\nSitters\r\n");
+					else
+						ch->Send("\r\nThe Council\r\n");
 					CurrentList = &TheCouncil;
 				}
 				std::list<std::string>::iterator name = CurrentList->begin();

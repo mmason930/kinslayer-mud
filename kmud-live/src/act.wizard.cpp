@@ -57,6 +57,7 @@
 
 #include "TestResource.h"
 #include "HttpServer.h"
+#include "Exception.h"
 
 /*   external vars  */
 extern GameTime time_info;
@@ -1706,6 +1707,17 @@ ACMD(do_pardon)
 	victim->RemoveWarrant(ch, clan);
 	MudLog(BRF, MAX(LVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s has pardoned %s.", GET_NAME(ch), GET_NAME(victim));
 
+	if(!load)
+	{//We want all MOBs in the clan to forget the player if they previously were set to aggro them.
+		for(Character *mob = character_list;mob;mob = mob->next)
+		{
+			if(IS_NPC(mob) && mob->isInClan(clan))
+			{
+				mob->Forget(victim);
+			}
+		}
+	}
+
 	CLEANUP(victim, load);
 }
 
@@ -2648,12 +2660,6 @@ ACMD(do_award)
 	HalfChop(argument, questPointAmountString, argument);
 	skip_spaces(&argument);
 
-	if(GET_LEVEL(ch) < LVL_GOD && !IS_NPC(ch))
-	{
-		ch->Send("What?!?\r\n");
-		return;
-	}
-
 	if(!*targetUserName || !*clanName || !*questPointAmountString || !*argument)
 	{
 		ch->Send("Syntax: <Player Name> <Clan Name> <Quest Points> <Reason>\r\n");
@@ -2682,9 +2688,30 @@ ACMD(do_award)
 
 	questPointAmount = atoi(questPointAmountString);
 
+	//Check to see if the user is allowed to perform this action.
+	bool isPermitted = false;
+	if(GET_LEVEL(ch) >= LVL_GRGOD || IS_NPC(ch))
+		isPermitted = true;
+	else
+	{
+		UserClan *userClan = ch->getUserClan(clanId);
+		if(userClan && userClan->getIsCouncil())
+			isPermitted = true;
+	}
+
+	if(!isPermitted)
+	{
+		ch->Send("You are not permitted to perform this action.\r\n");
+		return;
+	}
+
 	try
 	{
 		clanQuestPointTransaction = ClanUtil::performQuestPointTransaction(gameDatabase, targetUserId, clanId, questPointAmount, ch->getUserType(), ch->getUserId(), argument); //'argument' is the reason.
+	}
+	catch(Exception e)
+	{
+		ch->Send("%s\r\n", e.what());
 	}
 	catch(std::exception e)
 	{
