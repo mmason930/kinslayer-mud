@@ -17,66 +17,7 @@
 			<result name="Success" type="tiles">Home</result>
 		</action>
 		
-		<action name="CallTarget" class="org.kinslayermud.web.actions.CallTargetAction" method="execute">
-			<result name="Redirect" type="tiles">${forward}</result>
-		</action>
-
-		<action name="GetImage" class="org.kinslayermud.web.actions.GetImageAction" method="execute">
-		</action>
-		
-		<action name="Browse" class="org.kinslayermud.web.search.SearchAction" method="execute">
-			<result name="Success" type="tiles">SearchResults</result>
-			<result name="Failure" type="chain">Home</result>
-		</action>
-		
-		<action name="ViewListing" class="org.kinslayermud.web.search.ViewListingAction" method="execute">
-			<result name="Success" type="tiles">ViewListing</result>
-			<result name="ListingNotFound" type="redirect">ViewCart</result>
-			<result name="Failure" type="chain">Home</result>
-		</action>
-		
-		<action name="AddCartSaleProduct" class="org.kinslayermud.web.checkout.AddCartSaleProductAction">
-			<result name="Success" type="redirect">ViewCart</result>
-			<result name="Failure" type="chain">Home</result>
-		</action>
-		
-		<action name="RemoveFromCart" class="org.kinslayermud.web.checkout.RemoveFromCartAction">
-			<result name="Success" type="redirect">ViewCart</result>
-			<result name="Failure" type="chain">Home</result>
-		</action>
-		
-		<action name="ViewCart" class="org.kinslayermud.web.checkout.ViewCartAction">
-			<result name="Success" type="tiles">ViewCart</result>
-			<result name="Failure" type="chain">Home</result>
-		</action>
-		
 		<action name="JSONResponse" class="org.kinslayermud.web.generic.JSONResponseAction" />
-		
-		<action name="SetItemShipping" class="org.kinslayermud.web.checkout.SetItemShippingAction">
-			<result name="Success" type="chain">JSONResponse</result>
-			<result name="Failure" type="chain">JSONResponse</result>
-		</action>
-		
-		<action name="PaypalExpressCheckout" class="org.kinslayermud.web.checkout.PaypalExpressCheckoutAction">
-			<result name="Success" type="chain">Home</result>
-			<result name="Failure" type="chain">Home</result>
-		</action>
-		
-		<action name="PaypalExpressCheckoutReviewOrder" class="org.kinslayermud.web.checkout.PaypalExpressCheckoutReviewOrderAction">
-			<result name="Success" type="redirect">ReviewOrder</result>
-			<result name="Failure" type="chain">Home</result>
-		</action>
-		
-		<action name="ReviewOrder" class="org.kinslayermud.web.checkout.ReviewOrderAction">
-			<result name="ShippingOrPaymentNotComplete" type="chain">ViewCart</result>
-			<result name="Success" type="tiles">ReviewOrder</result>
-			<result name="Failure" type="chain">ViewCart</result>
-		</action>
-		
-		<action name="CompleteCheckout" class="org.kinslayermud.web.checkout.CompleteCheckoutAction">
-			<result name="Success" type="tiles">Home</result>
-			<result name="Failure" type="chain">ReviewOrder</result>
-		</action>
 		
 		<action name="*" class="org.kinslayermud.web.actions.DefaultAction" method="execute">
 			<result name="Redirect" type="chain">Home</result>

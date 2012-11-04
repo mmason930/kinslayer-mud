@@ -7,25 +7,5 @@
 <tiles-definitions>
   <definition name="Home" template="/View/Home/Home.jsp">
   </definition>
-  
-  <definition name="SearchResults" template="/View/Framework/StandardLayout.jsp">
-    <put-attribute name="title" value="Kinslayer - Search Results"/>
-    <put-attribute name="body" value="/View/Search/SearchResults.jsp"/>
-  </definition>
-  
-  <definition name="ViewListing" template="/View/Framework/StandardLayout.jsp">
-    <put-attribute name="title" value="Kinslayer - View Listing"/>
-    <put-attribute name="body" value="/View/Search/ViewListing.jsp"/>
-  </definition>
-  
-  <definition name="ViewCart" template="/View/Framework/StandardLayout.jsp">
-    <put-attribute name="title" value="Kinslayer - View Cart"/>
-    <put-attribute name="body" value="/View/Checkout/ViewCart.jsp"/>
-  </definition>
-  
-  <definition name="ReviewOrder" template="/View/Framework/StandardLayout.jsp">
-    <put-attribute name="title" value="Kinslayer - Review Order"/>
-    <put-attribute name="body" value="/View/Checkout/ReviewOrder.jsp"/>
-  </definition>
  
 </tiles-definitions>
