@@ -19,6 +19,11 @@
 		
 		<action name="JSONResponse" class="org.kinslayermud.web.generic.JSONResponseAction" />
 		
+		<action name="*" class="com.kinslayermud.web.home.DefaultAction" method="execute">
+			<result name="Redirect" type="chain">Home</result>
+			<result name="Failure">/View/Test/PageNotFound.jsp</result>
+		</action>
+		
 	</package>
 
 </struts>

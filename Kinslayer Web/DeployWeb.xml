@@ -65,7 +65,7 @@
 		<mkdir dir="${web-webinf}"/>
 
 		<copydir src="${checkout-view}" dest="${web-view}" />
-		<copy file="{checkout-root}/index.jsp" tofile="{web-root}/index.jsp" />
+		<copy file="${checkout-root}/index.jsp" todir="${web-root}" />
 
 		<copy todir="${web-webinf}">
 			<fileset dir="${checkout-webinf}"/>
