@@ -17,13 +17,6 @@
 			<result name="Success" type="tiles">Home</result>
 		</action>
 		
-		<action name="JSONResponse" class="org.kinslayermud.web.generic.JSONResponseAction" />
-		
-		<action name="*" class="org.kinslayermud.web.actions.DefaultAction" method="execute">
-			<result name="Redirect" type="chain">Home</result>
-			<result name="Failure">/View/Test/PageNotFound.jsp</result>
-		</action>
-		
 	</package>
 
 </struts>
