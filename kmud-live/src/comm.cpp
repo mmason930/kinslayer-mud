@@ -2053,7 +2053,8 @@ void vwrite_to_output( Descriptor *t, int swap_args, const char *format, va_list
 	if ( t->descriptor->getOutputBufferSize() < LARGE_BUFSIZE )
 	{
 		t->descriptor->send(EndString);
-		t->character->LogOutput( EndString );
+		if(t->character)
+			t->character->LogOutput( EndString );
 	}
 	else
 	{
