@@ -10,6 +10,7 @@ public class DefaultAction extends StoreAction {
   
   public String execute(WebSupport webSupport) {
     
+    System.out.println("Request URI: " + request.getRequestURI());
     if(request.getRequestURI().equals("/")) {
       
       return REDIRECT_FORWARD;
