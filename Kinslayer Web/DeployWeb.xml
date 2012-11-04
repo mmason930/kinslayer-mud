@@ -1,4 +1,4 @@
-<project name="build mymeatinyourmouth" default="build" basedir=".">
+<project name="build kinslayermud" default="build" basedir=".">
 
 	<property name="tomcat-home" value="/tomcat"/>
 	<property name="tomcat-bin" value="${tomcat-home}/bin"/>
@@ -7,13 +7,13 @@
 	<property name="web-classes" value="${web-webinf}/classes"/>
 	<property name="web-lib" value="${web-webinf}/lib"/>
 	<property name="web-view" value="${web-root}/View"/>
-	<property name="checkout-root" value="MyMeatInYourMouth Web"/>
+	<property name="checkout-root" value="Kinslayer Web"/>
 	<property name="checkout-src" value="${checkout-root}/src"/>
 	<property name="checkout-webinf" value="${checkout-root}/WebContent/WEB-INF"/>
 	<property name="checkout-lib" value="${checkout-webinf}/lib/"/>
 	<property name="checkout-classes" value="${checkout-webinf}/classes"/>
 	<property name="checkout-view" value="${checkout-root}/View"/>
-	<property name="checkout-shared-root" value="MyMeatInYourMouth Shared"/>
+	<property name="checkout-shared-root" value="Kinslayer Shared"/>
 	<property name="checkout-shared-src" value="${checkout-shared-root}/src"/>
 	
 	<path id="classpath">
@@ -30,10 +30,10 @@
 
 	<target name="svn-checkout">
 		<exec dir="." executable="svn">
-			<arg line="checkout http://localhost/svn/mymeatinyourmouth/HEAD/MyMeatInYourMouth%20Web --username=mmason --password='W@qsablast'" />
+			<arg line="checkout http://localhost/svn/kmud-live/trunk/Kinslayer%20Web --username=mmason --password='W@qsablast'" />
 		</exec>
 		<exec dir="." executable="svn">
-			<arg line="checkout http://localhost/svn/mymeatinyourmouth/HEAD/MyMeatInYourMouth%20Shared --username=mmason --password='W@qsablast'" />
+			<arg line="checkout http://localhost/svn/kmud-live/trunk/Kinslayer%20Shared --username=mmason --password='W@qsablast'" />
 		</exec>
 	</target>
 	
@@ -73,8 +73,8 @@
 	
 	<target name="consolidate-projects">
 		<!-- Move source files over -->
-		<copy todir="${checkout-src}/com/mymeatinyourmouth/">
-			<fileset dir="${checkout-shared-src}/com/mymeatinyourmouth/"/>
+		<copy todir="${checkout-src}/org/kinsalyermud/">
+			<fileset dir="${checkout-shared-src}/org/kinslayermud/"/>
 		</copy>
 
 		<!-- Move jar files over -->
