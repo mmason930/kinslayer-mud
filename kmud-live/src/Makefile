@@ -46,7 +46,7 @@ OBJFILES = comm.o act.comm.o act.informative.o act.movement.o act.item.o \
 	ClanQuestPointTransaction.o OLCUtil.o UserClan.o OlcEditType.o UserEmailEditor.o MailUtil.o \
 	GatewayListener.o WebSocketDataFrame.o WebSocketClientHeaderIETF_HYBI17.o WebSocketClientHeader.o \
 	HttpServer.o WebSocketClientHeaderHixie76.o sha1.o TestResource.o HttpResponse.o HttpQueue.o \
-	HttpProtocol.o HttpUtil.o HttpDescriptor.o HttpRequest.o GatewayDescriptorType.o UserMacro.o
+	HttpProtocol.o HttpUtil.o HttpDescriptor.o HttpRequest.o GatewayDescriptorType.o
 OBJFILES := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILES))
 
 
