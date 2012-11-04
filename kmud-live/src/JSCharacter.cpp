@@ -201,7 +201,7 @@ flusspferd::array JSCharacter::inventory()
 	{
 		Object *o;
 		for (o = real->carrying; o; o = o->next_content)
-			a.push(lookupValue(0));
+			a.push(lookupValue(o));
 	}
 	return a;
 }
