@@ -17,6 +17,8 @@
 			<result name="Success" type="tiles">Home</result>
 		</action>
 		
+		<action name="JSONResponse" class="org.kinslayermud.web.generic.JSONResponseAction" />
+		
 	</package>
 
 </struts>
