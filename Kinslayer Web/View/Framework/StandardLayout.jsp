@@ -8,7 +8,7 @@
 		<meta http-equiv="content-type" content="text/html;charset=iso-8859-2" />
 		<title><tiles:insertAttribute name="title" /></title>
 		<base href="http://localhost/newsite/" />
-		<link rel="stylesheet" href="./includes/style.css" type="text/css"/>
+		<link rel="stylesheet" href="./Styles/style.css" type="text/css"/>
 	</head>
 
 	<body>

@@ -1,0 +1,56 @@
+body {
+      background: #000000;
+      }
+div#header {
+      position: fixed; 
+      top:0;
+      left: 10px;
+      bottom: 80%;
+      right: 10%;
+      background: black;
+      }
+div#headertitle {
+      position: fixed;
+      left: 5%;
+      bottom: 80%;
+      right: 10%;
+      top: 5%;
+      background-image: url(title.gif);
+      background-repeat: no-repeat;
+      width: 400px;
+      height: 90px;
+      }
+div#headerright {
+      position: fixed;
+      
+      }
+div#main {
+      position: fixed;
+      top: 25%;
+      bottom: 5%;
+      left: 5%;
+      right: 5%;
+      background: #333333;
+      border: solid 5px #663300;
+      }
+div#innermain {
+      border: solid 1px #000000;
+      margin: 1em;
+      align: center;
+      height: 92%;
+      background: #CCCCCC;
+      }
+div#mainleft {
+      position: fixed;
+      float:left;
+      top: 30%;
+      width: 20%;
+      bottom: 5%;
+      background: #663300;
+      }
+div#sidebartitle {
+      background: #cc9933;
+}
+div#sidebar {
+}
+
