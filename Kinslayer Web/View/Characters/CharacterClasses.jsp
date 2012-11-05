@@ -18,11 +18,10 @@ In the KinslayerMUD world there are different types of character options known a
 <br/>
 
 <div class="classGrouping">
-
  <div class="classGroupingHeader">Human Classes</div>
  <div class="classGroupingBody">
-  Elite: Blademaster <br/>
-  Elite: Ogier <br/>
+  Blademaster <span class="classElite">(elite)</span><br/>
+  Ogier <span class="classElite">(elite)</span> <br/>
   Channeler<br/>
   Thief <br/>
   Ranger <br/>
@@ -30,13 +29,12 @@ In the KinslayerMUD world there are different types of character options known a
  </div>
 </div>
 
-
 <div class="classGrouping">
  <div class="classGroupingHeader">Shadow Classes</div>
  <div class="classGroupingBody">
-  Elite: Myrddraal <br/>
-  Elite: Dreadlord <br/>
-  Elite: Greyman <br/>
+  Myrddraal <span class="classElite">(elite)</span> <br/>
+  Dreadlord <span class="classElite">(elite)</span> <br/>
+  Greyman <span class="classElite">(elite)</span> <br/>
   Dreadguard<br/>
   Thief<br/>
   Ranger <br/>

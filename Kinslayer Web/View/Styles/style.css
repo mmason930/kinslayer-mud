@@ -442,6 +442,12 @@ ul.subnav li a:hover
 	line-height: 20px;
 }
 
+.classElite
+{
+	font-weight: bold;
+	font-size: 12px;
+}
+
 .bold
 {
 	font-weight: bold;
