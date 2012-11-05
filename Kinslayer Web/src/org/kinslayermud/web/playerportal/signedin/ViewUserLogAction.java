@@ -1,11 +1,13 @@
 package org.kinslayermud.web.playerportal.signedin;
 
 import org.kinslayermud.character.User;
+import org.kinslayermud.exception.DataInterfaceException;
 import org.kinslayermud.telnet.TelnetColor;
 import org.kinslayermud.userlog.UserLog;
 import org.kinslayermud.util.MiscUtil;
 import org.kinslayermud.util.StringUtil;
 import org.kinslayermud.util.WebSupport;
+import org.kinslayermud.util.WebSupportImp;
 
 public class ViewUserLogAction extends ValidateSignInAction {
 
@@ -33,7 +35,7 @@ public class ViewUserLogAction extends ValidateSignInAction {
     return FAILURE_FORWARD;
   }
   
-  public String formatUserLog(String consoleBuffer) {
+  public static String formatUserLog(String consoleBuffer) {
     
     StringBuffer formattedLog = new StringBuffer();
     StringBuffer numberTextStringBuffer = new StringBuffer();
@@ -64,7 +66,7 @@ public class ViewUserLogAction extends ValidateSignInAction {
             index = tempIndex;
             
             TelnetColor newColor = TelnetColor.getTelnetColorByColorCode(colorCode);
-System.out.println("NEW COLOR: " + newColor.getStandardName());
+System.out.println("NEW COLOR: " + (newColor == null ? "<NULL>" : newColor.getStandardName()));
             if(newColor != null) {
               
               if(!currentColor.equals(TelnetColor.normal)) {
@@ -100,4 +102,12 @@ System.out.println("NEW COLOR: " + newColor.getStandardName());
     return StringUtil.ConvertToHTML(formattedLog.toString());
   }
   
+  
+  public static void main(String[] args) throws DataInterfaceException {
+    
+    WebSupport webSupport = new WebSupportImp();
+    
+    UserLog userLog = webSupport.getUserLog(7);
+    formatUserLog(userLog.getConsoleOutput());
+  }
 }
