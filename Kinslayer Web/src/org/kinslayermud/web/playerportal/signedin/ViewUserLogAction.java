@@ -26,7 +26,7 @@ public class ViewUserLogAction extends ValidateSignInAction {
       
       if(userLog.getUserId() == user.getUserId()) {
         
-        userLog.setConsoleOutput(formatUserLog(StringUtil.ConvertToHTML(userLog.getConsoleOutput())));
+        userLog.setConsoleOutput(formatUserLog(StringUtil.ConvertToHTML(userLog.getConsoleOutput()), false, true));
         request.setAttribute("UserLog", userLog);
         return SUCCESS_FORWARD;
       }
@@ -35,7 +35,7 @@ public class ViewUserLogAction extends ValidateSignInAction {
     return FAILURE_FORWARD;
   }
   
-  public static String formatUserLog(String consoleBuffer) {
+  public static String formatUserLog(String consoleBuffer, boolean htmlMode, boolean forumMode) {
     
     StringBuffer formattedLog = new StringBuffer();
     StringBuffer numberTextStringBuffer = new StringBuffer();
@@ -66,33 +66,50 @@ public class ViewUserLogAction extends ValidateSignInAction {
             index = tempIndex;
             
             TelnetColor newColor = TelnetColor.getTelnetColorByColorCode(colorCode);
-System.out.println("NEW COLOR: " + (newColor == null ? "<NULL>" : newColor.getStandardName()));
             if(newColor != null) {
               
               if(!currentColor.equals(TelnetColor.normal)) {
               
-                formattedLog.append("</span>");
+                if(htmlMode)
+                  formattedLog.append("</span>");
+                else if(forumMode)
+                  formattedLog.append("[/color]");
                 
                 if(isBolded && newColor.equals(TelnetColor.normal)) {
-                  formattedLog.append("</span>");
+                  
+                  if(htmlMode)
+                    formattedLog.append("</span>");
+                  else if(forumMode)
+                    formattedLog.append("[/b]");
                   isBolded = false;
                 }
               }
               
               if(!newColor.equals(TelnetColor.normal) && !newColor.equals(TelnetColor.bold)) {
                 
-                formattedLog.append("<span style='color: #" + newColor.getHexCode() + ";'>");
+                if(htmlMode)
+                  formattedLog.append("<span style='color: #" + newColor.getHexCode() + ";'>");
+                else if(forumMode)
+                  formattedLog.append("[color=#" + newColor.getHexCode() + "]");
+                
                 if(isBolded) {
-                  formattedLog.append("<span style='font-weight:bold;'>");
+                  
+                  if(htmlMode)
+                    formattedLog.append("<span style='font-weight:bold;'>");
+                  else if(forumMode)
+                    formattedLog.append("[b]");
                 }
                 currentColor = newColor;
               }
               else if(newColor.equals(TelnetColor.bold)) {
-                formattedLog.append("<span style='font-weight:bold;'>");
+                
+                if(htmlMode)
+                  formattedLog.append("<span style='font-weight:bold;'>");
+                else if(forumMode)
+                  formattedLog.append("[b]");
                 isBolded = true;
               }
             }
-            System.out.println("COLOR CODE: " + colorCode);
           }
         }
       }
@@ -103,14 +120,5 @@ System.out.println("NEW COLOR: " + (newColor == null ? "<NULL>" : newColor.getSt
     }
 
     return formattedLog.toString();
-  }
-  
-  
-  public static void main(String[] args) throws DataInterfaceException {
-    
-    WebSupport webSupport = new WebSupportImp();
-    
-    UserLog userLog = webSupport.getUserLog(7);
-    formatUserLog(userLog.getConsoleOutput());
   }
 }
