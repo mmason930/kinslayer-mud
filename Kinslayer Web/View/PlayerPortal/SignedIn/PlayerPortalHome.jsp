@@ -2,7 +2,7 @@
 <%@ include file="/View/Framework/Kinslayer.jsp" %>
 <%
 User user = (User)request.getAttribute("User");
-List<UserLogRecord> userLogRecords = (List<UserLogRecord>)request.getAttribute("UserLogRecord");
+List<UserLogRecord> userLogRecords = (List<UserLogRecord>)request.getAttribute("UserLogRecords");
 %>
 	<div class="container_box">
 	
