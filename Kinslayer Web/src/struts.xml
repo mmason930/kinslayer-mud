@@ -60,18 +60,18 @@
 		</action>
 		
 		<action name="PlayerPortalSignIn" class="org.kinslayermud.web.playerportal.SignInAction" method="execute">
-			<result name="Success" type="redirect">PlayerPortalHome.do</result>
+			<result name="Success" type="redirect">player-portal-home</result>
 			<result name="Failure" type="tiles">PlayerPortalSignInMenu</result>
 		</action>
 		
 		<action name="PlayerPortalHome" class="org.kinslayermud.web.playerportal.signedin.PlayerPortalHomeAction" method="execute">
 			<result name="Success" type="tiles">PlayerPortalHome</result>
-			<result name="Failure" type="redirect">PlayerPortalSignInMenu.do</result>
+			<result name="Failure" type="redirect">player-portal</result>
 		</action>
 		
 		<action name="PlayerPortalSignOut" class="org.kinslayermud.web.playerportal.signedin.SignOutAction" method="execute">
-			<result name="Success" type="redirect">PlayerPortalSignInMenu.do</result>
-			<result name="Failure" type="redirect">PlayerPortalSignInMenu.do</result>
+			<result name="Success" type="redirect">player-portal</result>
+			<result name="Failure" type="redirect">player-portal</result>
 		</action>
 
 		<!--  LEGENDS -->
