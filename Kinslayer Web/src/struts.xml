@@ -19,16 +19,18 @@
 			<result name="Success" type="tiles">Home</result>
 		</action>
 		
-		<action name="NewToMuds" class="org.kinslayermud.web.newtomuds.NewToMudsHomeAction" method="execute">
-			<result name="Success" type="tiles">NewToMuds</result>
-		</action>
 		
-		<action name="CharacterClasses" class="org.kinslayermud.web.newtomuds.CharacterClassesAction" method="execute">
+		<action name="CharacterClasses" class="org.kinslayermud.web.characters.CharacterClassesAction" method="execute">
 			<result name="Success" type="tiles">CharacterClasses</result>
 		</action>
 		
 		<action name="CharacterSkills" class="org.kinslayermud.web.characters.CharacterSkillsAction" method="execute">
 			<result name="Success" type="tiles">CharacterSkills</result>
+		</action>
+		
+		
+		<action name="NewToMuds" class="org.kinslayermud.web.newtomuds.NewToMudsHomeAction" method="execute">
+			<result name="Success" type="tiles">NewToMuds</result>
 		</action>
 		
 		<action name="NewToMudsBasicCommands" class="org.kinslayermud.web.newtomuds.NewToMudsBasicCommandsAction" method="execute">
