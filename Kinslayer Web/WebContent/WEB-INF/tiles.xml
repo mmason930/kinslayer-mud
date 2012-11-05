@@ -11,12 +11,24 @@
     <put-attribute name="body" value="/View/Home/Home.jsp"/>
   </definition>
   
+  
+  
+  <definition name="CharacterClasses" template="/View/Framework/StandardLayout.jsp">
+    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="body" value="/View/Characters/CharacterClasses.jsp"/>
+  </definition>
+  
+  <definition name="CharacterSkills" template="/View/Framework/StandardLayout.jsp">
+    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="body" value="/View/Characters/CharacterSkills.jsp"/>
+  </definition>
+  
+  
   <definition name="NewToMuds" template="/View/Framework/StandardLayout.jsp">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
     <put-attribute name="body" value="/View/NewToMudsHome/NewToMudsHome.jsp"/>
   </definition>
   
-
   <definition name="NewToMudsCharacterCreation" template="/View/Framework/StandardLayout.jsp">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
     <put-attribute name="body" value="/View/NewToMudsHome/NewToMudsCharacterCreation.jsp"/>
