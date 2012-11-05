@@ -53,6 +53,23 @@
 			<result name="Success" type="tiles">SuperMobListing</result>
 		</action>
 		
+		
+		<!-- PLAYER PORTAL -->
+		<!--
+		<action name="PlayerPortalSignInMenu" class="org.kinslayermud.web.playerportal.SignInMenuAction" method="execute">
+			<result name="Success" type="tiles">PlayerPortalSignInMenu</result>
+		</action>
+		
+		<action name="PlayerPortalSignIn" class="org.kinslayermud.web.playerportal.SignInAction" method="execute">
+			<result name="Success">PlayerPortalHome</result>
+			<result name="Failure" type="tiles">PlayerPortalSignInMenu</result>
+		</action>
+		
+		<action name="PlayerPortalHome" class="org.kinslayermud.web.playerportal.signedin.PlayerPortalHomeAction" method="execute">
+			<result name="Success" type="tiles">PlayerPortalHome</result>
+			<result name="Failure">PlayerPortalSignInMenu</result>
+		</action>
+		-->
 
 		<!--  LEGENDS -->
 		<action name="LegendsIntroduction" class="org.kinslayermud.web.legends.LegendsIntroductionAction" method="execute">
