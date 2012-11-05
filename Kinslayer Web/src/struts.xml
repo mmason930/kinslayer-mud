@@ -60,7 +60,7 @@
 		</action>
 		
 		<action name="PlayerPortalSignIn" class="org.kinslayermud.web.playerportal.SignInAction" method="execute">
-			<result name="Success" type="chain">PlayerPortalHome</result>
+			<result name="Success" type="redirect">PlayerPortalHome</result>
 			<result name="Failure" type="tiles">PlayerPortalSignInMenu</result>
 		</action>
 		
