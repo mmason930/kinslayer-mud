@@ -17,11 +17,6 @@ webColoredLink = WebSiteUrlUtil.getUserLogUrl(webSupport.getInstanceDomain(), us
 			</div>
 			<br/>
 			
-			<div class="userPortalContentHeader">
-				<h2>Player Portal</h2>
-			</div>
-			<br/>
-			
 			<div class="textCentered">
 				<span class="userPortalUserLogDisplayTypeBox">
 					Display Type: <a href="http://dev.kinslayermud.org/player-portal-view-user-log/7/">Normal</a> | <a href="http://dev.kinslayermud.org/player-portal-view-user-log/7/?DisplayType=Forum">Forum Colored</a> | <a href="http://dev.kinslayermud.org/player-portal-view-user-log/7/?DisplayType=Html">Web Colored</a>
