@@ -78,9 +78,9 @@ public class UserUtil {
   public static User getUserFromSession(Statement statement, String sessionId) throws SQLException {
     
     String sql = " SELECT"
-               + "   user.*"
-               + " FROM user, websiteSession"
-               + " WHERE user.user_id = websiteSession.user_id"
+               + "   users.*"
+               + " FROM users, websiteSession"
+               + " WHERE users.user_id = websiteSession.user_id"
                + " AND websiteSession.id = " + SQLUtil.escapeQuoteString(sessionId);
     
     ResultSet resultSet = statement.executeQuery(sql);
