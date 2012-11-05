@@ -8,7 +8,7 @@
 			<div>
 			
 			<h1>
-				Practicing Skills
+				Character Skills
 			</h1>
 			
 			<p>	In order for a character to acquire skills he or she must find instructors that are willing to teach ranger, thief, warrior, or channelling skills.
