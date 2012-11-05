@@ -354,7 +354,7 @@ ul.subnav li
 ul.subnav li a
 {
 	color: #FFFFFF;
-	background-image: url('./images/folder-tab-large.png');
+	background-image: url('../../images/folder-tab-large.png');
 	width: 152px;
 	height: 24px;
 	font-size: 13px;
