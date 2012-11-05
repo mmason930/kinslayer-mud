@@ -8,7 +8,7 @@
 
   <definition name="Home" template="/View/Framework/StandardLayout.jsp">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
-    <put-attribute name="body" value="/View/Framework/Home.jsp"/>
+    <put-attribute name="body" value="/View/Home/Home.jsp"/>
   </definition>
  
 </tiles-definitions>
