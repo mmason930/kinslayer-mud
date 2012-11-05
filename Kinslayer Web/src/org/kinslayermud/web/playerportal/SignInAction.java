@@ -28,11 +28,11 @@ public class SignInAction extends StandardAction {
     String username = request.getParameter(USERNAME_PARAMETER);
     String password = request.getParameter(PASSWORD_PARAMETER);
     
-    if(username == null) {
+    if(username == null || username.isEmpty()) {
       
       errors.add("You must enter a username.");
     }
-    if(password == null) {
+    if(password == null || password.isEmpty()) {
       
       errors.add("You must enter a password.");
     }
