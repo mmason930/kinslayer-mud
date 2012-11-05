@@ -34,7 +34,7 @@ public abstract class StandardAction extends ActionSupport implements ServletReq
       request.setAttribute("SessionUserName", sessionUserNameCookie.getValue());
     }
     
-    Cookie sessionUserIdCookie = HttpUtil.getCookieByName(request, "SESSIONUSERIDCOOKIE");
+    Cookie sessionUserIdCookie = HttpUtil.getCookieByName(request, "SESSIONUSERID");
     if(sessionUserIdCookie != null && MiscUtil.isValidIntString(sessionUserIdCookie.getValue())) {
       
       request.setAttribute("SessionUserId", Integer.valueOf(sessionUserIdCookie.getValue()));
