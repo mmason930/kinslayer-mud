@@ -277,6 +277,11 @@ a.playNow:active
 	display: list-item;
 }
 
+#playerLogBuffer
+{
+	font-family: terminal,'courier new';
+}
+
 .userPortalContentHeader
 {
 	margin-left: auto;

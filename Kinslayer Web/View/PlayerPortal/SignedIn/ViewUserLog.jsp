@@ -48,9 +48,7 @@ $(document).ready(function() {
 			<br/>
 			
 			<div id="playerLogBuffer">
-				<pre>
-					<%= userLog.getConsoleOutput() %>
-				</pre>
+				<%= userLog.getConsoleOutput() %>
 			</div>
 		
 		</div>
