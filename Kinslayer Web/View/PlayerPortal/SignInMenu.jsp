@@ -1,7 +1,7 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ include file="/View/Framework/Kinslayer.jsp" %>
 <%
-List<String> errors = (List<String>)request.getAttribute("FormError");
+List<String> errors = (List<String>)request.getAttribute("FormErrors");
 %>
         <div class="container_box">
         
