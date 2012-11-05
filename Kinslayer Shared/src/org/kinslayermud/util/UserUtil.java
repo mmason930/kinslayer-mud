@@ -17,7 +17,7 @@ public class UserUtil {
     String sql = " SELECT *"
                + " FROM users"
                + " WHERE username = " + SQLUtil.escapeQuoteString(username)
-               + " AND password = " + SQLUtil.escapeQuoteString(MiscUtil.md5(password));
+               + " AND user_password = " + SQLUtil.escapeQuoteString(MiscUtil.md5(password));
     
     ResultSet resultSet = statement.executeQuery(sql);
     
