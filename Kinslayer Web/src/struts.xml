@@ -20,6 +20,7 @@
 		</action>
 		
 		
+		<!--  CHARACTERS -->
 		<action name="CharacterClasses" class="org.kinslayermud.web.characters.CharacterClassesAction" method="execute">
 			<result name="Success" type="tiles">CharacterClasses</result>
 		</action>
@@ -29,6 +30,21 @@
 		</action>
 		
 		
+		<!--  TRADES -->
+		<action name="TradesIntroduction" class="org.kinslayermud.web.trades.TradesIntroductionAction" method="execute">
+			<result name="Success" type="tiles">TradesIntroduction</result>
+		</action>
+		
+		<action name="TradesMining" class="org.kinslayermud.web.trades.TradesMiningAction" method="execute">
+			<result name="Success" type="tiles">TradesMining</result>
+		</action>
+		
+		<action name="TradesSmithing" class="org.kinslayermud.web.trades.TradesSmithingAction" method="execute">
+			<result name="Success" type="tiles">TradesSmithing</result>
+		</action>
+		
+		
+		<!--  NEW TO MUDS -->
 		<action name="NewToMuds" class="org.kinslayermud.web.newtomuds.NewToMudsHomeAction" method="execute">
 			<result name="Success" type="tiles">NewToMuds</result>
 		</action>
@@ -45,6 +61,8 @@
 			<result name="Success" type="tiles">NewToMudsConnecting</result>
 		</action>
 		
+		
+		<!--  MISC -->
 		<action name="JSONResponse" class="org.kinslayermud.web.generic.JSONResponseAction" />
 		
 		<action name="*" class="org.kinslayermud.web.home.DefaultAction" method="execute">

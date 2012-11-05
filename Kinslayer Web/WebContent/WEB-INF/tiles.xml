@@ -24,6 +24,22 @@
   </definition>
   
   
+  <definition name="TradesIntroduction" template="/View/Framework/StandardLayout.jsp">
+    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="body" value="/View/Trades/TradesIntroduction.jsp"/>
+  </definition>
+  
+  <definition name="TradesMining" template="/View/Framework/StandardLayout.jsp">
+    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="body" value="/View/Trades/TradesMining.jsp"/>
+  </definition>
+  
+  <definition name="TradesSmithing" template="/View/Framework/StandardLayout.jsp">
+    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="body" value="/View/Trades/TradesSmithing.jsp"/>
+  </definition>
+  
+  
   <definition name="NewToMuds" template="/View/Framework/StandardLayout.jsp">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
     <put-attribute name="body" value="/View/NewToMudsHome/NewToMudsHome.jsp"/>
