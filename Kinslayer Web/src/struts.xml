@@ -13,7 +13,7 @@
 			<result-type name="tiles" class="org.apache.struts2.views.tiles.TilesResult" />
 		</result-types>
 		
-		<action name="Home" class="org.kinslayermud.web.home.HomeAction" method="execute">
+		<action name="Home.do" class="org.kinslayermud.web.home.HomeAction" method="execute">
 			<result name="Success" type="tiles">Home</result>
 		</action>
 		
