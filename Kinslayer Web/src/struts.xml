@@ -73,6 +73,12 @@
 			<result name="Success" type="redirect">player-portal</result>
 			<result name="Failure" type="redirect">player-portal</result>
 		</action>
+		
+		<action name="PlayerPortalViewUserLog" class="org.kinslayermud.web.playerportal.signedin.ViewUserLogAction" method="execute">
+			<result name="Success" type="tiles">PlayerPortalViewUserLog</result>
+			<result name="Failure" type="redirect">player-portal-home</result>
+		</action>
+		
 
 		<!--  LEGENDS -->
 		<action name="LegendsIntroduction" class="org.kinslayermud.web.legends.LegendsIntroductionAction" method="execute">
