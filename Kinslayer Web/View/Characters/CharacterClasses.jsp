@@ -49,20 +49,20 @@ In the KinslayerMUD world there are different types of character options known a
 <br/>
 <br/>
 
-In both races Channelers and Dreaguards are magic orientated characters. Accordingly with the Wheel of Time storyline they draw their power from saidar or saidin, depending on whether they are male or female.<br/>
+In both racesn <span class="bold">Channelers</span> and <span class="bold">Dreaguards</span> are magic orientated characters. Accordingly with the Wheel of Time storyline, they draw their power from saidar or saidin,
+depending on whether they are male or female.<br/>
 <br/>
-The Myrddraal, Blademaster, and Dreadlord classes are achieved at the Elite level through gaining 9 ranks in a clan. Their special abilities are not discussed in this guide.<br/>
+The <span class="bold">Myrddraal</span>, <span class="bold">Blademaster</span>, and <span class="bold">Dreadlord</span> classes are achieved at the Elite level through gaining 9 ranks in a clan. Their special abilities are not discussed in this guide.<br/>
 <br/>
-Thieves are a town-orientated class, using stealth skills to find and quickly strike their opponents.<br/>
+<span class="bold">Thieves</span> are a town-orientated class, using stealth skills to find and quickly strike their opponents.<br/>
 <br/>
-Rangers are geared to face the outdoors, with special skills to track their opponents down in the wilderness.<br/>
+<span class="bold">Rangers</span> are geared to face the outdoors, with special skills to track their opponents down in the wilderness.<br/>
 <br/>
-Warriors on the other hand tend to be stronger characters on average, using their brutal strength to eliminate their enemies.<br/>
+<span class="bold">Warriors</span> on the other hand tend to be stronger characters on average, using their brutal strength to eliminate their enemies.<br/>
 <br/>
 Each class has a distinct set of skills that they can practice, however they may acquire skills that belong to a different class at a higher practice cost. For example a warrior may wish to learn how to "Track" which is a ranger skill, a warrior will have to give up twice the practice sessions.<br/>
 <br/>
-*Practice sessions are further explained in the "<a href="./character-skills">Character Skills</a>" section.*
-
+<span class="bold">*Practice sessions are further explained in the "<a href="./character-skills">Character Skills</a>" section.*</span>
 
 			</p>
 			</div>
