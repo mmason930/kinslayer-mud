@@ -15,18 +15,26 @@ public class ViewUserLogAction extends ValidateSignInAction {
   protected String FAILURE_FORWARD = "Failure";
   
   protected String USERLOGID_PARAMETER = "UserLogId";
+  protected String DISPLAYTYPE_PARAMETER = "DisplayType";
   
   public String execute(WebSupport webSupport, User user) throws Exception {
     
     String userLogIdString = request.getParameter(USERLOGID_PARAMETER);
-    
+    String displayType = StringUtil.removeNull(request.getParameter(DISPLAYTYPE_PARAMETER));
     if(userLogIdString != null && MiscUtil.isValidIntString(userLogIdString)) {
       
       UserLog userLog = webSupport.getUserLog(Integer.valueOf(userLogIdString));
       
       if(userLog.getUserId() == user.getUserId()) {
         
-        userLog.setConsoleOutput(formatUserLog(StringUtil.ConvertToHTML(userLog.getConsoleOutput()), false, true));
+        boolean forumMode = false, htmlMode = false;
+        
+        if(displayType.equals("Forum"))
+          forumMode = true;
+        else if(displayType.equals("Html"))
+          htmlMode = true;
+        
+        userLog.setConsoleOutput(formatUserLog(StringUtil.ConvertToHTML(userLog.getConsoleOutput()), htmlMode, forumMode));
         request.setAttribute("UserLog", userLog);
         return SUCCESS_FORWARD;
       }
