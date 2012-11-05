@@ -2,9 +2,13 @@ package org.kinslayermud.util;
 
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.List;
 
 import org.kinslayermud.character.User;
 import org.kinslayermud.exception.DataInterfaceException;
+import org.kinslayermud.userlog.UserLog;
+import org.kinslayermud.userlog.UserLogRecord;
+import org.kinslayermud.userlog.UserLogUtil;
 
 
 public class WebSupportImp implements WebSupport {
@@ -101,6 +105,61 @@ public class WebSupportImp implements WebSupport {
       statement.close();
       connection.commit();
       connection.close();
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+
+  public List<UserLogRecord> getUserLogRecords(int userId) throws DataInterfaceException {
+    
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = DatabaseUtil.getConnection();
+      statement = connection.createStatement();
+      
+      List<UserLogRecord> userLogRecords = UserLogUtil.getUserLogRecords(statement, userId);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return userLogRecords;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public UserLog getUserLog(int userLogId, boolean throwIfNotFound) throws DataInterfaceException {
+    
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = DatabaseUtil.getConnection();
+      statement = connection.createStatement();
+      
+      UserLog userLog = UserLogUtil.getUserLog(statement, userLogId, false);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return userLog;
     }
     catch(Throwable throwable) {
       

@@ -2,6 +2,7 @@
 <%@ include file="/View/Framework/Kinslayer.jsp" %>
 <%
 User user = (User)request.getAttribute("User");
+List<UserLogRecord> userLogRecords = (List<UserLogRecord>)request.getAttribute("UserLogRecord");
 %>
 	<div class="container_box">
 	
@@ -15,6 +16,18 @@ User user = (User)request.getAttribute("User");
 			<span class="userPortalBigBold">
 				Welcome, <%=user.getUserName()%>
 			</span>
+			
+			<br/>
+			
+<%
+for(UserLogRecord userLogRecord : userLogRecords) {
+%>
+			<a href="./player-portal-player-log/<%=userLogRecord.getId()%>/">
+				<%=MiscUtil.formatDateEEEEcsMMMsDsYYYY(userLogRecord.getRecordDate())%><br/>
+			</a>
+<%
+}
+%>
 		
 		</div>
 		<div style="clear: both;"></div>
