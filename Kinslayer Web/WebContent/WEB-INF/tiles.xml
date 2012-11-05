@@ -36,6 +36,33 @@
   </definition>
   
   
+  <!-- LEGENDS -->
+  <definition name="LegendsIntroduction" template="/View/Framework/StandardLayout.jsp">
+    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="body" value="/View/Legends/LegendsIntroduction.jsp"/>
+  </definition>
+  
+  <definition name="LegendsOverall" template="/View/Framework/StandardLayout.jsp">
+    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="body" value="/View/Legends/LegendsOverall.jsp"/>
+  </definition>
+  
+  <definition name="LegendsWeekly" template="/View/Framework/StandardLayout.jsp">
+    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="body" value="/View/Legends/LegendsWeekly.jsp"/>
+  </definition>
+  
+  <definition name="LegendsMonthly" template="/View/Framework/StandardLayout.jsp">
+    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="body" value="/View/Legends/LegendsMonthly.jsp"/>
+  </definition>
+  
+  <definition name="LegendsYearly" template="/View/Framework/StandardLayout.jsp">
+    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="body" value="/View/Legends/LegendsYearly.jsp"/>
+  </definition>
+  
+  
   <!--  TRADES -->
   <definition name="TradesIntroduction" template="/View/Framework/StandardLayout.jsp">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>

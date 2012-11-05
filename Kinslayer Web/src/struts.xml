@@ -53,6 +53,28 @@
 			<result name="Success" type="tiles">SuperMobListing</result>
 		</action>
 		
+
+		<!--  LEGENDS -->
+		<action name="LegendsIntroduction" class="org.kinslayermud.web.legends.LegendsIntroductionAction" method="execute">
+			<result name="Success" type="tiles">LegendsIntroduction</result>
+		</action>
+		
+		<action name="LegendsOverall" class="org.kinslayermud.web.legends.LegendsIntroductionAction" method="execute">
+			<result name="Success" type="tiles">LegendsOverall</result>
+		</action>
+		
+		<action name="LegendsWeekly" class="org.kinslayermud.web.legends.LegendsIntroductionAction" method="execute">
+			<result name="Success" type="tiles">LegendsWeekly</result>
+		</action>
+		
+		<action name="LegendsMonthly" class="org.kinslayermud.web.legends.LegendsIntroductionAction" method="execute">
+			<result name="Success" type="tiles">LegendsMonthly</result>
+		</action>
+		
+		<action name="LegendsYearly" class="org.kinslayermud.web.legends.LegendsIntroductionAction" method="execute">
+			<result name="Success" type="tiles">LegendsYearly</result>
+		</action>
+		
 		
 		<!--  EQUIPMENT -->
 		<action name="EquipmentIntroduction" class="org.kinslayermud.web.equipment.EquipmentIntroductionAction" method="execute">
