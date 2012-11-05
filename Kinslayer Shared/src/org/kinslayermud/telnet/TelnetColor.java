@@ -22,14 +22,14 @@ abstract class TelnetColorStatic {
 public enum TelnetColor implements VEnum {
 
   normal(0, "Normal", null, 0),
-  bold(0, "Bold", null, 1),
-  red(0, "Red", "800000", 31),
-  green(0, "Green", "00B300", 32),
-  yellow(0, "Yellow", "808000", 33),
-  blue(0, "Blue", "000080", 34),
-  magenta(0, "Magenta", "800080", 35),
-  cyan(0, "Cyan", "008080", 36),
-  white(0, "White", "FFFFFF", 37);
+  bold(1, "Bold", null, 1),
+  red(2, "Red", "800000", 31),
+  green(3, "Green", "00B300", 32),
+  yellow(4, "Yellow", "808000", 33),
+  blue(5, "Blue", "000080", 34),
+  magenta(6, "Magenta", "800080", 35),
+  cyan(7, "Cyan", "008080", 36),
+  white(8, "White", "FFFFFF", 37);
   
   private String standardName;
   private String hexCode;
