@@ -281,13 +281,25 @@ a.playNow:active
 {
 	margin-left: auto;
 	margin-right: auto;
-	width: 292px;
+	text-align:center;
+}
+
+.userPortalUserLogDisplayTypeBox
+{
+	background: #DDDDDD;
+	padding: 10px;
+	border: 1px solid #000000;
 }
 
 .userPortalBigBold
 {
 	font-size: 14px;
 	font-weight: bold;
+}
+
+.textCentered
+{
+	text-align:center;
 }
 
 button.userPortalLoginButton
