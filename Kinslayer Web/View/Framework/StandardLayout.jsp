@@ -20,6 +20,8 @@ if(sessionUserName != null && sessionUserId != null) {
 		<title><tiles:insertAttribute name="title" /></title>
 		<base href="http://dev.kinslayermud.org/" />
 		<link rel="stylesheet" href="./View/Styles/style.css" type="text/css"/>
+		<script type="text/javascript" src="./View/JavaScript/jquery-1.8.0.js" />
+		<script type="text/javascript" src="./View/JavaScript/scripts.js" />
 	</head>
 
 	<body>
