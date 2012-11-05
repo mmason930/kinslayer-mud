@@ -16,9 +16,6 @@ public abstract class StandardAction extends ActionSupport implements ServletReq
   protected HttpServletResponse response;
   protected WebSupport webSupport;
   
-  protected static final String CART_ID_COOKIE_NAME = "CartId";
-  protected static final String CART_RANDOM_ID_COOKIE_NAME = "CartRandomId";
-  
   public StandardAction() {
 
     webSupport = new WebSupportImp();
