@@ -45,7 +45,7 @@ public class ViewUserLogAction extends ValidateSignInAction {
         System.out.println("ESCAPE CHARACTER FOUND.");
         
         tempIndex = index + 1;
-        if(index < consoleBuffer.length() && consoleBuffer.charAt(index) == '[') {
+        if(tempIndex < consoleBuffer.length() && consoleBuffer.charAt(tempIndex) == '[') {
           
           System.out.println("BRACKET FOUND.");
           numberTextStringBuffer = new StringBuffer();
