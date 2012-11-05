@@ -42,9 +42,12 @@ public class ViewUserLogAction extends ValidateSignInAction {
       
       if(consoleBuffer.charAt(index) == 0x1B) {
         
+        System.out.println("ESCAPE CHARACTER FOUND.");
+        
         tempIndex = index + 1;
         if(index < consoleBuffer.length() && consoleBuffer.charAt(index) == '[') {
           
+          System.out.println("BRACKET FOUND.");
           numberTextStringBuffer = new StringBuffer();
           ++tempIndex;
           
@@ -54,6 +57,8 @@ public class ViewUserLogAction extends ValidateSignInAction {
             
             ++tempIndex;
           }
+          
+          System.out.println("TOTAL NUMBER TEXT BUFFER: " + numberTextStringBuffer.toString());
           
           if(numberTextStringBuffer.length() > 0 && tempIndex < consoleBuffer.length() && consoleBuffer.charAt(tempIndex) == 'm') {
             
