@@ -1,5 +1,3 @@
-<%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
-<%@ include file="/View/Framework/Kinslayer.jsp" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
@@ -23,6 +21,7 @@
 					| <a class="quickNav" href="./forums">Forums</a>
 					| <a class="quickNav" href="./wiki/index.php/Main_Page">Wiki</a>
 					| <a class="quickNav" href="<?php echo $signInUrl ?>"><?php echo $signInMessage; ?></a>
+
 <!--
 					| <a class="quickNav" href="./player-portal-home">Player Portal</a>
 -->
@@ -64,29 +63,3 @@
 						<div class="clearBoth"></div>
 						<img src="images/banner-960x140.jpg" style="display:block;"></img>
 					</div>
-					
-				<tiles:insertAttribute name="body" />
-				
-				</div> <!-- End Content Inner -->
-					
-			</div>	<!-- End of Container -->
-			<div class="footer">
-				<p>
-					&copy; Copyright <?php echo strftime("%Y", time()); ?> <a href="http://www.kinslayermud.org">KinslayerMUD.org</a>
-				</p>
-			</div> <!-- End of Footer -->
-
-		</div> <!-- End of Content -->
-		<script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-		</script>
-		<script type="text/javascript">
-try {
-var pageTracker = _gat._getTracker("UA-284526-1");
-pageTracker._trackPageview();
-} catch(err) {}
-</script>
-	</body>
-</html>
-

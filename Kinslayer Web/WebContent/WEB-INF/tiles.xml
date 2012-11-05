@@ -5,7 +5,10 @@
        "http://tiles.apache.org/dtds/tiles-config_2_0.dtd">
  
 <tiles-definitions>
-  <definition name="Home" template="/View/Home/Home.jsp">
+
+  <definition name="Home" template="/View/Framework/StandardLayout.jsp">
+    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="body" value="/Framework/Home.jsp"/>
   </definition>
  
 </tiles-definitions>
