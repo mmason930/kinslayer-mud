@@ -12,7 +12,7 @@ UserLog userLog = (UserLog)request.getAttribute("UserLog");
 			</div>
 			<br/>
 			
-			<%= userLog.getConsoleOutput() %>
+			<%= StringUtil.ConvertToHTML(userLog.getConsoleOutput()) %>
 		
 		</div>
 		<div style="clear: both;"></div>
