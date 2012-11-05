@@ -206,7 +206,7 @@ public abstract class StringUtil {
     
     int SPACES_PER_TAB = spacesPerTab; 
     
-    String html = "";
+    StringBuffer html = new StringBuffer();
     
 
     int charCount = 0;
@@ -216,7 +216,7 @@ public abstract class StringUtil {
     {
       if(text.charAt(0) == '\n')
       {
-        html += "<br>\n";
+        html.append("<br>\n");
         flag = false;
         charCount = 0;
       }
@@ -224,14 +224,14 @@ public abstract class StringUtil {
       {
         for(int j = 0; j < charCount % SPACES_PER_TAB; j++)
         {
-          html += "&nbsp";
+          html.append("&nbsp");
           charCount++;
         }
         flag = true;
       }
       else
       {
-        html += text.charAt(0);
+        html.append(text.charAt(0));
         flag = false;
         charCount++;
       }
@@ -244,13 +244,13 @@ public abstract class StringUtil {
       {
         if( (flag || prev == ' ') && text.charAt(i) == ' ')
         {
-          html += "&nbsp";
+          html.append("&nbsp");
           flag = true;
           charCount++;
         }
         else if(text.charAt(i) == '\n')
         {
-          html += "<br>\n";
+          html.append("<br>\n");
           flag = false;
           charCount = 0;
         }
@@ -258,14 +258,14 @@ public abstract class StringUtil {
         {
           for(int j = 0; j < charCount % SPACES_PER_TAB; j++)
           {
-            html += "&nbsp";
+            html.append("&nbsp");
             charCount++;
           }
           flag = true;
         }
         else
         {
-          html += text.charAt(i);
+          html.append(text.charAt(i));
           flag = false;
           charCount++;
         }
@@ -274,7 +274,7 @@ public abstract class StringUtil {
       }
     }
     
-    return html;
+    return html.toString();
   }
 
   /** returns a empty string if the string is null */
