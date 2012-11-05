@@ -45,15 +45,15 @@
 		
 		
 		<!--  EQUIPMENT -->
-		<action name="EquipmentIntroduction" class="org.kinslayermud.web.trades.EquipmentIntroductionAction" method="execute">
+		<action name="EquipmentIntroduction" class="org.kinslayermud.web.equipment.EquipmentIntroductionAction" method="execute">
 			<result name="Success" type="tiles">EquipmentIntroduction</result>
 		</action>
 		
-		<action name="EquipmentTypes" class="org.kinslayermud.web.trades.EquipmentTypesAction" method="execute">
+		<action name="EquipmentTypes" class="org.kinslayermud.web.equipment.EquipmentTypesAction" method="execute">
 			<result name="Success" type="tiles">EquipmentTypes</result>
 		</action>
 		
-		<action name="EquipmentCatalog" class="org.kinslayermud.web.trades.EquipmentCatalogAction" method="execute">
+		<action name="EquipmentCatalog" class="org.kinslayermud.web.equipment.EquipmentCatalogAction" method="execute">
 			<result name="Success" type="tiles">EquipmentCatalog</result>
 		</action>
 		
