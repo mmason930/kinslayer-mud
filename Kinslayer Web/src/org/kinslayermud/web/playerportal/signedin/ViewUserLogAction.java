@@ -1,6 +1,7 @@
 package org.kinslayermud.web.playerportal.signedin;
 
 import org.kinslayermud.character.User;
+import org.kinslayermud.telnet.TelnetColor;
 import org.kinslayermud.userlog.UserLog;
 import org.kinslayermud.util.MiscUtil;
 import org.kinslayermud.util.StringUtil;
@@ -37,17 +38,16 @@ public class ViewUserLogAction extends ValidateSignInAction {
     StringBuffer formattedLog = new StringBuffer();
     StringBuffer numberTextStringBuffer = new StringBuffer();
     int tempIndex;
+    TelnetColor currentColor = TelnetColor.normal;
+    boolean isBolded = false;
     
     for(int index = 0;index < consoleBuffer.length();++index) {
       
       if(consoleBuffer.charAt(index) == 0x1B) {
         
-        System.out.println("ESCAPE CHARACTER FOUND.");
-        
         tempIndex = index + 1;
         if(tempIndex < consoleBuffer.length() && consoleBuffer.charAt(tempIndex) == '[') {
           
-          System.out.println("BRACKET FOUND.");
           numberTextStringBuffer = new StringBuffer();
           ++tempIndex;
           
@@ -58,12 +58,12 @@ public class ViewUserLogAction extends ValidateSignInAction {
             ++tempIndex;
           }
           
-          System.out.println("TOTAL NUMBER TEXT BUFFER: " + numberTextStringBuffer.toString());
-          
           if(numberTextStringBuffer.length() > 0 && tempIndex < consoleBuffer.length() && consoleBuffer.charAt(tempIndex) == 'm') {
             
             int colorCode = Integer.valueOf(numberTextStringBuffer.toString());
             index = tempIndex;
+
+            System.out.println("COLOR CODE: " + colorCode);
           }
         }
       }
