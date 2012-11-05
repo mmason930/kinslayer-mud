@@ -1,4 +1,4 @@
-﻿body
+body
 {
 	padding: 0;
 	margin: 0;
@@ -28,13 +28,13 @@ a:hover.quickNav { color: #258EE8; background: inherit; }
 
 /* header */
 #header { height: 75px; }
-#logo { height: 80px; padding: 15px 0 0 8px; background-image: url(../images/title.gif); background-repeat: no-repeat;}
+#logo { height: 80px; padding: 15px 0 0 8px; background-image: url(../../images/title.gif); background-repeat: no-repeat;}
 #logo p { margin: 0; padding: 0 0 0 10px; color: #FFFFFF; background: #000000; }
 #top_links { float: right; width: 570px; margin: 20px 5px 0 0; text-align: right; }
 
 /* grey subheader */
-.greyboxtop { clear: both; height: 8px; background: #cccccc url(../images/grey_top.gif) no-repeat; color: #000; }
-.greybox { background: #cccccc url(../images/grey_bottom.gif) no-repeat bottom left; color: #444; padding: 1px 13px 7px 13px; margin: 0 0 20px 0; }
+.greyboxtop { clear: both; height: 8px; background: #cccccc url(../../images/grey_top.gif) no-repeat; color: #000; }
+.greybox { background: #cccccc url(../../images/grey_bottom.gif) no-repeat bottom left; color: #444; padding: 1px 13px 7px 13px; margin: 0 0 20px 0; }
 .greybox p { padding: 7px 0; margin: 0;}
 
 
@@ -42,7 +42,7 @@ a:hover.quickNav { color: #258EE8; background: inherit; }
 .quickNavLeft
 {
 	float: left;
-	background-image: url('../images/quickNavScroll.png');
+	background-image: url('../../images/quickNavScroll.png');
 	background-position: -66px -70px !important;
 	width:5px;
 	height:35px;
@@ -51,7 +51,7 @@ a:hover.quickNav { color: #258EE8; background: inherit; }
 .quickNavRight
 {
 	float: left;
-	background-image: url('../images/quickNavScroll.png');
+	background-image: url('../../images/quickNavScroll.png');
 	background-position: 0px -70px !important;
 	width:61px;
 	height:35px;
@@ -60,7 +60,7 @@ a:hover.quickNav { color: #258EE8; background: inherit; }
 a.quickNavAnchor
 {
 	float: left;
-	background-image: url('../images/quickNavScroll.png');
+	background-image: url('../../images/quickNavScroll.png');
 	text-shadow: #777777 2px 2px 5px;
 	width: 115px;
 	height: 27px;
