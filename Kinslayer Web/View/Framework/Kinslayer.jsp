@@ -4,7 +4,11 @@
 <%@ page import="org.kinslayermud.userlog.*" %>
 <%@ page import="org.kinslayermud.character.*" %>
 <%@ page import="java.util.*" %>
-<%!
+<%
 
+WebSupport webSupport = (WebSupport)request.getAttribute("WebSupport");
+
+%>
+<%!
 
 %>

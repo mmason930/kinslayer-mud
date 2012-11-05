@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts2.interceptor.ServletRequestAware;
 import org.apache.struts2.interceptor.ServletResponseAware;
+import org.kinslayermud.misc.Provider;
 import org.kinslayermud.util.MiscUtil;
 import org.kinslayermud.util.WebSupport;
 import org.kinslayermud.util.WebSupportImp;
@@ -45,6 +46,8 @@ public abstract class StandardAction extends ActionSupport implements ServletReq
       
       request.setAttribute("SessionId", Integer.valueOf(sessionIdCookie.getValue()));
     }
+    
+    request.setAttribute("WebSupport", webSupport);
     
     return execute(webSupport);
   }

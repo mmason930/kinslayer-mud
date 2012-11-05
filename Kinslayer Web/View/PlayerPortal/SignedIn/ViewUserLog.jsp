@@ -2,6 +2,11 @@
 <%@ include file="/View/Framework/Kinslayer.jsp" %>
 <%
 UserLog userLog = (UserLog)request.getAttribute("UserLog");
+String normalLink, forumColoredLink, webColoredLink;
+
+normalLink = WebSiteUrlUtil.getUserLogUrl(webSupport.getInstanceDomain(), userLog.getId(), false, false);
+forumColoredLink = WebSiteUrlUtil.getUserLogUrl(webSupport.getInstanceDomain(), userLog.getId(), false, true);
+webColoredLink = WebSiteUrlUtil.getUserLogUrl(webSupport.getInstanceDomain(), userLog.getId(), true, false);
 %>
 	<div class="container_box">
 	
@@ -11,6 +16,8 @@ UserLog userLog = (UserLog)request.getAttribute("UserLog");
 				<h2>Player Portal</h2>
 			</div>
 			<br/>
+			
+			Display Type: <a href="<%=normalLink%>">Normal</a> | <a href="<%=forumColoredLink%>">Forum Colored</a> | <a href="<%=webColoredLink%>">Web Colored</a>
 			
 			<%= userLog.getConsoleOutput() %>
 		

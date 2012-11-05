@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.kinslayermud.character.User;
 import org.kinslayermud.exception.DataInterfaceException;
+import org.kinslayermud.misc.Provider;
 import org.kinslayermud.userlog.UserLog;
 import org.kinslayermud.userlog.UserLogRecord;
 import org.kinslayermud.userlog.UserLogUtil;
@@ -13,6 +14,12 @@ import org.kinslayermud.userlog.UserLogUtil;
 
 public class WebSupportImp implements WebSupport {
 
+  protected Provider provider;
+  public WebSupportImp() {
+    
+    provider = new Provider();
+  }
+  
   public User performLogin(String username, String password) throws DataInterfaceException {
     
     Connection connection = null;
@@ -170,5 +177,10 @@ public class WebSupportImp implements WebSupport {
       QueryUtil.closeNoThrow(statement);
       QueryUtil.closeNoThrow(connection);
     }
+  }
+  
+  public String getInstanceDomain() {
+    
+    return provider.getInstanceDomain();
   }
 }
