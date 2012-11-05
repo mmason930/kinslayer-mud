@@ -22,7 +22,7 @@ List<UserLogRecord> userLogRecords = (List<UserLogRecord>)request.getAttribute("
 <%
 for(UserLogRecord userLogRecord : userLogRecords) {
 %>
-			<a href="./player-portal-player-log/<%=userLogRecord.getId()%>/">
+			<a href="./player-portal-view-user-log/<%=userLogRecord.getId()%>/">
 				<%=MiscUtil.formatDateEEEEcsMMMsDsYYYY(userLogRecord.getRecordDate())%><br/>
 			</a>
 <%
