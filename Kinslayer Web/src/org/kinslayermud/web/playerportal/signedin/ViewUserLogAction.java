@@ -82,15 +82,16 @@ public class ViewUserLogAction extends ValidateSignInAction {
                   formattedLog.append("</span>");
                 else if(forumMode)
                   formattedLog.append("[/color]");
+              }
+              
+
+              if(isBolded) {
                 
-                if(isBolded) {
-                  
-                  if(htmlMode)
-                    formattedLog.append("</span>");
-                  else if(forumMode)
-                    formattedLog.append("[/b]");
-                  isBolded = false;
-                }
+                if(htmlMode)
+                  formattedLog.append("</span>");
+                else if(forumMode)
+                  formattedLog.append("[/b]");
+                isBolded = false;
               }
               
               if(!newColor.equals(TelnetColor.normal) && !newColor.equals(TelnetColor.bold)) {
