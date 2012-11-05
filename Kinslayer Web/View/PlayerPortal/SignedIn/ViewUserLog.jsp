@@ -8,6 +8,17 @@ normalLink = WebSiteUrlUtil.getUserLogUrl(webSupport.getInstanceDomain(), userLo
 forumColoredLink = WebSiteUrlUtil.getUserLogUrl(webSupport.getInstanceDomain(), userLog.getId(), false, true);
 webColoredLink = WebSiteUrlUtil.getUserLogUrl(webSupport.getInstanceDomain(), userLog.getId(), true, false);
 %>
+
+<script type="text/javascript">
+$(document).ready(function() {
+
+	$("#selectAllButton").bind("click", function() {
+
+		selectText("playerLogBuffer");
+	});
+});
+</script>
+
 	<div class="container_box">
 	
 		<div class="userPortalContent">
@@ -31,7 +42,13 @@ webColoredLink = WebSiteUrlUtil.getUserLogUrl(webSupport.getInstanceDomain(), us
 			<br/>
 			
 			<br/>
+			
+			<a href="#" id="selectAllButton">Select All</a>
+			<br/>
+			
+			<div id="playerLogBuffer">
 			<%= userLog.getConsoleOutput() %>
+			</div>
 		
 		</div>
 		<div style="clear: both;"></div>
