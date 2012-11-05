@@ -1,11 +1,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
-		<meta name="DESCRIPTION" content="<?php if(isset($overallMetaDescription)) echo($overallMetaDescription); else echo("KinslayerMUD is a free online Wheel of Time based roleplaying game");?>" />
 		<meta http-equiv="Content-Language" content="EN" /> 
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
 		<meta http-equiv="content-type" content="text/html;charset=iso-8859-2" />
-		<title><?php if(isset($overallTitle)) echo($overallTitle); else echo("KinslayerMUD.org - A Free Online Wheel of Time Game");?></title>
+		<title><tiles:insertAttribute name="title" /></title>
 		<base href="http://localhost/newsite/" />
 		<link rel="stylesheet" href="./includes/style.css" type="text/css"/>
 	</head>
