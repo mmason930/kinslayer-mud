@@ -13,14 +13,14 @@
 			<result-type name="tiles" class="org.apache.struts2.views.tiles.TilesResult" />
 		</result-types>
 		
-		<action name="Home.do" class="org.kinslayermud.web.home.HomeAction" method="execute">
+		<action name="Home" class="org.kinslayermud.web.home.HomeAction" method="execute">
 			<result name="Success" type="tiles">Home</result>
 		</action>
 		
 		<action name="JSONResponse.do" class="org.kinslayermud.web.generic.JSONResponseAction" />
 		
 		<action name="*" class="org.kinslayermud.web.home.DefaultAction" method="execute">
-			<result name="Redirect" type="chain">Home.do</result>
+			<result name="Redirect" type="chain">Home</result>
 			<result name="Failure">/View/Test/PageNotFound.jsp</result>
 		</action>
 		
