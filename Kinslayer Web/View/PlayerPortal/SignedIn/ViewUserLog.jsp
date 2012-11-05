@@ -18,7 +18,7 @@ webColoredLink = WebSiteUrlUtil.getUserLogUrl(webSupport.getInstanceDomain(), us
 			<br/>
 			
 			Display Type: <a href="<%=normalLink%>">Normal</a> | <a href="<%=forumColoredLink%>">Forum Colored</a> | <a href="<%=webColoredLink%>">Web Colored</a>
-			
+			<br/>
 			<%= userLog.getConsoleOutput() %>
 		
 		</div>
