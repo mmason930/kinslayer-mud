@@ -19,7 +19,7 @@
 			<result name="Success" type="tiles">Home</result>
 		</action>
 		
-		<action name="NewToMuds" class="org.kinslayermud.web.home.NewToMudsHomeAction" method="execute">
+		<action name="NewToMuds" class="org.kinslayermud.web.newtomuds.NewToMudsHomeAction" method="execute">
 			<result name="Success" type="tiles">NewToMudsHome</result>
 		</action>
 		
