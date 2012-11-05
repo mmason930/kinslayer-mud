@@ -39,7 +39,7 @@ public class SignInAction extends StandardAction {
     
     if(errors.size() > 0) {
       
-      request.setAttribute("Errors", errors);
+      request.setAttribute("FormErrors", errors);
       return FAILURE_FORWARD;
     }
     
@@ -48,7 +48,7 @@ public class SignInAction extends StandardAction {
     if(user == null) {
       
       errors.add("The username or password you entered was incorrect. Please try again.");
-      request.setAttribute("Errors", errors);
+      request.setAttribute("FormErrors", errors);
       return FAILURE_FORWARD;
     }
     
