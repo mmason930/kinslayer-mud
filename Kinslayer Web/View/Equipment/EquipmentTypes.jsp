@@ -12,7 +12,24 @@
 			</h1>
 			
 			<p>
-				Content
+          		The different types of Equipment available are:
+
+				<span style="text-align:center;">
+					<p>
+						Head Gear <br/>
+						Earrings (max two: one on each ear) <br/>
+						Shoulder Protection <br />
+						Arm & Sleeve Protection <br />
+						Wrist Trinkets (max two: one on each wrist)<br />
+						Ring Trinkets (max two: on one finger per hand)<br />
+						Hand Gear<br />
+						A shield in one hand <br />
+						Weapons may be wielding with one hand, or two depending on its size <br />
+						Leg Wear <br />
+						Footwear
+					</p>
+				</span>
+
 			</p>
 			</div>
 		</div>
