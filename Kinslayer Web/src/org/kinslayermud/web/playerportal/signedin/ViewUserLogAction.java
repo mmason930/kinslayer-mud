@@ -82,6 +82,9 @@ System.out.println("NEW COLOR: " + (newColor == null ? "<NULL>" : newColor.getSt
               if(!newColor.equals(TelnetColor.normal) && !newColor.equals(TelnetColor.bold)) {
                 
                 formattedLog.append("<span style='color: #" + newColor.getHexCode() + ";'>");
+                if(isBolded) {
+                  formattedLog.append("<span style='font-weight:bold;'>");
+                }
                 currentColor = newColor;
               }
               else if(newColor.equals(TelnetColor.bold)) {
