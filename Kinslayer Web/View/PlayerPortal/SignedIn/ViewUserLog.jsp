@@ -11,17 +11,24 @@ webColoredLink = WebSiteUrlUtil.getUserLogUrl(webSupport.getInstanceDomain(), us
 	<div class="container_box">
 	
 		<div class="userPortalContent">
-
-			<div class="userPortalContentHeader">
-				<h2>Player Portal</h2>
-			</div>
-			<br/>
 			
+			<span class="userPortalBreadcrumbs">
+			<a href="#">Player Portal Home</a> &gt; Player Log
+			</span>
+
 			<div class="textCentered">
 				<span class="userPortalUserLogDisplayTypeBox">
-					Display Type: <a href="http://dev.kinslayermud.org/player-portal-view-user-log/7/">Normal</a> | <a href="http://dev.kinslayermud.org/player-portal-view-user-log/7/?DisplayType=Forum">Forum Colored</a> | <a href="http://dev.kinslayermud.org/player-portal-view-user-log/7/?DisplayType=Html">Web Colored</a>
+					Display Type: <a href="<%=normalLink%>">Normal</a> | <a href="<%=forumColoredLink%>">Forum Colored</a> | <a href="<%=webColoredLink%>">Web Colored</a>
 				</span>
 			</div>
+			<br/>
+			<br/>
+
+			<div class="userPortalContentHeader">
+				<h2>Player Log</h2>
+				<span class="bigBold"><%=MiscUtil.formatDateEEEEcsMMMsDsYYYY(userLog.getRecordDate())%></span>
+			</div>
+			<br/>
 			
 			<br/>
 			<%= userLog.getConsoleOutput() %>
