@@ -92,4 +92,13 @@ public class UserUtil {
     
     return null;
   }
+  
+  public static void performPlayerPortalSignOut(Statement statement, String sessionId, int userId) throws SQLException {
+    
+    String sql = " DELETE FROM websiteSession "
+               + " WHERE user_id = " + userId
+               + " AND id = " + SQLUtil.escapeQuoteString(sessionId);
+    
+    statement.executeUpdate(sql);
+  }
 }

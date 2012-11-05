@@ -9,4 +9,5 @@ public interface WebSupport {
   public User performLogin(String username, String password) throws DataInterfaceException;
   public void createUserSession(int userId, String sessionId) throws DataInterfaceException;
   public User getUserFromSession(String sessionId) throws DataInterfaceException;
+  public void performPlayerPortalSignOut(String sessionId, int userId) throws DataInterfaceException;
 }

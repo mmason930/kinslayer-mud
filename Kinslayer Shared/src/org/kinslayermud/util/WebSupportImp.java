@@ -87,4 +87,29 @@ public class WebSupportImp implements WebSupport {
       QueryUtil.closeNoThrow(connection);
     }
   }
+  
+  public void performPlayerPortalSignOut(String sessionId, int userId) throws DataInterfaceException {
+    
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = DatabaseUtil.getConnection();
+      statement = connection.createStatement();
+      
+      UserUtil.performPlayerPortalSignOut(statement, sessionId, userId);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
 }
