@@ -9,7 +9,7 @@ public class DatabaseUtil {
   public static Connection getConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
   
     String hostname = "localhost";
-    String database = "mymeatinyourmouth";
+    String database = "livemud";
     String username = "root";
     String password = "Car Keys Suck!";
 //    String password = "";
