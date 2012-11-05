@@ -99,7 +99,6 @@ public class ViewUserLogAction extends ValidateSignInAction {
                   else if(forumMode)
                     formattedLog.append("[b]");
                 }
-                currentColor = newColor;
               }
               else if(newColor.equals(TelnetColor.bold)) {
                 
@@ -109,6 +108,9 @@ public class ViewUserLogAction extends ValidateSignInAction {
                   formattedLog.append("[b]");
                 isBolded = true;
               }
+              
+              if(newColor != null && !newColor.equals(TelnetColor.bold))
+                currentColor = newColor;
             }
           }
         }
