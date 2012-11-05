@@ -66,9 +66,13 @@
 		
 		<action name="PlayerPortalHome" class="org.kinslayermud.web.playerportal.signedin.PlayerPortalHomeAction" method="execute">
 			<result name="Success" type="tiles">PlayerPortalHome</result>
-			<result name="Failure">PlayerPortalSignInMenu</result>
+			<result name="Failure" type="redirect">PlayerPortalSignInMenu.do</result>
 		</action>
 		
+		<action name="PlayerPortalSignOut" class="org.kinslayermud.web.playerportal.signedin.SignOutAction" method="execute">
+			<result name="Success" type="redirect">PlayerPortalSignInMenu.do</result>
+			<result name="Failure" type="redirect">PlayerPortalSignInMenu.do</result>
+		</action>
 
 		<!--  LEGENDS -->
 		<action name="LegendsIntroduction" class="org.kinslayermud.web.legends.LegendsIntroductionAction" method="execute">
