@@ -23,7 +23,7 @@
 		
 		     <p>A SuperMOB is characterized by being difficult to take down individually, however they often may have many followers with them. These are
 		     often referred to as "minions". In many cases these followers must be taken down before being able to finish off the SuperMOB himself.
-		     <br /> <br /> A list of SuperMOBs can be found on our "<span class="bold"><a href="./supermob_listing.php">SuperMOB Listing</a></span></span>" feature. This list also shows what type of equipment each SuperMOB may have, and
+		     <br /> <br /> A list of SuperMOBs can be found on our "<span class="bold"><a href="./supermob_listing">SuperMOB Listing</a></span></span>" feature. This list also shows what type of equipment each SuperMOB may have, and
 		     in what area of the world they can be found. Be warned that some SuperMOBs may be considered innocent, especially when playing the Human race. Some may be considered leaders
 		     of player factions and may not be wise to kill.
 		     </p>
