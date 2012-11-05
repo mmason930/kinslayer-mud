@@ -51,6 +51,11 @@ public class ViewUserLogAction extends ValidateSignInAction {
     TelnetColor currentColor = TelnetColor.normal;
     boolean isBolded = false;
     
+    if(forumMode) {
+      
+      formattedLog.append("[pre]");
+    }
+    
     for(int index = 0;index < consoleBuffer.length();++index) {
       
       if(consoleBuffer.charAt(index) == 0x1B) {
@@ -128,6 +133,10 @@ public class ViewUserLogAction extends ValidateSignInAction {
         
         formattedLog.append(consoleBuffer.charAt(index));
       }
+    }
+    
+    if(forumMode) {
+      formattedLog.append("[/pre]");
     }
 
     return formattedLog.toString();
