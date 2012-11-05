@@ -64,7 +64,6 @@
   
   
   <!-- PLAYER PORTAL -->
-  <!--
   <definition name="PlayerPortalSignInMenu" template="/View/Framework/StandardLayout.jsp">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
     <put-attribute name="body" value="/View/PlayerPortal/SignInMenu.jsp"/>
@@ -74,7 +73,7 @@
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
     <put-attribute name="body" value="/View/PlayerPortal/SignedIn/PlayerPortalHome.jsp"/>
   </definition>
-  -->
+  
   
   <!--  TRADES -->
   <definition name="TradesIntroduction" template="/View/Framework/StandardLayout.jsp">

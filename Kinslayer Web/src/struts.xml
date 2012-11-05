@@ -55,7 +55,6 @@
 		
 		
 		<!-- PLAYER PORTAL -->
-		<!--
 		<action name="PlayerPortalSignInMenu" class="org.kinslayermud.web.playerportal.SignInMenuAction" method="execute">
 			<result name="Success" type="tiles">PlayerPortalSignInMenu</result>
 		</action>
@@ -69,7 +68,7 @@
 			<result name="Success" type="tiles">PlayerPortalHome</result>
 			<result name="Failure">PlayerPortalSignInMenu</result>
 		</action>
-		-->
+		
 
 		<!--  LEGENDS -->
 		<action name="LegendsIntroduction" class="org.kinslayermud.web.legends.LegendsIntroductionAction" method="execute">
