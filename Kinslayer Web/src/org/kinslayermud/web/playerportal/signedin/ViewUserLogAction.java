@@ -62,7 +62,31 @@ public class ViewUserLogAction extends ValidateSignInAction {
             
             int colorCode = Integer.valueOf(numberTextStringBuffer.toString());
             index = tempIndex;
-
+            
+            TelnetColor newColor = TelnetColor.getTelnetColorByColorCode(colorCode);
+System.out.println("NEW COLOR: " + newColor.getStandardName());
+            if(newColor != null) {
+              
+              if(!currentColor.equals(TelnetColor.normal)) {
+              
+                formattedLog.append("</span>");
+                
+                if(isBolded && newColor.equals(TelnetColor.normal)) {
+                  formattedLog.append("</span>");
+                  isBolded = false;
+                }
+              }
+              
+              if(!newColor.equals(TelnetColor.normal) && !newColor.equals(TelnetColor.bold)) {
+                
+                formattedLog.append("<span style='color: #" + newColor.getColorCode() + ";'>");
+                currentColor = newColor;
+              }
+              else if(newColor.equals(TelnetColor.bold)) {
+                formattedLog.append("<span style='font-weight:bold;'>");
+                isBolded = true;
+              }
+            }
             System.out.println("COLOR CODE: " + colorCode);
           }
         }
