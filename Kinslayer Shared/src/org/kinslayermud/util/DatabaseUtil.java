@@ -11,8 +11,8 @@ public class DatabaseUtil {
     String hostname = "localhost";
     String database = "livemud";
     String username = "root";
-    //String password = "Car Keys Suck!";
-    String password = "";
+    String password = "Car Keys Suck!";
+//    String password = "";
     
     
     Class.forName("com.mysql.jdbc.Driver").newInstance();
