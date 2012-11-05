@@ -1,5 +1,16 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ include file="/View/Framework/Kinslayer.jsp" %>
+<%
+String sessionUserName = (String)request.getAttribute("SessionUserName");
+Integer sessionUserId = (Integer)request.getAttribute("SessionUserId");
+String signInMessage = "Sign In";
+String signInUrl = "./player-portal";
+if(sessionUserName != null && sessionUserId != null) {
+
+  signInMessage = "Sign Out [" + sessionUserName + "]";
+  signInUrl = "./player-portal-sign-out";
+}
+%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
@@ -21,10 +32,14 @@
 					| <a class="quickNav" href="./legends">Top PVP Players</a>
 					| <a class="quickNav" href="./forums">Forums</a>
 					| <a class="quickNav" href="./wiki/index.php/Main_Page">Wiki</a>
-					| <a class="quickNav" href="<?php echo $signInUrl ?>"><?php echo $signInMessage; ?></a>
-<!--
+					| <a class="quickNav" href="<%=signInUrl%>"><%=signInMessage%></a>
+<%
+if(sessionUserName != null && sessionUserId != null) {
+%>
 					| <a class="quickNav" href="./player-portal-home">Player Portal</a>
--->
+<%
+}
+%>
 					<br />To log into the game, connect to KinslayerMUD.org using port 2222 with your favorite MUD Client, or Telnet.
 					<a href="/mudclient/mudclient.php" class="playNow">&gt; PLAY NOW!</a>
 				</p>
