@@ -13,7 +13,7 @@ webColoredLink = WebSiteUrlUtil.getUserLogUrl(webSupport.getInstanceDomain(), us
 		<div class="userPortalContent">
 			
 			<span class="userPortalBreadcrumbs">
-			<a href="#">Player Portal Home</a> &gt; Player Log
+			<a href="./player-portal-home">Player Portal Home</a> &gt; Player Log
 			</span>
 
 			<div class="textCentered">
