@@ -145,7 +145,7 @@ public class WebSupportImp implements WebSupport {
     }
   }
   
-  public UserLog getUserLog(int userLogId, boolean throwIfNotFound) throws DataInterfaceException {
+  public UserLog getUserLog(int userLogId) throws DataInterfaceException {
     
     Connection connection = null;
     Statement statement = null;

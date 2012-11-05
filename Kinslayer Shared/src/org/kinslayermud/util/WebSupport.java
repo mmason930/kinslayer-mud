@@ -16,5 +16,5 @@ public interface WebSupport {
   public User getUserFromSession(String sessionId) throws DataInterfaceException;
   public void performPlayerPortalSignOut(String sessionId, int userId) throws DataInterfaceException;
   public List<UserLogRecord> getUserLogRecords(int userId) throws DataInterfaceException;
-  public UserLog getUserLog(int userLogId, boolean throwIfNotFound) throws DataInterfaceException;
+  public UserLog getUserLog(int userLogId) throws DataInterfaceException;
 }

@@ -1,8 +1,7 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ include file="/View/Framework/Kinslayer.jsp" %>
 <%
-User user = (User)request.getAttribute("User");
-List<UserLogRecord> userLogRecords = (List<UserLogRecord>)request.getAttribute("UserLogRecords");
+UserLog userLog = (UserLog)request.getAttribute("UserLog");
 %>
 	<div class="container_box">
 	
@@ -13,7 +12,7 @@ List<UserLogRecord> userLogRecords = (List<UserLogRecord>)request.getAttribute("
 			</div>
 			<br/>
 			
-			A USER LOG IS HERE!
+			<%= userLog.getConsoleOutput() %>
 		
 		</div>
 		<div style="clear: both;"></div>
