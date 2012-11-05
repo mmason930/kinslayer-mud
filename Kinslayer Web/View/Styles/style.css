@@ -123,7 +123,7 @@ h1
 {
 	margin: auto;
 	padding: 8px;
-	font-size: 11px;
+	font-size: 12px;
 }
 
 .container_box
@@ -395,4 +395,54 @@ ul.subnav li a:hover
 	margin-left:3px;
 	clear: left;
 	overflow: hidden;
+}
+
+
+.classGrouping
+{
+	float: left;
+	margin-left: 10px;
+	width: 180px;
+}
+
+.classGroupingHeader
+{
+	font-size: 17px;
+	font-weight: bold;
+	padding: 5px;
+
+	text-align: center;
+
+	color: #FFFFFF;
+	text-decoration: none;
+	text-shadow: 2px 2px 0 #302f30;
+	
+	-webkit-border-radius: 5px 5px 0px 0px;
+	-moz-border-radius: 5px 5px 0px 0px;
+	-ms-border-radius: 5px 5px 0px 0px;
+	-o-border-radius: 5px 5px 0px 0px;
+	border-radius: 5px 5px 0px 0px;
+
+	border: 1px solid #000000;
+	box-shadow: #555555 0 0 2px;
+	background:-webkit-gradient(linear,left top,left bottom,color-stop(0.05,#d04a3b),color-stop(1,#b31904));
+	background:-moz-linear-gradient(center top,#d04a3b 5%,#b31904 100%);
+	background-color:#b31904;
+}
+
+.classGroupingBody
+{
+	font-size: 15px;
+	background: #CCCCCC;
+	border: 1px solid #000000;
+	border-top: none;
+	padding: 5px;
+	height: 150px;
+	box-shadow: #555555 0 0 2px;
+	line-height: 20px;
+}
+
+.bold
+{
+	font-weight: bold;
 }
