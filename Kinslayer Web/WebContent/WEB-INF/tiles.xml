@@ -15,5 +15,23 @@
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
     <put-attribute name="body" value="/View/NewToMudsHome/NewToMudsHome.jsp"/>
   </definition>
+  
+
+  <definition name="NewToMudsCharacterCreation" template="/View/Framework/StandardLayout.jsp">
+    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="body" value="/View/NewToMudsHome/NewToMudsCharacterCreation.jsp"/>
+  </definition>
+  
+
+  <definition name="NewToMudsConnecting" template="/View/Framework/StandardLayout.jsp">
+    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="body" value="/View/NewToMudsHome/NewToMudsConnecting.jsp"/>
+  </definition>
+  
+
+  <definition name="NewToMudsBasicCommands" template="/View/Framework/StandardLayout.jsp">
+    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="body" value="/View/NewToMudsHome/NewToMudsBasicCommands.jsp"/>
+  </definition>
  
 </tiles-definitions>

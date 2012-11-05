@@ -20,7 +20,19 @@
 		</action>
 		
 		<action name="NewToMuds" class="org.kinslayermud.web.newtomuds.NewToMudsHomeAction" method="execute">
-			<result name="Success" type="tiles">NewToMudsHome</result>
+			<result name="Success" type="tiles">NewToMuds</result>
+		</action>
+		
+		<action name="NewToMudsBasicCommands" class="org.kinslayermud.web.newtomuds.NewToMudsBasicCommandsAction" method="execute">
+			<result name="Success" type="tiles">NewToMudsBasicCommands</result>
+		</action>
+		
+		<action name="NewToMudsCharacterCreation" class="org.kinslayermud.web.newtomuds.NewToMudsCharacterCreationAction" method="execute">
+			<result name="Success" type="tiles">NewToMudsCharacterCreation</result>
+		</action>
+		
+		<action name="NewToMudsConnecting" class="org.kinslayermud.web.newtomuds.NewToMudsConnectingAction" method="execute">
+			<result name="Success" type="tiles">NewToMudsConnecting</result>
 		</action>
 		
 		<action name="JSONResponse" class="org.kinslayermud.web.generic.JSONResponseAction" />
