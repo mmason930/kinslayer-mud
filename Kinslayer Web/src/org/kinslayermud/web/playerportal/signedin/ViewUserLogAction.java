@@ -26,7 +26,7 @@ public class ViewUserLogAction extends ValidateSignInAction {
       
       if(userLog.getUserId() == user.getUserId()) {
         
-        userLog.setConsoleOutput(formatUserLog(userLog.getConsoleOutput()));
+        userLog.setConsoleOutput(formatUserLog(StringUtil.ConvertToHTML(userLog.getConsoleOutput())));
         request.setAttribute("UserLog", userLog);
         return SUCCESS_FORWARD;
       }
@@ -99,7 +99,7 @@ System.out.println("NEW COLOR: " + (newColor == null ? "<NULL>" : newColor.getSt
       }
     }
 
-    return StringUtil.ConvertToHTML(formattedLog.toString());
+    return formattedLog.toString();
   }
   
   
