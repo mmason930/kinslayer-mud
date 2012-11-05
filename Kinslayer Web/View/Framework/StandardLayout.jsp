@@ -18,7 +18,7 @@ if(sessionUserName != null && sessionUserId != null) {
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
 		<meta http-equiv="content-type" content="text/html;charset=iso-8859-2" />
 		<title><tiles:insertAttribute name="title" /></title>
-		<base href="./" />
+		<base href="http://dev.kinslayermud.org/" />
 		<link rel="stylesheet" href="./View/Styles/style.css" type="text/css"/>
 	</head>
 
