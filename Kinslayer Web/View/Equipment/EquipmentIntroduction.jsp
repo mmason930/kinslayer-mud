@@ -12,7 +12,9 @@
 			</h1>
 			
 			<p>
-				Content
+				Wearing equipment provides protection against an enemy attack, either in the form of absorbing the blow,
+				providing better ease of movement to dodge a blow, or a combination of both. KinslayerMUD offers different
+				types of equipment and the ease of procuring equipment depends on the abilities offered.
 			</p>
 			</div>
 		</div>
