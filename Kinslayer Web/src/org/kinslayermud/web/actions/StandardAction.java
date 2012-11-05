@@ -10,7 +10,7 @@ import org.kinslayermud.util.WebSupportImp;
 
 import com.opensymphony.xwork2.ActionSupport;
 
-public abstract class StoreAction extends ActionSupport implements ServletRequestAware, ServletResponseAware {
+public abstract class StandardAction extends ActionSupport implements ServletRequestAware, ServletResponseAware {
 
   protected HttpServletRequest request;
   protected HttpServletResponse response;
@@ -19,7 +19,7 @@ public abstract class StoreAction extends ActionSupport implements ServletReques
   protected static final String CART_ID_COOKIE_NAME = "CartId";
   protected static final String CART_RANDOM_ID_COOKIE_NAME = "CartRandomId";
   
-  public StoreAction() {
+  public StandardAction() {
 
     webSupport = new WebSupportImp();
   }

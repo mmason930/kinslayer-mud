@@ -1,9 +1,9 @@
 package org.kinslayermud.web.home;
 
 import org.kinslayermud.util.WebSupport;
-import org.kinslayermud.web.actions.StoreAction;
+import org.kinslayermud.web.actions.StandardAction;
 
-public class DefaultAction extends StoreAction {
+public class DefaultAction extends StandardAction {
 
   private static String REDIRECT_FORWARD = "Redirect";
   private static String FAILURE_FORWARD = "Failure";
