@@ -11,6 +11,6 @@ public class WebSiteUrlUtil {
     else if(forumMode)
       displayType=  "Forum";
     
-    return "http://" + instanceDomain + "/player-portal-view-user-log/" + userLogId + "/" + (displayType == null ? "" : ("DisplayType=" + displayType));
+    return "http://" + instanceDomain + "/player-portal-view-user-log/" + userLogId + "/" + (displayType == null ? "" : ("?DisplayType=" + displayType));
   }
 }
