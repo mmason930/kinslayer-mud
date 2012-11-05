@@ -254,6 +254,18 @@ public abstract class StringUtil {
           flag = false;
           charCount = 0;
         }
+        else if(text.charAt(i) == '<') {
+          html.append("&lt;");
+        }
+        else if(text.charAt(i) == '>') {
+          html.append("&gt;");
+        }
+        else if(text.charAt(i) == '"') {
+          html.append("&quot;");
+        }
+        else if(text.charAt(i) == '\'') {
+          html.append("&apos;");
+        }
         else if(text.charAt(i) == '\t')
         {
           for(int j = 0; j < charCount % SPACES_PER_TAB; j++)
