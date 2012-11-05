@@ -10,5 +10,10 @@
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
     <put-attribute name="body" value="/View/Home/Home.jsp"/>
   </definition>
+  
+  <definition name="NewToMudsHome" template="/View/Framework/StandardLayout.jsp">
+    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="body" value="/View/NewToMudsHome/NewToMudsHome.jsp"/>
+  </definition>
  
 </tiles-definitions>
