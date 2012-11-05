@@ -44,6 +44,16 @@
 		</action>
 		
 		
+		<!--  SUPER MOBS -->
+		<action name="SuperMobWhatIs" class="org.kinslayermud.web.supermobs.SuperMobWhatIsAction" method="execute">
+			<result name="Success" type="tiles">SuperMobWhatIs</result>
+		</action>
+		
+		<action name="SuperMobListing" class="org.kinslayermud.web.supermobs.SuperMobListingAction" method="execute">
+			<result name="Success" type="tiles">SuperMobListing</result>
+		</action>
+		
+		
 		<!--  EQUIPMENT -->
 		<action name="EquipmentIntroduction" class="org.kinslayermud.web.equipment.EquipmentIntroductionAction" method="execute">
 			<result name="Success" type="tiles">EquipmentIntroduction</result>
