@@ -12,9 +12,10 @@ webColoredLink = WebSiteUrlUtil.getUserLogUrl(webSupport.getInstanceDomain(), us
 <script type="text/javascript">
 $(document).ready(function() {
 
-	$("#selectAllButton").bind("click", function() {
+	$("#selectAllButton").bind("click", function(event) {
 
 		selectText("playerLogBuffer");
+		event.preventDefault();
 	});
 });
 </script>
