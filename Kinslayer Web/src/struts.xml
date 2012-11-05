@@ -7,6 +7,7 @@
 
 	<constant name="struts.devMode" value="true" />
 	<constant name="struts.enable.SlashesInActionNames" value="true"/>
+	<constant name="struts.action.extension" value=",action,do" />
 	
 	<package name="basicstruts2" extends="struts-default">
 
