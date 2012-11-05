@@ -19,9 +19,13 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -54,6 +58,17 @@ public abstract class MiscUtil {
   private static char[] defaultRandomIDCharacterSet = null;
   private static char[] numericRandomIDCharacterSet = null;
 
+  public static String md5(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    
+    MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+    String md5Hex = new BigInteger(1, messageDigest.digest(str.getBytes("UTF-8"))).toString(16);
+    
+    if(md5Hex.length() != 32)
+      return "0" + md5Hex;
+    
+    return md5Hex;
+  }
+  
   /**
    * Locates and opens the specified file as an InputStream.  If the specified
    * file is not found or fails to open, an exception is thrown.
