@@ -13,7 +13,7 @@ a { color: #003B6E; background: inherit; }
 a:hover { color: #3399cc; background: inherit; }	
 
 /* headings */
-h2 { font: bold 2em "Arial", Sans-Serif; margin: 0; letter-spacing: -1px; }
+h2 { font: bold 21px "Arial", Sans-Serif; margin: 0; letter-spacing: -1px; }
 h1 { font: bold 2em Arial, Sans-Serif; margin: 0; padding: 0; color: #003B6E;}
 h2 a, h2 a { color: #2b2b2b; background: #fff; text-decoration: none; }
 h1 a:hover, h2 a:hover { color: #2b2b2b; background: #FFF; }
