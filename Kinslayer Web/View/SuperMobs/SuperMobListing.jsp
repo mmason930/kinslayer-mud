@@ -11,9 +11,7 @@
 				List of SuperMOBs
 			</h1>
 			
-			<p>
-				Content
-			</p>
+			
 			</div>
 		</div>
 		<div style="clear: both;"></div>
