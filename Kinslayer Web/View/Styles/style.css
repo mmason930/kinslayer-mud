@@ -455,5 +455,20 @@ ul.subnav li a:hover
 
 .italics
 {
-	font-style: italics;
+	font-style: italic;
+}
+
+.smallFont
+{
+	font-size: 11px;
+}
+
+.mediumFont
+{
+	font-size: 13px;
+}
+
+.largeFont
+{
+	font-size: 15px;
 }
