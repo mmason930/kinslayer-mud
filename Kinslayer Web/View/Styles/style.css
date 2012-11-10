@@ -452,3 +452,8 @@ ul.subnav li a:hover
 {
 	font-weight: bold;
 }
+
+.italics
+{
+	font-style: italics;
+}
