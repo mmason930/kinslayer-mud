@@ -19,7 +19,7 @@ List<MobPrototype> superMobPrototypes = (List<MobPrototype>)request.getAttribute
 for(MobPrototype superMobPrototype : superMobPrototypes) {
 %>
 						<li>
-							<a href="#"><span><%=StringUtil.ConvertToHTML(superMobPrototype.getShortDescription())%></span></a>
+							<a href="/supermob-listing?MobPrototypeId=<%=superMobPrototype.getId()%>"><span><%=StringUtil.ConvertToHTML(StringUtil.properString(superMobPrototype.getShortDescription()))%></span></a>
 						</li>
 <%
 }
@@ -33,7 +33,7 @@ if(mobPrototype != null) {
 %>
 			<div class="smobDetailsContainer">
 				<div class="smobDetails">
-					<span class="bold largeFont"><%=StringUtil.ConvertToHTML(mobPrototype.getShortDescription()) %></span><br/>
+					<span class="bold largeFont"><%=StringUtil.ConvertToHTML(StringUtil.properString(mobPrototype.getShortDescription())) %></span><br/>
 					<span class="italics mediumFont">
 <%
   if(zone != null) {
