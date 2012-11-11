@@ -71,12 +71,15 @@ if(mobPrototype != null) {
         boolean isFirst = true;
         for(ObjectWearType objectWearType : objectWearTypes) {
           
+          if(objectWearType.equals(ObjectWearType.take))
+            continue;
+          
           if(isFirst)
             isFirst = false;
           else
             objectWearDisplay += ", ";
           
-          objectWearDisplay += objectWearType.getStandardName();
+          objectWearDisplay += ("<a href='#'>" + objectWearType.getStandardName() + "</a>");
         }
 %>
 
