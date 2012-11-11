@@ -20,7 +20,7 @@ KitWithItemsAndObjectPrototypes kitWithItemsAndObjectPrototypes = (KitWithItemsA
 for(MobPrototype superMobPrototype : superMobPrototypes) {
 %>
             <li>
-              <a href="/supermob-listing?MobPrototypeId=<%=superMobPrototype.getId()%>" <%= (mobPrototype != null && mobPrototype.getId() == superMobPrototype.getId()) ? ("class='selected') : ""%>><span><%=StringUtil.ConvertToHTML(StringUtil.properString(superMobPrototype.getShortDescription()))%></span></a>
+              <a href="/supermob-listing?MobPrototypeId=<%=superMobPrototype.getId()%>" <%= (mobPrototype != null && mobPrototype.getId() == superMobPrototype.getId()) ? ("class='selected'") : ""%>><span><%=StringUtil.ConvertToHTML(StringUtil.properString(superMobPrototype.getShortDescription()))%></span></a>
             </li>
 <%
 }
