@@ -79,14 +79,14 @@ if(mobPrototype != null) {
           else
             objectWearDisplay += ", ";
           
-          objectWearDisplay += ("<a href='#'>" + objectWearType.getStandardName() + "</a>");
+          objectWearDisplay += ("<a href='#'>" + StringUtil.ConvertToHTML(objectWearType.getStandardName()) + "</a>");
         }
 %>
 
 
 						<tr>
 							<td class="itemNameColumn"><%=StringUtil.ConvertToHTML(StringUtil.properString(objectPrototype.getShortDescription()))%></td>
-							<td class="bodyLocationColumn"><%=StringUtil.ConvertToHTML(objectWearDisplay)%></td>
+							<td class="bodyLocationColumn"><%=objectWearDisplay%></td>
 							<td class="loadProbabilityColumn"><%=kitItem.getProbability()%>%</td>
 						</tr>
 <%
