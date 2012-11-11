@@ -15,9 +15,15 @@ List<MobPrototype> superMobPrototypes = (List<MobPrototype>)request.getAttribute
 				<div class="classGroupingHeader">Choose a SuperMOB</div>
 				<div class="smobListBody">
 					<ul>
+<%
+for(MobPrototype superMobPrototype : superMobPrototypes) {
+%>
 						<li>
-							<a href="#"><span>Snake King</span></a>
+							<a href="#"><span><%=URLEncoder.encode(superMobPrototype.getShortDescription(), "UTF-8")%></span></a>
 						</li>
+<%
+}
+%>
 					</ul>
 					<div class="clearLeft"></div>
 				</div>
