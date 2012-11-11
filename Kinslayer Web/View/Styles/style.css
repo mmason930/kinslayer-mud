@@ -154,10 +154,11 @@ h1
 
 
 /* bottom thirds */
-.thirds { float: left; width: 203px; background: #eee; margin: 0 12px 0 0; color: #5d5d5d; }
+.thirds { float: left; width: 201px; background: #eee; margin: 0 12px 0 0; color: #5d5d5d; }
 .smallbox
 {
 	border: 2px solid #000000;
+	min-height: 130px;
 	-webkit-border-radius: 10px 10px 10px 10px;
 	-moz-border-radius: 10px 10px 10px 10px;
 	-ms-border-radius: 10px 10px 10px 10px;
