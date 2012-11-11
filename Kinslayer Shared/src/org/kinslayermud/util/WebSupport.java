@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.kinslayermud.character.User;
 import org.kinslayermud.exception.DataInterfaceException;
+import org.kinslayermud.kit.KitWithItemsAndObjectPrototypes;
 import org.kinslayermud.mob.MobPrototype;
 import org.kinslayermud.userlog.UserLog;
 import org.kinslayermud.userlog.UserLogRecord;
@@ -22,4 +23,5 @@ public interface WebSupport {
   public MobPrototype getMobPrototype(int mobPrototypeId) throws DataInterfaceException;
   public List<MobPrototype> getSuperMobPrototypes() throws DataInterfaceException;
   public Zone getZoneLoadingSuperMobPrototype(int mobPrototypeId) throws DataInterfaceException;
+  public KitWithItemsAndObjectPrototypes getKitWithItemsAndObjectPrototypes(int kitId) throws DataInterfaceException;
 }

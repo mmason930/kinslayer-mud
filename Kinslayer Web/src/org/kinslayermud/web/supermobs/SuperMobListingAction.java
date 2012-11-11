@@ -2,6 +2,8 @@ package org.kinslayermud.web.supermobs;
 
 import java.util.List;
 
+import org.kinslayermud.kit.KitUtil;
+import org.kinslayermud.kit.KitWithItemsAndObjectPrototypes;
 import org.kinslayermud.mob.MobPrototype;
 import org.kinslayermud.util.MiscUtil;
 import org.kinslayermud.util.StringUtil;
@@ -30,11 +32,12 @@ public class SuperMobListingAction extends StandardAction {
       
         if(mobPrototype.getId() == mobPrototypeId) {
           
-          request.setAttribute("MobPrototype", mobPrototype);
-          
           Zone zone = webSupport.getZoneLoadingSuperMobPrototype(mobPrototype.getId());
+          KitWithItemsAndObjectPrototypes kitWithItemsAndObjectPrototypes = webSupport.getKitWithItemsAndObjectPrototypes(mobPrototype.getPrimaryKit());
           
           request.setAttribute("Zone", zone);
+          request.setAttribute("MobPrototype", mobPrototype);
+          request.setAttribute("KitWithItemsAndObjectPrototypes", kitWithItemsAndObjectPrototypes);
         }
       }
     }

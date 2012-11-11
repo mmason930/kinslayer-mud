@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.kinslayermud.character.User;
 import org.kinslayermud.exception.DataInterfaceException;
+import org.kinslayermud.kit.KitUtil;
+import org.kinslayermud.kit.KitWithItemsAndObjectPrototypes;
 import org.kinslayermud.misc.Provider;
 import org.kinslayermud.mob.MobPrototype;
 import org.kinslayermud.mob.MobUtil;
@@ -257,6 +259,33 @@ public class WebSupportImp implements WebSupport {
       connection.close();
       
       return zone;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public KitWithItemsAndObjectPrototypes getKitWithItemsAndObjectPrototypes(int kitId) throws DataInterfaceException {
+    
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = DatabaseUtil.getConnection();
+      statement = connection.createStatement();
+      
+      KitWithItemsAndObjectPrototypes kitWithItemsAndObjectPrototypes = KitUtil.getKitWithItemsAndObjectPrototypes(statement, kitId, false);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return kitWithItemsAndObjectPrototypes;
     }
     catch(Throwable throwable) {
       

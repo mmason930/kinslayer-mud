@@ -5,6 +5,7 @@
 MobPrototype mobPrototype = (MobPrototype)request.getAttribute("MobPrototype");
 Zone zone = (Zone)request.getAttribute("Zone");
 List<MobPrototype> superMobPrototypes = (List<MobPrototype>)request.getAttribute("SuperMobPrototypes");
+KitWithItemsAndObjectPrototypes kitWithItemsAndObjectPrototypes = (KitWithItemsAndObjectPrototypes)request.getAttribute("KitWithItemsAndObjectPrototypes");
 %>
 	<tiles:insertTemplate template="/View/SuperMobs/Framework/SubNav.jsp" flush="true" />
 	<div class="container_box">
@@ -56,11 +57,27 @@ if(mobPrototype != null) {
 							<th class="bodyLocationColumn">Location</th>
 							<th class="loadProbabilityColumn">Probability</th>
 						</tr>
+<%
+  if(kitWithItemsAndObjectPrototypes != null) {
+    Map<Integer, ObjectPrototype> idToObjectPrototypeMap = kitWithItemsAndObjectPrototypes.getIdToObjectPrototypeMap();
+    
+    for(List<KitItem> kitItemList : kitWithItemsAndObjectPrototypes.getKitWithItems().getKitItemLists()) {
+    
+      for(KitItem kitItem : kitItemList) {
+        ObjectPrototype objectPrototype = idToObjectPrototypeMap.get(kitItem.getObjectPrototypeId());
+%>
+
+
 						<tr>
-							<td class="itemNameColumn">a worn golden signet ring</td>
+							<td class="itemNameColumn">StringUtil.ConvertToHTML(StringUtil.ProperString(objectPrototype.getName())</td>
 							<td class="bodyLocationColumn">Finger</td>
-							<td class="loadProbabilityColumn">95%</td>
+							<td class="loadProbabilityColumn"><%=kitItem.getProbability()%>%</td>
 						</tr>
+<%
+      }
+    }
+  }
+%>
 					</table>
 				</div>
 			</div>
