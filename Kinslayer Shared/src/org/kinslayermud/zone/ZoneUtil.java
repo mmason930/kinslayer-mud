@@ -12,12 +12,12 @@ public class ZoneUtil {
 
   public static Zone getZoneLoadingSuperMobPrototype(Statement statement, int mobPrototypeId, boolean throwIfNotFound) throws SQLException, NonExistentObjectException {
     
-    String sql = " SELECT zone.*"
+    String sql = " SELECT zoneIndex.*"
                + " FROM zoneIndex, zoneCommand"
                + " WHERE zoneIndex.id = zoneCommand.zone_id"
                + " AND zoneCommand.arg1 = " + mobPrototypeId
                + " AND zoneCommand.cmd = 'M'"
-               + " AND zone.closed = " + SQLUtil.encodeBooleanInt(false);
+               + " AND zoneIndex.closed = " + SQLUtil.encodeBooleanInt(false);
     
     ResultSet resultSet = statement.executeQuery(sql);
     
