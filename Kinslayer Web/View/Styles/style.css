@@ -598,3 +598,18 @@ ul.subnav li a:hover
 {
 	clear: left;
 }
+
+a.lightBlueHyperlink
+{
+	color: #0346FF;
+}
+
+a.lightBlueHyperlink:hover
+{
+	color: #FF0000;
+}
+
+.noUnderline
+{
+	text-decoration: none;
+}
