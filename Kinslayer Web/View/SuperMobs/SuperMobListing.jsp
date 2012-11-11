@@ -19,7 +19,7 @@ List<MobPrototype> superMobPrototypes = (List<MobPrototype>)request.getAttribute
 for(MobPrototype superMobPrototype : superMobPrototypes) {
 %>
 						<li>
-							<a href="#"><span><%=URLEncoder.encode(superMobPrototype.getShortDescription(), "UTF-8")%></span></a>
+							<a href="#"><span><%=StringUtil.ConvertToHTML(superMobPrototype.getShortDescription())%></span></a>
 						</li>
 <%
 }
@@ -33,7 +33,7 @@ if(mobPrototype != null) {
 %>
 			<div class="smobDetailsContainer">
 				<div class="smobDetails">
-					<span class="bold largeFont"><%=URLEncoder.encode(mobPrototype.getShortDescription(), "UTF-8") %></span><br/>
+					<span class="bold largeFont"><%=StringUtil.ConvertToHTML(mobPrototype.getShortDescription()) %></span><br/>
 					<span class="italics mediumFont">Located in the area known as <span class="bold">Tar Valon</span>.</span>
 				</div>
 				<div class="smobEquipment">
