@@ -65,12 +65,25 @@ if(mobPrototype != null) {
     
       for(KitItem kitItem : kitItemList) {
         ObjectPrototype objectPrototype = idToObjectPrototypeMap.get(kitItem.getObjectPrototypeId());
+        Set<ObjectWearType> objectWearTypes = objectPrototype.getObjectWearTypes();
+        String objectWearDisplay = "";
+        
+        boolean isFirst = true;
+        for(ObjectWearType objectWearType : objectWearTypes) {
+          
+          if(isFirst)
+            isFirst = false;
+          else
+            objectWearDisplay += ", ";
+          
+          objectWearDisplay += objectWearType.getStandardName();
+        }
 %>
 
 
 						<tr>
 							<td class="itemNameColumn"><%=StringUtil.ConvertToHTML(StringUtil.properString(objectPrototype.getShortDescription()))%></td>
-							<td class="bodyLocationColumn">Finger</td>
+							<td class="bodyLocationColumn"><%=StringUtil.ConvertToHTML(objectWearDisplay)%></td>
 							<td class="loadProbabilityColumn"><%=kitItem.getProbability()%>%</td>
 						</tr>
 <%

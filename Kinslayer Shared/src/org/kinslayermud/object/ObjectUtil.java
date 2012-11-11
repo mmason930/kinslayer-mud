@@ -22,6 +22,7 @@ public class ObjectUtil {
     objectPrototype.setOffensiveBonus(resultSet.getInt("offensive"));
     objectPrototype.setAbsorb(resultSet.getInt("absorb"));
     objectPrototype.setWeight(resultSet.getBigDecimal("weight"));
+    objectPrototype.setWear(resultSet.getInt("wear"));
     
     return objectPrototype;
   }

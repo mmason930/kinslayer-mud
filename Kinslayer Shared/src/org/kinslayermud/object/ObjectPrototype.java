@@ -1,6 +1,9 @@
 package org.kinslayermud.object;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.kinslayermud.misc.DataObjectWithIntId;
 
@@ -12,6 +15,7 @@ public class ObjectPrototype extends DataObjectWithIntId {
   protected int parryBonus;
   protected int absorb;
   protected BigDecimal weight;
+  protected int wear;
   
   public String getShortDescription() {
     return shortDescription;
@@ -48,5 +52,33 @@ public class ObjectPrototype extends DataObjectWithIntId {
   }
   public void setWeight(BigDecimal weight) {
     this.weight = weight;
+  }
+  
+  public int getWear() {
+    
+    return wear;
+  }
+  
+  public void setWear(int wear) {
+    
+    this.wear = wear;
+  }
+  
+  public Set<ObjectWearType> getObjectWearTypes() {
+    
+    Set<ObjectWearType> objectWearTypes = new HashSet<ObjectWearType>();
+    
+    Iterator<ObjectWearType> iter = ObjectWearType.getSetIterator();
+    while(iter.hasNext()) {
+      
+      ObjectWearType objectWearType = iter.next();
+      
+      if((wear & (1 << objectWearType.value())) != 0) {
+        
+        objectWearTypes.add(objectWearType);
+      }
+    }
+    
+    return objectWearTypes;
   }
 }
