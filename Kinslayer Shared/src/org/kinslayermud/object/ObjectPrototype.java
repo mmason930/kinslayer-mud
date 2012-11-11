@@ -1,8 +1,8 @@
 package org.kinslayermud.object;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.kinslayermud.misc.DataObjectWithIntId;
@@ -66,7 +66,7 @@ public class ObjectPrototype extends DataObjectWithIntId {
   
   public Set<ObjectWearType> getObjectWearTypes() {
     
-    Set<ObjectWearType> objectWearTypes = new HashSet<ObjectWearType>();
+    Set<ObjectWearType> objectWearTypes = new LinkedHashSet<ObjectWearType>();
     
     Iterator<ObjectWearType> iter = ObjectWearType.getSetIterator();
     while(iter.hasNext()) {
