@@ -169,7 +169,7 @@ h1
 }
 .smallboxContainer
 {
-	margin-left: 5px;
+	margin: 0 5px 0 5px;
 }
 .smallbox p { padding: 0; margin: 0; }
 .thirds a {color: #003B6E; background: inherit; }
