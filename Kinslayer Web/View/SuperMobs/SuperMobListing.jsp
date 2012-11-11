@@ -38,7 +38,7 @@ if(mobPrototype != null) {
 <%
   if(zone != null) {
 %>
-						Located in the area known as <span class="bold">StringUtil.ConvertToHTML(zone.getName())</span>.
+						Located in the area known as <span class="bold"><%=StringUtil.ConvertToHTML(zone.getName())%></span>.
 <%
   }
   else {
