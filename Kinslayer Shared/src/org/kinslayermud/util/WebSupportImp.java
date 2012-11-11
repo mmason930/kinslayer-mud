@@ -7,6 +7,8 @@ import java.util.List;
 import org.kinslayermud.character.User;
 import org.kinslayermud.exception.DataInterfaceException;
 import org.kinslayermud.misc.Provider;
+import org.kinslayermud.mob.MobPrototype;
+import org.kinslayermud.mob.MobUtil;
 import org.kinslayermud.userlog.UserLog;
 import org.kinslayermud.userlog.UserLogRecord;
 import org.kinslayermud.userlog.UserLogUtil;
@@ -182,5 +184,59 @@ public class WebSupportImp implements WebSupport {
   public String getInstanceDomain() {
     
     return provider.getInstanceDomain();
+  }
+
+  public MobPrototype getMobPrototype(int mobPrototypeId) throws DataInterfaceException {
+    
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = DatabaseUtil.getConnection();
+      statement = connection.createStatement();
+      
+      MobPrototype mobPrototype = MobUtil.getMobPrototype(statement, mobPrototypeId, false);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return mobPrototype;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public List<MobPrototype> getSuperMobPrototypes() throws DataInterfaceException {
+    
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = DatabaseUtil.getConnection();
+      statement = connection.createStatement();
+      
+      List<MobPrototype> mobPrototypes = MobUtil.getSuperMobPrototypes(statement);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return mobPrototypes;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
   }
 }

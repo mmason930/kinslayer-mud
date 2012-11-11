@@ -1,5 +1,11 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ include file="/View/Framework/Kinslayer.jsp" %>
+<%
+
+MobPrototype mobPrototype = (MobPrototype)request.getAttribute("MobPrototype");
+List<MobPrototype> superMobPrototypes = (List<MobPrototype>)request.getAttribute("SuperMobPrototypes");
+
+%>
 	<tiles:insertTemplate template="/View/SuperMobs/Framework/SubNav.jsp" flush="true" />
 	<div class="container_box">
 	
@@ -16,10 +22,12 @@
 					<div class="clearLeft"></div>
 				</div>
 			</div>
-
+<%
+if(mobPrototype != null) {
+%>
 			<div class="smobDetailsContainer">
 				<div class="smobDetails">
-					<span class="bold largeFont">Snake King</span><br/>
+					<span class="bold largeFont"><%=URLEncoder.encode(mobPrototype.getShortDescription(), "UTF-8") %></span><br/>
 					<span class="italics mediumFont">Located in the area known as <span class="bold">Tar Valon</span>.</span>
 				</div>
 				<div class="smobEquipment">
@@ -37,6 +45,9 @@
 					</table>
 				</div>
 			</div>
+<%
+}
+%>
 		</div>
 		<div style="clear: both;"></div>
 	</div> <!-- End of Container Box -->
