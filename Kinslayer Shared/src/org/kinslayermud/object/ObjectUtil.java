@@ -19,7 +19,7 @@ public class ObjectUtil {
     objectPrototype.setShortDescription(resultSet.getString("sdesc"));
     objectPrototype.setDodgeBonus(resultSet.getInt("dodge"));
     objectPrototype.setParryBonus(resultSet.getInt("parry"));
-    objectPrototype.setOffensiveBonus(resultSet.getInt("offense"));
+    objectPrototype.setOffensiveBonus(resultSet.getInt("offensive"));
     objectPrototype.setAbsorb(resultSet.getInt("absorb"));
     objectPrototype.setWeight(resultSet.getBigDecimal("weight"));
     
