@@ -18,7 +18,7 @@ public class KitUtil {
   public static Kit getKit(Statement statement, int kitId, boolean throwIfNotFound) throws SQLException, NonExistentObjectException {
     
     String sql = " SELECT *"
-               + " FROM kit"
+               + " FROM kits"
                + " WHERE vnum = " + kitId;
     
     ResultSet resultSet = statement.executeQuery(sql);
