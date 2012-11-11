@@ -71,7 +71,7 @@ if(mobPrototype != null) {
         boolean isFirst = true;
         for(ObjectWearType objectWearType : objectWearTypes) {
           
-          if(objectWearType.equals(ObjectWearType.take))
+          if(objectWearType.value() == ObjectWearType.take.value())
             continue;
           
           if(isFirst)
