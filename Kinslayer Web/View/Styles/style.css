@@ -593,3 +593,8 @@ ul.subnav li a:hover
 {
 	width: 20%;
 }
+
+.clearLeft
+{
+	clear: left;
+}
