@@ -523,6 +523,11 @@ ul.subnav li a:hover
 	background: #DDDDDD;
 }
 
+.smobList ul li a.selected
+{
+	background: #AAA !important;
+}
+
 .smobList ul li a:hover
 {
 	color: #FF0000;
