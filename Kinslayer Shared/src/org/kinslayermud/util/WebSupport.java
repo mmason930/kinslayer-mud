@@ -7,6 +7,7 @@ import org.kinslayermud.exception.DataInterfaceException;
 import org.kinslayermud.mob.MobPrototype;
 import org.kinslayermud.userlog.UserLog;
 import org.kinslayermud.userlog.UserLogRecord;
+import org.kinslayermud.zone.Zone;
 
 
 public interface WebSupport {
@@ -20,4 +21,5 @@ public interface WebSupport {
   public String getInstanceDomain();
   public MobPrototype getMobPrototype(int mobPrototypeId) throws DataInterfaceException;
   public List<MobPrototype> getSuperMobPrototypes() throws DataInterfaceException;
+  public Zone getZoneLoadingSuperMobPrototype(int mobPrototypeId) throws DataInterfaceException;
 }

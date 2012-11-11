@@ -12,6 +12,8 @@ import org.kinslayermud.mob.MobUtil;
 import org.kinslayermud.userlog.UserLog;
 import org.kinslayermud.userlog.UserLogRecord;
 import org.kinslayermud.userlog.UserLogUtil;
+import org.kinslayermud.zone.Zone;
+import org.kinslayermud.zone.ZoneUtil;
 
 
 public class WebSupportImp implements WebSupport {
@@ -228,6 +230,33 @@ public class WebSupportImp implements WebSupport {
       connection.close();
       
       return mobPrototypes;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public Zone getZoneLoadingSuperMobPrototype(int mobPrototypeId) throws DataInterfaceException {
+    
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = DatabaseUtil.getConnection();
+      statement = connection.createStatement();
+      
+      Zone zone = ZoneUtil.getZoneLoadingSuperMobPrototype(statement, mobPrototypeId, false);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return zone;
     }
     catch(Throwable throwable) {
       

@@ -3,8 +3,8 @@
 <%
 
 MobPrototype mobPrototype = (MobPrototype)request.getAttribute("MobPrototype");
+Zone zone = (Zone)request.getAttribute("Zone");
 List<MobPrototype> superMobPrototypes = (List<MobPrototype>)request.getAttribute("SuperMobPrototypes");
-
 %>
 	<tiles:insertTemplate template="/View/SuperMobs/Framework/SubNav.jsp" flush="true" />
 	<div class="container_box">
@@ -34,7 +34,20 @@ if(mobPrototype != null) {
 			<div class="smobDetailsContainer">
 				<div class="smobDetails">
 					<span class="bold largeFont"><%=StringUtil.ConvertToHTML(mobPrototype.getShortDescription()) %></span><br/>
-					<span class="italics mediumFont">Located in the area known as <span class="bold">Tar Valon</span>.</span>
+					<span class="italics mediumFont">
+<%
+  if(zone != null) {
+%>
+						Located in the area known as <span class="bold">Tar Valon</span>.
+<%
+  }
+  else {
+%>
+                        The whereabouts of this superMOB are unknown.
+<%
+  }
+%>
+					</span>
 				</div>
 				<div class="smobEquipment">
 					<table class="smobEquipmentTable">

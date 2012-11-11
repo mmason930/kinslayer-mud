@@ -7,6 +7,7 @@ import org.kinslayermud.util.MiscUtil;
 import org.kinslayermud.util.StringUtil;
 import org.kinslayermud.util.WebSupport;
 import org.kinslayermud.web.actions.StandardAction;
+import org.kinslayermud.zone.Zone;
 
 public class SuperMobListingAction extends StandardAction {
 
@@ -30,6 +31,10 @@ public class SuperMobListingAction extends StandardAction {
         if(mobPrototype.getId() == mobPrototypeId) {
           
           request.setAttribute("MobPrototype", mobPrototype);
+          
+          Zone zone = webSupport.getZoneLoadingSuperMobPrototype(mobPrototype.getId());
+          
+          request.setAttribute("Zone", zone);
         }
       }
     }

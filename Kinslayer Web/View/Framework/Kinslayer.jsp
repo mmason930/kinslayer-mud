@@ -4,6 +4,7 @@
 <%@ page import="org.kinslayermud.userlog.*" %>
 <%@ page import="org.kinslayermud.character.*" %>
 <%@ page import="org.kinslayermud.mob.*" %>
+<%@ page import="org.kinslayermud.zone.*" %>
 <%@ page import="java.net.*" %>
 <%@ page import="java.util.*" %>
 <%
