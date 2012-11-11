@@ -69,7 +69,7 @@ if(mobPrototype != null) {
 
 
 						<tr>
-							<td class="itemNameColumn"><%=StringUtil.ConvertToHTML(StringUtil.ProperString(objectPrototype.getName())%></td>
+							<td class="itemNameColumn"><%=StringUtil.ConvertToHTML(StringUtil.properString(objectPrototype.getShortDescription()))%></td>
 							<td class="bodyLocationColumn">Finger</td>
 							<td class="loadProbabilityColumn"><%=kitItem.getProbability()%>%</td>
 						</tr>
