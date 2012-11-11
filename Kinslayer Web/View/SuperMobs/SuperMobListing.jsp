@@ -53,8 +53,8 @@ if(mobPrototype != null) {
 					<table class="smobEquipmentTable">
 						<tr>
 							<th class="itemNameColumn">Item Name</th>
-							<th class="bodyLocationColumn">Body Location</th>
-							<th class="loadProbabilityColumn">Load Probability</th>
+							<th class="bodyLocationColumn">Location</th>
+							<th class="loadProbabilityColumn">Probability</th>
 						</tr>
 						<tr>
 							<td class="itemNameColumn">a worn golden signet ring</td>
