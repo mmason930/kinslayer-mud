@@ -41,7 +41,7 @@ public class MobUtil {
   public static List<MobPrototype> getMobPrototypesMeetingCriteria(Statement statement, String criteria, String orderBy) throws SQLException {
     
     String sql = " SELECT *"
-               + " FROM mob_prototypes"
+               + " FROM mob_protos"
                + " WHERE " + criteria
                + (orderBy != null ? " ORDER BY " + orderBy : "");
     List<MobPrototype> mobPrototypes = new LinkedList<MobPrototype>();
