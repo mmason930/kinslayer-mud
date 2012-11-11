@@ -472,3 +472,124 @@ ul.subnav li a:hover
 {
 	font-size: 15px;
 }
+
+.smobList
+{
+	float: left;
+	overflow: hidden;
+}
+
+.smobListHeader
+{
+	-webkit-border-radius: 5px 5px 0px 0px;
+	-moz-border-radius: 5px 5px 0px 0px;
+	-ms-border-radius: 5px 5px 0px 0px;
+	-o-border-radius: 5px 5px 0px 0px;
+	border-radius: 5px 5px 0px 0px;
+}
+
+.smobList ul
+{
+	margin: 0 0 0 0;
+	padding: 0 0 0 0;
+}
+
+.smobListBody
+{
+	border: 1px solid #000000;
+	border-top: none;
+}
+
+.smobList ul li
+{
+	list-style: none;
+}
+
+.smobList ul li:hover
+{
+	list-style: none;
+	text-decoration: none;
+}
+
+.smobList ul li a
+{
+	text-decoration: none;
+	line-height: 21px;
+	color: #0346FF;
+	font-weight: bold;
+	float: left;
+	width: 100%;
+	background: #DDDDDD;
+}
+
+.smobList ul li a:hover
+{
+	color: #FF0000;
+	background: #00aeff;
+}
+
+.smobList ul li a span
+{
+	margin-left: 5px;
+}
+
+.smobDetailsContainer
+{
+	overflow: hidden;
+}
+
+.smobDetails .largeFont
+{
+	font-size: 28px;
+	margin-bottom: 7px;
+	display: inline-block;
+}
+
+.smobDetails .mediumFont
+{
+	font-size: 16px;
+}
+
+.smobDetails
+{
+	text-align: center;
+}
+.smobEquipment
+{
+	margin-left: 50px;
+}
+
+.smobEquipmentTable
+{
+	margin-top: 20px;
+}
+
+.smobEquipmentTable th
+{
+	font-weight: bold;
+	text-align: left;
+	font-size: 16px;
+}
+
+.smobEquipmentTable tr
+{
+}
+
+.smobEquipmentTable td
+{
+}
+
+.smobEquipmentTable .itemNameColumn
+{
+	width: 60%;
+}
+
+.smobEquipmentTable .bodyLocationColumn
+{
+	width: 20%;
+}
+
+.smobEquipmentTable .loadProbabilityColumn
+{
+	width: 20%;
+}
