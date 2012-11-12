@@ -476,6 +476,7 @@ ul.subnav li a:hover
 
 .smobList
 {
+	width: 240px;
 	float: left;
 	overflow: hidden;
 }
