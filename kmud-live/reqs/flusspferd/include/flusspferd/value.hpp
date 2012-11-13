@@ -97,7 +97,7 @@ public:
       typename boost::mpl::or_<
         typename boost::is_integral<OtherType>::type,
         typename boost::is_floating_point<OtherType>::type,
-        typename boost::is_convertible<OtherType, object>::type
+        typename boost::is_convertible<OtherType, object&>::type
       >::type
     >::type * = 0)
   {
