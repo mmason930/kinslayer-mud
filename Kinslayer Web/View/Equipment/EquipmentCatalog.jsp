@@ -1,20 +1,91 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ include file="/View/Framework/Kinslayer.jsp" %>
-	<tiles:insertTemplate template="/View/Equipment/Framework/SubNav.jsp" flush="true" />
-	<div class="container_box">
-	
-		<div style="margin: 20px; float:left;">
-		
-			<div>
-			
-			<h1>
-				Equipment Catalog
-			</h1>
-			
-			<p>
-				Content
-			</p>
-			</div>
+<%
+
+%>
+  <tiles:insertTemplate template="/View/Equipment/Framework/SubNav.jsp" flush="true" />
+  <div class="container_box">
+
+    <div style="margin: 20px; float:left; width: 100%">
+
+      <div class="smobList">
+        <div class="classGroupingHeader">Choose an Equipment Type</div>
+        <div class="smobListBody">
+          <ul>
+<%
+for(MobPrototype superMobPrototype : superMobPrototypes) {
+%>
+            <li>
+              <a href="/supermob-listing?MobPrototypeId=<%=superMobPrototype.getId()%>" <%= (mobPrototype != null && mobPrototype.getId() == superMobPrototype.getId()) ? ("class='selected'") : ""%>><span><%=StringUtil.ConvertToHTML(StringUtil.properString(superMobPrototype.getShortDescription()))%></span></a>
+            </li>
+<%
+}
+%>
+          </ul>
+          <div class="clearLeft"></div>
+        </div>
+      </div>
+<%
+if(mobPrototype != null) {
+%>
+      <div class="smobDetailsContainer">
+        <div class="smobDetails">
+          <span class="bold largeFont"><%=StringUtil.ConvertToHTML(StringUtil.properString(mobPrototype.getShortDescription())) %></span><br/>
+        </div>
+        <div class="smobEquipment">
+          <table class="smobEquipmentTable">
+            <tr>
+              <th class="itemNameColumn">Item Name</th>
+              <th class="bodyLocationColumn">Location</th>
+              <th class="loadProbabilityColumn">Probability</th>
+            </tr>
+<%
+  if(kitWithItemsAndObjectPrototypes != null) {
+    Map<Integer, ObjectPrototype> idToObjectPrototypeMap = kitWithItemsAndObjectPrototypes.getIdToObjectPrototypeMap();
+    
+    for(List<KitItem> kitItemList : kitWithItemsAndObjectPrototypes.getKitWithItems().getKitItemLists()) {
+    
+      for(KitItem kitItem : kitItemList) {
+        ObjectPrototype objectPrototype = idToObjectPrototypeMap.get(kitItem.getObjectPrototypeId());
+        Set<ObjectWearType> objectWearTypes = objectPrototype.getObjectWearTypes();
+        String objectWearDisplay = "";
+        
+        boolean isFirst = true;
+        for(ObjectWearType objectWearType : objectWearTypes) {
+          
+          if(objectWearType.equals(ObjectWearType.take))
+            continue;
+          
+          if(isFirst)
+            isFirst = false;
+          else
+            objectWearDisplay += ", ";
+          
+          objectWearDisplay += ("<a href='#' class='lightBlueHyperlink bold noUnderline'>" + StringUtil.ConvertToHTML(objectWearType.getStandardName()) + "</a>");
+        }
+%>
+
+
+            <tr>
+	         <td class="itemNameColumn">
+	           <a href="#" class="lightBlueHyperlink bold noUnderline">
+	             <%=StringUtil.ConvertToHTML(StringUtil.properString(objectPrototype.getShortDescription()))%>
+               </a>
+	         </td>
+	         <td class="bodyLocationColumn"><%=objectWearDisplay%></td>
+	         <td class="loadProbabilityColumn"><%=kitItem.getProbability()%>%</td>
+	       </tr>
+<%
+      }
+    }
+  }
+%>
+          </table>
+        </div>
+      </div>
+<%
+}
+%>
 		</div>
 		<div style="clear: both;"></div>
 	</div> <!-- End of Container Box -->

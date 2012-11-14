@@ -2,7 +2,6 @@ package org.kinslayermud.web.supermobs;
 
 import java.util.List;
 
-import org.kinslayermud.kit.KitUtil;
 import org.kinslayermud.kit.KitWithItemsAndObjectPrototypes;
 import org.kinslayermud.mob.MobPrototype;
 import org.kinslayermud.util.MiscUtil;
