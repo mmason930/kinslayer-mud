@@ -176,9 +176,15 @@ void Descriptor::cleanup()
 void Descriptor::socketWriteInstant( const std::string &str )
 {
 	this->descriptor->socketWriteInstant( str );
-	if(this->character && PLR_FLAGGED(this->character, PLR_LOGGER))
+
+	Character *loggingCharacter = this->character;
+
+	if(this->original)
+		loggingCharacter = this->original;
+
+	if(loggingCharacter && PLR_FLAGGED(loggingCharacter, PLR_LOGGER))
 	{
-		this->character->LogOutput(str);
+		loggingCharacter->LogOutput(str);
 	}
 }
 

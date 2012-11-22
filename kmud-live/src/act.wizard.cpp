@@ -1239,6 +1239,7 @@ void AutoSave( void );
 
 flusspferd::object JS_parseJson(std::string jsonText);
 std::string JS_stringifyJson(flusspferd::object obj);
+void DeleteOldTracks();
 
 /*** Extra immortal command to perform various, usually one-time test/maintanence routines ***/
 ACMD(do_extra)
@@ -1263,6 +1264,34 @@ ACMD(do_extra)
 			std::string jsonStr = JS_stringifyJson(commandObject);
 
 			ch->desc->sendWebSocketCommand(jsonStr);
+		}
+		else if( !str_cmp(vArgs.at(0), "trackgen") )
+		{
+			Character *target = get_char_vis(ch, vArgs.at(2).c_str());
+			int nrOfTracks = 0;
+			int tracksPerRoom = 12;
+			for(int i = 0;i < World.size();++i)
+			{
+				for(int trackNumber = 0;trackNumber < tracksPerRoom;++trackNumber)
+				{
+					target->LayTrack(World[ i ], 0);
+					TrackList.back()->laytime = time(0) - (60 * 100);
+					++nrOfTracks;
+				}
+
+				if(nrOfTracks >= 100000)
+					break;
+			}
+		}
+		else if(!str_cmp(vArgs.at(0), "trackdel"))
+		{
+			Clock MyClock;
+
+			MyClock.reset(true);
+			DeleteOldTracks();
+			MyClock.turnOff();
+
+			ch->Send("Total Clocks: %d, Seconds: %f\r\n", MyClock.getClocks(), MyClock.getSeconds());
 		}
 		else if( !str_cmp(vArgs.at(0), "eval") )
 		{
@@ -2263,7 +2292,7 @@ ACMD(do_council)
 		}
 		else
 		{
-			victim->LoadClans();
+//			victim->LoadClans();
 			load = true;
 		}
 	}
@@ -2411,7 +2440,8 @@ ACMD(do_declan)
 		else
 			loaded = true;
 	}
-	if(clanId && (victim && !victim->getUserClan(clanId)))
+	UserClan *userClan = victim->getUserClan(clanId);
+	if(clanId && (victim && !userClan))
 	{
 		ch->Send("That player is not in that clan.\r\n");
 		return;
@@ -2423,6 +2453,15 @@ ACMD(do_declan)
 	{
 		ch->Send("You have removed %s from clan %s.\r\n", playername, clan->Name.c_str());
 		MudLog(NRM, MAX(GET_INVIS_LEV(ch), LVL_GOD), TRUE, "%s removed %s from clan %s.", ch->player.name.c_str(), playername, clan->Name.c_str());
+		
+		//Remove from the database.
+		if(!userClan->isNew())
+		{
+			std::list<int> userClanIds;
+			userClanIds.push_back(userClan->getId());
+			ClanUtil::removeUserClansFromDatabase(gameDatabase, userClanIds);
+		}
+
 		if(victim)
 			victim->removeFromClan(clanId);
 	}
@@ -2674,6 +2713,12 @@ ACMD(do_award)
 
 	targetUserId = targetUserPlayerIndex->id;
 
+	if(GET_LEVEL(ch) < LVL_IMMORT && targetUserId == ch->player.idnum)
+	{
+		ch->Send("You may not award yourself quest points.\r\n");
+		return;
+	}
+
 	if(!(clanId = GetClanByString(clanName)))
 	{
 		ch->Send("There is no such clan.\r\n");
@@ -2687,6 +2732,13 @@ ACMD(do_award)
 	}
 
 	questPointAmount = atoi(questPointAmountString);
+	questPointAmount = MIN(30000, questPointAmount);
+	questPointAmount = MAX(-30000,questPointAmount);
+	if(GET_LEVEL(ch) < LVL_IMMORT && (questPointAmount > 5 || questPointAmount < -5))
+	{
+		ch->Send("You may only award quest points in the range of -5 to 5.\r\n");
+		return;
+	}
 
 	//Check to see if the user is allowed to perform this action.
 	bool isPermitted = false;

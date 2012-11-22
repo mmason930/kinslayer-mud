@@ -1425,15 +1425,19 @@ std::string Track::ToString(bool full_view)
 }
 
 /* Galnor: 02-25-2005 - Return the time in minutes since the track was layed. */
-time_t Track::Age()
+time_t Track::Age(time_t timeContext)
 {
-	return ((time(0) - laytime.getTime()) / 60);
+	return ((timeContext - laytime) / 60);
+}
+
+Track::Track()
+{
 }
 
 /* Galnor: 02-25-2006 - Return the appropriate string for a track based on its age. */
 std::string Track::AgeString()
 {
-	time_t age = Age();
+	time_t age = Age(time(0));
 
 	if(age >= 48)
 		return "two days old";

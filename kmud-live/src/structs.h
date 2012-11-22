@@ -2403,21 +2403,11 @@ public:
 class Track
 {
 	public:
-		Track()
-		{
-			direction = 0;
-			race = 0;
-			ch_class = 0;
-			room = 0;
-			bloody = false;
-			mount = false;
-			mount_ridden = false;
-			npc = false;
-		}
+		Track();
 		Track *Clone();
 		std::string name;		//The display name of the layer.
 		std::string alias;		//Alias of the track layer.
-		DateTime laytime;		//When was the track laid?
+		time_t laytime;		//When was the track laid?
 		byte direction;			//What direction?
 		byte race;				//What race was the track layer?
 		byte ch_class;			//Needed for fades and such.
@@ -2427,7 +2417,7 @@ class Track
 		bool mount;				//Laid by a mount?
 		bool mount_ridden;		//Laid by a mount that was ridden?
 
-		time_t Age();
+		time_t Age(time_t timeContext);
 		std::string NameString();
 		std::string AgeString();
 		std::string ToString(bool full_view);

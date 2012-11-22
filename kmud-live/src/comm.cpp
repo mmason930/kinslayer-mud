@@ -1134,6 +1134,13 @@ void gameLoop()
 				}
 			}
 
+			Character *loggingCharacter = d->character;
+			if(d->original)
+				loggingCharacter = d->original;
+
+			if(loggingCharacter && STATE(d) != CON_PASSWORD)
+				loggingCharacter->LogOutput(command + "\n");
+
 			if(command.length() > MAX_INPUT_LENGTH) {
 
 				d->Send("Input too long... Truncated.\r\n");
@@ -1452,16 +1459,55 @@ void NewbieTips()
 		tip_on = 1;
 }
 
+class PassickTrackDeletionJob : public Job
+{
+	std::list<Track*> *tracksToDelete;
+public:
+	PassickTrackDeletionJob( std::list<Track*> *tracksToDelete )
+	{
+		this->tracksToDelete = tracksToDelete;
+	}
+	virtual void performRoutine()
+	{
+		for(auto iter = tracksToDelete->begin();iter != tracksToDelete->end();++iter)
+		{
+			delete (*iter);
+		}
+
+		delete tracksToDelete;
+	}
+	virtual void performPostJobRoutine()
+	{
+		//...
+	}
+};
+
 void DeleteOldTracks()
 {
-	std::list<Track *>::iterator t;
-	for ( t = TrackList.begin();t != TrackList.end();++t )
+	//Tracks should be sorted newest to oldest. We will scan the back of the track list until
+	//We find the first track that has not yet expired.
+	time_t timeContext = time(0);
+	Track *track;
+	std::list<Track *> *tracksToDelete = new std::list<Track *>();
+	while(!TrackList.empty())
 	{
-		if ( ( *t ) ->Age() >= 50 )
+		track = TrackList.back();
+		if(track->Age(timeContext) >= 50)
 		{
-			t = TrackList.erase( t );
+			//delete track;
+			if(track->room)
+				track->room->Tracks.remove(track);
+			TrackList.pop_back();
+
+			tracksToDelete->push_back(track);
 		}
+		else
+			break;
 	}
+
+	//Free up the tracks in a separate thread.
+	Job *job = new PassickTrackDeletionJob(tracksToDelete);
+	ThreadedJobManager::get().addJob( job );
 }
 
 void TaintEvents( int pulse )
@@ -2048,20 +2094,25 @@ void vwrite_to_output( Descriptor *t, int swap_args, const char *format, va_list
 	std::string EndString = FormatEndlines( cBuffer );
 	delete[]cBuffer;
 
+	
+	Character *loggerCharacter = t->character;
+
+	if(t->original)
+		loggerCharacter = t->original;
 
 	// if we have enough space, just write to buffer and that's it!
 	if ( t->descriptor->getOutputBufferSize() < LARGE_BUFSIZE )
 	{
 		t->descriptor->send(EndString);
-		if(t->character)
-			t->character->LogOutput( EndString );
+		if(loggerCharacter)
+			loggerCharacter->LogOutput( EndString );
 	}
 	else
 	{
 		t->descriptor->send("***OVERFLOW***");
 
-		if ( t->character && PLR_FLAGGED( t->character, PLR_LOGGER ) )
-			t->character->LogOutput( "***OVERFLOW***" );
+		if ( loggerCharacter && PLR_FLAGGED( t->character, PLR_LOGGER ) )
+			loggerCharacter->LogOutput( "***OVERFLOW***" );
 	}
 }
 

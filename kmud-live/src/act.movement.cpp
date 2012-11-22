@@ -175,11 +175,6 @@ Track *Track::Clone()
 }
 Track::Track(Character *ch, int dir, Room *room)
 {
-	if(!ch || !room)
-	{
-		delete this;
-		return;
-	}
 	this->race			= ch->player.race;
 	this->ch_class		= ch->player.chclass;
 	this->direction		= dir;
@@ -190,6 +185,7 @@ Track::Track(Character *ch, int dir, Room *room)
 	this->mount			= (MOB_FLAGGED(ch,MOB_MOUNT) || MOB_FLAGGED(ch,MOB_SHADOW_MOUNT) || MOB_FLAGGED(ch, MOB_OGIER_MOUNT));
 	this->mount_ridden	= (RIDDEN_BY(ch));
 	this->npc			= (IS_NPC(ch));
+	this->laytime		= time(0);
 
 	room->Tracks.push_front(this);
 	TrackList.push_back(this);
@@ -198,8 +194,6 @@ Track::Track(Character *ch, int dir, Room *room)
 /* Galnor 02-24-2005 - Track destructor. Remove from global list and room list. */
 Track::~Track()
 {
-	if(this->room)
-		this->room->Tracks.remove(this);
 }
 
 Room *FindFadingRoom(char *name)
