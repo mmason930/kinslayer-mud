@@ -97,7 +97,7 @@ void Descriptor::cleanup()
 
 	if ( this->snoop_by )
 	{
-		this->snoop_by->Send( "Your victim is no longer among us.\r\n" );
+		this->snoop_by->Send( "Your snoop target is no longer among us.\r\n" );
 		this->snoop_by->snooping = NULL;
 	}
 

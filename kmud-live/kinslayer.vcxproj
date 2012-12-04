@@ -43,8 +43,8 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost\boost_1_44;C:\dev\kmud-live\reqs\mysql\include;C:\dev\js\src\dist;C:\dev\kmud-live\reqs\sqlDatabase;C:\dev\kmud-live\reqs\flusspferd\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost\boost_1_44\lib;C:\dev\kmud-live\reqs\mysql\lib\debug;C:\dev\js\src\dist\lib;C:\dev\kmud-live\reqs\sqlDatabase\Debug;C:\dev\kmud-live\reqs\flusspferd\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost_1_51;C:\dev\kmud-live\reqs\mysql\include;C:\dev\js\src\dist;C:\dev\kmud-live\reqs\sqlDatabase;C:\dev\kmud-live\reqs\flusspferd\include;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost_1_51\lib;C:\dev\kmud-live\reqs\mysql\lib\debug;C:\dev\js\src\dist\lib;C:\dev\kmud-live\reqs\sqlDatabase\Debug;C:\dev\kmud-live\reqs\flusspferd\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

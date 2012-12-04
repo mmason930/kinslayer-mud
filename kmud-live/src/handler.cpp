@@ -1547,7 +1547,7 @@ void Character::Extract( UserLogoutType *userLogoutType, bool full_delete )
 		}
 		if (desc->snoop_by)
 		{
-			desc->snoop_by->Send("Your victim is no longer among us.\r\n");
+			desc->snoop_by->Send("Your snoop target is no longer among us.\r\n");
 			desc->snoop_by->snooping = NULL;
 			desc->snoop_by = NULL;
 		}

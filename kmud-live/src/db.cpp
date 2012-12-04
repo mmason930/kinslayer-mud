@@ -51,6 +51,7 @@
 #endif
 
 #include "StringUtil.h"
+#include <boost/filesystem.hpp>
 
 boost::uuids::uuid u;
 
@@ -2536,7 +2537,10 @@ Room::~Room()
 		delete ExD;
 	}
 	while( !this->Tracks.empty() )
+	{
 		delete ( this->Tracks.front() );
+		this->Tracks.pop_front();
+	}
 
 	if( this->PTable )
 		delete this->PTable;

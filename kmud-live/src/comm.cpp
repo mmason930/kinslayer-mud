@@ -78,6 +78,7 @@
 #include "HttpException.h"
 #include "HttpServer.h"
 #include <boost/regex.hpp>
+#include <boost/filesystem.hpp>
 
 extern HttpServer httpServer;
 
@@ -394,12 +395,12 @@ int main( int argc, char **argv )
 				MudLog(BRF, 100, TRUE, "Importing player logs.");
 				DateTime currentDatetime;
 				std::stringstream sqlBuffer;
-
+				
 				boost::filesystem::path playerLogDirectoryPath(LIB_PLRLOGS);
 				boost::filesystem::directory_iterator end;
 				for( boost::filesystem::directory_iterator iter(playerLogDirectoryPath) ; iter != end ; ++iter )
 				{
-					std::string fileName = (*iter).filename();
+					std::string fileName = (*iter).path().filename().string();
 					std::string::size_type pos;
 
 					pos = fileName.find('_');
@@ -677,7 +678,7 @@ void onAfterSocketWrite(void *data, kuListener *listener, kuDescriptor *descript
 
 		d->hadOutput = true;
 
-		if(d->snoop_by && d->snoop_by->descriptor) {
+		if(d->snoop_by && d->snoop_by->descriptor && d->snoop_by->character && d->snoop_by->character->HasPermissionToSnoop()) {
 
 			d->snoop_by->descriptor->send((std::string("% ") + output).c_str());
 		}
@@ -1153,7 +1154,7 @@ void gameLoop()
 				StringUtil::replace(command, "$", "$$");
 			}
 
-			if(d->snoop_by && d->snoop_by->descriptor) {
+			if(d->snoop_by && d->snoop_by->descriptor && d->snoop_by->character && d->snoop_by->character->HasPermissionToSnoop()) {
 
 				d->snoop_by->socketWriteInstant(std::string("% ") + command + std::string("\n"));
 			}

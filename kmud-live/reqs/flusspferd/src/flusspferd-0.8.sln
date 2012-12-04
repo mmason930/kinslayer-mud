@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flusspferd-0.8", "flusspferd-0.8.vcxproj", "{F205BACB-BE0F-430E-BBBA-340DDF23F68F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F205BACB-BE0F-430E-BBBA-340DDF23F68F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F205BACB-BE0F-430E-BBBA-340DDF23F68F}.Debug|Win32.Build.0 = Debug|Win32
+		{F205BACB-BE0F-430E-BBBA-340DDF23F68F}.Release|Win32.ActiveCfg = Release|Win32
+		{F205BACB-BE0F-430E-BBBA-340DDF23F68F}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

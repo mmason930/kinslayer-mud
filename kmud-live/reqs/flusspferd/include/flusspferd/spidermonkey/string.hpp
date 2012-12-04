@@ -34,7 +34,9 @@ namespace flusspferd {
 
 class value;
 
+#ifdef WIN32
 typedef jschar char16_t;
+#endif
 
 #ifndef IN_DOXYGEN
 

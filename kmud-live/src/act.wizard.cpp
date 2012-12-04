@@ -4062,8 +4062,7 @@ ACMD(do_snoop)
 				ch->GrantPermissionToSnoop();
 		}
 
-		MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "%s begins snooping %s.",
-			GET_NAME(ch), GET_NAME(victim));
+		MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "%s begins snooping %s.", GET_NAME(ch), GET_NAME(victim));
 
 		if (ch->desc->snooping)
 			ch->desc->snooping->snoop_by = NULL;
