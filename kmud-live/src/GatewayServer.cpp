@@ -178,6 +178,7 @@ bool GatewayServer::loadConfiguration()
 	this->mudRootDirectoryPath = resources["MUD Root Directory"];
 	this->restartOnShutdown = atoi(resources["Restart On Shutdown"].c_str());
 	this->mudExecutablePath = resources["MUD Executable Path"];
+	return true;
 }
 
 void GatewayServer::setupAndRun()

@@ -1,9 +1,10 @@
 CC = g++
 
+FLUSSPFERD_INCLUDES = ../include
 # Any special flags you want to pass to the compiler
 MYFLAGS =  -O -std=c++0x -DXP_UNIX -I/usr/local/include -DICONV_ACCEPTS_NONCONST_INPUT=1 -Wformat-security -Wformat -Wpointer-arith -Wcast-align -Wredundant-decls \
  		-L/usr/local/lib -DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10 \
-              -I/usr/local/lib/pkgconfig/../../include -I../include -I/usr/local/include
+              -I/usr/local/lib/pkgconfig/../../include -I$(FLUSSPFERD_INCLUDES) -I/usr/local/include
 
 #flags for profiling (see hacker.doc for more information)
 PROFILE =
@@ -50,6 +51,8 @@ clean:
 
 install:
 	cp $(LIBDIR)/* /usr/local/lib/
+#	rm -rf /usr/local/include/flusspferd
+	cp -R $(FLUSSPFERD_INCLUDES)/* /usr/local/include/
 
 full:
 	clean
