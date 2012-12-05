@@ -34,8 +34,10 @@ namespace flusspferd {
 
 class value;
 
-#ifdef WIN32
-typedef jschar char16_t;
+#ifndef WIN32
+typedef char16_t js_char16_t;
+#else
+typedef jschar js_char16_t;
 #endif
 
 #ifndef IN_DOXYGEN
@@ -53,7 +55,7 @@ protected:
   string_impl(JSString *s) : str(s) { }
   string_impl(char const *s);
   string_impl(char const *s, std::size_t n);
-  string_impl(char16_t const *s, std::size_t n);
+  string_impl(js_char16_t const *s, std::size_t n);
   string_impl(value const &v);
 
   friend JSString *get_string(string_impl &s);
