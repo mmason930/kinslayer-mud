@@ -691,7 +691,6 @@ JSManager::~JSManager()
 	}
 	triggerOperationalCallbackThread.join();
 
-	triggerOperationalCallbackThread.join();
 	unordered_map<int, JSTrigger*>::iterator iter = mapper.begin();
 	for( ; iter != mapper.end(); ++iter)
 	{
