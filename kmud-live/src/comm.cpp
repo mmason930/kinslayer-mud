@@ -518,10 +518,6 @@ void onDescriptorOpen(void *data, kuListener *listener, kuDescriptor *descriptor
 	// prepend to list
 	newd->next = descriptor_list;
 	descriptor_list = newd;
-
-	newd->socketWriteInstant(startup);
-
-	newd->socketWriteInstant("By what name do you wish to be known? ");
 }
 
 void onDescriptorClose(void *data, kuListener *listener, kuDescriptor *descriptor)
@@ -1092,24 +1088,33 @@ void gameLoop()
 			processGatewayCommand(input);
 		}
 
+		//Process Web Socket Commands & prepare input
+		for(d = descriptor_list; d; d = next_d)
+		{
+			next_d = d->next;
+			if(d->getGatewayDescriptorType() == GatewayDescriptorType::websocket)
+			{
+				d->processWebSocketCommands();
+			}
+			else
+			{
+				while(d->descriptor->hasCommand())
+					d->commandQueue.push_back(d->descriptor->getCommand());
+			}
+		}
+
 		// Process commands.
 		for ( d = descriptor_list; d; d = next_d )
 		{
 			next_d = d->next;
-
-			if ( d->character && d->character->wait > 0 ) {
+			if(d->commandQueue.empty())
 				continue;
-			}
 
-			if(d->descriptor->hasCommand() == false) {
-
-				continue;
-			}
-
+			std::string command = d->commandQueue.front();
+			d->commandQueue.pop_front();
+				
 			aliased = 0;
 			d->hadInput = true;
-
-			std::string command = d->descriptor->getCommand();
 
 			//Let's process TELNET INPUT!!
 
@@ -1156,7 +1161,7 @@ void gameLoop()
 
 			if(d->snoop_by && d->snoop_by->descriptor && d->snoop_by->character && d->snoop_by->character->HasPermissionToSnoop()) {
 
-				d->snoop_by->socketWriteInstant(std::string("% ") + command + std::string("\n"));
+				d->snoop_by->sendInstant(std::string("% ") + command + std::string("\n"));
 			}
 
 			char comm[MAX_INPUT_LENGTH+1];//Keeping this way for legacy reasons... Will change someday. 2011-04-10
@@ -1249,11 +1254,11 @@ void gameLoop()
 
 			if(d->hadOutput) {
 
-				d->socketWriteInstant("\r\n");
+				d->sendInstant("\r\n");
 			}
 			if(d->hadInput || d->hadOutput) {
 
-				d->socketWriteInstant(d->MakePrompt());
+				d->sendInstant(d->MakePrompt());
 			}
 
 			d->hadInput = false;
@@ -1437,7 +1442,7 @@ void AutoSave( void )
 		if( STATE( d ) == CON_PLAYING )
 		{
 			strcpy(tmpBuf, d->MakePrompt());
-			d->socketWriteInstant(d->MakePrompt());
+			d->sendInstant(d->MakePrompt());
 		}
 	}
 }
@@ -1597,7 +1602,7 @@ void invisiblePing()
 {
 	for(Descriptor *descriptor = descriptor_list;descriptor;descriptor = descriptor->next)
 	{
-		descriptor->socketWriteInstant(std::string("\r\n") + std::string(descriptor->MakePrompt()));
+		descriptor->sendInstant(std::string("\r\n") + std::string(descriptor->MakePrompt()));
 //		descriptor->SendRaw("\0");
 	}
 }
@@ -2093,6 +2098,13 @@ void vwrite_to_output( Descriptor *t, int swap_args, const char *format, va_list
 	cBuffer[ bSize - 1 ]  = '\0';
 
 	std::string EndString = FormatEndlines( cBuffer );
+	for(std::string::size_type pos = 0;pos < EndString.size();)
+	{
+		if(EndString[ pos ] < 0)
+			EndString.erase(pos, 1);
+		else
+			++pos;
+	}
 	delete[]cBuffer;
 
 	
@@ -2104,13 +2116,19 @@ void vwrite_to_output( Descriptor *t, int swap_args, const char *format, va_list
 	// if we have enough space, just write to buffer and that's it!
 	if ( t->descriptor->getOutputBufferSize() < LARGE_BUFSIZE )
 	{
-		t->descriptor->send(EndString);
+		if(t->getGatewayDescriptorType() == GatewayDescriptorType::websocket)
+			t->descriptor->send(t->encodeWebSocketOutputCommand(EndString.c_str()));
+		else if(t->getGatewayDescriptorType() == GatewayDescriptorType::rawTCP)
+			t->descriptor->send(EndString);
 		if(loggerCharacter)
 			loggerCharacter->LogOutput( EndString );
 	}
 	else
 	{
-		t->descriptor->send("***OVERFLOW***");
+		if(t->getGatewayDescriptorType() == GatewayDescriptorType::websocket)
+			t->descriptor->send(t->encodeWebSocketOutputCommand("***OVERFLOW***"));
+		else if(t->getGatewayDescriptorType() == GatewayDescriptorType::rawTCP)
+			t->descriptor->send("***OVERFLOW***");
 
 		if ( loggerCharacter && PLR_FLAGGED( t->character, PLR_LOGGER ) )
 			loggerCharacter->LogOutput( "***OVERFLOW***" );
@@ -2158,21 +2176,21 @@ void Character::ShowTimer()
 		return ;
 
 	if ( !( timer % 40 ) )
-		desc->socketWriteInstant("\r\n * ");
+		desc->sendInstant("\r\n * ");
 	else if ( !( timer % 35 ) )
-		desc->socketWriteInstant(" + ");
+		desc->sendInstant(" + ");
 	else if ( !( timer % 30 ) )
-		desc->socketWriteInstant(" - ");
+		desc->sendInstant(" - ");
 	else if ( !( timer % 25 ) )
-		desc->socketWriteInstant(" = ");
+		desc->sendInstant(" = ");
 	else if ( !( timer % 20 ) )
-		desc->socketWriteInstant(" % ");
+		desc->sendInstant(" % ");
 	else if ( !( timer % 15 ) )
-		desc->socketWriteInstant(" = ");
+		desc->sendInstant(" = ");
 	else if ( !( timer % 10 ) )
-		desc->socketWriteInstant(" - ");
+		desc->sendInstant(" - ");
 	else if ( !( timer % 5 ) )
-		desc->socketWriteInstant(" + ");
+		desc->sendInstant(" + ");
 }
 
 void checkTimers()
@@ -2594,7 +2612,7 @@ void sendToAll( const char* messg, bool instant )
 		if ( STATE( i ) == CON_PLAYING )
 		{
 			if( instant == true )
-				i->socketWriteInstant(messg);
+				i->sendInstant(messg);
 			else
 				SEND_TO_Q( messg, i );
 		}

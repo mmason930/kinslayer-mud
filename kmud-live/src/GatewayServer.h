@@ -17,7 +17,6 @@ private:
 
 	std::list<GatewayDescriptor*> descriptors;
 	std::list<GatewayListener *> listeners;
-//	kuListener *listener;
 
 	kuClient *motherConnectionToServer;
 

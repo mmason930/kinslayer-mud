@@ -46,6 +46,7 @@ extern const char *race_menu;
 extern char *motd;
 extern char *imotd;
 extern char *background;
+extern char *startup;
 extern Character *character_list;
 extern Descriptor *descriptor_list;
 extern int circle_restrict;
@@ -1748,6 +1749,10 @@ void Descriptor::Nanny( char* arg )
 
 						this->session = sessionKey;
 
+						this->sendInstant(startup);
+
+						this->sendInstant("By what name do you wish to be known? ");
+
 						break;
 					}
 
@@ -1936,9 +1941,12 @@ void Descriptor::Nanny( char* arg )
 				return ;
 			}
 
+
 			if(this->getGatewayDescriptorType() == GatewayDescriptorType::websocket)
 			{
-				this->sendWebSocketUsernameCommand(GET_NAME(this->character));
+				std::list<UserMacro*> userMacros = CharacterUtil::getUserMacros(gameDatabase, this->character->getUserId());
+				this->sendWebSocketUsernameCommand(GET_NAME(this->character), userMacros);
+				CharacterUtil::freeUserMacros(userMacros);
 			}
 
 			/* Password was correct. */

@@ -4,6 +4,9 @@
 #include "DateTime.h"
 #include "GatewayDescriptorType.h"
 
+#include <list>
+#include "jsoncpp/json.h"
+
 class Descriptor
 {
 protected:
@@ -37,6 +40,7 @@ public:
 	class Descriptor *snoop_by;		// And who is snooping this char
 	class Descriptor *next;			// Link to next descriptor
 	class OLC *olc;					// OLC info - defined in olc.h
+	std::list<std::string> commandQueue;
 	bool hadInput;
 	bool hadOutput;
 
@@ -44,6 +48,7 @@ public:
 	void Send( const char *messg, ... );
 	void Send( const std::string s );
 	void SendRaw( const char *messg );
+	void sendInstant( const std::string &str );
 	void socketWriteInstant( const std::string &str );
 	void NewbieMenuFinish();
 	void EchoOn();
@@ -56,6 +61,8 @@ public:
 	void persistentDisconnect();
 	void closeSocketClean();
 
+	void processWebSocketCommands();
+
 	std::string session;
 
 	GatewayDescriptorType *getGatewayDescriptorType() const;
@@ -64,8 +71,13 @@ public:
 	static void sendWebSocketCommands(const int pulse);
 	void sendWebSocketCommand(const std::string &command);
 
-	void sendWebSocketUsernameCommand(const std::string &username);
+	void sendWebSocketUsernameCommand(const std::string &username, const std::list<class UserMacro *> &userMacros);
 	void sendWebSocketPlayersOnlineCommand(const int playersOnline);
+	std::string encodeWebSocketOutputCommand(const char *output);
+	std::string encodeWebSocketCommand(const std::string &command);
+
+	void processWebSocketSaveUserMacroCommand(Json::Value &commandObject);
+	void processWebSocketDeleteUserMacroCommand(Json::Value &commandObject);
 
 	Descriptor& operator<< ( const std::string &s );
 	Descriptor& operator<< ( const int );

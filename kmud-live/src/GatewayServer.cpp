@@ -515,7 +515,7 @@ void GatewayServer::sendToDescriptors(const std::string &message)
 
 		GatewayDescriptor *descriptor = (*iter);
 
-		descriptor->sendToClient(message);
+		descriptor->sendOutputMessageToClient(message);
 
 		++iter;
 	}

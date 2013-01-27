@@ -32,6 +32,9 @@
 #include "DatabaseUtil.h"
 #include "MiscUtil.h"
 
+Clock individualHitClockDamage;
+#define PERFORM_VIOLENCE_LOGGING 0
+
 /* Structures */
 Character *combat_list = NULL;	/* head of l-list of fighting chars */
 Character *next_combat_list = NULL;
@@ -585,6 +588,7 @@ void Character::SetNewFighting()
 	}
 }
 
+Clock corpseClock1, corpseClock2, corpseClock3, corpseClock4, corpseClock5;
 void Character::MakeCorpse()
 {//TODO: Review
 	Object *corpse, *o, *obj;
@@ -597,7 +601,9 @@ void Character::MakeCorpse()
 	if ( !desc && !IS_NPC( this ) )
 		type = " torn up ";
 
+	corpseClock1.turnOn();
 	corpse = create_obj();
+	corpseClock1.turnOff();
 
 	corpse->item_number = NOTHING;
 	corpse->in_room = 0;
@@ -669,8 +675,11 @@ void Character::MakeCorpse()
 	for ( o = corpse->contains; o != NULL; o = o->next_content )
 		o->in_obj = corpse;
 
+	corpseClock2.turnOn();
 	object_list_new_owner( corpse, NULL );
+	corpseClock2.turnOff();
 
+	corpseClock4.turnOn();
 	/* transfer character's equipment to the corpse */
 	for ( i = 0; i < NUM_WEARS;++i )
 	{
@@ -680,14 +689,19 @@ void Character::MakeCorpse()
 			obj_to_obj( unequip_char( this, i ), corpse );
 		}
 	}
+	corpseClock4.turnOff();
 
 	carrying = NULL;
 	IS_CARRYING_N( this ) = 0;
 
+	corpseClock5.turnOn();
 	corpse->MoveToRoom( in_room );
+	corpseClock5.turnOff();
 	if(!ROOM_FLAGGED(in_room, ROOM_VAULT))
 	{
+		corpseClock3.turnOn();
 		in_room->corpseSave();
+		corpseClock3.turnOff();
 	}
 }
 
@@ -713,6 +727,12 @@ void Character::DeathCry()
 	}
 }
 
+Clock dieClock1, dieClock2, dieClock3, dieClock4, dieClock5;
+Clock dieClock6, dieClock7, dieClock8, dieClock9, dieClock10;
+Clock dieClock11, dieClock12, dieClock13, dieClock14, dieClock15;
+Clock dieClock16;
+
+Clock dieClock14A, dieClock14B, dieClock14C;
 void Character::Die( Character *killer )
 {//TODO: Review
 
@@ -721,6 +741,7 @@ void Character::Die( Character *killer )
 
 	if(killer != NULL)
 	{
+		dieClock1.turnOn();
 		if ( (killer != this) && (IS_NPC(this) || this->desc) && !isInArena(this) && !isInArena(killer) )
 		{
 			if ( AFF_FLAGGED( killer, AFF_GROUP ) )
@@ -728,6 +749,8 @@ void Character::Die( Character *killer )
 			else
 				solo_gain( killer, this );
 		}
+		dieClock1.turnOff();
+		dieClock2.turnOn();
 		if ( !IS_NPC( this ) )
 		{
 			MudLog( BRF, (MAX(LVL_IMMORT,GET_LEVEL(this))), TRUE,
@@ -735,7 +758,8 @@ void Character::Die( Character *killer )
 			if ( MOB_FLAGGED( killer, MOB_MEMORY ) )
 				killer->Forget(this);
 		}
-		
+		dieClock2.turnOff();
+		dieClock3.turnOn();
 		if(!isInArena(this) && !isInArena(killer)) {
 
 			killer->WeaveGroupDistribution( this );
@@ -758,7 +782,8 @@ void Character::Die( Character *killer )
 				MudLog( NRM, LVL_GRGOD, TRUE, "%s dropped to level %d.", GET_NAME( this ), GET_LEVEL( this ) );
 			}
 		}
-
+		dieClock3.turnOff();
+		dieClock4.turnOn();
 		if ( !IS_NPC( killer ) && ( GET_LEVEL( this ) < LVL_IMMORT ) && ( killer != this ) && !isInArena(this))
 			GET_DEATH_WAIT( this ) = 10;
 		else
@@ -781,24 +806,50 @@ void Character::Die( Character *killer )
 		}
 
 		killer->StopFighting();
+		dieClock4.turnOff();
 	}//END OF if(killer != NULL)
-
+	dieClock5.turnOn();
 #ifdef KINSLAYER_JAVASCRIPT
 	js_death_trigger( this, killer );
 #endif
+	dieClock5.turnOff();
 
+	dieClock6.turnOn();
 	while ( this->affected )
 		affect_remove( this, this->affected );
+	dieClock6.turnOff();
 
+	dieClock7.turnOn();
 	if ( FIGHTING( this ) && FIGHTING( FIGHTING( this ) ) )
 		FIGHTING( this ) ->StopFighting();
+	dieClock7.turnOff();
 
+	dieClock8.turnOn();
 	this->CancelTimer( false );
+	dieClock8.turnOff();
+
+	dieClock9.turnOn();
 	this->Dismount();
+	dieClock9.turnOff();
+
+	dieClock10.turnOn();
 	this->StopFighting();
+	dieClock10.turnOff();
+
+	dieClock11.turnOn();
 	this->DeathCry();
+	dieClock11.turnOff();
+
+	dieClock12.turnOn();
 	this->RemoveSource();
+	dieClock12.turnOff();
+
+	dieClock13.turnOn();
 	ShieldManager::GetManager().KillShieldsByTarget(this);
+	dieClock13.turnOff();
+
+	dieClock14.turnOn();
+	dieClock14A.turnOn();
 	this->Send( "You are dead! Sorry...\r\n" );
 
 	if ( MOB_FLAGGED( this, MOB_GHOST ) )
@@ -806,20 +857,28 @@ void Character::Die( Character *killer )
 	else
 		Act( "$n is dead! R.I.P.", FALSE, this, 0, 0, TO_ROOM );
 
+	dieClock14A.turnOff();
 	if(!isInArena(this)) {
-
+		dieClock14B.turnOn();
 		this->MakeCorpse();
+		dieClock14B.turnOff();
+		dieClock14C.turnOn();
 		this->itemSave();
+		dieClock14C.turnOff();
 	}
+	dieClock14.turnOff();
 
 	if ( IS_NPC( this ) )
 	{
+		dieClock15.turnOn();
 		this->StopFighting();
 		this->Extract();
+		dieClock15.turnOff();
 		return;
 	}
 	else
 	{
+		dieClock16.turnOn();
 		this->PlayerData->mood = MOOD_WIMPY;
 		GET_HIT( this ) = 1;
 		GET_MOVE( this ) = 1;
@@ -846,6 +905,7 @@ void Character::Die( Character *killer )
 			this->Send( "\nYou feel completely drained of all of your strength..." );
 
 		this->Save();
+		dieClock16.turnOff();
 	}
 }
 
@@ -1242,52 +1302,56 @@ int mana_damage( Character *ch, Character *vict, int damage )
  *	= 0	No damage.
  *	> 0	How much damage done.
  */
+Clock damageClock1, damageClock2, damageClock3, damageClock4, damageClock5, damageClock6, damageClock7;
 int damage( Character * ch, Character * victim, int dam, int attacktype, int BodyPart )
 {//TODO: Needs rewrite
 	if ( GET_POS( victim ) <= POS_DEAD )
 	{
-		Log( "SYSERR: Attempt to damage corpse '%s' in room #%d by '%s'.",
-		     GET_NAME( victim ), victim->in_room->vnum, GET_NAME( ch ) );
+		Log( "SYSERR: Attempt to damage corpse '%s' in room #%d by '%s'.", GET_NAME( victim ), victim->in_room->vnum, GET_NAME( ch ) );
 		victim->Die( ch );
-		return 0;			/* -je, 7/7/92 */
+		return 0;			// -je, 7/7/92
 	}
 
-	/* peaceful rooms */
+	// peaceful rooms
 	if ( ch != victim && ROOM_FLAGGED( ch->in_room, ROOM_PEACEFUL ) )
 	{
 		ch->Send( "This room just has such a peaceful, easy feeling...\r\n" );
 		return 0;
 	}
 
-	/* You can't damage an immortal! */
+	// You can't damage an immortal!
 	if ( !IS_NPC( victim ) && ( GET_LEVEL( victim ) >= LVL_IMMORT ) )
 		dam = 0;
 
-	if ( victim != ch && attacktype != SPELL_DECAY && attacktype != SPELL_BLAZE && attacktype != SPELL_DARK_PLAGUE 
-		&& attacktype != SKILL_MISC)
+	damageClock1.turnOn();
+	if ( victim != ch && attacktype != SPELL_DECAY && attacktype != SPELL_BLAZE && attacktype != SPELL_DARK_PLAGUE && attacktype != SKILL_MISC)
 	{
-		/* Start the attacker fighting the victim */
+		// Start the attacker fighting the victim
 		if ( GET_POS( ch ) > POS_STUNNED && !FIGHTING( ch ) && attacktype != SKILL_COMPEL )
 			ch->SetFighting( victim );
 
-		/* Start the victim fighting the attacker */
+		// Start the victim fighting the attacker
 		if ( GET_POS( victim ) > POS_STUNNED && !FIGHTING( victim ) && attacktype != SKILL_COMPEL )
 			victim->SetFighting( ch );
 	}
+	damageClock1.turnOff();
 
-	/* If you attack a pet, it hates your guts */
+	damageClock2.turnOn();
+	// If you attack a pet, it hates your guts
 	if ( victim->master == ch && attacktype != SKILL_COMPEL)
 		victim->stopFollowing();
 
-	/* If the attacker is invisible, he becomes visible */
+	// If the attacker is invisible, he becomes visible
 	if ( AFF_FLAGGED( ch, AFF_INVISIBLE ) )
 		ch->Appear();
 
-	/* Cut damage if victim has sanct, to a minimum 1 */
+	// Cut damage if victim has sanct, to a minimum 1
 	if ( AFF_FLAGGED( victim, AFF_SANCTUARY ) && dam >= 2 )
 		dam = ( int ) ( ( double ) dam * atof(WeaveManager::GetManager().GetWeave("Sanctuary")->getAttribute("DmgFactor").c_str()) );
+	damageClock2.turnOff();
 
-	/* Fades and Ogier take less damage from weaves */
+	damageClock3.turnOn();
+	// Fades and Ogier take less damage from weaves
 	if ( attacktype < 130 && IS_FADE(ch) )
 	{
 		dam *= .8;
@@ -1301,11 +1365,11 @@ int damage( Character * ch, Character * victim, int dam, int attacktype, int Bod
 	if ( IS_FADE(ch) && GET_SKILL(ch, SKILL_SHADOW_RAGE) && AFF_FLAGGED(ch, AFF_SHADOW_RAGE) )
 		dam = (dam + 1) * .6;
 	
-	/* Set the maximum damage per round and subtract the hit points */
+	// Set the maximum damage per round and subtract the hit points
 	dam = MAX( MIN( dam, 5000 ), 0 );
 	GET_HIT( victim ) -= dam;
 
-	/* Gain exp for the hit */
+	// Gain exp for the hit
 
 	if ( ch != victim )
 	{
@@ -1313,7 +1377,9 @@ int damage( Character * ch, Character * victim, int dam, int attacktype, int Bod
 		gain_exp( ch, MIN( max_hit_exp, GET_LEVEL( victim ) * dam * Conf->play.hit_exp_mult ) );
 	}
 	update_pos( victim );
+	damageClock3.turnOff();
 
+	damageClock4.turnOn();
 	if ( dam > 0 )
 	{
 		if ( (victim->timer > 0 && victim->desc && ( !str_cmp( victim->Command, "channel" )
@@ -1338,7 +1404,7 @@ int damage( Character * ch, Character * victim, int dam, int attacktype, int Bod
 	{
 		victim->SetBashState( PULSE_VIOLENCE );
 	}
-
+	damageClock4.turnOff();
 	/*
 	 * skill_message sends a message from the messages file in lib/misc.
 	 * dam_message just sends a generic "You hit $n extremely hard.".
@@ -1351,7 +1417,7 @@ int damage( Character * ch, Character * victim, int dam, int attacktype, int Bod
 	 * dam_message. Otherwise, always send a dam_message.
 	 */
 
-
+	damageClock5.turnOn();
 	if( attacktype == SKILL_MISC )
 	{//Raw damage - Galnor 12/19/2009
 		//...
@@ -1375,9 +1441,10 @@ int damage( Character * ch, Character * victim, int dam, int attacktype, int Bod
 			dam_message( dam, ch, victim, attacktype, BodyPart );
 		}
 	}
+	damageClock5.turnOff();
+	// Use send() Act() doesn't send message if you are DEAD.
 
-	/* Use send() Act() doesn't send message if you are DEAD. */
-
+	damageClock6.turnOn();
 	switch ( GET_POS( victim ) )
 	{
 	case POS_MORTALLYW:
@@ -1392,7 +1459,7 @@ int damage( Character * ch, Character * victim, int dam, int attacktype, int Bod
 		Act( "$n is stunned, but will probably regain consciousness again.", TRUE, victim, 0, 0, TO_ROOM );
 		victim->Send( "You're stunned, but will probably regain consciousness again.\r\n" );
 		break;
-	default: 			/* >= POSITION SLEEPING */
+	default: 			// >= POSITION SLEEPING
 		if ( dam > ( GET_MAX_HIT( victim ) / 4 ) )
 		{
 			Act( "That really did HURT!", FALSE, victim, 0, 0, TO_CHAR );
@@ -1417,13 +1484,14 @@ int damage( Character * ch, Character * victim, int dam, int attacktype, int Bod
 		break;
 	}
 
-	/* stop someone from fighting if they're stunned or worse */
+	// stop someone from fighting if they're stunned or worse
 	if ( ( GET_POS( victim ) == POS_DEAD && FIGHTING( victim ) ) )
 		victim->StopFighting();
-
-	/* Uh oh. Victim died. */
+	damageClock6.turnOff();
+	// Uh oh. Victim died.
 	if ( GET_POS( victim ) == POS_DEAD )
 	{
+		damageClock7.turnOn();
 		if( attacktype == SPELL_DECAY )
 			victim->Die( victim->DecayedBy ? (victim->DecayedBy) : (ch) );
 		else if( attacktype == SPELL_BLAZE )
@@ -1432,6 +1500,7 @@ int damage( Character * ch, Character * victim, int dam, int attacktype, int Bod
 			victim->Die( victim->PlaguedBy ? (victim->PlaguedBy) : (ch) );
 		else
 			victim->Die( ch );
+		damageClock7.turnOff();
 		return -1;
 
 	}
@@ -1588,6 +1657,7 @@ int Character::DefenseMeleeRoll()
 
 void Character::GainNoQuit( Character *victim )
 {//TODO: Revise
+
 	int noquit = 0;
 	affected_type af, *a;
 
@@ -1617,6 +1687,8 @@ void Character::GainNoQuit( Character *victim )
 int hit( Character * ch, Character * victim, int type )
 {//TODO: Rewrite
 	Object * wielded = GET_EQ( ch, WEAR_WIELD );
+	int finalDamageCalculation;
+
 	int w_type, dam, bp = ( ( ch->ps_tgt != -1 ) ? ch->ps_tgt : RandomBodyPart() );
 
 	if ( !ch || !victim )
@@ -1674,28 +1746,13 @@ int hit( Character * ch, Character * victim, int type )
 
 	//	If it's a combat skill, we already have everything we need. No reason to check each skill separately.
 	if ( type < TYPE_HIT && type > MAX_SPELLS )
-		return damage( ch, victim, dam, type, -1 );
+	{
+		individualHitClockDamage.turnOn();
+		finalDamageCalculation = damage( ch, victim, dam, type, -1 );
+		individualHitClockDamage.turnOff();
+		return finalDamageCalculation;
+	}
 
-	///*This was moved up, and is returned here so that abs does not affect damage on a stab */
-	//if ( type == SKILL_BACKSTAB )
-	//{
-	//	return damage( ch, victim, dam, type, -1 );
-	//}
-
-	//if ( type == SKILL_CHARGE || type == SKILL_SKEWER )
-	//{
-	//	return damage( ch, victim, dam, type, -1 );
-	//}
-
-	//if (type == SKILL_PRECISESTRIKE)
-	//{
-	//	return damage( ch, victim, ch->CalculateDamage(victim, type, ch->ps_tgt), type, ch->ps_tgt);
-	//}
-
-	//if (type == SKILL_BASH)
-	//{
-	//	return damage( ch, victim, dam, type, -1 );
-	//}
 	/* decide whether this is a hit or a miss */
 	int roll = MiscUtil::random(1, 20);
 	if(AFF_FLAGGED(ch, AFF_DARK_PLAGUE))
@@ -1704,19 +1761,24 @@ int hit( Character * ch, Character * victim, int type )
 		if( weave )
 			roll += MiscUtil::Convert<int>(weave->getAttribute("HitRollModifier"));
 	}
-	
+
 	if ( !(roll <= 1) && ( (roll == 20 && !IS_NPC(ch)) || ch->OffenseMeleeRoll() > victim->DefenseMeleeRoll() ) )
 	{
 #ifdef KINSLAYER_JAVASCRIPT
 		js_hitpercent_triggers(ch, victim);
 #endif
-		return damage( ch, victim, dam, w_type, bp );
+		individualHitClockDamage.turnOn();
+		finalDamageCalculation = damage( ch, victim, dam, w_type, bp );
+		individualHitClockDamage.turnOff();
 	}
 	else
-	{
-		/* the attacker missed the victim */
-		return damage( ch, victim, 0, w_type, bp );
+	{// the attacker missed the victim
+		individualHitClockDamage.turnOn();
+		finalDamageCalculation = damage( ch, victim, 0, w_type, bp );
+		individualHitClockDamage.turnOff();
 	}
+
+	return finalDamageCalculation;
 }
 
 /* Old, crappy coding from 2004ish for chain weapon type */
@@ -1810,14 +1872,49 @@ void perform_violence( void )
 	Object *wielded;
 	int percent, prob;
 
+	Clock loopClock, triggerClock, hitClock, specialClock;
+	individualHitClockDamage.reset(false);
+
+	loopClock.turnOn();
+	
+	damageClock1.reset(false); damageClock2.reset(false); damageClock3.reset(false); damageClock4.reset(false); damageClock5.reset(false); damageClock6.reset(false); damageClock7.reset(false);
+
+	dieClock1.reset(false);
+	dieClock2.reset(false);
+	dieClock3.reset(false);
+	dieClock4.reset(false);
+	dieClock5.reset(false);
+	dieClock6.reset(false);
+	dieClock7.reset(false);
+	dieClock8.reset(false);
+	dieClock9.reset(false);
+	dieClock10.reset(false);
+	dieClock11.reset(false);
+	dieClock12.reset(false);
+	dieClock13.reset(false);
+	dieClock14.reset(false);
+	dieClock15.reset(false);
+	dieClock16.reset(false);
+
+	dieClock14A.reset(false);
+	dieClock14B.reset(false);
+	dieClock14C.reset(false);
+
+	corpseClock1.reset(false);
+	corpseClock2.reset(false);
+	corpseClock3.reset(false);
+	corpseClock4.reset(false);
+	corpseClock5.reset(false);
+
 	for ( ch = combat_list; ch; ch = next_combat_list )
 	{
 		next_combat_list = ch->next_fighting;
 		
+		triggerClock.turnOn();
 #ifdef KINSLAYER_JAVASCRIPT
 		js_fight_triggers(ch, FIGHTING(ch));
 #endif
-
+		triggerClock.turnOff();
 		/* Checks the characters timer to see whether to pass the round or go on to hit() *Galnor* */
 		if ( CHECK_WAIT( ch ) )
 			continue;
@@ -1844,6 +1941,7 @@ void perform_violence( void )
 
 		wielded = GET_EQ( ch, WEAR_WIELD );
 
+		hitClock.turnOn();
 		if ( wielded && IS_OBJ_STAT( wielded, ITEM_CHAIN ) )
 			ch->HitAllFighting();
 		else
@@ -1852,6 +1950,7 @@ void perform_violence( void )
 				return ;
 			hit( ch, FIGHTING( ch ), TYPE_UNDEFINED );
 		}
+		hitClock.turnOff();
 
 		if ( wielded && FIGHTING( ch ) )
 		{
@@ -1864,9 +1963,10 @@ void perform_violence( void )
 					prob = 99;
 				else
 					prob = GET_SKILL( ch, SKILL_ATTACK );
-
+				hitClock.turnOn();
 				if ( percent < prob && FIGHTING( ch ) != NULL )
 					hit( ch, FIGHTING( ch ), TYPE_UNDEFINED );
+				hitClock.turnOff();
 
 			}
 			else if ( IS_FADE(ch) && GET_SKILL(ch, SKILL_SHADOW_RAGE) && AFF_FLAGGED(ch, AFF_SHADOW_RAGE) )
@@ -1876,11 +1976,13 @@ void perform_violence( void )
 					affect_from_char( ch, 0, AFF_SHADOW_RAGE );
 					continue;
 				}
+				hitClock.turnOn();
 				percent = MiscUtil::random( 1, 100 );
 				prob = ch->GetSkillLevel(SKILL_SHADOW_RAGE) * 13;
 				if ( percent < prob && FIGHTING(ch) != NULL )
 					hit( ch, FIGHTING(ch), TYPE_UNDEFINED );
 				GET_SHADOW(ch) = MAX(GET_SHADOW(ch) - 2, 0);
+				hitClock.turnOff();
 			}
 
 		}
@@ -1888,9 +1990,56 @@ void perform_violence( void )
 		if ( MOB_FLAGGED( ch, MOB_SPEC ) && MobManager::GetManager().GetIndex((u_int)ch->nr)->func != NULL ) {
 			char sEmpty[12];
 			*sEmpty = '\0';
+			specialClock.turnOn();
 			( MobManager::GetManager().GetIndex((u_int)ch->nr)->func ) ( ch, ch, 0, sEmpty );
+			specialClock.turnOff();
 		}
 	}
+
+
+#if(PERFORM_VIOLENCE_LOGGING == 1)
+	std::cout << "===================================================" << std::endl;
+	std::cout << "Perform Combat    :"; loopClock.print();
+	std::cout << "Combat Trigger    :"; triggerClock.print();
+	std::cout << "Combat Hit        :"; hitClock.print();
+	std::cout << "Hit Damage        :"; individualHitClockDamage.print();
+	std::cout << "Damage1           :"; damageClock1.print();
+	std::cout << "Damage2           :"; damageClock2.print();
+	std::cout << "Damage3           :"; damageClock3.print();
+	std::cout << "Damage4           :"; damageClock4.print();
+	std::cout << "Damage5           :"; damageClock5.print();
+	std::cout << "Damage6           :"; damageClock6.print();
+	std::cout << "Damage7           :"; damageClock7.print();
+	std::cout << "Special           :"; specialClock.print();
+	
+	
+	std::cout << "Die clock1        :"; dieClock1.print();
+	std::cout << "Die clock2        :"; dieClock2.print();
+	std::cout << "Die clock3        :"; dieClock3.print();
+	std::cout << "Die clock4        :"; dieClock4.print();
+	std::cout << "Die clock5        :"; dieClock5.print();
+	std::cout << "Die clock6        :"; dieClock6.print();
+	std::cout << "Die clock7        :"; dieClock7.print();
+	std::cout << "Die clock8        :"; dieClock8.print();
+	std::cout << "Die clock9        :"; dieClock9.print();
+	std::cout << "Die clock10       :"; dieClock10.print();
+	std::cout << "Die clock11       :"; dieClock11.print();
+	std::cout << "Die clock12       :"; dieClock12.print();
+	std::cout << "Die clock13       :"; dieClock13.print();
+	std::cout << "Die clock14       :"; dieClock14.print();
+	std::cout << "Die clock14A      :"; dieClock14A.print();
+	std::cout << "Die clock14B      :"; dieClock14B.print();
+	std::cout << "Die clock14C      :"; dieClock14C.print();
+	std::cout << "Die clock15       :"; dieClock15.print();
+	std::cout << "Die clock16       :"; dieClock16.print();
+
+	std::cout << "Corpse clock1     :"; corpseClock1.print();
+	std::cout << "Corpse clock2     :"; corpseClock2.print();
+	std::cout << "Corpse clock3     :"; corpseClock3.print();
+	std::cout << "Corpse clock4     :"; corpseClock4.print();
+	std::cout << "Corpse clock5     :"; corpseClock5.print();
+	std::cout << "===================================================" << std::endl << std::endl << std::endl;
+#endif
 }
 
 /* Galnor: 8-3-2005, For the second time(hard drive ate this the first time), return random fighting target. */

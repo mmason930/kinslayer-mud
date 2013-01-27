@@ -2,6 +2,8 @@
 #include "GatewayDescriptor.h"
 #include "WebSocketDataFrame.h"
 
+#include "jsoncpp/json.h"
+
 GatewayDescriptor::GatewayDescriptor()
 {
 	serverConnection = NULL;
@@ -74,6 +76,23 @@ void GatewayDescriptor::sendToClient(const std::string &packet)
 void GatewayDescriptor::sendToServer(const std::string &packet)
 {
 	serverConnection->send(packet);
+}
+
+void GatewayDescriptor::sendOutputMessageToClient(const std::string &packet)
+{
+	if(this->getGatewayListener()->getType() == GATEWAY_LISTENER_TYPE_WEBSOCKET)
+	{
+		Json::Value rootValue;
+		rootValue["method"] = "Output";
+		rootValue["data"] = packet;
+
+		Json::FastWriter writer;
+		this->sendToClient(writer.write(rootValue) + (char)0x06);
+	}
+	else
+	{
+		this->sendToClient(packet);
+	}
 }
 
 std::string GatewayDescriptor::pullFromClient()

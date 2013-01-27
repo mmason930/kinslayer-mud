@@ -44,7 +44,7 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost_1_51;C:\dev\kmud-live\reqs\mysql\include;C:\dev\js\src\dist;C:\dev\kmud-live\reqs\sqlDatabase;C:\dev\kmud-live\reqs\flusspferd\include;$(IncludePath)</IncludePath>
-    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost_1_51\lib;C:\dev\kmud-live\reqs\mysql\lib\debug;C:\dev\js\src\dist\lib;C:\dev\kmud-live\reqs\sqlDatabase\Debug;C:\dev\kmud-live\reqs\flusspferd\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\dev\boost_1_51\lib;C:\dev\kmud-live\reqs\mysql\lib\debug;C:\dev\js\src\dist\lib;C:\dev\kmud-live\reqs\sqlDatabase\Debug;C:\dev\kmud-live\reqs\flusspferd\lib;C:\dev\kmud-live\reqs\iconv\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -131,6 +131,9 @@
     <ClCompile Include="src\HttpUtil.cpp" />
     <ClCompile Include="src\interpreter.cpp" />
     <ClCompile Include="src\jedit.cpp" />
+    <ClCompile Include="src\jsoncpp\json_reader.cpp" />
+    <ClCompile Include="src\jsoncpp\json_value.cpp" />
+    <ClCompile Include="src\jsoncpp\json_writer.cpp" />
     <ClCompile Include="src\kedit.cpp" />
     <ClCompile Include="src\limits.cpp" />
     <ClCompile Include="src\magic.cpp" />
@@ -230,6 +233,16 @@
     <ClInclude Include="src\HttpServer.h" />
     <ClInclude Include="src\HttpUtil.h" />
     <ClInclude Include="src\interpreter.h" />
+    <ClInclude Include="src\jsoncpp\autolink.h" />
+    <ClInclude Include="src\jsoncpp\config.h" />
+    <ClInclude Include="src\jsoncpp\features.h" />
+    <ClInclude Include="src\jsoncpp\forwards.h" />
+    <ClInclude Include="src\jsoncpp\json.h" />
+    <ClInclude Include="src\jsoncpp\json_batchallocator.h" />
+    <ClInclude Include="src\jsoncpp\json_tool.h" />
+    <ClInclude Include="src\jsoncpp\reader.h" />
+    <ClInclude Include="src\jsoncpp\value.h" />
+    <ClInclude Include="src\jsoncpp\writer.h" />
     <ClInclude Include="src\MailUtil.h" />
     <ClInclude Include="src\md5.h" />
     <ClInclude Include="src\mobs.h" />
@@ -297,6 +310,9 @@
   <ItemGroup>
     <None Include="GatewayServer.vcproj" />
     <None Include="dbChanges.sql" />
+    <None Include="src\jsoncpp\json_internalarray.inl" />
+    <None Include="src\jsoncpp\json_internalmap.inl" />
+    <None Include="src\jsoncpp\json_valueiterator.inl" />
     <None Include="src\Makefile" />
     <None Include="ClassDiagram1.cd" />
   </ItemGroup>

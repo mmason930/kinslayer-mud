@@ -55,6 +55,11 @@ public:
 
 	std::string getInputBuffer();
 
+	const char *getInputDataBuffer() const
+	{
+		return input.c_str();
+	}
+
 	const std::string &getHost()
 	{
 		return host;

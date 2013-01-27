@@ -8,15 +8,14 @@
 #include "comm.h"
 #include "kuDescriptor.h"
 
-#include <flusspferd.hpp>
-
 #include "Descriptor.h"
-
-flusspferd::object JS_parseJson(std::string jsonText);
-std::string JS_stringifyJson(flusspferd::object obj);
+#include "UserMacro.h"
+#include "StringUtil.h"
+#include "CharacterUtil.h"
 
 extern kuDescriptor *gatewayConnection;
 extern Descriptor *descriptor_list;
+extern sql::Connection gameDatabase;
 
 Descriptor::Descriptor()
 {
@@ -173,6 +172,14 @@ void Descriptor::cleanup()
 	delete ( this );
 }
 
+void Descriptor::sendInstant( const std::string &str )
+{
+	if(this->getGatewayDescriptorType() == GatewayDescriptorType::websocket)
+		socketWriteInstant(encodeWebSocketOutputCommand(str.c_str()));
+	else
+		socketWriteInstant(str);
+}
+
 void Descriptor::socketWriteInstant( const std::string &str )
 {
 	this->descriptor->socketWriteInstant( str );
@@ -200,7 +207,7 @@ void Descriptor::setGatewayDescriptorType(GatewayDescriptorType *gatewayDescript
 
 void Descriptor::sendWebSocketCommands(const int pulse)
 {
-	if(pulse % (PASSES_PER_SEC * 5) == 0)
+	if(pulse % (PASSES_PER_SEC * 1) == 0)
 	{
 		int playersOnline = 0;
 
@@ -222,40 +229,198 @@ void Descriptor::sendWebSocketCommands(const int pulse)
 	}
 }
 
-void Descriptor::sendWebSocketUsernameCommand(const std::string &username)
+void Descriptor::sendWebSocketUsernameCommand(const std::string &username, const std::list<UserMacro *> &userMacros)
 {
-	flusspferd::object commandObject = flusspferd::create_object(flusspferd::object());
+	Json::Value commandObject;
+	Json::FastWriter writer;
 
-	commandObject.set_property("method", "Username");
-	commandObject.set_property("username", username);
+	commandObject["method"] = "Username";
+	commandObject["username"] = username;
+	commandObject["macros"] = Json::Value();
 
-	flusspferd::array macroArray = flusspferd::create_array();
+	for(auto userMacroIter = userMacros.begin();userMacroIter != userMacros.end();++userMacroIter)
+	{
+		Json::Value userMacroObject;
+		userMacroObject["keyCode"] = (*userMacroIter)->getKeyCode();
+		userMacroObject["replacement"] = (*userMacroIter)->getReplacement();
+		userMacroObject["id"] = (*userMacroIter)->getId();
+		
+		commandObject["macros"].append(userMacroObject);
+	}
 
-
-	sendWebSocketCommand(JS_stringifyJson(commandObject));
+	sendWebSocketCommand(writer.write(commandObject));
 }
 
 void Descriptor::sendWebSocketPlayersOnlineCommand(const int playersOnline)
 {
-	flusspferd::object commandObject = flusspferd::create_object(flusspferd::object());
+	Json::Value commandObject;
+	Json::FastWriter writer;
 
-	commandObject.set_property("method", "Players Online");
-	commandObject.set_property("numberOfPlayers", playersOnline);
+	commandObject["method"] = "Players Online";
+	commandObject["numberOfPlayers"] = playersOnline;
 
-	sendWebSocketCommand(JS_stringifyJson(commandObject));
+	if(character)
+	{
+		commandObject["level"] = GET_LEVEL(character);
+		commandObject["expToLevel"] = character->ExperienceToLevel();
+		commandObject["weavePoints"] = character->points.weave;
+		commandObject["hitPoints"] = GET_HIT(character);
+		commandObject["maxHitPoints"] = GET_MAX_HIT(character);
+		commandObject["spellPoints"] = GET_MANA(character);
+		commandObject["maxSpellPoints"] = GET_MAX_MANA(character);
+		commandObject["movePoints"] = GET_MOVE(character);
+		commandObject["maxMovePoints"] = GET_MAX_MOVE(character);
+		commandObject["title"] = GET_TITLE(character);
+		commandObject["offensive"] = character->Offense();
+		commandObject["dodge"] = character->Dodge();
+		commandObject["parry"] = character->Parry();
+		commandObject["asbsorb"] = character->Absorb();
+	}
+
+	sendWebSocketCommand(writer.write(commandObject));
+}
+
+std::string Descriptor::encodeWebSocketOutputCommand(const char *output)
+{
+	Json::Value commandObject;
+	Json::FastWriter writer;
+
+	commandObject["method"] = "Output";
+	commandObject["data"] = output;
+
+	return encodeWebSocketCommand(writer.write(commandObject));
+}
+
+std::string Descriptor::encodeWebSocketCommand(const std::string &command)
+{
+	return command + (char)0x06;
 }
 
 void Descriptor::sendWebSocketCommand(const std::string &command)
 {
-	std::stringstream buffer;
+		this->socketWriteInstant(encodeWebSocketCommand(command));
+}
 
-	buffer << (unsigned char)0x1B
-		   << (unsigned char)0x06
-		   << (unsigned char)0x1B
-		   << command
-		   << (unsigned char)0x06
-		   << (unsigned char)0x1B
-		   << (unsigned char)0x06;
+void Descriptor::processWebSocketSaveUserMacroCommand(Json::Value &commandObject)
+{
+	if(this->character)
+	{
+		UserMacro *userMacro = NULL;
+		unsigned short keyCode;
+		std::string replacement;
 
-	this->socketWriteInstant(buffer.str().c_str());
+		if(commandObject["keyCode"].isNull() || !commandObject["keyCode"].isInt())
+		{
+			MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(character)), TRUE, "%s attempting to save macro with invalid keyCode.", GET_NAME(character));
+			return;
+		}
+		if(commandObject["replacement"].isNull() || !commandObject["replacement"].isString())
+		{
+			MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(character)), TRUE, "%s attempting to save macro with invalid replacement.", GET_NAME(character));
+			return;
+		}
+
+		keyCode = (unsigned short)commandObject["keyCode"].asInt();
+		replacement = commandObject["replacement"].asString();
+
+		if(!commandObject["id"].isNull() && commandObject["id"].isInt())
+		{
+			int userMacroId = commandObject["id"].asInt();
+			userMacro = CharacterUtil::getUserMacro(gameDatabase, userMacroId);
+
+			if(userMacro == NULL)
+			{
+				MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(character)), TRUE, "%s attempting to save user macro that does not exist. ID: %d. Key: %d, Replacement: %s", GET_NAME(character), userMacroId, keyCode, StringUtil::vaEscape(replacement));
+				return;
+			}
+
+			if(userMacro->getUserId() != character->getUserId())
+			{
+				MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(character)), TRUE, "%s attempting to save macro that belongs to another user. ID: %d.", GET_NAME(character), userMacroId);
+				delete userMacro;
+				return;
+			}
+		}
+		else
+		{
+			CharacterUtil::deleteUserMacro(gameDatabase, character->getUserId(), keyCode);
+
+			userMacro = new UserMacro();
+			userMacro->setUserId(character->getUserId());
+			userMacro->setCreatedDatetime(DateTime());
+		}
+
+		userMacro->setKeyCode(keyCode);
+		userMacro->setReplacement(replacement);
+
+		CharacterUtil::putUserMacro(gameDatabase, userMacro);
+
+		Json::Value commandResponse;
+		commandResponse["method"] = "Save User Macro";
+		commandResponse["wasSuccessful"] = true;
+		commandResponse["userMacroId"] = userMacro->getId();
+		commandResponse["keyCode"] = userMacro->getKeyCode();
+		commandResponse["replacement"] = userMacro->getReplacement();
+
+		Json::FastWriter writer;
+
+		this->sendWebSocketCommand(writer.write(commandResponse));
+
+		delete userMacro;
+	}
+}
+
+void Descriptor::processWebSocketDeleteUserMacroCommand(Json::Value &commandObject)
+{
+	if(!character)
+		return;
+
+	if(commandObject["keyCode"].isNull() || !commandObject["keyCode"].isInt())
+	{
+		MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(character)), TRUE, "%s attempting to delete user macro with invalid ID.", GET_NAME(character));
+		return;
+	}
+
+	unsigned short keyCode = (unsigned short)commandObject["keyCode"].asInt();
+	CharacterUtil::deleteUserMacro(gameDatabase, character->getUserId(), keyCode);
+}
+
+void Descriptor::processWebSocketCommands()
+{
+	while(true)
+	{
+		const char *inputDataBuffer = this->descriptor->getInputDataBuffer();
+		const char *endOfCommandPointer = strchr(inputDataBuffer, 0x06);
+
+		if(endOfCommandPointer != NULL)
+		{
+			std::string jsonCommand = std::string(inputDataBuffer, endOfCommandPointer - inputDataBuffer);
+			Json::Value commandObject;
+			Json::Reader reader;
+
+			if(!reader.parse(jsonCommand, commandObject, false))
+			{
+				MudLog(BRF, LVL_APPR, TRUE, "Could not process websocket command. Input: %s", StringUtil::vaEscape(jsonCommand));
+				break;
+			}
+
+			this->descriptor->eraseInput(0, (endOfCommandPointer - inputDataBuffer) + 1);
+			
+			std::string method = commandObject["method"].asString();
+			if(method == "Input")
+			{
+				this->commandQueue.push_back(commandObject["data"].asString());
+			}
+			else if(method == "Save User Macro")
+			{
+				processWebSocketSaveUserMacroCommand(commandObject);
+			}
+			else if(method == "Delete User Macro")
+			{
+				processWebSocketDeleteUserMacroCommand(commandObject);
+			}
+		}
+		else
+			break;
+	}
 }

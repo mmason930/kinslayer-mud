@@ -94,6 +94,9 @@
     <ClCompile Include="src\GatewayListener.cpp" />
     <ClCompile Include="src\GatewayMain.cpp" />
     <ClCompile Include="src\GatewayServer.cpp" />
+    <ClCompile Include="src\jsoncpp\json_reader.cpp" />
+    <ClCompile Include="src\jsoncpp\json_value.cpp" />
+    <ClCompile Include="src\jsoncpp\json_writer.cpp" />
     <ClCompile Include="src\kuClient.cpp" />
     <ClCompile Include="src\kuDescriptor.cpp" />
     <ClCompile Include="src\kuListener.cpp" />
@@ -117,6 +120,16 @@
     <ClInclude Include="src\GatewayDescriptorType.h" />
     <ClInclude Include="src\GatewayListener.h" />
     <ClInclude Include="src\GatewayServer.h" />
+    <ClInclude Include="src\jsoncpp\autolink.h" />
+    <ClInclude Include="src\jsoncpp\config.h" />
+    <ClInclude Include="src\jsoncpp\features.h" />
+    <ClInclude Include="src\jsoncpp\forwards.h" />
+    <ClInclude Include="src\jsoncpp\json.h" />
+    <ClInclude Include="src\jsoncpp\json_batchallocator.h" />
+    <ClInclude Include="src\jsoncpp\json_tool.h" />
+    <ClInclude Include="src\jsoncpp\reader.h" />
+    <ClInclude Include="src\jsoncpp\value.h" />
+    <ClInclude Include="src\jsoncpp\writer.h" />
     <ClInclude Include="src\kuClient.h" />
     <ClInclude Include="src\kuDescriptor.h" />
     <ClInclude Include="src\kuListener.h" />
@@ -131,6 +144,11 @@
     <ClInclude Include="src\WebSocketClientHeaderIETF_HYBI17.h" />
     <ClInclude Include="src\WebSocketDataFrame.h" />
     <ClInclude Include="src\WebSocketException.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\jsoncpp\json_internalarray.inl" />
+    <None Include="src\jsoncpp\json_internalmap.inl" />
+    <None Include="src\jsoncpp\json_valueiterator.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

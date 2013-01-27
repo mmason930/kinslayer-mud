@@ -471,6 +471,16 @@ std::list<UserMacro *> CharacterUtil::getUserMacros(sql::Connection connection, 
 	return userMacros;
 }
 
+void CharacterUtil::freeUserMacros(std::list<UserMacro *> &userMacros)
+{
+	for(auto userMacroIter = userMacros.begin();userMacroIter != userMacros.end();++userMacroIter)
+	{
+		delete (*userMacroIter);
+	}
+
+	userMacros.clear();
+}
+
 UserMacro *CharacterUtil::getUserMacro(sql::Row row)
 {
 	UserMacro *userMacro = new UserMacro();
@@ -482,6 +492,56 @@ UserMacro *CharacterUtil::getUserMacro(sql::Row row)
 	userMacro->setCreatedDatetime(DateTime(row.getTimestamp("created_datetime")));
 	
 	return userMacro;
+}
+
+UserMacro *CharacterUtil::getUserMacroMeetingCriteria(sql::Connection connection, const std::string &criteria)
+{
+	std::stringstream sqlBuffer;
+	sqlBuffer	<< " SELECT *"
+				<< " FROM userMacro"
+				<< " WHERE " << criteria;
+
+	sql::Query query = connection->sendQuery(sqlBuffer.str());
+
+	while(query->hasNextRow())
+	{
+		sql::Row row = query->getRow();
+		return getUserMacro(row);
+	}
+
+	return NULL;
+}
+
+UserMacro *CharacterUtil::getUserMacro(sql::Connection connection, int userMacroId)
+{
+	return getUserMacroMeetingCriteria(connection, "id = " + MiscUtil::toString(userMacroId));
+}
+
+UserMacro *CharacterUtil::getUserMacro(sql::Connection connection, int userId, const unsigned short &keyCode)
+{
+	std::string criteria = "user_id = " + MiscUtil::toString(userId) + " AND key_code = " + MiscUtil::toString(keyCode);
+	return getUserMacroMeetingCriteria(connection, criteria);
+}
+
+void CharacterUtil::deleteUserMacro(sql::Connection connection, int userId, const unsigned short &keyCode)
+{
+	std::stringstream sqlBuffer;
+
+	sqlBuffer	<< " DELETE FROM userMacro"
+				<< " WHERE user_id = " << userId
+				<< " AND key_code = " << keyCode;
+
+	connection->sendRawQuery(sqlBuffer.str());
+}
+
+void CharacterUtil::deleteUserMacro(sql::Connection connection, int userMacroId)
+{
+	std::stringstream sqlBuffer;
+
+	sqlBuffer	<< " DELETE FROM userMacro"
+				<< " WHERE id = " << userMacroId;
+
+	connection->sendRawQuery(sqlBuffer.str());
 }
 
 void CharacterUtil::putUserMacro(sql::Connection connection, UserMacro *userMacro)

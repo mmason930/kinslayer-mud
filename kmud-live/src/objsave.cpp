@@ -692,15 +692,6 @@ void Room::itemSave()
 
 void Room::corpseSave()
 {
-	//itemSave();
-
-	/***** Temporary fix by Fogel *****
-	* Calling itemSave() when a corpse is made will save every object in the room. This 
-	* results in the objects saving over reboot, leading to objects that load normally in the room
-	* to stack. Eventually whatever Galnor was doing below should probably be finished, but for now this
-	* should prevent the object stacking from continuing.
-	*****/
-
 	std::list<Object*> corpses;
 	
 	for( Object *obj = this->contents;obj;obj = obj->next_content )
@@ -710,35 +701,6 @@ void Room::corpseSave()
 	}
 
 	Object::saveTopLevelHolderItems('R', MiscUtil::toString(this->vnum), corpses);
-
-/**
-	//TODO: Finish this
-	std::stringstream QueryBuffer;
-
-	if( ROOM_FLAGGED(this, ROOM_VAULT) )
-		return;
-
-	QueryBuffer << "DELETE FROM objects WHERE holder_type='R' AND holder_id='" << this->vnum << "';";
-	try {
-		gameDatabase->sendRawQuery(QueryBuffer.str());
-	} catch( sql::QueryException e ) {
-		MudLog(BRF, LVL_APPR, TRUE, "Unable to delete items for room #%d: %s",
-			this->vnum, e.getMessage().c_str());
-		return;
-	}
-	bool hasCorpse = false;
-	for( Object *obj = this->contents;obj;obj = obj->next_content )
-	{
-		if( IS_CORPSE(obj) ) {
-			hasCorpse = true;
-			obj->saveItems(true, 'R', ToString(this->vnum), true);
-		}
-	}
-	if( hasCorpse ) {
-		if( std::find( Room::corpseRooms.begin(), Room::corpseRooms.end(), this->vnum ) == Room::corpseRooms.end() )
-			Room::corpseRooms.insert( this->vnum );
-	}
-**/
 }
 void Room::saveCorpseRooms()
 {

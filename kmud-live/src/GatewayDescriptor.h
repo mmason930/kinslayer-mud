@@ -35,6 +35,8 @@ public:
 	void sendToClient(const std::string &packet);
 	void sendToServer(const std::string &packet);
 
+	void sendOutputMessageToClient(const std::string &packet);
+
 	std::string pullFromClient();
 	std::string pullFromServer();
 
