@@ -330,7 +330,7 @@ void Descriptor::processWebSocketSaveUserMacroCommand(Json::Value &commandObject
 
 			if(userMacro == NULL)
 			{
-				MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(character)), TRUE, "%s attempting to save user macro that does not exist. ID: %d. Key: %d, Replacement: %s", GET_NAME(character), userMacroId, keyCode, StringUtil::vaEscape(replacement));
+				MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(character)), TRUE, "%s attempting to save user macro that does not exist. ID: %d. Key: %d, Replacement: %s", GET_NAME(character), userMacroId, keyCode, StringUtil::vaEscape(replacement).c_str());
 				return;
 			}
 
@@ -400,7 +400,7 @@ void Descriptor::processWebSocketCommands()
 
 			if(!reader.parse(jsonCommand, commandObject, false))
 			{
-				MudLog(BRF, LVL_APPR, TRUE, "Could not process websocket command. Input: %s", StringUtil::vaEscape(jsonCommand));
+				MudLog(BRF, LVL_APPR, TRUE, "Could not process websocket command. Input: %s", StringUtil::vaEscape(jsonCommand).c_str());
 				break;
 			}
 

@@ -46,7 +46,9 @@ OBJFILES = comm.o act.comm.o act.informative.o act.movement.o act.item.o \
 	ClanQuestPointTransaction.o OLCUtil.o UserClan.o OlcEditType.o UserEmailEditor.o MailUtil.o \
 	GatewayListener.o WebSocketDataFrame.o WebSocketClientHeaderIETF_HYBI17.o WebSocketClientHeader.o \
 	HttpServer.o WebSocketClientHeaderHixie76.o sha1.o TestResource.o HttpResponse.o HttpQueue.o \
-	HttpProtocol.o HttpUtil.o HttpDescriptor.o HttpRequest.o GatewayDescriptorType.o
+	HttpProtocol.o HttpUtil.o HttpDescriptor.o HttpRequest.o GatewayDescriptorType.o \
+	src/jsoncpp/json_reader.o src/jsoncpp/json_writer.o src/jsoncpp/json_value.o
+
 OBJFILES := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILES))
 
 
@@ -54,7 +56,7 @@ OBJFILESGATEWAY = DateTime.o GatewayClient.o GatewayDescriptor.o GatewayDescript
 	GatewayMain.o GatewayServer.o kuClient.o kuDescriptor.o kuListener.o kuSockets.o MiscUtil.o \
 	StringUtil.o MudStatus.o SystemUtil.o sha1.o GatewayDescriptorType.o WebSocketDataFrame.o \
 	WebSocketClientHeaderIETF_HYBI17.o WebSocketClientHeader.o WebSocketClientHeaderHixie76.o \
-	GatewayListener.o
+	GatewayListener.o src/jsoncpp/json_reader.o src/jsoncpp/json_writer.o src/jsoncpp/json_value.o
 
 OBJFILESGATEWAY := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILESGATEWAY))
 
