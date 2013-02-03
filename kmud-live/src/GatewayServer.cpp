@@ -642,24 +642,41 @@ void GatewayServer::run()
 			processInputFromMotherConnectionToServer();
 		}
 
-		for(descriptorIter = descriptors.begin();descriptorIter != descriptors.end();++descriptorIter) {
+		for(descriptorIter = descriptors.begin();descriptorIter != descriptors.end();) {
 
 			GatewayDescriptor *descriptor = (*descriptorIter);
+			bool removedDescriptor = false;
 
 			if(descriptor->getStatus() == GatewayDescriptorStatus::connected) {
-
-				std::string inputFromClient = descriptor->pullFromClient();
-
-				std::string inputFromServer = descriptor->pullFromServer();
-
-				if(inputFromServer.empty() == false) {
-
-					descriptor->sendToClient(inputFromServer);
+				
+				std::string inputFromClient, inputFromServer;
+				try
+				{
+					 inputFromClient = descriptor->pullFromClient();
+				}
+				catch(WebSocketException webSocketException)
+				{
+					if(webSocketException.what() == "Socket Closed")
+					{
+						this->disconnectDescriptorFromGameAndGateway(descriptor);
+						descriptorIter = descriptors.erase(descriptorIter);
+						removedDescriptor = true;
+					}
 				}
 
-				if(inputFromClient.empty() == false) {
+				if(!removedDescriptor)
+				{
+					inputFromServer = descriptor->pullFromServer();
 
-					descriptor->sendToServer(inputFromClient);
+					if(inputFromServer.empty() == false) {
+
+						descriptor->sendToClient(inputFromServer);
+					}
+
+					if(inputFromClient.empty() == false) {
+
+						descriptor->sendToServer(inputFromClient);
+					}
 				}
 			}
 			else if(descriptor->getStatus() == GatewayDescriptorStatus::awaitingConnection && getMotherConnectionToServer() != NULL && !this->mudIsDown()) {
@@ -683,21 +700,19 @@ void GatewayServer::run()
 
 					descriptor->appendToCurrentInputBuffer(dataFromWebSocketClient);
 
-					if(!WebSocketClientHeader::isComplete(descriptor->getCurrentInputBuffer()))
+					if(WebSocketClientHeader::isComplete(descriptor->getCurrentInputBuffer()))
 					{
-						continue;
+						dataFromWebSocketClient = descriptor->getCurrentInputBuffer();
+
+						std::auto_ptr<WebSocketClientHeader> webSocketClientHeader(WebSocketClientHeader::allocateByInitialClientPacket(dataFromWebSocketClient));
+						webSocketClientHeader->read(dataFromWebSocketClient);
+						std::string response = webSocketClientHeader->generateResponse(descriptor->getGatewayListener()->getListener()->l_GetPort(), "mud-protocol");
+
+						descriptor->sendToClient(response);
+						descriptor->setStatus(GatewayDescriptorStatus::awaitingConnection);
+
+						std::cout << makeTimestamp() << " Client `" << descriptor->getSession() << "` is being put into awaitingConnection status." << std::endl;
 					}
-
-					dataFromWebSocketClient = descriptor->getCurrentInputBuffer();
-
-					std::auto_ptr<WebSocketClientHeader> webSocketClientHeader(WebSocketClientHeader::allocateByInitialClientPacket(dataFromWebSocketClient));
-					webSocketClientHeader->read(dataFromWebSocketClient);
-					std::string response = webSocketClientHeader->generateResponse(descriptor->getGatewayListener()->getListener()->l_GetPort(), "mud-protocol");
-
-					descriptor->sendToClient(response);
-					descriptor->setStatus(GatewayDescriptorStatus::awaitingConnection);
-
-					std::cout << makeTimestamp() << " Client `" << descriptor->getSession() << "` is being put into awaitingConnection status." << std::endl;
 				}
 				catch(WebSocketException webSocketException)
 				{
@@ -705,6 +720,9 @@ void GatewayServer::run()
 					std::cout << "ERROR : WebSocketException caught while handshaking: " << webSocketException.what() << std::endl;
 				}
 			}
+
+			if(!removedDescriptor)
+				++descriptorIter;
 		}
 
 		boost::this_thread::sleep( boost::posix_time::millisec( 10 ) );

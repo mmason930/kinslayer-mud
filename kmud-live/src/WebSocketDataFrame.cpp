@@ -88,6 +88,7 @@ void WebSocketDataFrame::setMaskCode(const std::vector<unsigned char> &maskCode)
 
 WebSocketDataFrame *WebSocketDataFrame::parse(const std::string &input, unsigned int &bytesRead)
 {
+	WebSocketDataFrame *webSocketDataFrame;
 	bytesRead = 0;
 
 	if(input.size() < 2)
@@ -101,6 +102,13 @@ WebSocketDataFrame *WebSocketDataFrame::parse(const std::string &input, unsigned
 
 	unsigned char opcode = ((unsigned char)input[ readPos ]) & ~(240);
 
+	if(opcode == 0x8)
+	{
+		webSocketDataFrame = new WebSocketDataFrame();
+		webSocketDataFrame->setOpCode(opcode);
+		return webSocketDataFrame;
+	}
+
 	++readPos;
 
 	bool mask = ((unsigned char)input[ readPos ]) & (1 << 7);
@@ -113,8 +121,12 @@ WebSocketDataFrame *WebSocketDataFrame::parse(const std::string &input, unsigned
 
 		if(readPos + 2 > input.size())
 			return NULL;
+		
+		payloadLength = 0;
+		
+		payloadLength = (payloadLength << 8) + ((unsigned char)input[readPos    ]);
+		payloadLength = (payloadLength << 8) + ((unsigned char)input[readPos + 1]);
 
-		payloadLength = ((unsigned int)input[readPos]) + (((unsigned int)input[readPos + 1]) << 8);
 		readPos += 2;
 	}
 	else if(payloadLength == 127)
@@ -172,8 +184,8 @@ WebSocketDataFrame *WebSocketDataFrame::parse(const std::string &input, unsigned
 
 	readPos += payloadLength;
 	bytesRead = readPos;
-
-	WebSocketDataFrame *webSocketDataFrame = new WebSocketDataFrame();
+	
+	webSocketDataFrame = new WebSocketDataFrame();
 
 	webSocketDataFrame->setFin(fin);
 	webSocketDataFrame->setRsv1(rsv1);

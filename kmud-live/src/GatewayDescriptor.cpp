@@ -1,6 +1,7 @@
 #include <sstream>
 #include "GatewayDescriptor.h"
 #include "WebSocketDataFrame.h"
+#include "WebSocketException.h"
 
 #include "jsoncpp/json.h"
 
@@ -108,8 +109,15 @@ std::string GatewayDescriptor::pullFromClient()
 
 			if(webSocketDataFrame != NULL)
 			{
+				if(webSocketDataFrame->getOpCode() == 0x8)
+				{
+					delete webSocketDataFrame;
+					throw WebSocketException("Socket Closed");
+				}
 				clientConnection->eraseInput(0, bytesRead);
-				return webSocketDataFrame->getPayloadData();
+				input = webSocketDataFrame->getPayloadData();
+				delete webSocketDataFrame;
+				return input;
 			}
 		}
 	}
