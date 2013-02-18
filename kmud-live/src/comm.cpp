@@ -1032,13 +1032,6 @@ void endGameSession()
 	gameDatabase->sendRawQuery(queryBuffer.str());
 }
 
-/*
-* gameLoop contains the main loop which drives the entire MUD.  It
-* cycles once every 0.10 seconds and is responsible for accepting
-* new connections, polling existing connections for input, dequeueing
-* output and sending it out to players, and calling "heartbeat" functions
-* such as mobileActivity().
-*/
 void gameLoop()
 {
 	int missed_pulses = 0, aliased;
@@ -1055,7 +1048,6 @@ void gameLoop()
 	bootTime = time( 0 );
 	pulse = 0;
 
-	/* The Main Loop.  The Big Cheese.  The Top Dog.  The Head Honcho.  The.. */
 	while ( !circle_shutdown )
 	{
 		boost::this_thread::sleep( boost::posix_time::microsec( OPT_USEC ) );
@@ -1109,6 +1101,8 @@ void gameLoop()
 			next_d = d->next;
 			if(d->commandQueue.empty())
 				continue;
+			if(d->character && d->character->wait > 0)
+				continue;
 
 			std::string command = d->commandQueue.front();
 			d->commandQueue.pop_front();
@@ -1116,7 +1110,7 @@ void gameLoop()
 			aliased = 0;
 			d->hadInput = true;
 
-			//Let's process TELNET INPUT!!
+			//Process Telnet input.
 
 			for(int pos = 0;pos < (int)command.size();++pos)
 			{

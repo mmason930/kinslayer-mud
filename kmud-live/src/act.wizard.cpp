@@ -2734,7 +2734,7 @@ ACMD(do_award)
 	questPointAmount = atoi(questPointAmountString);
 	questPointAmount = MIN(30000, questPointAmount);
 	questPointAmount = MAX(-30000,questPointAmount);
-	if(GET_LEVEL(ch) < LVL_IMMORT && (questPointAmount > 5 || questPointAmount < -5))
+	if(GET_LEVEL(ch) < LVL_IMMORT && !IS_NPC(ch) && (questPointAmount > 5 || questPointAmount < -5))
 	{
 		ch->Send("You may only award quest points in the range of -5 to 5.\r\n");
 		return;
@@ -3664,9 +3664,6 @@ void do_stat_character(Character * ch, Character * k)
 		strcat(buf, ", Connected: ");
 		strcat(buf, buf2);
 	}
-
-	ch->Send(strcat(buf, "\r\n"));
-	*buf = 0;
 
 	if(IS_NPC(k))
 	{
