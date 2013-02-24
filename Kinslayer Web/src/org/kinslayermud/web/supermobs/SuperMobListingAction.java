@@ -6,11 +6,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.kinslayermud.kit.KitWithItemsAndObjectPrototypes;
 import org.kinslayermud.mob.MobPrototype;
 import org.kinslayermud.mob.SuperMob;
 import org.kinslayermud.util.MiscUtil;
 import org.kinslayermud.util.StringUtil;
+import org.kinslayermud.util.WebSiteUrlUtil;
 import org.kinslayermud.util.WebSupport;
 import org.kinslayermud.web.actions.StandardAction;
 import org.kinslayermud.zone.Zone;
@@ -21,12 +24,24 @@ public class SuperMobListingAction extends StandardAction {
   protected String FAILURE_FORWARD = "Failure";
   
   protected String MOBPROTOTYPEID_PARAMETER = "MobPrototypeId";
+  protected String MOBPROTOTYPEIDNEW_PARAMETER = "MobPrototypeIdNew";
   
   public String execute(WebSupport webSupport) throws Exception {
 
     System.out.println("Supermob listing.");
-    String mobPrototypeIdParameter = StringUtil.removeNull(request.getParameter(MOBPROTOTYPEID_PARAMETER));
+    String mobPrototypeIdParameter = StringUtil.removeNull(request.getParameter(MOBPROTOTYPEIDNEW_PARAMETER));
     Integer mobPrototypeId = null;
+    
+    //301 redirect all requests sent to the old URL format.
+    if(request.getParameter(MOBPROTOTYPEID_PARAMETER) != null) {
+      
+      mobPrototypeId = Integer.valueOf(request.getParameter(MOBPROTOTYPEID_PARAMETER));
+      MobPrototype mobPrototype = webSupport.getMobPrototype(mobPrototypeId);
+      
+      response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+      response.setHeader("Location", WebSiteUrlUtil.getSuperMobListingUrl(webSupport.getInstanceDomain(), mobPrototypeId, mobPrototype.getShortDescription()));
+      return null;
+    }
 
     List<SuperMob> superMobs = webSupport.getAllOpenSuperMobs();
     Collection<Integer> mobPrototypeIdCollection = new HashSet<Integer>();

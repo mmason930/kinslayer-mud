@@ -88,6 +88,7 @@ RewriteRule ^smithing-as-human(.*)$		/ [QSA,L,R=301]
 RewriteRule ^smithing-on-darkside(.*)$		/ [QSA,L,R=301]
 RewriteRule ^smob.php(.*)			/supermob-listing$1 [QSA,L,R=301]
 RewriteRule ^smob_listing.php(.*)		/supermob-listing$1 [QSA,L,R=301]
+RewriteRule ^supermob-listing/(.*)-(.*)$	./SuperMobListing.do?MobPrototypeIdNew=$2 [QSA,L]		
 RewriteRule ^supermob-listing(.*)$		./SuperMobListing.do$1 [QSA,L]
 
 RewriteRule ^telnet.php(.*)				/mudclient/mudclient.php [QSA,L,R=301]
