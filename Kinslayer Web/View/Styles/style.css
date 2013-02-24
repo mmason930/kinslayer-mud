@@ -139,6 +139,7 @@ a:hover {
 
 .battleLogContainer
 {
+	position: absolute;
 	width: 60%;
 	left: 20%;
 	height: 25%;
