@@ -1,34 +1,35 @@
 package org.kinslayermud.web.home;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.struts2.interceptor.ServletRequestAware;
-import org.apache.struts2.interceptor.ServletResponseAware;
+import org.kinslayermud.character.User;
+import org.kinslayermud.playerkilling.PlayerKill;
+import org.kinslayermud.util.WebSupport;
+import org.kinslayermud.web.actions.StandardAction;
 
-import com.opensymphony.xwork2.ActionSupport;
-
-public class HomeAction extends ActionSupport implements ServletRequestAware, ServletResponseAware {
-
-
-  private HttpServletRequest request;
-  private HttpServletResponse response;
+public class HomeAction extends StandardAction {
 
   private static String SUCCESS_FORWARD = "Success";
-  public String execute() {
-
-    System.out.println("HomeAction start!");
+  
+  public String execute(WebSupport webSupport) throws Exception {
+    
+    List<PlayerKill> playerKills = webSupport.getLastSoManyPlayerKills(10);
+    
+    Collection<Integer> userIdCollection = new HashSet<Integer>();
+    
+    for(PlayerKill playerKill : playerKills) {
+      
+      userIdCollection.addAll(playerKill.getUserIdSet());
+    }
+    
+    Map<Integer, User> userMap = webSupport.getUserMap(userIdCollection);
+    
+    request.setAttribute("PlayerKills", playerKills);
+    request.setAttribute("UserMap", userMap);
     
     return SUCCESS_FORWARD;
-  }
-
-  public void setServletRequest(HttpServletRequest request) {
-
-    this.request = request;
-  }
-
-  public void setServletResponse(HttpServletResponse response) {
-
-    this.response = response;
   }
 }

@@ -5,9 +5,14 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.kinslayermud.character.User;
+import org.kinslayermud.character.UserClass;
+import org.kinslayermud.character.UserRace;
 import org.kinslayermud.exception.NonExistentObjectException;
 
 public class UserUtil {
@@ -56,8 +61,31 @@ public class UserUtil {
     
     user.setUserId(resultSet.getInt("user_id"));
     user.setUserName(resultSet.getString("username"));
+    user.setLevel(resultSet.getInt("level"));
+    user.setLastLogon(resultSet.getTimestamp("last_logon"));
+    user.setLastLogout(resultSet.getTimestamp("last_logout"));
+    user.setUserClass(UserClass.getEnum(resultSet.getInt("chclass")));
+    user.setUserRace(UserRace.getEnum(resultSet.getInt("race")));
     
     return user;
+  }
+  
+  public static Map<Integer, User> getUserMap(Statement statement, Collection<Integer> userIdCollection) throws SQLException {
+    
+    Map<Integer, User> userMap = new HashMap<Integer, User>();
+    
+    String sql = " SELECT *"
+               + " FROM users"
+               + " WHERE user_id IN" + SQLUtil.buildListSQL(userIdCollection, false, true);
+    ResultSet resultSet = statement.executeQuery(sql);
+    
+    while(resultSet.next()) {
+      
+      User user = getUser(resultSet);
+      userMap.put(user.getUserId(), user);
+    }
+    
+    return userMap;
   }
   
   public static void createUserSession(Statement statement, int userId, String sessionId) throws SQLException {

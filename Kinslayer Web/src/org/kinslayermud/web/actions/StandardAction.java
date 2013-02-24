@@ -1,11 +1,13 @@
 package org.kinslayermud.web.actions;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts2.interceptor.ServletRequestAware;
 import org.apache.struts2.interceptor.ServletResponseAware;
+import org.apache.struts2.util.ServletContextAware;
 import org.kinslayermud.misc.Provider;
 import org.kinslayermud.util.MiscUtil;
 import org.kinslayermud.util.WebSupport;
@@ -14,21 +16,28 @@ import org.kinslayermud.web.util.HttpUtil;
 
 import com.opensymphony.xwork2.ActionSupport;
 
-public abstract class StandardAction extends ActionSupport implements ServletRequestAware, ServletResponseAware {
+public abstract class StandardAction extends ActionSupport implements ServletRequestAware, ServletResponseAware, ServletContextAware {
 
   protected HttpServletRequest request;
   protected HttpServletResponse response;
+  protected ServletContext servletContext;
   protected WebSupport webSupport;
   
   public StandardAction() {
 
-    webSupport = new WebSupportImp();
   }
   
   public abstract String execute(WebSupport webSupport) throws Exception;
   
   public String execute() throws Exception {
   
+    Provider provider = new Provider();
+    provider.loadConfiguration(this.servletContext.getInitParameter("ConfigurationPath"));
+    webSupport = new WebSupportImp(provider);
+    
+    request.setAttribute("WebSupport", webSupport);
+    
+    
     Cookie sessionUserNameCookie = HttpUtil.getCookieByName(request, "SESSIONUSERNAME");
     if(sessionUserNameCookie != null) {
       
@@ -47,8 +56,6 @@ public abstract class StandardAction extends ActionSupport implements ServletReq
       request.setAttribute("SessionId", Integer.valueOf(sessionIdCookie.getValue()));
     }
     
-    request.setAttribute("WebSupport", webSupport);
-    
     return execute(webSupport);
   }
   
@@ -60,5 +67,10 @@ public abstract class StandardAction extends ActionSupport implements ServletReq
   public void setServletResponse(HttpServletResponse response) {
 
     this.response = response;
+  }
+  
+  public void setServletContext(ServletContext servletContext) {
+    
+    this.servletContext = servletContext;
   }
 }

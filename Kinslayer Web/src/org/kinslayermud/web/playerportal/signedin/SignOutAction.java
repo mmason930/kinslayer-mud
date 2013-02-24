@@ -14,17 +14,17 @@ public class SignOutAction extends ValidateSignInAction {
     webSupport.performPlayerPortalSignOut(sessionId, user.getUserId());
     
     Cookie cookie = new Cookie("SESSIONID", null);
-    cookie.setMaxAge(-1000);
+    cookie.setMaxAge(0);
     cookie.setPath("/");
     response.addCookie(cookie);
     
     cookie = new Cookie("SESSIONUSERID", null);
-    cookie.setMaxAge(-1000);
+    cookie.setMaxAge(0);
     cookie.setPath("/");
     response.addCookie(cookie);
     
     cookie = new Cookie("SESSIONUSERNAME", null);
-    cookie.setMaxAge(-1000);
+    cookie.setMaxAge(0);
     cookie.setPath("/");
     response.addCookie(cookie);
 

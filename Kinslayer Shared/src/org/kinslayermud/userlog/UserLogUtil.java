@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.kinslayermud.exception.NonExistentObjectException;
+import org.kinslayermud.util.QueryUtil;
+import org.kinslayermud.util.SQLUtil;
 
 public class UserLogUtil {
 
@@ -78,5 +80,36 @@ public class UserLogUtil {
     userLog.setRecordDate(resultSet.getTimestamp("record_date"));
     
     return userLog;
+  }
+  
+  public static void putUserLog(Statement statement, UserLog userLog) throws SQLException {
+    
+    String sql;
+    
+    if(userLog.isNew()) {
+      
+      sql = " INSERT INTO userLog("
+          + "   `user_id`,"
+          + "   `console_output`,"
+          + "   `record_date`"
+          + " ) VALUES ("
+          + userLog.getUserId() + ","
+          + SQLUtil.escapeQuoteString(userLog.getConsoleOutput()) + ","
+          + SQLUtil.encodeQuoteDate(userLog.getRecordDate())
+          + " )";
+      
+      statement.executeUpdate(sql);
+      userLog.setId(QueryUtil.getLastInsertedID(statement));
+    }
+    else {
+      
+      sql = " UPDATE userLog SET"
+          + "   user_id = " + userLog.getUserId() + ","
+          + "   console_output = " + SQLUtil.escapeQuoteString(userLog.getConsoleOutput()) + ","
+          + "   record_date = " + SQLUtil.encodeQuoteDate(userLog.getRecordDate())
+          + " WHERE id = " + userLog.getId();
+      
+      statement.executeUpdate(sql);
+    }
   }
 }

@@ -2,29 +2,23 @@
 <%@ include file="/View/Framework/Kinslayer.jsp" %>
 <%
 User user = (User)request.getAttribute("User");
-List<UserLogRecord> userLogRecords = (List<UserLogRecord>)request.getAttribute("UserLogRecords");
 %>
 	<div class="container_box">
 	
 		<div class="userPortalContent">
 
-			<div class="userPortalContentHeader">
-				<h2>Player Portal</h2>
-			</div>
-			<br/>
-			
-			<span class="userPortalBigBold">
-				Welcome, <%=user.getUserName()%>
-			</span>
-			
-			<br/>
-			
+			Level: <%=user.getLevel() %><br/>
+			Race: <%=user.getUserRace().getStandardName() %><br/>
+			Class: <%=user.getUserClass().getStandardName() %><br/>
 <%
-for(UserLogRecord userLogRecord : userLogRecords) {
+if(user.getLastLogon() != null) {
 %>
-			<a href="./player-portal-view-user-log/<%=userLogRecord.getId()%>/">
-				<%=MiscUtil.formatDateEEEEcsMMMsDsYYYY(userLogRecord.getRecordDate())%><br/>
-			</a>
+			Last Logged In: <%= MiscUtil.formatDateMMMMsDucsYYYYathcMMsAM(user.getLastLogon()) %><br/>
+<%
+}
+if(user.getLastLogout() != null) {
+%>
+			Last Logged Out: <%= MiscUtil.formatDateMMMMsDucsYYYYathcMMsAM(user.getLastLogout()) %><br/>
 <%
 }
 %>

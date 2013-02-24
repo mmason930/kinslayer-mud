@@ -7,6 +7,9 @@
 <%@ page import="org.kinslayermud.zone.*" %>
 <%@ page import="org.kinslayermud.object.*" %>
 <%@ page import="org.kinslayermud.kit.*" %>
+<%@ page import="org.kinslayermud.playerkilling.*" %>
+<%@ page import="org.kinslayermud.user.login.*" %>
+<%@ page import="org.kinslayermud.comm.*" %>
 <%@ page import="java.net.*" %>
 <%@ page import="java.util.*" %>
 <%

@@ -4,59 +4,79 @@
 
 MobPrototype mobPrototype = (MobPrototype)request.getAttribute("MobPrototype");
 Zone zone = (Zone)request.getAttribute("Zone");
-List<MobPrototype> superMobPrototypes = (List<MobPrototype>)request.getAttribute("SuperMobPrototypes");
 KitWithItemsAndObjectPrototypes kitWithItemsAndObjectPrototypes = (KitWithItemsAndObjectPrototypes)request.getAttribute("KitWithItemsAndObjectPrototypes");
-%>
-  <tiles:insertTemplate template="/View/SuperMobs/Framework/SubNav.jsp" flush="true" />
-  <div class="container_box">
+SuperMob superMob = (SuperMob)request.getAttribute("SuperMob");
 
-    <div style="margin: 20px; float:left; width: 100%">
-
-      <div class="smobList">
-        <div class="classGroupingHeader">Choose a SuperMOB</div>
-        <div class="smobListBody">
-          <ul>
-<%
-for(MobPrototype superMobPrototype : superMobPrototypes) {
+List<SuperMob> superMobs = (List<SuperMob>)request.getAttribute("SuperMobs");
+Map<Integer, MobPrototype> mobPrototypeMap = (Map<Integer, MobPrototype>)request.getAttribute("MobPrototypeMap");
 %>
-            <li>
-              <a href="/supermob-listing?MobPrototypeId=<%=superMobPrototype.getId()%>" <%= (mobPrototype != null && mobPrototype.getId() == superMobPrototype.getId()) ? ("class='selected'") : ""%>><span><%=StringUtil.ConvertToHTML(StringUtil.properString(superMobPrototype.getShortDescription()))%></span></a>
-            </li>
-<%
-}
-%>
-          </ul>
-          <div class="clearLeft"></div>
-        </div>
-      </div>
+		<div id="pageContent" class="noTopMargin autoWidth">
+		
 <%
 if(mobPrototype != null) {
 %>
-      <div class="smobDetailsContainer">
-        <div class="smobDetails">
-          <span class="bold largeFont"><%=StringUtil.ConvertToHTML(StringUtil.properString(mobPrototype.getShortDescription())) %></span><br/>
-          <span class="italics mediumFont">
+			<h1 id="pageTitle"><%=StringUtil.ConvertToHTML(StringUtil.properString(mobPrototype.getShortDescription()))%></h1>
+			<div id="superMobLocation" class="italics">
 <%
   if(zone != null) {
 %>
-            Located in the area known as <span class="bold"><%=StringUtil.ConvertToHTML(zone.getName())%></span>.
+			Located in the area known as <span class="bold"><%=StringUtil.ConvertToHTML(StringUtil.properString(zone.getName()))%></span>.
 <%
   }
   else {
 %>
-            The whereabouts of this superMOB are unknown.
+            The whereabouts of this SuperMOB are unknown.
 <%
   }
+}
 %>
-          </span>
-        </div>
-        <div class="smobEquipment">
-          <table class="smobEquipmentTable">
-            <tr>
-              <th class="itemNameColumn">Item Name</th>
-              <th class="bodyLocationColumn">Location</th>
-              <th class="loadProbabilityColumn">Probability</th>
-            </tr>
+			</div>
+			<div id="contentInner">
+				<div id="superMobLeftNav">
+					<ul>
+<%
+for(SuperMob currentSuperMob : superMobs) {
+  MobPrototype currentMobPrototype = mobPrototypeMap.get(currentSuperMob.getMobId());
+  
+  if(currentMobPrototype == null) {
+    continue;
+  }
+%>
+						<li>
+							<a href="/supermob-listing?MobPrototypeId=<%=currentSuperMob.getMobId()%>" <%= (superMob != null && superMob.getId() == currentSuperMob.getId()) ? ("class='selected'") : ""%>><span><%=StringUtil.ConvertToHTML(StringUtil.properString(currentMobPrototype.getShortDescription()))%></span></a>
+						</li>
+<%
+}
+%>
+				</div>
+<%
+if(mobPrototype != null) {
+%>
+				<div id="superMobRightNav">
+					<div id="superMobDetailPanel">
+						<img id="superMobImage" src="<%=superMob.getMobImageUrl() == null ? "./images/knight.jpg" : superMob.getMobImageUrl()%>"></img>
+						<div id="superMobDescription">
+						
+							<%=StringUtil.ConvertToHTML(superMob.getDescription())%>
+							<br/>
+							<br/>							
+							This SuperMOB is rated: <%=superMob.getDifficulty().getStandardName()%>
+						</div>
+<%
+if(superMob.getMapImageUrl() != null) {
+%>
+						<img id="superMobMap" src="<%=superMob.getMapImageUrl()%>"></img>
+<%
+}
+%>
+					</div>
+					
+					<table id="superMobEquipmentTable">
+						<tr>
+							<th class="itemNameColumn">Item Name</th>
+							<th class="bodyLocationColumn">Location</th>
+							<th class="loadProbabilityColumn">Probability</th>
+						</tr>
 <%
   if(kitWithItemsAndObjectPrototypes != null) {
     Map<Integer, ObjectPrototype> idToObjectPrototypeMap = kitWithItemsAndObjectPrototypes.getIdToObjectPrototypeMap();
@@ -79,31 +99,23 @@ if(mobPrototype != null) {
           else
             objectWearDisplay += ", ";
           
-          objectWearDisplay += ("<a href='#' class='lightBlueHyperlink bold noUnderline'>" + StringUtil.ConvertToHTML(objectWearType.getStandardName()) + "</a>");
+          objectWearDisplay += StringUtil.ConvertToHTML(objectWearType.getDisplayTerm());
         }
 %>
-
-
-            <tr>
-	         <td class="itemNameColumn">
-	           <a href="#" class="lightBlueHyperlink bold noUnderline">
-	             <%=StringUtil.ConvertToHTML(StringUtil.properString(objectPrototype.getShortDescription()))%>
-               </a>
-	         </td>
-	         <td class="bodyLocationColumn"><%=objectWearDisplay%></td>
-	         <td class="loadProbabilityColumn"><%=kitItem.getProbability()%>%</td>
-	       </tr>
+						<tr>
+							<td class="itemNameColumn"><%=StringUtil.ConvertToHTML(StringUtil.properString(objectPrototype.getShortDescription()))%></td>
+							<td class="bodyLocationColumn"><%=objectWearDisplay%></td>
+							<td class="loadProbabilityColumn"><%=kitItem.getProbability()%>%</td>
+						</tr>
 <%
       }
     }
   }
 %>
-          </table>
-        </div>
-      </div>
+					</table>
+				</div>
 <%
 }
 %>
+			</div>
 		</div>
-		<div style="clear: both;"></div>
-	</div> <!-- End of Container Box -->

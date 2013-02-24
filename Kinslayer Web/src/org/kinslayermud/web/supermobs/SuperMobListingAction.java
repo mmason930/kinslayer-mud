@@ -1,9 +1,14 @@
 package org.kinslayermud.web.supermobs;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.kinslayermud.kit.KitWithItemsAndObjectPrototypes;
 import org.kinslayermud.mob.MobPrototype;
+import org.kinslayermud.mob.SuperMob;
 import org.kinslayermud.util.MiscUtil;
 import org.kinslayermud.util.StringUtil;
 import org.kinslayermud.util.WebSupport;
@@ -19,29 +24,42 @@ public class SuperMobListingAction extends StandardAction {
   
   public String execute(WebSupport webSupport) throws Exception {
 
+    System.out.println("Supermob listing.");
     String mobPrototypeIdParameter = StringUtil.removeNull(request.getParameter(MOBPROTOTYPEID_PARAMETER));
     Integer mobPrototypeId = null;
-    
-    List<MobPrototype> superMobPrototypes = webSupport.getSuperMobPrototypes();
 
+    List<SuperMob> superMobs = webSupport.getAllOpenSuperMobs();
+    Collection<Integer> mobPrototypeIdCollection = new HashSet<Integer>();
+    Map<Integer, MobPrototype> mobPrototypeMap = new HashMap<Integer, MobPrototype>();
+    
+    for(SuperMob superMob : superMobs) {
+      
+      mobPrototypeIdCollection.add(superMob.getMobId());
+    }
+
+    mobPrototypeMap = webSupport.getMobPrototypeMap(mobPrototypeIdCollection);
+    
     if(MiscUtil.isValidIntString(mobPrototypeIdParameter)) {
       
       mobPrototypeId = Integer.valueOf(mobPrototypeIdParameter);
-      for(MobPrototype mobPrototype : superMobPrototypes) {
+      for(SuperMob superMob : superMobs) {
       
-        if(mobPrototype.getId() == mobPrototypeId) {
-          
-          Zone zone = webSupport.getZoneLoadingSuperMobPrototype(mobPrototype.getId());
+        if(superMob.getMobId() == mobPrototypeId) {
+
+          MobPrototype mobPrototype = mobPrototypeMap.get(superMob.getMobId());
+          Zone zone = webSupport.getZoneLoadingSuperMobPrototype(superMob.getMobId());
           KitWithItemsAndObjectPrototypes kitWithItemsAndObjectPrototypes = webSupport.getKitWithItemsAndObjectPrototypes(mobPrototype.getPrimaryKit());
           
           request.setAttribute("Zone", zone);
           request.setAttribute("MobPrototype", mobPrototype);
+          request.setAttribute("SuperMob", superMob);
           request.setAttribute("KitWithItemsAndObjectPrototypes", kitWithItemsAndObjectPrototypes);
         }
       }
     }
     
-    request.setAttribute("SuperMobPrototypes", superMobPrototypes);
+    request.setAttribute("SuperMobs", superMobs);
+    request.setAttribute("MobPrototypeMap", mobPrototypeMap);
     
     return SUCCESS_FORWARD;
   }

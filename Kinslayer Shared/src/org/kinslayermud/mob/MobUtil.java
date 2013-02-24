@@ -3,10 +3,14 @@ package org.kinslayermud.mob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.kinslayermud.exception.NonExistentObjectException;
+import org.kinslayermud.util.SQLUtil;
 
 public class MobUtil {
 
@@ -58,13 +62,20 @@ public class MobUtil {
     return mobPrototypes;
   }
   
-  public static List<MobPrototype> getSuperMobPrototypes(Statement statement) throws SQLException {
+  public static Map<Integer, MobPrototype> getMobPrototypeMap(Statement statement, Collection<Integer> mobIdCollection) throws SQLException {
     
-    String criteria = "(mob_flags & (1 << 23))";
-    String orderBy = "sdesc";
+    String criteria = "vnum IN" + SQLUtil.buildListSQL(mobIdCollection, false, true);
+    List<MobPrototype> mobPrototypes = getMobPrototypesMeetingCriteria(statement, criteria, null);
+    Map<Integer, MobPrototype> mobPrototypeMap = new HashMap<Integer, MobPrototype>();
     
-    return getMobPrototypesMeetingCriteria(statement, criteria, orderBy);
+    for(MobPrototype mobPrototype : mobPrototypes) {
+      
+      mobPrototypeMap.put(mobPrototype.getId(), mobPrototype);
+    }
+    
+    return mobPrototypeMap;
   }
+  
   
   public static MobPrototype getMobPrototype(ResultSet resultSet) throws SQLException {
     
@@ -78,4 +89,44 @@ public class MobUtil {
     return mobPrototype;
   }
   
+  public static List<SuperMob> getSuperMobsMeetingCriteria(Statement statement, String criteria, String orderBy) throws SQLException {
+    
+    List<SuperMob> superMobs = new LinkedList<SuperMob>();
+    
+    String sql = " SELECT *"
+               + " FROM superMob"
+               + " WHERE " + criteria
+               + (orderBy != null ? (" ORDER BY " + orderBy) : "");
+    ResultSet resultSet = statement.executeQuery(sql);
+    
+    while(resultSet.next()) {
+      
+      SuperMob superMob = getSuperMob(resultSet);
+      
+      superMobs.add(superMob);
+    }
+    
+    return superMobs;
+  }
+  
+  public static List<SuperMob> getAllOpenSuperMobs(Statement statement) throws SQLException {
+    
+    String criteria = "status = " + SuperMobStatus.open;
+    return getSuperMobsMeetingCriteria(statement, criteria, null);
+  }
+  
+  public static SuperMob getSuperMob(ResultSet resultSet) throws SQLException {
+    
+    SuperMob superMob = new SuperMob();
+
+    superMob.setId(resultSet.getInt("id"));
+    superMob.setMobId(resultSet.getInt("mob_id"));
+    superMob.setStatus(SuperMobStatus.getEnum(resultSet.getInt("status")));
+    superMob.setDifficulty(SuperMobDifficulty.getEnum(resultSet.getInt("difficulty")));
+    superMob.setDescription(resultSet.getString("description"));
+    superMob.setMobImageUrl(resultSet.getString("mob_image_url"));
+    superMob.setMapImageUrl(resultSet.getString("map_image_url"));
+    
+    return superMob;
+  }
 }

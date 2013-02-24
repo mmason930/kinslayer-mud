@@ -19,6 +19,10 @@
 			<result name="Success" type="tiles">Home</result>
 		</action>
 		
+		<!-- WEB CLIENT --> 
+		<action name="WebSocketClient" class="org.kinslayermud.web.client.WebSocketClientAction" method="execute">
+			<result name="Success" type="tiles">WebSocketClient</result>
+		</action>
 		
 		<!--  CHARACTERS -->
 		<action name="CharacterClasses" class="org.kinslayermud.web.characters.CharacterClassesAction" method="execute">
@@ -69,6 +73,11 @@
 			<result name="Failure" type="redirect">player-portal</result>
 		</action>
 		
+		<action name="PlayerPortalViewTrophies" class="org.kinslayermud.web.playerportal.signedin.ViewTrophiesAction" method="execute">
+			<result name="Success" type="tiles">PlayerPortalViewTrophies</result>
+			<result name="Failure" type="redirect">player-portal</result>
+		</action>
+		
 		<action name="PlayerPortalSignOut" class="org.kinslayermud.web.playerportal.signedin.SignOutAction" method="execute">
 			<result name="Success" type="redirect">player-portal</result>
 			<result name="Failure" type="redirect">player-portal</result>
@@ -76,6 +85,21 @@
 		
 		<action name="PlayerPortalViewUserLog" class="org.kinslayermud.web.playerportal.signedin.ViewUserLogAction" method="execute">
 			<result name="Success" type="tiles">PlayerPortalViewUserLog</result>
+			<result name="Failure" type="redirect">player-portal-home</result>
+		</action>
+		
+		<action name="PlayerPortalViewUserLogs" class="org.kinslayermud.web.playerportal.signedin.ViewUserLogsAction" method="execute">
+			<result name="Success" type="tiles">PlayerPortalViewUserLogs</result>
+			<result name="Failure" type="redirect">player-portal-home</result>
+		</action>
+		
+		<action name="PlayerPortalViewLoginHistory" class="org.kinslayermud.web.playerportal.signedin.ViewLoginHistoryAction" method="execute">
+			<result name="Success" type="tiles">PlayerPortalViewLoginHistory</result>
+			<result name="Failure" type="redirect">player-portal-home</result>
+		</action>
+		
+		<action name="PlayerPortalViewTellHistory" class="org.kinslayermud.web.playerportal.signedin.ViewTellHistoryAction" method="execute">
+			<result name="Success" type="tiles">PlayerPortalViewTellHistory</result>
 			<result name="Failure" type="redirect">player-portal-home</result>
 		</action>
 		
@@ -117,6 +141,11 @@
 		
 		
 		<!--  NEW TO MUDS -->
+		
+		<action name="AboutKinslayer" class="org.kinslayermud.web.newtomuds.AboutKinslayerAction" method="execute">
+			<result name="Success" type="tiles">AboutKinslayer</result>
+		</action> 
+
 		<action name="NewToMuds" class="org.kinslayermud.web.newtomuds.NewToMudsHomeAction" method="execute">
 			<result name="Success" type="tiles">NewToMuds</result>
 		</action>
@@ -133,6 +162,18 @@
 			<result name="Success" type="tiles">NewToMudsConnecting</result>
 		</action>
 		
+		
+		
+		<!-- ADMIN -->
+		<action name="Admin.Home" class="org.kinslayermud.web.admin.HomeAction" method="execute">
+			<result name="Success" type="tiles">Admin.ViewUserLog</result>
+		</action>
+		<action name="Admin.LoadUserLog" class="org.kinslayermud.web.admin.LoadUserLogAction" method="execute">
+			<result name="Success" type="tiles">Admin.ViewUserLog</result>
+		</action>
+		<action name="Admin.SaveUserLog" class="org.kinslayermud.web.admin.SaveUserLogAction" method="execute">
+			<result name="Success" type="tiles">Admin.ViewUserLog</result>
+		</action>
 		
 		<!--  MISC -->
 		<action name="JSONResponse" class="org.kinslayermud.web.generic.JSONResponseAction" />

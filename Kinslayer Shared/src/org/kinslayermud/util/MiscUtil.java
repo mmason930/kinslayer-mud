@@ -30,6 +30,7 @@ import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -45,6 +46,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.bind.DatatypeConverter;
+
+import org.kinslayermud.user.login.UserLogin;
 
 /** Contains miscellaneous utility functions. */
 public abstract class MiscUtil {
@@ -719,6 +722,12 @@ public abstract class MiscUtil {
   public static String formatDateMMMsDDcsYYYY (Date date) {
     SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy");
     return dateFormat.format(date);
+  }
+
+  /** Formats the date in the form MMM dd YYYY hh:mm:ss (Dec 10, 2004 23:59:59) */
+  public static String formatDateMMMsDDcsYYYYsHHsMMsSS (Date date) {
+    SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy hh:mm:ss");
+    return dateFormat.format(date);
   }  
 
   /** Formats the date in the form MMMM dd YYYY (December 10, 2004) */
@@ -816,6 +825,12 @@ public abstract class MiscUtil {
   /** Formats the date (time) in the form HH:MMAM */
   public static String formatDateHHcMMAM (Date date) {
     SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mma");
+    return dateFormat.format(date);
+  }
+  
+  /** Formats the date (time) in the form HH:MM */
+  public static String formatDateHHcMM (Date date) {
+    SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
     return dateFormat.format(date);
   }
 
@@ -1460,6 +1475,39 @@ public abstract class MiscUtil {
     Type[] array = (Type[]) Array.newInstance(typeClass, list.size());
     list.toArray(array);
     return array;
+  }
+  
+  public static <Type> List<List<Type>> createOrderedColumnTable(List<Type> dataList, final int numberOfColumns) {
+
+    List<List<Type>> table = new ArrayList<List<Type>>();
+    int entriesPerColumn = (dataList.size() / numberOfColumns) + 1;
+    
+    int rowNumber = 0;
+    int column = 0;
+    List<Type> row = null;
+    for(Type dataObject : dataList) {
+      
+      if(rowNumber >= entriesPerColumn) {
+        
+        rowNumber = 0;
+        ++column;
+      }
+      
+      if(column == 0) {
+        
+        row = new ArrayList<Type>();
+        table.add(row);
+      }
+      else {
+        row = table.get(rowNumber);
+      }
+      
+      row.add(dataObject);
+      
+      ++rowNumber;
+    }
+    
+    return table;
   }
   
   public static void log(String message) {

@@ -2,15 +2,28 @@ package org.kinslayermud.util;
 
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.kinslayermud.character.User;
+import org.kinslayermud.comm.Comm;
+import org.kinslayermud.comm.CommUtil;
 import org.kinslayermud.exception.DataInterfaceException;
 import org.kinslayermud.kit.KitUtil;
 import org.kinslayermud.kit.KitWithItemsAndObjectPrototypes;
 import org.kinslayermud.misc.Provider;
 import org.kinslayermud.mob.MobPrototype;
 import org.kinslayermud.mob.MobUtil;
+import org.kinslayermud.mob.SuperMob;
+import org.kinslayermud.object.ObjectPrototype;
+import org.kinslayermud.object.ObjectUtil;
+import org.kinslayermud.object.ObjectWeaponType;
+import org.kinslayermud.object.ObjectWearType;
+import org.kinslayermud.playerkilling.PKUtil;
+import org.kinslayermud.playerkilling.PlayerKill;
+import org.kinslayermud.user.login.UserLogin;
+import org.kinslayermud.user.login.UserLoginUtil;
 import org.kinslayermud.userlog.UserLog;
 import org.kinslayermud.userlog.UserLogRecord;
 import org.kinslayermud.userlog.UserLogUtil;
@@ -21,9 +34,8 @@ import org.kinslayermud.zone.ZoneUtil;
 public class WebSupportImp implements WebSupport {
 
   protected Provider provider;
-  public WebSupportImp() {
-    
-    provider = new Provider();
+  public WebSupportImp(Provider provider) {
+    this.provider = provider;
   }
   
   public User performLogin(String username, String password) throws DataInterfaceException {
@@ -31,7 +43,7 @@ public class WebSupportImp implements WebSupport {
     Connection connection = null;
     Statement statement = null;
     try {
-      connection = DatabaseUtil.getConnection();
+      connection = provider.getConnection();
       statement = connection.createStatement();
       
       User user = UserUtil.performLogin(statement, username, password);
@@ -58,7 +70,7 @@ public class WebSupportImp implements WebSupport {
     Connection connection = null;
     Statement statement = null;
     try {
-      connection = DatabaseUtil.getConnection();
+      connection = provider.getConnection();
       statement = connection.createStatement();
       
       UserUtil.createUserSession(statement, userId, sessionId);
@@ -83,7 +95,7 @@ public class WebSupportImp implements WebSupport {
     Connection connection = null;
     Statement statement = null;
     try {
-      connection = DatabaseUtil.getConnection();
+      connection = provider.getConnection();
       statement = connection.createStatement();
       
       User user = UserUtil.getUserFromSession(statement, sessionId);
@@ -110,7 +122,7 @@ public class WebSupportImp implements WebSupport {
     Connection connection = null;
     Statement statement = null;
     try {
-      connection = DatabaseUtil.getConnection();
+      connection = provider.getConnection();
       statement = connection.createStatement();
       
       UserUtil.performPlayerPortalSignOut(statement, sessionId, userId);
@@ -136,7 +148,7 @@ public class WebSupportImp implements WebSupport {
     Connection connection = null;
     Statement statement = null;
     try {
-      connection = DatabaseUtil.getConnection();
+      connection = provider.getConnection();
       statement = connection.createStatement();
       
       List<UserLogRecord> userLogRecords = UserLogUtil.getUserLogRecords(statement, userId);
@@ -163,7 +175,7 @@ public class WebSupportImp implements WebSupport {
     Connection connection = null;
     Statement statement = null;
     try {
-      connection = DatabaseUtil.getConnection();
+      connection = provider.getConnection();
       statement = connection.createStatement();
       
       UserLog userLog = UserLogUtil.getUserLog(statement, userLogId, false);
@@ -195,7 +207,7 @@ public class WebSupportImp implements WebSupport {
     Connection connection = null;
     Statement statement = null;
     try {
-      connection = DatabaseUtil.getConnection();
+      connection = provider.getConnection();
       statement = connection.createStatement();
       
       MobPrototype mobPrototype = MobUtil.getMobPrototype(statement, mobPrototypeId, false);
@@ -217,21 +229,21 @@ public class WebSupportImp implements WebSupport {
     }
   }
   
-  public List<MobPrototype> getSuperMobPrototypes() throws DataInterfaceException {
+  public Map<Integer, MobPrototype> getMobPrototypeMap(Collection<Integer> mobPrototypeIdCollection) throws DataInterfaceException {
     
     Connection connection = null;
     Statement statement = null;
     try {
-      connection = DatabaseUtil.getConnection();
+      connection = provider.getConnection();
       statement = connection.createStatement();
       
-      List<MobPrototype> mobPrototypes = MobUtil.getSuperMobPrototypes(statement);
+      Map<Integer, MobPrototype> mobPrototypeMap = MobUtil.getMobPrototypeMap(statement, mobPrototypeIdCollection);
       
       statement.close();
       connection.commit();
       connection.close();
       
-      return mobPrototypes;
+      return mobPrototypeMap;
     }
     catch(Throwable throwable) {
       
@@ -249,7 +261,7 @@ public class WebSupportImp implements WebSupport {
     Connection connection = null;
     Statement statement = null;
     try {
-      connection = DatabaseUtil.getConnection();
+      connection = provider.getConnection();
       statement = connection.createStatement();
       
       Zone zone = ZoneUtil.getZoneLoadingSuperMobPrototype(statement, mobPrototypeId, false);
@@ -276,7 +288,7 @@ public class WebSupportImp implements WebSupport {
     Connection connection = null;
     Statement statement = null;
     try {
-      connection = DatabaseUtil.getConnection();
+      connection = provider.getConnection();
       statement = connection.createStatement();
       
       KitWithItemsAndObjectPrototypes kitWithItemsAndObjectPrototypes = KitUtil.getKitWithItemsAndObjectPrototypes(statement, kitId, false);
@@ -286,6 +298,246 @@ public class WebSupportImp implements WebSupport {
       connection.close();
       
       return kitWithItemsAndObjectPrototypes;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public Map<Integer, User> getUserMap(Collection<Integer> userIdCollection) throws DataInterfaceException {
+
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      Map<Integer, User> userMap = UserUtil.getUserMap(statement, userIdCollection);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return userMap;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  public List<PlayerKill> getLastSoManyPlayerKills(int howMany) throws DataInterfaceException {
+
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      List<PlayerKill> playerKills = PKUtil.getLastSoManyPlayerKills(statement, howMany);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return playerKills;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public List<SuperMob> getAllOpenSuperMobs() throws DataInterfaceException {
+
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      List<SuperMob> superMobs = MobUtil.getAllOpenSuperMobs(statement);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return superMobs;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public List<ObjectPrototype> getObjectPrototypesByWearType(ObjectWearType objectWearType) throws DataInterfaceException {
+
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      List<ObjectPrototype> superMobs = ObjectUtil.getObjectPrototypesByWearType(statement, objectWearType);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return superMobs;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+
+  public List<ObjectPrototype> getObjectPrototypesByWeaponType(ObjectWeaponType objectWeaponType) throws DataInterfaceException {
+
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      List<ObjectPrototype> superMobs = ObjectUtil.getObjectPrototypesByWeaponType(statement, objectWeaponType);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return superMobs;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public List<PlayerKill> getPlayerKillsByKillerId(int killerUserId) throws DataInterfaceException {
+
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      List<PlayerKill> playerKills = PKUtil.getPlayerKillsByKillerId(statement, killerUserId);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return playerKills;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public List<UserLogin> getUserLoginsByUserId(int userId) throws DataInterfaceException {
+
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      List<UserLogin> userLogins = UserLoginUtil.getUserLoginsByUserId(statement, userId);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return userLogins;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public List<Comm> getTellHistory(int userId, int offset, int fetchSize) throws DataInterfaceException {
+
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      List<Comm> tellHistory = CommUtil.getTellHistory(statement, userId, offset, fetchSize);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return tellHistory;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public void putUserLog(UserLog userLog) throws DataInterfaceException {
+
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      UserLogUtil.putUserLog(statement, userLog);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
     }
     catch(Throwable throwable) {
       

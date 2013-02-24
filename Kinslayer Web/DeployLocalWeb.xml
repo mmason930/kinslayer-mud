@@ -1,0 +1,78 @@
+<project name="build kinslayermud" default="build" basedir=".">
+
+	<property name="web-root" value="C:\var\www-kin-prod\web"/>
+	
+	<property name="kinslayer-web-root" value="./"/>
+	<property name="kinslayer-shared-root" value="../Kinslayer Shared"/>
+	<property name="tomcat-home" value="C:/dev/apache-tomcat-7.0.34"/>
+	<property name="tomcat-script-extension" value=".bat"/>
+	<property name="tomcat-bin" value="${tomcat-home}/bin"/>
+	
+	<property name="deployed-web-inf" value="${web-root}/WEB-INF"/>
+	<property name="deployed-classes" value="${deployed-web-inf}/classes"/>
+	<property name="deployed-lib" value="${deployed-web-inf}/lib"/>
+	
+	<path id="classpath">
+		<fileset dir="${checkout-lib}">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+	
+	<target name="build" depends="stop-tomcat,delete-web-root,create-web-root,consolidate,start-tomcat" />
+
+	<target name="delete-web-root">
+		<delete dir="${web-root}"/>
+	</target>
+	
+	<target name="create-web-root">
+		<mkdir dir="${web-root}"/>
+	</target>
+	
+	<target name="consolidate">
+		
+		<!-- Generate WEB-INF -->
+		<copy todir="${web-root}/WEB-INF">
+			<fileset dir="${kinslayer-web-root}/WebContent/WEB-INF"/>
+		</copy>
+		
+		<copy todir="${deployed-classes}">
+			<fileset dir="${kinslayer-web-root}/bin" />
+			<fileset dir="${kinslayer-shared-root}/bin" />
+		</copy>
+		
+		<copy todir="${deployed-lib}">
+			
+			<fileset dir="${kinslayer-web-root}">
+				<include name="**/*.jar"/>
+			</fileset>
+			<fileset dir="${kinslayer-shared-root}">
+				<include name="**/*.jar"/>
+			</fileset>
+		</copy>
+		
+		<copy todir="${web-root}/View">
+			<fileset dir="${kinslayer-web-root}/View"/>
+		</copy>
+		
+		<copy todir="${web-root}/../" file="${kinslayer-web-root}/.htaccess"/>
+<!--	<copy todir="${web-root}/../" file="${kinslayer-web-root}/index.jsp"/> -->
+		
+	</target>
+	
+	<target name="stop-tomcat">
+		<echo>
+			Stopping tomcat.
+		</echo>
+		<exec executable="${tomcat-bin}/shutdown${tomcat-script-extension}" />
+
+		<sleep seconds="3" />
+	</target>
+        
+	<target name="start-tomcat">
+		<echo>
+			Starting tomcat.
+		</echo>
+		<exec executable="${tomcat-bin}/startup${tomcat-script-extension}" />
+	</target>
+
+</project>

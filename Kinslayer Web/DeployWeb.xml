@@ -2,7 +2,7 @@
 
 	<property name="tomcat-home" value="/tomcat"/>
 	<property name="tomcat-bin" value="${tomcat-home}/bin"/>
-	<property name="web-root" value="/var/www/web"/>
+	<property name="web-root" value=""/>
 	<property name="web-webinf" value="${web-root}/WEB-INF"/>
 	<property name="web-classes" value="${web-webinf}/classes"/>
 	<property name="web-lib" value="${web-webinf}/lib"/>
@@ -15,6 +15,9 @@
 	<property name="checkout-view" value="${checkout-root}/View"/>
 	<property name="checkout-shared-root" value="Kinslayer Shared"/>
 	<property name="checkout-shared-src" value="${checkout-shared-root}/src"/>
+
+	<property name="branch" value="trunk" />
+	<property name="revision" value="" />
 	
 	<path id="classpath">
 		<fileset dir="${checkout-lib}">
@@ -30,10 +33,10 @@
 
 	<target name="svn-checkout">
 		<exec dir="." executable="svn">
-			<arg line="checkout http://localhost/svn/kmud-live/trunk/Kinslayer%20Web --username=mmason --password='W@qsablast'" />
+			<arg line="checkout http://localhost/svn/kmud-live/${branch}/Kinslayer%20Web${revision} --username=mmason --password='W@qsablast'" />
 		</exec>
 		<exec dir="." executable="svn">
-			<arg line="checkout http://localhost/svn/kmud-live/trunk/Kinslayer%20Shared --username=mmason --password='W@qsablast'" />
+			<arg line="checkout http://localhost/svn/kmud-live/${branch}/Kinslayer%20Shared${revision} --username=mmason --password='W@qsablast'" />
 		</exec>
 	</target>
 	
@@ -64,7 +67,18 @@
 
 		<mkdir dir="${web-webinf}"/>
 
+		<!--
+		<copy file="${checkout-root}/index.jsp" todir="/var/www-dev" failonerror="false" />
+		-->
+		<copy file="${checkout-root}/.htaccess" todir="/var/www-dev" failonerror="false" />
+
+		<copy todir="${web-view}">
+			<fileset dir="${checkout-view}"/>
+		</copy>
+		
+		<!--
 		<copydir src="${checkout-view}" dest="${web-view}" />
+		-->
 		<!--
 		<copy file="${checkout-root}/index.jsp" todir="${web-root}" />
 		-->

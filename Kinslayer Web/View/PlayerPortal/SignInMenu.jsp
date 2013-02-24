@@ -29,7 +29,7 @@ if(errors != null && errors.size() > 0) {
                                 <div class="userPortalInputField">Password:</div>
                                 <input type="password" name="Password" /><br/>
                                 
-                                <button class="userPortalLoginButton" type="submit">&gt; LOG IN</button>
+                                <button class="userPortalLoginButton" type="submit">SIGN IN</button>
                         </form>
                 
                 </div>

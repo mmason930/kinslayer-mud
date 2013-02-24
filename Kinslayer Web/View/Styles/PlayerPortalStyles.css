@@ -1,0 +1,190 @@
+/*** Sign In ***/
+#userPortalLoginForm
+{
+	width: 305px;
+	margin:auto;
+}
+
+.userPortalInputField
+{
+	display: inline-block;
+	margin-top: 15px;
+}
+
+.userPortalLoginButton
+{
+	font-size: 16px;
+	background: #000;
+	border: 1px solid #FFF;
+	color: #FFF;
+	padding: 5px 10px 5px 10px;
+	text-align: center;
+	display: block;
+	font-weight: bold;
+	width: 120px;
+	margin: 10px auto 0px auto;
+}
+
+.userPortalLoginButton:hover
+{
+	color: red;
+	background: #880015;
+	color: #000000;
+	cursor: pointer;
+}
+
+#userPortalLoginForm ul
+{
+	color: #880015 !important;
+	font-weight: bold;
+	margin-left: 0;
+	padding-left: 0;
+}
+
+
+.userPortalContent a
+{
+	color: #3953FA;
+}
+
+.userPortalContent a:hover
+{
+	color: #880015;
+}
+
+.userPortalContainer
+{
+	width: 80%;
+}
+
+.userPortalContainerInner
+{
+	padding: 20px;
+	background-color: #111;
+	border-radius: 7px;
+
+	border: 1px solid #555;
+}
+
+.userPortalWelcome
+{
+	font-size: .9em;
+	float: left;
+}
+
+.userPortalContentHeader
+{
+	font-weight: bold;
+	overflow:hidden;
+	text-align: center;
+}
+
+.userPortalContainerInner h2
+{
+	padding: 0;
+	margin: 0;
+}
+
+ul.userPortalTopNav
+{
+	position: relative;
+	top: 1px;
+	margin: 0 0 0 1%;
+	padding: 0;
+	list-style: none;
+}
+
+ul.userPortalTopNav li
+{
+}
+
+ul.userPortalTopNav li a
+{
+	float: left;
+	background-color: #222;
+	color: #FFF;
+
+	border-radius: 10px 10px 0 0;
+	padding: 5px 10px 5px 10px;
+	font-size: 1.1em;
+	border: 1px solid #555;
+	border-right: none;
+}
+
+ul.userPortalTopNav li a:hover, ul.userPortalTopNav li a.selected
+{
+	color: #DB5C5C;
+	border-radius: 15px 15px 0 0;
+	background-color: #333;
+	border-color: #874055;
+}
+
+ul.userPortalTopNav li:last-child a
+{
+	border-right: 1px solid #000;
+}
+
+table.userPortalTrophies
+{
+	margin-top: 2%;
+	border: 1px solid #555;
+	width: 100%;
+}
+
+table.userPortalTrophies th.victimName
+{
+	width: 15%;
+}
+table.userPortalTrophies th.time
+{
+	width: 27%;
+}
+table.userPortalTrophies th.weavePoints
+{
+	width: 13%;
+}
+table.userPortalTrophies th.partyMembers
+{
+	width: 45%;
+}
+table.userPortalTrophies td
+{
+	text-align: center;
+}
+
+/*** Login History ***/
+table.userPortalLoginHistory
+{
+	margin-top: 2%;
+	border: 1px solid #555;
+	width: 100%;
+}
+
+table.userPortalLoginHistory td
+{
+	text-align: left;
+	width: 33%;
+}
+
+
+/*** Tell History ***/
+.tellHistoryPagination
+{
+	display: inline-block;
+	text-align: center;
+	width: 100%;
+}
+
+/*** User Logs ***/
+table.userLogTable
+{
+	margin-top: 2%;
+	border: 1px solid #555;
+	width: 100%;
+}
+
+table.userLogTable td
+{
+	text-align: left;
+	width: 33%;
+}
