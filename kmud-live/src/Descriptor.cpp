@@ -175,12 +175,23 @@ void Descriptor::cleanup()
 void Descriptor::sendInstant( const std::string &str )
 {
 	if(this->getGatewayDescriptorType() == GatewayDescriptorType::websocket)
-		socketWriteInstant(encodeWebSocketOutputCommand(str.c_str()));
+	{
+		Character *loggingCharacter = this->character;
+
+		if(this->original)
+			loggingCharacter = this->original;
+		if(loggingCharacter && PLR_FLAGGED(loggingCharacter, PLR_LOGGER))
+		{
+			loggingCharacter->LogOutput(str);
+		}
+
+		socketWriteInstant(encodeWebSocketOutputCommand(str.c_str()), false);
+	}
 	else
-		socketWriteInstant(str);
+		socketWriteInstant(str, true);
 }
 
-void Descriptor::socketWriteInstant( const std::string &str )
+void Descriptor::socketWriteInstant( const std::string &str, bool recordToUserLog )
 {
 	this->descriptor->socketWriteInstant( str );
 
@@ -189,7 +200,7 @@ void Descriptor::socketWriteInstant( const std::string &str )
 	if(this->original)
 		loggingCharacter = this->original;
 
-	if(loggingCharacter && PLR_FLAGGED(loggingCharacter, PLR_LOGGER))
+	if(loggingCharacter && PLR_FLAGGED(loggingCharacter, PLR_LOGGER) && recordToUserLog)
 	{
 		loggingCharacter->LogOutput(str);
 	}
@@ -298,7 +309,7 @@ std::string Descriptor::encodeWebSocketCommand(const std::string &command)
 
 void Descriptor::sendWebSocketCommand(const std::string &command)
 {
-		this->socketWriteInstant(encodeWebSocketCommand(command));
+		this->socketWriteInstant(encodeWebSocketCommand(command), false);
 }
 
 void Descriptor::processWebSocketSaveUserMacroCommand(Json::Value &commandObject)

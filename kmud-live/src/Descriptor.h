@@ -49,7 +49,7 @@ public:
 	void Send( const std::string s );
 	void SendRaw( const char *messg );
 	void sendInstant( const std::string &str );
-	void socketWriteInstant( const std::string &str );
+	void socketWriteInstant( const std::string &str, bool recordToUserLog );
 	void NewbieMenuFinish();
 	void EchoOn();
 	void EchoOff();
