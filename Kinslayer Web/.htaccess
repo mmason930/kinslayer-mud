@@ -5,8 +5,8 @@
 
 RewriteEngine on
 
-RewriteRule ^forums_old(.*)$ /forums [R=301,L]
-RewriteRule ^oldforum(.*)$ /forums [R=301,L]
+RewriteRule ^forums_old(.*)$ /forums [R=301,L,QSA]
+RewriteRule ^oldforum(.*)$ /forums [R=301,L,QSA]
 RewriteRule ^old_web/telnet.php(.*)$ /mudclient/mudclient.php$1 [R=301,L]
 RewriteRule ^old_web(.*)$ / [R=301,L]
 
@@ -90,13 +90,14 @@ RewriteRule ^smob.php(.*)			/supermob-listing$1 [QSA,L,R=301]
 RewriteRule ^smob_listing.php(.*)		/supermob-listing$1 [QSA,L,R=301]
 RewriteRule ^supermob-listing(.*)$		./SuperMobListing.do$1 [QSA,L]
 
+RewriteRule ^telnet.php(.*)				/mudclient/mudclient.php [QSA,L,R=301]
+RewriteRule ^telnet/quickguide.php(.*)	/mudclient/mudclient.php [QSA,L,R=301]
 RewriteRule ^thief-skills/(.*)$			./character-skills?class_name=thief&skill_name=$1 [QSA,L]
 RewriteRule ^thief-skills(.*)$			./character-skills?class_name=thief$1 [QSA,L]
 RewriteRule ^thief-skills(.*)$			./character-skills?class_name=thief$1 [QSA,L]
-RewriteRule ^types-of-equipment(.*)$		./EquipmentTypes.do$1 [QSA,L]
-RewriteRule ^trades.php(.*)			/player-trades$1 [QSA,L,R=301]
-RewriteRule ^telnet/quickguide.php(.*)		/mudclient/mudclient.php [QSA,L,R=301]
 RewriteRule ^topkills.php(.*)$			/$1 [QSA,L,R=301]
+RewriteRule ^trades.php(.*)			/player-trades$1 [QSA,L,R=301]
+RewriteRule ^types-of-equipment(.*)$		./EquipmentTypes.do$1 [QSA,L]
 
 RewriteRule ^warrior-skills/(.*)$		./classes-and-races$1 [QSA,L]
 RewriteRule ^warrior-skills(.*)$		./classes-and-races$1 [QSA,L]

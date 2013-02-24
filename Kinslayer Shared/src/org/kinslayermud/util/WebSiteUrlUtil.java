@@ -1,5 +1,6 @@
 package org.kinslayermud.util;
 
+import org.kinslayermud.mob.SuperMob;
 import org.kinslayermud.object.EquipmentListingType;
 import org.kinslayermud.object.ObjectWeaponType;
 import org.kinslayermud.object.ObjectWearType;
@@ -69,6 +70,9 @@ public class WebSiteUrlUtil {
   
   public static String getForumProfileUrl(int userId) {
     return "./forums/memberlist.php?mode=viewprofile&u=" + userId;
+  }
+  public static String getSuperMobListingUrl(SuperMob superMob) {
+    return "/supermob-listing?MobPrototypeId=" + superMob.getMobId();
   }
   
   protected static String cleanUrlDisplayText (String urlDisplayText) {
