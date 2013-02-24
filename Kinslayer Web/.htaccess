@@ -5,29 +5,65 @@
 
 RewriteEngine on
 
-RewriteRule ^forums_old(.*)$ /forums$1 [R=301,L]
-RewriteRule ^old_web/telnet.php(.*)$ /mud-applet [R=301,L]
+RewriteRule ^forums_old(.*)$ /forums [R=301,L]
+RewriteRule ^oldforum(.*)$ /forums [R=301,L]
+RewriteRule ^old_web/telnet.php(.*)$ /mud-client/mud-client.php$1 [R=301,L]
 RewriteRule ^old_web(.*)$ / [R=301,L]
 
-RewriteRule ^mud-applet /MudApplet/telnet.php [QSA,L]
+RewriteRule ^about-kinslayermud(.*)$		./AboutKinslayer.do$1 [QSA,L]
 
-RewriteRule ^new-to-muds(.*)$			./NewToMuds.do$1 [QSA,L]
-RewriteRule ^connecting-to-the-game(.*)$	./NewToMudsConnecting.do$1 [QSA,L]
-RewriteRule ^creating-a-character(.*)$		./NewToMudsCharacterCreation.do$1 [QSA,L]
 RewriteRule ^basic-commands(.*)$		./NewToMudsBasicCommands.do$1 [QSA,L]
 
 RewriteRule ^character-classes(.*)$		./CharacterClasses.do$1 [QSA,L]
 RewriteRule ^character-skills(.*)$		./CharacterSkills.do$1 [QSA,L]
+RewriteRule ^classes-and-races(.*)$		./CharacterClasses.do$1 [QSA,L]
+RewriteRule ^clients.php(.*)$			/$1 [QSA,L,R=301]
+RewriteRule ^character.php(.*)$			/classes-and-races$1 [QSA,L,R=301]
+RewriteRule ^connecting-to-the-game(.*)$	./NewToMudsConnecting.do$1 [QSA,L]
+RewriteRule ^contact_us.php(.*)$		/$1 [QSA,L,R=301]
+RewriteRule ^communicating-with-players(.*)$	/$1 [QSA,L,R=301]
+RewriteRule ^creating-a-character(.*)$		./NewToMudsCharacterCreation.do$1 [QSA,L]
 
-RewriteRule ^mud-clients(.*)$			./new_to_mud_clients.php$1 [QSA,L]
-RewriteRule ^moving-around(.*)$			./new_to_mud_moving_around.php$1 [QSA,L]
-RewriteRule ^elements-of-a-room(.*)$		./new_to_mud_elements_of_room.php$1 [QSA,L]
-RewriteRule ^communicating-with-players(.*)$	./new_to_mud_communication.php$1 [QSA,L]
-RewriteRule ^feeding-and-eating(.*)$		./new_to_mud_food_drink.php$1 [QSA,L]
-RewriteRule ^gaining-experience-and-levels(.*)$	./new_to_mud_gaining_experience.php$1 [QSA,L]
-RewriteRule ^game-maps(.*)$			./game_maps.php$1 [QSA,L]
+RewriteRule ^elements-of-a-room(.*)$		/$1 [QSA,L,R=301]
+RewriteRule ^equipment-listing/armor/(.*)-(.*)$	./EquipmentCatalog.do?EquipmentListingType=0&ObjectWearType=$2 [QSA,L]
+RewriteRule ^equipment-listing/armor(.*)$		./EquipmentCatalog.do?EquipmentListingType=0$1 [QSA,L]
+RewriteRule ^equipment-listing/weapons/(.*)-(.*)$	./EquipmentCatalog.do?EquipmentListingType=1&ObjectWeaponType=$2 [QSA,L]
+RewriteRule ^equipment-listing/weapons(.*)$			./EquipmentCatalog.do?EquipmentListingType=1$1 [QSA,L]
+RewriteRule ^equipment-listing(.*)$					./EquipmentCatalog.do$1 [QSA,L]
+RewriteRule ^equipment.php(.*)			./equipment-listing$1 [QSA,L,R=301]
+RewriteRule ^eq_equipment_listing.php(.*)	./equipment-listing$1 [QSA,L,R=301]
+
+RewriteRule ^feeding-and-eating(.*)$		/$1 [QSA,L,R=301]
+
+RewriteRule ^gaining-experience-and-levels(.*)$	/$1 [QSA,L,R=301]
+RewriteRule ^game-maps(.*)$			/$1 [QSA,L,R=301]
 RewriteRule ^getting-started(.*)$		./getting_started.php$1 [QSA,L]
-RewriteRule ^what-is-a-mud(.*)$			./what_is_a_mud.php$1 [QSA,L]
+
+RewriteRule ^index.php(.*)$	/$1 [QSA,L,R=301]
+RewriteRule ^introduction-to-mining(.*)$	./TradesMining.do$1 [QSA,L]
+RewriteRule ^introduction-to-smithing(.*)$	./TradesSmithing.do$1 [QSA,L]
+RewriteRule ^introduction-to-equipment(.*)$	./EquipmentIntroduction.do$1 [QSA,L]
+
+RewriteRule ^help.php(.*)$			/ [QSA,L,R=301]
+
+RewriteRule ^legends-introduction(.*)$		/ [QSA,L,R=301]
+RewriteRule ^legends$				/ [QSA,L,R=301]
+RewriteRule ^legends-weekly(.*)$		/ [QSA,L,R=301]
+RewriteRule ^legends-monthly$			/ [QSA,L,R=301]
+RewriteRule ^legends-yearly$			/ [QSA,L,R=301]
+RewriteRule ^links.php(.*)$			/ [QSA,L,R=301]
+RewriteRule ^logs.php(.*)$			/ [QSA,L,R=301]
+
+RewriteRule ^mining-on-darkside(.*)$		/$1 [QSA,L,R=301]
+RewriteRule ^mining-as-human(.*)$		/$1 [QSA,L,R=301]
+RewriteRule ^mud.php(.*)			./about-kinslayermud$1 [QSA,L,R=301]
+RewriteRule ^mud-applet(.*) 			./mud-client/mud-client.php$1 [QSA,L,R=301]
+RewriteRule ^mud-clients(.*)$			/$1 [QSA,L,R=301]
+RewriteRule ^moving-around(.*)$			/$1 [QSA,L,R=301]
+
+RewriteRule ^namegen.php(.*)$			/$1 [QSA,L,R=301]
+RewriteRule ^new-to-muds(.*)$			/$1 [QSA,L,R=301]
+RewriteRule ^new_to_mud.php(.*)$		/$1 [QSA,L,R=301]
 
 RewriteRule ^player-portal-login(.*)$			./PlayerPortalSignIn.do$1 [QSA,L]
 RewriteRule ^player-portal-home(.*)$			./PlayerPortalHome.do$1 [QSA,L]
@@ -39,66 +75,35 @@ RewriteRule ^player-portal/view-login-history(.*)$	./PlayerPortalViewLoginHistor
 RewriteRule ^player-portal/view-tell-history/(.*)$	./PlayerPortalViewTellHistory.do?PageNumber=$1 [QSA,L]
 RewriteRule ^player-portal/view-tell-history(.*)$	./PlayerPortalViewTellHistory.do$1 [QSA,L]
 RewriteRule ^player-portal(.*)$				./PlayerPortalSignInMenu.do$1 [QSA,L]
+RewriteRule ^player-trades(.*)$				./TradesIntroduction.do$1 [QSA,L]
 
-RewriteRule ^web-socket-client(.*)$			./WebSocketClient.do$1 [QSA,L]
-
-RewriteRule ^weave-skills/(.*)$			./character-skills?class_name=channeler&skill_name=$1 [QSA,L]
-RewriteRule ^weave-skills(.*)$			./character-skills?class_name=channeler$1 [QSA,L]
+RewriteRule ^quickguide.php(.*)			./about-kinslayermud$1 [QSA,L,R=301]
 
 RewriteRule ^ranger-skills/(.*)$		./character-skills?class_name=ranger&skill_name=$1 [QSA,L]
 RewriteRule ^ranger-skills(.*)$			./character-skills?class_name=ranger$1 [QSA,L]
-RewriteRule ^warrior-skills/(.*)$		./character-skills?class_name=warrior&skill_name=$1 [QSA,L]
-RewriteRule ^warrior-skills(.*)$		./character-skills?class_name=warrior$1 [QSA,L]
-RewriteRule ^thief-skills/(.*)$			./character-skills?class_name=thief&skill_name=$1 [QSA,L]
-RewriteRule ^thief-skills(.*)$			./character-skills?class_name=thief$1 [QSA,L]
+RewriteRule ^rules.php(.*)$			./about-kinslayermud$1 [QSA,L,R=301]
 
-RewriteRule ^ranger-skills(.*)$			./character-skills?class_name=ranger$1 [QSA,L]
-RewriteRule ^warrior-skills(.*)$		./character-skills?class_name=warrior$1 [QSA,L]
-RewriteRule ^thief-skills(.*)$			./character-skills?class_name=thief$1 [QSA,L]
-
-RewriteRule ^classes-and-races(.*)$		./CharacterClasses.do$1 [QSA,L]
-
-RewriteRule ^player-trades(.*)$				./TradesIntroduction.do$1 [QSA,L]
-RewriteRule ^introduction-to-mining(.*)$	./TradesMining.do$1 [QSA,L]
-RewriteRule ^introduction-to-smithing(.*)$	./TradesSmithing.do$1 [QSA,L]
-RewriteRule ^about-kinslayermud(.*)$		./AboutKinslayer.do$1 [QSA,L]
-
-RewriteRule ^index.php(.*)$	/$1 [QSA,L,R=301]
-RewriteRule ^introduction-to-equipment(.*)$	./EquipmentIntroduction.do$1 [QSA,L]
-RewriteRule ^types-of-equipment(.*)$		./EquipmentTypes.do$1 [QSA,L]
-
-RewriteRule ^equipment-listing/armor/(.*)-(.*)$	./EquipmentCatalog.do?EquipmentListingType=0&ObjectWearType=$2 [QSA,L]
-RewriteRule ^equipment-listing/armor(.*)$		./EquipmentCatalog.do?EquipmentListingType=0$1 [QSA,L]
-
-RewriteRule ^equipment-listing/weapons/(.*)-(.*)$	./EquipmentCatalog.do?EquipmentListingType=1&ObjectWeaponType=$2 [QSA,L]
-RewriteRule ^equipment-listing/weapons(.*)$			./EquipmentCatalog.do?EquipmentListingType=1$1 [QSA,L]
-RewriteRule ^equipment-listing(.*)$					./EquipmentCatalog.do$1 [QSA,L]
-
-
-RewriteRule ^what-is-a-supermob(.*)$		./SuperMobWhatIs.do$1 [QSA,L]
+RewriteRule ^scumbait.php(.*)$			/ [QSA,L,R=301]
+RewriteRule ^smithing-as-human(.*)$		/ [QSA,L,R=301]
+RewriteRule ^smithing-on-darkside(.*)$		/ [QSA,L,R=301]
+RewriteRule ^smob.php(.*)			./supermob-listing$1 [QSA,L,R=301]
+RewriteRule ^smob_listing.php(.*)		./supermob-listing$1 [QSA,L,R=301]
 RewriteRule ^supermob-listing(.*)$		./SuperMobListing.do$1 [QSA,L]
 
-RewriteRule ^legends-introduction(.*)$		./LegendsIntroduction.do$1 [QSA,L]
-RewriteRule ^legends$				./LegendsOverall.do$1 [QSA,L]
-RewriteRule ^legends-weekly(.*)$		./LegendsWeekly.do [QSA]
-RewriteRule ^legends-monthly$			./LegendsMonthly.do [QSA,L]
-RewriteRule ^legends-yearly$			./LegendsYearly.do [QSA,L]
-
+RewriteRule ^thief-skills/(.*)$			./character-skills?class_name=thief&skill_name=$1 [QSA,L]
+RewriteRule ^thief-skills(.*)$			./character-skills?class_name=thief$1 [QSA,L]
+RewriteRule ^thief-skills(.*)$			./character-skills?class_name=thief$1 [QSA,L]
+RewriteRule ^types-of-equipment(.*)$		./EquipmentTypes.do$1 [QSA,L]
 RewriteRule ^trades.php(.*)			./player-trades$1 [QSA,L,R=301]
-RewriteRule ^mining-on-darkside(.*)$		./mining_dark.php$1 [QSA,L]
-RewriteRule ^mining-as-human(.*)$		./mining_human.php$1 [QSA,L]
-RewriteRule ^smithing-as-human(.*)$		./smithing_human.php$1 [QSA,L]
-RewriteRule ^smithing-on-darkside(.*)$		./smithing_dark.php$1 [QSA,L]
-RewriteRule ^weapon-listing(.*)$		./eq_weapon_listing.php$1 [QSA,L]
+RewriteRule ^telnet/quickguide.php(.*)		./mud-client/mud-client.php [QSA,L,R=301]
+RewriteRule ^topkills.php(.*)$			/$1 [QSA,L,R=301]
 
-
-RewriteRule ^mud.php(.*)			./what-is-a-mud$1 [QSA,L,R=301]
-RewriteRule ^equipment.php(.*)			./introduction-to-equipment$1 [QSA,L,R=301]
-RewriteRule ^smob.php(.*)			./what-is-a-supermob$1 [QSA,L,R=301]
-RewriteRule ^smob_listing.php(.*)		./supermob-listing$1 [QSA,L,R=301]
-
-#RewriteRule ^(.*)\.do$				$1.do_rewrite$2
-
-#RewriteRule ^(.*)$				/tomcat/$1 [L]
-
-#RewriteRule ^new_to_mud_clients.php(.*)$ ./mud-clients$1 [QSA,R=301,L]
+RewriteRule ^warrior-skills/(.*)$		./classes-and-races$1 [QSA,L]
+RewriteRule ^warrior-skills(.*)$		./classes-and-races$1 [QSA,L]
+RewriteRule ^warrior-skills(.*)$		./classes-and-races$1 [QSA,L]
+RewriteRule ^weapon-listing(.*)$		./equipment-listing/weapons [QSA,L,R=301]
+RewriteRule ^weave-skills/(.*)$			./classes-and-races$1 [QSA,L]
+RewriteRule ^weave-skills(.*)$			./classes-and-races$1 [QSA,L]
+RewriteRule ^web-socket-client(.*)$			./WebSocketClient.do$1 [QSA,L]
+RewriteRule ^what-is-a-mud(.*)$			./about-kinslayermud$1 [QSA,L,R=301]
+RewriteRule ^what-is-a-supermob(.*)$		./SuperMobWhatIs.do$1 [QSA,L]
