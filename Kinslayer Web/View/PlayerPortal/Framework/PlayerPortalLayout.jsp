@@ -6,6 +6,7 @@
 <%
 String sessionUserName = (String)request.getAttribute("SessionUserName");
 boolean hideTopNavBoolean = StringUtil.removeNull(hideTopNav).equals("true");
+System.out.println("HIDE TOP NAV `" + hideTopNav + "`");
 %>
 <div class="container_box">
 
