@@ -180,10 +180,8 @@ void Descriptor::sendInstant( const std::string &str )
 
 		if(this->original)
 			loggingCharacter = this->original;
-		if(loggingCharacter && PLR_FLAGGED(loggingCharacter, PLR_LOGGER))
-		{
+		if(loggingCharacter)
 			loggingCharacter->LogOutput(str);
-		}
 
 		socketWriteInstant(encodeWebSocketOutputCommand(str.c_str()), false);
 	}
@@ -200,7 +198,7 @@ void Descriptor::socketWriteInstant( const std::string &str, bool recordToUserLo
 	if(this->original)
 		loggingCharacter = this->original;
 
-	if(loggingCharacter && PLR_FLAGGED(loggingCharacter, PLR_LOGGER) && recordToUserLog)
+	if(loggingCharacter && recordToUserLog)
 	{
 		loggingCharacter->LogOutput(str);
 	}

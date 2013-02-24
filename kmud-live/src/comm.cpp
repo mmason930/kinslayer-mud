@@ -2124,7 +2124,7 @@ void vwrite_to_output( Descriptor *t, int swap_args, const char *format, va_list
 		else if(t->getGatewayDescriptorType() == GatewayDescriptorType::rawTCP)
 			t->descriptor->send("***OVERFLOW***");
 
-		if ( loggerCharacter && PLR_FLAGGED( t->character, PLR_LOGGER ) )
+		if(loggingCharacter)
 			loggerCharacter->LogOutput( "***OVERFLOW***" );
 	}
 }
