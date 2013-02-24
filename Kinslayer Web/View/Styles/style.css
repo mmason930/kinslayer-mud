@@ -140,8 +140,6 @@ a:hover {
 .battleLogContainer
 {
 	width: 60%;
-	position: absolute;
-	bottom: 5%;
 	left: 20%;
 	height: 25%;
 }
@@ -150,6 +148,8 @@ a:hover {
 {
 	text-align: center;
 	height:15%;
+	padding: 0;
+	margin: 0;
 }
 
 .battleLogPrompt
@@ -365,4 +365,20 @@ a:hover {
 .userSessionLink + span:last-child
 {
 	display: none;
+}
+
+.homeContent
+{
+	width: 60%;
+	margin: auto;
+	margin-top: 1%;
+}
+
+.homeContent h1
+{
+	font-size: 20px;
+	margin: 0;
+	padding: 0;
+	display: block;
+	text-align: center;
 }
