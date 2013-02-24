@@ -16,7 +16,8 @@ String leftNavSelected = (String)request.getAttribute("LeftNavSelected");
 					-->
 					<li><a <%=leftNavSelected.equals("Equipment") ? "class='selected'" : "" %> href="<%=WebSiteUrlUtil.getEquipmentListingUrl(webSupport.getInstanceDomain(), null, null, null) %>">Equipment</a></li>
 					<li><a <%=leftNavSelected.equals("SuperMobs") ? "class='selected'" : "" %> href="./supermob-listing">SuperMOBs</a></li>
-					<li><a href="./forums">Community</a></li>
+					<li><a href="./forums" rel="nofollow">Community</a></li>
+					<li><a href="./wiki">Wiki</a></li>
 					<li><a <%=leftNavSelected.equals("About") ? "class='selected'" : "" %> href="./about-kinslayermud">What is KinslayerMUD?</a></li>
 				</ul>
 			</div>
