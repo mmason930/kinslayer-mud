@@ -71,8 +71,8 @@ public class WebSiteUrlUtil {
   public static String getForumProfileUrl(int userId) {
     return "./forums/memberlist.php?mode=viewprofile&u=" + userId;
   }
-  public static String getSuperMobListingUrl(SuperMob superMob) {
-    return "/supermob-listing?MobPrototypeId=" + superMob.getMobId();
+  public static String getSuperMobListingUrl(String instanceDomain, SuperMob superMob) {
+    return "http://" + instanceDomain + "/supermob-listing?MobPrototypeId=" + superMob.getMobId();
   }
   
   protected static String cleanUrlDisplayText (String urlDisplayText) {
