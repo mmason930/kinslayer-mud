@@ -140,7 +140,7 @@ a:hover {
 .battleLogContainer
 {
 	width: 60%;
-	margin: absolute;
+	margin: auto;
 	margin-top: 10px;
 	height: 25%;
 }
