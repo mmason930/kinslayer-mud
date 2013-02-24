@@ -1,6 +1,6 @@
 <project name="build kinslayermud" default="build" basedir=".">
 
-	<property name="tomcat-home" value="/tomcat"/>
+	<property name="tomcat-home" value=""/>
 	<property name="tomcat-bin" value="${tomcat-home}/bin"/>
 	<property name="web-root" value=""/>
 	<property name="web-webinf" value="${web-root}/WEB-INF"/>
@@ -70,7 +70,7 @@
 		<!--
 		<copy file="${checkout-root}/index.jsp" todir="/var/www-dev" failonerror="false" />
 		-->
-		<copy file="${checkout-root}/.htaccess" todir="/var/www-dev" failonerror="false" />
+		<copy file="${checkout-root}/.htaccess" todir="${web-root}/../" failonerror="false" />
 
 		<copy todir="${web-view}">
 			<fileset dir="${checkout-view}"/>
@@ -94,7 +94,7 @@
 		</copy>
 
 		<!-- Move jar files over -->
-		<copy todir="${checkout-lib}">
+		<copy todir="${checkout-lib}" flatten="true">
 			<fileset dir="${checkout-shared-root}">
 				<include name="**/*.jar"/>
 			</fileset>

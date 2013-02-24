@@ -5,10 +5,14 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.kinslayermud.misc.Provider;
+import org.kinslayermud.mob.MobPrototype;
 import org.kinslayermud.mob.MobUtil;
 import org.kinslayermud.mob.SuperMob;
 import org.kinslayermud.object.EquipmentListingType;
@@ -92,9 +96,18 @@ public class GenerateDynamicSitemapProcess implements KinslayerProcess {
   public void writeSuperMobPages(Statement statement, FileWriter fileWriter) throws SQLException, IOException {
     
     List<SuperMob> superMobs = MobUtil.getAllOpenSuperMobs(statement);
+    Set<Integer> mobPrototypeIdSet = new HashSet<Integer>();
     for(SuperMob superMob : superMobs) {
       
-      writeUrl(fileWriter, WebSiteUrlUtil.getSuperMobListingUrl(provider.getInstanceDomain(), superMob), CHANGE_FREQUENCY_WEEKLY);
+      mobPrototypeIdSet.add(superMob.getMobId());
+    }
+    
+    Map<Integer, MobPrototype> mobPrototypeMap = MobUtil.getMobPrototypeMap(statement, mobPrototypeIdSet);
+    
+    for(SuperMob superMob : superMobs) {
+      
+      MobPrototype mobPrototype = mobPrototypeMap.get(superMob.getMobId());
+      writeUrl(fileWriter, WebSiteUrlUtil.getSuperMobListingUrl(provider.getInstanceDomain(), superMob.getMobId(), mobPrototype.getShortDescription()), CHANGE_FREQUENCY_WEEKLY);
     }
   }
 }

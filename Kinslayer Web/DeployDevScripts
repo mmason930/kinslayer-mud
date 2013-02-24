@@ -1,5 +1,5 @@
 #!/bin/bash
-COMMAND="ant -buildfile ./DeployWeb.xml"
+COMMAND="ant -buildfile ./DeployScripts.xml"
 
 if [ ! -z "$1" ]
 then
@@ -16,6 +16,7 @@ then
 		COMMAND=$COMMAND" -Drevision=@$2"
 fi
 
-COMMAND=$COMMAND" -Dweb-root=/var/www-dev/web -Dtomcat-home=/kinslayer/tomcat-dev"
+COMMAND=$COMMAND" -Dscripts-root=/kinslayer/dev/scripts"
 
 $COMMAND
+

@@ -1,0 +1,55 @@
+<project name="build affiliatesite" default="build" basedir=".">
+
+	<property name="scripts-root" value=""/>
+	<property name="scripts-lib" value="${scripts-root}/lib"/>
+	<property name="scripts-classes" value="${scripts-root}/classes"/>
+	<property name="checkout-root" value="Kinslayer Shared"/>
+	<property name="checkout-src" value="${checkout-root}/src"/>
+	<property name="checkout-classes" value="${checkout-root}/classes"/>
+	<property name="checkout-lib" value="${checkout-root}/lib"/>
+
+	<property name="branch" value="trunk" />
+	<property name="revision" value="" />
+
+	<path id="classpath">
+		<fileset dir="${checkout-lib}">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+	
+	<target name="build" depends="svn-cleanup,svn-checkout,compile-scripts" />
+
+	<target name="svn-cleanup">
+		<delete dir="${checkout-root}" />
+	</target>
+
+	<target name="svn-checkout">
+		<exec dir="." executable="svn">
+			<arg line="checkout file:///home/subversion/kmud-live/${branch}/Kinslayer%20Shared --username=mmason --password='W@qsablast'" />
+		</exec>
+	</target>
+	
+	<target name="compile-scripts">
+		<mkdir dir="${checkout-classes}"/>
+		<javac srcdir="${checkout-src}" destdir="${checkout-classes}" classpathref="classpath">
+			<include name="**/*.java"/>
+		</javac>
+		
+		<delete dir="${scripts-lib}"/>
+		<delete dir="${scripts-classes}"/>
+		
+		<mkdir dir="${scripts-lib}" />
+		<mkdir dir="${scripts-classes}" />
+		
+		<copy todir="${scripts-lib}">
+			<fileset dir="${checkout-lib}"/>
+		</copy>
+		
+		<copy todir="${scripts-classes}">
+			<fileset dir="${checkout-classes}"/>
+		</copy>
+		
+		<antcall target="svn-cleanup" />
+	</target>
+
+</project>

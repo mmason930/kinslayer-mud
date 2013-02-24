@@ -43,7 +43,7 @@ for(SuperMob currentSuperMob : superMobs) {
   }
 %>
 						<li>
-							<a href="<%=WebSiteUrlUtil.getSuperMobListingUrl(webSupport.getInstanceDomain(), superMob) %>" <%= (superMob != null && superMob.getId() == currentSuperMob.getId()) ? ("class='selected'") : ""%>><span><%=StringUtil.ConvertToHTML(StringUtil.properString(currentMobPrototype.getShortDescription()))%></span></a>
+							<a href="<%=WebSiteUrlUtil.getSuperMobListingUrl(webSupport.getInstanceDomain(), superMob.getMobId(), currentMobPrototype.getShortDescription()) %>" <%= (superMob != null && superMob.getId() == currentSuperMob.getId()) ? ("class='selected'") : ""%>><span><%=StringUtil.ConvertToHTML(StringUtil.properString(currentMobPrototype.getShortDescription()))%></span></a>
 						</li>
 <%
 }
