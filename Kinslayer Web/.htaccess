@@ -7,7 +7,7 @@ RewriteEngine on
 
 RewriteRule ^forums_old(.*)$ /forums [R=301,L]
 RewriteRule ^oldforum(.*)$ /forums [R=301,L]
-RewriteRule ^old_web/telnet.php(.*)$ /mud-client/mud-client.php$1 [R=301,L]
+RewriteRule ^old_web/telnet.php(.*)$ /mudclient/mudclient.php$1 [R=301,L]
 RewriteRule ^old_web(.*)$ / [R=301,L]
 
 RewriteRule ^about-kinslayermud(.*)$		./AboutKinslayer.do$1 [QSA,L]
@@ -30,8 +30,8 @@ RewriteRule ^equipment-listing/armor(.*)$		./EquipmentCatalog.do?EquipmentListin
 RewriteRule ^equipment-listing/weapons/(.*)-(.*)$	./EquipmentCatalog.do?EquipmentListingType=1&ObjectWeaponType=$2 [QSA,L]
 RewriteRule ^equipment-listing/weapons(.*)$			./EquipmentCatalog.do?EquipmentListingType=1$1 [QSA,L]
 RewriteRule ^equipment-listing(.*)$					./EquipmentCatalog.do$1 [QSA,L]
-RewriteRule ^equipment.php(.*)			./equipment-listing$1 [QSA,L,R=301]
-RewriteRule ^eq_equipment_listing.php(.*)	./equipment-listing$1 [QSA,L,R=301]
+RewriteRule ^equipment.php(.*)			/equipment-listing$1 [QSA,L,R=301]
+RewriteRule ^eq_equipment_listing.php(.*)	/equipment-listing$1 [QSA,L,R=301]
 
 RewriteRule ^feeding-and-eating(.*)$		/$1 [QSA,L,R=301]
 
@@ -56,8 +56,8 @@ RewriteRule ^logs.php(.*)$			/ [QSA,L,R=301]
 
 RewriteRule ^mining-on-darkside(.*)$		/$1 [QSA,L,R=301]
 RewriteRule ^mining-as-human(.*)$		/$1 [QSA,L,R=301]
-RewriteRule ^mud.php(.*)			./about-kinslayermud$1 [QSA,L,R=301]
-RewriteRule ^mud-applet(.*) 			./mud-client/mud-client.php$1 [QSA,L,R=301]
+RewriteRule ^mud.php(.*)			/about-kinslayermud$1 [QSA,L,R=301]
+RewriteRule ^mud-applet(.*) 			/mud-client/mud-client.php$1 [QSA,L,R=301]
 RewriteRule ^mud-clients(.*)$			/$1 [QSA,L,R=301]
 RewriteRule ^moving-around(.*)$			/$1 [QSA,L,R=301]
 
@@ -77,33 +77,33 @@ RewriteRule ^player-portal/view-tell-history(.*)$	./PlayerPortalViewTellHistory.
 RewriteRule ^player-portal(.*)$				./PlayerPortalSignInMenu.do$1 [QSA,L]
 RewriteRule ^player-trades(.*)$				./TradesIntroduction.do$1 [QSA,L]
 
-RewriteRule ^quickguide.php(.*)			./about-kinslayermud$1 [QSA,L,R=301]
+RewriteRule ^quickguide.php(.*)			/about-kinslayermud$1 [QSA,L,R=301]
 
 RewriteRule ^ranger-skills/(.*)$		./character-skills?class_name=ranger&skill_name=$1 [QSA,L]
 RewriteRule ^ranger-skills(.*)$			./character-skills?class_name=ranger$1 [QSA,L]
-RewriteRule ^rules.php(.*)$			./about-kinslayermud$1 [QSA,L,R=301]
+RewriteRule ^rules.php(.*)$			/about-kinslayermud$1 [QSA,L,R=301]
 
 RewriteRule ^scumbait.php(.*)$			/ [QSA,L,R=301]
 RewriteRule ^smithing-as-human(.*)$		/ [QSA,L,R=301]
 RewriteRule ^smithing-on-darkside(.*)$		/ [QSA,L,R=301]
-RewriteRule ^smob.php(.*)			./supermob-listing$1 [QSA,L,R=301]
-RewriteRule ^smob_listing.php(.*)		./supermob-listing$1 [QSA,L,R=301]
+RewriteRule ^smob.php(.*)			/supermob-listing$1 [QSA,L,R=301]
+RewriteRule ^smob_listing.php(.*)		/supermob-listing$1 [QSA,L,R=301]
 RewriteRule ^supermob-listing(.*)$		./SuperMobListing.do$1 [QSA,L]
 
 RewriteRule ^thief-skills/(.*)$			./character-skills?class_name=thief&skill_name=$1 [QSA,L]
 RewriteRule ^thief-skills(.*)$			./character-skills?class_name=thief$1 [QSA,L]
 RewriteRule ^thief-skills(.*)$			./character-skills?class_name=thief$1 [QSA,L]
 RewriteRule ^types-of-equipment(.*)$		./EquipmentTypes.do$1 [QSA,L]
-RewriteRule ^trades.php(.*)			./player-trades$1 [QSA,L,R=301]
-RewriteRule ^telnet/quickguide.php(.*)		./mud-client/mud-client.php [QSA,L,R=301]
+RewriteRule ^trades.php(.*)			/player-trades$1 [QSA,L,R=301]
+RewriteRule ^telnet/quickguide.php(.*)		/mudclient/mudclient.php [QSA,L,R=301]
 RewriteRule ^topkills.php(.*)$			/$1 [QSA,L,R=301]
 
 RewriteRule ^warrior-skills/(.*)$		./classes-and-races$1 [QSA,L]
 RewriteRule ^warrior-skills(.*)$		./classes-and-races$1 [QSA,L]
 RewriteRule ^warrior-skills(.*)$		./classes-and-races$1 [QSA,L]
-RewriteRule ^weapon-listing(.*)$		./equipment-listing/weapons [QSA,L,R=301]
+RewriteRule ^weapon-listing(.*)$		/equipment-listing/weapons [QSA,L,R=301]
 RewriteRule ^weave-skills/(.*)$			./classes-and-races$1 [QSA,L]
 RewriteRule ^weave-skills(.*)$			./classes-and-races$1 [QSA,L]
-RewriteRule ^web-socket-client(.*)$			./WebSocketClient.do$1 [QSA,L]
-RewriteRule ^what-is-a-mud(.*)$			./about-kinslayermud$1 [QSA,L,R=301]
+RewriteRule ^web-socket-client(.*)$		./WebSocketClient.do$1 [QSA,L]
+RewriteRule ^what-is-a-mud(.*)$			/about-kinslayermud$1 [QSA,L,R=301]
 RewriteRule ^what-is-a-supermob(.*)$		./SuperMobWhatIs.do$1 [QSA,L]
