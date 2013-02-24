@@ -94,7 +94,7 @@ public class GenerateDynamicSitemapProcess implements KinslayerProcess {
     List<SuperMob> superMobs = MobUtil.getAllOpenSuperMobs(statement);
     for(SuperMob superMob : superMobs) {
       
-      writeUrl(fileWriter, WebSiteUrlUtil.getSuperMobListingUrl(superMob), CHANGE_FREQUENCY_WEEKLY);
+      writeUrl(fileWriter, WebSiteUrlUtil.getSuperMobListingUrl(provider.getInstanceDomain(), superMob), CHANGE_FREQUENCY_WEEKLY);
     }
   }
 }
