@@ -2,16 +2,19 @@
 <%@ include file="/View/Framework/Kinslayer.jsp" %>
 <tiles:useAttribute name="topNavSelected" classname="java.lang.String" />
 <tiles:useAttribute name="playerPortalH2" classname="java.lang.String" />
+<tiles:useAttribute name="hideTopNav" classname="java.lang.String" ignore="true" />
 <%
 String sessionUserName = (String)request.getAttribute("SessionUserName");
-System.out.println("Session User Name Is Null: " + (sessionUserName == null ? "Yes" : "No") );
+boolean hideTopNavBoolean = StringUtil.removeNull(hideTopNav).equals("true");
 %>
 <div class="container_box">
 
 		<div class="userPortalContent">
 
 			<div class="userPortalContainer">
-
+<%
+if(!hideTopNavBoolean) {
+%>
 				<ul class="userPortalTopNav">
 					<li><a href="<%=WebSiteUrlUtil.getPlayerPortalHomeUrl()%>" <%=topNavSelected.equals("Home") ? "class='selected'" : "" %>>Home</a></li>
 					<li><a href="<%=WebSiteUrlUtil.getPlayerPortalViewUserLogs() %>" <%=topNavSelected.equals("UserLogs") ? "class='selected'" : "" %>>User Logs</a></li>
@@ -19,6 +22,9 @@ System.out.println("Session User Name Is Null: " + (sessionUserName == null ? "Y
 					<li><a href="<%=WebSiteUrlUtil.getPlayerPortalViewTrophiesUrl() %>" <%=topNavSelected.equals("ViewTrophies") ? "class='selected'" : "" %>>Trophies</a></li>
 					<li><a href="<%=WebSiteUrlUtil.getPlayerPortalViewTellHistoryUrl(null) %>" <%=topNavSelected.equals("ViewTellHistory") ? "class='selected'" : "" %>>Tell History</a></li>
 				</ul>
+<%
+}
+%>
 				<div class="clearLeft"></div>
 				<div class="userPortalContainerInner">
 					<div class="userPortalWelcome"><%=sessionUserName == null ? "" : ("Welcome, " + sessionUserName)%></div>

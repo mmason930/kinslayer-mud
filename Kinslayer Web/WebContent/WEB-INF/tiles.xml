@@ -94,6 +94,7 @@
     <put-attribute name="content" value="/View/PlayerPortal/SignedIn/ViewTrophies.jsp" cascade="true"/>
     <put-attribute name="topNavSelected" value="ViewTrophies" cascade="true"/>
     <put-attribute name="playerPortalH2" value="Trophies" cascade="true"/>
+    <put-attribute name="playerPortalH2" value="Trophies" cascade="true"/>
   </definition>
   
   <definition name="PlayerPortalSignInMenu" extends="PlayerPortalLayout">
@@ -101,6 +102,7 @@
     <put-attribute name="MetaDescription" value="Sign in to your in-game player here. View information about your MUD player here."/>
     <put-attribute name="content" value="/View/PlayerPortal/SignInMenu.jsp" cascade="true"/>
     <put-attribute name="playerPortalH2" value="Sign In" cascade="true"/>
+    <put-attribute name="hideTopNav" value="true" cascade="true"/>
   </definition>
   
   <definition name="PlayerPortalHome" extends="PlayerPortalLayout">
