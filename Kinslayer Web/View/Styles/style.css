@@ -5,6 +5,15 @@ body
 	color: #FFF;
 }
 
+.inlineHeader
+{
+	display: inline;
+	margin: 0;
+	padding: 0;
+	font-size: inherit !important;
+	font-weight: bold;
+}
+
 a {
 	color: #FFF;
 	text-decoration: none;
@@ -564,7 +573,7 @@ a:hover {
 
 .equipmentDescriptionBox
 {
-	width: 87%;
+	width: 73%;
 	margin: 2% 0 2% 0;
 }
 

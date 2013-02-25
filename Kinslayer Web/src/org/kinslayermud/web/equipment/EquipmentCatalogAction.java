@@ -14,6 +14,12 @@ import org.kinslayermud.web.actions.StandardAction;
 
 public class EquipmentCatalogAction extends StandardAction {
   
+  public static class PageDescription {
+    
+    public String h1;
+    public String pageContent;
+  }
+  
   public static class LeftNavListItem {
     
     protected String anchorDisplay;
@@ -101,11 +107,77 @@ public class EquipmentCatalogAction extends StandardAction {
       }
     }
     
+    PageDescription pageDescription = getPageDescription(equipmentListingType, objectWearType, objectWeaponType);
+    
+    request.setAttribute("PageContent", pageDescription.pageContent);
+    request.setAttribute("H1", pageDescription.h1);
     request.setAttribute("EquipmentListingType", equipmentListingType);
     request.setAttribute("LestNavListItems", leftNavListItems);
     request.setAttribute("ObjectPrototypes", objectPrototypes);
     
     return SUCCESS_FORWARD;
+  }
+  
+  public PageDescription getPageDescription(EquipmentListingType equipmentListingType, ObjectWearType objectWearType, ObjectWeaponType objectWeaponType) {
+    
+    PageDescription pageDescription = new PageDescription();
+
+    if(equipmentListingType == null && objectWearType == null && objectWeaponType == null) {
+      
+      pageDescription.h1 = "Equipment Catalog";
+      pageDescription.pageContent
+        = "<p>Equipment is an essential part of your character's development; without it, survival and progress will be impossible."
+        + " Your character's equipment consists of weapons and armor collected throughout the game: from quests, super mobs,"
+        + " mining, smithing and shops. Every item has status modifiers and will either strenthen or hinder your character's"
+        + " ability to fight and move throughout the game.</p>"
+        + " While exploring the world of Kinslayer MUD, you will run across many items featured in <h2 class='inlineHeader'>Robert Jordan's"
+        + " 'The Wheel of Time'</h2> series. Begin viewing the Equipment Catalog by selecting either <strong>Armor</strong> or"
+        + " <strong>Weapons</strong> above.";          
+    }
+    
+    if(equipmentListingType != null && equipmentListingType.equals(EquipmentListingType.weapon)) {
+      
+      //Weapons page
+      if(objectWeaponType == null) {
+        
+        pageDescription.h1 = "Weapon Catalog";
+        pageDescription.pageContent
+          = "<p>Essential to your character's ability both to defend from and attack opponents, <h2='inlineHeader'>weapons in Kinslayer MUD come in many"
+          + " varying classes</h2>. Each weapon class requires a different skill to be trained at skill trainers located across the game."
+          + " The more proficient your skill in the weapon class, the more the weapon's status modifiers will affect your character.</p>"
+          + "<p>With the exception of Short Blades, every weapon class belongs to the Warrrior class of skills, giving Warriors"
+          + " a greater flexibility when it comes to choosing their weapon class of choice. Any class, however, is able to "
+          + " obtain, practice, and wield weapons from any class they choose. Some factors do limit the ability to wield a weapon,"
+          + " such as your character's Strength attribute and the weight of the weapon in question.</p>"
+          + " <p>Select an option from the left to view a detailed list of all equipment in the Weapon Class.</p>";
+      }
+    }
+    
+    if(equipmentListingType != null && equipmentListingType.equals(EquipmentListingType.armor)) {
+      
+      //Weapons page
+      if(objectWeaponType == null) {
+        
+        pageDescription.h1 = "Armor Catalog";
+        pageDescription.pageContent
+          = "<p>Helmets, gauntlets, boots, shields and more. Armor is necessary for your character's defense. The main status modifiers"
+          + " that armor provides are: Dodge, Parry, and Absorb. The higher your Dodge and Parry bonuses, the more proficient your character"
+          + " will be at avoiding melee attacks. Absorb, on the other hand, allows your armor to diminish the damage that"
+          + " your opponent deals against you.</p>"
+          + " <p>Absorbtion armor is a passive ability and requires no skill training in order to benefit from its affects. Dodge and Parry,"
+          + " on the other hand, require skills to be trained both in the Warrior & Thief classes. Top tier dodge and parry equipment"
+          + " can also be more difficult to come across, and can be worn on every equipment slot available to your character.</p>"
+          + "<p>While armor is essential to your success in the game, its benefits are minimal against Channelers, whose Weaves"
+          + " typically bypass the three defensive status modifiers. Channelers, meanwhile, usually need to avoid being hit while"
+          + " their weave is being carried out. With the high penalties for skill training for the Channeler class, this can be"
+          + " a very difficult area to dominate.</p>"
+          + " To see a detailed list of all equipment available for a given armor equipment slot, make a selection from the list to the left.</p>";
+          
+      }
+      
+    }
+    
+    return pageDescription;
   }
   
   public List<LeftNavListItem> getLeftNavListItemsForEquipment(ObjectWearType selectedObjectWearType) {
