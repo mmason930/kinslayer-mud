@@ -156,7 +156,7 @@ public class EquipmentCatalogAction extends StandardAction {
     if(equipmentListingType != null && equipmentListingType.equals(EquipmentListingType.armor)) {
       
       //Weapons page
-      if(objectWeaponType == null) {
+      if(objectWearType == null) {
         
         pageDescription.h1 = "Armor Catalog";
         pageDescription.pageContent
