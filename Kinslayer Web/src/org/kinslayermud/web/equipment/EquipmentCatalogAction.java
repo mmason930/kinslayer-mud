@@ -18,6 +18,8 @@ public class EquipmentCatalogAction extends StandardAction {
     
     public String h1;
     public String pageContent;
+    public String metaDescription;
+    public String title;
   }
   
   public static class LeftNavListItem {
@@ -111,6 +113,8 @@ public class EquipmentCatalogAction extends StandardAction {
     
     request.setAttribute("PageContent", pageDescription.pageContent);
     request.setAttribute("H1", pageDescription.h1);
+    request.setAttribute("Title", pageDescription.title);
+    request.setAttribute("MetaDescription", pageDescription.metaDescription);
     request.setAttribute("EquipmentListingType", equipmentListingType);
     request.setAttribute("LestNavListItems", leftNavListItems);
     request.setAttribute("ObjectPrototypes", objectPrototypes);
@@ -132,7 +136,9 @@ public class EquipmentCatalogAction extends StandardAction {
         + " ability to fight and move throughout the game.</p>"
         + " While exploring the world of Kinslayer MUD, you will run across many items featured in <h2 class='inlineHeader'>Robert Jordan's"
         + " 'The Wheel of Time'</h2> series. Begin viewing the Equipment Catalog by selecting either <strong>Armor</strong> or"
-        + " <strong>Weapons</strong> above.";          
+        + " <strong>Weapons</strong> above.";
+      pageDescription.title = "Equipment Catalog | Search Game Equipment Online | Kinslayer MUD";
+      pageDescription.metaDescription = "Search the Kinslayer MUD equipment catalog. Find all weapons and armor online available in the game.";
     }
     
     if(equipmentListingType != null && equipmentListingType.equals(EquipmentListingType.weapon)) {
@@ -150,6 +156,13 @@ public class EquipmentCatalogAction extends StandardAction {
           + " obtain, practice, and wield weapons from any class they choose. Some factors do limit the ability to wield a weapon,"
           + " such as your character's Strength attribute and the weight of the weapon in question.</p>"
           + " <p>Select an option from the left to view a detailed list of all equipment in the Weapon Class.</p>";
+        pageDescription.title = "Weapon Catalog | View Game Weapons Online | Kinslayer MUD";
+        pageDescription.metaDescription = "Search all weapons available on Kinslayer MUD online in the equipment catalog. Many weapon classes available in game.";
+      }
+      else {
+        
+        pageDescription.title = objectWeaponType.getPluralName() + " | Weapon Equipment Catalog | Kinslayer MUD";
+        pageDescription.metaDescription = "See all " + objectWeaponType.getSingularName().toLowerCase() + " weapons on Kinslayer MUD using the equipment catalog online.";
       }
     }
     
@@ -172,9 +185,14 @@ public class EquipmentCatalogAction extends StandardAction {
           + " their weave is being carried out. With the high penalties for skill training for the Channeler class, this can be"
           + " a very difficult area to dominate.</p>"
           + " To see a detailed list of all equipment available for a given armor equipment slot, make a selection from the list to the left.</p>";
-          
+        pageDescription.title = "Armor Catalog | View Game Armor Online | Kinslayer MUD";
+        pageDescription.metaDescription = "Search all armor available in the Kinslayer MUD online game. There are many armor classes available in game.";
       }
-      
+      else {
+
+        pageDescription.title = objectWearType.getDisplayTerm() + " | Armor Equipment Catalog | Kinslayer MUD";
+        pageDescription.metaDescription = "See all " + objectWearType.getSingularTerm().toLowerCase() + " armor on Kinslayer MUD using the equipment catalog online.";
+      }
     }
     
     return pageDescription;

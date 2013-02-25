@@ -2,13 +2,20 @@
 <%@ include file="/View/Framework/Kinslayer.jsp" %>
 <tiles:useAttribute name="leftNavSelected" classname="java.lang.String" />
 <tiles:useAttribute name="MetaDescription" classname="java.lang.String" ignore="true" />
+<tiles:useAttribute name="title" classname="java.lang.String" ignore="true" />
 <%
 request.setAttribute("LeftNavSelected", StringUtil.removeNull(leftNavSelected));
+if(request.getAttribute("MetaDescription") != null) {
+  MetaDescription = (String)request.getAttribute("MetaDescription");
+}
+if(request.getAttribute("Title") != null) {
+  title = (String)request.getAttribute("Title");
+}
 %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
-		<title><tiles:insertAttribute name="title" /></title>
+		<title><%=title %></title>
 		<meta http-equiv="Content-Language" content="EN" />
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <%

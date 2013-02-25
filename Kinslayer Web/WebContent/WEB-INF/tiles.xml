@@ -184,7 +184,8 @@
   
   <!--  ABOUT KINSLAYER -->
   <definition name="AboutKinslayer" extends="StandardLayout">
-    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="title" value="About Kinslayer MUD | Free Online Game"/>
+    <put-attribute name="MetaDescription" value="Kinslayer MUD is a free online game based on Robert Jordan's The Wheel of Time series. To play, click here." />
     <put-attribute name="body" value="/View/NewToMudsHome/AboutKinslayer.jsp"/>
     <put-attribute name="leftNavSelected" value="About"/>
   </definition>
