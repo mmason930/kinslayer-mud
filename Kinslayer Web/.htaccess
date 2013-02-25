@@ -5,6 +5,9 @@
 
 RewriteEngine on
 
+RewriteCond %{HTTP_HOST} ^kinslayermud.org$		[NC]
+RewriteRule ^(.*)$ http://www.kinslayermud.org/$1	[L,R=301]
+
 RewriteRule ^forums_old(.*)$ /forums? [R=301,L]
 RewriteRule ^oldforum(.*)$ /forums? [R=301,L]
 RewriteRule ^old_web/telnet.php(.*)$ /mudclient/mudclient.php? [R=301,L]
