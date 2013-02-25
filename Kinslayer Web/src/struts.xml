@@ -178,6 +178,8 @@
 		<!--  MISC -->
 		<action name="JSONResponse" class="org.kinslayermud.web.generic.JSONResponseAction" />
 		
+		<action name="GetNextFeaturedMUDListing" class="org.kinslayermud.web.featuredmudlisting.GetNextFeaturedMUDListingAction" />
+		
 		<action name="*" class="org.kinslayermud.web.home.DefaultAction" method="execute">
 			<result name="Redirect" type="chain">Home</result>
 			<result name="Failure">/View/Test/PageNotFound.jsp</result>

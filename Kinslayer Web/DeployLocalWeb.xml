@@ -40,7 +40,7 @@
 			<fileset dir="${kinslayer-shared-root}/bin" />
 		</copy>
 		
-		<copy todir="${deployed-lib}">
+		<copy todir="${deployed-lib}" flatten="true">
 			
 			<fileset dir="${kinslayer-web-root}">
 				<include name="**/*.jar"/>

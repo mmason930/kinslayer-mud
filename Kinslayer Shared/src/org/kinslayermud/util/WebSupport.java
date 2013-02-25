@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.kinslayermud.advertising.FeaturedMUDListing;
 import org.kinslayermud.character.User;
 import org.kinslayermud.comm.Comm;
 import org.kinslayermud.exception.DataInterfaceException;
@@ -41,6 +42,6 @@ public interface WebSupport {
   public List<PlayerKill> getPlayerKillsByKillerId(int killerUserId) throws DataInterfaceException;
   public List<UserLogin> getUserLoginsByUserId(int userId) throws DataInterfaceException;
   public List<Comm> getTellHistory(int userId, int offset, int fetchSize) throws DataInterfaceException;
-  
   public void putUserLog(UserLog userLog) throws DataInterfaceException;
+  public FeaturedMUDListing getRandomFeaturedMUDListing(Collection<Integer> featuredMUDListingIdCollectionToExclude) throws DataInterfaceException;
 }

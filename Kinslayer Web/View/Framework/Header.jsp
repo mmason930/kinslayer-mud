@@ -23,8 +23,6 @@ if(sessionUserId != null) {
 }
 %>
 Host: kinslayermud.org | Port: 2222</div>
-			<div class="bannerContainer">
-				<img class="bannerImage" src="./images/sword_on_black_surface_and_background-wide-no-margins.jpg"></img>
-			</div>
+			<img class="bannerImage" src="./images/sword_on_black_surface_and_background-wide-no-margins.jpg"></img>
 		</div>
 		<div class="clearLeft"></div>

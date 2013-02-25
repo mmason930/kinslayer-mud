@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.kinslayermud.advertising.FeaturedMUDListing;
+import org.kinslayermud.advertising.FeaturedMUDListingUtil;
 import org.kinslayermud.character.User;
 import org.kinslayermud.comm.Comm;
 import org.kinslayermud.comm.CommUtil;
@@ -538,6 +540,33 @@ public class WebSupportImp implements WebSupport {
       statement.close();
       connection.commit();
       connection.close();
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public FeaturedMUDListing getRandomFeaturedMUDListing(Collection<Integer> featuredMUDListingIdCollectionToExclude) throws DataInterfaceException {
+
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      FeaturedMUDListing featuredMUDListing = FeaturedMUDListingUtil.getRandomFeaturedMUDListing(statement, featuredMUDListingIdCollectionToExclude);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return featuredMUDListing;
     }
     catch(Throwable throwable) {
       
