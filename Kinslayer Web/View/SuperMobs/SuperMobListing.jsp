@@ -54,7 +54,7 @@ if(mobPrototype != null) {
 %>
 				<div id="superMobRightNav">
 					<div id="superMobDetailPanel">
-						<img id="superMobImage" src="<%=superMob.getMobImageUrl() == null ? "./images/knight.jpg" : superMob.getMobImageUrl()%>"></img>
+						<img id="superMobImage" src="<%=superMob.getMobImageUrl() == null ? "./images/smobs/images/knight.jpg" : superMob.getMobImageUrl()%>"></img>
 						<div id="superMobDescription">
 						
 							<%=StringUtil.ConvertToHTML(superMob.getDescription())%>
