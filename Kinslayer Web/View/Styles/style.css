@@ -564,8 +564,8 @@ a:hover {
 
 .equipmentDescriptionBox
 {
-	padding: 20px;
-	margin-bottom: 2%;
+	width: 87%;
+	margin: 2% 0 2% 0;
 }
 
 .equipmentDescriptionBox .header
