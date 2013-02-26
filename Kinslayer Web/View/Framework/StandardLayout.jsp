@@ -40,16 +40,8 @@ if(MetaDescription != null) {
 		<div class="clearBoth"></div>
 		<div style="margin-bottom: 1%;">&nbsp;</div>
 
-		<script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-		</script>
-		<script type="text/javascript">
-try {
-var pageTracker = _gat._getTracker("UA-284526-1");
-pageTracker._trackPageview();
-} catch(err) {}
-		</script>
+		<tiles:insertTemplate template="/View/Framework/Footer.jsp" />
+
 	</body>
 </html>
 

@@ -8,6 +8,8 @@ RewriteEngine on
 RewriteCond %{HTTP_HOST} ^kinslayermud.org$		[NC]
 RewriteRule ^(.*)$ http://www.kinslayermud.org/$1	[L,R=301]
 
+RewriteRule ^forums/profile.php(.*)		/forums? [L,R=301]
+RewriteRule ^forums/login.php(.*)		/forums? [L,R=301]
 RewriteRule ^forums_old(.*)$ /forums? [R=301,L]
 RewriteRule ^oldforum(.*)$ /forums? [R=301,L]
 RewriteRule ^old_web/telnet.php(.*)$ /mudclient/mudclient.php? [R=301,L]
@@ -61,6 +63,7 @@ RewriteRule ^legends-weekly(.*)$		/? [L,R=301]
 RewriteRule ^legends-monthly$			/? [L,R=301]
 RewriteRule ^legends-yearly$			/? [L,R=301]
 RewriteRule ^links.php(.*)$			/? [L,R=301]
+RewriteRule ^links2.php(.*)$			/? [L,R=301]
 RewriteRule ^logs.php(.*)$			/? [L,R=301]
 
 RewriteRule ^mining-on-darkside(.*)$		/? [L,R=301]
@@ -108,6 +111,8 @@ RewriteRule ^topkills.php(.*)$			/? [L,R=301]
 RewriteRule ^trades.php(.*)			/? [L,R=301]
 RewriteRule ^types-of-equipment(.*)$		./EquipmentTypes.do$1 [QSA,L]
 
+RewriteRule ^var/www-prod/supermob-listing(.*)$		/supermob-listing$1 [L,R=301]
+
 RewriteRule ^warrior-skills/(.*)$		./classes-and-races$1 [QSA,L]
 RewriteRule ^warrior-skills(.*)$		./classes-and-races$1 [QSA,L]
 RewriteRule ^weapon-listing(.*)$		/equipment-listing/weapons? [L,R=301]
@@ -116,3 +121,4 @@ RewriteRule ^weave-skills(.*)$			./classes-and-races$1 [QSA,L]
 RewriteRule ^web-socket-client(.*)$		./WebSocketClient.do$1 [QSA,L]
 RewriteRule ^what-is-a-mud(.*)$			/about-kinslayermud? [L,R=301]
 RewriteRule ^what-is-a-supermob(.*)$		./SuperMobWhatIs.do$1 [QSA,L]
+
