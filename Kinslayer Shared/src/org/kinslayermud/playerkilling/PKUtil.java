@@ -37,7 +37,6 @@ public class PKUtil {
     List<UserPlayerKill> userPlayerKills = new LinkedList<UserPlayerKill>();
     ResultSet resultSet = statement.executeQuery(sql);
     
-    System.out.println(sql);
     while(resultSet.next()) {
       
       userPlayerKills.add(getUserPlayerKill(resultSet));
@@ -114,7 +113,6 @@ public class PKUtil {
                + " FROM userPlayerKill"
                + " WHERE killer_id = " + killerUserId;
     
-    System.out.println(sql);
     Collection<Integer> playerKillIds = new HashSet<Integer>();
     ResultSet resultSet = statement.executeQuery(sql);
     

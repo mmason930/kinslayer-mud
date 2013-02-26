@@ -28,7 +28,6 @@ public class SuperMobListingAction extends StandardAction {
   
   public String execute(WebSupport webSupport) throws Exception {
 
-    System.out.println("Supermob listing.");
     String mobPrototypeIdParameter = StringUtil.removeNull(request.getParameter(MOBPROTOTYPEIDNEW_PARAMETER));
     Integer mobPrototypeId = null;
     
@@ -53,7 +52,7 @@ public class SuperMobListingAction extends StandardAction {
     }
 
     mobPrototypeMap = webSupport.getMobPrototypeMap(mobPrototypeIdCollection);
-    
+    MobPrototype mobPrototype = null;
     if(MiscUtil.isValidIntString(mobPrototypeIdParameter)) {
       
       mobPrototypeId = Integer.valueOf(mobPrototypeIdParameter);
@@ -61,7 +60,7 @@ public class SuperMobListingAction extends StandardAction {
       
         if(superMob.getMobId() == mobPrototypeId) {
 
-          MobPrototype mobPrototype = mobPrototypeMap.get(superMob.getMobId());
+          mobPrototype = mobPrototypeMap.get(superMob.getMobId());
           Zone zone = webSupport.getZoneLoadingSuperMobPrototype(superMob.getMobId());
           KitWithItemsAndObjectPrototypes kitWithItemsAndObjectPrototypes = webSupport.getKitWithItemsAndObjectPrototypes(mobPrototype.getPrimaryKit());
           
@@ -69,8 +68,15 @@ public class SuperMobListingAction extends StandardAction {
           request.setAttribute("MobPrototype", mobPrototype);
           request.setAttribute("SuperMob", superMob);
           request.setAttribute("KitWithItemsAndObjectPrototypes", kitWithItemsAndObjectPrototypes);
+          break;
         }
       }
+    }
+    
+    if(mobPrototype != null) {
+      
+      request.setAttribute("MetaDescription", mobPrototype.getShortDescription().replace("\"", "") + " Super Mob listing. View other super mobs in the game.");
+      request.setAttribute("Title", mobPrototype.getShortDescription().replace("\"", "") + " | Super MOB Listing | Kinslayer MUD");
     }
     
     request.setAttribute("SuperMobs", superMobs);

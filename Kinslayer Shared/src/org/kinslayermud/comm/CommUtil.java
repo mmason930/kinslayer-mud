@@ -99,7 +99,6 @@ public class CommUtil {
         + " FROM " + tempTableName
         + " WHERE id BETWEEN " + (offset + 1) + " AND " + (offset + fetchSize);
     
-    System.out.println("SQL : " + sql);
     resultSet = statement.executeQuery(sql);
     Collection<Integer> commIdCollection = new HashSet<Integer>();
     while(resultSet.next()) {
@@ -119,8 +118,6 @@ public class CommUtil {
       Comm comm = getComm(resultSet);
       tellHistory.add(comm);
     }
-    
-    System.out.println("Tell History Size: " + tellHistory.size());
     
     return tellHistory;
   }

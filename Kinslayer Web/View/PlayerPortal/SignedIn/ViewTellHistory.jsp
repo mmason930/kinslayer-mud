@@ -7,8 +7,6 @@ Map<Integer, MobPrototype> mobPrototypeMap = (Map<Integer, MobPrototype>)request
 Map<Integer, User> userMap = (Map<Integer, User>)request.getAttribute("UserMap");
 int pageNumber = (Integer)request.getAttribute("PageNumber");
 boolean hasNextPage = (Boolean)request.getAttribute("HasNextPage");
-System.out.println("Page Number: " + pageNumber);
-System.out.println("Has Next Page: " + hasNextPage);
 %>
 <div style="margin-top: 2%;"></div>
 <div class="tellHistoryPagination">
