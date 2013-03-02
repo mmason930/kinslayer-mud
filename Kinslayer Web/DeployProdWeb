@@ -3,12 +3,15 @@ COMMAND="ant -buildfile ./DeployWeb.xml"
 
 if [ ! -z "$1" ]
 then
-        if [ "$1" == "trunk" ]
-        then
-                COMMAND=$COMMAND" -Dbranch=$1"
-        else
-                COMMAND=$COMMAND" -Dbranch=branches/$1"
-        fi
+	if [ "$1" == "trunk" ]
+	then
+		COMMAND=$COMMAND" -Dbranch=$1"
+	elif [[ $1 == REV_* ]]
+	then
+		COMMAND=$COMMAND" -Dbranch=tags/$1"
+	else
+		COMMAND=$COMMAND" -Dbranch=branches/$1"
+	fi
 fi
 
 if [ ! -z "$2" ]

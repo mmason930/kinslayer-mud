@@ -1,6 +1,6 @@
 <project name="build kinslayermud" default="build" basedir=".">
 
-	<property name="web-root" value="C:\var\www-kin-prod\web"/>
+	<property name="web-root" value="C:\var\www-kin\web"/>
 	
 	<property name="kinslayer-web-root" value="./"/>
 	<property name="kinslayer-shared-root" value="../Kinslayer Shared"/>
