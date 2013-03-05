@@ -16,6 +16,7 @@ public class ObjectPrototype extends DataObjectWithIntId {
   protected int absorb;
   protected BigDecimal weight;
   protected int wear;
+  protected int[] values = new int[12];
   
   public String getShortDescription() {
     return shortDescription;
@@ -80,5 +81,15 @@ public class ObjectPrototype extends DataObjectWithIntId {
     }
     
     return objectWearTypes;
+  }
+  
+  public int getValue(int number) {
+    
+    return values[ number ];
+  }
+  
+  public void setValue(int number, int value) {
+    
+    this.values[ number ] = value;
   }
 }

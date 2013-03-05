@@ -25,6 +25,19 @@ public class ObjectUtil {
     objectPrototype.setAbsorb(resultSet.getInt("absorb"));
     objectPrototype.setWeight(resultSet.getBigDecimal("weight"));
     objectPrototype.setWear(resultSet.getInt("wear"));
+
+    objectPrototype.setValue(0 , resultSet.getInt("obj_flag0"));
+    objectPrototype.setValue(1 , resultSet.getInt("obj_flag1"));
+    objectPrototype.setValue(2 , resultSet.getInt("obj_flag2"));
+    objectPrototype.setValue(3 , resultSet.getInt("obj_flag3"));
+    objectPrototype.setValue(4 , resultSet.getInt("obj_flag4"));
+    objectPrototype.setValue(5 , resultSet.getInt("obj_flag5"));
+    objectPrototype.setValue(6 , resultSet.getInt("obj_flag6"));
+    objectPrototype.setValue(7 , resultSet.getInt("obj_flag7"));
+    objectPrototype.setValue(8 , resultSet.getInt("obj_flag8"));
+    objectPrototype.setValue(9 , resultSet.getInt("obj_flag9"));
+    objectPrototype.setValue(10, resultSet.getInt("obj_flag10"));
+    objectPrototype.setValue(11, resultSet.getInt("obj_flag11"));
     
     return objectPrototype;
   }

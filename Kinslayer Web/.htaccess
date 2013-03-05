@@ -47,12 +47,15 @@ RewriteRule ^gaining-experience-and-levels(.*)$	/? [L,R=301]
 RewriteRule ^game-maps(.*)$			/? [L,R=301]
 RewriteRule ^game_maps.php(.*)$			/? [L,R=301]
 RewriteRule ^get-next-featured-mud-listing/(.*)$		./GetNextFeaturedMUDListing.do?FeaturedMUDListingID=$1 [QSA,L]
-RewriteRule ^getting-started(.*)$		./getting_started.php$1 [QSA,L]
+RewriteRule ^getting-started(.*)$		/?$1 [L,R=301]
+
+RewriteRule ^help/(.*)$		./Help.ViewHelpFile.do?HelpFilePath=$1 [QSA,L]
+RewriteRule ^help(.*)$		./Help.ViewHelpFile.do$1 [QSA,L]
 
 RewriteRule ^index.php(.*)$	/$1 [QSA,L,R=301]
-RewriteRule ^introduction-to-mining(.*)$	./TradesMining.do$1 [QSA,L]
-RewriteRule ^introduction-to-smithing(.*)$	./TradesSmithing.do$1 [QSA,L]
-RewriteRule ^introduction-to-equipment(.*)$	./EquipmentIntroduction.do$1 [QSA,L]
+RewriteRule ^introduction-to-mining(.*)$	/? [L,R=301]
+RewriteRule ^introduction-to-smithing(.*)$	/? [L,R=301]
+RewriteRule ^introduction-to-equipment(.*)$	/? [L,R=301]
 
 RewriteRule ^help.php(.*)$			/? [L,R=301]
 
@@ -76,6 +79,8 @@ RewriteRule ^moving-around(.*)$			/? [L,R=301]
 RewriteRule ^namegen.php(.*)$			/? [L,R=301]
 RewriteRule ^new-to-muds(.*)$			/? [L,R=301]
 RewriteRule ^new_to_mud.php(.*)$		/? [L,R=301]
+RewriteRule ^new_to_mud_character_creation.php(.*)$		/? [L,R=301]
+
 
 RewriteRule ^player-portal-login(.*)$			./PlayerPortalSignIn.do$1 [QSA,L]
 RewriteRule ^player-portal-home(.*)$			./PlayerPortalHome.do$1 [QSA,L]
@@ -91,8 +96,8 @@ RewriteRule ^player-trades(.*)$				./TradesIntroduction.do$1 [QSA,L]
 
 RewriteRule ^quickguide.php(.*)			/about-kinslayermud? [L,R=301]
 
-RewriteRule ^ranger-skills/(.*)$		./character-skills?class_name=ranger&skill_name=$1 [QSA,L]
-RewriteRule ^ranger-skills(.*)$			./character-skills?class_name=ranger$1 [QSA,L]
+RewriteRule ^ranger-skills/(.*)$		/? [L,R=301]
+RewriteRule ^ranger-skills(.*)$			/? [L,R=301]
 RewriteRule ^rules.php(.*)$			/about-kinslayermud? [L,R=301]
 
 RewriteRule ^scumbait/(.*)$			/? [L,R=301]

@@ -12,6 +12,8 @@ import org.kinslayermud.character.User;
 import org.kinslayermud.comm.Comm;
 import org.kinslayermud.comm.CommUtil;
 import org.kinslayermud.exception.DataInterfaceException;
+import org.kinslayermud.help.HelpFile;
+import org.kinslayermud.help.HelpUtil;
 import org.kinslayermud.kit.KitUtil;
 import org.kinslayermud.kit.KitWithItemsAndObjectPrototypes;
 import org.kinslayermud.misc.Provider;
@@ -567,6 +569,114 @@ public class WebSupportImp implements WebSupport {
       connection.close();
       
       return featuredMUDListing;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public HelpFile getHelpFile(int helpFileId) throws DataInterfaceException {
+
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      HelpFile helpFile = HelpUtil.getHelpFile(statement, helpFileId, false);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return helpFile;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+
+  public HelpFile getHelpFileByModRewrittenName(String modRewrittenName, Integer parentId) throws DataInterfaceException {
+
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      HelpFile helpFile = HelpUtil.getHelpFileByModRewrittenName(statement, modRewrittenName, parentId, false);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return helpFile;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+
+  public List<HelpFile> getHelpFileChain(int helpFileId) throws DataInterfaceException {
+
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      List<HelpFile> helpFileChain = HelpUtil.getHelpFileChain(statement, helpFileId);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return helpFileChain;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public List<HelpFile> getHelpFilesByParentId(Integer parentId) throws DataInterfaceException {
+
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      List<HelpFile> helpFiles = HelpUtil.getHelpFilesByParentId(statement, parentId);
+      
+      statement.close();
+      connection.commit();
+      connection.close();
+      
+      return helpFiles;
     }
     catch(Throwable throwable) {
       

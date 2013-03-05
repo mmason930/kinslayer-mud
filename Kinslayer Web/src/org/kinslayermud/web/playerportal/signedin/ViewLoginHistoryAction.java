@@ -1,6 +1,5 @@
 package org.kinslayermud.web.playerportal.signedin;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -28,7 +27,6 @@ public class ViewLoginHistoryAction extends ValidateSignInAction {
         return arg0.getLoginDatetime().compareTo(arg1.getLoginDatetime());
       }
     });
-    
     
     request.setAttribute("UserLoginTable", MiscUtil.createOrderedColumnTable(userLogins, NUMBER_OF_COLUMNS));
     request.setAttribute("UserLogins", userLogins);

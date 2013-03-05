@@ -163,6 +163,16 @@
 		</action>
 		
 		
+		<!-- HELP FILES -->
+		<action name="Help.ViewHelpFile" class="org.kinslayermud.web.help.ViewHelpFileAction" method="execute">
+			<result name="Success" type="tiles">Help.ViewHelpFile</result>
+			<result name="Failure" type="redirect">help</result>
+		</action>
+		
+		<action name="Help.Home" class="org.kinslayermud.web.help.HomeAction" method="execute">
+			<result name="Success" type="tiles">Help.Home</result>
+		</action>
+		
 		
 		<!-- ADMIN -->
 		<action name="Admin.Home" class="org.kinslayermud.web.admin.HomeAction" method="execute">

@@ -553,21 +553,37 @@ a:hover {
 .equipmentWeaponTableContainerInner table tr td.offensiveColumn,
 .equipmentWeaponTableContainer .offensiveColumn
 {
-	width: 13.33%;
+	width: 8%;
 	text-align: center;
 }
 .equipmentWeaponTableContainerInner table tr th.parryColumn,
 .equipmentWeaponTableContainerInner table tr td.parryColumn,
 .equipmentWeaponTableContainer .parryColumn
 {
-	width: 13.33%;
+	width: 8%;
 	text-align: center;
 }
 .equipmentWeaponTableContainerInner table tr th.weightColumn,
 .equipmentWeaponTableContainerInner table tr td.weightColumn,
 .equipmentWeaponTableContainer .weightColumn
 {
-	width: 13.33%;
+	width: 8%;
+	text-align: center;
+}
+
+.equipmentWeaponTableContainerInner table tr th.damageLow,
+.equipmentWeaponTableContainerInner table tr td.damageLow,
+.equipmentWeaponTableContainer .damageLow
+{
+	width: 8%;
+	text-align: center;
+}
+
+.equipmentWeaponTableContainerInner table tr th.damageHigh,
+.equipmentWeaponTableContainerInner table tr td.damageHigh,
+.equipmentWeaponTableContainer .damageHigh
+{
+	width: 8%;
 	text-align: center;
 }
 

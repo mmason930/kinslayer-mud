@@ -1,6 +1,8 @@
 package org.kinslayermud.util;
 
-import org.kinslayermud.mob.SuperMob;
+import java.util.List;
+
+import org.kinslayermud.help.HelpFile;
 import org.kinslayermud.object.EquipmentListingType;
 import org.kinslayermud.object.ObjectWeaponType;
 import org.kinslayermud.object.ObjectWearType;
@@ -73,6 +75,25 @@ public class WebSiteUrlUtil {
   }
   public static String getSuperMobListingUrl(String instanceDomain, int mobPrototypeId, String mobShortDescription) {
     return "http://" + instanceDomain + "/supermob-listing/" + cleanUrlDisplayText(mobShortDescription) + "-" + mobPrototypeId;
+  }
+  public static String getHelpFileUrl(String instanceDomain, List<HelpFile> helpFileChain) {
+    
+    StringBuffer urlStringBuffer = new StringBuffer("http://" + instanceDomain + "/help");
+    for(HelpFile helpFile : helpFileChain) {
+      urlStringBuffer.append("/" + helpFile.getModRewrittenName());
+    }
+    
+    return urlStringBuffer.toString();
+  }
+  
+  public static String getHelpFileUrl(String instanceDomain, List<HelpFile> parentHelpFileChain, HelpFile helpFile) {
+    
+    StringBuffer urlStringBuffer = new StringBuffer("http://" + instanceDomain + "/help");
+    for(HelpFile parentHelpFile : parentHelpFileChain) {
+      urlStringBuffer.append("/" + parentHelpFile.getModRewrittenName());
+    }
+    
+    return urlStringBuffer.toString() + "/" + helpFile.getModRewrittenName();
   }
   
   protected static String cleanUrlDisplayText (String urlDisplayText) {

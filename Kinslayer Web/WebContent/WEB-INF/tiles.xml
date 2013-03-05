@@ -218,7 +218,26 @@
     <put-attribute name="leftNavSelected" value="GettingStarted"/>
   </definition>
   
+  <!-- HELP -->
+  <definition name="HelpLayout" extends="StandardLayout">
+    <put-attribute name="title" value=""/>
+    <put-attribute name="body" value="/View/Help/Framework/HelpLayout.jsp"/>
+    <put-attribute name="content" value="" cascade="true"/>
+    <put-attribute name="leftNavSelected" value="Help" cascade="true"/>
+  </definition>
   
+  <definition name="Help.Home" extends="HelpLayout">
+    <put-attribute name="title" value="Help Files | Kinslayer MUD | Free Online Game"/>
+    <put-attribute name="content" value="/View/Help/Home.jsp" cascade="true"/>
+  </definition>
+  
+  <definition name="Help.ViewHelpFile" extends="HelpLayout">
+    <put-attribute name="title" value=""/>
+    <put-attribute name="content" value="/View/Help/ViewHelpFile.jsp" cascade="true"/>
+  </definition>
+  
+  
+  <!-- ADMIN -->
   <definition name="Admin.ViewUserLog" extends="StandardLayout">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
     <put-attribute name="body" value="/View/Admin/ViewUserLog.jsp"/>

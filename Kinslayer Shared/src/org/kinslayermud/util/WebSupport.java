@@ -8,6 +8,7 @@ import org.kinslayermud.advertising.FeaturedMUDListing;
 import org.kinslayermud.character.User;
 import org.kinslayermud.comm.Comm;
 import org.kinslayermud.exception.DataInterfaceException;
+import org.kinslayermud.help.HelpFile;
 import org.kinslayermud.kit.KitWithItemsAndObjectPrototypes;
 import org.kinslayermud.mob.MobPrototype;
 import org.kinslayermud.mob.SuperMob;
@@ -44,4 +45,8 @@ public interface WebSupport {
   public List<Comm> getTellHistory(int userId, int offset, int fetchSize) throws DataInterfaceException;
   public void putUserLog(UserLog userLog) throws DataInterfaceException;
   public FeaturedMUDListing getRandomFeaturedMUDListing(Collection<Integer> featuredMUDListingIdCollectionToExclude) throws DataInterfaceException;
+  public HelpFile getHelpFile(int helpFileId) throws DataInterfaceException;
+  public HelpFile getHelpFileByModRewrittenName(String modRewrittenName, Integer parentId) throws DataInterfaceException;
+  public List<HelpFile> getHelpFileChain(int helpFileId) throws DataInterfaceException;
+  public List<HelpFile> getHelpFilesByParentId(Integer parentId) throws DataInterfaceException;
 }

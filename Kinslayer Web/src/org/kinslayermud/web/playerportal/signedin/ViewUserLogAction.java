@@ -1,13 +1,11 @@
 package org.kinslayermud.web.playerportal.signedin;
 
 import org.kinslayermud.character.User;
-import org.kinslayermud.exception.DataInterfaceException;
 import org.kinslayermud.telnet.TelnetColor;
 import org.kinslayermud.userlog.UserLog;
 import org.kinslayermud.util.MiscUtil;
 import org.kinslayermud.util.StringUtil;
 import org.kinslayermud.util.WebSupport;
-import org.kinslayermud.util.WebSupportImp;
 
 public class ViewUserLogAction extends ValidateSignInAction {
 
