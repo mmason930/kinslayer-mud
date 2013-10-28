@@ -65,48 +65,37 @@ std::string Execute( const char *command )
 #endif
 
 #ifndef WIN32
-std::string ParseMemoryFromMemInfo( std::string sLineBuffer )
-{
-	std::string sTagName, sNumber;
-	std::string::size_type iPos = sLineBuffer.find(":");
-
-	sTagName = sLineBuffer.substr(0,iPos);
-	if( sTagName == "MemFree" ) {
-		sNumber = sLineBuffer.substr(iPos+1);
-
-		while( sNumber.size() > 0 && sNumber[ 0 ] == ' ' )
-			sNumber.erase(0,1);
-
-		std::vector< std::string > vParts = StringUtil::SplitToContainer< std::vector< std::string >, std::string >( sNumber, ' ' );
-
-		if( vParts.size() != 2 )
-			return "";
-
-		__int64 llBytes;
-		if( vParts[ 1 ] == "kB" )
-			llBytes = (MiscUtil::Convert< __int64 >( vParts[ 0 ] ) * 1024LL);
-		if( vParts[ 1 ] == "mB" )
-			llBytes = (MiscUtil::Convert< __int64 >( vParts[ 0 ] ) * 1048576LL);
-		if( vParts[ 1 ] == "gB" )
-			llBytes = (MiscUtil::Convert< __int64 >( vParts[ 0 ] ) * 1073741824LL);
-		return MiscUtil::Convert< std::string >( llBytes );
-	}
-	return "";
-}
 __int64 AvailableSystemMemory()
 {
-	std::ifstream inFile( "/proc/meminfo" );
-
-	if( !inFile.is_open() )
+	char buffer[1024];
+	FILE *processPipe = popen("/usr/bin/free", "r");
+	if(processPipe == NULL)
+	{
 		return -1;
-	std::string sMemory;
-	std::string sLineBuffer;
-	while( !inFile.eof() ) {
-		std::getline( inFile, sLineBuffer );
-		sMemory = ParseMemoryFromMemInfo( sLineBuffer );
-		if( !sMemory.empty() )
-			return MiscUtil::Convert< __int64 >( sMemory );
 	}
+
+	std::string str;
+	while(!feof(processPipe))
+	{
+		fgets(buffer, 1023, processPipe);
+
+		str += std::string(buffer);
+	}
+
+	fclose(processPipe);
+
+	std::vector<std::string> lineVector = StringUtil::SplitToVector(str, '\n');
+	for(int index = 0;index < lineVector.size();++index)
+	{
+		std::cout << "Line: " << lineVector[index] << std::endl;
+		if(StringUtil::startsWith(lineVector[index], "-/+"))
+		{
+			std::vector<std::string> wordVector = StringUtil::SplitToVector(lineVector[index], ' ');
+			if(wordVector.size() > 0)
+				return MiscUtil::Convert< __int64 >( wordVector[ wordVector.size() - 1 ] );
+		}
+	}
+
 	return -1;
 }
 #endif

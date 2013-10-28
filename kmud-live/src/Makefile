@@ -25,6 +25,7 @@ BINDIR = ../bin
 
 CPPFLAGS = -ggdb3 $(MYFLAGS) $(PROFILE)
 
+#LIBS = -lmysqlclient -lsqlDatabase -lflusspferd -lcrypt -lstdc++ -lboost_regex -lboost_filesystem -lmozjs -lboost_thread
 LIBS = -lmysqlclient -lsqlDatabase -lflusspferd -lcrypt -lstdc++ -lboost_regex -lboost_filesystem -lmozjs -lboost_thread
 
 OBJDIR = obj
@@ -47,7 +48,7 @@ OBJFILES = comm.o act.comm.o act.informative.o act.movement.o act.item.o \
 	GatewayListener.o WebSocketDataFrame.o WebSocketClientHeaderIETF_HYBI17.o WebSocketClientHeader.o \
 	HttpServer.o WebSocketClientHeaderHixie76.o sha1.o TestResource.o HttpResponse.o HttpQueue.o \
 	HttpProtocol.o HttpUtil.o HttpDescriptor.o HttpRequest.o GatewayDescriptorType.o \
-	jsoncpp/json_reader.o jsoncpp/json_writer.o jsoncpp/json_value.o
+	jsoncpp/json_reader.o jsoncpp/json_writer.o jsoncpp/json_value.o sqlDatabase.o
 
 OBJFILES := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILES))
 
