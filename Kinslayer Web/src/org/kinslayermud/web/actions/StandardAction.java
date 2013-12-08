@@ -11,7 +11,6 @@ import org.apache.struts2.util.ServletContextAware;
 import org.kinslayermud.misc.Provider;
 import org.kinslayermud.util.MiscUtil;
 import org.kinslayermud.util.WebSupport;
-import org.kinslayermud.util.WebSupportImp;
 import org.kinslayermud.web.util.HttpUtil;
 
 import com.opensymphony.xwork2.ActionSupport;
@@ -33,7 +32,7 @@ public abstract class StandardAction extends ActionSupport implements ServletReq
   
     Provider provider = new Provider();
     provider.loadConfiguration(this.servletContext.getInitParameter("ConfigurationPath"));
-    webSupport = new WebSupportImp(provider);
+    webSupport = new WebSupport(provider);
     
     request.setAttribute("WebSupport", webSupport);
     

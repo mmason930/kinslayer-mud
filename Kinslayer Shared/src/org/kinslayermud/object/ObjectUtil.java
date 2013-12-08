@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.kinslayermud.util.SQLUtil;
 
@@ -96,5 +97,12 @@ public class ObjectUtil {
     String orderBy = " sdesc";
     
     return getObjectPrototypesMeetingCriteria(statement, criteria, orderBy);
+  }
+  
+  public static Map<String, Obj> getObjectMap(Statement statement, Set<String> objectIdSet) throws SQLException {
+    
+    Map<String, Obj> objectMap = new HashMap<String, Obj>();
+    
+    return objectMap;
   }
 }
