@@ -109,7 +109,7 @@ public class ObjectUtil {
     
     String retoolShortDescription = resultSet.getString("object_retools.retool_sdesc");
     String specialShortDescription = resultSet.getString("object_specials.sdesc");
-    String objectShortDescription = resultSet.getString("objects.sdesc");
+    String objectPrototypeShortDescription = resultSet.getString("obj_protos.sdesc");
     
     if(!StringUtil.isNullOrEmptyTrimmedString(retoolShortDescription)) {
       object.setShortDescription(retoolShortDescription);
@@ -118,7 +118,7 @@ public class ObjectUtil {
       object.setShortDescription(specialShortDescription);
     }
     else {
-      object.setShortDescription(objectShortDescription);
+      object.setShortDescription(objectPrototypeShortDescription);
     }
     
     return object;
