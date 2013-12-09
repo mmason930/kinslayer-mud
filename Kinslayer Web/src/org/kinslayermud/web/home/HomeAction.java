@@ -18,19 +18,11 @@ public class HomeAction extends StandardAction {
   private static String SUCCESS_FORWARD = "Success";
   
   public String execute(WebSupport webSupport) throws Exception {
+
+    List<PlayerKill> playerKills = webSupport.getHomePlayerKills();
+    Map<Integer, User> userMap = webSupport.getHomeUserMap();
     
-    //Player Kills...
-    List<PlayerKill> playerKills = webSupport.getLastSoManyPlayerKills(10);
-    
-    Collection<Integer> userIdCollection = new HashSet<Integer>();
-    
-    for(PlayerKill playerKill : playerKills) {
-      
-      userIdCollection.addAll(playerKill.getUserIdSet());
-    }
-    
-    Map<Integer, User> userMap = webSupport.getUserMap(userIdCollection);
-    
+    /***
     //Auction Items...
     List<AuctionItem> auctionItems = webSupport.getActiveAuctionItems();
     Set<String> objectIdSet = new HashSet<String>();
@@ -41,10 +33,10 @@ public class HomeAction extends StandardAction {
     }
     
     Map<String, Obj> objectMap = webSupport.getObjectMap(objectIdSet);
-    
+    ***/
     
     request.setAttribute("PlayerKills", playerKills);
-    request.setAttribute("AuctionItems", auctionItems);
+    //request.setAttribute("AuctionItems", auctionItems);
     request.setAttribute("UserMap", userMap);
     
     return SUCCESS_FORWARD;

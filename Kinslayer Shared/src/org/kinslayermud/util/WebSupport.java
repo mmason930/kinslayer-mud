@@ -3,6 +3,7 @@ package org.kinslayermud.util;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,8 +43,44 @@ import org.kinslayermud.zone.ZoneUtil;
 public class WebSupport {
 
   protected Provider provider;
+  protected List<PlayerKill> homePlayerKills;
+  protected Map<Integer, User> homeUserMap;
+  
+  public List<PlayerKill> getHomePlayerKills() {
+    
+    return homePlayerKills;
+  }
+  
+  public Map<Integer, User> getHomeUserMap() {
+    
+    return homeUserMap;
+  }
+  
+  public void loadHomeResources() {
+    
+    try {
+      homePlayerKills = getLastSoManyPlayerKills(10);
+    
+      Collection<Integer> userIdCollection = new HashSet<Integer>();
+    
+      for(PlayerKill playerKill : homePlayerKills) {
+      
+        userIdCollection.addAll(playerKill.getUserIdSet());
+      }
+    
+      homeUserMap = getUserMap(userIdCollection);
+    }
+    catch(Exception exception) {
+      
+      System.out.println("Could not load home resources.");
+      exception.printStackTrace();
+    }
+  }
+  
   public WebSupport(Provider provider) {
     this.provider = provider;
+    
+    loadHomeResources();
   }
   
   public User performLogin(String username, String password) throws DataInterfaceException {
