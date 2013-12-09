@@ -17,7 +17,7 @@ public class AuctionUtil {
 
     auctionItem.setId(resultSet.getInt("auctionItem.id"));
     auctionItem.setAuctionId(resultSet.getInt("auctionItem.auction_id"));
-    auctionItem.setObjectId(resultSet.getString("actionItem.object_id"));
+    auctionItem.setObjectId(resultSet.getString("auctionItem.object_id"));
     auctionItem.setOwnerId(resultSet.getInt("auctionItem.owner_id"));
     auctionItem.setEndTime(resultSet.getLong("auctionItem.end_time"));
     auctionItem.setStartingPrice(resultSet.getLong("auctionItem.starting_price"));
