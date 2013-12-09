@@ -10,14 +10,7 @@ List<AuctionItem> auctionItems = (List<AuctionItem>)request.getAttribute("Auctio
 %>
         <a href="./mudclient/mudclient.php" class="playNowButton">Play Now!</a>
 
-		<div class="homeContent">
-			<h1>A Free Online Wheel of Time Based Game</h1>
-			<div class="siteDescription">
-				<p>Kinslayer MUD is a <strong>free online text-based game</strong>. A Multi-user dungeon is one of the oldest forms of online gaming. They lack the complexity of graphics, allowing for intense competition in ways that no modern-day game can accurately capture.</p>
-				<p>Based on Robert Jordan's popular "Wheel of Time" fantasy series, Kinslayer features popular elements of the books such as <strong>Shadowspawn</strong> classes such as <strong>Trollocs</strong> and <strong>Myrddraal</strong> and classes such as tainted male channelers. To jump into the thick of the action, click the "Play Now!" button above!
-			</div>
-		</div>
-		
+
 <style type="text/css">
 .auctionsContainer {
 	float: left;
@@ -36,6 +29,27 @@ List<AuctionItem> auctionItems = (List<AuctionItem>)request.getAttribute("Auctio
 
 .auctionsContainer a {
 	color: #0000FF;
+}
+
+.auctionsContainer .auction {
+	margin-bottom: 10px;
+}
+
+.auctionsContainer .auction:last-child {
+	margin-bottom: 0px;
+}
+
+
+.copper {
+	color: #BA6D00;
+}
+
+.silver {
+	color: #969696;
+}
+
+.gold {
+	color: #FFD000;
 }
 
 </style>
@@ -60,30 +74,48 @@ for(AuctionItem auctionItem : auctionItems) {
     }
     
 %>
-			<%=StringUtil.escapeHTMLCharacters(shortDescription) %><br>
-			by 
+			<div class="auction">
+				<%=StringUtil.escapeHTMLCharacters(shortDescription) %><br>
+				by 
 <%
     if(user != null) {
 %>
-			<a href="<%=userUrl%>">
+				<a href="<%=userUrl%>">
 <%
     }
 %>
-				<%=userName %>
+					<%=userName %>
 <%
     if(user != null) {
 %>
-			</a>
+				</a>
 <%
     }
 %>
-			<%=moneyBreakdown.getGold() %>g, <%=moneyBreakdown.getSilver() %>s, <%=moneyBreakdown.getCopper() %>c
-			<br/>
+				<span class="gold">
+					<%=moneyBreakdown.getGold() %>g
+				</span>, 
+				<span class="silver">
+					<%=moneyBreakdown.getSilver() %>s
+				</span>,
+				<span class="copper">
+					<%=moneyBreakdown.getCopper() %>c
+				</span>
+			</div>
 <%
   }
 }
 %>
 		</div>
+
+		<div class="homeContent">
+			<h1>A Free Online Wheel of Time Based Game</h1>
+			<div class="siteDescription">
+				<p>Kinslayer MUD is a <strong>free online text-based game</strong>. A Multi-user dungeon is one of the oldest forms of online gaming. They lack the complexity of graphics, allowing for intense competition in ways that no modern-day game can accurately capture.</p>
+				<p>Based on Robert Jordan's popular "Wheel of Time" fantasy series, Kinslayer features popular elements of the books such as <strong>Shadowspawn</strong> classes such as <strong>Trollocs</strong> and <strong>Myrddraal</strong> and classes such as tainted male channelers. To jump into the thick of the action, click the "Play Now!" button above!
+			</div>
+		</div>
+		
 
 		<div class="battleLogContainer">
 			<h2 class="battleLogDescription">Live Battle Reports</h2>
