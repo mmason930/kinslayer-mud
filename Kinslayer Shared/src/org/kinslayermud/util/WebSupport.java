@@ -68,7 +68,7 @@ public class WebSupport {
     
       Collection<Integer> userIdCollection = new HashSet<Integer>();
     
-      for(PlayerKill playerKill : homePlayerKills) {
+      for(PlayerKill playerKill : playerKills) {
       
         userIdCollection.addAll(playerKill.getUserIdSet());
       }
