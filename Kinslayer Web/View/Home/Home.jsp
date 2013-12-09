@@ -101,15 +101,9 @@ for(AuctionItem auctionItem : auctionItems) {
 <%
     }
 %>
-				<span class="gold">
-					<%=moneyBreakdown.getGold() %>g
-				</span>, 
-				<span class="silver">
-					<%=moneyBreakdown.getSilver() %>s
-				</span>,
-				<span class="copper">
-					<%=moneyBreakdown.getCopper() %>c
-				</span>
+				<span class="gold"><%=moneyBreakdown.getGold() %>g</span>, 
+				<span class="silver"><%=moneyBreakdown.getSilver() %>s</span>,
+				<span class="copper"><%=moneyBreakdown.getCopper() %>c</span>
 			</div>
 <%
   }
