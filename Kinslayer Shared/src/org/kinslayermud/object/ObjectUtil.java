@@ -130,7 +130,7 @@ public class ObjectUtil {
     String sql = " SELECT "
                + "   objects.id,"
                + "   objects.vnum,"
-               + "   obj_protos.sdesc."
+               + "   obj_protos.sdesc,"
                + "   object_specials.sdesc,"
                + "   object_retools.retool_sdesc"
                + " FROM (objects)"
