@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.kinslayermud.util.SQLUtil;
+import org.kinslayermud.util.StringUtil;
 
 public class ObjectUtil {
 
@@ -99,9 +100,52 @@ public class ObjectUtil {
     return getObjectPrototypesMeetingCriteria(statement, criteria, orderBy);
   }
   
+  public static Obj getObject(ResultSet resultSet) throws SQLException {
+    
+    Obj object = new Obj();
+    
+    object.setId(resultSet.getString("objects.id"));
+    object.setVnum(resultSet.getInt("objects.vnum"));
+    
+    String retoolShortDescription = resultSet.getString("object_retools.retool_sdesc");
+    String specialShortDescription = resultSet.getString("object_specials.sdesc");
+    String objectShortDescription = resultSet.getString("objects.sdesc");
+    
+    if(!StringUtil.isNullOrEmptyTrimmedString(retoolShortDescription)) {
+      object.setShortDescription(retoolShortDescription);
+    }
+    else if(!StringUtil.isNullOrEmptyTrimmedString(specialShortDescription)) {
+      object.setShortDescription(specialShortDescription);
+    }
+    else {
+      object.setShortDescription(objectShortDescription);
+    }
+    
+    return object;
+  }
+  
   public static Map<String, Obj> getObjectMap(Statement statement, Set<String> objectIdSet) throws SQLException {
     
     Map<String, Obj> objectMap = new HashMap<String, Obj>();
+    String sql = " SELECT "
+               + "   objects.id,"
+               + "   objects.vnum,"
+               + "   obj_protos.sdesc."
+               + "   object_specials.sdesc,"
+               + "   object_retools.retool_sdesc"
+               + " FROM (objects)"
+               + " LEFT JOIN obj_protos ON obj_protos.vnum = objects.vnum"
+               + " LEFT JOIN object_specials ON object_specials.id = objects.id"
+               + " LEFT JOIN object_retools ON object_retools.id = objects.id"
+               + " WHERE objects.id IN " + SQLUtil.buildListSQL(objectIdSet, true, true);
+    ResultSet resultSet = statement.executeQuery(sql);
+    
+    while(resultSet.next()) {
+      
+      Obj object = getObject(resultSet);
+      
+      objectMap.put(object.getId(), object);
+    }
     
     return objectMap;
   }

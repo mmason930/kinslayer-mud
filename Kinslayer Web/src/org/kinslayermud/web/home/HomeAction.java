@@ -3,7 +3,9 @@ package org.kinslayermud.web.home;
 import java.util.List;
 import java.util.Map;
 
+import org.kinslayermud.auction.AuctionItem;
 import org.kinslayermud.character.User;
+import org.kinslayermud.object.Obj;
 import org.kinslayermud.playerkilling.PlayerKill;
 import org.kinslayermud.util.WebSupport;
 import org.kinslayermud.web.actions.StandardAction;
@@ -16,22 +18,15 @@ public class HomeAction extends StandardAction {
 
     List<PlayerKill> playerKills = webSupport.getHomePlayerKills();
     Map<Integer, User> userMap = webSupport.getHomeUserMap();
+    Map<String, Obj> objectMap = webSupport.getHomeObjectMap();
+    List<AuctionItem> auctionItems = webSupport.getHomeAuctionItems();
     
-    /***
-    //Auction Items...
-    List<AuctionItem> auctionItems = webSupport.getActiveAuctionItems();
-    Set<String> objectIdSet = new HashSet<String>();
-    
-    for(AuctionItem auctionItem : auctionItems) {
-      
-      objectIdSet.add(auctionItem.getObjectId());
-    }
-    
-    Map<String, Obj> objectMap = webSupport.getObjectMap(objectIdSet);
-    ***/
+    System.out.println("Auction Items: " + auctionItems.size());
+    System.out.println("Object Map: " + objectMap.size());
     
     request.setAttribute("PlayerKills", playerKills);
-    //request.setAttribute("AuctionItems", auctionItems);
+    request.setAttribute("AuctionItems", auctionItems);
+    request.setAttribute("ObjectMap", objectMap);
     request.setAttribute("UserMap", userMap);
     
     return SUCCESS_FORWARD;

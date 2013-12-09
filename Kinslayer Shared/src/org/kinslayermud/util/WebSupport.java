@@ -46,6 +46,7 @@ public class WebSupport {
   protected volatile List<PlayerKill> homePlayerKills;
   protected volatile Map<Integer, User> homeUserMap;
   protected volatile List<AuctionItem> homeAuctionItems;
+  protected volatile Map<String, Obj> homeObjectMap;
   
   public List<PlayerKill> getHomePlayerKills() {
     
@@ -57,6 +58,16 @@ public class WebSupport {
     return homeUserMap;
   }
   
+  public List<AuctionItem> getHomeAuctionItems() {
+    
+    return homeAuctionItems;
+  }
+  
+  public Map<String, Obj> getHomeObjectMap() {
+    
+    return homeObjectMap;
+  }
+  
   public void loadHomeResources() {
     
     try {
@@ -64,7 +75,17 @@ public class WebSupport {
       System.out.println("Loading Home Resources...");
       
       List<PlayerKill> playerKills = getLastSoManyPlayerKills(10);
+      List<AuctionItem> auctionItems = getActiveAuctionItems();
       Map<Integer, User> userMap;
+      Map<String, Obj> objectMap;
+      Set<String> objectIdSet = new HashSet<String>();
+      
+      for(AuctionItem auctionItem : auctionItems) {
+        
+        objectIdSet.add(auctionItem.getObjectId());
+      }
+      
+      objectMap = getObjectMap(objectIdSet);
     
       Collection<Integer> userIdCollection = new HashSet<Integer>();
     
@@ -77,6 +98,8 @@ public class WebSupport {
       
       this.homePlayerKills = playerKills;
       this.homeUserMap = userMap;
+      this.homeAuctionItems = auctionItems;
+      this.homeObjectMap = objectMap;
     }
     catch(Exception exception) {
       
