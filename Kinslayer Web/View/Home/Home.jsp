@@ -52,6 +52,15 @@ List<AuctionItem> auctionItems = (List<AuctionItem>)request.getAttribute("Auctio
 	color: #FFD000;
 }
 
+
+a.blueLink:hover {
+	color: #880015;
+}
+
+a.blueLink {
+	color: #3953FA;
+}
+
 </style>
 
 		<div class="auctionsContainer">
@@ -80,7 +89,7 @@ for(AuctionItem auctionItem : auctionItems) {
 <%
     if(user != null) {
 %>
-				<a href="<%=userUrl%>">
+				<a href="<%=userUrl%>" class="blueLink">
 <%
     }
 %>
