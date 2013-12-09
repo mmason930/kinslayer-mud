@@ -11,6 +11,7 @@
 <%@ page import="org.kinslayermud.user.login.*" %>
 <%@ page import="org.kinslayermud.comm.*" %>
 <%@ page import="org.kinslayermud.help.*" %>
+<%@ page import="org.kinslayermud.auction.*" %>
 <%@ page import="java.net.*" %>
 <%@ page import="java.util.*" %>
 <%

@@ -79,15 +79,16 @@ public class WebSupport {
       Map<Integer, User> userMap;
       Map<String, Obj> objectMap;
       Set<String> objectIdSet = new HashSet<String>();
+      Collection<Integer> userIdCollection = new HashSet<Integer>();
       
       for(AuctionItem auctionItem : auctionItems) {
         
         objectIdSet.add(auctionItem.getObjectId());
+        userIdCollection.add(auctionItem.getOwnerId());
       }
       
       objectMap = getObjectMap(objectIdSet);
     
-      Collection<Integer> userIdCollection = new HashSet<Integer>();
     
       for(PlayerKill playerKill : playerKills) {
       

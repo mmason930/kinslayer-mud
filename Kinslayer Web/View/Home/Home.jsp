@@ -4,6 +4,8 @@
 
 List<PlayerKill> playerKills = (List<PlayerKill>)request.getAttribute("PlayerKills");
 Map<Integer, User> userMap = (Map<Integer, User>)request.getAttribute("UserMap");
+Map<String, Obj> objectMap = (Map<String, Obj>)request.getAttribute("ObjectMap");
+List<AuctionItem> auctionItems = (List<AuctionItem>)request.getAttribute("AuctionItems");
 
 %>
         <a href="./mudclient/mudclient.php" class="playNowButton">Play Now!</a>
@@ -14,6 +16,56 @@ Map<Integer, User> userMap = (Map<Integer, User>)request.getAttribute("UserMap")
 				<p>Kinslayer MUD is a <strong>free online text-based game</strong>. A Multi-user dungeon is one of the oldest forms of online gaming. They lack the complexity of graphics, allowing for intense competition in ways that no modern-day game can accurately capture.</p>
 				<p>Based on Robert Jordan's popular "Wheel of Time" fantasy series, Kinslayer features popular elements of the books such as <strong>Shadowspawn</strong> classes such as <strong>Trollocs</strong> and <strong>Myrddraal</strong> and classes such as tainted male channelers. To jump into the thick of the action, click the "Play Now!" button above!
 			</div>
+		</div>
+		
+<style type="text/css">
+.auctionsContainer {
+	float: left;
+	width: 17%;
+	margin-left: 1.5%;
+	/*** border: 1px solid #FFF; ***/
+}
+
+.bold {
+	font-weight: bold;
+}
+
+.centerText {
+	text-align: center;
+}
+
+.auctionsContainer a {
+	color: #0000FF;
+}
+
+</style>
+
+		<div class="auctionsContainer">
+
+			<div class="bold centerText">Open Auctions</div><br>
+<%
+for(AuctionItem auctionItem : auctionItems) {
+  Obj object = objectMap.get(auctionItem.getObjectId());
+  User user = userMap.get(auctionItem.getOwnerId());
+  
+  if(object != null) {
+
+    MoneyBreakdown moneyBreakdown = new MoneyBreakdown(auctionItem.getStartingPrice());
+    String shortDescription = object.getShortDescription();
+    String userName = "<Deleted>", userUrl = null;
+    
+    if(user != null) {
+      userName = user.getUserName();
+      userUrl = WebSiteUrlUtil.getForumProfileUrl(user.getUserId());
+    }
+    
+%>
+			<%=StringUtil.escapeHTMLCharacters(shortDescription) %><br>
+			by <a href="#">Galnor</a> 15g, 12s, 3c
+<%
+  }
+}
+%>
 		</div>
 
 		<div class="battleLogContainer">
