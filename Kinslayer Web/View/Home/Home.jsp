@@ -61,7 +61,24 @@ for(AuctionItem auctionItem : auctionItems) {
     
 %>
 			<%=StringUtil.escapeHTMLCharacters(shortDescription) %><br>
-			by <a href="#">Galnor</a> 15g, 12s, 3c
+			by 
+<%
+    if(user != null) {
+%>
+			<a href="<%=userUrl%>">
+<%
+    }
+%>
+				<%=userName %>
+<%
+    if(user != null) {
+%>
+			</a>
+<%
+    }
+%>
+			<%=moneyBreakdown.getGold() %>g, <%=moneyBreakdown.getSilver() %>s, <%=moneyBreakdown.getCopper() %>c
+			<br/>
 <%
   }
 }
