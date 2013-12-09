@@ -23,7 +23,7 @@ public class KinslayerServiceThread extends Thread implements Runnable {
     while(running) {
       
       long currentTime = System.currentTimeMillis();
-      if(timeOfLastHomeResourcesLoad + HOME_RESOURCES_LOAD_MS >= currentTime) {
+      if(currentTime >= timeOfLastHomeResourcesLoad + HOME_RESOURCES_LOAD_MS) {
         
         webSupport.loadHomeResources();
         timeOfLastHomeResourcesLoad = System.currentTimeMillis();
