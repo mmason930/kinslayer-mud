@@ -1,14 +1,9 @@
 package org.kinslayermud.web.home;
 
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.kinslayermud.auction.AuctionItem;
 import org.kinslayermud.character.User;
-import org.kinslayermud.object.Obj;
 import org.kinslayermud.playerkilling.PlayerKill;
 import org.kinslayermud.util.WebSupport;
 import org.kinslayermud.web.actions.StandardAction;

@@ -43,8 +43,9 @@ import org.kinslayermud.zone.ZoneUtil;
 public class WebSupport {
 
   protected Provider provider;
-  protected List<PlayerKill> homePlayerKills;
-  protected Map<Integer, User> homeUserMap;
+  protected volatile List<PlayerKill> homePlayerKills;
+  protected volatile Map<Integer, User> homeUserMap;
+  protected volatile List<AuctionItem> homeAuctionItems;
   
   public List<PlayerKill> getHomePlayerKills() {
     
@@ -59,7 +60,11 @@ public class WebSupport {
   public void loadHomeResources() {
     
     try {
-      homePlayerKills = getLastSoManyPlayerKills(10);
+      
+      System.out.println("Loading Home Resources...");
+      
+      List<PlayerKill> playerKills = getLastSoManyPlayerKills(10);
+      Map<Integer, User> userMap;
     
       Collection<Integer> userIdCollection = new HashSet<Integer>();
     
@@ -68,7 +73,10 @@ public class WebSupport {
         userIdCollection.addAll(playerKill.getUserIdSet());
       }
     
-      homeUserMap = getUserMap(userIdCollection);
+      userMap = getUserMap(userIdCollection);
+      
+      this.homePlayerKills = playerKills;
+      this.homeUserMap = userMap;
     }
     catch(Exception exception) {
       

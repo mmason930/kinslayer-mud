@@ -1,11 +1,16 @@
 package org.kinslayermud.web.servletcontext;
 
+import java.util.Date;
+
 import org.kinslayermud.util.WebSupport;
 
 public class KinslayerServiceThread extends Thread implements Runnable {
 
   protected WebSupport webSupport;
   protected volatile boolean running;
+  
+  protected final long HOME_RESOURCES_LOAD_MS = 15000;
+  protected long timeOfLastHomeResourcesLoad = System.currentTimeMillis();
   
   public KinslayerServiceThread(WebSupport webSupport) {
     
@@ -16,6 +21,13 @@ public class KinslayerServiceThread extends Thread implements Runnable {
   public void run() {
     
     while(running) {
+      
+      long currentTime = System.currentTimeMillis();
+      if(timeOfLastHomeResourcesLoad + HOME_RESOURCES_LOAD_MS >= currentTime) {
+        
+        webSupport.loadHomeResources();
+        timeOfLastHomeResourcesLoad = System.currentTimeMillis();
+      }
       
       Thread.yield();
     }
