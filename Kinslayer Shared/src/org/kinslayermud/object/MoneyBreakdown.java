@@ -8,7 +8,7 @@ public class MoneyBreakdown {
   
   public MoneyBreakdown(long total) {
     
-    copper = (int) (total % 10000);
+    copper = (int) (total % 100);
     silver = (int) (total / 100) % 100;
     gold   = (int) (total / 10000);
   }

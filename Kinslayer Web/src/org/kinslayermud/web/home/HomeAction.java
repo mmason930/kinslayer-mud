@@ -21,9 +21,6 @@ public class HomeAction extends StandardAction {
     Map<String, Obj> objectMap = webSupport.getHomeObjectMap();
     List<AuctionItem> auctionItems = webSupport.getHomeAuctionItems();
     
-    System.out.println("Auction Items: " + auctionItems.size());
-    System.out.println("Object Map: " + objectMap.size());
-    
     request.setAttribute("PlayerKills", playerKills);
     request.setAttribute("AuctionItems", auctionItems);
     request.setAttribute("ObjectMap", objectMap);
