@@ -8,8 +8,17 @@ import org.kinslayermud.util.WebSupport;
 
 public class KinslayerServletContext implements ServletContextListener {
   
+  protected KinslayerServiceThread kinslayerServiceThread;
+  
   public void contextDestroyed(ServletContextEvent servletContextEvent) {
     
+    kinslayerServiceThread.kill();
+    try {
+      kinslayerServiceThread.join();
+    }
+    catch (InterruptedException e) {
+      e.printStackTrace();
+    }
   }
 
   public void contextInitialized(ServletContextEvent servletContextEvent) {
@@ -20,6 +29,10 @@ public class KinslayerServletContext implements ServletContextListener {
       WebSupport webSupport = new WebSupport(provider);
     
       servletContextEvent.getServletContext().setAttribute("WebSupport", webSupport);
+      
+      KinslayerServiceThread kinslayerServiceThread = new KinslayerServiceThread(webSupport);
+      kinslayerServiceThread.setName("Kinslayer Service Thread");
+      kinslayerServiceThread.start();
     }
     catch(Exception exception) {
       
