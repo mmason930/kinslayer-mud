@@ -3,14 +3,28 @@ package org.kinslayermud.web.servletcontext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-public class KinslayerServletContext implements ServletContextListener {
+import org.kinslayermud.misc.Provider;
+import org.kinslayermud.util.WebSupport;
 
-  public void contextDestroyed(ServletContextEvent arg0) {
+public class KinslayerServletContext implements ServletContextListener {
+  
+  public void contextDestroyed(ServletContextEvent servletContextEvent) {
     
   }
 
-  public void contextInitialized(ServletContextEvent arg0) {
+  public void contextInitialized(ServletContextEvent servletContextEvent) {
     
-    System.out.println("Servlet Context Created!!1!");
+    try {
+      Provider provider = new Provider();
+      provider.loadConfiguration(servletContextEvent.getServletContext().getInitParameter("ConfigurationPath"));
+      WebSupport webSupport = new WebSupport(provider);
+    
+      servletContextEvent.getServletContext().setAttribute("WebSupport", webSupport);
+    }
+    catch(Exception exception) {
+      
+      System.out.println("FATAL ERROR: Could not intialize KinslayerServletContext");
+      exception.printStackTrace();
+    }
   }
 }

@@ -30,12 +30,8 @@ public abstract class StandardAction extends ActionSupport implements ServletReq
   
   public String execute() throws Exception {
   
-    Provider provider = new Provider();
-    provider.loadConfiguration(this.servletContext.getInitParameter("ConfigurationPath"));
-    webSupport = new WebSupport(provider);
-    
+    this.webSupport = (WebSupport)servletContext.getAttribute("WebSupport");
     request.setAttribute("WebSupport", webSupport);
-    
     
     Cookie sessionUserNameCookie = HttpUtil.getCookieByName(request, "SESSIONUSERNAME");
     if(sessionUserNameCookie != null) {
