@@ -27,7 +27,7 @@ public class HomeAction extends StandardAction {
     request.setAttribute("AuctionItems", auctionItems);
     request.setAttribute("ObjectMap", objectMap);
     request.setAttribute("UserMap", userMap);
-    request.getAttribute("AuctionItemIdToHighestAuctionBidMap");
+    request.setAttribute("AuctionItemIdToHighestAuctionBidMap", auctionItemIdToHighestAuctionBidMap);
     
     return SUCCESS_FORWARD;
   }
