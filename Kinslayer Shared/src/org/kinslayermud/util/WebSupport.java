@@ -3,6 +3,7 @@ package org.kinslayermud.util;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import java.util.Set;
 
 import org.kinslayermud.advertising.FeaturedMUDListing;
 import org.kinslayermud.advertising.FeaturedMUDListingUtil;
+import org.kinslayermud.auction.AuctionBid;
 import org.kinslayermud.auction.AuctionItem;
 import org.kinslayermud.auction.AuctionUtil;
 import org.kinslayermud.character.User;
@@ -47,6 +49,7 @@ public class WebSupport {
   protected volatile Map<Integer, User> homeUserMap;
   protected volatile List<AuctionItem> homeAuctionItems;
   protected volatile Map<String, Obj> homeObjectMap;
+  protected volatile Map<Integer, AuctionBid> homeAuctionItemIdToHighestAuctionBidMap;
   
   public List<PlayerKill> getHomePlayerKills() {
     
@@ -68,6 +71,11 @@ public class WebSupport {
     return homeObjectMap;
   }
   
+  public Map<Integer, AuctionBid> getHomeAuctionItemIdToHighestAuctionBidMap() {
+    
+    return homeAuctionItemIdToHighestAuctionBidMap;
+  }
+  
   public void loadHomeResources() {
     
     try {
@@ -80,14 +88,17 @@ public class WebSupport {
       Map<String, Obj> objectMap;
       Set<String> objectIdSet = new HashSet<String>();
       Collection<Integer> userIdCollection = new HashSet<Integer>();
+      Map<Integer, AuctionBid> auctionItemIdToHighestAuctionBidMap;
+      Set<Integer> auctionItemIdSet = new HashSet<Integer>();
       
       for(AuctionItem auctionItem : auctionItems) {
         
         objectIdSet.add(auctionItem.getObjectId());
         userIdCollection.add(auctionItem.getOwnerId());
+        auctionItemIdSet.add(auctionItem.getAuctionId());
       }
       
-      objectMap = getObjectMap(objectIdSet);
+      objectMap = objectIdSet.size() > 0 ? getObjectMap(objectIdSet) : new HashMap<String, Obj>();
     
     
       for(PlayerKill playerKill : playerKills) {
@@ -95,12 +106,14 @@ public class WebSupport {
         userIdCollection.addAll(playerKill.getUserIdSet());
       }
     
-      userMap = getUserMap(userIdCollection);
+      userMap = getUserMap(userIdCollection);      
+      auctionItemIdToHighestAuctionBidMap = auctionItemIdSet.size() > 0 ? getAuctionBidIdToHighestAuctionBidMap(auctionItemIdSet) : new HashMap<Integer, AuctionBid>();
       
       this.homePlayerKills = playerKills;
       this.homeUserMap = userMap;
       this.homeAuctionItems = auctionItems;
       this.homeObjectMap = objectMap;
+      this.homeAuctionItemIdToHighestAuctionBidMap = auctionItemIdToHighestAuctionBidMap;
     }
     catch(Exception exception) {
       
@@ -133,6 +146,36 @@ public class WebSupport {
       connection = null;
       
       return user;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public Map<Integer, AuctionBid> getAuctionBidIdToHighestAuctionBidMap(Set<Integer> auctionItemIdSet) throws DataInterfaceException {
+    
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      Map<Integer, AuctionBid> auctionItemIdToHighestAuctionBidMap = AuctionUtil.getAuctionItemIdToHighestAuctionBid(statement, auctionItemIdSet);
+      
+      statement.close();
+      statement = null;
+      
+      connection.commit();
+      connection.close();
+      connection = null;
+      
+      return auctionItemIdToHighestAuctionBidMap;
     }
     catch(Throwable throwable) {
       

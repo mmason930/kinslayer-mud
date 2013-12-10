@@ -3,6 +3,7 @@ package org.kinslayermud.web.home;
 import java.util.List;
 import java.util.Map;
 
+import org.kinslayermud.auction.AuctionBid;
 import org.kinslayermud.auction.AuctionItem;
 import org.kinslayermud.character.User;
 import org.kinslayermud.object.Obj;
@@ -20,11 +21,13 @@ public class HomeAction extends StandardAction {
     Map<Integer, User> userMap = webSupport.getHomeUserMap();
     Map<String, Obj> objectMap = webSupport.getHomeObjectMap();
     List<AuctionItem> auctionItems = webSupport.getHomeAuctionItems();
+    Map<Integer, AuctionBid> auctionItemIdToHighestAuctionBidMap = webSupport.getHomeAuctionItemIdToHighestAuctionBidMap();
     
     request.setAttribute("PlayerKills", playerKills);
     request.setAttribute("AuctionItems", auctionItems);
     request.setAttribute("ObjectMap", objectMap);
     request.setAttribute("UserMap", userMap);
+    request.getAttribute("AuctionItemIdToHighestAuctionBidMap");
     
     return SUCCESS_FORWARD;
   }

@@ -6,6 +6,7 @@ List<PlayerKill> playerKills = (List<PlayerKill>)request.getAttribute("PlayerKil
 Map<Integer, User> userMap = (Map<Integer, User>)request.getAttribute("UserMap");
 Map<String, Obj> objectMap = (Map<String, Obj>)request.getAttribute("ObjectMap");
 List<AuctionItem> auctionItems = (List<AuctionItem>)request.getAttribute("AuctionItems");
+Map<Integer, AuctionBid> auctionItemIdToHighestAuctionBidMap = (Map<Integer, AuctionBid>)request.getAttribute("AuctionItemIdToHighestAuctionBidMap");
 
 %>
         <a href="./mudclient/mudclient.php" class="playNowButton">Play Now!</a>
@@ -73,7 +74,8 @@ for(AuctionItem auctionItem : auctionItems) {
   
   if(object != null) {
 
-    MoneyBreakdown moneyBreakdown = new MoneyBreakdown(auctionItem.getStartingPrice());
+    AuctionBid highestAuctionBid = auctionItemIdToHighestAuctionBidMap.get(auctionItem.getId());
+    MoneyBreakdown moneyBreakdown = new MoneyBreakdown(highestAuctionBid == null ? auctionItem.getStartingPrice() : highestAuctionBid.getBidAmount());
     String shortDescription = object.getShortDescription();
     String userName = "<Deleted>", userUrl = null;
     
