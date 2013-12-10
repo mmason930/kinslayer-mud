@@ -11,59 +11,6 @@ Map<Integer, AuctionBid> auctionItemIdToHighestAuctionBidMap = (Map<Integer, Auc
 %>
         <a href="./mudclient/mudclient.php" class="playNowButton">Play Now!</a>
 
-
-<style type="text/css">
-.auctionsContainer {
-	float: left;
-	width: 17%;
-	margin-left: 1.5%;
-	/*** border: 1px solid #FFF; ***/
-}
-
-.bold {
-	font-weight: bold;
-}
-
-.centerText {
-	text-align: center;
-}
-
-.auctionsContainer a {
-	color: #0000FF;
-}
-
-.auctionsContainer .auction {
-	margin-bottom: 10px;
-}
-
-.auctionsContainer .auction:last-child {
-	margin-bottom: 0px;
-}
-
-
-.copper {
-	color: #BA6D00;
-}
-
-.silver {
-	color: #969696;
-}
-
-.gold {
-	color: #FFD000;
-}
-
-
-a.blueLink:hover {
-	color: #880015;
-}
-
-a.blueLink {
-	color: #3953FA;
-}
-
-</style>
-
 		<div class="auctionsContainer">
 
 			<div class="bold centerText">Open Auctions</div><br>
