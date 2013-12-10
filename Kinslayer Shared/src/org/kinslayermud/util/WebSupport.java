@@ -95,7 +95,7 @@ public class WebSupport {
         
         objectIdSet.add(auctionItem.getObjectId());
         userIdCollection.add(auctionItem.getOwnerId());
-        auctionItemIdSet.add(auctionItem.getAuctionId());
+        auctionItemIdSet.add(auctionItem.getId());
       }
       
       objectMap = objectIdSet.size() > 0 ? getObjectMap(objectIdSet) : new HashMap<String, Obj>();
