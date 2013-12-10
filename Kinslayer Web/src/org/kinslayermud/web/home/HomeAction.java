@@ -23,6 +23,8 @@ public class HomeAction extends StandardAction {
     List<AuctionItem> auctionItems = webSupport.getHomeAuctionItems();
     Map<Integer, AuctionBid> auctionItemIdToHighestAuctionBidMap = webSupport.getHomeAuctionItemIdToHighestAuctionBidMap();
     
+    System.out.println("Map Size: " + auctionItemIdToHighestAuctionBidMap.size());
+    
     request.setAttribute("PlayerKills", playerKills);
     request.setAttribute("AuctionItems", auctionItems);
     request.setAttribute("ObjectMap", objectMap);
