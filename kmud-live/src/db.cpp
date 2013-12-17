@@ -44,6 +44,7 @@
 #include "ClanUtil.h"
 #include "HttpServer.h"
 #include "GatewayDescriptorType.h"
+#include "ObjectMoveLogger.h"
 
 #ifdef KINSLAYER_JAVASCRIPT
 #include "js.h"
@@ -58,6 +59,8 @@ boost::uuids::uuid u;
 std::list< std::pair< Character*, event_info* > * > BashStandQueue;
 std::list< Character * > CharPurgeList;
 std::list< Object *    > ObjPurgeList;
+boost::thread *objectMoveLoggerThread;
+ObjectMoveLogger objectMoveLogger;
 
 
 /**************************************************************************
@@ -397,6 +400,8 @@ void bootWorld(void)
 	Log("Loading global scripts.");
 	BootGlobalScripts();
 #endif
+
+	objectMoveLoggerThread = new boost::thread(boost::bind(&ObjectMoveLogger::threadHandler, &objectMoveLogger));
 
 	Log("Renumbering rooms.");
 	renum_world();

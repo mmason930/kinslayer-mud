@@ -31,6 +31,8 @@
 #include "UserLogoutType.h"
 #include "Descriptor.h"
 #include "UserClan.h"
+#include "UserType.h"
+#include "ObjectMoveLogger.h"
 
 #include "js.h"
 
@@ -52,6 +54,7 @@ time_t time_of_boot_high = 0;
 int apply_ac(Character * ch, int eq_pos);
 void update_object(Object * obj, int use);
 void update_char_objects(Character * ch);
+extern ObjectMoveLogger objectMoveLogger;
 
 /* external functions */
 void remove_follower(Character * ch);
@@ -966,6 +969,9 @@ void obj_to_char(Object *object, Character *ch)
 {
 	if (object && ch && !object->carried_by && !object->worn_by && !object->in_obj)
 	{
+
+		objectMoveLogger.logObjectMove(object->objID, std::string("Moved to ") + ch->getUserType()->getStandardName() + std::string(" ") + ToString(ch->getUserId()));
+
 		object->next_content = ch->carrying;
 		ch->carrying = object;
 		object->carried_by = ch;
@@ -994,6 +1000,9 @@ void obj_from_char(Object *object)
 	}
 	if(!object->carried_by)
 		return;
+
+	objectMoveLogger.logObjectMove(object->objID, std::string("Removed from ") + object->carried_by->getUserType()->getStandardName() + std::string(" ") + ToString(object->carried_by->getUserId()));
+
 	REMOVE_FROM_LIST(object, object->carried_by->carrying, next_content);
 
 	/* set flag for crash-save system, but not on mobs! */
@@ -1095,6 +1104,7 @@ void equip_char(Character * ch, Object * obj, int pos)
 		return;
 	}
 
+	objectMoveLogger.logObjectMove(obj->objID, std::string("Equipped to ") + ch->getUserType()->getStandardName() + std::string(" ") + ToString(ch->getUserId()));
 
 	GET_EQ(ch, pos) = obj;
 	obj->worn_by = ch;
@@ -1138,6 +1148,8 @@ Object *unequip_char(Character * ch, int pos)
 	obj = GET_EQ(ch, pos);
 	obj->worn_by = NULL;
 	obj->worn_on = -1;
+
+	objectMoveLogger.logObjectMove(obj->objID, std::string("Removed equip from ") + ch->getUserType()->getStandardName() + std::string(" ") + ToString(ch->getUserId()));
 
 	if (ch->in_room)
 	{
@@ -1318,6 +1330,8 @@ void Object::MoveToRoom(Room *room, bool vaultSave)
 	else if(this->in_room){}
 	else
 	{
+		objectMoveLogger.logObjectMove(this->objID, std::string("Moved to room #") + ToString(room->vnum));
+
 		this->next_content = room->contents;
 		room->contents = this;
 		this->in_room = room;
@@ -1372,6 +1386,8 @@ void Object::RemoveFromRoom(bool vaultSave)
 //		r->itemSave();
 	}
 
+	objectMoveLogger.logObjectMove(this->objID, std::string("Removed from room #") + ToString(this->item_number));
+
 	this->in_room = 0;
 	this->next_content = NULL;
 }
@@ -1385,6 +1401,8 @@ void obj_to_obj(Object * obj, Object * obj_to)
 		    (void *) obj, (void *) obj, (void *) obj_to);
 		return;
 	}
+
+	objectMoveLogger.logObjectMove(obj->objID, std::string("Moved to obj ") + ToString(obj->objID));
 
 	obj->next_content = obj_to->contains;
 	obj_to->contains = obj;
@@ -1402,6 +1420,8 @@ void obj_from_obj(Object * obj)
 		Log("SYSERR: (%s): trying to illegally extract obj from obj.", __FILE__);
 		return;
 	}
+
+	objectMoveLogger.logObjectMove(obj->objID, std::string("Removed from obj ") + ToString(obj->in_obj->objID));
 
 	obj_from = obj->in_obj;
 	REMOVE_FROM_LIST(obj, obj_from->contains, next_content);

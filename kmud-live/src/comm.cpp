@@ -125,6 +125,7 @@ extern char *policies;
 extern char *startup;
 
 extern std::map<std::string, std::string> basicConfiguration;
+extern boost::thread *objectMoveLoggerThread;
 
 struct PendingSession
 {
@@ -982,6 +983,10 @@ void initiateGame( int port )
 	delete listener;
 
 	dbContext.reset();
+
+	Log("Closing object movement log thread.");
+	objectMoveLoggerThread->interrupt();
+	delete objectMoveLoggerThread;
 
 	Log("~~~Summary~~~");
 	Log("Rooms       : Total Alloc: %d, Dealloc: %d, Rem: %d",
