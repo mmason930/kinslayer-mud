@@ -1,7 +1,5 @@
 package org.kinslayermud.web.servletcontext;
 
-import java.util.Date;
-
 import org.kinslayermud.util.WebSupport;
 
 public class KinslayerServiceThread extends Thread implements Runnable {
@@ -29,7 +27,12 @@ public class KinslayerServiceThread extends Thread implements Runnable {
         timeOfLastHomeResourcesLoad = System.currentTimeMillis();
       }
       
-      Thread.yield();
+      try {
+        Thread.sleep(1000);
+      }
+      catch (InterruptedException e) {
+        running = false;
+      }
     }
   }
   
