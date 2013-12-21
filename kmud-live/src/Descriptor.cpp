@@ -433,3 +433,13 @@ void Descriptor::processWebSocketCommands()
 			break;
 	}
 }
+
+std::string Descriptor::getEmailAddress()
+{
+	return emailAddress;
+}
+
+void Descriptor::setEmailAddress(const std::string &emailAddress)
+{
+	this->emailAddress = emailAddress;
+}

@@ -13,6 +13,7 @@ protected:
 	void cleanup();
 
 	GatewayDescriptorType *gatewayDescriptorType;
+	std::string emailAddress;
 
 public:
 	Descriptor();
@@ -78,6 +79,9 @@ public:
 
 	void processWebSocketSaveUserMacroCommand(Json::Value &commandObject);
 	void processWebSocketDeleteUserMacroCommand(Json::Value &commandObject);
+
+	std::string getEmailAddress();
+	void setEmailAddress(const std::string &emailAddress);
 
 	Descriptor& operator<< ( const std::string &s );
 	Descriptor& operator<< ( const int );

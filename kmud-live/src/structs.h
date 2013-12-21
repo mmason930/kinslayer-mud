@@ -376,6 +376,7 @@ const int CON_SGEDIT = 34;			// OLC mode - SG edit
 const int CON_JEDIT = 35;			// OLC mode - Javascript Edit
 const int CON_GATEWAY = 36;
 const int CON_EMAIL = 37;			// User is editing their email settings.
+const int CON_REG_EMAIL = 38;		// User is entering their email address while registering.
 
 
 /* Character equipment positions: used as index for class Character.equipment[] */

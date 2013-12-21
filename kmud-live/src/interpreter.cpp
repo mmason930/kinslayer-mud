@@ -1651,6 +1651,15 @@ void Descriptor::NewbieMenuFinish()
 	this->character->MySQLInsertQuery();
 	this->character->Save();
 	this->character->CreatePlayerIndex();
+
+	//Record the user's email address.
+	UserEmailAddress userEmailAddress;
+	userEmailAddress.setUserId(this->character->getUserId());
+	userEmailAddress.setEmailAddress(this->getEmailAddress());
+	userEmailAddress.setConfirmed(false);
+	userEmailAddress.setCreatedDatetime(DateTime());
+
+	CharacterUtil::putUserEmailAddress(gameDatabase, &userEmailAddress);
 }
 
 int getCommandIndex(const std::string &commandText)
@@ -2067,8 +2076,8 @@ void Descriptor::Nanny( char* arg )
 		this->EchoOn();
 		if ( STATE( this ) == CON_CNFPASSWD )
 		{
-			this->Send( "What is your gender: [M]ale or [F]emale? " );
-			STATE( this ) = CON_QSEX;
+			this->Send("Please enter your email address: \r\n");
+			STATE( this ) = CON_REG_EMAIL;
 		}
 		else
 		{
@@ -2078,6 +2087,20 @@ void Descriptor::Nanny( char* arg )
 		}
 
 		break;
+
+	case CON_REG_EMAIL:
+
+		if(!MiscUtil::isValidEmailAddress(arg))
+		{
+			this->Send("You entered an invalid email address. Please try again: \r\n");
+			break;
+		}
+
+		this->setEmailAddress(arg);
+		this->Send( "What is your gender: [M]ale or [F]emale? " );
+		STATE( this ) = CON_QSEX;
+		break;
+
 	case CON_QSEX:    		/* query sex of new user         */
 		switch ( *arg )
 		{
@@ -2311,6 +2334,9 @@ void Descriptor::Nanny( char* arg )
 		this->Send( "\r\n\n%s\r\n", CONFIG_WELC_MESSG );
 		this->character->next = character_list;
 		character_list = this->character;
+
+		if(GET_LEVEL(this->character) <= 5)
+			this->character->PlayerData->wimp_level = GET_MAX_HIT(this->character) / 2;
 
 		if ( this->character->NeedsReset() )
 		{

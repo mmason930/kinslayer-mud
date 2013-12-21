@@ -296,7 +296,13 @@ public:
 		} catch( sql::QueryException e ) {
 			e.report();
 		}
-		connection->sendRawQuery("DROP TABLE IF EXISTS `tempObjectsPurgeQueue`");
+
+		try {
+			connection->sendRawQuery("DROP TABLE IF EXISTS `tempObjectsPurgeQueue`");
+		}
+		catch( sql::QueryException e ) {
+			e.report();
+		}
 		MyClock.turnOff();
 	}
 	void performPostJobRoutine()
@@ -550,8 +556,8 @@ void boot_db(void)
 	JSManager::get()->executeExpression("bootProcs();");
 #endif
 
-	Log("Running Live Object Maintenance Queries...");
-	ThreadedJobManager::get().addJob( new LiveObjectMaintenanceJob( dbContext->createConnection() ) );
+	//Log("Running Live Object Maintenance Queries...");
+	//ThreadedJobManager::get().addJob( new LiveObjectMaintenanceJob( dbContext->createConnection() ) );
 
 	Log("Booting Warrants.");
 	BootWarrants();
