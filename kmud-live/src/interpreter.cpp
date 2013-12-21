@@ -914,6 +914,7 @@ void CommandInterpreter( Character *ch, char *argument )
 	}
 	else if ( GET_POS( ch ) < complete_cmd_info[ cmd ].minimum_position )
 	{
+		get_char_cols(ch);
 		switch ( GET_POS( ch ) )
 		{
 		case POS_DEAD:
@@ -928,12 +929,18 @@ void CommandInterpreter( Character *ch, char *argument )
 			break;
 		case POS_SLEEPING:
 			ch->Send( "In your dreams, or what?\r\n" );
+			if(GET_LEVEL(ch) <= 5)
+				ch->Send( "Try [%sWAK%s]ing first.\r\n", cyn, nrm );
 			break;
 		case POS_RESTING:
 			ch->Send( "Nah... You feel too relaxed to do that..\r\n" );
+			if(GET_LEVEL(ch) <= 5)
+				ch->Send( "Try [%sST%s]anding first.\r\n", cyn, nrm );
 			break;
 		case POS_SITTING:
 			ch->Send( "Maybe you should get on your feet first?\r\n" );
+			if(GET_LEVEL(ch) <= 5)
+				ch->Send( "Try [%sST%s]anding first.\r\n", cyn, nrm );
 			break;
 		case POS_FIGHTING:
 			ch->Send( "No way!  You're fighting for your life!\r\n" );
