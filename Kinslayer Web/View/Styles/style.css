@@ -181,8 +181,8 @@ a:hover {
 	padding: 10px;
 	text-align: center;
 	border: 1px solid #FFF;
-	width: 10%;
-	height: 5%;
+	width: 150px;
+	height: 25px;
 }
 
 .playNowButton:hover
@@ -206,6 +206,7 @@ a:hover {
 .auctionsContainer {
 	float: left;
 	width: 17%;
+	height: 100%;
 	margin-left: 1.5%;
 }
 
@@ -643,3 +644,39 @@ a.blueLink {
 	margin: 0;
 }
 *** End of Equipment Pages ***/
+
+
+@media (max-width: 1000px) {
+
+	.leftNavMenu ul li a {
+
+		font-size: 18px;
+		line-height: 150%;
+	}
+
+	.leftNav .logoText {
+
+		font-size: 20px;
+	}
+
+	.rightSideContainer {
+		width: 70%;
+	}
+
+	.leftNav {
+		width: 28%;
+	}
+
+	.auctionsContainer {
+		width: 30%;
+	}
+
+	.bannerImage {
+
+		height: 33%;
+	}
+
+	.topRight {
+		font-size: 12px;
+	}
+}
