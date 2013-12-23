@@ -12,6 +12,7 @@ String leftNavSelected = (String)request.getAttribute("LeftNavSelected");
 					<li><a <%=leftNavSelected.equals("SuperMobs") ? "class='selected'" : "" %> href="./supermob-listing">SuperMOBs</a></li>
 					<li><a href="./forums" rel="nofollow">Community</a></li>
 					<li><a <%=leftNavSelected.equals("About") ? "class='selected'" : "" %> href="./about-kinslayermud">What is KinslayerMUD?</a></li>
+					<li><a href="./mudclient/mudclient.php" rel="nofollow">Play Now!</a></li>
 <!--
 					<li><a <%=leftNavSelected.equals("Help") ? "class='selected'" : "" %> href="./help">Help</a></li>
 -->

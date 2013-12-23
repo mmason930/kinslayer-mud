@@ -14,7 +14,9 @@ if(sessionUserName != null && sessionUserId != null) {
 		<tiles:insertTemplate template="/View/Framework/LeftNav.jsp"/>
 	
 		<div class="rightSideContainer">
-			<div class="topRight"><a href="<%=signInUrl %>"><%=signInMessage %></a> |
+			<div class="topRight">
+			<a href="./mudclient/mudclient.php" rel="nofollow">Play Now</a> |
+			<a href="<%=signInUrl %>"><%=signInMessage %></a> |
 <%
 if(sessionUserId != null) {
 %>
