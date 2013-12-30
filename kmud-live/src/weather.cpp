@@ -62,7 +62,7 @@ void sendToOutdoor(int zone, const char * messg)
 		if( ch->IsPurged() ) continue;
 		if (OUTSIDE(ch))
 			if (ch->in_room->zone == zone)
-				ch->Send(messg);
+				ch->send(messg);
 	}	
 }
 
@@ -99,9 +99,9 @@ void another_hour(int mode)
 						{
 							Zone *zone = ch->in_room->GetZone();
 							if(zone->GetSunrise().empty())
-								ch->Send("The sun rises from the east.\r\n");
+								ch->send("The sun rises from the east.\r\n");
 							else
-								ch->Send("%s\r\n", zone->GetSunrise().c_str());
+								ch->send("%s\r\n", zone->GetSunrise().c_str());
 						}
 					}
 				}
@@ -129,9 +129,9 @@ void another_hour(int mode)
 						if(OUTSIDE(ch) && AWAKE(ch))
 						{
 							if(zone->GetSunset().empty())
-								ch->Send("The sun sets in the west.\r\n");
+								ch->send("The sun sets in the west.\r\n");
 							else
-								ch->Send("%s\r\n", zone->GetSunset().c_str());
+								ch->send("%s\r\n", zone->GetSunset().c_str());
 						}
 					}
 				}

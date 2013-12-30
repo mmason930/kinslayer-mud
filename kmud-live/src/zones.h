@@ -49,12 +49,12 @@ class ResetCommand
 class ZoneManager
 {
 private:
-	boost::recursive_mutex ZoneListMutex;
+	std::recursive_mutex ZoneListMutex;
 
 	std::vector< Zone* > ZoneList;
 	static ZoneManager *Self;
 public:
-	static boost::recursive_mutex SingletonMutex;
+	static std::recursive_mutex SingletonMutex;
 	ZoneManager() {};
 	~ZoneManager();
 	static ZoneManager& GetManager();
@@ -175,7 +175,7 @@ public:
 	void SetRnum( const int _rnum ) { rnum = _rnum; }
 
 	void Boot( const sql::Row &ZoneRow, std::list< sql::Row > &RowList );
-	void Save();
+	void save();
 	int Distance( Zone *OtherZone );
 
 	/*

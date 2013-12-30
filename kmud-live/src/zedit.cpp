@@ -121,22 +121,22 @@ void zedit_new_zone(Character *ch, int vzone_num)
 
 	if(vzone_num < 0)
 	{
-		ch->Send("You can't make negative zones.\r\n");
+		ch->send("You can't make negative zones.\r\n");
 		return;
 	}
 	else if(vzone_num > 999)
 	{
-		ch->Send("999 is the highest zone allowed.\r\n");
+		ch->send("999 is the highest zone allowed.\r\n");
 		return;
 	}
 	else if(ZoneManager::GetManager().GetZoneByVnum(vzone_num) != NULL)
 	{
-		ch->Send("That zone already exists.\r\n");
+		ch->send("That zone already exists.\r\n");
 		return;
 	}
 	else if(ZoneManager::GetManager().GetZoneByRoomVnum(vzone_num*100) != NULL )
 	{
-		ch->Send("A zone exists that contains the minumum room vnum(%d).\r\n", (vzone_num*100));
+		ch->send("A zone exists that contains the minumum room vnum(%d).\r\n", (vzone_num*100));
 		return;
 	}
 
@@ -149,14 +149,14 @@ void zedit_new_zone(Character *ch, int vzone_num)
 	MobManager::GetManager().SavePrototypes(zone->getVnum());
 	oedit_save_to_disk(rnum);
 	sedit_save_to_disk();
-	zone->Save();
+	zone->save();
 
 	/*
 	 * Previously, creating a new zone while invisible gave you away.
 	 * That quirk has been fixed with the MAX() statement.
 	 */
 	MudLog(BRF, MAX(LVL_BUILDER, GET_INVIS_LEV(ch)), TRUE, "OLC: %s creates new zone #%d", GET_NAME(ch), vzone_num);
-	ch->Send("Zone created successfully.\r\n");
+	ch->send("Zone created successfully.\r\n");
 
 	return;
 }
@@ -315,7 +315,7 @@ ACMD(do_zlist)
 	{
 		if(!global && znr != ch->in_room->zone)
 			continue;
-		ch->Send(COLOR_YELLOW(ch, CL_COMPLETE));
+		ch->send(COLOR_YELLOW(ch, CL_COMPLETE));
 		for(s = 0;s < z->cmd.size();++s)
 		{
 			switch (z->cmd[s]->command)
@@ -484,8 +484,8 @@ ACMD(do_zlist)
 
 
 	if(!count)
-		ch->Send("%sThere were no commands that met your criteria.\r\n", nrm);
-	ch->Send(COLOR_NORMAL(ch, CL_COMPLETE));
+		ch->send("%sThere were no commands that met your criteria.\r\n", nrm);
+	ch->send(COLOR_NORMAL(ch, CL_COMPLETE));
 }
 
 /*
@@ -636,7 +636,7 @@ void zedit_disp_menu(Descriptor *d)
 	       );
 
 	strcat(buf, buf1);
-	d->Send(buf);
+	d->send(buf);
 
 	OLC_MODE(d) = ZEDIT_MAIN_MENU;
 }
@@ -649,7 +649,7 @@ void zedit_disp_menu(Descriptor *d)
 void zedit_disp_comtype(Descriptor *d)
 {
 	get_char_cols(d->character);
-	d->Send(
+	d->send(
 #if defined(CLEAR_SCREEN)
 	    "[H[J"
 #endif
@@ -675,14 +675,14 @@ void zedit_disp_arg1(Descriptor *d)
 	switch (OLC_CMD(d)->command)
 	{
 		case 'M':
-			d->Send("Input mob's vnum : ");
+			d->send("Input mob's vnum : ");
 			OLC_MODE(d) = ZEDIT_ARG1;
 			break;
 		case 'O':
 		case 'E':
 		case 'P':
 		case 'G':
-			d->Send("Input object vnum : ");
+			d->send("Input object vnum : ");
 			OLC_MODE(d) = ZEDIT_ARG1;
 			break;
 		case 'D':
@@ -699,7 +699,7 @@ void zedit_disp_arg1(Descriptor *d)
 			 */
 			cleanup_olc(d, CLEANUP_ALL);
 			MudLog(BRF, LVL_BUILDER, TRUE, "SYSERR: OLC: zedit_disp_arg1(): Help!");
-			d->Send("Oops...\r\n");
+			d->send("Oops...\r\n");
 			return;
 	}
 }
@@ -721,24 +721,24 @@ void zedit_disp_arg2(Descriptor *d)
 		case 'O':
 		case 'P':
 		case 'G':
-			d->Send("Give the percentage chance that this event should happen: ");
+			d->send("Give the percentage chance that this event should happen: ");
 			break;
 
 		case 'E':
-			d->Send("What chance out of 100 should this have to load? ");
+			d->send("What chance out of 100 should this have to load? ");
 			break;
 		case 'D':
 			while (*dirs[i] != '\n')
 			{
-				d->Send("%d) Exit %s.\r\n", i, dirs[i]);
+				d->send("%d) Exit %s.\r\n", i, dirs[i]);
 				++i;
 			}
 
-			d->Send("Enter exit number for door : ");
+			d->send("Enter exit number for door : ");
 			break;
 
 		case 'R':
-			d->Send("Input object's vnum : ");
+			d->send("Input object's vnum : ");
 			break;
 		default:
 
@@ -747,7 +747,7 @@ void zedit_disp_arg2(Descriptor *d)
 			 */
 			cleanup_olc(d, CLEANUP_ALL);
 			MudLog(BRF, LVL_BUILDER, TRUE, "SYSERR: OLC: zedit_disp_arg2(): Help!");
-			d->Send("Oops...\r\n");
+			d->send("Oops...\r\n");
 			return;
 	}
 
@@ -770,7 +770,7 @@ void zedit_disp_arg3(Descriptor *d)
 
 			while (*equipment_types[i] != '\n')
 			{
-				d->Send("%2d) %26.26s %2d) %26.26s\r\n", i,
+				d->send("%2d) %26.26s %2d) %26.26s\r\n", i,
 				        equipment_types[i], i + 1, (*equipment_types[i + 1] != '\n') ?
 				        equipment_types[i + 1] : "");
 
@@ -782,22 +782,22 @@ void zedit_disp_arg3(Descriptor *d)
 
 			}
 
-			d->Send("Location to equip : ");
+			d->send("Location to equip : ");
 			break;
 
 		case 'P':
-			d->Send("Vnum of the container : ");
+			d->send("Vnum of the container : ");
 			break;
 
 		case 'D':
-			d->Send(	"0)  Door open\r\n"
+			d->send(	"0)  Door open\r\n"
 			         "1)  Door closed\r\n"
 			         "2)  Door locked\r\n"
 			         "Enter state of the door : ");
 			break;
 
 		case 'G':
-			d->Send("Input the maximum number that can exist in a mobs inventory : ");
+			d->send("Input the maximum number that can exist in a mobs inventory : ");
 			break;
 
 		case 'M':
@@ -809,7 +809,7 @@ void zedit_disp_arg3(Descriptor *d)
 			 */
 			cleanup_olc(d, CLEANUP_ALL);
 			MudLog(BRF, LVL_BUILDER, TRUE, "SYSERR: OLC: zedit_disp_arg3(): Help!");
-			d->Send("Oops...\r\n");
+			d->send("Oops...\r\n");
 			return;
 	}
 
@@ -827,7 +827,7 @@ void zedit_disp_arg4(Descriptor *d)
 
 		case 'M':
 		case 'O':
-			d->Send("Input the maximum number that can exist in this room : ");
+			d->send("Input the maximum number that can exist in this room : ");
 			break;
 
 		case 'G':
@@ -852,7 +852,7 @@ void zedit_disp_arg5(Descriptor *d)
 
 		case 'M':
 		case 'O':
-			d->Send("Input the maximum number that can exist in this zone : ");
+			d->send("Input the maximum number that can exist in this zone : ");
 			break;
 		case 'G':
 		case 'P':
@@ -875,10 +875,10 @@ void zedit_disp_arg6(Descriptor *d)
 	{
 
 		case 'M':
-			d->Send("Should this mob stack, or only load when it's previous no longer exists? : ");
+			d->send("Should this mob stack, or only load when it's previous no longer exists? : ");
 			break;
 		case 'O':
-			d->Send("Should this object stack, or only load when it's previous no longer exists? : ");
+			d->send("Should this object stack, or only load when it's previous no longer exists? : ");
 			break;
 		case 'G':
 		case 'P':
@@ -901,7 +901,7 @@ void zedit_disp_arg7(Descriptor *d)
 	{
 
 		case 'M':
-			d->Send("Should this mob follow the previous mob? (y/n) : ");
+			d->send("Should this mob follow the previous mob? (y/n) : ");
 			break;
 
 		case 'O':
@@ -946,7 +946,7 @@ void zedit_parse(Descriptor *d, char *arg)
 					/*
 					 * Save the zone in memory, hiding invisible people.
 					 */
-					d->Send("Saving zone info in memory.\r\n");
+					d->send("Saving zone info in memory.\r\n");
 					zedit_save_internally(d);
 					AddOlcLog( d->character, "zone", d->olc->zone->getVnum() );
 					MudLog(CMP, MAX(LVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE, "OLC: %s edits zone info for room %d.",
@@ -959,8 +959,8 @@ void zedit_parse(Descriptor *d, char *arg)
 					break;
 
 				default:
-					d->Send("Invalid choice!\r\n");
-					d->Send("Do you wish to save the zone info? : ");
+					d->send("Invalid choice!\r\n");
+					d->send("Do you wish to save the zone info? : ");
 					break;
 
 			}
@@ -977,12 +977,12 @@ void zedit_parse(Descriptor *d, char *arg)
 
 					if (OLC_ZONE(d)->GetAge() || OLC_ZONE(d)->getVnum() || OLC_NUM(d))
 					{
-						d->Send("Do you wish to save the changes to the zone info? (y/n) : ");
+						d->send("Do you wish to save the changes to the zone info? (y/n) : ");
 						OLC_MODE(d) = ZEDIT_CONFIRM_SAVESTRING;
 					}
 					else
 					{
-						d->Send("No changes made.\r\n");
+						d->send("No changes made.\r\n");
 						cleanup_olc(d, CLEANUP_ALL);
 					}
 
@@ -991,17 +991,17 @@ void zedit_parse(Descriptor *d, char *arg)
 				case 'H':
 					if(GET_LEVEL(d->character) < LVL_IMPL)
 					{
-						d->Send("You're too low level to do this.\r\n");
+						d->send("You're too low level to do this.\r\n");
 						break;
 					}
 					if(OLC_ZONE(d)->IsDeleted())
 					{
-						d->Send("This zone will no longer be deleted when the game reboots.\r\n");
+						d->send("This zone will no longer be deleted when the game reboots.\r\n");
 						OLC_ZONE(d)->UnsetDeleted();
 					}
 					else
 					{
-						d->Send("This zone will be deleted when the game reboots.\r\n");
+						d->send("This zone will be deleted when the game reboots.\r\n");
 						OLC_ZONE(d)->SetDeleted();
 					}
 					zedit_disp_menu(d);
@@ -1012,7 +1012,7 @@ void zedit_parse(Descriptor *d, char *arg)
 					* New entry.
 					*/
 
-					d->Send("What number in the list should the new command be? : ");
+					d->send("What number in the list should the new command be? : ");
 					OLC_MODE(d) = ZEDIT_NEW_ENTRY;
 					break;
 
@@ -1021,7 +1021,7 @@ void zedit_parse(Descriptor *d, char *arg)
 					/*
 					* Change an entry.
 					*/
-					d->Send("Which command do you wish to change? : ");
+					d->send("Which command do you wish to change? : ");
 					OLC_MODE(d) = ZEDIT_CHANGE_ENTRY;
 					break;
 
@@ -1030,7 +1030,7 @@ void zedit_parse(Descriptor *d, char *arg)
 					/*
 					* Delete an entry.
 					*/
-					d->Send("Which command do you wish to delete? : ");
+					d->send("Which command do you wish to delete? : ");
 					OLC_MODE(d) = ZEDIT_DELETE_ENTRY;
 					break;
 
@@ -1039,14 +1039,14 @@ void zedit_parse(Descriptor *d, char *arg)
 					/*
 					* Edit zone name.
 					*/
-					d->Send("Enter new zone name : ");
+					d->send("Enter new zone name : ");
 					OLC_MODE(d) = ZEDIT_ZONE_NAME;
 					break;
 				case 's':
 				case 'S':
 					/* Close / Open the zone */
 					OLC_ZONE(d)->SetClosed(OLC_ZONE(d)->IsClosed() ? false : true);
-					d->Send("The zone is now %s.", OLC_ZONE(d)->IsClosed() ? "closed" : "open");
+					d->send("The zone is now %s.", OLC_ZONE(d)->IsClosed() ? "closed" : "open");
 					zedit_disp_menu(d);
 					return;
 				case 't':
@@ -1060,19 +1060,19 @@ void zedit_parse(Descriptor *d, char *arg)
 
 					else
 					{
-						d->Send("Enter new top of zone : ");
+						d->send("Enter new top of zone : ");
 						OLC_MODE(d) = ZEDIT_ZONE_TOP;
 					}
 
 					break;
 				case 'x':
 				case 'X':
-					d->Send("Enter the X coordinate for this zone.\r\n");
+					d->send("Enter the X coordinate for this zone.\r\n");
 					OLC_MODE(d) = ZEDIT_X;
 					break;
 				case 'y':
 				case 'Y':
-					d->Send("Enter the Y coordinate for this zone.\r\n");
+					d->send("Enter the Y coordinate for this zone.\r\n");
 					OLC_MODE(d) = ZEDIT_Y;
 					break;
 
@@ -1081,7 +1081,7 @@ void zedit_parse(Descriptor *d, char *arg)
 					/*
 					* Edit zone lifespan.
 					*/
-					d->Send("Enter new zone lifespan : ");
+					d->send("Enter new zone lifespan : ");
 					OLC_MODE(d) = ZEDIT_ZONE_LIFE;
 					break;
 
@@ -1090,7 +1090,7 @@ void zedit_parse(Descriptor *d, char *arg)
 					/*
 					Edit zone reset mode.
 					*/
-					d->Send(	"\r\n"
+					d->send(	"\r\n"
 					         "0) Never reset\r\n"
 					         "1) Reset only when no players in zone\r\n"
 					         "2) Normal reset\r\n"
@@ -1102,7 +1102,7 @@ void zedit_parse(Descriptor *d, char *arg)
 				case 'B':
 					if (GET_LEVEL(d->character) < LVL_GOD)
 					{
-						d->Send("You do not have permission to edit the builders.\r\n");
+						d->send("You do not have permission to edit the builders.\r\n");
 						zedit_disp_menu(d);
 					}
 
@@ -1111,18 +1111,18 @@ void zedit_parse(Descriptor *d, char *arg)
 						/*
 						Edit zone builder list.
 						*/
-						d->Send("Enter new zone builders : ");
+						d->send("Enter new zone builders : ");
 						OLC_MODE(d) = ZEDIT_ZONE_BUILDERS;
 					}
 					break;
 				case 'f':
 				case 'F':
-					d->Send("Enter new sunrise message : ");
+					d->send("Enter new sunrise message : ");
 					OLC_MODE(d) = ZEDIT_SUNRISE;
 					break;
 				case 'g':
 				case 'G':
-					d->Send("Enter new sunset message : ");
+					d->send("Enter new sunset message : ");
 					OLC_MODE(d) = ZEDIT_SUNSET;
 					break;
 				default:
@@ -1188,13 +1188,13 @@ void zedit_parse(Descriptor *d, char *arg)
 			OLC_CMD(d)->command = toupper(*arg);
 			if (!OLC_CMD(d)->command || (strchr("MOPEDGR", OLC_CMD(d)->command) == NULL))
 			{
-				d->Send("Invalid choice, try again : ");
+				d->send("Invalid choice, try again : ");
 			}
 			else
 			{
 				if (OLC_VAL(d))
 				{	/* If there was a previous command. */
-					d->Send("Is this command dependent on the success of the previous one? (y/n)\r\n");
+					d->send("Is this command dependent on the success of the previous one? (y/n)\r\n");
 					OLC_MODE(d) = ZEDIT_IF_FLAG;
 				}
 
@@ -1221,7 +1221,7 @@ void zedit_parse(Descriptor *d, char *arg)
 					OLC_CMD(d)->if_flag = 0;
 					break;
 				default:
-					d->Send("Try again : ");
+					d->send("Try again : ");
 					return;
 			}
 			zedit_disp_arg1(d);
@@ -1234,7 +1234,7 @@ void zedit_parse(Descriptor *d, char *arg)
 
 			if (!isdigit(*arg))
 			{
-				d->Send("Must be a numeric value, try again : ");
+				d->send("Must be a numeric value, try again : ");
 				return;
 			}
 			switch (OLC_CMD(d)->command)
@@ -1246,7 +1246,7 @@ void zedit_parse(Descriptor *d, char *arg)
 						zedit_disp_arg2(d);
 					}
 					else
-						d->Send("That mobile does not exist, try again : ");
+						d->send("That mobile does not exist, try again : ");
 					break;
 				case 'O':
 				case 'P':
@@ -1258,7 +1258,7 @@ void zedit_parse(Descriptor *d, char *arg)
 						zedit_disp_arg2(d);
 					}
 					else
-						d->Send("That object does not exist, try again : ");
+						d->send("That object does not exist, try again : ");
 					break;
 				case 'D':
 				case 'R':
@@ -1268,7 +1268,7 @@ void zedit_parse(Descriptor *d, char *arg)
 					 */
 					cleanup_olc(d, CLEANUP_ALL);
 					MudLog(BRF, LVL_BUILDER, TRUE, "SYSERR: OLC: zedit_parse(): case ARG1: Ack!");
-					d->Send("Oops...\r\n");
+					d->send("Oops...\r\n");
 					break;
 			}
 			break;
@@ -1280,7 +1280,7 @@ void zedit_parse(Descriptor *d, char *arg)
 
 			if (!isdigit(*arg))
 			{
-				d->Send("Must be a numeric value, try again : ");
+				d->send("Must be a numeric value, try again : ");
 				return;
 			}
 
@@ -1291,7 +1291,7 @@ void zedit_parse(Descriptor *d, char *arg)
 
 					if(atoi(arg) < 0 || atoi(arg) > 100)
 					{
-						d->Send("Must be from 0 to 100. Try again : ");
+						d->send("Must be from 0 to 100. Try again : ");
 						return;
 					}
 
@@ -1304,7 +1304,7 @@ void zedit_parse(Descriptor *d, char *arg)
 
 					if(atoi(arg) < 0 || atoi(arg) > 100)
 					{
-						d->Send("Must be from 0 to 100. Try again : ");
+						d->send("Must be from 0 to 100. Try again : ");
 						return;
 					}
 
@@ -1316,7 +1316,7 @@ void zedit_parse(Descriptor *d, char *arg)
 
 					if(atoi(arg) < 0 || atoi(arg) > 100)
 					{
-						d->Send("Must be from 0 to 100. Try again : ");
+						d->send("Must be from 0 to 100. Try again : ");
 						return;
 					}
 					OLC_CMD(d)->arg2 = atoi(arg);
@@ -1339,7 +1339,7 @@ void zedit_parse(Descriptor *d, char *arg)
 						++i;
 
 					if ((pos < 0) || (pos > (unsigned int)i))
-						d->Send("Try again : ");
+						d->send("Try again : ");
 
 					else
 					{
@@ -1357,7 +1357,7 @@ void zedit_parse(Descriptor *d, char *arg)
 					}
 
 					else
-						d->Send("That object does not exist, try again : ");
+						d->send("That object does not exist, try again : ");
 
 					break;
 
@@ -1368,7 +1368,7 @@ void zedit_parse(Descriptor *d, char *arg)
 
 					cleanup_olc(d, CLEANUP_ALL);
 					MudLog(BRF, LVL_BUILDER, TRUE, "SYSERR: OLC: zedit_parse(): case ARG2: Ack!");
-					d->Send("Oops...\r\n");
+					d->send("Oops...\r\n");
 					break;
 			}
 
@@ -1382,7 +1382,7 @@ void zedit_parse(Descriptor *d, char *arg)
 
 			if (!isdigit(*arg))
 			{
-				d->Send("Must be a numeric value, try again : ");
+				d->send("Must be a numeric value, try again : ");
 				return;
 			}
 
@@ -1399,7 +1399,7 @@ void zedit_parse(Descriptor *d, char *arg)
 						++i;
 
 					if ((pos < 0) || (pos > (unsigned int)i))
-						d->Send("Try again : ");
+						d->send("Try again : ");
 
 					else
 					{
@@ -1417,7 +1417,7 @@ void zedit_parse(Descriptor *d, char *arg)
 					}
 
 					else
-						d->Send("That object does not exist, try again : ");
+						d->send("That object does not exist, try again : ");
 
 					break;
 
@@ -1425,7 +1425,7 @@ void zedit_parse(Descriptor *d, char *arg)
 					pos = atoi(arg);
 
 					if ((pos < 0) || (pos > 3))
-						d->Send("Try again : ");
+						d->send("Try again : ");
 
 					else
 					{
@@ -1439,7 +1439,7 @@ void zedit_parse(Descriptor *d, char *arg)
 					pos = atoi(arg);
 
 					if (pos < 0)
-						d->Send("Try again : ");
+						d->send("Try again : ");
 
 					else
 					{
@@ -1460,7 +1460,7 @@ void zedit_parse(Descriptor *d, char *arg)
 
 					cleanup_olc(d, CLEANUP_ALL);
 					MudLog(BRF, LVL_BUILDER, TRUE, "SYSERR: OLC: zedit_parse(): case ARG3: Ack!");
-					d->Send("Oops...\r\n");
+					d->send("Oops...\r\n");
 					break;
 			}
 
@@ -1471,7 +1471,7 @@ void zedit_parse(Descriptor *d, char *arg)
 			/*. Parse the input for arg4, and go back to main menu. */
 			if (!isdigit(*arg) && (*arg != '-' && !isdigit(*(arg + 1))))
 			{
-				d->Send("Must be a numeric value, try again : ");
+				d->send("Must be a numeric value, try again : ");
 				return;
 			}
 
@@ -1500,7 +1500,7 @@ void zedit_parse(Descriptor *d, char *arg)
 			/*. Parse the input for arg5, and go back to main menu. */
 			if (!isdigit(*arg) && (*arg != '-' || !isdigit(*(arg + 1))))
 			{
-				d->Send("Must be a numeric value, try again : ");
+				d->send("Must be a numeric value, try again : ");
 				return;
 			}
 
@@ -1528,7 +1528,7 @@ void zedit_parse(Descriptor *d, char *arg)
 			/*. Parse the input for arg6, and go back to main menu. */
 			if (!isdigit(*arg) && OLC_CMD(d)->command != 'M' && OLC_CMD(d)->command != 'O')
 			{
-				d->Send("Must be a numeric value, try again : ");
+				d->send("Must be a numeric value, try again : ");
 				return;
 			}
 
@@ -1541,7 +1541,7 @@ void zedit_parse(Descriptor *d, char *arg)
 						OLC_CMD(d)->arg6 = 0;
 					else
 					{
-						d->Send("You must type 'Y' or 'N' : ");
+						d->send("You must type 'Y' or 'N' : ");
 						return;
 					}
 					zedit_disp_arg7(d);
@@ -1553,7 +1553,7 @@ void zedit_parse(Descriptor *d, char *arg)
 						OLC_CMD(d)->arg6 = 0;
 					else
 					{
-						d->Send("You must type 'Y' or 'N' : ");
+						d->send("You must type 'Y' or 'N' : ");
 						return;
 					}
 					zedit_disp_menu(d);
@@ -1590,7 +1590,7 @@ void zedit_parse(Descriptor *d, char *arg)
 							OLC_CMD(d)->arg7 = -1;
 							break;
 						default:
-							d->Send("Try again : ");
+							d->send("Try again : ");
 							return;
 					}
 					zedit_disp_menu(d);
@@ -1638,7 +1638,7 @@ void zedit_parse(Descriptor *d, char *arg)
 			 */
 			pos = atoi(arg);
 			if (!isdigit(*arg) || (pos < 0) || (pos > 2))
-				d->Send("Try again (0-2) : ");
+				d->send("Try again (0-2) : ");
 			else
 			{
 				OLC_ZONE(d)->SetResetMode(pos);
@@ -1651,7 +1651,7 @@ void zedit_parse(Descriptor *d, char *arg)
 		case ZEDIT_X:
 			pos = atoi(arg);
 			if(!isdigit(*arg))
-				d->Send("You must enter a digit.\r\n");
+				d->send("You must enter a digit.\r\n");
 			else
 			{
 				OLC_ZONE(d)->SetX(pos);
@@ -1662,7 +1662,7 @@ void zedit_parse(Descriptor *d, char *arg)
 		case ZEDIT_Y:
 			pos = atoi(arg);
 			if(!isdigit(*arg))
-				d->Send("You must enter a digit.\r\n");
+				d->send("You must enter a digit.\r\n");
 			else
 			{
 				OLC_ZONE(d)->SetY(pos);
@@ -1676,7 +1676,7 @@ void zedit_parse(Descriptor *d, char *arg)
 			 */
 			pos = atoi(arg);
 			if (!isdigit(*arg) || (pos < 0) || (pos > 240))
-				d->Send("Try again (0-240) : ");
+				d->send("Try again (0-240) : ");
 			else
 			{
 				OLC_ZONE(d)->SetLifespan(pos);
@@ -1706,7 +1706,7 @@ void zedit_parse(Descriptor *d, char *arg)
 			 */
 			cleanup_olc(d, CLEANUP_ALL);
 			MudLog(BRF, LVL_BUILDER, TRUE, "SYSERR: OLC: zedit_parse(): Reached default case!");
-			d->Send("Oops...\r\n", d);
+			d->send("Oops...\r\n", d);
 			break;
 	}
 }

@@ -1,7 +1,3 @@
-
-
-#ifdef KINSLAYER_JAVASCRIPT
-
 #include "JSRoom.h"
 
 #include "JSCharacter.h"
@@ -198,7 +194,7 @@ void JSRoom::echoaround(JSCharacter& ch, std::string message)
 	if( real ) {
 		for(Character *p = real->people;p;p = p->next_in_room) {
 			if( p != ch.toReal() ) {
-				p->Send( StringUtil::vaEscape(message).c_str() );
+				p->send( StringUtil::vaEscape(message).c_str() );
 			}
 		}
 	}
@@ -224,11 +220,9 @@ flusspferd::value JSRoom::load_obj( const int vnum )
 	sprintf(obj->creator, "Loaded by Javascript. JSRoom #%d.", this->real->vnum);
 
 	obj->MoveToRoom(real);
-#ifdef KINSLAYER_JAVASCRIPT
 	if( !obj->IsPurged() ) {
 		js_load_triggers(obj);
 	}
-#endif
 
 	return lookupValue(obj);
 }
@@ -244,11 +238,9 @@ flusspferd::value JSRoom::load_mob( const int vnum )
 	mob = new Character(r_num, REAL);
 	mob->MoveToRoom(real);
 
-#ifdef KINSLAYER_JAVASCRIPT
 	if( !mob->IsPurged() ) {
 		js_load_triggers(mob);
 	}
-#endif
 	return lookupValue(mob);
 }
 flusspferd::array JSRoom::pathToRoom( JSRoom *otherRoom )
@@ -265,4 +257,3 @@ flusspferd::array JSRoom::pathToRoom( JSRoom *otherRoom )
 	}
 	return path;
 }
-#endif

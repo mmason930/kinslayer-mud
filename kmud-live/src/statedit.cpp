@@ -40,7 +40,7 @@ void StateditParse(Descriptor *d, const std::string &arg)
             StateditDisplayStatGroupMainMenu(d);
             break;
         case 'B':
-            d->Send("Currently disabled.\r\n");
+            d->send("Currently disabled.\r\n");
             StateditDisplayMainMenu(d);
             break;
         case 'Q':
@@ -51,7 +51,7 @@ void StateditParse(Descriptor *d, const std::string &arg)
             break;
         default:
             StateditDisplayMainMenu(d);
-            d->Send("Invalid option. Try again:\r\n");
+            d->send("Invalid option. Try again:\r\n");
             break;
         }
         break;
@@ -95,14 +95,14 @@ void StateditParse(Descriptor *d, const std::string &arg)
         }
         default:
             StateditDisplayStatGroupMainMenu( d );
-            d->Send("Invalid option. Try again:");
+            d->send("Invalid option. Try again:");
             break;
         }
         break;
     case STATEDIT_RACE:
     {
         if( atoi( arg.c_str() ) <= 0 || atoi( arg.c_str() ) - 1 >= NUM_RACES )
-            d->Send("Invalid race. Try again:");
+            d->send("Invalid race. Try again:");
         else
         {
             d->olc->sg_race = atoi( arg.c_str() ) - 1;
@@ -113,7 +113,7 @@ void StateditParse(Descriptor *d, const std::string &arg)
     case STATEDIT_CLASS:
     {
         if( atoi( arg.c_str() ) <= 0 || atoi( arg.c_str() ) - 1 >= NUM_CLASSES )
-            d->Send("Invalid class. Try again:");
+            d->send("Invalid class. Try again:");
         else
         {
             d->olc->sg_class = atoi( arg.c_str() ) - 1;
@@ -124,7 +124,7 @@ void StateditParse(Descriptor *d, const std::string &arg)
     case STATEDIT_SEX:
     {
         if( atoi( arg.c_str() ) <= 0 || atoi( arg.c_str() ) - 1 >= NUM_GENDERS )
-            d->Send("Invalid gender. Try again:");
+            d->send("Invalid gender. Try again:");
         else
         {
             d->olc->sg_sex = atoi( arg.c_str() ) - 1;
@@ -141,7 +141,7 @@ void StateditParse(Descriptor *d, const std::string &arg)
         else if(!MiscUtil::isNumber((char*)arg.c_str()) ||
         !(StatManager::GetManager().StatByID( (atoi(arg.c_str())) )))
         {
-            d->Send("Invalid stat. Try again:");
+            d->send("Invalid stat. Try again:");
         }
         else
         {
@@ -165,18 +165,18 @@ void StateditParse(Descriptor *d, const std::string &arg)
 
         if(arg[ 0 ] == 'q' || arg[ 0 ] == 'Q')
         {
-            d->Send("Save changes to this stat list? ");
+            d->send("Save changes to this stat list? ");
             OLC_MODE( d ) = STATEDIT_CONFIRM_STAT_LIST_SAVE;
         }
         else if(MiscUtil::isNumber((char*)arg.c_str()) && roll >= 0 && roll < (int)d->olc->sgRolls.size() )
         {
-            d->Send("Input the probablity of rolling this stat(0 - 100) : ");
+            d->send("Input the probablity of rolling this stat(0 - 100) : ");
             d->olc->sg_roll = roll;
             d->olc->sgRolls[ roll ] = 0;
             OLC_MODE( d ) = STATEDIT_CHOOSE_PROBABILITY;
         }
         else
-            d->Send("Invalid input. Try again:");
+            d->send("Invalid input. Try again:");
         break;
     }
     case STATEDIT_CONFIRM_STAT_LIST_SAVE:
@@ -191,15 +191,15 @@ void StateditParse(Descriptor *d, const std::string &arg)
                 d->olc->sgRolls.begin(),
                 d->olc->sgRolls.end()
             );
-			StatManager::GetManager().Save();
+			StatManager::GetManager().save();
             StateditDisplayStatSelectMenu( d );
             break;
         case 'N':
-            d->Send("Not saved.\r\n");
+            d->send("Not saved.\r\n");
             StateditDisplayStatSelectMenu( d );
             break;
         default:
-            d->Send("You must specify [Y]es or [N]o : ");
+            d->send("You must specify [Y]es or [N]o : ");
             break;
         }
         break;
@@ -209,7 +209,7 @@ void StateditParse(Descriptor *d, const std::string &arg)
         int prob = atoi( arg.c_str() );
         if( !MiscUtil::isNumber( (char*)arg.c_str() ) || prob < 0 || prob > 100 )
         {
-            d->Send("Must be a number between 0 and 100. Try again:");
+            d->send("Must be a number between 0 and 100. Try again:");
         }
         else
         {
@@ -218,7 +218,7 @@ void StateditParse(Descriptor *d, const std::string &arg)
                 total += d->olc->sgRolls[ i ];
             if( total + prob > 100)
             {
-                d->Send("The sum of all rolls cannot be more than 100."
+                d->send("The sum of all rolls cannot be more than 100."
                         "Your input must be between %d & 0 to qualify.\r\n", 100 - total
                        );
             }
@@ -249,14 +249,14 @@ void StateditDisplayRollMenu(Descriptor *d)
         total += (int)d->olc->sgRolls[ i ];
     }
 
-    d->Send("Total Used: %s%d%s/100\r\n", (total == 100 ? grn : cyn), total, nrm);
+    d->send("Total Used: %s%d%s/100\r\n", (total == 100 ? grn : cyn), total, nrm);
     for(int i = 0;i < (int)d->olc->sgRolls.size();++i)
     {
-        d->Send("%s%2d%s) %d%%\r\n", grn, i, nrm,
+        d->send("%s%2d%s) %d%%\r\n", grn, i, nrm,
             (int)(d->olc->sgRolls[ (byte) i ]) );
     }
-    d->Send("\r\n%sQ%s) Quit\r\n", grn, nrm);
-    d->Send("Choose a roll or option:");
+    d->send("\r\n%sQ%s) Quit\r\n", grn, nrm);
+    d->send("Choose a roll or option:");
     OLC_MODE( d ) = STATEDIT_CHOOSE_ROLL;
 }
 
@@ -267,10 +267,10 @@ void StateditDisplayStatSelectMenu(Descriptor *d)
     for(std::list<Stat>::iterator S = StatManager::GetManager().StatList.begin();
     S != StatManager::GetManager().StatList.end();++S)
     {
-        d->Send("%s%2d%s) %s\r\n", grn, (*S).GetID(), nrm, (*S).GetAbbrev().c_str());
+        d->send("%s%2d%s) %s\r\n", grn, (*S).GetID(), nrm, (*S).GetAbbrev().c_str());
     }
-    d->Send("%sQ%s) Quit\r\n", grn, nrm);
-    d->Send("Choose a stat:");
+    d->send("%sQ%s) Quit\r\n", grn, nrm);
+    d->send("Choose a stat:");
 
     OLC_MODE( d ) = STATEDIT_CHOOSE_STAT;
 }
@@ -280,9 +280,9 @@ void StateditDisplayRaceMenu(Descriptor *d)
     get_char_cols( d->character );
     for(int i = 0;*pc_race_types[ i ] != '\n';++i)
     {
-        d->Send("%s%2d%s) %s\r\n", grn, i + 1, nrm, pc_race_types[ i ]);
+        d->send("%s%2d%s) %s\r\n", grn, i + 1, nrm, pc_race_types[ i ]);
     }
-    d->Send("Choose a race:");
+    d->send("Choose a race:");
 
     OLC_MODE( d ) = STATEDIT_RACE;
 }
@@ -292,9 +292,9 @@ void StateditDisplayClassMenu(Descriptor *d)
     get_char_cols( d->character );
     for(int i = 0;*pc_class_types[ i ] != '\n';++i)
     {
-        d->Send("%s%2d%s) %s\r\n", grn, i + 1, nrm, pc_class_types[ i ]);
+        d->send("%s%2d%s) %s\r\n", grn, i + 1, nrm, pc_class_types[ i ]);
     }
-    d->Send("Choose a class:");
+    d->send("Choose a class:");
 
     OLC_MODE( d ) = STATEDIT_CLASS;
 }
@@ -304,9 +304,9 @@ void StateditDisplaySexMenu(Descriptor *d)
     get_char_cols( d->character );
     for(int i = 0;*sexes[ i ] != '\n';++i)
     {
-        d->Send("%s%d%s) %s\r\n", grn, i + 1, nrm, sexes[ i ]);
+        d->send("%s%d%s) %s\r\n", grn, i + 1, nrm, sexes[ i ]);
     }
-    d->Send("Choose a gender:");
+    d->send("Choose a gender:");
 
     OLC_MODE( d ) = STATEDIT_SEX;
 }
@@ -314,17 +314,17 @@ void StateditDisplaySexMenu(Descriptor *d)
 void StateditDisplayStatGroupMainMenu(Descriptor *d)
 {
     get_char_cols( d->character );
-    d->Send("%sA%s) Race  : %s%s%s\r\n",
+    d->send("%sA%s) Race  : %s%s%s\r\n",
         grn, nrm, cyn, d->olc->sg_race == -1 ?  "None" : pc_race_types[d->olc->sg_race], nrm);
-    d->Send("%sB%s) Class : %s%s%s\r\n",
+    d->send("%sB%s) Class : %s%s%s\r\n",
         grn, nrm, cyn, d->olc->sg_class == -1 ?  "None" : pc_class_types[d->olc->sg_class], nrm);
-    d->Send("%sC%s) Sex   : %s%s%s\r\n",
+    d->send("%sC%s) Sex   : %s%s%s\r\n",
         grn, nrm, cyn, d->olc->sg_sex == -1 ?  "None" : sexes[d->olc->sg_sex], nrm);
 
-    d->Send("%sE%s) Edit\r\n"          , grn, nrm                  );
-    d->Send("%sQ%s) Quit\r\n"          , grn, nrm                  );
+    d->send("%sE%s) Edit\r\n"          , grn, nrm                  );
+    d->send("%sQ%s) Quit\r\n"          , grn, nrm                  );
 
-    d->Send("Choose an Option:");
+    d->send("Choose an Option:");
     d->olc->statgroup = 0;
     d->olc->sg_roll = 0;
     OLC_MODE( d ) = STATEDIT_SG_MAIN_MENU;
@@ -335,9 +335,9 @@ void StateditDisplayMainMenu(Descriptor *d)
 {
     get_char_cols(d->character);
 
-    d->Send("%sA%s) Edit a StatGroup\r\n"       , grn, nrm);
-    d->Send("%sB%s) Edit Stat Configutation\r\n", grn, nrm);
-    d->Send("%sQ%s) Quit\r\n"                   , grn, nrm);
+    d->send("%sA%s) Edit a StatGroup\r\n"       , grn, nrm);
+    d->send("%sB%s) Edit Stat Configutation\r\n", grn, nrm);
+    d->send("%sQ%s) Quit\r\n"                   , grn, nrm);
     OLC_MODE(d) = STATEDIT_MAIN_MENU;
 }
 
@@ -355,7 +355,7 @@ ACMD(do_statedit)
 
 	if( GET_LEVEL(ch) < LVL_IMPL && !PLR_FLAGGED(ch, PLR_STAT_EDITOR) )
 	{
-		ch->Send("You do not have permission to use this command.\r\n");
+		ch->send("You do not have permission to use this command.\r\n");
 		return;
 	}
 
@@ -365,7 +365,7 @@ ACMD(do_statedit)
 	{
 		if(STATE(d) == CON_STATEDIT && d->olc && d->olc->statgroup)
 		{
-			ch->Send("%s is currently editing the stat tables.\r\n",
+			ch->send("%s is currently editing the stat tables.\r\n",
                 d->character ? GET_NAME(d->character) : "Someone");
 			return;
 		}

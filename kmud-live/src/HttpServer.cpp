@@ -31,7 +31,9 @@ void HttpServer::deploy(int port)
 {
 	this->port = port;
 
-	mainThread = boost::thread( boost::bind( &HttpServer::run, this ) );
+	mainThread = std::thread( &HttpServer::run, this );
+
+	mainThread.detach();
 }
 
 void httpServerOnCloseDescriptorCallback(void *data, kuListener *listener, kuDescriptor *descriptor)
@@ -128,7 +130,7 @@ void HttpServer::run()
 			}
 		}
 
-		boost::this_thread::yield();
+		std::this_thread::sleep_for( std::chrono::milliseconds(50) );
 	}
 
 	delete listener;
@@ -154,7 +156,7 @@ void HttpServer::disconnect()
 void HttpServer::addResource(HttpResource *resource)
 {
 	{
-		boost::mutex::scoped_lock lock(this->resourceMutex);
+		std::lock_guard<std::mutex> lock(this->resourceMutex);
 		resources[ resource->getPath() ] = resource;
 	}
 }

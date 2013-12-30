@@ -1,6 +1,3 @@
-
-#ifdef KINSLAYER_JAVASCRIPT
-
 #include "structs.h"
 #include "js_utils.h"
 #include "flusspferd.hpp"
@@ -145,5 +142,3 @@ std::string getUniqueName()
     s = s + MiscUtil::Convert<std::string>(count);
     return s;
 }
-
-#endif

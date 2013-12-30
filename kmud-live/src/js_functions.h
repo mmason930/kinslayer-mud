@@ -1,8 +1,6 @@
 #ifndef KINSLAYER_JS_FUNCTIONS_H
 #define KINSLAYER_JS_FUNCTIONS_H
 
-#ifdef KINSLAYER_JAVASCRIPT
-
 
 class Character;
 class JSTrigger;
@@ -95,5 +93,3 @@ void JS_sendToZone(int zoneNumber, flusspferd::string message);
 flusspferd::object JS_createDatetime(const DateTime &dateTime);
 
 #endif
-#endif
-

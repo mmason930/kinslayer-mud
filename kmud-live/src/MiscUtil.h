@@ -2,6 +2,8 @@
 #define MISC_UTIL_H
 
 #include <list>
+#include <map>
+#include <sstream>
 #include "DateTime.h"
 
 class MiscUtil {

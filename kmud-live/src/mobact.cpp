@@ -296,7 +296,7 @@ void mobileActivity(void)
 		{
 			ch->HuntVictim();
 		}
-		ch->ProcessForgets();
+		ch->processForgets();
 		
 		/* Add new mobile actions here */
 	}				/* end for() */
@@ -325,7 +325,7 @@ void Character::Remember(Character *victim)
 	this->MobData->memory.push_back(victim->player.idnum);
 }
 
-void Character::ProcessForgets()
+void Character::processForgets()
 {
 	if( !IS_NPC(this) ) return;
 	for(std::list<long>::iterator mem = MobData->ForgetList.begin();mem != MobData->ForgetList.end();++mem)
@@ -344,7 +344,7 @@ void Character::Forget(Character *victim)
 
 
 /* erase ch's memory */
-void Character::ClearMemory()
+void Character::clearMemory()
 {
 	if(IS_NPC(this))
 		this->MobData->memory.clear();

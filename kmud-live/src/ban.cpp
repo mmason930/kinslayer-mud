@@ -90,7 +90,7 @@ void BanManager::Boot()
 			MyRow["name"], MyRow["site"], atoi(MyRow["id"].c_str())));
 	}
 }
-void BanManager::Save()
+void BanManager::save()
 {
 	std::stringstream Query;
 
@@ -286,27 +286,27 @@ ACMD(do_ban)
 
 	if (!*argument)
 	{
-		ch->Send(BanManager::GetManager().GrabBanList().c_str());
+		ch->send(BanManager::GetManager().GrabBanList().c_str());
 		return;
 	}
 	TwoArguments(argument, flag, site);
 
 	if (!*site || !*flag)
 	{
-		ch->Send("Usage: ban {all | select | new | name} site_name\r\n", ch);
+		ch->send("Usage: ban {all | select | new | name} site_name\r\n", ch);
 		return;
 	}
 
 	if (!(!str_cmp(flag, "select") || !str_cmp(flag, "all") || !str_cmp(flag, "new") || !str_cmp(flag, "name")))
 	{
-		ch->Send("Flag must be ALL, SELECT, NEW, or NAME.\r\n");
+		ch->send("Flag must be ALL, SELECT, NEW, or NAME.\r\n");
 		return;
 	}
 
 	//Does the ban already exist?
 	if( BanManager::GetManager().GetBanBySite( site ) != NULL ) 
 	{
-			ch->Send("That site has already been banned -- unban it to change the ban type.\r\n");
+			ch->send("That site has already been banned -- unban it to change the ban type.\r\n");
 			return;
 	}
 	BanElement *NewElement
@@ -323,7 +323,7 @@ ACMD(do_ban)
 		MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE, "%s has banned %s for %s players.",
 			GET_NAME(ch), NewElement->GetSite().c_str(), NewElement->GetTypeStr().c_str());
 	}
-	ch->Send("Site banned.\r\n");
+	ch->send("Site banned.\r\n");
 	NewElement->AddToDatabase();
 }
 
@@ -335,18 +335,18 @@ ACMD(do_unban)
 
 	if (!*site)
 	{
-		ch->Send("A site to unban might help.\r\n");
+		ch->send("A site to unban might help.\r\n");
 		return;
 	}
 	BanElement *MyElement = BanManager::GetManager().GetBanBySite(site);
 
 	if( MyElement == NULL )//Not found!
 	{
-		ch->Send("That site is not currently banned.\r\n");
+		ch->send("That site is not currently banned.\r\n");
 		return;
 	}
 
-	ch->Send("Site unbanned.\r\n");
+	ch->send("Site unbanned.\r\n");
 	MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE, "%s removed the %s-ban on %s.",
 		GET_NAME(ch), MyElement->GetTypeStr().c_str(), MyElement->GetSite().c_str());
 

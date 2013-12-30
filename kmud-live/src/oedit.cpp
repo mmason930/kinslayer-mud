@@ -383,7 +383,7 @@ void oedit_save_to_disk(int zone_num)
 			if(obj->deleted)
 				obj->ProtoDelete();
 			else if( obj->needs_save )
-				obj->ProtoSave();
+				obj->protoSave();
 		}
 	}
 
@@ -404,10 +404,10 @@ void oedit_disp_container_flags_menu(Descriptor *d)
 	sprintbit(GET_OBJ_VAL(OLC_OBJ(d), 1), (const char **) container_bits, buf1);
 #if defined(CLEAR_SCREEN)
 
-	d->Send("[H[J");
+	d->send("[H[J");
 #endif
 
-	d->Send(
+	d->send(
 	    "%s1%s) CLOSEABLE\r\n"
 	    "%s2%s) CLOSED\r\n"
 	    "%s3%s) LOCKED\r\n"
@@ -428,10 +428,10 @@ void oedit_disp_extradesc_menu(Descriptor *d)
 	get_char_cols(d->character);
 #if defined(CLEAR_SCREEN)
 
-	d->Send("[H[J");
+	d->send("[H[J");
 #endif
 
-	d->Send(
+	d->send(
 	    "Extra desc menu\r\n"
 	    "%s1%s) Keyword: %s%s\r\n"
 	    "%s2%s) Description:\r\n%s%s\r\n"
@@ -469,10 +469,10 @@ void oedit_disp_decays_menu(Descriptor *d)
 	get_char_cols(d->character);
 #if defined(CLEAR_SCREEN)
 
-	d->Send("[H[J");
+	d->send("[H[J");
 #endif
 
-	d->Send(
+	d->send(
 	    "Decays Menu\r\n"
 	    "%s1%s) Decay Type: %s%s\r\n"
 	    "%s2%s) Decay Timer: %s%d\r\n"
@@ -497,7 +497,7 @@ void oedit_disp_prompt_apply_menu(Descriptor *d)
 	get_char_cols(d->character);
 #if defined(CLEAR_SCREEN)
 
-	d->Send("[H[J");
+	d->send("[H[J");
 #endif
 
 	for (counter = 0; counter < MAX_OBJ_AFFECT; ++counter)
@@ -506,15 +506,15 @@ void oedit_disp_prompt_apply_menu(Descriptor *d)
 		{
 			sprinttype(OLC_OBJ(d)->affected[counter].location, (const char **) apply_types, buf2);
 
-			d->Send(" %s%d%s) %+d to %s\r\n", grn, counter + 1, nrm,
+			d->send(" %s%d%s) %+d to %s\r\n", grn, counter + 1, nrm,
 			        OLC_OBJ(d)->affected[counter].modifier, buf2);
 		}
 		else
 		{
-			d->Send(" %s%d%s) None.\r\n", grn, counter + 1, nrm);
+			d->send(" %s%d%s) None.\r\n", grn, counter + 1, nrm);
 		}
 	}
-	d->Send("\r\nEnter affection to modify (0 to quit) : ");
+	d->send("\r\nEnter affection to modify (0 to quit) : ");
 	OLC_MODE(d) = OEDIT_PROMPT_APPLY;
 }
 
@@ -528,15 +528,15 @@ void oedit_liquid_type(Descriptor *d)
 	get_char_cols(d->character);
 #if defined(CLEAR_SCREEN)
 
-	d->Send("[H[J");
+	d->send("[H[J");
 #endif
 
 	for (counter = 0; counter < NUM_LIQ_TYPES;++counter)
 	{
-		d->Send(" %s%2d%s) %s%-20.20s %s", grn, counter, nrm, yel,
+		d->send(" %s%2d%s) %s%-20.20s %s", grn, counter, nrm, yel,
 		        drinks[counter], !(++columns % 2) ? "\r\n" : "");
 	}
-	d->Send("\r\n%sEnter drink type : ", nrm);
+	d->send("\r\n%sEnter drink type : ", nrm);
 	OLC_MODE(d) = OEDIT_VALUE_3;
 }
 
@@ -550,15 +550,15 @@ void oedit_disp_apply_menu(Descriptor *d)
 	get_char_cols(d->character);
 #if defined(CLEAR_SCREEN)
 
-	d->Send("[H[J");
+	d->send("[H[J");
 #endif
 
 	for (counter = 0; *(apply_types[counter]) != '\n';++counter)
 	{
-		d->Send("%s%2d%s) %-20.20s %s", grn, counter, nrm,
+		d->send("%s%2d%s) %-20.20s %s", grn, counter, nrm,
 		        apply_types[counter], !(++columns % 2) ? "\r\n" : "");
 	}
-	d->Send("\r\nEnter apply type (0 is no apply) : ");
+	d->send("\r\nEnter apply type (0 is no apply) : ");
 	OLC_MODE(d) = OEDIT_APPLY;
 }
 
@@ -572,17 +572,17 @@ void oedit_disp_weapon_menu(Descriptor *d)
 	get_char_cols(d->character);
 #if defined(CLEAR_SCREEN)
 
-	d->Send("[H[J");
+	d->send("[H[J");
 #endif
 
 	for (counter = 0; counter < NUM_ATTACK_TYPES; counter++)
 	{
-		d->Send("%s%2d%s) %-20.20s %s", grn, counter, nrm,
+		d->send("%s%2d%s) %-20.20s %s", grn, counter, nrm,
 		        attack_hit_text[counter].singular,
 		        !(++columns % 2) ? "\r\n" : "");
 	}
 
-	d->Send("\r\nEnter weapon type : ");
+	d->send("\r\nEnter weapon type : ");
 }
 
 /*
@@ -595,15 +595,15 @@ void oedit_disp_spells_menu(Descriptor *d)
 	get_char_cols(d->character);
 #if defined(CLEAR_SCREEN)
 
-	d->Send("[H[J");
+	d->send("[H[J");
 #endif
 
 	for (counter = 0; counter < NUM_SPELLS;++counter)
 	{
-		d->Send("%s%2d%s) %s%-20.20s %s", grn, counter, nrm, yel,
+		d->send("%s%2d%s) %s%-20.20s %s", grn, counter, nrm, yel,
 		        WeaveManager::GetManager().GetWeaveName(counter).c_str(), !(++columns % 3) ? "\r\n" : "");
 	}
-	d->Send("\r\n%sEnter spell choice (0 for none) : ", nrm);
+	d->send("\r\n%sEnter spell choice (0 for none) : ", nrm);
 }
 
 /*
@@ -622,32 +622,32 @@ void oedit_disp_val1_menu(Descriptor *d)
 			oedit_disp_val3_menu(d);
 			break;
 		case ITEM_POTION:
-			d->Send("Spell level : ");
+			d->send("Spell level : ");
 			break;
 		case ITEM_WEAPON:
 			oedit_disp_weapon_type_menu(d);
 			break;
 		case ITEM_ARMOR:
-			d->Send("Apply to AC : ");
+			d->send("Apply to AC : ");
 			break;
 		case ITEM_CONTAINER:
-			d->Send("Max weight to contain : ");
+			d->send("Max weight to contain : ");
 			break;
 		case ITEM_ANGREAL:
-			d->Send("Cost of Weaving, % out of 100 : ");
+			d->send("Cost of Weaving, % out of 100 : ");
 			break;
 		case ITEM_DRINKCON:
 		case ITEM_FOUNTAIN:
-			d->Send("Max drink units : ");
+			d->send("Max drink units : ");
 			break;
 		case ITEM_FOOD:
-			d->Send("Hours to fill stomach : ");
+			d->send("Hours to fill stomach : ");
 			break;
 		case ITEM_MONEY:
-			d->Send("Number of gold coins : ");
+			d->send("Number of gold coins : ");
 			break;
 		case ITEM_KEY:
-			d->Send("Number of uses before key breaks (0 for infinite) : ");
+			d->send("Number of uses before key breaks (0 for infinite) : ");
 			break;
 		case ITEM_NOTE:
 			/*
@@ -674,11 +674,11 @@ void oedit_disp_val2_menu(Descriptor *d)
 			break;
 
 		case ITEM_WEAPON:
-			d->Send("Lower end of damage range : ");
+			d->send("Lower end of damage range : ");
 			break;
 
 		case ITEM_ANGREAL:
-			d->Send("Damage %, out of 100 : ");
+			d->send("Damage %, out of 100 : ");
 			break;
 
 		case ITEM_FOOD:
@@ -697,7 +697,7 @@ void oedit_disp_val2_menu(Descriptor *d)
 
 		case ITEM_DRINKCON:
 		case ITEM_FOUNTAIN:
-			d->Send("Initial drink units : ");
+			d->send("Initial drink units : ");
 			break;
 
 		default:
@@ -716,19 +716,19 @@ void oedit_disp_val3_menu(Descriptor *d)
 	{
 
 		case ITEM_LIGHT:
-			d->Send("Number of hours (0 = burnt, -1 is infinite) : ");
+			d->send("Number of hours (0 = burnt, -1 is infinite) : ");
 			break;
 		case ITEM_POTION:
 			oedit_disp_spells_menu(d);
 			break;
 		case ITEM_WEAPON:
-			d->Send("Higher end of damage range : ");
+			d->send("Higher end of damage range : ");
 			break;
 		case ITEM_CONTAINER:
-			d->Send("Vnum of key to open container (-1 for no key) : ");
+			d->send("Vnum of key to open container (-1 for no key) : ");
 			break;
 		case ITEM_ANGREAL:
-			d->Send("Number of Charges. -1 for unlimited : ");
+			d->send("Number of Charges. -1 for unlimited : ");
 			break;
 		case ITEM_DRINKCON:
 		case ITEM_FOUNTAIN:
@@ -752,7 +752,7 @@ void oedit_disp_val4_menu(Descriptor *d)
 			oedit_disp_spells_menu(d);
 			break;
 		case ITEM_LIGHT:
-			d->Send("Maxium hours of light if refuelled (0 = infinite) : ");
+			d->send("Maxium hours of light if refuelled (0 = infinite) : ");
 			break;
 		case ITEM_WEAPON:
 			oedit_disp_weapon_menu(d);
@@ -760,10 +760,10 @@ void oedit_disp_val4_menu(Descriptor *d)
 		case ITEM_DRINKCON:
 		case ITEM_FOUNTAIN:
 		case ITEM_FOOD:
-			d->Send("Poisoned (0 = not poison) : ");
+			d->send("Poisoned (0 = not poison) : ");
 			break;
 		case ITEM_CONTAINER:
-			d->Send("Enter pick requirement(-1 for unpickable) : ");
+			d->send("Enter pick requirement(-1 for unpickable) : ");
 			break;
 		default:
 			oedit_disp_menu(d);
@@ -780,10 +780,10 @@ void oedit_disp_val5_menu(Descriptor *d)
 	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
 	{
 		case ITEM_LIGHT:
-			d->Send("Can this be refilled? (1 for yes, 0 for no) : ");
+			d->send("Can this be refilled? (1 for yes, 0 for no) : ");
 			break;
 		case ITEM_WEAPON:
-			d->Send("Enter bash rating(0 - 100) : ");
+			d->send("Enter bash rating(0 - 100) : ");
 			break;
 		default:
 			oedit_disp_menu(d);
@@ -800,7 +800,7 @@ void oedit_disp_val6_menu(Descriptor *d)
 	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
 	{
 		case ITEM_WEAPON:
-			d->Send("Enter low end of backstab damage range : ");
+			d->send("Enter low end of backstab damage range : ");
 			break;
 		default:
 			oedit_disp_menu(d);
@@ -817,7 +817,7 @@ void oedit_disp_val7_menu(Descriptor *d)
 	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
 	{
 		case ITEM_WEAPON:
-			d->Send("Enter high end of backstab damage range : ");
+			d->send("Enter high end of backstab damage range : ");
 			break;
 		default:
 			oedit_disp_menu(d);
@@ -834,7 +834,7 @@ void oedit_disp_val8_menu(Descriptor *d)
 	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
 	{
 		case ITEM_WEAPON:
-			d->Send("Enter backstab rating(0 - 100) : ");
+			d->send("Enter backstab rating(0 - 100) : ");
 			break;
 		default:
 			oedit_disp_menu(d);
@@ -851,7 +851,7 @@ void oedit_disp_val9_menu(Descriptor *d)
 	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
 	{
 		case ITEM_WEAPON:
-			d->Send("Enter low end of charge damage range : ");
+			d->send("Enter low end of charge damage range : ");
 			break;
 		default:
 			oedit_disp_menu(d);
@@ -868,7 +868,7 @@ void oedit_disp_val10_menu(Descriptor *d)
 	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
 	{
 		case ITEM_WEAPON:
-			d->Send("Enter high end of charge damage range : ");
+			d->send("Enter high end of charge damage range : ");
 			break;
 		default:
 			oedit_disp_menu(d);
@@ -885,7 +885,7 @@ void oedit_disp_val11_menu(Descriptor *d)
 	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
 	{
 		case ITEM_WEAPON:
-			d->Send("Enter charge rating(0 - 100) : ");
+			d->send("Enter charge rating(0 - 100) : ");
 			break;
 		default:
 			oedit_disp_menu(d);
@@ -922,7 +922,7 @@ void oedit_disp_clan1_menu(Descriptor *d)
 		case ITEM_WEAPON:
 		case ITEM_ARMOR:
 		case ITEM_CONTAINER:
-			d->Send("Enter clan number : ");
+			d->send("Enter clan number : ");
 			break;
 		default:
 			oedit_disp_menu(d);
@@ -939,7 +939,7 @@ void oedit_disp_clan2_menu(Descriptor *d)
 	{
 		case ITEM_WEAPON:
 		case ITEM_ARMOR:
-			d->Send("Enter extra offensive bonus : ");
+			d->send("Enter extra offensive bonus : ");
 			break;
 		default:
 			oedit_disp_menu(d);
@@ -956,7 +956,7 @@ void oedit_disp_clan3_menu(Descriptor *d)
 	{
 		case ITEM_WEAPON:
 		case ITEM_ARMOR:
-			d->Send("Enter extra parry bonus : ");
+			d->send("Enter extra parry bonus : ");
 			break;
 		default:
 			oedit_disp_menu(d);
@@ -973,7 +973,7 @@ void oedit_disp_clan4_menu(Descriptor *d)
 	{
 		case ITEM_WEAPON:
 		case ITEM_ARMOR:
-			d->Send("Enter extra dodge bonus : ");
+			d->send("Enter extra dodge bonus : ");
 			break;
 		default:
 			oedit_disp_menu(d);
@@ -991,7 +991,7 @@ void oedit_disp_clan5_menu(Descriptor *d)
 		case ITEM_WEAPON:
 			break;
 		case ITEM_ARMOR:
-			d->Send("Enter absorption bonus : ");
+			d->send("Enter absorption bonus : ");
 			break;
 		default:
 			oedit_disp_menu(d);
@@ -1008,7 +1008,7 @@ void oedit_disp_clan6_menu(Descriptor *d)
 	{
 		case ITEM_WEAPON:
 		case ITEM_ARMOR:
-			d->Send("Enter weight bonus : ");
+			d->send("Enter weight bonus : ");
 			break;
 		default:
 			oedit_disp_menu(d);
@@ -1025,7 +1025,7 @@ void oedit_disp_clan7_menu(Descriptor *d)
 	{
 		case ITEM_WEAPON:
 		case ITEM_ARMOR:
-			d->Send("Enter moves bonus : ");
+			d->send("Enter moves bonus : ");
 			break;
 		default:
 			oedit_disp_menu(d);
@@ -1042,7 +1042,7 @@ void oedit_disp_clan8_menu(Descriptor *d)
 	{
 		case ITEM_WEAPON:
 		case ITEM_ARMOR:
-			d->Send("Enter hit point bonus : ");
+			d->send("Enter hit point bonus : ");
 			break;
 		default:
 			oedit_disp_menu(d);
@@ -1058,7 +1058,7 @@ void oedit_disp_clan9_menu(Descriptor *d)
 	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
 	{
 		case ITEM_WEAPON:
-			d->Send("Enter bonus to low damage range : ");
+			d->send("Enter bonus to low damage range : ");
 		case ITEM_ARMOR:
 			break;
 		default:
@@ -1075,7 +1075,7 @@ void oedit_disp_clan10_menu(Descriptor *d)
 	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
 	{
 		case ITEM_WEAPON:
-			d->Send("Enter bonus to high damage range : ");
+			d->send("Enter bonus to high damage range : ");
 		case ITEM_ARMOR:
 			break;
 		default:
@@ -1092,16 +1092,16 @@ void oedit_disp_type_menu(Descriptor *d)
 	get_char_cols(d->character);
 #if defined(CLEAR_SCREEN)
 
-	d->Send("[H[J");
+	d->send("[H[J");
 #endif
 
 	for (counter = 0; counter < NUM_ITEM_TYPES; counter++)
 	{
-		d->Send("%s%2d%s) %-20.20s %s", grn, counter, nrm,
+		d->send("%s%2d%s) %-20.20s %s", grn, counter, nrm,
 		        item_types[counter], !(++columns % 2) ? "\r\n" : "");
 	}
 	d
-	->Send("\r\nEnter object type : ");
+	->send("\r\nEnter object type : ");
 }
 
 /*
@@ -1114,17 +1114,17 @@ void oedit_disp_extra_menu(Descriptor *d)
 	get_char_cols(d->character);
 #if defined(CLEAR_SCREEN)
 
-	d->Send("[H[J");
+	d->send("[H[J");
 #endif
 
 	for (counter = 0; counter < NUM_ITEM_FLAGS; counter++)
 	{
-		d->Send("%s%2d%s) %-20.20s %s", grn, counter + 1, nrm,
+		d->send("%s%2d%s) %-20.20s %s", grn, counter + 1, nrm,
 		        extra_bits[counter], !(++columns % 2) ? "\r\n" : "");
 	}
 
 	sprintbit(GET_OBJ_EXTRA(OLC_OBJ(d)),extra_bits, buf1);
-	d->Send("\r\nObject flags: %s%s%s\r\n"
+	d->send("\r\nObject flags: %s%s%s\r\n"
 	        "Enter object extra flag (0 to quit) : ",
 	        cyn, buf1, nrm);
 }
@@ -1140,18 +1140,18 @@ void oedit_disp_wear_menu(Descriptor *d)
 
 #if defined(CLEAR_SCREEN)
 
-	d->Send("[H[J");
+	d->send("[H[J");
 
 #endif
 
 	for (counter = 0; counter < NUM_ITEM_WEARS; counter++)
 	{
-		d->Send("%s%2d%s) %-20.20s %s", grn, counter + 1, nrm,
+		d->send("%s%2d%s) %-20.20s %s", grn, counter + 1, nrm,
 		        wear_bits[counter], !(++columns % 2) ? "\r\n" : "");
 	}
 
 	sprintbit(GET_OBJ_WEAR(OLC_OBJ(d)), wear_bits, buf1);
-	d->Send("\r\nWear flags: %s%s%s\r\n"
+	d->send("\r\nWear flags: %s%s%s\r\n"
 	        "Enter wear flag, 0 to quit : ", cyn, buf1, nrm);
 }
 
@@ -1164,15 +1164,15 @@ void oedit_disp_weapon_type_menu(Descriptor *d)
 
 #if defined(CLEAR_SCREEN)
 
-	d->Send(".[H.[J");
+	d->send(".[H.[J");
 
 #endif
 
 	for (counter = 0; counter < MAX_WEAPON_TYPE; counter++)
-		d->Send("%s%2d%s) %-20.20s %s", grn, counter, nrm,
+		d->send("%s%2d%s) %-20.20s %s", grn, counter, nrm,
 		        weapon_types[counter], !(++columns % 2) ? "\r\n" : "");
 
-	d->Send("\r\nChoose a number listed for the weapon type.\r\n");
+	d->send("\r\nChoose a number listed for the weapon type.\r\n");
 }
 
 /*
@@ -1196,7 +1196,7 @@ void oedit_disp_menu(Descriptor *d)
 	 * Build first half of menu.
 	*/
 
-	d->Send(
+	d->send(
 #if defined(CLEAR_SCREEN)
 	    "[H[J"
 #endif
@@ -1222,7 +1222,7 @@ void oedit_disp_menu(Descriptor *d)
 	 * Build second half of menu.
 	 */
 	sprintbit(GET_OBJ_WEAR(obj), wear_bits, buf1);
-	d->Send(
+	d->send(
 	    "%s7%s) Wear flags  : %s%s\r\n"
 	    "%s8%s) Weight      : %s%.1f\r\n"
 	    "%s9%s) Cost        : %s%d G, %d S, %d C\r\n"
@@ -1237,9 +1237,7 @@ void oedit_disp_menu(Descriptor *d)
 	    "%sH%s) Values      : %s%d %d %d %d %d %d %d %d %d %d %d %d\r\n"
 	    "%sI%s) Clan        : %s%d %d %d %d %d %.1f %d %d %d %d\r\n"
 		"%sK%s) Delete      : %s%s\r\n"
-#ifdef KINSLAYER_JAVASCRIPT
 		"%sJ%s) JavaScript  : %s%s\r\n"
-#endif
 	    "%sT%s) Applies menu\r\n"
 	    "%sU%s) Extra descriptions menu\r\n"
 		"%sV%s) Decay menu\r\n"
@@ -1271,9 +1269,7 @@ void oedit_disp_menu(Descriptor *d)
 		GET_OBJ_CL_HPS(obj), GET_OBJ_CL_DMG1(obj),
 		GET_OBJ_CL_DMG2(obj),
 	    grn, nrm, cyn, obj->deleted ? "Yes" : "No",
-#ifdef KINSLAYER_JAVASCRIPT
 		grn, nrm, cyn, (obj->js_scripts->size() ? "Set." : "Not Set."),
-#endif
 	    grn, nrm,
 	    grn, nrm,
 		grn, nrm,
@@ -1299,7 +1295,7 @@ void oedit_parse(Descriptor *d, char *arg)
 
 				case 'y':
 				case 'Y':
-					d->Send("Saving object to memory.\r\n");
+					d->send("Saving object to memory.\r\n");
 					oedit_save_internally(d);
 					AddOlcLog( d->character, "obj", d->olc->obj->getVnum() );
 					cleanup_olc(d, CLEANUP_STRUCTS);
@@ -1314,8 +1310,8 @@ void oedit_parse(Descriptor *d, char *arg)
 					return;
 
 				default:
-					d->Send("Invalid choice!\r\n");
-					d->Send("Do you wish to save this object internally?\r\n");
+					d->send("Invalid choice!\r\n");
+					d->send("Do you wish to save this object internally?\r\n");
 					return;
 			}
 
@@ -1330,32 +1326,32 @@ void oedit_parse(Descriptor *d, char *arg)
 				case 'Q':
 					if (OLC_VAL(d))
 					{	/* Something has been modified. */
-						d->Send("Do you wish to save this object internally? : ");
+						d->send("Do you wish to save this object internally? : ");
 						OLC_MODE(d) = OEDIT_CONFIRM_SAVESTRING;
 					}
 					else
 						cleanup_olc(d, CLEANUP_ALL);
 					return;
 				case '1':
-					d->Send("Enter namelist : ");
+					d->send("Enter namelist : ");
 					OLC_MODE(d) = OEDIT_EDIT_NAMELIST;
 					break;
 				case '2':
-					d->Send("Enter short desc : ");
+					d->send("Enter short desc : ");
 					OLC_MODE(d) = OEDIT_SHORTDESC;
 					break;
 				case '3':
-					d->Send("Enter long desc :-\r\n| ");
+					d->send("Enter long desc :-\r\n| ");
 					OLC_MODE(d) = OEDIT_LONGDESC;
 					break;
 				case '4':
 					OLC_MODE(d) = OEDIT_ACTDESC;
-					d->Send("Enter action description: (/s saves /h for help)\r\n\r\n");
+					d->send("Enter action description: (/s saves /h for help)\r\n\r\n");
 					d->backstr = NULL;
 
 					if (OLC_OBJ(d)->action_description)
 					{
-						d->Send(OLC_OBJ(d)->action_description);
+						d->send(OLC_OBJ(d)->action_description);
 						d->backstr = str_dup(OLC_OBJ(d)->action_description);
 					}
 					d->str = &OLC_OBJ(d)->action_description;
@@ -1375,46 +1371,46 @@ void oedit_parse(Descriptor *d, char *arg)
 					OLC_MODE(d) = OEDIT_WEAR;
 					break;
 				case '8':
-					d->Send("Enter weight : ");
+					d->send("Enter weight : ");
 					OLC_MODE(d) = OEDIT_WEIGHT;
 					break;
 				case '9':
-					d->Send("Enter cost : ");
+					d->send("Enter cost : ");
 					OLC_MODE(d) = OEDIT_COST;
 					break;
 				case 'a':
 				case 'A':
-					d->Send("Enter cost per day : ");
+					d->send("Enter cost per day : ");
 					OLC_MODE(d) = OEDIT_COSTPERDAY;
 					break;
 				case 'b':
 				case 'B':
-					d->Send("Enter timer : ");
+					d->send("Enter timer : ");
 					OLC_MODE(d) = OEDIT_TIMER;
 					break;
 				case 'c':
 				case 'C':
-					d->Send("Enter the maximum number of this object allowed to exist : ");
+					d->send("Enter the maximum number of this object allowed to exist : ");
 					OLC_MODE(d) = OEDIT_MAX;
 					break;
 				case 'd':
 				case 'D':
-					d->Send("Enter Value :");
+					d->send("Enter Value :");
 					OLC_MODE(d) = OEDIT_OB;
 					break;
 				case 'e':
 				case 'E':
-					d->Send("Enter Value :");
+					d->send("Enter Value :");
 					OLC_MODE(d) = OEDIT_PB;
 					break;
 				case 'f':
 				case 'F':
-					d->Send("Enter Value :");
+					d->send("Enter Value :");
 					OLC_MODE(d) = OEDIT_DB;
 					break;
 				case 'g':
 				case 'G':
-					d->Send("Enter Value :");
+					d->send("Enter Value :");
 					OLC_MODE(d) = OEDIT_ABS;
 					break;
 				case 'h':
@@ -1457,12 +1453,12 @@ void oedit_parse(Descriptor *d, char *arg)
 				case 'K':
 					if(OLC_OBJ(d)->deleted)
 					{
-						d->Send("This item will no longer be deleted.\r\n");
+						d->send("This item will no longer be deleted.\r\n");
 						OLC_OBJ(d)->deleted = false;
 					}
 					else
 					{
-						d->Send("This item will be deleted after the next reboot.\r\n");
+						d->send("This item will be deleted after the next reboot.\r\n");
 						OLC_OBJ(d)->deleted = true;
 					}
 					OLC_VAL(d) = 1;
@@ -1492,7 +1488,6 @@ void oedit_parse(Descriptor *d, char *arg)
 					OLC_VAL(d) = 1;
 					oedit_disp_decays_menu(d);
 					break;
-#ifdef KINSLAYER_JAVASCRIPT
 				case 'j':
 				case 'J':
 					OLC_SCRIPT_EDIT_MODE(d) = JSCRIPT_MAIN_MENU;
@@ -1500,7 +1495,6 @@ void oedit_parse(Descriptor *d, char *arg)
 					d->olc->jsScripts = d->olc->obj->js_scripts;
 					JScriptDispMenu(d);
 					return;
-#endif
 				default:
 					oedit_disp_menu(d);
 					break;
@@ -1509,12 +1503,11 @@ void oedit_parse(Descriptor *d, char *arg)
 							 * end of OEDIT_MAIN_MENU
 							 */
 
-#ifdef KINSLAYER_JAVASCRIPT
 		case OLC_JSCRIPT_EDIT:
 			if( JScriptParse(d, arg) )
 				return;
 			break;
-#endif
+
 		case OEDIT_EDIT_NAMELIST:
 			if (OLC_OBJ(d)->name)
 				delete[] (OLC_OBJ(d)->name);
@@ -1537,7 +1530,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			number = atoi(arg);
 			if ((number < 1) || (number >= NUM_ITEM_TYPES))
 			{
-				d->Send("Invalid choice, try again : ");
+				d->send("Invalid choice, try again : ");
 				return;
 			}
 			else
@@ -1564,7 +1557,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			number = atoi(arg);
 			if ((number < 0) || (number > NUM_ITEM_WEARS))
 			{
-				d->Send("That's not a valid choice!\r\n");
+				d->send("That's not a valid choice!\r\n");
 				oedit_disp_wear_menu(d);
 				return;
 			}
@@ -1990,7 +1983,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			else
 			{
 				OLC_OBJ(d)->affected[OLC_VAL(d)].location = number;
-				d->Send("Modifier : ");
+				d->send("Modifier : ");
 				OLC_MODE(d) = OEDIT_APPLYMOD;
 			}
 			return;
@@ -2032,16 +2025,16 @@ void oedit_parse(Descriptor *d, char *arg)
 
 				case 1:
 					OLC_MODE(d) = OEDIT_EXTRADESC_KEY;
-					d->Send("Enter keywords, separated by spaces :-\r\n| ");
+					d->send("Enter keywords, separated by spaces :-\r\n| ");
 					return;
 
 				case 2:
 					OLC_MODE(d) = OEDIT_EXTRADESC_DESCRIPTION;
-					d->Send("Enter the extra description: (/s saves /h for help)\r\n\r\n");
+					d->send("Enter the extra description: (/s saves /h for help)\r\n\r\n");
 					d->backstr = NULL;
 					if (OLC_DESC(d)->description)
 					{
-						d->Send(OLC_DESC(d)->description);
+						d->send(OLC_DESC(d)->description);
 						d->backstr = str_dup(OLC_DESC(d)->description);
 					}
 					d->str = &OLC_DESC(d)->description;
@@ -2083,7 +2076,7 @@ void oedit_parse(Descriptor *d, char *arg)
 					return;
 				case 1:
 					OLC_MODE(d) = OEDIT_DECAY_TYPE;
-					d->Send("Enter an item type, or -1 to clear. The choices are: \r\n"
+					d->send("Enter an item type, or -1 to clear. The choices are: \r\n"
 							"1) General	\r\n"
 							"2) Cloth	\r\n"
 							"3) Wood	\r\n"
@@ -2095,11 +2088,11 @@ void oedit_parse(Descriptor *d, char *arg)
 					return;
 				case 2:
 					OLC_MODE(d) = OEDIT_DECAY_TIMER;
-					d->Send("Enter the timer length: \r\n");
+					d->send("Enter the timer length: \r\n");
 					return;
 				case 3:
 					OLC_MODE(d) = OEDIT_DECAY_TIMERTYPE;
-					d->Send("Enter a timer type, or -1 to clear. The choices are: \r\n"
+					d->send("Enter a timer type, or -1 to clear. The choices are: \r\n"
 							"1) Minutes \r\n"
 							"2) Hours	\r\n"
 							"3) Days	\r\n"
@@ -2129,7 +2122,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			}
 			else if( number < -1 || number > OBJECT_DECAY_FOOD )
 			{
-				d->Send("Choice must be between 1 and 6.\r\n");
+				d->send("Choice must be between 1 and 6.\r\n");
 				return;
 			}
 			d->olc->obj->decayType = number;
@@ -2145,7 +2138,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			}
 			else if( number < -1 || number > OBJECT_DECAY_YEARS )
 			{
-				d->Send("Choice must be between 1 and 6.\r\n");
+				d->send("Choice must be between 1 and 6.\r\n");
 				return;
 			}
 			d->olc->obj->decayTimerType = number;
@@ -2154,7 +2147,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			return;
 		default:
 			MudLog(BRF, LVL_BUILDER, TRUE, "SYSERR: OLC: Reached default case in oedit_parse()!");
-			d->Send("Oops...\r\n");
+			d->send("Oops...\r\n");
 			break;
 	}
 

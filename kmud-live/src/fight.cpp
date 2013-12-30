@@ -239,7 +239,7 @@ void Character::UpdateLegendEntry()
 
 	UpdateLegend();
 	if( this->LoggedIn() )
-		this->Save();
+		this->save();
 }
 void Character::InterruptTimer()
 {	
@@ -269,7 +269,7 @@ void Character::InterruptTimer()
 	//	WAIT_STATE(this, PULSE_VIOLENCE / 2);
 	//}
 	//else
-		this->Send( "You are interrupted and stop what you are doing.\r\n" );
+		this->send( "You are interrupted and stop what you are doing.\r\n" );
 }
 
 void update_slew( Character *ch, Character *victim )
@@ -280,8 +280,8 @@ void update_slew( Character *ch, Character *victim )
 	          GET_NAME( victim ), time_info.day + 1, suf, month_name[ ( int ) time_info.month ], time_info.year );
 }
 
-//GetWeaveLoss & GainWeave re-written by Galnor: 2006-11-17
-//WeaveGroupDistribution also newly added on the same date.
+//GetWeaveLoss & gainWeave re-written by Galnor: 2006-11-17
+//weaveGroupDistribution also newly added on the same date.
 //Re-wrote to better organize the system of Weave Point loss & gain.
 sh_int Character::GetWeaveLoss()
 {
@@ -291,12 +291,12 @@ sh_int Character::GetSamesideWeaveLoss()
 {
 	return (GET_WP( this ) / 10);
 }
-void Character::GainWeave( sh_int wp )
+void Character::gainWeave( sh_int wp )
 {
 	this->points.weave += wp;
-	this->Send("Your fame around the world has increased.\r\n");
+	this->send("Your fame around the world has increased.\r\n");
 }
-bool Character::CanGainWeave( Character* victim )
+bool Character::canGainWeave( Character* victim )
 {
 	if( !victim || victim == this || this->player.level >= LVL_IMMORT || PLR_FLAGGED(this, PLR_NO_WEAVE)
 
@@ -306,12 +306,12 @@ bool Character::CanGainWeave( Character* victim )
 	return true;
 }
 
-void Character::WeaveGroupDistribution( Character* victim )
+void Character::weaveGroupDistribution( Character* victim )
 {
 	int min_weave_gain = 5;
 	int min_sameside_weave_gain = 3;
 	int wp = 0;
-	if(!this->CanGainWeave( victim ))
+	if(!this->canGainWeave( victim ))
 		return;
 
 	if(GET_RACE(this) == GET_RACE(victim))
@@ -324,7 +324,7 @@ void Character::WeaveGroupDistribution( Character* victim )
 	Follower* f;
 
 	victim->points.weave -= wp * Conf->play.WpLossMultiplier;
-	victim->Send("Your fame has been diminished.\r\n");
+	victim->send("Your fame has been diminished.\r\n");
 
 	if(victim->player.level >= 30)
 	{
@@ -336,7 +336,7 @@ void Character::WeaveGroupDistribution( Character* victim )
 		{
 			//Only those in the room for the kill qualify for distribution gain.
 			if(f->follower->in_room == this->in_room && AFF_FLAGGED(f->follower, AFF_GROUP)
-			&& f->follower->CanGainWeave( victim ))
+			&& f->follower->canGainWeave( victim ))
 			{
 				++num_followers;
 				if(GET_RACE(this) == GET_RACE(victim))
@@ -360,7 +360,7 @@ void Character::WeaveGroupDistribution( Character* victim )
 	bool bNextPlayerKillIDObtained=false;
 	if(leader->in_room->zone == this->in_room->zone)
 	{
-		leader->GainWeave( wp / num_followers );
+		leader->gainWeave( wp / num_followers );
 		leader->UpdateLegendEntry();
 		update_slew(leader, victim);
 
@@ -371,9 +371,9 @@ void Character::WeaveGroupDistribution( Character* victim )
 	for(f = leader->followers;f;f = f->next)
 	{
 		if(f->follower->in_room->zone == this->in_room->zone && AFF_FLAGGED(f->follower, AFF_GROUP)
-			&& f->follower->CanGainWeave( victim ))
+			&& f->follower->canGainWeave( victim ))
 		{
-			f->follower->GainWeave( wp / num_followers );
+			f->follower->gainWeave( wp / num_followers );
 			f->follower->UpdateLegendEntry();
 			update_slew(f->follower, victim);
 
@@ -762,7 +762,7 @@ void Character::Die( Character *killer )
 		dieClock3.turnOn();
 		if(!isInArena(this) && !isInArena(killer)) {
 
-			killer->WeaveGroupDistribution( this );
+			killer->weaveGroupDistribution( this );
 		}
 
 		if(!isInArena(this)) {
@@ -778,7 +778,7 @@ void Character::Die( Character *killer )
 					break;
 
 				this->DropLevel();
-				this->Send( "Ugh! You lost a level!\r\n" );
+				this->send( "Ugh! You lost a level!\r\n" );
 				MudLog( NRM, LVL_GRGOD, TRUE, "%s dropped to level %d.", GET_NAME( this ), GET_LEVEL( this ) );
 			}
 		}
@@ -809,9 +809,7 @@ void Character::Die( Character *killer )
 		dieClock4.turnOff();
 	}//END OF if(killer != NULL)
 	dieClock5.turnOn();
-#ifdef KINSLAYER_JAVASCRIPT
 	js_death_trigger( this, killer );
-#endif
 	dieClock5.turnOff();
 
 	dieClock6.turnOn();
@@ -850,7 +848,7 @@ void Character::Die( Character *killer )
 
 	dieClock14.turnOn();
 	dieClock14A.turnOn();
-	this->Send( "You are dead! Sorry...\r\n" );
+	this->send( "You are dead! Sorry...\r\n" );
 
 	if ( MOB_FLAGGED( this, MOB_GHOST ) )
 		Act( "$n howls in pain and slowly fades away.", TRUE, this, 0, this, TO_NOTVICT );
@@ -902,9 +900,9 @@ void Character::Die( Character *killer )
 
 		Act( "$n suddenly arrives from the midst of the air.", FALSE, this, 0, 0, TO_ROOM );
 		if( !isInArena(this) )
-			this->Send( "\nYou feel completely drained of all of your strength..." );
+			this->send( "\nYou feel completely drained of all of your strength..." );
 
-		this->Save();
+		this->save();
 		dieClock16.turnOff();
 	}
 }
@@ -914,7 +912,7 @@ void perform_group_gain( Character *ch, int base, Character *victim )
 	int share;
 
 	share = MIN( max_exp_gain, MAX( 1, base ) );
-	ch->Send( "You receive your share of experience.\r\n" );
+	ch->send( "You receive your share of experience.\r\n" );
 
 	gain_exp( ch, share );
 }
@@ -982,7 +980,7 @@ void solo_gain( Character * ch, Character * victim )
 	exp = MAX( exp, 1 );
 
 	sprintf( buf2, "You receive some experience points!\r\n" );
-	ch->Send( buf2 );
+	ch->send( buf2 );
 
 	if ( GET_RACE( ch ) == GET_RACE( victim ) && !IS_NPC( victim ) )
 		gain_exp( ch, 1000 );
@@ -1132,18 +1130,18 @@ void dam_message( int dam, Character * ch, Character * victim, int w_type, int B
 	Act( buf, FALSE, ch, NULL, victim, TO_NOTVICT );
 
 	/* damage message to damager */
-	ch->Send( COLOR_GREEN( ch, CL_COMPLETE ) );
+	ch->send( COLOR_GREEN( ch, CL_COMPLETE ) );
 	buf = replace_string( dam_weapons[ msgnum ].to_char,
 	                      attack_hit_text[ w_type ].singular, attack_hit_text[ w_type ].plural, BodyPart );
 	Act( buf, FALSE, ch, NULL, victim, TO_CHAR, COLOR_GREEN(ch, CL_COMPLETE) );
-	ch->Send( COLOR_NORMAL( ch, CL_COMPLETE ) );
+	ch->send( COLOR_NORMAL( ch, CL_COMPLETE ) );
 
 	/* damage message to damagee */
-	victim->Send( (msgnum == 0 ? "" : COLOR_RED( victim, CL_COMPLETE )) );
+	victim->send( (msgnum == 0 ? "" : COLOR_RED( victim, CL_COMPLETE )) );
 	buf = replace_string( dam_weapons[ msgnum ].to_victim,
 	                      attack_hit_text[ w_type ].singular, attack_hit_text[ w_type ].plural, BodyPart );
 	Act( buf, FALSE, ch, NULL, victim, TO_VICT | TO_SLEEP, (msgnum == 0 ? "" : COLOR_RED( victim, CL_COMPLETE )) );
-	victim->Send( COLOR_NORMAL( victim, CL_COMPLETE ) );
+	victim->send( COLOR_NORMAL( victim, CL_COMPLETE ) );
 }
 
 /*
@@ -1188,14 +1186,14 @@ int skill_message( int dam, Character * ch, Character * vict, int attacktype, in
 				{
 					if ( msg->die_msg.attacker_msg )
 					{
-						ch->Send( COLOR_GREEN( ch, CL_COMPLETE ) );
+						ch->send( COLOR_GREEN( ch, CL_COMPLETE ) );
 						Act( msg->die_msg.attacker_msg, FALSE, ch, weap, vict, TO_CHAR,COLOR_GREEN( ch, CL_COMPLETE ) );
-						ch->Send( COLOR_NORMAL( ch, CL_COMPLETE ) );
+						ch->send( COLOR_NORMAL( ch, CL_COMPLETE ) );
 					}
 
-					vict->Send( COLOR_RED( vict, CL_COMPLETE ) );
+					vict->send( COLOR_RED( vict, CL_COMPLETE ) );
 					Act( msg->die_msg.victim_msg, FALSE, ch, weap, vict, TO_VICT | TO_SLEEP, COLOR_RED( vict, CL_COMPLETE ) );
-					vict->Send( COLOR_NORMAL( vict, CL_COMPLETE ) );
+					vict->send( COLOR_NORMAL( vict, CL_COMPLETE ) );
 
 					Act( msg->die_msg.room_msg, FALSE, ch, weap, vict, TO_NOTVICT );
 				}
@@ -1205,14 +1203,14 @@ int skill_message( int dam, Character * ch, Character * vict, int attacktype, in
 				{
 					if ( msg->hit_msg.attacker_msg )
 					{
-						ch->Send( COLOR_GREEN( ch, CL_COMPLETE ) );
+						ch->send( COLOR_GREEN( ch, CL_COMPLETE ) );
 						Act( msg->hit_msg.attacker_msg, FALSE, ch, weap, vict, TO_CHAR, COLOR_GREEN( ch, CL_COMPLETE ) );
-						ch->Send( COLOR_NORMAL( ch, CL_COMPLETE ) );
+						ch->send( COLOR_NORMAL( ch, CL_COMPLETE ) );
 					}
 
-					vict->Send( COLOR_RED( vict, CL_COMPLETE ) );
+					vict->send( COLOR_RED( vict, CL_COMPLETE ) );
 					Act( msg->hit_msg.victim_msg, FALSE, ch, weap, vict, TO_VICT | TO_SLEEP, COLOR_RED( vict, CL_COMPLETE ) );
-					vict->Send( COLOR_NORMAL( vict, CL_COMPLETE ) );
+					vict->send( COLOR_NORMAL( vict, CL_COMPLETE ) );
 
 					Act( msg->hit_msg.room_msg, FALSE, ch, weap, vict, TO_NOTVICT );
 				}
@@ -1247,15 +1245,15 @@ int skill_message( int dam, Character * ch, Character * vict, int attacktype, in
 				{
 					if ( msg->miss_msg.attacker_msg )
 					{
-						ch->Send( COLOR_GREEN( ch, CL_COMPLETE ) );
+						ch->send( COLOR_GREEN( ch, CL_COMPLETE ) );
 						Act( msg->miss_msg.attacker_msg, FALSE, ch, weap, vict, TO_CHAR, COLOR_GREEN( ch, CL_COMPLETE ) );
-						ch->Send( COLOR_NORMAL( ch, CL_COMPLETE ) );
+						ch->send( COLOR_NORMAL( ch, CL_COMPLETE ) );
 					}
 
-					vict->Send( COLOR_RED( vict, CL_COMPLETE ) );
+					vict->send( COLOR_RED( vict, CL_COMPLETE ) );
 
 					Act( msg->miss_msg.victim_msg, FALSE, ch, weap, vict, TO_VICT | TO_SLEEP, COLOR_RED( vict, CL_COMPLETE ) );
-					vict->Send( COLOR_NORMAL( vict, CL_COMPLETE ) );
+					vict->send( COLOR_NORMAL( vict, CL_COMPLETE ) );
 
 					Act( msg->miss_msg.room_msg, FALSE, ch, weap, vict, TO_NOTVICT );
 				}
@@ -1315,7 +1313,7 @@ int damage( Character * ch, Character * victim, int dam, int attacktype, int Bod
 	// peaceful rooms
 	if ( ch != victim && ROOM_FLAGGED( ch->in_room, ROOM_PEACEFUL ) )
 	{
-		ch->Send( "This room just has such a peaceful, easy feeling...\r\n" );
+		ch->send( "This room just has such a peaceful, easy feeling...\r\n" );
 		return 0;
 	}
 
@@ -1392,17 +1390,17 @@ int damage( Character * ch, Character * victim, int dam, int attacktype, int Bod
 
 	if ( attacktype == SKILL_PARRY && dam > 0)
 	{
-		victim->SetBashState( PULSE_VIOLENCE );
+		victim->setBashState( PULSE_VIOLENCE );
 	}
 
 	if ( attacktype == SKILL_BASH && dam > 0 )
 	{
-		victim->SetBashState( PULSE_VIOLENCE * 2 );
+		victim->setBashState( PULSE_VIOLENCE * 2 );
 	}
 
 	if ( attacktype == SKILL_PULVERIZE && dam > 0)
 	{
-		victim->SetBashState( PULSE_VIOLENCE );
+		victim->setBashState( PULSE_VIOLENCE );
 	}
 	damageClock4.turnOff();
 	/*
@@ -1449,15 +1447,15 @@ int damage( Character * ch, Character * victim, int dam, int attacktype, int Bod
 	{
 	case POS_MORTALLYW:
 		Act( "$n is mortally wounded, and will die soon, if not aided.", TRUE, victim, 0, 0, TO_ROOM );
-		victim->Send( "You are mortally wounded, and will die soon, if not aided.\r\n" );
+		victim->send( "You are mortally wounded, and will die soon, if not aided.\r\n" );
 		break;
 	case POS_INCAP:
 		Act( "$n is incapacitated and will slowly die, if not aided.", TRUE, victim, 0, 0, TO_ROOM );
-		victim->Send( "You are incapacitated an will slowly die, if not aided.\r\n" );
+		victim->send( "You are incapacitated an will slowly die, if not aided.\r\n" );
 		break;
 	case POS_STUNNED:
 		Act( "$n is stunned, but will probably regain consciousness again.", TRUE, victim, 0, 0, TO_ROOM );
-		victim->Send( "You're stunned, but will probably regain consciousness again.\r\n" );
+		victim->send( "You're stunned, but will probably regain consciousness again.\r\n" );
 		break;
 	default: 			// >= POSITION SLEEPING
 		if ( dam > ( GET_MAX_HIT( victim ) / 4 ) )
@@ -1469,7 +1467,7 @@ int damage( Character * ch, Character * victim, int dam, int attacktype, int Bod
 		{
 			if ( dam > 0 )
 			{
-				victim->Send( "You wish that your wounds would stop BLEEDING so much!\r\n" );
+				victim->send( "You wish that your wounds would stop BLEEDING so much!\r\n" );
 			}
 
 			if ( ch != victim && MOB_FLAGGED( victim, MOB_WIMPY ) )
@@ -1478,7 +1476,7 @@ int damage( Character * ch, Character * victim, int dam, int attacktype, int Bod
 		if ( !IS_NPC( victim ) && victim->PlayerData->wimp_level && ( victim != ch ) &&
 		        GET_HIT( victim ) < victim->PlayerData->wimp_level && GET_HIT( victim ) > 0 )
 		{
-			victim->Send( "You wimp out, and attempt to flee!\r\n" );
+			victim->send( "You wimp out, and attempt to flee!\r\n" );
 			do_flee( victim, NULL, 0, 0 );
 		}
 		break;
@@ -1698,7 +1696,7 @@ int hit( Character * ch, Character * victim, int type )
 	        ( ROOM_FLAGGED( ch->in_room, ROOM_TUNNEL ) && victim->NumFighting() >= CONFIG_TUNNEL_SIZE ) )
 	        && FIGHTING( ch ) != victim && FIGHTING( victim ) != ch )
 	{
-		ch->Send( "You'd probably get killed before you got there, it is so crowded!\r\n" );
+		ch->send( "You'd probably get killed before you got there, it is so crowded!\r\n" );
 		return 0;
 	}
 
@@ -1764,9 +1762,7 @@ int hit( Character * ch, Character * victim, int type )
 
 	if ( !(roll <= 1) && ( (roll == 20 && !IS_NPC(ch)) || ch->OffenseMeleeRoll() > victim->DefenseMeleeRoll() ) )
 	{
-#ifdef KINSLAYER_JAVASCRIPT
 		js_hitpercent_triggers(ch, victim);
-#endif
 		individualHitClockDamage.turnOn();
 		finalDamageCalculation = damage( ch, victim, dam, w_type, bp );
 		individualHitClockDamage.turnOff();
@@ -1911,9 +1907,7 @@ void perform_violence( void )
 		next_combat_list = ch->next_fighting;
 		
 		triggerClock.turnOn();
-#ifdef KINSLAYER_JAVASCRIPT
 		js_fight_triggers(ch, FIGHTING(ch));
-#endif
 		triggerClock.turnOff();
 		/* Checks the characters timer to see whether to pass the round or go on to hit() *Galnor* */
 		if ( CHECK_WAIT( ch ) )
@@ -1972,7 +1966,7 @@ void perform_violence( void )
 			else if ( IS_FADE(ch) && GET_SKILL(ch, SKILL_SHADOW_RAGE) && AFF_FLAGGED(ch, AFF_SHADOW_RAGE) )
 			{
 				if( GET_SHADOW(ch) <= 1 ) {
-					ch->Send( "Your anger abates.\n\r" );
+					ch->send( "Your anger abates.\n\r" );
 					affect_from_char( ch, 0, AFF_SHADOW_RAGE );
 					continue;
 				}

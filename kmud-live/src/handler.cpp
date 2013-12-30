@@ -832,27 +832,27 @@ void Character::StepThroughGate( class Gate *g )
 	catch( RoomNotFoundException e )
 	{
 		e.report();
-		this->Send("For some odd reason, you were unable to step through the gate!\r\n");
+		this->send("For some odd reason, you were unable to step through the gate!\r\n");
 		return;
 	}
 
 	if( MOUNT(this) && SECT(OtherEnd) == SECT_INSIDE )
 	{
-		this->Send("You cannot ride there.\r\n");
+		this->send("You cannot ride there.\r\n");
 		return;
 	}
 
-	this->Send("You enter through the gate.\r\n");
+	this->send("You enter through the gate.\r\n");
 	this->RemoveFromRoom();
 
 	//Send the exit message to the room the character was in.
 	for(Character *onLooker = FirstRoom->people;onLooker;onLooker = onLooker->next_in_room)
 		if( GET_POS(onLooker) > POS_SLEEPING && CAN_SEE(onLooker,this))
-			onLooker->Send("%s steps through the gateway.\r\n", PERS(this,onLooker));
+			onLooker->send("%s steps through the gateway.\r\n", PERS(this,onLooker));
 	//Now send the message to the other end of the gate.
 	for(Character *onLooker = OtherEnd->people;onLooker;onLooker = onLooker->next_in_room)
 		if( GET_POS(onLooker) > POS_SLEEPING && CAN_SEE(onLooker,this) )
-			onLooker->Send("%s enters through the gateway.\r\n", PERS(this,onLooker));
+			onLooker->send("%s enters through the gateway.\r\n", PERS(this,onLooker));
 
 	this->MoveToRoom(OtherEnd);
 	look_at_room(this, FALSE);
@@ -945,22 +945,22 @@ void Character::MoveToRoom(Room *room)
 
 	if(this->Eavesdropping)
 	{
-		this->StopEavesdropping();		
+		this->stopEavesdropping();		
 	}
 	if(this->in_room->EavesWarder && this->in_room->EavesWarder == this)
 	{
-		this->StopWarding();
+		this->stopWarding();
 	}
 
 	if(ROOM_FLAGGED(this->in_room, ROOM_NOSOURCE) && this->ChannelingAbility())
 	{
 		if(PRF_FLAGGED(this, PRF_SOURCE))
 		{
-			this->Send("The One Power suddenly leaves you, and vanishes out of sight.\r\n");
+			this->send("The One Power suddenly leaves you, and vanishes out of sight.\r\n");
 			this->RemoveSource();
 		}
 		else
-			this->Send("The True Source vanishes from your sight.\r\n");
+			this->send("The True Source vanishes from your sight.\r\n");
 	}
 }
 
@@ -1450,9 +1450,7 @@ void Object::Extract( bool lowerItemCount )
 	if( lowerItemCount && GET_OBJ_RNUM(this) != NOTHING && !this->IsPurged() )
 		--ItemCount[GET_OBJ_RNUM(this)];
 
-#ifdef KINSLAYER_JAVASCRIPT
 	js_extraction_scripts( this );
-#endif
 
 	this->RemoveFromAll();
 
@@ -1540,9 +1538,7 @@ void Character::Extract( UserLogoutType *userLogoutType, bool full_delete )
 	if( purged == true )
 		return;
 
-#ifdef KINSLAYER_JAVASCRIPT
 	js_extraction_scripts( this );
-#endif
 
 	if (!IS_NPC(this) && !desc)
 	{
@@ -1567,7 +1563,7 @@ void Character::Extract( UserLogoutType *userLogoutType, bool full_delete )
 		}
 		if (desc->snoop_by)
 		{
-			desc->snoop_by->Send("Your snoop target is no longer among us.\r\n");
+			desc->snoop_by->send("Your snoop target is no longer among us.\r\n");
 			desc->snoop_by->snooping = NULL;
 			desc->snoop_by = NULL;
 		}
@@ -1628,7 +1624,7 @@ void Character::Extract( UserLogoutType *userLogoutType, bool full_delete )
 		StopFighting();
 
 	if(!IS_NPC(this))
-		this->Save();
+		this->save();
 
 	if(!IS_NPC(this) && userLogoutType != NULL && userLogoutType != UserLogoutType::notRealLogout) {
 	
@@ -1753,27 +1749,15 @@ Character *get_char_room_vis(Character *ch, const char *name)
 /* Search for matching name regardless of anything else. */
 Character *get_char_by_name(const char *name, int npc)
 {
-	Character *i, *ptr = (Character *)atoi(name);
+	Character *i;
 
 	if(!name)
 		return NULL;
 
-	if(isdigit(*name))
+	for (i = character_list; i; i = i->next)
 	{
-		for (i = character_list; i; i = i->next)
-		{
-			if( i->IsPurged() ) continue;
-			if(i == ptr && (npc || !IS_NPC(ptr)))
-				return (Character *)atoi(name);
-		}
-	}
-	else
-	{
-		for (i = character_list; i; i = i->next)
-		{
-			if ((npc || !IS_NPC(i)) && isname(name, i->player.name))
-				return i;
-		}
+		if ((npc || !IS_NPC(i)) && isname(name, i->player.name))
+			return i;
 	}
 
 	return NULL;
@@ -1875,7 +1859,7 @@ Object *get_obj_vis(Character * ch, char *name)
 
 	/* ok.. no luck yet. scan the entire obj list   */
 	for (i = object_list; i && (j <= num); i = i->next)
-		if ( !i->IsPurged() && ((i->getName() && isname(tmp, i->getName())) || (Object *)atoi(name) == i) )
+		if ( !i->IsPurged() && ((i->getName() && isname(tmp, i->getName()))) )
 			if (CAN_SEE_OBJ(ch, i))
 				if (++j == num)
 					return i;

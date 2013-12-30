@@ -3,11 +3,18 @@
 #include "sysdep.h"
 #include "structs.h"
 #include "utils.h"
+#include "db.h"
+#include "md5.h"
+#include "screen.h"
 #include "accounts.h"
+#include "interpreter.h"
 #include "olc.h"
 #include "comm.h"
 #include "kuDescriptor.h"
+#include "UserEmailAddress.h"
 
+#include "stats.h"
+#include "telnet.h"
 #include "Descriptor.h"
 #include "UserMacro.h"
 #include "StringUtil.h"
@@ -16,6 +23,16 @@
 extern kuDescriptor *gatewayConnection;
 extern Descriptor *descriptor_list;
 extern sql::Connection gameDatabase;
+
+int performDupeCheck( Descriptor *d );
+extern int circle_restrict;
+extern char *imotd;
+extern char *motd;
+extern Character *character_list;
+extern int boot_high;
+void UpdateBootHigh( const int new_high, bool first=false );
+ACMD( do_follow );
+void js_enter_game_trigger(Character *self, Character *actor);
 
 Descriptor::Descriptor()
 {
@@ -96,7 +113,7 @@ void Descriptor::cleanup()
 
 	if ( this->snoop_by )
 	{
-		this->snoop_by->Send( "Your snoop target is no longer among us.\r\n" );
+		this->snoop_by->send( "Your snoop target is no longer among us.\r\n" );
 		this->snoop_by->snooping = NULL;
 	}
 
@@ -115,9 +132,7 @@ void Descriptor::cleanup()
 	case CON_KEDIT:
 	case CON_WEDIT:
 	case CON_AUCTION:
-#ifdef KINSLAYER_JAVASCRIPT
 	case CON_JEDIT:
-#endif
 	cleanup_olc( this, CLEANUP_ALL );
 
 	default:
@@ -236,6 +251,17 @@ void Descriptor::sendWebSocketCommands(const int pulse)
 			descriptor->sendWebSocketPlayersOnlineCommand(playersOnline);
 		}
 	}
+}
+
+
+void Descriptor::sendWebSocketDisplaySignInLightboxMessage()
+{
+	Json::FastWriter writer;
+	Json::Value commandObject;
+
+	commandObject["method"] = "Display Sign In Lightbox";
+
+	sendWebSocketCommand(writer.write(commandObject));
 }
 
 void Descriptor::sendWebSocketUsernameCommand(const std::string &username, const std::list<UserMacro *> &userMacros)
@@ -394,6 +420,314 @@ void Descriptor::processWebSocketDeleteUserMacroCommand(Json::Value &commandObje
 	CharacterUtil::deleteUserMacro(gameDatabase, character->getUserId(), keyCode);
 }
 
+void Descriptor::processWebSocketSignInCommand(Json::Value &commandObject)
+{
+	Json::Value response;
+	response["method"] = "Sign In";
+	Json::FastWriter writer;
+	
+	if(this->character)
+		response["error"] = "You are already signed in.";
+	else if(commandObject["username"].isNull())
+		response["error"] = "You must enter a username.";
+	else if(commandObject["password"].isNull())
+		response["error"] = "You must enter a password.";
+
+	if(!response["error"].isNull())
+	{
+		this->sendWebSocketCommand(writer.write(response));
+		return;
+	}
+
+	std::string username = commandObject["username"].asString();
+	std::string password = commandObject["password"].asString();
+
+	if(!BanManager::GetManager().IsValidName( username ))
+	{
+		response["error"] = "The username you have entered is invalid.";
+		this->sendWebSocketCommand(writer.write(response));
+		return;
+	}
+
+
+	if( Conf->play.switch_restriction )
+	{
+		Switch *sw = NULL;
+		if(SwitchManager::GetManager().WillBeMultiplaying( this->host, username ) )
+		{
+			response["error"] = "You are already signed in to another character.";
+			this->sendWebSocketCommand(writer.write(response));
+			return;
+		}
+
+		if( (sw = SwitchManager::GetManager().GetGreatestSwitch( this->host, username )) != NULL )
+		{
+			if( !SwitchManager::GetManager().HasWaitedLongEnough(username, host, sw) )
+			{
+				Time remainder = SwitchManager::GetManager().TimeRemaining(username, host, sw);
+				response["error"] = "You must wait " + MiscUtil::toString(remainder.Minutes()) + " seconds and " + MiscUtil::toString(remainder.Seconds()) + " seconds.";
+				this->sendWebSocketCommand(writer.write(response));
+				return;
+			}
+
+			//This player was on the switch list, but has waited the required time.
+			//SwitchManager::GetManager().RemoveSwitchByIP( this->host );
+		}
+	}
+
+	Character *ch = CharacterUtil::loadCharacter(username);
+
+	if(ch == NULL || PLR_FLAGGED(ch, PLR_DELETED))
+	{
+		if(ch)
+			delete ch;
+		response["error"] = "There is no character by that username.";
+		this->sendWebSocketCommand(writer.write(response));
+		return;
+	}
+		
+	if(!ch->passwordMatches(password))
+	{
+		response["error"] = "The password you entered is incorrect.";
+		++ch->PlayerData->bad_pws;
+		ch->basicSave();
+		delete ch;
+		this->sendWebSocketCommand(writer.write(response));
+		return;
+	}
+
+	if ( BanManager::GetManager().IsBanned( this->host ) == BAN_SELECT && !PLR_FLAGGED( this->character, PLR_SITEOK ) )
+	{
+		response["error"] = "Sorry, this char has not been cleared for login from your site!";
+		STATE( this ) = CON_CLOSE;
+		MudLog( NRM, LVL_GOD, TRUE, "Connection attempt for %s denied from %s", GET_NAME( this->character ), this->host );
+		this->sendWebSocketCommand(writer.write(response));
+		delete ch;
+		return;
+	}
+
+	int load_result = ch->PlayerData->bad_pws;
+	ch->PlayerData->bad_pws = 0;
+	this->bad_pws = 0;
+
+	//We need to convert the password entered to MD5.
+	if( !ch->PasswordUpdated() )
+	{
+		ch->player.passwd = str_dup(MD5::getHashFromString(password.c_str()).c_str());
+		ch->PasswordUpdated( true );
+	}
+
+	if ( GET_LEVEL( ch ) < circle_restrict )
+	{
+		response["error"] = "The game is temporarily restricted.. try again later.";
+		STATE( this ) = CON_CLOSE;
+		MudLog( NRM, LVL_GOD, TRUE, "Request for login denied for %s [%s] (wizlock)", GET_NAME( ch ), this->host );
+		this->sendWebSocketCommand(writer.write(response));
+		delete ch;
+		return ;
+	}
+	
+
+	if(this->getGatewayDescriptorType() == GatewayDescriptorType::websocket)
+	{
+		std::list<UserMacro*> userMacros = CharacterUtil::getUserMacros(gameDatabase, ch->getUserId());
+		this->sendWebSocketUsernameCommand(GET_NAME(ch), userMacros);
+		CharacterUtil::freeUserMacros(userMacros);
+	}
+
+	this->echoOn();
+	this->idle_tics = 0;
+	this->character = ch;
+	ch->desc = this;
+
+	// check to make sure that no other copies of this player are logged in.
+	if ( performDupeCheck( this ) )
+	{
+		this->sendWebSocketCommand(writer.write(response));
+		return;
+	}
+
+	MudLog( BRF, MAX( LVL_GRGOD, GET_INVIS_LEV( this->character ) ), TRUE, "%s [%s] has connected.", GET_NAME( this->character ), this->host );
+
+	if ( GET_LEVEL( this->character ) >= LVL_IMMORT )
+		this->send( imotd );
+	else
+		this->send( motd );
+	if ( load_result )
+	{
+		this->send( "\r\n\r\n\007\007\007"
+	         "%s%d LOGIN FAILURE%s SINCE LAST SUCCESSFUL LOGIN.%s\r\n",
+	         COLOR_RED( this->character, CL_SPARSE ), load_result,
+	         ( load_result > 1 ) ? "S" : "", COLOR_NORMAL( this->character, CL_SPARSE ) );
+		this->character->PlayerData->bad_pws = 0;
+	}
+	
+	STATE( this ) = CON_MENU;
+	this->completeEnterGame();
+
+	Log("Sending response.");
+	this->sendWebSocketCommand(writer.write(response));
+}
+
+void Descriptor::processWebSocketUserRegistrationDetailsCommand(Json::Value &commandObject)
+{
+	Json::Value response;
+
+	response["method"] = "User Creation Details";
+	response["maxUsernameLength"] = (int)MAX_NAME_LENGTH;
+	response["minUsernameLength"] = (int)MIN_NAME_LENGTH;
+	response["maxPasswordLength"] = (int)MAX_PWD_LENGTH;
+	response["minPasswordLength"] = (int)MIN_PWD_LENGTH;
+
+	Json::FastWriter writer;
+	this->sendWebSocketCommand(writer.write(response));
+}
+
+bool isGenderOpen(int genderValue);
+bool isRaceOpen(int raceValue);
+bool isClassOpen(int classValue, int raceValue);
+
+void Descriptor::sendWebSocketErrorMessage(Json::Value &command, const std::string &errorMessage)
+{
+	command["errors"] = Json::Value(Json::arrayValue);
+	command["errors"].append(errorMessage);
+
+	Json::FastWriter writer;
+	this->sendWebSocketCommand(writer.write(command));
+}
+
+void Descriptor::processWebSocketUserCreationCommand(Json::Value &commandObject)
+{
+	Json::Value response;
+	std::vector<std::string> errors;
+	std::string username;
+	std::string password;
+	std::string emailAddress;
+	Switch *sw;
+	Character *previousCharacter;
+
+	response["method"] = "User Creation";
+
+	try {
+		username = commandObject["username"].asString();
+	}
+	catch (std::runtime_error e) {
+		sendWebSocketErrorMessage(commandObject, "Please enter a username.");
+		return;
+	}
+
+	try {
+		password = commandObject["password"].asString();
+	}
+	catch (std::runtime_error e) {
+		sendWebSocketErrorMessage(commandObject, "Please enter a password.");
+		return;
+	}
+
+	try {
+		emailAddress = commandObject["emailAddress"].asString();
+	}
+	catch (std::runtime_error e) {
+		sendWebSocketErrorMessage(commandObject, "Please enter an email.");
+		return;
+	}
+
+
+	if (circle_restrict)
+	{
+		errors.push_back("Sorry, new characters can't be created at the moment.");
+	}
+
+	if (username.length() < MIN_NAME_LENGTH || username.length() > MAX_NAME_LENGTH)
+		errors.push_back("Username must be between " + MiscUtil::toString(MIN_NAME_LENGTH) + " and " + MiscUtil::toString(MAX_NAME_LENGTH) + " characters.");
+	else if (!CharacterUtil::isValidUserName(username))
+		errors.push_back("Usernames must contain only alphabetical characters.");
+	else if (!BanManager::GetManager().IsValidName(username) || fill_word(username.c_str()) || reserved_word(username.c_str()))
+		errors.push_back("The username you entered is invalid.");
+	else if (Conf->play.switch_restriction && SwitchManager::GetManager().WillBeMultiplaying(this->host, username))
+		errors.push_back("You are already logged into another character. You must log out before switching.");
+	else if (Conf->play.switch_restriction && (sw = SwitchManager::GetManager().GetGreatestSwitch(this->host, username)) != NULL)
+	{
+		if (!SwitchManager::GetManager().HasWaitedLongEnough(username, host, sw))
+		{
+			Time Remainder = SwitchManager::GetManager().TimeRemaining(username, host, sw);
+			errors.push_back("You must wait " + MiscUtil::toString(((int)Remainder.Minutes())) + " minute" + (Remainder.Minutes() == 1 ? "" : "s") + ", " + MiscUtil::toString((int)Remainder.Seconds() % 60) + " second" + (Remainder.Seconds() % 60 == 1 ? "" : "s") + " before you may log into another character.");
+		}
+	}
+	else if (playerExists(username) && (previousCharacter = CharacterUtil::loadCharacter(username)) != NULL)
+	{
+		if (!PLR_FLAGGED(previousCharacter, PLR_DELETED))
+			errors.push_back("A character by that name already exists.");
+		delete previousCharacter;
+		previousCharacter = NULL;
+	}
+
+	if (password.length() < MIN_PWD_LENGTH || password.length() > MAX_PWD_LENGTH)
+		errors.push_back("Password must be between " + MiscUtil::toString(MIN_PWD_LENGTH) + " and " + MiscUtil::toString(MAX_PWD_LENGTH) + " characters.");
+	else if (!str_cmp(password, username))
+		errors.push_back("Password and username must not be the same.");
+
+	if (!MiscUtil::isValidEmailAddress(emailAddress))
+		errors.push_back("The email you entered is invalid.");
+
+	if (commandObject["genderValue"].isNull() || !commandObject["genderValue"].isInt())
+		errors.push_back("Please select a gender.");
+	else if (!isGenderOpen(commandObject["genderValue"].asInt()))
+		errors.push_back("The gender you selected is invalid.");
+
+	if (commandObject["raceValue"].isNull() || !commandObject["raceValue"].isInt())
+		errors.push_back("Please select a race.");
+	else if (!isRaceOpen(commandObject["raceValue"].asInt()))
+		errors.push_back("The race you selected is invalid.");
+
+	if (commandObject["classValue"].isNull() || !commandObject["classValue"].isInt())
+		errors.push_back("Please select a class.");
+	else if (!isClassOpen(commandObject["classValue"].asInt(), commandObject["raceValue"].asInt()))
+		errors.push_back("The class you selected is invalid.");
+	
+	if (BanManager::GetManager().IsBanned(this->host) >= BAN_NEW)
+	{
+		MudLog(NRM, LVL_APPR, TRUE, "Request for new char %s denied from [%s] (siteban)", GET_NAME(this->character), this->host);
+		errors.push_back("Sorry, new characters are not allowed from your site!");
+		STATE(this) = CON_CLOSE;
+	}
+
+	if(errors.size() > 0)
+	{
+		response["errors"] = Json::Value(Json::arrayValue);
+
+		for(auto error : errors)
+		{
+			response["errors"].append(error);
+		}
+
+		Json::FastWriter writer;
+		this->sendWebSocketCommand(writer.write(response));
+		return;
+	}
+
+	this->character = new Character(CharPlayer);
+	this->character->desc = this;
+	this->character->player.name = StringUtil::cap(StringUtil::allLower(username));
+	GET_PASSWD(this->character) = MD5::getHashFromString(password.c_str());
+	GET_SEX(this->character) = commandObject["genderValue"].asInt();
+	GET_RACE(this->character) = commandObject["raceValue"].asInt();
+	GET_CLASS(this->character) = commandObject["classValue"].asInt();
+	this->setEmailAddress(emailAddress);
+	this->character->PasswordUpdated(true);
+	
+	MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(this->character)), TRUE, "%s [%s] new player.", GET_NAME(this->character), this->host);
+
+	this->echoOn();
+	this->character->Init();
+	StatManager::GetManager().RollStats(this->character);
+	this->newbieMenuFinish();
+	this->completeEnterGame();
+
+	Json::FastWriter writer;
+	this->sendWebSocketCommand(writer.write(response));
+}
+
 void Descriptor::processWebSocketCommands()
 {
 	while(true)
@@ -428,9 +762,126 @@ void Descriptor::processWebSocketCommands()
 			{
 				processWebSocketDeleteUserMacroCommand(commandObject);
 			}
+			else if(method == "Sign In")
+			{
+				processWebSocketSignInCommand(commandObject);
+			}
+			else if (method == "User Creation Details")
+			{
+				processWebSocketUserRegistrationDetailsCommand(commandObject);
+			}
+			else if (method == "User Creation")
+			{
+				processWebSocketUserCreationCommand(commandObject);
+			}
 		}
 		else
 			break;
+	}
+}
+
+void Descriptor::completeEnterGame()
+{
+	loggedIn = true;
+	this->character->loadItems();
+	Room *loadRoom;
+
+	//We need to update the player's points over the time they were not logged in.
+	time_t timeDiff = (time(0) - this->character->points.last_logout);
+
+	//Regen no more than 60 tics.
+	for(int tics = MIN(60,(timeDiff / SECS_PER_MUD_HOUR));tics > 0;--tics)
+	{
+		this->character->PointUpdate(true);
+	}
+
+	LAST_LOGON( this->character ) = time( 0 );
+	this->character->player.time.logon.setTime(time( 0 ));
+	this->send( "\r\n\n%s\r\n", CONFIG_WELC_MESSG );
+	this->character->next = character_list;
+	character_list = this->character;
+
+	if(GET_LEVEL(this->character) <= 5)
+		this->character->PlayerData->wimp_level = GET_MAX_HIT(this->character) / 2;
+
+	if ( this->character->NeedsReset() )
+	{
+		this->character->ResetAllSkills();
+		this->send( "%s%sYour skills have been automatically reset for free as a result of a global reset.%s\r\n",
+		    COLOR_RED( this->character, CL_SPARSE ), COLOR_BOLD( this->character, CL_SPARSE ),
+			COLOR_NORMAL( this->character, CL_SPARSE ) );
+		this->character->reset_time = time( 0 );
+	}
+
+	int currentPlayerCount;
+	if( (currentPlayerCount = NumPlayers(true,false)) > boot_high )
+	{
+		UpdateBootHigh( currentPlayerCount );
+	}
+
+	if ( !( loadRoom = FindRoomByVnum( this->character->PlayerData->load_room ) ) )
+		loadRoom = this->character->StartRoom();
+	this->character->MoveToRoom( loadRoom );
+	Act( "$n has entered the game.", TRUE, this->character, 0, 0, TO_ROOM );
+
+	MudLog( CMP, MAX( GET_INVIS_LEV( this->character ), LVL_APPR ), TRUE, "%s logging in at room %d.", GET_NAME( this->character ), this->character->PlayerData->load_room );
+
+	this->character->AddLogin(this->host, DateTime(), this->getGatewayDescriptorType());
+	Character *mount = NULL;
+
+	if ( this->character->PlayerData->mount_save > 0 )
+	{
+		if((mount = new Character(this->character->PlayerData->mount_save, VIRTUAL ))->nr == -1)
+		{
+			delete mount;
+			mount = 0;
+		}
+		else
+		{
+			mount->MoveToRoom( loadRoom );
+			if ( this->character->in_room->sector_type == SECT_INSIDE )
+				do_follow( mount, ( char* ) GET_NAME( this->character ), 0, 0 );
+			else
+			{
+				MOUNT( this->character ) = mount;
+				RIDDEN_BY( mount ) = this->character;
+			}
+		}
+	}
+
+	STATE( this ) = CON_PLAYING;
+	if ( !GET_LEVEL( this->character ) )
+	{
+		this->send( CONFIG_START_MESSG, this );
+	}
+
+	look_at_room( this->character, 0 );
+	js_enter_game_trigger(character,character);
+
+	//If the user has been registered for over seven days, display a reminder to register their email if they haven't already done so.
+	if( (DateTime().getTime() - this->character->player.time.birth.getTime()) / (60 * 60 * 24) >= 7)
+	{
+		//Check to see that the user has at least one confirmed email address.
+		std::list<UserEmailAddress *> userEmailAddresses = CharacterUtil::getUserEmailAddresses(gameDatabase, this->character->getUserId());
+		bool hasConfirmedEmail = false;
+
+		for(auto iter = userEmailAddresses.begin();iter != userEmailAddresses.end();++iter)
+		{
+			UserEmailAddress *userEmailAddress = (*iter);
+			if(userEmailAddress->getConfirmed())
+			{
+				hasConfirmedEmail = true;
+				break;
+			}
+		}
+
+		CharacterUtil::freeUserEmailAddresses(userEmailAddresses);
+
+		if(!hasConfirmedEmail)
+		{
+			this->send("\r\n%s%s ** You have not registered and confirmed an email address. Please type `email` to do so.\r\n"
+					   " ** Registering an email will allow you to retrieve your password if you ever forget it.%s\r\n", COLOR_BOLD(this->character, CL_NORMAL), COLOR_RED(this->character, CL_NORMAL), COLOR_NORMAL(this->character, CL_NORMAL));
+		}
 	}
 }
 
@@ -442,4 +893,262 @@ std::string Descriptor::getEmailAddress()
 void Descriptor::setEmailAddress(const std::string &emailAddress)
 {
 	this->emailAddress = emailAddress;
+}
+
+bool Descriptor::hasPermissionToSnoop()
+{
+	return (character && character->PermissionToSnoop);
+}
+
+// Turn off echoing (specific to telnet client)
+void Descriptor::echoOff()
+{
+	char off_string[] =
+	{
+		(char)IAC,
+		(char)WILL,
+		(char)TELOPT_ECHO,
+		(char)0,
+	};
+
+	this->sendRaw(off_string);
+}
+
+
+// Turn on echoing (specific to telnet client)
+void Descriptor::echoOn()
+{
+	char on_string[] =
+	{
+		(char)IAC,
+		(char)WONT,
+		(char)TELOPT_ECHO,
+		(char)TELOPT_NAOFFD,
+		(char)TELOPT_NAOCRD,
+		(char)0,
+	};
+
+	sendRaw(on_string);
+}
+
+const char *Descriptor::makePrompt()
+{
+	static char prompt[256];
+	Character *victim;
+	*prompt = '\0';
+	
+	// Note, prompt is truncated at MAX_PROMPT_LENGTH chars (structs.h )
+	// These two checks were reversed to allow page_string() to work in the online editor.
+
+	if (showstr_count)
+		sprintf(prompt, "\r[ Return to continue, (q)uit, (r)efresh, (b)ack, or page number (%d/%d) ]",
+		showstr_page, showstr_count);
+	else if (str)
+		strcpy(prompt, "] ");
+	else if (STATE(this) == CON_PLAYING)
+	{
+		*prompt = '\0';
+
+		if (GET_INVIS_LEV(character))
+			sprintf(prompt, "i%d ", GET_INVIS_LEV(character));
+
+		if (PRF_FLAGGED(character, PRF_DISPHP))
+			sprintf(prompt + strlen(prompt), "HP:%s ", this->character->Health());
+
+		if (PRF_FLAGGED(character, PRF_DISPMANA) && (IS_CHANNELER(character) || IS_DREADLORD(character) || IS_DREADGUARD(character)))
+			sprintf(prompt + strlen(prompt), "SP:%s ", mana(GET_MAX_MANA(character) > 0 ?
+			100 * GET_MANA(character) / (GET_MAX_MANA(character)) : 1));
+
+		if (PRF_FLAGGED(character, PRF_DISPMANA) && (IS_FADE(character)))
+			sprintf(prompt + strlen(prompt), "SHP:%s ", mana(GET_MAX_SHADOW(character) > 0 ?
+			100 * GET_SHADOW(character) / (GET_MAX_SHADOW(character)) : 1));
+
+		if (PRF_FLAGGED(character, PRF_DISPMOVE))
+			sprintf(prompt + strlen(prompt), "MV:%s ", moves(GET_MAX_MOVE(character) > 0 ?
+			100 * GET_MOVE(character) / (GET_MAX_MOVE(character)) : 1));
+
+		victim = FIGHTING(character);
+
+		if (victim)
+			sprintf(prompt + strlen(prompt), "  - %s: %s",
+			GET_NAME(victim), victim->Health());
+
+
+		if (victim && FIGHTING(victim) && FIGHTING(victim) != character)
+			sprintf(prompt + strlen(prompt), " --- %s: %s",
+			GET_NAME(FIGHTING(victim)), FIGHTING(victim)->Health());
+
+		if (IS_NPC(this->character))
+		{
+			sprintf(prompt + strlen(prompt), "  -%s%s%s%s", COLOR_BOLD(character, CL_COMPLETE),
+				COLOR_GREEN(character, CL_COMPLETE), GET_NAME(this->character), COLOR_NORMAL(character, CL_COMPLETE));
+		}
+
+		strcat(prompt, ">\r\n");
+	}
+
+	else if (STATE(this) == CON_PLAYING && IS_NPC(character))
+		sprintf(prompt, "\n%s> \n", GET_NAME(character));
+
+	return prompt;
+}
+
+void Descriptor::sendRaw(const char *outputBuffer)
+{
+#ifdef WIN32
+	va_list args = 0;
+#else
+	va_list args;
+#endif
+	if (!outputBuffer) return;
+	writeToOutput(false, outputBuffer, args);
+}
+
+void Descriptor::send(const char *messg, ...)
+{
+	if (!messg)
+		return;
+
+	va_list args;
+	va_start(args, messg);
+	writeToOutput(true, messg, args);
+	va_end(args);
+}
+
+// Add a new string to a player's output queue
+void Descriptor::writeToOutput(bool swapArguments, const char *format, va_list args)
+{
+	unsigned int bufferSize = LARGE_BUFSIZE, bytesWritten;
+	char *outputBufferFormatted = new char[bufferSize];
+	std::string finalOutput;
+
+	// Galnor 12/21/2009 - Use dynamically allocated buffer and restrict buffer size
+	if (swapArguments)
+		vsnprintf(outputBufferFormatted, bufferSize - 1, format, args);
+	else
+		strncpy(outputBufferFormatted, format, bufferSize - 1);
+
+	outputBufferFormatted[bufferSize - 1] = '\0';
+
+	//Strip all straggling carriage returns or invalid characters. Prepend all newlines with carriage returns.
+	for (char *bufferCharacter = outputBufferFormatted; *bufferCharacter; ++bufferCharacter)
+	{
+		if ( (*bufferCharacter) < 0 || (*bufferCharacter) == '\r')
+			continue;
+		else if (*bufferCharacter == '\n')
+			finalOutput += "\r\n";
+		else
+			finalOutput += (*bufferCharacter);
+	}
+
+	delete[] outputBufferFormatted;
+	Character *loggerCharacter = this->character;
+
+	if (this->original)
+		loggerCharacter = this->original;
+
+	// if we have enough space, just write to buffer and that's it!
+	if (this->descriptor->getOutputBufferSize() < LARGE_BUFSIZE)
+	{
+		if (this->getGatewayDescriptorType() == GatewayDescriptorType::websocket)
+			this->descriptor->send(this->encodeWebSocketOutputCommand(finalOutput.c_str()));
+		else if (this->getGatewayDescriptorType() == GatewayDescriptorType::rawTCP)
+			this->descriptor->send(finalOutput);
+		if (loggerCharacter)
+			loggerCharacter->LogOutput(finalOutput);
+	}
+	else
+	{
+		if (this->getGatewayDescriptorType() == GatewayDescriptorType::websocket)
+			this->descriptor->send(this->encodeWebSocketOutputCommand("***OVERFLOW***"));
+		else if (this->getGatewayDescriptorType() == GatewayDescriptorType::rawTCP)
+			this->descriptor->send("***OVERFLOW***");
+
+		if (loggerCharacter)
+			loggerCharacter->LogOutput("***OVERFLOW***");
+	}
+}
+
+// Descriptor operator<< overloading
+Descriptor& Descriptor::operator<< (const std::string &s)
+{
+	this->send(s.c_str());
+	return *this;
+}
+
+Descriptor& Descriptor::operator<< (const char * s)
+{
+	this->send(s);
+	return *this;
+}
+
+Descriptor& Descriptor::operator<< (const char s)
+{
+	this->send(ToString(s).c_str());
+	return *this;
+}
+
+Descriptor& Descriptor::operator<< (const int s)
+{
+	this->send(ToString(s).c_str());
+	return *this;
+}
+Descriptor& Descriptor::operator<< (const float s)
+{
+	this->send(ToString(s).c_str());
+	return *this;
+
+}
+
+Descriptor& Descriptor::operator<< (const double s)
+{
+	this->send(ToString(s).c_str());
+	return *this;
+
+}
+
+Descriptor& Descriptor::operator<< (const bool s)
+{
+	this->send(ToString(s).c_str());
+	return *this;
+
+}
+
+void Descriptor::newbieMenuFinish()
+{
+	//this->send( Conf->operation.NEWBIE_MSG );
+	if (this->character->GetCon() != this->character->real_abils.con)
+	{
+		this->character->SetCon(this->character->real_abils.con);
+		this->character->ResetHitRolls(true);
+		GET_HIT(this->character) = GET_MAX_HIT(this->character);
+	}
+
+	SET_BIT_AR(PRF_FLAGS(this->character), PRF_COLOR_2);
+	SET_BIT_AR(PRF_FLAGS(this->character), PRF_DISPHP);
+	SET_BIT_AR(PRF_FLAGS(this->character), PRF_DISPMOVE);
+	SET_BIT_AR(PRF_FLAGS(this->character), PRF_DISPMANA);
+	SET_BIT_AR(PRF_FLAGS(this->character), PRF_AUTOEXIT);
+
+	this->character->SetStr(this->character->real_abils.str);
+	this->character->SetInt(this->character->real_abils.intel);
+	this->character->SetWis(this->character->real_abils.wis);
+	this->character->SetDex(this->character->real_abils.dex);
+	this->character->restat_time.setTime(time(0));
+
+	if (playerExists(this->character->player.name))
+		MySQLDeleteAll(this->character->player.name);
+
+	this->character->mysqlInsertQuery();
+	this->character->save();
+	this->character->createPlayerIndex();
+
+	//Record the user's email address.
+	UserEmailAddress userEmailAddress;
+	userEmailAddress.setUserId(this->character->getUserId());
+	userEmailAddress.setEmailAddress(this->getEmailAddress());
+	userEmailAddress.setConfirmed(false);
+	userEmailAddress.setCreatedDatetime(DateTime());
+
+	CharacterUtil::putUserEmailAddress(gameDatabase, &userEmailAddress);
 }

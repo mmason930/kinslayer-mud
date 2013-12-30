@@ -70,7 +70,7 @@ std::list<PendingSession> pendingSessions;
 /* external functions */
 int parse_class( char arg );
 int special( Character *ch, char *cmd, char *arg );
-int	search_block( char *arg, char **listy, int exact );
+int	search_block( const char *arg, char **listy, int exact );
 void oedit_parse( Descriptor *d, char *arg );
 void redit_parse( Descriptor *d, char *arg );
 void zedit_parse( Descriptor *d, char *arg );
@@ -82,9 +82,7 @@ void cedit_parse( Descriptor *d, char *arg );
 void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg);
 void StateditParse( Descriptor *d, const std::string &arg );
 void AuctionParse( Descriptor *d, const std::string &arg );
-#ifdef KINSLAYER_JAVASCRIPT
 void JeditParse( Descriptor *d, const std::string &arg );
-#endif
 
 SPECIAL( receptionist );
 SPECIAL( bank );
@@ -97,8 +95,6 @@ SPECIAL( PokerDealer );
 int performDupeCheck( Descriptor *d );
 void performFlee( Character *ch );
 int performAlias( Descriptor *d, char *orig );
-int reserved_word( char *argument );
-int _parse_name( char *arg, char *name );
 
 
 /* prototypes for all do_x functions. */
@@ -188,11 +184,9 @@ ACMD( do_invert );
 ACMD( do_invis );
 ACMD( do_ipfind );
 ACMD( do_install );
-#ifdef KINSLAYER_JAVASCRIPT
 ACMD( do_jedit );
 ACMD( do_jstat );
 ACMD( do_jattach );
-#endif
 ACMD( do_insert );
 ACMD( do_kick );
 ACMD( do_kill );
@@ -522,12 +516,10 @@ class CommandInfo cmd_info[] =
 	    {	"ipfind"	, "ip"	, POS_DEAD		, do_ipfind			, LVL_GRGOD	, 0					, 0.0	,  0 	},
 	    {	"insert"	, "ip"	, POS_DEAD		, do_insert			, LVL_GOD	, 0					, 0.0	,  0 	},
 		{	"install"	, "ins"	, POS_DEAD		, do_install		, LVL_GOD	, 0					, 0.0	,  0	},
-#ifdef KINSLAYER_JAVASCRIPT
 		{	"jattach"	, "ja"	, POS_DEAD		, do_jattach		, LVL_GOD	, 0					, 0.0	,  0 	},
 		{	"jedit"		, "jed"	, POS_DEAD		, do_jedit			, LVL_APPR	, 0					, 0.0	,  0 	},
 		{	"jstat"		, "js"	, POS_DEAD		, do_jstat			, LVL_APPR	, 0					, 0.0	,  0 	},
 		{	"jslist"	, "jsl"	, POS_DEAD		, do_jslist			, LVL_APPR	, 0					, 0.0	,  0	},
-#endif
 	    {	"kill"		, "k"	, POS_FIGHTING	, do_kill			, 0			, 0					, 0.0	,  0 	},
 	    {	"kedit"		, "ke"	, POS_DEAD		, do_olc			, LVL_APPR	, SCMD_OLC_KEDIT	, 0.0	,  0 	},
 	    {	"kick"		, "kic"	, POS_FIGHTING	, do_kick			, 1			, 0					, 0.0	,  0 	},
@@ -828,7 +820,6 @@ void CommandInterpreter( Character *ch, char *argument )
 
 	std::vector< std::string > vArgs = StringUtil::getArgVector( argument );
 
-#ifdef KINSLAYER_JAVASCRIPT
 	/* otherwise, find the command */
 	if ( ( !ch->ignoreCommandTrigger ) && (
 		str_cmp(arg,"override")
@@ -837,7 +828,6 @@ void CommandInterpreter( Character *ch, char *argument )
 	{//command trigger took over
 		return ;
 	}
-#endif
 
 	if( ch->desc ) {
 
@@ -860,8 +850,6 @@ void CommandInterpreter( Character *ch, char *argument )
 	else
 		line = AnyOneArg( argument, arg );
 
-#ifdef KINSLAYER_JAVASCRIPT
-
 	/* otherwise, find the command */
 	if ( ( !ch->ignoreCommandTrigger ) && (
 		str_cmp(arg,"override")
@@ -870,7 +858,6 @@ void CommandInterpreter( Character *ch, char *argument )
 	{//command trigger took over
 		return ;
 	}
-#endif
 
 	//This will get set to true in an override command. Always set false once we bypass the above check.
 	ch->ignoreCommandTrigger = false;
@@ -898,19 +885,19 @@ void CommandInterpreter( Character *ch, char *argument )
 
 	if ( complete_cmd_info[ cmd ].command[0] == '\n' )
 	{
-		ch->Send( "What?!?\r\n" );
+		ch->send( "What?!?\r\n" );
 	}
 	else if ( PLR_FLAGGED( ch, PLR_FROZEN ) && GET_LEVEL( ch ) < LVL_IMPL )
 	{
-		ch->Send( "You try, but the mind-numbing cold prevents you...\r\n" );
+		ch->send( "You try, but the mind-numbing cold prevents you...\r\n" );
 	}
 	else if ( complete_cmd_info[ cmd ].command_pointer == NULL )
 	{
-		ch->Send( "Sorry, that command hasn't been implemented yet.\r\n" );
+		ch->send( "Sorry, that command hasn't been implemented yet.\r\n" );
 	}
 	else if ( DisabledCommands.find(cmd) != DisabledCommands.end() )
 	{
-		ch->Send( "That command has been disabled.\r\n" );
+		ch->send( "That command has been disabled.\r\n" );
 	}
 	else if ( GET_POS( ch ) < complete_cmd_info[ cmd ].minimum_position )
 	{
@@ -918,32 +905,32 @@ void CommandInterpreter( Character *ch, char *argument )
 		switch ( GET_POS( ch ) )
 		{
 		case POS_DEAD:
-			ch->Send( "Lie still; you are DEAD!!!\r\n" );
+			ch->send( "Lie still; you are DEAD!!!\r\n" );
 			break;
 		case POS_INCAP:
 		case POS_MORTALLYW:
-			ch->Send( "You are in a pretty bad shape, unable to do anything!\r\n" );
+			ch->send( "You are in a pretty bad shape, unable to do anything!\r\n" );
 			break;
 		case POS_STUNNED:
-			ch->Send( "All you can do right now is think about the stars!\r\n" );
+			ch->send( "All you can do right now is think about the stars!\r\n" );
 			break;
 		case POS_SLEEPING:
-			ch->Send( "In your dreams, or what?\r\n" );
+			ch->send( "In your dreams, or what?\r\n" );
 			if(GET_LEVEL(ch) <= 5)
-				ch->Send( "Try [%sWAK%s]ing first.\r\n", cyn, nrm );
+				ch->send( "Try [%sWAK%s]ing first.\r\n", cyn, nrm );
 			break;
 		case POS_RESTING:
-			ch->Send( "Nah... You feel too relaxed to do that..\r\n" );
+			ch->send( "Nah... You feel too relaxed to do that..\r\n" );
 			if(GET_LEVEL(ch) <= 5)
-				ch->Send( "Try [%sST%s]anding first.\r\n", cyn, nrm );
+				ch->send( "Try [%sST%s]anding first.\r\n", cyn, nrm );
 			break;
 		case POS_SITTING:
-			ch->Send( "Maybe you should get on your feet first?\r\n" );
+			ch->send( "Maybe you should get on your feet first?\r\n" );
 			if(GET_LEVEL(ch) <= 5)
-				ch->Send( "Try [%sST%s]anding first.\r\n", cyn, nrm );
+				ch->send( "Try [%sST%s]anding first.\r\n", cyn, nrm );
 			break;
 		case POS_FIGHTING:
-			ch->Send( "No way!  You're fighting for your life!\r\n" );
+			ch->send( "No way!  You're fighting for your life!\r\n" );
 			break;
 		}
 	}
@@ -984,14 +971,12 @@ void Character::CancelTimer( bool show )
 	GET_TARGET(this) = NULL;
 	GET_TARGET2(this) = NULL;
 
-#ifdef KINSLAYER_JAVASCRIPT
 	if (this->delayed_command == "delayed_javascript" && this->delayed_script)
 	{
 		JSManager::get()->execute_timer(this->delayed_script, false);
 		this->delayed_script.reset();
 		isKJS = true;
-	}	
-#endif
+	}
 	this->delayed_command.erase();
 
 	if( this->ShieldBlock )
@@ -1003,7 +988,7 @@ void Character::CancelTimer( bool show )
 		return;
 	}
 	if ( show && !isKJS )
-		this->Send( "Cancelled...\r\n" );
+		this->send( "Cancelled...\r\n" );
 }
 
 /**************************************************************************
@@ -1024,15 +1009,15 @@ ACMD( do_alias )
 	if (!*arg)
 	{			// no argument specified -- list currently defined aliases
 
-		ch->Send( "Currently defined aliases:\r\n" );
+		ch->send( "Currently defined aliases:\r\n" );
 
 		if( !ch->aliases.size() )
-			ch->Send( " None.\r\n" );
+			ch->send( " None.\r\n" );
 		else
 		{
 			for(std::map<std::string,std::string>::iterator alias = ch->aliases.begin();alias != ch->aliases.end();++alias)
 			{
-				ch->Send( "%-15s %s\r\n", alias->first.c_str(), alias->second.c_str() );
+				ch->send( "%-15s %s\r\n", alias->first.c_str(), alias->second.c_str() );
 			}
 		}
 	}
@@ -1049,22 +1034,22 @@ ACMD( do_alias )
 			MySQLDeleteAlias( ch->player.name, arg );
 			if(!*repl)
 			{
-				ch->Send("Alias deleted.\r\n");
+				ch->send("Alias deleted.\r\n");
 				return;
 			}
 		}
 		else if(!*repl)
 		{
-			ch->Send("No such alias.\r\n");
+			ch->send("No such alias.\r\n");
 		}
 		/* otherwise, either add or redefine an alias */
 		if ( !str_cmp( arg, "alias" ) )
 		{
-			ch->Send( "You can't alias 'alias'.\r\n" );
+			ch->send( "You can't alias 'alias'.\r\n" );
 			return;
 		}
 		ch->aliases[arg] = repl;
-		ch->Send( "Alias added.\r\n" );
+		ch->send( "Alias added.\r\n" );
 		MySQLSaveAlias(ch->player.name, ch->aliases.find(arg), false);
 	}
 }
@@ -1112,7 +1097,7 @@ int performAlias( Descriptor *d, char *orig )
  * it to be returned.  Returns -1 if not found; 0..n otherwise.  Array
  * must be terminated with a '\n' so it knows to stop searching.
  */
-int search_block( char *arg, const char **listy, int exact )
+int search_block( const char *arg, const char **listy, int exact )
 {
 	register int i, l;
 	char buffer[MAX_INPUT_LENGTH];
@@ -1192,13 +1177,13 @@ char *delete_doubledollar( char *str )
 	return str;
 }
 
-int fill_word( char *argument )
+int fill_word( const char *argument )
 {
 	return ( search_block( argument, filler, TRUE ) >= 0 );
 }
 
 
-int reserved_word( char *argument )
+int reserved_word( const char *argument )
 {
 	return ( search_block( argument, reserved, TRUE ) >= 0 );
 }
@@ -1435,7 +1420,7 @@ int special( Character *ch, char *cmd, char *arg )
 *  Stuff for controlling the non-playing sockets (get name, pwd etc)       *
 ************************************************************************* */
 
-int _parse_name( char *arg, char *name )
+int _parse_name( const char *arg, char *name )
 {
 	int i;
 
@@ -1466,7 +1451,6 @@ int performDupeCheck( Descriptor *d )
 	Character *target = NULL, *ch, *next_ch;
 	int mode = 0;
 
-
 	int id = d->character->player.idnum;
 
 	/*
@@ -1483,7 +1467,7 @@ int performDupeCheck( Descriptor *d )
 
 		if ( k->original && ( k->original->player.idnum == id ) )
 		{    /* switched char */
-			k->Send( "\r\nMultiple login detected -- disconnecting.\r\n" );
+			k->send( "\r\nMultiple login detected -- disconnecting.\r\n" );
 			STATE( k ) = CON_CLOSE;
 
 			if ( !target )
@@ -1503,7 +1487,7 @@ int performDupeCheck( Descriptor *d )
 		{
 			if ( !target && STATE( k ) == CON_PLAYING )
 			{
-				k->Send( "\r\nThis body has been usurped!\r\n" );
+				k->send( "\r\nThis body has been usurped!\r\n" );
 				target = k->character;
 				mode = USURP;
 			}
@@ -1511,7 +1495,7 @@ int performDupeCheck( Descriptor *d )
 			k->character->desc = NULL;
 			k->character = NULL;
 			k->original = NULL;
-			k->Send( "\r\nMultiple login detected -- disconnecting.\r\n" );
+			k->send( "\r\nMultiple login detected -- disconnecting.\r\n" );
 			STATE( k ) = CON_CLOSE;
 		}
 	}
@@ -1577,7 +1561,7 @@ int performDupeCheck( Descriptor *d )
 
 	case RECON:
 		d->loggedIn = true;
-		d->Send( "Reconnecting.\r\n" );
+		d->send( "Reconnecting.\r\n" );
 		Act( "$n has reconnected.", TRUE, d->character, 0, 0, TO_ROOM );
 		MudLog( NRM, MAX( LVL_IMMORT, GET_INVIS_LEV( d->character ) ), TRUE, "%s has reconnected.",
 			GET_NAME( d->character ) );
@@ -1586,7 +1570,7 @@ int performDupeCheck( Descriptor *d )
 
 	case USURP:
 		d->loggedIn = true;
-		d->Send( "You take over your own body, already in use!\r\n" );
+		d->send( "You take over your own body, already in use!\r\n" );
 		Act( "$n suddenly keels over in pain, surrounded by a white aura...\r\n"
 			"$n's body has been taken over by a new spirit!",
 			TRUE, d->character, 0, 0, TO_ROOM );
@@ -1596,7 +1580,7 @@ int performDupeCheck( Descriptor *d )
 		break;
 
 	case UNSWITCH:
-		d->Send( "Reconnecting to unswitched char." );
+		d->send( "Reconnecting to unswitched char." );
 		MudLog( NRM, MAX( LVL_IMMORT, GET_INVIS_LEV( d->character ) ), TRUE, "%s has reconnected.", GET_NAME( d->character ) );
 		break;
 	}
@@ -1608,58 +1592,17 @@ void Character::StatSelectionMenu( bool notify )
 {
 	if ( notify )
 	{
-		this->Send( "Now it is time for you to setup your character's status points. To increase a status point,\r\n"
+		this->send( "Now it is time for you to setup your character's status points. To increase a status point,\r\n"
 		            "simply type the first letter of the stat type you wish to increase, followed by a '+' sign.\r\n"
 		            "So for example, if you wish to increase your strength, you would type 's+'. The same goes for\r\n"
 		            "decreasing, except you use a '-' sign('s-'). When you have the stats you desire, simply type 'done'\r\n\n" );
 	}
-	this->Send( "Current Stats:   Str: %d[%d], Int: %d[%d], Wis: %d[%d], Dex: %d[%d], Con: %d[%d]\r\n",
+	this->send( "Current Stats:   Str: %d[%d], Int: %d[%d], Wis: %d[%d], Dex: %d[%d], Con: %d[%d]\r\n",
                 (int)this->real_abils.str, this->CostPerStat( STAT_STR ), (int)this->real_abils.intel,
                  this->CostPerStat( STAT_INT ), (int)this->real_abils.wis, this->CostPerStat( STAT_WIS ),
                 (int)this->real_abils.dex, this->CostPerStat( STAT_DEX ), (int)this->real_abils.con,
 	            this->CostPerStat( STAT_CON ) );
-	this->Send( "\r\n%d points remaining. Type 'done' when you are finished.\r\n", this->Stats );
-}
-
-void Descriptor::NewbieMenuFinish()
-{
-	STATE( this ) = CON_NEWBMSG;
-	//this->Send( Conf->operation.NEWBIE_MSG );
-	this->Send("Press any key to begin playing!\r\n");
-	if ( this->character->GetCon() != this->character->real_abils.con )
-	{
-		this->character->SetCon( this->character->real_abils.con );
-		this->character->ResetHitRolls( true );
-		GET_HIT(this->character) = GET_MAX_HIT(this->character);
-	}
-
-	SET_BIT_AR( PRF_FLAGS( this->character ), PRF_COLOR_2 );
-	SET_BIT_AR( PRF_FLAGS( this->character ), PRF_DISPHP );
-	SET_BIT_AR( PRF_FLAGS( this->character ), PRF_DISPMOVE );
-	SET_BIT_AR( PRF_FLAGS( this->character ), PRF_DISPMANA );
-	SET_BIT_AR( PRF_FLAGS( this->character ), PRF_AUTOEXIT );
-
-	this->character->SetStr(this->character->real_abils.str );
-	this->character->SetInt(this->character->real_abils.intel );
-	this->character->SetWis(this->character->real_abils.wis );
-	this->character->SetDex(this->character->real_abils.dex );
-	this->character->restat_time.setTime( time( 0 ) );
-
-	if(playerExists(this->character->player.name))
-		MySQLDeleteAll(this->character->player.name);
-
-	this->character->MySQLInsertQuery();
-	this->character->Save();
-	this->character->CreatePlayerIndex();
-
-	//Record the user's email address.
-	UserEmailAddress userEmailAddress;
-	userEmailAddress.setUserId(this->character->getUserId());
-	userEmailAddress.setEmailAddress(this->getEmailAddress());
-	userEmailAddress.setConfirmed(false);
-	userEmailAddress.setCreatedDatetime(DateTime());
-
-	CharacterUtil::putUserEmailAddress(gameDatabase, &userEmailAddress);
+	this->send( "\r\n%d points remaining. Type 'done' when you are finished.\r\n", this->Stats );
 }
 
 int getCommandIndex(const std::string &commandText)
@@ -1674,7 +1617,7 @@ int getCommandIndex(const std::string &commandText)
 }
 
 // deal with newcomers and other non-playing sockets
-void Descriptor::Nanny( char* arg )
+void Descriptor::nanny( char* arg )
 {
 	char buf[ 128 ];
 	int load_result, cost = 0;
@@ -1726,11 +1669,9 @@ void Descriptor::Nanny( char* arg )
 	case CON_EMAIL:
 		parseUserEmailAddressEditor( this, arg );
 		break;
-#ifdef KINSLAYER_JAVASCRIPT
 	case CON_JEDIT:
 		JeditParse( this, arg );
 		break;
-#endif
 	/*. End of OLC states .*/
 	case CON_GATEWAY:
 	{
@@ -1754,20 +1695,22 @@ void Descriptor::Nanny( char* arg )
 					if(pendingSession.sessionKey == sessionKey) {
 
 						strcpy(this->host, pendingSession.host.c_str());
-
-						STATE(this) = CON_GET_NAME;
-
 						this->setGatewayDescriptorType(pendingSession.gatewayDescriptorType);
-
 						pendingSessions.erase(iter);
-
 						pendingSessionFound = true;
-
 						this->session = sessionKey;
 
-						this->sendInstant(startup);
-
-						this->sendInstant("By what name do you wish to be known? ");
+						if(pendingSession.gatewayDescriptorType == GatewayDescriptorType::websocket)
+						{
+							STATE(this) = CON_WEBSOCKET_LOGIN;
+							sendWebSocketDisplaySignInLightboxMessage();
+						}
+						else
+						{
+							this->sendInstant(startup);
+							this->sendInstant("By what name do you wish to be known? ");
+							STATE(this) = CON_GET_NAME;
+						}
 
 						break;
 					}
@@ -1797,11 +1740,11 @@ void Descriptor::Nanny( char* arg )
 			STATE( this ) = CON_CLOSE;
 		else
 		{
-			if ( ( _parse_name( arg, tmp_name ) ) || strlen( tmp_name ) < 2 ||
-			strlen( tmp_name ) > MAX_NAME_LENGTH || !BanManager::GetManager().IsValidName( tmp_name ) ||
+			if ((_parse_name(arg, tmp_name)) || strlen(tmp_name) < MIN_NAME_LENGTH ||
+				strlen(tmp_name) > MAX_NAME_LENGTH || !BanManager::GetManager().IsValidName(tmp_name) ||
 			fill_word( strcpy( buf, tmp_name ) ) || reserved_word( buf ) )
 			{
-				this->Send( "Invalid name, please try another.\r\n"
+				this->send( "Invalid name, please try another.\r\n"
 				         "Name: " );
 				return ;
 			}
@@ -1809,7 +1752,7 @@ void Descriptor::Nanny( char* arg )
 
 			if( Conf->play.switch_restriction && SwitchManager::GetManager().WillBeMultiplaying( this->host, tmp_name ) )
 			{
-				this->Send("You are already logged into another character. You must log out before switching.\r\n");
+				this->send("You are already logged into another character. You must log out before switching.\r\n");
 				return;
 			}
 			//Below, we check to see if the player has waited the required time.
@@ -1823,7 +1766,7 @@ void Descriptor::Nanny( char* arg )
 				if( !SwitchManager::GetManager().HasWaitedLongEnough(tmp_name,host,sw) )
 				{
 					Time Remainder = SwitchManager::GetManager().TimeRemaining(tmp_name,host,sw);
-					this->Send("You must wait %d minutes, %d seconds before you may log into another character.\r\n",
+					this->send("You must wait %d minutes, %d seconds before you may log into another character.\r\n",
 						(int)Remainder.Minutes(), (int)(Remainder.Seconds() % 60));
 					return;
 				}
@@ -1843,13 +1786,13 @@ void Descriptor::Nanny( char* arg )
 
 					if ( !BanManager::GetManager().IsValidName( tmp_name ) )
 					{
-						this->Send( "Invalid name, please try another.\r\nName:\r\n" );
+						this->send( "Invalid name, please try another.\r\nName:\r\n" );
 						return ;
 					}
 					this->character->desc = this;
 
 					this->character->player.name = StringUtil::cap( tmp_name );
-					this->Send( "Did I get that right, %s (Y/N)? \r\n", tmp_name );
+					this->send( "Did I get that right, %s (Y/N)? \r\n", tmp_name );
 					STATE( this ) = CON_NAME_CNFRM;
 				}
 				else
@@ -1861,7 +1804,7 @@ void Descriptor::Nanny( char* arg )
 					REMOVE_BIT( PLR_FLAGS( this->character ), Q_BIT(PLR_WRITING) );
 					REMOVE_BIT( PLR_FLAGS( this->character ), Q_BIT(PLR_MAILING) );
 					REMOVE_BIT( PLR_FLAGS( this->character ), Q_BIT(PLR_CRYO) );
-					this->Send( "Welcome back, %s. Please enter your password:", GET_NAME( this->character ) );
+					this->send( "Welcome back, %s. Please enter your password:", GET_NAME( this->character ) );
 					this->idle_tics = 0;
 					this->character->desc = this;
 					STATE( this ) = CON_PASSWORD;
@@ -1873,7 +1816,7 @@ void Descriptor::Nanny( char* arg )
 				/* Check for multiple creations of a character. */
 				if ( !BanManager::GetManager().IsValidName( tmp_name ) )
 				{
-					this->Send( "Invalid name, please try another.\r\nName: " );
+					this->send( "Invalid name, please try another.\r\nName: " );
 					return ;
 				}
 
@@ -1881,7 +1824,7 @@ void Descriptor::Nanny( char* arg )
 					this->character = new Character(CharPlayer);
 				this->character->desc = this;
 				this->character->player.name = tmp_name;
-				this->Send( "Are you certain, %s, that you wish to use this name? (Y/N) ", tmp_name );
+				this->send( "Are you certain, %s, that you wish to use this name? (Y/N) ", tmp_name );
 				STATE( this ) = CON_NAME_CNFRM;
 			}
 		}
@@ -1894,69 +1837,60 @@ void Descriptor::Nanny( char* arg )
 			{
 				MudLog( NRM, LVL_APPR, TRUE, "Request for new char %s denied from [%s] (siteban)",
 			        GET_NAME( this->character ), this->host );
-				this->Send( "Sorry, new characters are not allowed from your site!\r\n" );
+				this->send( "Sorry, new characters are not allowed from your site!\r\n" );
 				STATE( this ) = CON_CLOSE;
 				return ;
 			}
 
 			if ( circle_restrict )
 			{
-				this->Send( "Sorry, new players can't be created at the moment.\r\n" );
+				this->send( "Sorry, new players can't be created at the moment.\r\n" );
 				MudLog( NRM, LVL_APPR, TRUE, "Request for new char %s denied from [%s] (wizlock)",
 			        GET_NAME( this->character ), this->host );
 				STATE( this ) = CON_CLOSE;
 				return ;
 				}
       
-			this->Send( "Please enter a password: ", GET_NAME( this->character ) );
+			this->send( "Please enter a password: ", GET_NAME( this->character ) );
 			STATE( this ) = CON_NEWPASSWD;
 		}
 		else if ( *arg == 'n' || *arg == 'N' )
 		{
-			this->Send( "Okay, what IS it, then? " );
+			this->send( "Okay, what IS it, then? " );
 			this->character->player.name.erase();
 			STATE( this ) = CON_GET_NAME;
 		}
 		else
 		{
-			this->Send( "Please type Yes or No: " );
+			this->send( "Please type Yes or No: " );
 		}
 		break;
 	case CON_PASSWORD:    		/* get pwd for known player      */
 
-		this->EchoOn();		/* turn echo back on */
+		this->echoOn();		/* turn echo back on */
 
 		if ( !*arg )
 			STATE( this ) = CON_CLOSE;
 		else
 		{
-			/*this->EchoOff()*/EchoOffNew(this);
-			if (
-				(!this->character->PasswordUpdated() &&
-				strncmp( CRYPT(arg, this->character->player.passwd.c_str()), GET_PASSWD(this->character).c_str(), 10 )) ||
-				(this->character->PasswordUpdated() &&
-				GET_PASSWD(this->character).compare( MD5::getHashFromString(arg)) )
-				)
+			if(!this->character->passwordMatches(arg))
 			{
-				MudLog( BRF, LVL_GOD, TRUE,
-			        "Bad PW: %s [%s]", GET_NAME( this->character ), this->host );
+				MudLog( BRF, LVL_GOD, TRUE, "Bad PW: %s [%s]", GET_NAME( this->character ), this->host );
 
 				++this->character->PlayerData->bad_pws;
-				this->character->BasicSave();
+				this->character->basicSave();
 				if ( ++( this->bad_pws ) >= max_bad_pws )
 				{	/* 3 strikes and you're out. */
-					this->Send( "Wrong password... disconnecting.\r\n" );
+					this->send( "Wrong password... disconnecting.\r\n" );
 					STATE( this ) = CON_CLOSE;
 				}
 				else
 				{
-					this->Send( "Wrong password.\r\nTry again: " );
-//					this->EchoOff();
+					this->send( "Wrong password.\r\nTry again: " );
 				}
 
 				return ;
 			}
-
 
 			if(this->getGatewayDescriptorType() == GatewayDescriptorType::websocket)
 			{
@@ -1980,7 +1914,7 @@ void Descriptor::Nanny( char* arg )
 		        !PLR_FLAGGED( this->character, PLR_SITEOK ) )
 			{
 
-				this->Send( "Sorry, this char has not been cleared for login from your site!\r\n" );
+				this->send( "Sorry, this char has not been cleared for login from your site!\r\n" );
 				STATE( this ) = CON_CLOSE;
 				MudLog( NRM, LVL_GOD, TRUE,
 					"Connection attempt for %s denied from %s", GET_NAME( this->character ), this->host );
@@ -1988,7 +1922,7 @@ void Descriptor::Nanny( char* arg )
 			}
 			if ( GET_LEVEL( this->character ) < circle_restrict )
 			{
-				this->Send( "The game is temporarily restricted.. try again later.\r\n" );
+				this->send( "The game is temporarily restricted.. try again later.\r\n" );
 				STATE( this ) = CON_CLOSE;
 				MudLog( NRM, LVL_GOD, TRUE, "Request for login denied for %s [%s] (wizlock)",
 			        GET_NAME( this->character ), this->host );
@@ -1999,71 +1933,50 @@ void Descriptor::Nanny( char* arg )
 			if ( performDupeCheck( this ) )
 				return;
 
-			MudLog( BRF, MAX( LVL_GRGOD, GET_INVIS_LEV( this->character ) ), TRUE,
-		        "%s [%s] has connected.", GET_NAME( this->character ), this->host );
+			MudLog( BRF, MAX( LVL_GRGOD, GET_INVIS_LEV( this->character ) ), TRUE, "%s [%s] has connected.", GET_NAME( this->character ), this->host );
 
-			if ( !this->character->NeedsRestat() )
+			if ( GET_LEVEL( this->character ) >= LVL_IMMORT )
+				this->send( imotd );
+			else
+				this->send( motd );
+			if ( load_result )
 			{
-				if ( GET_LEVEL( this->character ) >= LVL_IMMORT )
-					this->Send( imotd );
-				else
-					this->Send( motd );
-				if ( load_result )
-				{
-					this->Send( "\r\n\r\n\007\007\007"
-				         "%s%d LOGIN FAILURE%s SINCE LAST SUCCESSFUL LOGIN.%s\r\n",
-				         COLOR_RED( this->character, CL_SPARSE ), load_result,
-				         ( load_result > 1 ) ? "S" : "", COLOR_NORMAL( this->character, CL_SPARSE ) );
-					this->character->PlayerData->bad_pws = 0;
-				}
+				this->send( "\r\n\r\n\007\007\007"
+			         "%s%d LOGIN FAILURE%s SINCE LAST SUCCESSFUL LOGIN.%s\r\n",
+			         COLOR_RED( this->character, CL_SPARSE ), load_result,
+			         ( load_result > 1 ) ? "S" : "", COLOR_NORMAL( this->character, CL_SPARSE ) );
+				this->character->PlayerData->bad_pws = 0;
 			}
 
-			if ( this->character->NeedsRestat() )
-			{
-				this->character->real_abils.intel = this->character->StatMinimum( STAT_INT );
-				this->character->real_abils.wis = this->character->StatMinimum( STAT_WIS );
-				this->character->real_abils.dex = this->character->StatMinimum( STAT_DEX );
-				this->character->real_abils.str = this->character->StatMinimum( STAT_STR );
-				this->character->real_abils.con = this->character->StatMinimum( STAT_CON );
-				this->character->Stats = this->character->NumOfStats();
-
-				this->character->Send( "%s%sA major change has occured with the statting system."
-                    " You are being given the opportunity to setup your stats again.%s\r\n\n",
-                    COLOR_RED( this->character, CL_SPARSE ), COLOR_BOLD( this->character, CL_SPARSE ),
-                    COLOR_NORMAL( this->character, CL_SPARSE ) );
-
-				this->character->StatSelectionMenu( true );
-				STATE( this ) = CON_STATEDIT;
-				return ;
-			}
 			STATE( this ) = CON_MENU;
 			goto menu;
 		}
 
 	case CON_NEWPASSWD:
 	case CON_CHPWD_GETNEW:
-		if ( !*arg || strlen( arg ) > MAX_PWD_LENGTH || strlen( arg ) < 3 ||
-        !str_cmp( arg, GET_NAME( this->character ) ) )
+	{
+		size_t passwordLength = strlen(arg);
+		if (!*arg || passwordLength > MAX_PWD_LENGTH || passwordLength < MIN_PWD_LENGTH || !str_cmp(arg, GET_NAME(this->character)))
 		{
-			this->Send( "\r\nIllegal password.\r\nTry again:" );
+			this->send("\r\nIllegal password.\r\nTry again:");
 			return;
 		}
+		
+		this->character->player.passwd = MD5::getHashFromString(arg);
+		this->send("\r\nPlease verify your password: ");
 
-		this->character->player.passwd = MD5::getHashFromString( arg );
-		this->Send( "\r\nPlease verify your password: " );
-
-		if ( STATE( this ) == CON_NEWPASSWD )
-			STATE( this ) = CON_CNFPASSWD;
+		if (STATE(this) == CON_NEWPASSWD)
+			STATE(this) = CON_CNFPASSWD;
 		else
-			STATE( this ) = CON_CHPWD_VRFY;
+			STATE(this) = CON_CHPWD_VRFY;
 		break;
-
+	}
 	case CON_CNFPASSWD:
 	case CON_CHPWD_VRFY:
 		if( this->character->player.passwd.compare( MD5::getHashFromString( arg ) ) )
 		{
-			this->Send( "\r\nPasswords don't match... start over.\r\n" );
-			this->Send( "Password: " );
+			this->send( "\r\nPasswords don't match... start over.\r\n" );
+			this->send( "Password: " );
 
 			if ( STATE( this ) == CON_CNFPASSWD )
 				STATE( this ) = CON_NEWPASSWD;
@@ -2073,16 +1986,16 @@ void Descriptor::Nanny( char* arg )
 		}
 		this->character->PasswordUpdated( true );//This will inform future logins that the PW is using m5, not crypt
 
-		this->EchoOn();
+		this->echoOn();
 		if ( STATE( this ) == CON_CNFPASSWD )
 		{
-			this->Send("Please enter your email address: \r\n");
+			this->send("Please enter your email address: \r\n");
 			STATE( this ) = CON_REG_EMAIL;
 		}
 		else
 		{
-			this->EchoOn();
-			this->Send( "\r\nDone.\r\n" );
+			this->echoOn();
+			this->send( "\r\nDone.\r\n" );
 			STATE( this ) = CON_MENU;
 		}
 
@@ -2092,12 +2005,12 @@ void Descriptor::Nanny( char* arg )
 
 		if(!MiscUtil::isValidEmailAddress(arg))
 		{
-			this->Send("You entered an invalid email address. Please try again: \r\n");
+			this->send("You entered an invalid email address. Please try again: \r\n");
 			break;
 		}
 
 		this->setEmailAddress(arg);
-		this->Send( "What is your gender: [M]ale or [F]emale? " );
+		this->send( "What is your gender: [M]ale or [F]emale? " );
 		STATE( this ) = CON_QSEX;
 		break;
 
@@ -2113,11 +2026,11 @@ void Descriptor::Nanny( char* arg )
 			this->character->player.sex = SEX_FEMALE;
 			break;
 		default:
-			this->Send( "Invalid sex...\r\nTry again: " );
+			this->send( "Invalid sex...\r\nTry again: " );
 			return ;
 		}
-		this->Send( race_menu );
-		this->Send( "Race:\r\n" );
+		this->send( race_menu );
+		this->send( "Race:\r\n" );
 		STATE( this ) = CON_QRACE;
 		break;
 
@@ -2137,16 +2050,16 @@ void Descriptor::Nanny( char* arg )
 	//		GET_RACE(this->character) = RACE_AIEL;
 	//		break;
 		default:
-			this->Send( "\r\nThat's not a race.\r\nRace: " );
+			this->send( "\r\nThat's not a race.\r\nRace: " );
 			return ;
 		}
 
 		if ( GET_RACE( this->character ) == RACE_HUMAN || GET_RACE( this->character ) == RACE_AIEL )
-			this->Send( human_class_menu );
+			this->send( human_class_menu );
 		else
-			this->Send( other_class_menu );
+			this->send( other_class_menu );
 
-		this->Send( "Class:\r\n" );
+		this->send( "Class:\r\n" );
 		STATE( this ) = CON_QCLASS;
 		break;
 
@@ -2181,7 +2094,7 @@ void Descriptor::Nanny( char* arg )
 			}
 			else
 			{
-				this->Send( "That is not a class!\r\nClass:" );
+				this->send( "That is not a class!\r\nClass:" );
 				return ;
 			}
 		case 'd':
@@ -2193,13 +2106,13 @@ void Descriptor::Nanny( char* arg )
 			}
 			else
 			{
-				this->Send( "That is not a class!\r\nClass:" );
+				this->send( "That is not a class!\r\nClass:" );
 				return;
 			}
 #endif
 		default:
 			GET_CLASS( this->character ) = CLASS_UNDEFINED;
-			this->Send( "That is not a class!\r\nClass:" );
+			this->send( "That is not a class!\r\nClass:" );
 			return ;
 		}
 		STATE( this ) = CON_STAT_OPTION;
@@ -2207,7 +2120,7 @@ void Descriptor::Nanny( char* arg )
 		MudLog( NRM, MAX( LVL_APPR, GET_INVIS_LEV( this->character ) ), TRUE,
 	        "%s [%s] new player.", GET_NAME( this->character ), this->host );
 
-		this->Send(
+		this->send(
 			"Would you like to choose your stats now, or enter the game and have your stats be randomly selected?\r\n"
 			"  A) Choose Stats Now\r\n"
 			"  B) Enter Game / Random Selection\r\n"
@@ -2227,10 +2140,11 @@ void Descriptor::Nanny( char* arg )
 		case 'B':
 			this->character->Init();
 			StatManager::GetManager().RollStats(this->character);
-			this->NewbieMenuFinish();
+			this->newbieMenuFinish();
+			this->completeEnterGame();
 			break;
 		default:
-			this->Send("Invalid option: Choose 'A' or 'B' : ");
+			this->send("Invalid option: Choose 'A' or 'B' : ");
 			return;
 		}
 		break;
@@ -2238,14 +2152,15 @@ void Descriptor::Nanny( char* arg )
 	{
 		if ( strlen( arg ) < 2 )
 		{
-			this->Send( "You must either type 'done' when you are finished, or choose the first letter of\r\n"
+			this->send( "You must either type 'done' when you are finished, or choose the first letter of\r\n"
 		         "the stat that you wish to increase or decrease followed by either a '+' to increase, or a\r\n"
 		         "'-' to decrease.\r\n" );
 			return ;
 		}
 		else if ( !str_cmp( arg, "done" ) )
 		{
-			this->NewbieMenuFinish();
+			this->newbieMenuFinish();
+			this->completeEnterGame();
 			return;
 		}
 
@@ -2274,7 +2189,7 @@ void Descriptor::Nanny( char* arg )
 			stat = &this->character->real_abils.con;
 			break;
 		default:
-			this->Send( "You inserted an invalid STAT type to increase. You must choose either S, I, W, D, or C.\r\n"
+			this->send( "You inserted an invalid STAT type to increase. You must choose either S, I, W, D, or C.\r\n"
 				"Try again: " );
 			return ;
 		}
@@ -2300,7 +2215,7 @@ void Descriptor::Nanny( char* arg )
 		}
 		else
 		{
-			this->Send( "The stat you choose must be followed by either a '+' or a '-', depending on whether you wish to\r\n"
+			this->send( "The stat you choose must be followed by either a '+' or a '-', depending on whether you wish to\r\n"
 			         "increase the status point or decrease.\r\nTry again: " );
 			return ;
 		}
@@ -2313,122 +2228,11 @@ void Descriptor::Nanny( char* arg )
 	case CON_MENU:    		/* get selection from main menu  */
 	{
 		menu:
-		loggedIn = true;
-		int tmp_high;
-		this->character->LoadWards();
-		this->character->loadItems();
-
-		//We need to update the player's points over the time they were not logged in.
-		time_t timeDiff = (time(0) - this->character->points.last_logout);
-
-		//Regen no more than 60 tics.
-		for(int tics = MIN(60,(timeDiff / SECS_PER_MUD_HOUR));tics > 0;--tics) {
-			this->character->PointUpdate(true);
-		}
-
-		LAST_LOGON( this->character ) = time( 0 );
-		this->character->player.time.logon.setTime(time( 0 ));
-
-		/* with the copyover patch, this next line goes in enter_player_game() */
-		this->character->player.idnum = this->character->player.idnum;
-		this->Send( "\r\n\n%s\r\n", CONFIG_WELC_MESSG );
-		this->character->next = character_list;
-		character_list = this->character;
-
-		if(GET_LEVEL(this->character) <= 5)
-			this->character->PlayerData->wimp_level = GET_MAX_HIT(this->character) / 2;
-
-		if ( this->character->NeedsReset() )
-		{
-			this->character->ResetAllSkills();
-			this->Send( "%s%sYour skills have been automatically reset for free as a result of a global reset.%s\r\n",
-			    COLOR_RED( this->character, CL_SPARSE ), COLOR_BOLD( this->character, CL_SPARSE ),
-				COLOR_NORMAL( this->character, CL_SPARSE ) );
-			this->character->reset_time = time( 0 );
-		}
-
-		if( (tmp_high = NumPlayers(true,false)) > boot_high )
-		{
-			UpdateBootHigh( tmp_high );
-		}
-
-		if ( !( load_room = FindRoomByVnum( this->character->PlayerData->load_room ) ) )
-			load_room = this->character->StartRoom();
-		this->character->MoveToRoom( load_room );
-		Act( "$n has entered the game.", TRUE, this->character, 0, 0, TO_ROOM );
-
-		MudLog( CMP, MAX( GET_INVIS_LEV( this->character ), LVL_APPR ), TRUE,
-	        "%s logging in at room %d.", GET_NAME( this->character ),
-		this->character->PlayerData->load_room );
-		Switch* sw;
-		if( (sw = SwitchManager::GetManager().GetSwitchByIP( this->host )) != NULL )
-		{//Notification?
-		}
-
-		this->character->AddLogin(this->host, DateTime(), this->getGatewayDescriptorType());
-		Character *mount = NULL;
-
-		if ( this->character->PlayerData->mount_save > 0 )
-		{
-			if((mount = new Character(this->character->PlayerData->mount_save, VIRTUAL ))->nr == -1)
-			{
-				delete mount;
-				mount = 0;
-			}
-			else
-			{
-				mount->MoveToRoom( load_room );
-				if ( this->character->in_room->sector_type == SECT_INSIDE )
-					do_follow( mount, ( char* ) GET_NAME( this->character ), 0, 0 );
-				else
-				{
-				MOUNT( this->character ) = mount;
-					RIDDEN_BY( mount ) = this->character;
-				}
-			}
-		}
-
-		STATE( this ) = CON_PLAYING;
-		if ( !GET_LEVEL( this->character ) )
-		{
-			this->Send( CONFIG_START_MESSG, this );
-		}
-
-		look_at_room( this->character, 0 );
-
-#ifdef KINSLAYER_JAVASCRIPT
-		js_enter_game_trigger(character,character);
-#endif
-		//If the user has been registered for over seven days, display a reminder to register their email if they haven't already done so.
-		if( (DateTime().getTime() - this->character->player.time.birth.getTime()) / (60 * 60 * 24) >= 7)
-		{
-			//Check to see that the user has at least one confirmed email address.
-			std::list<UserEmailAddress *> userEmailAddresses = CharacterUtil::getUserEmailAddresses(gameDatabase, this->character->getUserId());
-			bool hasConfirmedEmail = false;
-
-			for(auto iter = userEmailAddresses.begin();iter != userEmailAddresses.end();++iter)
-			{
-				UserEmailAddress *userEmailAddress = (*iter);
-				if(userEmailAddress->getConfirmed())
-				{
-					hasConfirmedEmail = true;
-					break;
-				}
-			}
-
-			CharacterUtil::freeUserEmailAddresses(userEmailAddresses);
-
-			if(!hasConfirmedEmail)
-			{
-				this->Send("\r\n%s%s ** You have not registered and confirmed an email address. Please type `email` to do so.\r\n"
-						   " ** Registering an email will allow you to retrieve your password if you ever forget it.%s\r\n", COLOR_BOLD(this->character, CL_NORMAL), COLOR_RED(this->character, CL_NORMAL), COLOR_NORMAL(this->character, CL_NORMAL));
-			}
-		}
-
+		completeEnterGame();
 		break;
 	}
 	default:
-		Log( "SYSERR: Nanny: illegal state of con'ness (%d) for '%s'; closing connection.",
+		Log( "SYSERR: nanny: illegal state of con'ness (%d) for '%s'; closing connection.",
 		     STATE( this ), this->character ? GET_NAME( this->character ) : "<unknown>" );
 		STATE( this ) = CON_DISCONNECT;	/* Safest to do. */
 		break;

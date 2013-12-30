@@ -33,7 +33,6 @@ THE SOFTWARE.
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/assign/list_of.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/unordered_set.hpp>
 #include <algorithm>
 #include <map>
@@ -58,7 +57,7 @@ struct optspec {
 
     item_type() : argument(none) {}
   };
-  typedef boost::shared_ptr<item_type> item_pointer;
+  typedef std::shared_ptr<item_type> item_pointer;
   typedef std::map<std::string, item_pointer> map_type;
 
   map_type options;

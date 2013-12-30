@@ -13,8 +13,6 @@
 #ifndef KINSLAYER_JSROW_H
 #define KINSLAYER_JSROW_H
 
-#ifdef KINSLAYER_JAVASCRIPT
-
 #include <flusspferd.hpp>
 
 #include <string>
@@ -100,5 +98,4 @@ private:
 };
 
 
-#endif
 #endif

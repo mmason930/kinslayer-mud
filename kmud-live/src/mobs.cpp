@@ -22,10 +22,8 @@
 #include "Descriptor.h"
 #include "ClanUtil.h"
 
-#ifdef KINSLAYER_JAVASCRIPT
 #include "js.h"
 #include "js_trigger.h"
-#endif
 
 MobManager *MobManager::Self = NULL;
 extern Character *character_list;
@@ -235,8 +233,6 @@ Character *MobManager::BootPrototype( sql::Row &MyRow )
 	std::string Assists = MyRow["assists"];
 	NewMob->MobData->assists = MiscUtil::splitToIntList(Assists, ' ');
 
-#ifdef KINSLAYER_JAVASCRIPT
-
 // Find any js scripts that are listed as attached to this mob in the db, and attach them to it
     NewMob->js_scripts = std::shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
     try {
@@ -252,8 +248,6 @@ Character *MobManager::BootPrototype( sql::Row &MyRow )
 		cout << "error in js mob load:" << endl;
         e.report();
     }
-
-#endif
 
 	if( !this->MyMobIndex.size() || this->MyMobIndex.back()->vnum < atoi(MyRow["vnum"].c_str()) )
 	{
@@ -517,27 +511,21 @@ std::list<std::string> MobManager::GrabSaveQuery( const unsigned int mob_rnum )
 		QueryBuffer <<	std::endl;
 
 		//Now produce a query to clear the script from the database.
-#ifdef KINSLAYER_JAVASCRIPT
 		RemoveBuffer2 << "DELETE FROM js_attachments WHERE type='M' AND target_vnum='" <<  VirtualMobile((u_int)m->nr) << "';" << std::endl;
-#endif
 	}
 	MyQueries.push_back(QueryBuffer.str());
 	if( RemoveBuffer1.str().size() > 0 )
 		MyQueries.push_back(RemoveBuffer1.str());
 
-#ifdef KINSLAYER_JAVASCRIPT
 	if( RemoveBuffer2.str().size() > 0 )
 		MyQueries.push_back(RemoveBuffer2.str());
-#endif
 
-#ifdef KINSLAYER_JAVASCRIPT
 	for(unsigned int i = 0;i < m->js_scripts->size();++i) {
 		QueryBuffer.str("");
 		QueryBuffer << "INSERT INTO js_attachments(type,target_vnum,script_vnum) VALUES('M','"
 			<< VirtualMobile((unsigned int)m->nr) << "','" << m->js_scripts->at(i)->vnum << "');";
 		MyQueries.push_back(QueryBuffer.str());
 	}
-#endif
 	return MyQueries;
 }
 
@@ -835,13 +823,11 @@ void MobManager::CopyPrototype( Character *Destination, Character *Source )
 
 	Destination->MobData = new MobOnlyData(Source->MobData);
 
-#ifdef KINSLAYER_JAVASCRIPT
 	Destination->js_scripts = std::shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
 	for( unsigned int i = 0;i < Source->js_scripts->size();++i )
 	{
 		Destination->js_scripts->push_back( Source->js_scripts->at( i ) );
 	}
-#endif
 	
 	//Create a deep copy of the clans.
 	Destination->userClans = ClanUtil::cloneUserClansFromMobPrototype(Source);

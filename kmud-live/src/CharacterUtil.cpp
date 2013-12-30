@@ -2,6 +2,8 @@
 #include <vector>
 #include <list>
 
+#include <boost/regex.hpp>
+
 #include "UserEmailAddress.h"
 #include "UserEmailAddressConfirmation.h"
 #include "CharacterUtil.h"
@@ -203,14 +205,14 @@ Character *CharacterUtil::loadCharacter(const int userId)
 	character->PlayerData->tradepracs = atoi(row["trade_pracs"].c_str());
 	character->PlayerData->account_id = atoi(row["account_id"].c_str());
 
-	character->LoadSkills();
-	character->LoadIgnores();
-	character->LoadAliases();
-	character->LoadClans();
-	character->LoadTrophies();
-	character->LoadHitRolls();
-	character->LoadManaRolls();
-	character->LoadQuests();
+	character->loadSkills();
+	character->loadIgnores();
+	character->loadAliases();
+	character->loadClans();
+	character->loadTrophies();
+	character->loadHitRolls();
+	character->loadManaRolls();
+	character->loadQuests();
 
 	character->PlayerData->userDisabledCommands = Character::loadUserDisabledCommands(character->player.idnum);
 	return character;
@@ -576,4 +578,9 @@ void CharacterUtil::putUserMacro(sql::Connection connection, UserMacro *userMacr
 
 		connection->sendRawQuery(sqlBuffer.str());
 	}
+}
+
+bool CharacterUtil::isValidUserName(const std::string username)
+{
+	return boost::regex_match(username, boost::regex("^[a-zA-Z]+$"));
 }

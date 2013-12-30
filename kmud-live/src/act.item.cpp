@@ -31,10 +31,8 @@
 #include "Descriptor.h"
 #include "ClanUtil.h"
 
-#ifdef KINSLAYER_JAVASCRIPT
 #include "js.h"
 #include "js_functions.h"
-#endif
 
 /* extern variables */
 extern sh_int donation_room_1;
@@ -224,7 +222,7 @@ int Character::Draw()
 		{
 			if (!this->CanDraw( GET_EQ( this, i) ->contains))
 				return 1;
-			this->Send( "You draw %s from %s.\r\n",
+			this->send( "You draw %s from %s.\r\n",
 			            GET_EQ( this, i ) ->contains->GetSDesc(), GET_EQ( this, i ) ->GetSDesc() );
 			Act( "$n draws $p from $P.", TRUE, this, GET_EQ( this, i ) ->contains, GET_EQ( this, i ), TO_ROOM );
 			break;
@@ -245,12 +243,12 @@ bool Character::CanDraw(Object *obj)
 {
 	if (GET_EQ(this, WEAR_SHIELD) && IS_OBJ_STAT(obj, ITEM_TWO_HANDED))
 	{
-		this->Send( "You can't use that right now! It requires two hands!\r\n" );
+		this->send( "You can't use that right now! It requires two hands!\r\n" );
 		return false;
 	}
 	if ( obj->Weight() > GetStr() )
 	{
-		this->Send( "It's too heavy for you to use.\r\n" );
+		this->send( "It's too heavy for you to use.\r\n" );
 		return false;
 	}
 
@@ -262,12 +260,12 @@ ACMD( do_draw )
 	int ret_val = 0;
 
 	if ( GET_EQ( ch, WEAR_WIELD ) )
-		ch->Send( "You are already wielding a weapon.\r\n" );
+		ch->send( "You are already wielding a weapon.\r\n" );
 	else
 	{
 		ret_val = ch->Draw();
 		if ( !ret_val )
-			ch->Send( "You don't seem to have anything sheathed.\r\n" );
+			ch->send( "You don't seem to have anything sheathed.\r\n" );
 	}
 }
 
@@ -285,19 +283,19 @@ int Character::Sheath()
 		{
 			if ( IS_OBJ_STAT( GET_EQ( this, i ), ITEM_DAGGER_SHEATH ) && GET_OBJ_VAL( weapon, 0 ) == WEAPON_SHORT_BLADE )
 			{
-				this->Send( "You slide %s into %s.\r\n", weapon->GetSDesc(), GET_EQ( this, i ) ->GetSDesc() );
+				this->send( "You slide %s into %s.\r\n", weapon->GetSDesc(), GET_EQ( this, i ) ->GetSDesc() );
 				Act( "$n slides $p into $P.", TRUE, this, weapon, GET_EQ( this, i ), TO_ROOM );
 				break;
 			}
 			else if ( IS_OBJ_STAT( GET_EQ( this, i ), ITEM_SWORD_SHEATH ) && GET_OBJ_VAL( weapon, 0 ) == WEAPON_LONG_BLADE )
 			{
-				this->Send( "You sheath %s into %s.\r\n", weapon->GetSDesc(), GET_EQ( this, i ) ->GetSDesc() );
+				this->send( "You sheath %s into %s.\r\n", weapon->GetSDesc(), GET_EQ( this, i ) ->GetSDesc() );
 				Act( "$n sheaths $p into $P.", TRUE, this, weapon, GET_EQ( this, i ), TO_ROOM );
 				break;
 			}
 			else if ( IS_OBJ_STAT( GET_EQ( this, i ), ITEM_SPEAR_SHEATH ) && GET_OBJ_VAL( weapon, 0 ) == WEAPON_SPEAR )
 			{
-				this->Send( "You sheath %s into %s.\r\n", weapon->GetSDesc(), GET_EQ( this, i ) ->GetSDesc() );
+				this->send( "You sheath %s into %s.\r\n", weapon->GetSDesc(), GET_EQ( this, i ) ->GetSDesc() );
 				Act( "$n sheaths $p into $P.", TRUE, this, weapon, GET_EQ( this, i ), TO_ROOM );
 				break;
 			}
@@ -316,12 +314,12 @@ ACMD( do_sheath )
 	int ret_val = 0;
 
 	if ( !GET_EQ( ch, WEAR_WIELD ) )
-		ch->Send( "You are not wielding anything to sheath.\r\n" );
+		ch->send( "You are not wielding anything to sheath.\r\n" );
 	else
 	{
 		ret_val = ch->Sheath();
 		if ( !ret_val )
-			ch->Send( "You do not have anything to sheath your weapon into.\r\n" );
+			ch->send( "You do not have anything to sheath your weapon into.\r\n" );
 	}
 }
 
@@ -366,12 +364,10 @@ void perform_give_extra( Character *giver, Character *receiver, Object *obj )
 
 void perform_put( Character * ch, Object * obj, Object * cont )
 {
-#ifdef KINSLAYER_JAVASCRIPT
 	if ( !js_object_dropped(ch, obj) || ch->IsPurged() || obj->IsPurged() )
 		return ;
 	if ( !js_dropped_in_room( ch->in_room, obj, ch ) || ch->IsPurged() || obj->IsPurged() )
 		return ;
-#endif
 
 	if ( cont->Weight() - obj->GetTotalWeight() > cont->GetTotalVal0() )
 		Act( "$p won't fit in $P.", FALSE, ch, obj, cont, TO_CHAR );
@@ -401,7 +397,7 @@ ACMD( do_diceroll )
 	rolla = MiscUtil::random( 1, 6 );
 	rollb = MiscUtil::random( 1, 6 );
 
-	ch->Send( "You shake the dice, and throw them onto the ground, revealing a %d and %d on your six sided dice.\r\n",
+	ch->send( "You shake the dice, and throw them onto the ground, revealing a %d and %d on your six sided dice.\r\n",
 	          rolla, rollb );
 
 
@@ -433,14 +429,14 @@ ACMD( do_put )
 	cont_dotmode = find_all_dots( arg2 );
 
 	if ( !*arg1 )
-		ch->Send( "Put what in what?\r\n" );
+		ch->send( "Put what in what?\r\n" );
 
 	else if ( cont_dotmode != FIND_INDIV )
-		ch->Send( "You can only put things into one container at a time.\r\n" );
+		ch->send( "You can only put things into one container at a time.\r\n" );
 
 	else if ( !*arg2 )
 	{
-		ch->Send( "What do you want to put %s in?\r\n", ( ( obj_dotmode == FIND_INDIV ) ? "it" : "them" ) );
+		ch->send( "What do you want to put %s in?\r\n", ( ( obj_dotmode == FIND_INDIV ) ? "it" : "them" ) );
 	}
 
 	else
@@ -449,14 +445,14 @@ ACMD( do_put )
 
 		if ( !cont )
 		{
-			ch->Send( "You don't see %s %s here.\r\n", AN( arg2 ), arg2 );
+			ch->send( "You don't see %s %s here.\r\n", AN( arg2 ), arg2 );
 		}
 
 		else if ( GET_OBJ_TYPE( cont ) != ITEM_CONTAINER )
 			Act( "$p is not a container.", FALSE, ch, cont, 0, TO_CHAR );
 
 		else if ( OBJVAL_FLAGGED( cont, CONT_CLOSED ) )
-			ch->Send( "You'd better open it first!\r\n" );
+			ch->send( "You'd better open it first!\r\n" );
 
 		else
 		{
@@ -464,11 +460,11 @@ ACMD( do_put )
 			{	/* put <obj> <container> */
 				if ( !( obj = get_obj_in_list_vis( ch, arg1, ch->carrying ) ) )
 				{
-					ch->Send( "You aren't carrying %s %s.\r\n", AN( arg1 ), arg1 );
+					ch->send( "You aren't carrying %s %s.\r\n", AN( arg1 ), arg1 );
 				}
 
 				else if ( obj == cont )
-					ch->Send( "You attempt to fold it into itself, but fail.\r\n" );
+					ch->send( "You attempt to fold it into itself, but fail.\r\n" );
 
 				else
 				{
@@ -499,11 +495,11 @@ ACMD( do_put )
 				if ( !found )
 				{
 					if ( obj_dotmode == FIND_ALL )
-						ch->Send( "You don't seem to have anything to put in it.\r\n" );
+						ch->send( "You don't seem to have anything to put in it.\r\n" );
 
 					else
 					{
-						ch->Send( "You don't seem to have any %ss.\r\n", arg1 );
+						ch->send( "You don't seem to have any %ss.\r\n", arg1 );
 					}
 				}
 			}
@@ -545,13 +541,11 @@ void perform_get_from_container( Character * ch, Object * obj, Object * cont, in
 		if ( IS_CARRYING_N( ch ) >= CAN_CARRY_N( ch ) )
 			Act( "$p: you can't hold any more items.", FALSE, ch, obj, 0, TO_CHAR );
 
-#ifdef KINSLAYER_JAVASCRIPT
 		else if ( js_object_get(ch, obj) && !obj->IsPurged() && !ch->IsPurged() )
 		{
-#endif
 			if ( IS_OBJ_STAT( cont, ITEM_CHEST ) && GET_LEVEL( ch ) >= LVL_IMMORT && GET_LEVEL( ch ) < LVL_GRGOD )
 			{
-				ch->Send( "You must be higher level to take items out of a clan chest.\r\n", GET_LEVEL( ch ) );
+				ch->send( "You must be higher level to take items out of a clan chest.\r\n", GET_LEVEL( ch ) );
 				return ;
 			}
 
@@ -565,10 +559,7 @@ void perform_get_from_container( Character * ch, Object * obj, Object * cont, in
 
 			if ( IS_OBJ_STAT( cont, ITEM_CHEST ) )
 				update_chest_log( ch, cont, obj, TYPE_OUT );
-
-#ifdef KINSLAYER_JAVASCRIPT
 		}
-#endif
 	}
 }
 
@@ -632,11 +623,11 @@ void get_from_container( Character * ch, Object * cont, char *arg, int mode )
 	{
 		if ( cont->Money )
 		{
-			ch->Send( "You receive %s.\r\n", ch->GoldString( cont->Money ).c_str() );
+			ch->send( "You receive %s.\r\n", ch->GoldString( cont->Money ).c_str() );
 			for ( p = ch->in_room->people;p;p = p->next_in_room )
 			{
 				if ( p != ch )
-					p->Send( "%s loots %s from %s.\r\n", GET_NAME( ch ), p->GoldString( cont->Money ).c_str(), cont->GetSDesc() );
+					p->send( "%s loots %s from %s.\r\n", GET_NAME( ch ), p->GoldString( cont->Money ).c_str(), cont->GetSDesc() );
 			}
 			ch->points.gold += cont->Money;
 			cont->Money = 0;
@@ -644,7 +635,7 @@ void get_from_container( Character * ch, Object * cont, char *arg, int mode )
 		}
 		else
 		{
-			ch->Send( "There are no coins in that.\r\n" );
+			ch->send( "There are no coins in that.\r\n" );
 		}
 	}
 	else if ( obj_dotmode == FIND_INDIV )
@@ -666,7 +657,7 @@ void get_from_container( Character * ch, Object * cont, char *arg, int mode )
 	{
 		if ( obj_dotmode == FIND_ALLDOT && !*arg )
 		{
-			ch->Send( "Get all of what?\r\n" );
+			ch->send( "Get all of what?\r\n" );
 			return ;
 		}
 
@@ -683,7 +674,7 @@ void get_from_container( Character * ch, Object * cont, char *arg, int mode )
 		}
 		if ( obj_dotmode == FIND_ALL && cont->Money )
 		{
-			ch->Send( "You receive %s.\r\n", ch->GoldString( cont->Money ).c_str() );
+			ch->send( "You receive %s.\r\n", ch->GoldString( cont->Money ).c_str() );
 			sprintf( buf, "%s receives %s from %s.", GET_NAME( ch ), ch->GoldString( cont->Money ).c_str(),
 			         cont->GetSDesc() );
 			Act( buf, TRUE, ch, 0, 0, TO_ROOM );
@@ -714,9 +705,7 @@ void get_from_container( Character * ch, Object * cont, char *arg, int mode )
 int perform_get_from_room( Character * ch, Object * obj, bool vaultSave )
 {
 	if ( can_take_obj( ch, obj ) &&  !obj->IsPurged() && !ch->IsPurged()
-#ifdef KINSLAYER_JAVASCRIPT
 		&& js_object_get(ch, obj) && !obj->IsPurged() && !ch->IsPurged()
-#endif
 		)
 	{
 		obj->RemoveFromRoom();
@@ -743,7 +732,7 @@ void get_from_room( Character *ch, char *arg )
 	{
 		if ( !( obj = get_obj_in_list_vis( ch, arg, ch->in_room->contents ) ) || obj->hidden )
 		{
-			ch->Send( "You don't see %s %s here.\r\n", AN( arg ), arg );
+			ch->send( "You don't see %s %s here.\r\n", AN( arg ), arg );
 		}
 		else
 			perform_get_from_room( ch, obj, false );
@@ -752,7 +741,7 @@ void get_from_room( Character *ch, char *arg )
 	{
 		if ( dotmode == FIND_ALLDOT && !*arg )
 		{
-			ch->Send( "Get all of what?\r\n" );
+			ch->send( "Get all of what?\r\n" );
 			return ;
 		}
 
@@ -770,10 +759,10 @@ void get_from_room( Character *ch, char *arg )
 		if ( !found )
 		{
 			if ( dotmode == FIND_ALL )
-				ch->Send( "There doesn't seem to be anything here.\r\n" );
+				ch->send( "There doesn't seem to be anything here.\r\n" );
 			else
 			{
-				ch->Send( "You don't see any %ss here.\r\n", arg );
+				ch->send( "You don't see any %ss here.\r\n", arg );
 			}
 		}
 	}
@@ -793,9 +782,9 @@ ACMD( do_get )
 	TwoArguments( argument, arg1, arg2 );
 
 	if ( IS_CARRYING_N( ch ) >= CAN_CARRY_N( ch ) )
-		ch->Send( "Your arms are already full!\r\n" );
+		ch->send( "Your arms are already full!\r\n" );
 	else if ( !*arg1 )
-		ch->Send( "Get what?\r\n" );
+		ch->send( "Get what?\r\n" );
 	else if ( !*arg2 )
 		get_from_room( ch, arg1 );
 	else
@@ -808,7 +797,7 @@ ACMD( do_get )
 
 			if ( !cont )
 			{
-				ch->Send( "You don't have %s %s.\r\n", AN( arg2 ), arg2 );
+				ch->send( "You don't have %s %s.\r\n", AN( arg2 ), arg2 );
 			}
 			else if ( GET_OBJ_TYPE( cont ) != ITEM_CONTAINER )
 				Act( "$p is not a container.", FALSE, ch, cont, 0, TO_CHAR );
@@ -820,7 +809,7 @@ ACMD( do_get )
 		{
 			if ( cont_dotmode == FIND_ALLDOT && !*arg2 )
 			{
-				ch->Send( "Get from all of what?\r\n" );
+				ch->send( "Get from all of what?\r\n" );
 				return ;
 			}
 
@@ -859,10 +848,10 @@ ACMD( do_get )
 			if ( !found )
 			{
 				if ( cont_dotmode == FIND_ALL )
-					ch->Send( "You can't seem to find any containers.\r\n" );
+					ch->send( "You can't seem to find any containers.\r\n" );
 				else
 				{
-					ch->Send( "You can't seem to find any %ss here.\r\n", arg2 );
+					ch->send( "You can't seem to find any %ss here.\r\n", arg2 );
 				}
 			}
 		}
@@ -871,12 +860,10 @@ ACMD( do_get )
 
 int perform_drop( Character *ch, Object *obj, bool vaultSave )
 {
-#ifdef KINSLAYER_JAVASCRIPT
 	if ( !js_object_dropped(ch, obj) || ch->IsPurged() || obj->IsPurged() )
 		return 0;
 	if ( !js_dropped_in_room( ch->in_room, obj, ch ) || ch->IsPurged() || obj->IsPurged() )
 		return 0;
-#endif
 
 	if ( IS_OBJ_STAT( obj, ITEM_NODROP ) && OBJ_FLAGGED(obj, ITEM_TEMP) )
 	{
@@ -913,7 +900,7 @@ ACMD( do_drop )
 
 	if ( !*::arg )
 	{
-		ch->Send( "What do you want to drop?\r\n" );
+		ch->send( "What do you want to drop?\r\n" );
 		return ;
 	}
 
@@ -923,7 +910,7 @@ ACMD( do_drop )
 		argument = OneArgument( argument, ::arg );
 
 		/* code to drop multiple items.  anyone want to write it? -je */
-		ch->Send( "Sorry, you can't do that to more than one item at a time.\r\n" );
+		ch->send( "Sorry, you can't do that to more than one item at a time.\r\n" );
 
 		return ;
 	}
@@ -935,7 +922,7 @@ ACMD( do_drop )
 		if ( dotmode == FIND_ALL )
 		{
 			if ( !ch->carrying )
-				ch->Send( "You don't seem to be carrying anything.\r\n" );
+				ch->send( "You don't seem to be carrying anything.\r\n" );
 
 			else
 				for ( obj = ch->carrying; obj; obj = next_obj )
@@ -949,13 +936,13 @@ ACMD( do_drop )
 		{
 			if ( !*::arg )
 			{
-				ch->Send( "What do you want to drop all of?\r\n" );
+				ch->send( "What do you want to drop all of?\r\n" );
 				return ;
 			}
 
 			if ( !( obj = get_obj_in_list_vis( ch, ::arg, ch->carrying ) ) )
 			{
-				ch->Send( "You don't seem to have any %ss.\r\n", ::arg );
+				ch->send( "You don't seem to have any %ss.\r\n", ::arg );
 			}
 
 			while ( obj )
@@ -969,7 +956,7 @@ ACMD( do_drop )
 		else
 		{
 			if ( !( obj = get_obj_in_list_vis( ch, ::arg, ch->carrying ) ) )
-				ch->Send( "You don't seem to have %s %s.\r\n", AN( ::arg ), ::arg );
+				ch->send( "You don't seem to have %s %s.\r\n", AN( ::arg ), ::arg );
 			else
 				amount += perform_drop( ch, obj, false );
 		}
@@ -1002,10 +989,8 @@ void perform_give( Character *ch, Character *vict, Object *obj )
 		Act( "$E can't carry that much weight.", FALSE, ch, 0, vict, TO_CHAR );
 		return ;
 	}
-#ifdef KINSLAYER_JAVASCRIPT
 	if( !js_object_give(ch, obj, vict)      || obj->IsPurged() || ch->IsPurged() || vict->IsPurged() )
 		return ;
-#endif
 
 	obj_from_char( obj );
 	obj_to_char( obj, vict );
@@ -1027,19 +1012,19 @@ Character *give_find_vict( Character *ch, char *arg )
 
 	if ( !*arg )
 	{
-		ch->Send( "To who?\r\n" );
+		ch->send( "To who?\r\n" );
 		return NULL;
 	}
 
 	else if ( !( vict = get_char_room_vis( ch, arg ) ) )
 	{
-		ch->Send( NOPERSON );
+		ch->send( NOPERSON );
 		return NULL;
 	}
 
 	else if ( vict == ch )
 	{
-		ch->Send( "What's the point of that?\r\n" );
+		ch->send( "What's the point of that?\r\n" );
 		return NULL;
 	}
 
@@ -1057,7 +1042,7 @@ ACMD( do_give )
 	argument = OneArgument( argument, ::arg );
 
 	if ( !*::arg )
-		ch->Send( "Give what to who?\r\n" );
+		ch->send( "Give what to who?\r\n" );
 	else if ( MiscUtil::isInt( ::arg ) )
 	{
 		strcpy( amt, ::arg );
@@ -1065,24 +1050,24 @@ ACMD( do_give )
 
 		if ( !*type )
 		{
-			ch->Send( "Give how much of what money type?\r\n" );
+			ch->send( "Give how much of what money type?\r\n" );
 			return ;
 		}
 		if ( !*target )
 		{
-			ch->Send( "Give to who?\r\n" );
+			ch->send( "Give to who?\r\n" );
 			return ;
 		}
 
 		if ( !( vict = get_char_room_vis( ch, target ) ) )
 		{
-			ch->Send( NOPERSON );
+			ch->send( NOPERSON );
 			return ;
 		}
 		if ( GET_RACE( vict ) != GET_RACE( ch ) && GET_LEVEL( ch ) < LVL_IMMORT && GET_LEVEL( vict ) < LVL_IMMORT &&
 		        !IS_NPC( ch ) )
 		{
-			ch->Send( "%s refuses to accept that from you.\r\n", GET_NAME( vict ) );
+			ch->send( "%s refuses to accept that from you.\r\n", GET_NAME( vict ) );
 			return ;
 		}
 
@@ -1106,29 +1091,26 @@ ACMD( do_give )
 		}
 		else
 		{
-			ch->Send( "You can only give multiple coin types to another person, not more than one item at a time.\r\n" );
+			ch->send( "You can only give multiple coin types to another person, not more than one item at a time.\r\n" );
 			return ;
 		}
 		if ( ch->points.gold < amount )
 		{
-			ch->Send( "You do not have that %s %s!\r\n", ( type[ strlen( type ) - 1 ] == 's' ) ? "many" : "much", type );
+			ch->send( "You do not have that %s %s!\r\n", ( type[ strlen( type ) - 1 ] == 's' ) ? "many" : "much", type );
 			return ;
 		}
 		if( amount <= 0 )
 		{
-			ch->Send( "You can't give a negative amount of money!\r\n" );
+			ch->send( "You can't give a negative amount of money!\r\n" );
 			return ;
 		}
-		ch->Send( "You give %s%d%s %s to %s.\r\n", col, atoi( amt ), COLOR_NORMAL( ch, CL_COMPLETE ), type,
+		ch->send( "You give %s%d%s %s to %s.\r\n", col, atoi( amt ), COLOR_NORMAL( ch, CL_COMPLETE ), type,
 		          GET_NAME( vict ) );
-		vict->Send( "%s gives you %s%d%s %s.\r\n", PERS( ch, vict ), vcol, atoi( amt ), COLOR_NORMAL( vict, CL_COMPLETE ), type );
+		vict->send( "%s gives you %s%d%s %s.\r\n", PERS( ch, vict ), vcol, atoi( amt ), COLOR_NORMAL( vict, CL_COMPLETE ), type );
 		ch->points.gold	-= amount;
 		vict->points.gold	+= amount;
 
-#ifdef KINSLAYER_JAVASCRIPT
 		js_bribe_trigger( vict, ch, amount);
-#endif
-
 	}
 	else
 	{
@@ -1139,7 +1121,7 @@ ACMD( do_give )
 		if ( GET_RACE( vict ) != GET_RACE( ch ) && GET_LEVEL( ch ) < LVL_IMMORT && GET_LEVEL( vict ) < LVL_IMMORT &&
 		        !IS_NPC( ch ) )
 		{
-			ch->Send( "%s refuses to accept that from you.\r\n", GET_NAME( vict ) );
+			ch->send( "%s refuses to accept that from you.\r\n", GET_NAME( vict ) );
 			return ;
 		}
 
@@ -1149,7 +1131,7 @@ ACMD( do_give )
 		{
 			if ( !( obj = get_obj_in_list_vis( ch, ::arg, ch->carrying ) ) )
 			{
-				ch->Send( "You don't seem to have %s %s.\r\n", AN( ::arg ), ::arg );
+				ch->send( "You don't seem to have %s %s.\r\n", AN( ::arg ), ::arg );
 			}
 
 			else
@@ -1160,12 +1142,12 @@ ACMD( do_give )
 		{
 			if ( dotmode == FIND_ALLDOT && !*::arg )
 			{
-				ch->Send( "All of what?\r\n" );
+				ch->send( "All of what?\r\n" );
 				return ;
 			}
 
 			if ( !ch->carrying )
-				ch->Send( "You don't seem to be holding anything.\r\n" );
+				ch->send( "You don't seem to be holding anything.\r\n" );
 
 			else
 				for ( obj = ch->carrying; obj; obj = next_obj )
@@ -1231,7 +1213,7 @@ ACMD( do_drink )
 			;
 		if ( !temp )
 		{
-			ch->Send( "There's nothing here to drink from.\r\n" );
+			ch->send( "There's nothing here to drink from.\r\n" );
 			return ;
 		}
 	}
@@ -1251,33 +1233,33 @@ ACMD( do_drink )
 	if ( ( GET_OBJ_TYPE( temp ) != ITEM_DRINKCON ) &&
 	        ( GET_OBJ_TYPE( temp ) != ITEM_FOUNTAIN ) )
 	{
-		ch->Send( "You can't drink from that!\r\n" );
+		ch->send( "You can't drink from that!\r\n" );
 		return ;
 	}
 
 	if ( on_ground && ( GET_OBJ_TYPE( temp ) == ITEM_DRINKCON ) )
 	{
-		ch->Send( "You have to be holding that to drink from it.\r\n" );
+		ch->send( "You have to be holding that to drink from it.\r\n" );
 		return ;
 	}
 
 	if ( ( ch->PlayerData->conditions[ DRUNK ] > 10 ) && ( ch->PlayerData->conditions[ THIRST ] > 0 ) )
 	{
 		/* The pig is drunk */
-		ch->Send( "You can't seem to get close enough to your mouth.\r\n" );
+		ch->send( "You can't seem to get close enough to your mouth.\r\n" );
 		Act( "$n tries to drink but misses $s mouth!", TRUE, ch, 0, 0, TO_ROOM );
 		return ;
 	}
 
 	if ( ( ch->PlayerData->conditions[ THIRST ] > 20 ) )
 	{
-		ch->Send( "Your stomach can't contain anymore!\r\n" );
+		ch->send( "Your stomach can't contain anymore!\r\n" );
 		return ;
 	}
 
 	if ( !GET_OBJ_VAL( temp, 1 ) )
 	{
-		ch->Send( "It's empty.\r\n" );
+		ch->send( "It's empty.\r\n" );
 		return ;
 	}
 
@@ -1286,7 +1268,7 @@ ACMD( do_drink )
 		sprintf( buf, "$n drinks %s from $p.", drinks[ GET_OBJ_VAL( temp, 2 ) ] );
 		Act( buf, TRUE, ch, temp, 0, TO_ROOM );
 
-		ch->Send( "You drink the %s.\r\n", drinks[ GET_OBJ_VAL( temp, 2 ) ] );
+		ch->send( "You drink the %s.\r\n", drinks[ GET_OBJ_VAL( temp, 2 ) ] );
 
 		if ( drink_aff[ GET_OBJ_VAL( temp, 2 ) ][ DRUNK ] > 0 )
 			amount = ( 25 - ch->PlayerData->conditions[ THIRST ] ) / drink_aff[ GET_OBJ_VAL( temp, 2 ) ][ DRUNK ];
@@ -1298,7 +1280,7 @@ ACMD( do_drink )
 	else
 	{
 		Act( "$n sips from $p.", TRUE, ch, temp, 0, TO_ROOM );
-		ch->Send( "It tastes like %s.\r\n", drinks[ GET_OBJ_VAL( temp, 2 ) ] );
+		ch->send( "It tastes like %s.\r\n", drinks[ GET_OBJ_VAL( temp, 2 ) ] );
 		amount = 1;
 	}
 
@@ -1321,14 +1303,14 @@ ACMD( do_drink )
 		gain_condition( ch, THIRST, drink_aff[ GET_OBJ_VAL( temp, 2 ) ][ THIRST ] * amount / 4 );
 
 	if ( ch->PlayerData->conditions[ DRUNK ] > 10 )
-		ch->Send( "You feel drunk.\r\n" );
+		ch->send( "You feel drunk.\r\n" );
 
 	if ( ch->PlayerData->conditions[ THIRST ] > 20 )
-		ch->Send( "You don't feel thirsty any more.\r\n" );
+		ch->send( "You don't feel thirsty any more.\r\n" );
 
 	if ( GET_OBJ_VAL( temp, 3 ) )
 	{	/* It was poisoned */
-		ch->Send( "Oops, it tasted rather strange!\r\n" );
+		ch->send( "Oops, it tasted rather strange!\r\n" );
 		Act( "$n chokes and utters some strange sounds.", TRUE, ch, 0, 0, TO_ROOM );
 
 		af.type = SPELL_POISON;
@@ -1364,13 +1346,13 @@ ACMD( do_eat )
 
 	if ( !*arg )
 	{
-		ch->Send( "Eat what?\r\n" );
+		ch->send( "Eat what?\r\n" );
 		return ;
 	}
 
 	if ( !( food = get_obj_in_list_vis( ch, arg, ch->carrying ) ) )
 	{
-		ch->Send( "You don't seem to have %s %s.\r\n", AN( arg ), arg );
+		ch->send( "You don't seem to have %s %s.\r\n", AN( arg ), arg );
 		return ;
 	}
 
@@ -1383,7 +1365,7 @@ ACMD( do_eat )
 
 	if ( ( GET_OBJ_TYPE( food ) != ITEM_FOOD ) && ( GET_LEVEL( ch ) < LVL_IMMORT ) )
 	{
-		ch->Send( "You can't eat THAT!\r\n" );
+		ch->send( "You can't eat THAT!\r\n" );
 		return ;
 	}
 
@@ -1415,7 +1397,7 @@ ACMD( do_eat )
 	if ( GET_OBJ_VAL( food, 3 ) && ( GET_LEVEL( ch ) < LVL_IMMORT ) )
 	{
 		/* The shit was poisoned ! */
-		ch->Send( "Oops, that tasted rather strange!\r\n" );
+		ch->send( "Oops, that tasted rather strange!\r\n" );
 		Act( "$n coughs and utters some strange sounds.", FALSE, ch, 0, 0, TO_ROOM );
 
 		af.type = SPELL_POISON;
@@ -1432,7 +1414,7 @@ ACMD( do_eat )
 	{
 		if ( !( --GET_OBJ_VAL( food, 0 ) ) )
 		{
-			ch->Send( "There's nothing left now.\r\n" );
+			ch->send( "There's nothing left now.\r\n" );
 			food->Extract(true);
 		}
 	}
@@ -1492,13 +1474,13 @@ ACMD( do_pour )
 
 				if ( GET_OBJ_VAL( from_obj, 2 ) != 16 )  // oil
 				{
-					ch->Send( "It isn't designed to burn anything but oil.\r\n" );
+					ch->send( "It isn't designed to burn anything but oil.\r\n" );
 					return ;
 				}
 
 				if ( GET_OBJ_VAL( to_obj, 4 ) == 0 )
 				{
-					ch->Send( "You can't refill that.\r\n" );
+					ch->send( "You can't refill that.\r\n" );
 					return ;
 				}
 
@@ -1510,7 +1492,7 @@ ACMD( do_pour )
 
 				if ( amount == 0 )
 				{
-					ch->Send( "It is empty...\r\n" );
+					ch->send( "It is empty...\r\n" );
 					return ;
 				}
 
@@ -1535,7 +1517,7 @@ ACMD( do_pour )
 				}
 				else if ( current == max )
 				{
-					ch->Send( "It is full.\r\n" );
+					ch->send( "It is full.\r\n" );
 					return ;
 				}
 				else
@@ -1557,19 +1539,19 @@ ACMD( do_pour )
 	{
 		if ( !*arg1 )
 		{		// no arguments
-			ch->Send( "What do you want to fill?  And what are you filling it from?\r\n" );
+			ch->send( "What do you want to fill?  And what are you filling it from?\r\n" );
 			return ;
 		}
 
 		if ( !( to_obj = get_obj_in_list_vis( ch, arg1, ch->carrying ) ) )
 		{
-			ch->Send( "You can't find it!" );
+			ch->send( "You can't find it!" );
 			return ;
 		}
 
 		if ( GET_OBJ_TYPE( to_obj ) == ITEM_LIGHT )
 		{
-			ch->Send( "It is not designed to be filled in that manner.\r\n" );
+			ch->send( "It is not designed to be filled in that manner.\r\n" );
 			return ;
 		}
 
@@ -1588,7 +1570,7 @@ ACMD( do_pour )
 
 		if ( !( from_obj = get_obj_in_list_vis( ch, arg2, ch->in_room->contents ) ) )
 		{
-			ch->Send( "There doesn't seem to be %s %s here.\r\n", AN( arg2 ), arg2 );
+			ch->send( "There doesn't seem to be %s %s here.\r\n", AN( arg2 ), arg2 );
 			return;
 		}
 
@@ -1679,7 +1661,7 @@ ACMD( do_pour )
 
 	if ( subcmd == SCMD_POUR )
 	{
-		ch->Send( "You pour the %s into the %s.", drinks[ GET_OBJ_VAL( from_obj, 2 ) ], arg2 );
+		ch->send( "You pour the %s into the %s.", drinks[ GET_OBJ_VAL( from_obj, 2 ) ], arg2 );
 	}
 
 	if ( subcmd == SCMD_FILL )
@@ -1867,18 +1849,18 @@ bool Character::CanWear(Object *obj, int &loc)
 
 	if (GET_EQ(this, WEAR_SHIELD ) && IS_OBJ_STAT(obj, ITEM_TWO_HANDED))
 	{
-		this->Send( "You can't use that right now! It requires two hands!\r\n" );
+		this->send( "You can't use that right now! It requires two hands!\r\n" );
 		return false;
 	}
 
 	if ( GET_EQ(this, WEAR_WIELD ) && loc == WEAR_SHIELD && IS_OBJ_STAT( GET_EQ( this, WEAR_WIELD ), ITEM_TWO_HANDED ) )
 	{
-		this->Send( "Both of your hands are occupied currently.\r\n" );
+		this->send( "Both of your hands are occupied currently.\r\n" );
 		return false;
 	}
 	if ( loc == WEAR_WIELD && obj->Weight() > GetStr() )
 	{
-		this->Send( "It's too heavy for you to use.\r\n" );
+		this->send( "It's too heavy for you to use.\r\n" );
 		return false;
 	}
 
@@ -1896,14 +1878,12 @@ bool Character::CanWear(Object *obj, int &loc)
 
 	if ( GET_EQ( this, loc ) )
 	{
-		this->Send( already_wearing[ loc ] );
+		this->send( already_wearing[ loc ] );
 		return false;
 	}
 
-#ifdef KINSLAYER_JAVASCRIPT
 	if ( !js_object_wear(this, obj, loc) || this->IsPurged() || obj->IsPurged() )
 		return false;
-#endif
 	return true;
 }
 
@@ -1991,7 +1971,7 @@ int find_eq_pos( Character * ch, Object * obj, char *arg, bool msg)
 		if ( msg && ( ( ( where = search_block( arg, ( const char ** ) keywords, FALSE ) ) < 0 ) ||
 		        ( *arg == '!' )) )
 		{
-			ch->Send( "'%s'?  What part of your body is THAT?\r\n", arg );
+			ch->send( "'%s'?  What part of your body is THAT?\r\n", arg );
 			return -1;
 		}
 	}
@@ -2010,7 +1990,7 @@ ACMD( do_wear )
 
 	if ( !*arg1 )
 	{
-		ch->Send( "Wear what?\r\n" );
+		ch->send( "Wear what?\r\n" );
 		return ;
 	}
 
@@ -2018,7 +1998,7 @@ ACMD( do_wear )
 
 	if ( *arg2 && ( dotmode != FIND_INDIV ) )
 	{
-		ch->Send( "You can't specify the same body location for more than one item!\r\n" );
+		ch->send( "You can't specify the same body location for more than one item!\r\n" );
 		return ;
 	}
 
@@ -2036,20 +2016,20 @@ ACMD( do_wear )
 		}
 
 		if ( !items_worn )
-			ch->Send( "You don't seem to have anything wearable.\r\n" );
+			ch->send( "You don't seem to have anything wearable.\r\n" );
 	}
 
 	else if ( dotmode == FIND_ALLDOT )
 	{
 		if ( !*arg1 )
 		{
-			ch->Send( "Wear all of what?\r\n" );
+			ch->send( "Wear all of what?\r\n" );
 			return ;
 		}
 
 		if ( !( obj = get_obj_in_list( arg1, ch->carrying ) ) )
 		{
-			ch->Send( "You don't seem to have any %ss.\r\n", arg1 );
+			ch->send( "You don't seem to have any %ss.\r\n", arg1 );
 		}
 
 		else
@@ -2072,7 +2052,7 @@ ACMD( do_wear )
 	{
 		if ( !( obj = get_obj_in_list_vis( ch, arg1, ch->carrying ) ) )
 		{
-			ch->Send( "You don't seem to have %s %s.\r\n", AN( arg1 ), arg1 );
+			ch->send( "You don't seem to have %s %s.\r\n", AN( arg1 ), arg1 );
 		}
 
 		else
@@ -2092,18 +2072,18 @@ ACMD( do_wield )
 	OneArgument( argument, ::arg );
 
 	if ( !*::arg )
-		ch->Send( "Wield what?\r\n" );
+		ch->send( "Wield what?\r\n" );
 
 	else if ( !( obj = get_obj_in_list_vis( ch, ::arg, ch->carrying ) ) )
 	{
-		ch->Send( "You don't seem to have %s %s.\r\n", AN( ::arg ), ::arg );
+		ch->send( "You don't seem to have %s %s.\r\n", AN( ::arg ), ::arg );
 	}
 
 	else
 	{
 		if ( !( IS_SET(obj->obj_flags.wear_flags, ITEM_WEAR_WIELD )))
 		{
-			ch->Send( "You can't wield that.\r\n" );
+			ch->send( "You can't wield that.\r\n" );
 		}
 		else
 		{
@@ -2119,11 +2099,11 @@ ACMD( do_grab )
 	OneArgument( argument, ::arg );
 
 	if ( !*::arg )
-		ch->Send( "Hold what?\r\n" );
+		ch->send( "Hold what?\r\n" );
 
 	else if /*( !( obj = get_obj_in_list_vis( ch, arg, ch->carrying ) ) )*/ ( !( obj = get_obj_in_list(::arg, ch->carrying)))
 	{
-		ch->Send( "You don't seem to have %s %s.\r\n", AN( ::arg ), ::arg );
+		ch->send( "You don't seem to have %s %s.\r\n", AN( ::arg ), ::arg );
 	}
 
 	else
@@ -2133,7 +2113,7 @@ ACMD( do_grab )
 		else if ( CAN_WEAR( obj, ITEM_WEAR_HOLD ) )
 			perform_wear( ch, obj, WEAR_HOLD );
 		else
-			ch->Send( "You can't hold that.\r\n" );
+			ch->send( "You can't hold that.\r\n" );
 	}
 }
 
@@ -2149,10 +2129,8 @@ void perform_remove( Character * ch, int pos )
 		Act( "$p: you can't carry that many items!", FALSE, ch, obj, 0, TO_CHAR );
 	else
 	{
-#ifdef KINSLAYER_JAVASCRIPT
 		if( !js_object_removed(ch, obj, pos) || ch->IsPurged() || obj->IsPurged() )
 			return;
-#endif
 		if(!IS_OBJ_STAT((obj), ITEM_INVISIBLE) || GET_LEVEL(ch) >= LVL_IMMORT)
 		{ //RHOLLOR 05.03.09 remove message to morts when item is INVIS
 			Act( "You stop using $p.", FALSE, ch, obj, 0, TO_CHAR );
@@ -2171,7 +2149,7 @@ ACMD( do_remove )
 
 	if ( !*::arg )
 	{
-		ch->Send( "Remove what?\r\n" );
+		ch->send( "Remove what?\r\n" );
 		return ;
 	}
 
@@ -2190,13 +2168,13 @@ ACMD( do_remove )
 			}
 		}
 		if ( !found )
-			ch->Send( "You're not using anything.\r\n", ch );
+			ch->send( "You're not using anything.\r\n", ch );
 	}
 
 	else if ( dotmode == FIND_ALLDOT )
 	{
 		if ( !*::arg )
-			ch->Send( "Remove all of what?\r\n", ch );
+			ch->send( "Remove all of what?\r\n", ch );
 
 		else
 		{
@@ -2212,7 +2190,7 @@ ACMD( do_remove )
 				}
 
 				if ( !found )
-					ch->Send( "You don't seem to be using any %ss.\r\n", ::arg );
+					ch->send( "You don't seem to be using any %ss.\r\n", ::arg );
 			}
 		}
 	}
@@ -2221,7 +2199,7 @@ ACMD( do_remove )
 	{
 		if ( !( obj = get_object_in_equip_vis( ch, ::arg, ch->equipment, &i ) ) )
 		{
-			ch->Send( "You don't seem to be using %s %s.\r\n", AN( ::arg ), ::arg );
+			ch->send( "You don't seem to be using %s %s.\r\n", AN( ::arg ), ::arg );
 		}
 
 		else
@@ -2239,13 +2217,13 @@ ACMD( do_break )
 
 	if ( !*::arg )
 	{
-		ch->Send( "Break what?\r\n" );
+		ch->send( "Break what?\r\n" );
 		return ;
 	}
 
 	else if ( !( o = get_obj_in_list_vis( ch, ::arg, ch->carrying ) ) && ( !( o = get_obj_in_list_vis( ch, ::arg, ( GET_EQ( ch, WEAR_HOLD ) ) ) ) ) )
 	{
-		ch->Send( "You don't seem to have %s %s.\r\n", AN( ::arg ), ::arg );
+		ch->send( "You don't seem to have %s %s.\r\n", AN( ::arg ), ::arg );
 		return ;
 	}
 
@@ -2254,13 +2232,13 @@ ACMD( do_break )
 		if ( GET_OBJ_TYPE( o ) != ITEM_KEY )
 		{
 			keyfound = true;
-			ch->Send( "Your puny fingers are too weak to break anything but a key!\r\n" );
+			ch->send( "Your puny fingers are too weak to break anything but a key!\r\n" );
 		}
 		else
 		{
 			keyfound = true;
 			o ->Extract();
-			ch->Send( "*snap*\r\n" );
+			ch->send( "*snap*\r\n" );
 			return ;
 		}
 	}
@@ -2273,14 +2251,14 @@ ACMD( do_break )
 			{
 				keyfound = true;
 				o ->Extract();
-				ch->Send( "*snap*\r\n" );
+				ch->send( "*snap*\r\n" );
 				return ;
 			}
 		}
 	}
 	else
 	{
-		ch->Send( "Your puny fingers are too weak to break anything but a key!\r\n" );
+		ch->send( "Your puny fingers are too weak to break anything but a key!\r\n" );
 		return ;
 	}
 }
@@ -2294,60 +2272,60 @@ ACMD( do_show )
 	TwoArguments(argument,arg1,arg2);
 	if( !*arg1 )
 	{
-		ch->Send("What do you wish to show, and to whom?\r\n");
+		ch->send("What do you wish to show, and to whom?\r\n");
 		return;
 	}
 	if( !*arg2 )
 	{
-		ch->Send("To whom do you wish to show that?\r\n");
+		ch->send("To whom do you wish to show that?\r\n");
 		return;
 	}
 	int posTrash;
 	if( !(item = get_object_in_equip_vis(ch, arg1, ch->equipment, &posTrash))
 		&& !(item = get_obj_in_list_vis(ch, arg1, ch->carrying)) )
 	{
-		ch->Send("You don't seem to have a '%s'.\r\n", arg1);
+		ch->send("You don't seem to have a '%s'.\r\n", arg1);
 		return;
 	}
 	if( !(target = get_char_room_vis(ch,arg2)) )
 	{
-		ch->Send(NOPERSON);
+		ch->send(NOPERSON);
 		return;
 	}
 	if( target == ch )
 	{
-		ch->Send("Show it to yourself? Now that's just silly.\r\n");
+		ch->send("Show it to yourself? Now that's just silly.\r\n");
 		return;
 	}
 	
-	ch->Send("You show %s to %s.\r\n", item->GetSDesc(), GET_NAME(target));
+	ch->send("You show %s to %s.\r\n", item->GetSDesc(), GET_NAME(target));
 	Act("$n shows $p to $N.", TRUE, ch, item, target, TO_NOTVICT);
 
 	if( !CAN_SEE(target,ch) )
 		return;
-	target->Send("%s shows you %s.\r\n", GET_NAME(ch), item->GetSDesc());
+	target->send("%s shows you %s.\r\n", GET_NAME(ch), item->GetSDesc());
 	if(item->GetExDesc())
 	{
-		target->Send("%s\r\n\r\n", item->GetExDesc()->description);
+		target->send("%s\r\n\r\n", item->GetExDesc()->description);
 	}
 
 	if( GET_OBJ_TYPE(item) == ITEM_NOTE && item->action_description )
 	{
-		target->Send("There is something written on it:\r\n\r\n%s",
+		target->send("There is something written on it:\r\n\r\n%s",
 			item->action_description);
 	}
 	else if( GET_OBJ_TYPE(item) == ITEM_WEAPON )
-		target->Send("It is a %s.\r\n", StringUtil::allLower(weapon_types[GET_OBJ_VAL(item,0)]));
+		target->send("It is a %s.\r\n", StringUtil::allLower(weapon_types[GET_OBJ_VAL(item,0)]));
 	else if( GET_OBJ_TYPE(item) == ITEM_CONTAINER )
 	{
-		target->Send("When you look inside, you see: \r\n");
+		target->send("When you look inside, you see: \r\n");
 		lookInObject(target, 0, item);
 	}
 	else if( (IS_OBJ_STAT(item, ITEM_SWORD_SHEATH) || IS_OBJ_STAT(item, ITEM_DAGGER_SHEATH)
 		|| IS_OBJ_STAT(item, ITEM_SPEAR_SHEATH)) && item->contains )
 	{
-		target->Send("There is something sheath inside:\r\n\r\n");
-		target->Send("%s\r\n", item->contains->GetSDesc());
+		target->send("There is something sheath inside:\r\n\r\n");
+		target->send("%s\r\n", item->contains->GetSDesc());
 	}
 }
 
@@ -2369,30 +2347,30 @@ bool remort_gear_message( Character *ch, Object *obj )
 {
 	if( !IS_FADE(ch) && GET_OBJ_CLAN(obj) == CLAN_MYRDDRAAL )
 	{
-		ch->Send("You feel a powerful dark presence surround you, preventing you from putting it on!\r\n");
+		ch->send("You feel a powerful dark presence surround you, preventing you from putting it on!\r\n");
 		return false;
 	}
 
 	if ( !IS_BLADEMASTER(ch) && GET_OBJ_CLAN(obj) == CLAN_BLADEMASTERS )
 	{
-		ch->Send("You feel far too unworthy to wear the gear of a blademaster!\r\n");
+		ch->send("You feel far too unworthy to wear the gear of a blademaster!\r\n");
 		return false;
 	}
 
 	if ( !IS_OGIER(ch) && GET_OBJ_CLAN(obj) == CLAN_OGIER )
 	{
-		ch->Send("An ogier's gear is too large for you to wear!\r\n");
+		ch->send("An ogier's gear is too large for you to wear!\r\n");
 		return false;
 	}
 	if ( !IS_GREYMAN(ch) && GET_OBJ_CLAN(obj) == CLAN_SOULLESS )
 	{
-		ch->Send("Somehow, you can't seem to keep your eyes on this object long enough to put it on.\r\n");
+		ch->send("Somehow, you can't seem to keep your eyes on this object long enough to put it on.\r\n");
 		return false;
 	}
 
 	if ( !IS_DREADLORD(ch) && GET_OBJ_CLAN(obj) == CLAN_CHOSEN )
 	{
-		ch->Send("The item begins to radiate heat, making you think it might be best not to wear it.\r\n");
+		ch->send("The item begins to radiate heat, making you think it might be best not to wear it.\r\n");
 		return false;
 	}
 
@@ -2441,14 +2419,14 @@ ACMD( do_auction )
 	/* Check to ensure that the current room has a valid auction */
 	if( (a = AuctionManager::GetManager().GetAuction( ch->in_room->auction_vnum )) == NULL )
 	{
-		ch->Send(YouCantDoThatHere);
+		ch->send(YouCantDoThatHere);
 		return;
 	}
 
 	//Check to ensure that the prerequisites match.
 	if( !a->raceIsAllowed( GET_RACE(ch) ) )
 	{
-		ch->Send(YouCantDoThatHere);
+		ch->send(YouCantDoThatHere);
 		return;
 	}
 

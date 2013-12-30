@@ -212,7 +212,7 @@ void Character::ListWarrants()
 	str += "\r\n";
 
 	if(HasWarrant)
-		this->Send(str.c_str());
+		this->send(str.c_str());
 }
 
 std::string MoodString(int mood)
@@ -254,7 +254,7 @@ void Character::ListLegends()
 	Character *victim;
 	std::stringstream Query;
 
-	this->Send("Below is a list of the current Legends of the Wheel.\r\n\n");
+	this->send("Below is a list of the current Legends of the Wheel.\r\n\n");
 
 	for(i = 1, l = Legends.begin();l != Legends.end();++l, ++i)
 	{
@@ -264,14 +264,14 @@ void Character::ListLegends()
 		if( (victim = CharacterUtil::loadCharacter((*l)->name)) != NULL )
 		{
 			if(GET_LEVEL(this) >= LVL_GRGOD)
-				this->Send("~  %d. %s the %s. - %d\r\n", i, GET_NAME(victim), victim->RaceName().c_str(), GET_WP(victim));
+				this->send("~  %d. %s the %s. - %d\r\n", i, GET_NAME(victim), victim->RaceName().c_str(), GET_WP(victim));
 			else
-				this->Send("~ %d. %s the %s.\r\n", i, GET_NAME(victim), victim->RaceName().c_str());
+				this->send("~ %d. %s the %s.\r\n", i, GET_NAME(victim), victim->RaceName().c_str());
 
 			if(!GET_SLEW_MESSAGE(victim).empty())
-				this->Send("      %s\r\n\n", GET_SLEW_MESSAGE(victim).c_str());
+				this->send("      %s\r\n\n", GET_SLEW_MESSAGE(victim).c_str());
 			else
-				this->Send("\r\n");
+				this->send("\r\n");
 			delete victim;
 		}
 	}
@@ -347,7 +347,7 @@ ACMD(do_scan)
             exit = DOWN;
             break;
          default:
-            ch->Send("What direction is that?\r\n");
+            ch->send("What direction is that?\r\n");
             return;
       }
    }
@@ -362,33 +362,33 @@ ACMD(do_scan)
 
    /* Galnor 07/14/2009 - Completely redid the if statements below */
 	if (GET_POS(ch) != POS_STANDING) {
-		ch->Send("You need to be on your feet to get a good look.\r\n");
+		ch->send("You need to be on your feet to get a good look.\r\n");
 		return;
 	}
 	if( exit != -1 )//If they chose a specific direction...
 	{
 		if (( !EXIT(ch,exit) || !EXIT(ch,exit)->to_room ))
 		{//If the exit is invalid...
-			ch->Send("There doesn't appear to be anything in that direction.\r\n");
+			ch->send("There doesn't appear to be anything in that direction.\r\n");
 			return;
 		}
 		else if( EXIT_FLAGGED( EXIT(ch,exit), EX_CLOSED ) )
 		{//If the exit is closed...
 			if((GET_SKILL(ch,SKILL_SEARCH) < EXIT(ch, exit)->HiddenLevel()) || !EXIT(ch,exit)->keyword )
-				ch->Send("There doesn't appear to be anything in that direction.\r\n");
+				ch->send("There doesn't appear to be anything in that direction.\r\n");
 			else
-				ch->Send("You cannot see through the %s.\r\n",fname(EXIT(ch, exit)->keyword));
+				ch->send("You cannot see through the %s.\r\n",fname(EXIT(ch, exit)->keyword));
 			return;
 		}
 		room = ch->in_room->dir_option[exit]->to_room;
 		if(room->IsDark() && !CAN_SEE_IN_DARK(ch))
 		{//If the room to be scanned is not visible...
-			ch->Send("It looks too dark in there to make anything out.\r\n");
+			ch->send("It looks too dark in there to make anything out.\r\n");
 			return;
 		}
 		if( room == ch->in_room )
 		{//Target room is current room.
-			ch->Send("You might as well look at the room you are currently in.\r\n");
+			ch->send("You might as well look at the room you are currently in.\r\n");
 			return;
 		}
 	}
@@ -404,10 +404,10 @@ ACMD(do_scan)
 		else {
 			if(room->people && canSeeCharsInRoom(ch, room)) {
 				listCharacterToCharacter(room->people, ch);
-				ch->Send(COLOR_NORMAL(ch, CL_NORMAL));
+				ch->send(COLOR_NORMAL(ch, CL_NORMAL));
 			}
 			else {
-				ch->Send("You cannot make anything out in that direction.\r\n");
+				ch->send("You cannot make anything out in that direction.\r\n");
 			}
 		}
 	}
@@ -418,7 +418,7 @@ ACMD(do_scan)
            !ch->in_room->sector_type != SECT_CITY)
    {
       listCharacterToCharacter(room->people, ch);
-      ch->Send(COLOR_NORMAL(ch, CL_NORMAL));
+      ch->send(COLOR_NORMAL(ch, CL_NORMAL));
    }
 
 */
@@ -438,7 +438,7 @@ ACMD(do_view)
 
 	if(!*buf1)
 	{
-		ch->Send("View list: Clan, Clans, Trophy, Legends <Weekly|Monthly|Yearly>\r\n");
+		ch->send("View list: Clan, Clans, Trophy, Legends <Weekly|Monthly|Yearly>\r\n");
 		return;
 	}
 
@@ -446,19 +446,19 @@ ACMD(do_view)
 	{
 		if(!*buf2 && ch->userClans.empty())
 		{
-			ch->Send("But which clan?\r\n");
+			ch->send("But which clan?\r\n");
 			return;
 		}
 
 		if(!(clan_num = GetClanByString(buf2)))
 		{
-			ch->Send("There is no such clan.\r\n");
+			ch->send("There is no such clan.\r\n");
 			return;
 		}
 
 		if(!ch->CanViewClan(clan_num))
 		{
-			ch->Send("You don't know anything about them.\r\n");
+			ch->send("You don't know anything about them.\r\n");
 			return;
 		}
 
@@ -468,17 +468,17 @@ ACMD(do_view)
 			c = ClanUtil::getClan(clan_num);
 
 		if(c == NULL || c->hidden_level > GET_LEVEL(ch))
-			ch->Send("There is no such clan.\r\n");
+			ch->send("There is no such clan.\r\n");
 
-		ch->Send(" --%s Members--\r\n", c->Name.c_str());
+		ch->send(" --%s Members--\r\n", c->Name.c_str());
 
 		int n;
 		c->GetPlayerList(TheClanned, TheCouncil);
 		for(i = 0;i <= c->RankNames.size();++i)
 		{
-			ch->Send((i == c->RankNames.size()) ? "" : "\r\n");
-			ch->Send("%s", (i == c->RankNames.size()) ? "" : c->RankNames[i].c_str());
-			ch->Send((i == c->RankNames.size()) ? "" : "\r\n");
+			ch->send((i == c->RankNames.size()) ? "" : "\r\n");
+			ch->send("%s", (i == c->RankNames.size()) ? "" : c->RankNames[i].c_str());
+			ch->send((i == c->RankNames.size()) ? "" : "\r\n");
 
 			if(i == c->RankNames.size())
 				CurrentList = &UnRanked;
@@ -496,21 +496,21 @@ ACMD(do_view)
 				if( i == c->RankNames.size() && n == 1 )
 				{
 					if(IsTowerClan(c->vnum))
-						ch->Send("\r\nSitters\r\n");
+						ch->send("\r\nSitters\r\n");
 					else
-						ch->Send("\r\nThe Council\r\n");
+						ch->send("\r\nThe Council\r\n");
 					CurrentList = &TheCouncil;
 				}
 				std::list<std::string>::iterator name = CurrentList->begin();
 				for(count = 0;name != CurrentList->end();++name, ++count)
 				{
 					if(count)
-						ch->Send(", ");
+						ch->send(", ");
 					else
-						ch->Send("   ");
+						ch->send("   ");
 					if(!(count % 5) && count)
-						ch->Send("\r\n   ");
-					ch->Send("%s%s%s", COLOR_CYAN(ch, CL_COMPLETE), (*name).c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
+						ch->send("\r\n   ");
+					ch->send("%s%s%s", COLOR_CYAN(ch, CL_COMPLETE), (*name).c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
 				}
 			}
 		}
@@ -524,7 +524,7 @@ ACMD(do_view)
 		{
 			if(clan->hidden_level <= GET_LEVEL(ch))
 			{
-				ch->Send("#%d %s\r\n", GET_LEVEL(ch) < LVL_GRGOD ? i : clan->vnum, clan->Name.c_str());
+				ch->send("#%d %s\r\n", GET_LEVEL(ch) < LVL_GRGOD ? i : clan->vnum, clan->Name.c_str());
 			}
 		}
 	}
@@ -533,7 +533,7 @@ ACMD(do_view)
 		std::map< std::string, int>::iterator pos;
 		char buf[MAX_STRING_LENGTH];
 
-		ch->Send(
+		ch->send(
 			"*** TROPHY *** (Number Killed, Mobile)\n\r"
 		);
 
@@ -545,7 +545,7 @@ ACMD(do_view)
 						, pos->first.c_str()
 				   );
 
-			ch->Send( buf );
+			ch->send( buf );
 			continue;
 		}
 	}
@@ -605,7 +605,7 @@ ACMD(do_view)
 			return;
 		}
 
-		ch->Send("Below is a list of the Legends of the %s:\r\n\r\n", Type.c_str());
+		ch->send("Below is a list of the Legends of the %s:\r\n\r\n", Type.c_str());
 		for(unsigned int i = 1;MyQuery->hasNextRow();++i) {
 			sql::Row MyRow = MyQuery->getRow();
 
@@ -618,15 +618,15 @@ ACMD(do_view)
 				Slew += (", resulting in a kill count of " + MyRow["kill_count"] + ".");
 			}
 
-			ch->Send("~ %d) %-17s - (%4s weave points)\r\n", i, NameAndRace.c_str(), MyRow["wp_total"].c_str());
-			ch->Send("    %s\r\n\r\n", Slew.c_str());
+			ch->send("~ %d) %-17s - (%4s weave points)\r\n", i, NameAndRace.c_str(), MyRow["wp_total"].c_str());
+			ch->send("    %s\r\n\r\n", Slew.c_str());
 		}
 
-		//	ch->Send("%s\r\n", Time::FormatDate("%m-%d-%y - %H:%M:%S",atoi(arg1)).c_str());
+		//	ch->send("%s\r\n", Time::FormatDate("%m-%d-%y - %H:%M:%S",atoi(arg1)).c_str());
 	}
 	else
 	{
-		ch->Send("Invalid view command.\r\n");
+		ch->send("Invalid view command.\r\n");
 	}
 }
 
@@ -636,12 +636,12 @@ void perform_search(Character *ch, int direction)
 	{
 		if(GET_SKILL(ch, SKILL_SEARCH) >= EXIT(ch, direction)->hidden && EXIT(ch, direction)->keyword)
 		{
-			ch->Send("You discovered the %s!\r\n", fname(EXIT(ch, direction)->keyword));
+			ch->send("You discovered the %s!\r\n", fname(EXIT(ch, direction)->keyword));
 			return;
 		}
 	}
 
-	ch->Send("You found nothing in that direction.\r\n");
+	ch->send("You found nothing in that direction.\r\n");
 }
 
 ACMD(do_search)
@@ -654,7 +654,7 @@ ACMD(do_search)
 
 	if((GET_LEVEL(ch) >= LVL_IMMORT && GET_LEVEL(ch) < LVL_GRGOD))
 	{
-		ch->Send("You shouldn't be doing this...\r\n");
+		ch->send("You shouldn't be doing this...\r\n");
 		return;
 	}
 
@@ -666,7 +666,7 @@ ACMD(do_search)
 			{
 				if(obj->Weight() + ch->CarriedWeight() > CAN_CARRY_W(ch))
 				{
-					ch->Send("You cannot carry that much weight.\r\n");
+					ch->send("You cannot carry that much weight.\r\n");
 					return;
 				}
 
@@ -674,7 +674,7 @@ ACMD(do_search)
 				obj->RemoveFromRoom();
 				obj_to_char(obj, ch);
 
-				ch->Send("You found %s!\r\n", obj->GetSDesc());
+				ch->send("You found %s!\r\n", obj->GetSDesc());
 
 				sprintf(buf, "%s found %s.", GET_NAME(ch), obj->GetSDesc());
 				Act(buf, TRUE, ch, NULL, NULL, TO_NOTVICT);
@@ -683,18 +683,18 @@ ACMD(do_search)
 			}
 		}
 
-		ch->Send("You couldn't find that item here.\r\n");
+		ch->send("You couldn't find that item here.\r\n");
 		return;
 	}
 
 	if ((direction = search_block(arg, (const char **) dirs, FALSE)) < 0)
 	{
-		ch->Send("Search in what direction?\r\n");
+		ch->send("Search in what direction?\r\n");
 		return;
 	}
 	if(IS_NPC(ch))
 	{
-		ch->Send("Mobs can't do this.\r\n");
+		ch->send("Mobs can't do this.\r\n");
 		return;
 	}
 
@@ -702,7 +702,7 @@ ACMD(do_search)
 	{
 		if(!EXIT_FLAGGED(EXIT(ch, direction), EX_CLOSED))
 		{
-			ch->Send("The way is already open!\r\n");
+			ch->send("The way is already open!\r\n");
 			return;
 		}
 	}
@@ -724,7 +724,7 @@ ACMD(do_warrants)
 	std::list<Warrant *>::iterator iter;
 	for(iter = Warrants.begin();iter != Warrants.end();++iter)
 	{
-		ch->Send("%d. %s\r\n", (*iter)->vnum, (*iter)->Name.c_str());
+		ch->send("%d. %s\r\n", (*iter)->vnum, (*iter)->Name.c_str());
 	}
 }
 
@@ -742,13 +742,13 @@ ACMD(do_incognito)
 {
 	if (!PRF_FLAGGED(ch, PRF_INCOG))
 	{
-		ch->Send("Your identity is now safe.\r\n");
+		ch->send("Your identity is now safe.\r\n");
 		SET_BIT_AR(PRF_FLAGS(ch), PRF_INCOG);
 	}
 
 	else
 	{
-		ch->Send("Your identity is no longer a secret.\r\n");
+		ch->send("Your identity is no longer a secret.\r\n");
 		REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_INCOG);
 	}
 }
@@ -821,7 +821,6 @@ void showObjectToCharacter(Object *object, Character *ch, int mode, int ammount)
 			strcat(buf, " (invisible)");
 			found = TRUE;
 		}
-#ifdef KINSLAYER_JAVASCRIPT
 		try {
 			std::string expression = "getCurrentDecayMessage(" + lookupName(object) + ");";
 			flusspferd::string decayString = JSManager::get()->executeExpression(expression);
@@ -833,7 +832,6 @@ void showObjectToCharacter(Object *object, Character *ch, int mode, int ammount)
 		} catch( flusspferd::exception e ) {
 			//...
 		}
-#endif
 	}
 	if(GET_OBJ_TYPE(object) == ITEM_LIGHT && mode == 6)
 	{
@@ -945,11 +943,11 @@ void listObjectToCharacter(Object *listy, Character *ch, int mode, int show)
 	{
 		if(!mode && i->hidden &&
 		        ( (AFF_FLAGGED(ch, AFF_NOTICE) && GET_SKILL(ch, SKILL_NOTICE) && !AFF_FLAGGED(ch, AFF_BLIND)) || GET_LEVEL(ch) >= LVL_IMMORT))
-			ch->Send("You notice %s hidden here.\r\n", i->GetSDesc());
+			ch->send("You notice %s hidden here.\r\n", i->GetSDesc());
 	}
 
 	if (!found && show)
-		ch->Send(" Nothing.\r\n");
+		ch->send(" Nothing.\r\n");
 }
 
 
@@ -984,7 +982,7 @@ void diagnoseCharacterToCharacter(Character *i, Character *ch)
 	else
 		strcpy(disp, " is bleeding awfully from big wounds.\r\n");
 
-	ch->Send("%s%s", name, disp);
+	ch->send("%s%s", name, disp);
 }
 
 void lookAtCharacter(Character * i, Character * ch)
@@ -997,7 +995,7 @@ void lookAtCharacter(Character * i, Character * ch)
 		return;
 
 	if (i->player.description)
-		ch->Send(i->player.description);
+		ch->send(i->player.description);
 	else
 		Act("You see nothing special about $m.\r\n", FALSE, i, 0, ch, TO_VICT);
 
@@ -1021,7 +1019,7 @@ void lookAtCharacter(Character * i, Character * ch)
 				else
 					strcpy(msg, where[j]);
 
-				ch->Send(msg);
+				ch->send(msg);
 				showObjectToCharacter(GET_EQ(i, j), ch, 1, 1);
 			}
 	}
@@ -1041,7 +1039,7 @@ void lookAtCharacter(Character * i, Character * ch)
 		}
 
 		if (!found)
-			ch->Send("You can't see anything.\r\n");
+			ch->send("You can't see anything.\r\n");
 
 	}
 }
@@ -1067,12 +1065,12 @@ void listOneCharacter(Character *i, Character *ch)
 	{
 		if(TAINT_CALC(ch))	//If SUPER tainted, the person doesn't see anything at all.
 			return;
-		ch->Send("A blurry shape of something %s is here.\r\n", GET_WEIGHT(i) >= GET_WEIGHT(ch) ? "large" : "small");
+		ch->send("A blurry shape of something %s is here.\r\n", GET_WEIGHT(i) >= GET_WEIGHT(ch) ? "large" : "small");
 	}
 
 	if(AFF_FLAGGED(ch, AFF_BLIND))
 	{
-		ch->Send("A blurry shape of something %s is here.\r\n", GET_WEIGHT(i) >= GET_WEIGHT(ch) ? "large" : "small");
+		ch->send("A blurry shape of something %s is here.\r\n", GET_WEIGHT(i) >= GET_WEIGHT(ch) ? "large" : "small");
 		return;
 	}
 
@@ -1087,7 +1085,7 @@ void listOneCharacter(Character *i, Character *ch)
 		if(RIDDEN_BY(i))
 			return;
 
-		ch->Send(i->player.long_descr);
+		ch->send(i->player.long_descr);
 
 		if ( PRF_FLAGGED(i, PRF_SOURCE) && GET_SEX(i) == SEX_FEMALE && GET_SEX(ch) == SEX_FEMALE )
 			Act("...$e is surrounded by a halo of light!", FALSE, i, 0, ch, TO_VICT);
@@ -1188,7 +1186,7 @@ void listOneCharacter(Character *i, Character *ch)
 	else
 		strcat(buf, ".\r\n");
 
-	ch->Send(buf);
+	ch->send(buf);
 
 	if ( PRF_FLAGGED(i, PRF_SOURCE) && GET_SEX(i) == SEX_FEMALE && GET_SEX(ch) == SEX_FEMALE && ch->ChannelingAbility() && i->ChannelingAbility() )
 		Act("...$e is surrounded by a halo of light!", FALSE, i, 0, ch, TO_VICT);
@@ -1234,7 +1232,7 @@ void performAutoExits(Character * ch)
 			                UPPER(*dirs[door]), COLOR_NORMAL(ch, CL_COMPLETE), COLOR_CYAN(ch, CL_COMPLETE));
 	}
 
-	ch->Send("%s[ Exits: %s]%s\r\n", COLOR_CYAN(ch, CL_COMPLETE),
+	ch->send("%s[ Exits: %s]%s\r\n", COLOR_CYAN(ch, CL_COMPLETE),
 	         *buf ? buf : "None! ", COLOR_NORMAL(ch, CL_COMPLETE));
 }
 
@@ -1246,7 +1244,7 @@ ACMD(do_exits)
 
 /*	if (AFF_FLAGGED(ch, AFF_BLIND))
 	{
-		ch->Send("You can't see a damned thing, you're blind!\r\n");
+		ch->send("You can't see a damned thing, you're blind!\r\n");
 		return;
 	}
 */
@@ -1277,13 +1275,13 @@ ACMD(do_exits)
 				strcat(buf, StringUtil::cap(buf2));
 			}
 
-	ch->Send("Obvious exits:\r\n");
+	ch->send("Obvious exits:\r\n");
 
 	if (*buf)
-		ch->Send(buf);
+		ch->send(buf);
 
 	else
-		ch->Send(" None.\r\n");
+		ch->send(" None.\r\n");
 }
 
 //Returns the # of tracks a player can see, based on certain conditions.
@@ -1345,11 +1343,11 @@ void Character::PrintTracks(Room *room, bool auto_track)
 	for(track = room->Tracks.begin();track != room->Tracks.end() && num_can_see > 0;++track, --num_can_see)
 	{
 		C++;
-		this->Send( (*track)->ToString( full_view ).c_str());
+		this->send( (*track)->ToString( full_view ).c_str());
 	}
 
 	if(!C && !auto_track)
-		this->Send("You do not see any tracks here.");
+		this->send("You do not see any tracks here.");
 }
 
 //Galnor: 2-25-2005	Print the tracks in a room to a player, based on their input, which goes to name.
@@ -1405,14 +1403,14 @@ void Character::PrintTracks(Room *room, std::string name)
 			--num_can_see;
 			C++;
 			//At this point we have a match
-//			this->Send(track->ToString( full_view ).c_str());
-			this->Send("You see %s tracks of %s leaving %s.\r\n", track->AgeString().c_str(),
+//			this->send(track->ToString( full_view ).c_str());
+			this->send("You see %s tracks of %s leaving %s.\r\n", track->AgeString().c_str(),
 			           this->GetSkillLevel(SKILL_TRACK) >= 7 ? track->name.c_str() : track->NameString().c_str(), dirs[track->direction]);
 		}
 	}
 
 	if(!C)
-		this->Send("You do not see any tracks here.");
+		this->send("You do not see any tracks here.");
 }
 std::string Track::ToString(bool full_view)
 {
@@ -1497,14 +1495,14 @@ std::string Track::NameString()
 }
 
 // 02/02/2009 - Coded by Galnor - this will show the user what is on the other side of the gate.
-void Character::LookAtGate( class Gate* gate )
+void Character::lookAtGate( class Gate* gate )
 {
 	Room* OtherRoom = gate->OtherEnd(this->in_room);//Get the other side of the gate.
 
 	if( OtherRoom == NULL )//This really should never happen, but...
-		this->Send("You can't make out what is on the other end of the gate.\r\n");
+		this->send("You can't make out what is on the other end of the gate.\r\n");
 	else
-		this->Send("On the other side of the gate, you see: %s\r\n", OtherRoom->name);
+		this->send("On the other side of the gate, you see: %s\r\n", OtherRoom->name);
 }
 
 /* vvvvvvvvvvvvvvvvvvvvv RHOLLOR 05.15.09 vvvvvvvvvvvvvvvvvv */
@@ -1528,18 +1526,18 @@ void do_auto_scan(Character *ch, bool typed) {
 		 //Added to the If below to fix a small bug
          if( ( room->people && canSeeCharsInRoom(ch, room) && (!room->IsDark() || CAN_SEE_IN_DARK(ch)))|| EXIT_FLAGGED(EXIT(ch, exit), EX_CLOSED)) {
 
-            ch->Send(COLOR_CYAN(ch, CL_NORMAL));
-            ch->Send("%-5s: ",StringUtil::cap(StringUtil::allLower(dirs[exit])));
-            ch->Send(COLOR_NORMAL(ch, CL_NORMAL));
+            ch->send(COLOR_CYAN(ch, CL_NORMAL));
+            ch->send("%-5s: ",StringUtil::cap(StringUtil::allLower(dirs[exit])));
+            ch->send(COLOR_NORMAL(ch, CL_NORMAL));
 
             if (EXIT_FLAGGED(EXIT(ch, exit), EX_CLOSED) && !EXIT(ch, exit)->HiddenLevel()
             && EXIT(ch, exit)->keyword)  {
-               ch->Send("The %s obstructs your view.\r\n",fname(EXIT(ch, exit)->keyword));
+               ch->send("The %s obstructs your view.\r\n",fname(EXIT(ch, exit)->keyword));
             }
 
             else if(room->IsDark() && !CAN_SEE_IN_DARK(ch))
             {
-               ch->Send("It looks too dark in there to make out anything.\r\n");
+               ch->send("It looks too dark in there to make out anything.\r\n");
             }
             else {
 				/* Galnor 07/14/2009 - Bug patch for mounted horses. listOneCharacter() leaves them invisible.
@@ -1572,7 +1570,7 @@ void do_auto_scan(Character *ch, bool typed) {
 
    if (none_seen == NUM_OF_DIRS && typed == true) {
 
-      ch->Send("There does not appear to be anything beyond this location.\r\n");
+      ch->send("There does not appear to be anything beyond this location.\r\n");
 
    }
 
@@ -1597,44 +1595,44 @@ void look_at_room(Character * ch, int ignore_brief)
 
 	if (ch->in_room->IsDark() && !CAN_SEE_IN_DARK(ch))
 	{
-		ch->Send("It is pitch black...\r\n");
+		ch->send("It is pitch black...\r\n");
 		return;
 	}
 
 /*	else if (AFF_FLAGGED(ch, AFF_BLIND))
 	{
-		ch->Send("You see nothing but infinite darkness...\r\n");
+		ch->send("You see nothing but infinite darkness...\r\n");
 		return;
 	}
 */	else if(ch->dizzy_time && TAINT_CALC(ch))
 	{
-		ch->Send("You are too dizzy to make out anything!\r\n");
+		ch->send("You are too dizzy to make out anything!\r\n");
 		return;
 	}
 
-	ch->Send(COLOR_CYAN(ch, CL_NORMAL));
+	ch->send(COLOR_CYAN(ch, CL_NORMAL));
 
 	if(ch->dizzy_time && TAINT_CALC(ch))
-		ch->Send("Too blurred to see!");
+		ch->send("Too blurred to see!");
 	else if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS))
 	{
 		sprintbit((long)ch->in_room->room_flags, (const char**)room_bits, buf, " ", "", "");
-		ch->Send("[%5d] %s [ %s]", ch->in_room->vnum,
+		ch->send("[%5d] %s [ %s]", ch->in_room->vnum,
 				ch->in_room->name, buf);
 	}
 	else
-		ch->Send(ch->in_room->name);
+		ch->send(ch->in_room->name);
 
-	ch->Send(COLOR_NORMAL(ch, CL_NORMAL));
-	ch->Send("\r\n");
+	ch->send(COLOR_NORMAL(ch, CL_NORMAL));
+	ch->send("\r\n");
 
 	if ((!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_BRIEF)) || ignore_brief ||
 	ROOM_FLAGGED(ch->in_room, ROOM_DEATH))
 	{
 		if(AFF_FLAGGED(ch, AFF_BLIND))
-			ch->Send("You can't seem to make out the details of your surroundings.\r\n");
+			ch->send("You can't seem to make out the details of your surroundings.\r\n");
 		else
-			ch->Send(ch->in_room->description);
+			ch->send(ch->in_room->description);
 	}
 
 	/* autoexits */
@@ -1649,19 +1647,19 @@ void look_at_room(Character * ch, int ignore_brief)
 		ch->PrintTracks(ch->in_room, true);
 
 	/* now list characters & objects */
-	ch->Send(COLOR_GREEN(ch, CL_NORMAL));
+	ch->send(COLOR_GREEN(ch, CL_NORMAL));
 	listObjectToCharacter(ch->in_room->contents, ch, 0, FALSE);
 
 	std::list<Gate*> TempGateList = ch->in_room->GetGates();
 	for(std::list<Gate *>::iterator i = TempGateList.begin();i != TempGateList.end();++i)
 	{
-		ch->Send("A strange gateway is here, leading to an unknown destination.\r\n");
+		ch->send("A strange gateway is here, leading to an unknown destination.\r\n");
 	}
 
-	ch->Send(COLOR_YELLOW(ch, CL_NORMAL));
+	ch->send(COLOR_YELLOW(ch, CL_NORMAL));
 	listCharacterToCharacter(ch->in_room->people, ch);
 
-	ch->Send(COLOR_NORMAL(ch, CL_NORMAL));
+	ch->send(COLOR_NORMAL(ch, CL_NORMAL));
 }
 
 void lookInDirection(Character * ch, int dir)
@@ -1675,23 +1673,23 @@ void lookInDirection(Character * ch, int dir)
 
 
 		if (EXIT(ch, dir)->general_description)
-			ch->Send(EXIT(ch, dir)->general_description);
+			ch->send(EXIT(ch, dir)->general_description);
 
 		if (EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED) && EXIT(ch, dir)->keyword && !hid)
 		{
-			ch->Send("The %s is closed.\r\n", fname(EXIT(ch, dir)->keyword));
+			ch->send("The %s is closed.\r\n", fname(EXIT(ch, dir)->keyword));
 		}
 
 		else if (EXIT_FLAGGED(EXIT(ch, dir), EX_ISDOOR) && EXIT(ch, dir)->keyword &&
 		         !EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED))
 		{
-			ch->Send("The %s is open.\r\n", fname(EXIT(ch, dir)->keyword));
+			ch->send("The %s is open.\r\n", fname(EXIT(ch, dir)->keyword));
 		}
 
 	}
 
 	else
-		ch->Send("Nothing special there...\r\n");
+		ch->send("Nothing special there...\r\n");
 }
 
 
@@ -1703,31 +1701,31 @@ void lookInObject(Character * ch, char *arg, Object *obj)
 
 	if ( (!arg || !*arg)  && !obj)
 	{
-		ch->Send("Look in what?\r\n");
+		ch->send("Look in what?\r\n");
 		return;
 	}
 	if (!obj && !(bits = generic_find(arg, FIND_OBJ_INV | FIND_OBJ_ROOM |
 	                               FIND_OBJ_EQUIP, ch, &dummy, &obj)))
 	{
-		ch->Send("There doesn't seem to be %s %s here.\r\n", AN(arg), arg);
+		ch->send("There doesn't seem to be %s %s here.\r\n", AN(arg), arg);
 		return;
 	}
 	//At this point, we know we have a valid object.
 	if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER || IS_SHEATH(obj))
 	{
 		if (obj->IsClosed() && !IS_SHEATH(obj))
-			ch->Send("It is closed.\r\n");
+			ch->send("It is closed.\r\n");
 		else
 		{
-			ch->Send(obj->GetSDesc());
+			ch->send(obj->GetSDesc());
 			if( obj->carried_by )
-				ch->Send(" (carried): \r\n");
+				ch->send(" (carried): \r\n");
 			else if( obj->in_room )
-				ch->Send(" (here): \r\n");
+				ch->send(" (here): \r\n");
 			else if( obj->worn_by )
-				ch->Send(" (used): \r\n");
+				ch->send(" (used): \r\n");
 			if(obj->Money)
-				ch->Send("%s%s%d%s Gold, %s%s%d%s Silver, %s%d%s Copper\r\n", COLOR_BOLD(ch, CL_COMPLETE), COLOR_YELLOW(ch, CL_COMPLETE),
+				ch->send("%s%s%d%s Gold, %s%s%d%s Silver, %s%d%s Copper\r\n", COLOR_BOLD(ch, CL_COMPLETE), COLOR_YELLOW(ch, CL_COMPLETE),
 				         CalcGold(obj->Money), COLOR_NORMAL(ch, CL_COMPLETE), COLOR_BOLD(ch, CL_COMPLETE), COLOR_CYAN(ch, CL_COMPLETE),
 				         CalcSilver(obj->Money), COLOR_NORMAL(ch, CL_COMPLETE), COLOR_YELLOW(ch, CL_COMPLETE), CalcCopper(obj->Money),
 				         COLOR_NORMAL(ch, CL_COMPLETE));
@@ -1739,16 +1737,16 @@ void lookInObject(Character * ch, char *arg, Object *obj)
 	{
 		/* item must be a fountain or drink container */
 		if (obj->GetTotalVal1() <= 0)
-			ch->Send("It is empty.\r\n");
+			ch->send("It is empty.\r\n");
 
 		else
 		{
 			if (GET_OBJ_VAL(obj,0) <= 0 || GET_OBJ_VAL(obj,1) > GET_OBJ_VAL(obj, 0))
-				ch->Send("Its contents seem somewhat murky.\r\n"); /* BUG */
+				ch->send("Its contents seem somewhat murky.\r\n"); /* BUG */
 			else
 			{
 				amt = (GET_OBJ_VAL(obj, 1) * 3) / GET_OBJ_VAL(obj, 0);
-				ch->Send("It's %sfull of a %s liquid.\r\n", fullness[amt], color_liquid[GET_OBJ_VAL(obj, 2)]);
+				ch->send("It's %sfull of a %s liquid.\r\n", fullness[amt], color_liquid[GET_OBJ_VAL(obj, 2)]);
 			}
 		}
 	}
@@ -1790,7 +1788,7 @@ void lookAtTarget(Character * ch, char *arg)
 
 	if (!*arg)
 	{
-		ch->Send("Look at what?\r\n");
+		ch->send("Look at what?\r\n");
 		return;
 	}
 
@@ -1819,7 +1817,7 @@ void lookAtTarget(Character * ch, char *arg)
 	}
 	if( found_gate != NULL )
 	{
-		ch->LookAtGate( found_gate );
+		ch->lookAtGate( found_gate );
 		return;
 	}
 
@@ -1850,7 +1848,7 @@ void lookAtTarget(Character * ch, char *arg)
 		if (GET_EQ(ch, j) && CAN_SEE_OBJ(ch, GET_EQ(ch, j)))
 			if ((desc = findExtraDescription(arg, GET_EQ(ch, j)->GetExDesc())) != NULL)
 			{
-				ch->Send(desc);
+				ch->send(desc);
 				found = TRUE;
 			}
 
@@ -1860,7 +1858,7 @@ void lookAtTarget(Character * ch, char *arg)
 		if (CAN_SEE_OBJ(ch, obj))
 			if ((desc = findExtraDescription(arg, obj->GetExDesc())) != NULL)
 			{
-				ch->Send(desc);
+				ch->send(desc);
 				found = TRUE;
 			}
 	}
@@ -1871,7 +1869,7 @@ void lookAtTarget(Character * ch, char *arg)
 		if (CAN_SEE_OBJ(ch, obj))
 			if ((desc = findExtraDescription(arg, obj->ex_description)) != NULL)
 			{
-				ch->Send(desc);
+				ch->send(desc);
 				found = TRUE;
 			}
 
@@ -1888,7 +1886,7 @@ void lookAtTarget(Character * ch, char *arg)
 	}
 
 	else if (!found)
-		ch->Send("You do not see that here.\r\n");
+		ch->send("You do not see that here.\r\n");
 }
 
 ACMD(do_look)
@@ -1900,14 +1898,14 @@ ACMD(do_look)
 		return;
 
 	if (GET_POS(ch) < POS_SLEEPING)
-		ch->Send("You can't see anything but stars!\r\n");
+		ch->send("You can't see anything but stars!\r\n");
 
 /*	else if (AFF_FLAGGED(ch, AFF_BLIND))
-		ch->Send("You can't see a damned thing, you're blind!\r\n");*/
+		ch->send("You can't see a damned thing, you're blind!\r\n");*/
 
 	else if (IS_DARK(ch->in_room) && !CAN_SEE_IN_DARK(ch))
 	{
-		ch->Send("It is pitch black...\r\n");
+		ch->send("It is pitch black...\r\n");
 		listCharacterToCharacter(ch->in_room->people, ch);	/* glowing red eyes */
 	}
 
@@ -1918,7 +1916,7 @@ ACMD(do_look)
 		if (subcmd == SCMD_READ)
 		{
 			if (!*arg)
-				ch->Send("Read what?\r\n");
+				ch->send("Read what?\r\n");
 			else
 				lookAtTarget(ch, arg);
 
@@ -1949,7 +1947,7 @@ ACMD(do_examine)
 
 	if (!*arg)
 	{
-		ch->Send("Examine what?\r\n");
+		ch->send("Examine what?\r\n");
 		return;
 	}
 
@@ -1966,7 +1964,7 @@ ACMD(do_examine)
 		        (IS_OBJ_STAT(tmp_object, ITEM_DAGGER_SHEATH))||
 				(IS_OBJ_STAT(tmp_object, ITEM_SPEAR_SHEATH)))
 		{
-			ch->Send("When you look inside, you see:\r\n");
+			ch->send("When you look inside, you see:\r\n");
 			lookInObject(ch, arg, tmp_object);
 		}
 	}
@@ -1974,7 +1972,7 @@ ACMD(do_examine)
 
 ACMD(do_gold)
 {
-	ch->Send("You have: %d %s%sGold%s, %d %s%sSilver%s, %d %sCopper%s.\r\n", ch->Gold(), COLOR_BOLD(ch, CL_NORMAL),
+	ch->send("You have: %d %s%sGold%s, %d %s%sSilver%s, %d %sCopper%s.\r\n", ch->Gold(), COLOR_BOLD(ch, CL_NORMAL),
 	         COLOR_YELLOW(ch, CL_NORMAL), COLOR_NORMAL(ch, CL_NORMAL), ch->Silver(), COLOR_BOLD(ch, CL_NORMAL),
 	         COLOR_CYAN(ch, CL_NORMAL), COLOR_NORMAL(ch, CL_NORMAL), ch->Copper(), COLOR_YELLOW(ch, CL_NORMAL),
 	         COLOR_NORMAL(ch, CL_NORMAL));
@@ -1990,7 +1988,7 @@ ACMD(do_stat)
 
 	if( ClassName.length() ) ClassName = " " + ClassName;
 
-	ch->Send("You are a %s%d%s year old %s%s %s%s%s.\r\n",
+	ch->send("You are a %s%d%s year old %s%s %s%s%s.\r\n",
 			COLOR_CYAN(ch, CL_COMPLETE), GET_AGE(ch), COLOR_NORMAL(ch, CL_COMPLETE),
 			COLOR_CYAN(ch, CL_COMPLETE), StringUtil::allLower((const char*)genders[GET_SEX(ch)]), ch->RaceName().c_str(),
 			ClassName.c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
@@ -1998,31 +1996,31 @@ ACMD(do_stat)
 	if(!IS_NPC(ch))
 	{
 		if(IS_BLADEMASTER(ch))
-			ch->Send("Your mood is currently: %s%s%s, your stance is: %s%s%s\r\n",
+			ch->send("Your mood is currently: %s%s%s, your stance is: %s%s%s\r\n",
 	         COLOR_CYAN(ch, CL_COMPLETE), MoodString(ch->PlayerData->mood).c_str(),
 			 COLOR_NORMAL(ch, CL_COMPLETE), COLOR_CYAN(ch, CL_COMPLETE), StanceString(ch->stance).c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
 		else
-			ch->Send("Your mood is currently: %s%s%s\r\n",
+			ch->send("Your mood is currently: %s%s%s\r\n",
 	         COLOR_CYAN(ch, CL_COMPLETE), MoodString(ch->PlayerData->mood).c_str(),
 			 COLOR_NORMAL(ch, CL_COMPLETE));
 	}
 
 	if(GET_WARNINGS(ch))
-		ch->Send("You have %s%d%s warning%s.\r\n",
+		ch->send("You have %s%d%s warning%s.\r\n",
 		         COLOR_CYAN(ch, CL_COMPLETE), GET_WARNINGS(ch), COLOR_NORMAL(ch, CL_COMPLETE), GET_WARNINGS(ch) == 1 ? "" : "s");
 
 	if (age(ch)->month == 0 && age(ch)->day == 0)
-		ch->Send("  It's your birthday today.\r\n");
+		ch->send("  It's your birthday today.\r\n");
 
 
-	ch->Send("Your height is %s%d%s feet, %s%d%s inches, weight %s%d%s pounds, weight carried %s%.1f%s lbs, worn: %s%.1f%s lbs.\r\n",
+	ch->send("Your height is %s%d%s feet, %s%d%s inches, weight %s%d%s pounds, weight carried %s%.1f%s lbs, worn: %s%.1f%s lbs.\r\n",
 	         COLOR_CYAN(ch, CL_COMPLETE), GET_HEIGHT(ch) / 12, COLOR_NORMAL(ch, CL_COMPLETE),
 	         COLOR_CYAN(ch, CL_COMPLETE), GET_HEIGHT(ch) % 12, COLOR_NORMAL(ch, CL_COMPLETE),
 	         COLOR_CYAN(ch, CL_COMPLETE), GET_WEIGHT(ch), COLOR_NORMAL(ch, CL_COMPLETE),
 	         COLOR_CYAN(ch, CL_COMPLETE), ch->CarriedWeight(), COLOR_NORMAL(ch, CL_COMPLETE),
 	         COLOR_CYAN(ch, CL_COMPLETE), ch->WornWeight(), COLOR_NORMAL(ch, CL_COMPLETE));
 
-	ch->Send("Offensive Bonus: %s%d%s Dodge Bonus: %s%d%s, Parry Bonus: %s%d%s\r\n",
+	ch->send("Offensive Bonus: %s%d%s Dodge Bonus: %s%d%s, Parry Bonus: %s%d%s\r\n",
 	         COLOR_CYAN(ch, CL_COMPLETE), ch->Offense(), COLOR_NORMAL(ch, CL_COMPLETE),
 	         COLOR_CYAN(ch, CL_COMPLETE), ch->Dodge()  , COLOR_NORMAL(ch, CL_COMPLETE),
 	         COLOR_CYAN(ch, CL_COMPLETE), ch->Parry()  , COLOR_NORMAL(ch, CL_COMPLETE));
@@ -2031,35 +2029,35 @@ ACMD(do_stat)
 
 	if(PRF_FLAGGED(ch, PRF_STATTED))
 	{
-		ch->Send("Your abilities are: Str: %s%d%s, Int: %s%d%s, Wis: %s%d%s, Dex: %s%d%s, Con: %s%d%s\r\n",
+		ch->send("Your abilities are: Str: %s%d%s, Int: %s%d%s, Wis: %s%d%s, Dex: %s%d%s, Con: %s%d%s\r\n",
 	         COLOR_CYAN(ch, CL_COMPLETE), ch->GetStr(), COLOR_NORMAL(ch, CL_COMPLETE),
 	         COLOR_CYAN(ch, CL_COMPLETE), ch->GetInt(), COLOR_NORMAL(ch, CL_COMPLETE),
 	         COLOR_CYAN(ch, CL_COMPLETE), ch->GetWis(), COLOR_NORMAL(ch, CL_COMPLETE),
 	         COLOR_CYAN(ch, CL_COMPLETE), ch->GetDex(), COLOR_NORMAL(ch, CL_COMPLETE),
 	         COLOR_CYAN(ch, CL_COMPLETE), ch->GetCon(), COLOR_NORMAL(ch, CL_COMPLETE));
 	}
-	ch->Send("You have died %s%d%s times, %s%d%s times to other players, %s%d%s times to monsters, and killed %s%d%s other worthy players.\r\n",
+	ch->send("You have died %s%d%s times, %s%d%s times to other players, %s%d%s times to monsters, and killed %s%d%s other worthy players.\r\n",
 	         COLOR_CYAN(ch, CL_COMPLETE), ch->pk_deaths + ch->mob_deaths, COLOR_NORMAL(ch, CL_COMPLETE),
 	         COLOR_CYAN(ch, CL_COMPLETE), ch->pk_deaths, COLOR_NORMAL(ch, CL_COMPLETE), COLOR_CYAN(ch, CL_COMPLETE),
 	         ch->mob_deaths, COLOR_NORMAL(ch, CL_COMPLETE), COLOR_CYAN(ch, CL_COMPLETE), ch->pks, COLOR_NORMAL(ch, CL_COMPLETE));
-	ch->Send("Your armor absorbs %s%d%s%% damage on average.\r\n",
+	ch->send("Your armor absorbs %s%d%s%% damage on average.\r\n",
 	         COLOR_CYAN(ch, CL_COMPLETE), ch->Absorb(), COLOR_NORMAL(ch, CL_COMPLETE));
 
-	ch->Send("You are affected by:\r\n");
+	ch->send("You are affected by:\r\n");
 
 	for (affected_type *af = ch->affected; af; af = af->next)
 		if(!invertedAffects.at(af->bitvector))
-			ch->Send("%-15s %2d\r\n", affected_bits[af->bitvector], af->duration + 1);
+			ch->send("%-15s %2d\r\n", affected_bits[af->bitvector], af->duration + 1);
 
 	if(PRF_FLAGGED(ch, PRF_BUILDWALK))
-		ch->Send("BUILDWALK\r\n");
+		ch->send("BUILDWALK\r\n");
 	if(ch->dizzy_time)
-		ch->Send("DIZZINESS\r\n");
+		ch->send("DIZZINESS\r\n");
 }
 
 ACMD(do_inventory)
 {
-	ch->Send("You are carrying:\r\n");
+	ch->send("You are carrying:\r\n");
 	listObjectToCharacter(ch->carrying, ch, 1, TRUE);
 
 }
@@ -2069,7 +2067,7 @@ ACMD(do_equipment)
 	int i, found = 0;
 	char msg[MAX_INPUT_LENGTH];
 
-	ch->Send("You are using:\r\n");
+	ch->send("You are using:\r\n");
 
 	for (i = 0; i < NUM_WEARS; i++)
 	{
@@ -2082,7 +2080,7 @@ ACMD(do_equipment)
                 else
                     strcpy(msg, where[i]);
 
-                ch->Send(msg);
+                ch->send(msg);
                 showObjectToCharacter(GET_EQ(ch, i), ch, 1, 1);
                 found = TRUE;
             }
@@ -2090,7 +2088,7 @@ ACMD(do_equipment)
 	}
 
 	if (!found)
-		ch->Send(" Nothing.\r\n");
+		ch->send(" Nothing.\r\n");
 
 }
 
@@ -2113,23 +2111,23 @@ ACMD(do_time)
 
 	strcat(buf, weekdays[weekday]);
 	strcat(buf, "\r\n");
-	ch->Send(buf);
+	ch->send(buf);
 
 	day = time_info.day + 1;	/* day in [1..35] */
 
 	suf = findSuffix(day);
 
-	ch->Send("The %d%s Day of the %s, Year %d.\r\n",
+	ch->send("The %d%s Day of the %s, Year %d.\r\n",
 	         day, suf, month_name[(int) time_info.month], time_info.year);
 
-	ch->Send("Server: %s\r\n", asctime(timeinfo));
+	ch->send("Server: %s\r\n", asctime(timeinfo));
 
-	ch->Send("The MUD will reboot in %d minutes at %s.\r\n", ((int) (rebootTime.getTime()-time(0)))/60,
+	ch->send("The MUD will reboot in %d minutes at %s.\r\n", ((int) (rebootTime.getTime()-time(0)))/60,
 		rebootTime.toString().c_str());
 
 	if(GET_LEVEL(ch) >= LVL_GRGOD)
 	{
-		ch->Send("THE NEXT MUD TICK WILL BE IN %s%s%d%s SECONDS.\r\n",
+		ch->send("THE NEXT MUD TICK WILL BE IN %s%s%d%s SECONDS.\r\n",
 		         COLOR_BOLD(ch, CL_COMPLETE), COLOR_GREEN(ch, CL_COMPLETE),
 		         (60 - (Seconds % 60)), COLOR_NORMAL(ch, CL_COMPLETE));
 	}
@@ -2193,15 +2191,15 @@ ACMD(do_weather)
 	if (OUTSIDE(ch))
 	{
 		// This shows sky info.
-		ch->Send("%s\r\n", weather_patterns[weather->get_sky()]);
+		ch->send("%s\r\n", weather_patterns[weather->get_sky()]);
 
-		ch->Send("The air feels %s wet and %s.\r\n", MakeWeatherAdj(weather->get_precipitation()).c_str(), MakeTemperatureAdj(weather->get_temp()).c_str());
+		ch->send("The air feels %s wet and %s.\r\n", MakeWeatherAdj(weather->get_precipitation()).c_str(), MakeTemperatureAdj(weather->get_temp()).c_str());
 
 		if (weather->get_storm()->get_type() != ST_NONE)
-			ch->Send("%s looms on the horizon.\r\n", weather_storm_names[weather->get_storm()->get_type()]);
+			ch->send("%s looms on the horizon.\r\n", weather_storm_names[weather->get_storm()->get_type()]);
 
 		if (weather->get_event()->get_event_type() != WE_NONE)
-			ch->Send("\r\nYou are in the midst of %s.\r\n", weather_event_names[weather->get_event()->get_event_type()]);
+			ch->send("\r\nYou are in the midst of %s.\r\n", weather_event_names[weather->get_event()->get_event_type()]);
 
 		if (weather->get_visibility() != 0)
 		{
@@ -2243,14 +2241,14 @@ ACMD(do_weather)
 				vis = "nonexistant";
 				break;
 			}
-			ch->Send("\r\nThe visibility is %s.\r\n", vis.c_str());
+			ch->send("\r\nThe visibility is %s.\r\n", vis.c_str());
 		}
 	}
 	else
-		ch->Send("There's no weather to see, here!\r\n");
+		ch->send("There's no weather to see, here!\r\n");
 	if(GET_LEVEL(ch) >= LVL_GOD)
 	{
-		ch->Send("Imm info\r\nPrecipitation: %d\r\nTemperature: %d\r\nSky: %d\r\nSun: %d\r\nVisibility decrease: %d\r\n",
+		ch->send("Imm info\r\nPrecipitation: %d\r\nTemperature: %d\r\nSky: %d\r\nSun: %d\r\nVisibility decrease: %d\r\n",
 		weather->get_precipitation(), weather->get_temp(), weather->get_sky(),
 		weather->get_sun(), weather->get_visibility());
 	}
@@ -2288,8 +2286,8 @@ ACMD(do_users)
 	int idle;
 	std::string name, state, timestamp, host;
 
-	ch->Send("Num   Name         State         Type        Idl  Login@             Site\r\n");
-	ch->Send("--- -------     ------------ ------------    --- --------    ------------------------\r\n");
+	ch->send("Num   Name         State         Type        Idl  Login@             Site\r\n");
+	ch->send("--- -------     ------------ ------------    --- --------    ------------------------\r\n");
 
 	for (d = descriptor_list; d; d = d->next)
 	{
@@ -2324,7 +2322,7 @@ ACMD(do_users)
 
 		if(d->character ? (CAN_SEE(ch, d->character)) : (1))
 		{
-			ch->Send("%s%3d  %-12s %-10s %-15s %3d %-8s       %-14s%s\r\n",
+			ch->send("%s%3d  %-12s %-10s %-15s %3d %-8s       %-14s%s\r\n",
 				(STATE(d) != CON_PLAYING) ? COLOR_GREEN(ch, CL_SPARSE) : "",
 				d->desc_num, name.c_str(), state.c_str(), d->getGatewayDescriptorType()->getStandardName().c_str(),
 				idle, timestamp.c_str(), host.c_str(),
@@ -2333,7 +2331,7 @@ ACMD(do_users)
 		}
 	}
 
-	ch->Send("\r\n\n%d visible sockets connected.\r\n", num_can_see);
+	ch->send("\r\n\n%d visible sockets connected.\r\n", num_can_see);
 }
 
 void print_wizards(Character *ch, int level, bool all)
@@ -2366,7 +2364,7 @@ void print_wizards(Character *ch, int level, bool all)
 	{
 		imm = (*i_imm);
 		if(!(++i % 5))
-			ch->Send("\r\n\t\t");
+			ch->send("\r\n\t\t");
 
 		/* Print the name in color depending on their idle time. */
 		if(GET_LEVEL(ch) >= LVL_GRGOD)
@@ -2376,45 +2374,45 @@ void print_wizards(Character *ch, int level, bool all)
 			if(idle < 7)
 				{}
 			else if(idle < 14)
-				ch->Send("%s%s", COLOR_BOLD(ch, CL_NORMAL), COLOR_CYAN(ch, CL_NORMAL));
+				ch->send("%s%s", COLOR_BOLD(ch, CL_NORMAL), COLOR_CYAN(ch, CL_NORMAL));
 			else if(idle < 21)
-				ch->Send("%s%s", COLOR_BOLD(ch, CL_NORMAL), COLOR_YELLOW(ch, CL_NORMAL));
+				ch->send("%s%s", COLOR_BOLD(ch, CL_NORMAL), COLOR_YELLOW(ch, CL_NORMAL));
 			else if(idle < 28)
-				ch->Send("%s%s", COLOR_BOLD(ch, CL_NORMAL), COLOR_GREEN(ch, CL_NORMAL));
+				ch->send("%s%s", COLOR_BOLD(ch, CL_NORMAL), COLOR_GREEN(ch, CL_NORMAL));
 			else
-				ch->Send("%s%s", COLOR_BOLD(ch, CL_NORMAL), COLOR_RED(ch, CL_NORMAL));
+				ch->send("%s%s", COLOR_BOLD(ch, CL_NORMAL), COLOR_RED(ch, CL_NORMAL));
 		}
 
-		ch->Send("%s%s%s", imm->player.name.c_str(), NORMAL, ((i < total) ? (", ") : ("")) );
+		ch->send("%s%s%s", imm->player.name.c_str(), NORMAL, ((i < total) ? (", ") : ("")) );
 
 		delete (*i_imm);
 	}
 
 
-	ch->Send("\r\n\n");
+	ch->send("\r\n\n");
 }
 
 void print_wizlist(Character *ch, bool all)
 {
 
-	ch->Send("Below are a list of all of the Immortals of the Wheel.\r\n\n\n");
+	ch->send("Below are a list of all of the Immortals of the Wheel.\r\n\n\n");
 
-	ch->Send("\t\t~Creators~\r\n\t\t");
+	ch->send("\t\t~Creators~\r\n\t\t");
 	print_wizards(ch, LVL_IMPL, all);
 
-	ch->Send("\t\t~Lords of the Wheel~\r\n\t\t");
+	ch->send("\t\t~Lords of the Wheel~\r\n\t\t");
 	print_wizards(ch, LVL_GRGOD, all);
 
-	ch->Send("\t\t~Tellers of the Wheel~\r\n\t\t");
+	ch->send("\t\t~Tellers of the Wheel~\r\n\t\t");
 	print_wizards(ch, LVL_GOD, all);
 
-	ch->Send("\t\t~Apprentices of the Wheel~\r\n\t\t");
+	ch->send("\t\t~Apprentices of the Wheel~\r\n\t\t");
 	print_wizards(ch, LVL_APPR, all);
 
-	ch->Send("\t\t~Builders of the Wheel~\r\n\t\t");
+	ch->send("\t\t~Builders of the Wheel~\r\n\t\t");
 	print_wizards(ch, LVL_BLDER, all);
 
-	ch->Send("\t\t~Immortals of the Wheel~\r\n\t\t");
+	ch->send("\t\t~Immortals of the Wheel~\r\n\t\t");
 	print_wizards(ch, LVL_IMMORT, all);
 }
 
@@ -2446,7 +2444,7 @@ ACMD(do_gen_ps)
 			page_string(ch->desc, imotd, 0);
 			break;
 		case SCMD_CLEAR:
-			ch->Send("\033[H\033[J");
+			ch->send("\033[H\033[J");
 			break;
 		case SCMD_VERSION:
 			break;
@@ -2467,7 +2465,7 @@ void performMortalWhere(Character * ch, char *arg)
 
 	if (!*arg)
 	{
-		ch->Send("Players in your Zone\r\n--------------------\r\n");
+		ch->send("Players in your Zone\r\n--------------------\r\n");
 		for (d = descriptor_list; d; d = d->next)
 		{
 			if (!show_on_who_list(d))
@@ -2501,7 +2499,7 @@ void performMortalWhere(Character * ch, char *arg)
 			if(AFF_FLAGGED(i, AFF_HIDE) && GET_LEVEL(ch) < LVL_IMMORT)
 				continue;
 
-			ch->Send("%-20s - %s\r\n", GET_NAME(i), i->in_room->name);
+			ch->send("%-20s - %s\r\n", GET_NAME(i), i->in_room->name);
 		}
 	}
 
@@ -2526,34 +2524,34 @@ void performMortalWhere(Character * ch, char *arg)
 			if(GET_RACE(ch) != GET_RACE(i) && GET_LEVEL(i) <= LVL_IMMORT)
 				continue;
 
-			ch->Send("%-25s - %s\r\n", GET_NAME(i), i->in_room->name);
+			ch->send("%-25s - %s\r\n", GET_NAME(i), i->in_room->name);
 			return;
 		}
 
-		ch->Send(NOPERSON);
+		ch->send(NOPERSON);
 	}
 
 	//NORMAL TROLLOC SMELL BONUS
 	if(horse && IS_TROLLOC(ch) && !IS_FADE(ch) && !IS_DREADLORD(ch) && !IS_DREADGUARD(ch) && GET_LEVEL(ch) < LVL_IMMORT)
-		ch->Send("You hear and smell horses in the surrounding area.\r\n");
+		ch->send("You hear and smell horses in the surrounding area.\r\n");
 
 	//DHA'VOL SMELL BONUS
 	if(ch->getUserClan(CLAN_DHAVOL) && GET_LEVEL(ch) < LVL_IMMORT)
 	{
 		for(counter = 0;counter < num_horses;++counter)
-			ch->Send("a horse			- Nearby\r\n");
+			ch->send("a horse			- Nearby\r\n");
 	}
 
 	//RANDOM HUMAN TROLL SMELLING BONUS
 	if(num_trolls > MiscUtil::random(1, 30))
-		ch->Send("You catch a fleeting whiff of the stench of shadowspawn.\r\n");
+		ch->send("You catch a fleeting whiff of the stench of shadowspawn.\r\n");
 
 	//WOLFBROTHER SENSING BONUS
 	if(ch->getUserClan(CLAN_WOLFBROTHER) && GET_LEVEL(ch) < LVL_IMMORT)
 	{
 		for(counter = 0;counter < num_trolls;counter++)
 		{
-			ch->Send("You smell shadowspawn nearby.\r\n");
+			ch->send("You smell shadowspawn nearby.\r\n");
 		}
 	}
 
@@ -2567,13 +2565,13 @@ void performMortalWhere(Character * ch, char *arg)
 
 			if(distance <= MAX(4, ( (userClan = ch->getUserClan(CLAN_SOULLESS)) ? userClan->getRank() / 2 : 1)))
 			{
-				ch->Send("%s%s%-25s - %s %s%s\r\n", COLOR_BOLD(ch, CL_COMPLETE), COLOR_RED(ch, CL_COMPLETE),
+				ch->send("%s%s%-25s - %s %s%s\r\n", COLOR_BOLD(ch, CL_COMPLETE), COLOR_RED(ch, CL_COMPLETE),
 				         GET_NAME(GET_MARKED(ch)), DistanceString(distance).c_str(), loc[slope], COLOR_NORMAL(ch, CL_COMPLETE));
 			}
 
 			else
 			{
-				ch->Send("%s%s%-25s - Somewhere %s%s\r\n", COLOR_BOLD(ch, CL_COMPLETE),
+				ch->send("%s%s%-25s - Somewhere %s%s\r\n", COLOR_BOLD(ch, CL_COMPLETE),
 				         COLOR_RED(ch, CL_COMPLETE), GET_NAME(GET_MARKED(ch)),
 				         loc[slope], COLOR_NORMAL(ch, CL_COMPLETE));
 			}
@@ -2581,14 +2579,14 @@ void performMortalWhere(Character * ch, char *arg)
 
 		else
 		{
-			ch->Send("%s%sYou have no target marked.%s\r\n", COLOR_BOLD(ch, CL_COMPLETE),
+			ch->send("%s%sYou have no target marked.%s\r\n", COLOR_BOLD(ch, CL_COMPLETE),
 			         COLOR_RED(ch, CL_COMPLETE), COLOR_NORMAL(ch, CL_COMPLETE));
 		}
 	}
 
 	//FADE CHANNELER SENSING
 	if (channeler && IS_FADE(ch) && IS_TROLLOC(ch))
-		ch->Send("You sense the presence of channelers nearby.\r\n");
+		ch->send("You sense the presence of channelers nearby.\r\n");
 
 }
 
@@ -2696,7 +2694,7 @@ void performImmortalWhere(Character * ch, char *arg)
 		}
 		if (!found)
 		{
-			ch->Send("Couldn't find any such thing.\r\n");
+			ch->send("Couldn't find any such thing.\r\n");
 			return;
 		}
 	}
@@ -2724,7 +2722,7 @@ ACMD(do_levels)
 
 	if (IS_NPC(ch))
 	{
-		ch->Send("You ain't nothin' but a hound-dog.\r\n");
+		ch->send("You ain't nothin' but a hound-dog.\r\n");
 		return;
 	}
 
@@ -2754,79 +2752,79 @@ ACMD(do_consider)
 
 	if (!(victim = get_char_room_vis(ch, buf)))
 	{
-		ch->Send("Consider killing who?\r\n");
+		ch->send("Consider killing who?\r\n");
 		return;
 	}
 
 	if (victim == ch)
 	{
-		ch->Send("Easy!  Very easy indeed!\r\n");
+		ch->send("Easy!  Very easy indeed!\r\n");
 		return;
 	}
 /****
 	if (!IS_NPC(victim))
 	{
-		ch->Send("Would you like to borrow a cross and a shovel?\r\n");
+		ch->send("Would you like to borrow a cross and a shovel?\r\n");
 		return;
 	}
 ****/
 	diff = (victim->Difficulty() - ch->Difficulty());
 
 	if( GET_LEVEL(ch) >= LVL_IMMORT ) {
-		ch->Send("You: %d\r\n", ch->Difficulty());
-		ch->Send("Opp: %d\r\n", victim->Difficulty());
-		ch->Send("\r\n");
-		ch->Send("Dif: %d\r\n", diff);
+		ch->send("You: %d\r\n", ch->Difficulty());
+		ch->send("Opp: %d\r\n", victim->Difficulty());
+		ch->send("\r\n");
+		ch->send("Dif: %d\r\n", diff);
 	}
 	if( diff >= 10000 )
-		ch->Send("Start burying your own grave!\r\n");
+		ch->send("Start burying your own grave!\r\n");
 	else if( diff >= 7500 )
-		ch->Send("Are you mad?\r\n");
+		ch->send("Are you mad?\r\n");
 	else if( diff >= 4000 )
-		ch->Send("You'd best be bloody lucky!\r\n");
+		ch->send("You'd best be bloody lucky!\r\n");
 	else if( diff >= 1000 )
-		ch->Send("You'd best come well prepared.\r\n");
+		ch->send("You'd best come well prepared.\r\n");
 	else if( diff >= -1000 )
-		ch->Send("It would be a close match.\r\n");
+		ch->send("It would be a close match.\r\n");
 	else if( diff >= -4000 )
-		ch->Send("You'd have the upper hand.\r\n");
+		ch->send("You'd have the upper hand.\r\n");
 	else if( diff >= -7500 )
-		ch->Send("You could do it with a needle!\r\n");
+		ch->send("You could do it with a needle!\r\n");
 	else
-		ch->Send("Now where did that chicken go?\r\n");
+		ch->send("Now where did that chicken go?\r\n");
 /*****
 	if (diff <= -10)
-		ch->Send("Now where did that chicken go?\r\n");
+		ch->send("Now where did that chicken go?\r\n");
 
 	else if (diff <= -5)
-		ch->Send("You could do it with a needle!\r\n");
+		ch->send("You could do it with a needle!\r\n");
 
 	else if (diff <= -2)
-		ch->Send("Easy.\r\n");
+		ch->send("Easy.\r\n");
 
 	else if (diff <= -1)
-		ch->Send("Fairly easy.\r\n");
+		ch->send("Fairly easy.\r\n");
 
 	else if (diff == 0)
-		ch->Send("The perfect match!\r\n");
+		ch->send("The perfect match!\r\n");
 
 	else if (diff <= 1)
-		ch->Send("You would need some luck!\r\n");
+		ch->send("You would need some luck!\r\n");
 
 	else if (diff <= 2)
-		ch->Send("You would need a lot of luck!\r\n");
+		ch->send("You would need a lot of luck!\r\n");
 
 	else if (diff <= 3)
-		ch->Send("You would need a lot of luck and great equipment!\r\n");
+		ch->send("You would need a lot of luck and great equipment!\r\n");
 
 	else if (diff <= 5)
-		ch->Send("Do you feel lucky, punk?\r\n");
+		ch->send("Do you feel lucky, punk?\r\n");
 
 	else if (diff <= 10)
-		ch->Send("Are you mad!?\r\n");
+		ch->send("Are you mad!?\r\n");
 
 	else if (diff <= 100)
-		ch->Send("You ARE mad!\r\n");
+		ch->send("You ARE mad!\r\n");
 *****/
 }
 
@@ -2842,7 +2840,7 @@ ACMD(do_diagnose)
 	{
 		if (!(vict = get_char_room_vis(ch, buf)))
 		{
-			ch->Send(NOPERSON);
+			ch->send(NOPERSON);
 			return;
 		}
 		else
@@ -2853,7 +2851,7 @@ ACMD(do_diagnose)
 		if (FIGHTING(ch))
 			diagnoseCharacterToCharacter(FIGHTING(ch), ch);
 		else
-			ch->Send("Diagnose who?\r\n");
+			ch->send("Diagnose who?\r\n");
 	}
 }
 
@@ -2879,13 +2877,13 @@ ACMD(do_color)
 
 	if (!*arg)
 	{
-		ch->Send("Your current color level is %s.\r\n", ctypes[COLOR_LEV(ch)]);
+		ch->send("Your current color level is %s.\r\n", ctypes[COLOR_LEV(ch)]);
 		return;
 	}
 
 	if (((tp = search_block(arg, (const char **) ctypes, FALSE)) == -1))
 	{
-		ch->Send("Usage: color { Off | Sparse | Normal | Complete }\r\n");
+		ch->send("Usage: color { Off | Sparse | Normal | Complete }\r\n");
 		return;
 	}
 
@@ -2897,7 +2895,7 @@ ACMD(do_color)
 	if (tp & 2)
 		SET_BIT_AR(PRF_FLAGS(ch), PRF_COLOR_2);
 
-	ch->Send("Your %scolor%s is now %s.\r\n", COLOR_RED(ch, CL_SPARSE),
+	ch->send("Your %scolor%s is now %s.\r\n", COLOR_RED(ch, CL_SPARSE),
 	         COLOR_NORMAL(ch, CL_OFF), ctypes[tp]);
 }
 
@@ -2960,7 +2958,7 @@ ACMD(do_toggle)
 			ONOFF(!PRF_FLAGGED(ch, PRF_NOGLOBAL)),
 	        ONOFF(!PRF_FLAGGED(ch, PRF_BUILDWALK)));
 
-	ch->Send(buf);
+	ch->send(buf);
 }
 
 
@@ -3037,13 +3035,13 @@ ACMD(do_commands)
 	{
 		if (!(vict = get_char_vis(ch, arg)) || IS_NPC(vict))
 		{
-			ch->Send("Who is that?\r\n");
+			ch->send("Who is that?\r\n");
 			return;
 		}
 
 		if (GET_LEVEL(ch) < GET_LEVEL(vict))
 		{
-			ch->Send("You can't see the commands of people above your level.\r\n");
+			ch->send("You can't see the commands of people above your level.\r\n");
 			return;
 		}
 
@@ -3082,7 +3080,7 @@ ACMD(do_commands)
 	}
 
 	strcat(buf, "\r\n");
-	ch->Send(buf);
+	ch->send(buf);
 }
 
 bool canSeeCharsInRoom(Character *ch, Room *room)

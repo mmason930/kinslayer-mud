@@ -50,7 +50,7 @@ public:
 
     bool RollStats(Character *ch);
     void Boot();
-	void Save();
+	void save();
 	void Free();
 
 private:

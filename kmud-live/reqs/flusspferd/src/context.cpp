@@ -33,7 +33,7 @@ THE SOFTWARE.
 #include "flusspferd/spidermonkey/object.hpp"
 #include "flusspferd/spidermonkey/runtime.hpp"
 #include "flusspferd/current_context_scope.hpp"
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <cstring>
 #include <cstdio>
 #include <iostream>
@@ -56,8 +56,8 @@ namespace {
 
 struct context::context_private {
   typedef boost::shared_ptr<root_object> root_object_ptr;
-  boost::unordered_map<std::string, root_object_ptr> prototypes;
-  boost::unordered_map<std::string, root_object_ptr> constructors;
+  std::unordered_map<std::string, root_object_ptr> prototypes;
+  std::unordered_map<std::string, root_object_ptr> constructors;
 };
 
 /// impl provides the hidden implementation part
@@ -182,7 +182,7 @@ context context::create() {
 }
 
 bool context::is_valid() const {
-  return p;
+  return p.get() != NULL;
 }
 
 object context::global() {

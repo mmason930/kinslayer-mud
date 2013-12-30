@@ -3,7 +3,7 @@
 
 #include <string>
 #include <map>
-#include <boost/thread.hpp>
+#include <thread>
 
 #include "HttpResource.h"
 #include "HttpDescriptor.h"
@@ -17,8 +17,8 @@ private:
 	int port;
 	unsigned int topRequestId;
 	std::map<std::string, class HttpResource*> resources;
-	boost::mutex resourceMutex;
-	boost::thread mainThread;
+	std::mutex resourceMutex;
+	std::thread mainThread;
 	std::list<HttpDescriptor *> httpDescriptors;
 	HttpQueue *queue;
 

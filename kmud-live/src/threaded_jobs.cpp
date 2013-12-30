@@ -56,10 +56,11 @@ void ThreadedJobManager::free()
 void ThreadedJobManager::addJob( Job *job )
 {
 	{//Lock
-		boost::mutex::scoped_lock m( jobsMutex );
+		std::lock_guard<std::mutex> m(jobsMutex);
 		lJobs.push_back( job );
 	}//Release
-	boost::thread( boost::bind( &ThreadedJobManager::runJob, this, job ) );
+	std::thread thread( &ThreadedJobManager::runJob, this, job );
+	thread.detach();
 }
 
 /***
@@ -73,11 +74,11 @@ void ThreadedJobManager::runJob( Job *job )
 {
 	job->performRoutine();
 	{//Lock
-		boost::mutex::scoped_lock m(jobsMutex);
+		std::lock_guard<std::mutex> m(jobsMutex);
 		this->lJobs.remove( job );
 	}//Release
 	{//Lock
-		boost::mutex::scoped_lock m(finishedJobsMutex);
+		std::lock_guard<std::mutex> m(finishedJobsMutex);
 		this->lFinishedJobs.push_back( job );
 	}//Release
 }
@@ -90,7 +91,7 @@ void ThreadedJobManager::runJob( Job *job )
 void ThreadedJobManager::cycleThroughFinishedJobs()
 {
 	{//Lock
-		boost::mutex::scoped_lock m( finishedJobsMutex );
+		std::lock_guard<std::mutex> m(finishedJobsMutex);
 		for(std::list< Job* >::iterator fjIter = lFinishedJobs.begin();fjIter != lFinishedJobs.end();++fjIter)
 		{
 			(*fjIter)->performPostJobRoutine();

@@ -10,7 +10,6 @@
 #ifndef KINSLAYER_JSCHARACTER_H
 #define KINSLAYER_JSCHARACTER_H
 
-#ifdef KINSLAYER_JAVASCRIPT
 #include <flusspferd.hpp>
 #include <string>
 #include <iostream>
@@ -425,5 +424,4 @@ private:
     Character * real;
 };
 
-#endif
 #endif

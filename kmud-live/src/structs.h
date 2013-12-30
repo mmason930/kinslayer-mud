@@ -377,6 +377,7 @@ const int CON_JEDIT = 35;			// OLC mode - Javascript Edit
 const int CON_GATEWAY = 36;
 const int CON_EMAIL = 37;			// User is editing their email settings.
 const int CON_REG_EMAIL = 38;		// User is entering their email address while registering.
+const int CON_WEBSOCKET_LOGIN = 39;	// User is in the login form for the websocket client.
 
 
 /* Character equipment positions: used as index for class Character.equipment[] */
@@ -700,7 +701,9 @@ const size_t MAX_INPUT_LENGTH = 512; // Max length per *line* of input
 const size_t MAX_MESSAGE_LENGTH = 2048;
 const size_t MAX_MESSAGES = 60;
 const size_t MAX_NAME_LENGTH = 16;
-const size_t MAX_PWD_LENGTH = 128;
+const size_t MIN_NAME_LENGTH = 2;
+const size_t MAX_PWD_LENGTH = 20;
+const size_t MIN_PWD_LENGTH = 3;
 const size_t MAX_TITLE_LENGTH = 80;
 const size_t HOST_LENGTH = 30;
 const size_t EXDSCR_LENGTH = 325;
@@ -712,24 +715,18 @@ const int    MAX_OBJ_AFFECT = 6;
 class JSTrigger;
 class JSInstance;
 
-#ifdef KINSLAYER_JAVASCRIPT
-
 /*** Added by Galnor on 11/06/2009 - base class for Object/Character/Room ***/
 class JSBindable
 {
 public:
-#ifdef KINSLAYER_JAVASCRIPT
 	std::shared_ptr<std::vector<JSTrigger*> > js_scripts;
 	std::shared_ptr<JSInstance> delayed_script;
-#endif
 	virtual class Room *InRoom() = 0;
 	virtual bool IsPurged() = 0;
 	void attachJS( const int vnum );
 	void detachJS( const int vnum, const int nr );
 	int countJS( const int vnum );
 };
-
-#endif
 
 /**********************************************************************
 
@@ -1006,10 +1003,8 @@ struct obj_affected_type
 /* ================== Memory Structure for Objects ================== */
 
 class Object
-#ifdef KINSLAYER_JAVASCRIPT
 //11/06/2009 - implement JSBindable interface
 	: public JSBindable
-#endif
 {
 	public:
 		static boost::uuids::random_generator uuidGenerator;
@@ -1094,7 +1089,7 @@ class Object
 		void RemoveFromRoom(bool vaultSave=true);
 
 		void ProtoBoot( class sql::Row &MyRow, const int rnum, const std::list<int> &jsAttachmentList );
-		void ProtoSave();
+		void protoSave();
 		void ProtoDelete();
 
 		std::list<Object*> loadItemList( bool recursive );
@@ -1216,10 +1211,8 @@ public:
 
 /* ================== Memory Structure for room ======================= */
 class Room //That's right! Classroom!
-#ifdef KINSLAYER_JAVASCRIPT
 //11/06/2009 - implement JSBindable interface
 	: public JSBindable
-#endif
 {
 	public:
 		static int nr_alloc;
@@ -1275,8 +1268,8 @@ class Room //That's right! Classroom!
 		void RemoveDoorBit( int dir, int bit );
 		void RemoveDoorBitOneSide( int dir, int bit );
 		void Copy( const Room *source, bool deep = true );
-		void Zero();
-		void Zero(bool free);
+		void zero();
+		void zero(bool free);
 
 		void AddToBatch( sql::BatchInsertStatement &roomInsert,
 					     sql::BatchInsertStatement &exitInsert,
@@ -1302,7 +1295,7 @@ class Room //That's right! Classroom!
 		void FreePrototype();
 		void FreeLiveRoom();
 
-		void Save();
+		void save();
 		void DeleteFromDatabase();
 
 		static void BootWorld();
@@ -1879,10 +1872,8 @@ public:
 };
 
 class Character
-#ifdef KINSLAYER_JAVASCRIPT
 //11/06/2009 - implement JSBindable interface
 	: public JSBindable
-#endif
 {
 public:
 	static int nr_alloc;
@@ -2111,7 +2102,7 @@ public:
 	bool CanAggro(Character *victim);
 	bool isInClan(const int clanId);
 	bool CanTrack(Room *room);
-	bool CanGainWeave( Character* victim );
+	bool canGainWeave( Character* victim );
 	bool CanPractice( class Weave* weave );
 	bool CanPractice( const int spell_vnum );
 	bool check_if_pc_in_group();
@@ -2119,34 +2110,35 @@ public:
 	bool IsPurged() { return purged; }
 	bool circleFollow(Character *target);
 	void stopFollowing();
+	bool passwordMatches(const std::string &passwordInput);
 
 
 	bool ShieldOutOfRange( Character* Target );
 
-	bool Save();
-	bool BasicSave();
-	bool SaveSkills();
-	bool SaveClans();
-	bool SaveTrophies();
-	bool SaveHitRolls();
-	bool SaveManaRolls();
-	bool SaveWeaves();
+	bool save();
+	bool basicSave();
+	bool saveSkills();
+	bool saveClans();
+	bool saveTrophies();
+	bool saveHitRolls();
+	bool saveManaRolls();
+	bool saveWeaves();
 
-	bool MySQLInsertQuery();
-	bool RollBash( Character *Victim, bool BashFaceoff );
-	bool RollBash( Character *Victim, int &off, int &def );
-	bool RollPrecStrike( Character *Victim );
-	bool RollPrecStrike( Character *Victim, int &off, int &def);
-	bool RollShieldBlock( Character *Victim, int attack_type );
-	bool LoadSkills();
-	bool LoadIgnores();
-	bool LoadAliases();
-	bool LoadClans();
-	bool LoadTrophies();
-	bool LoadHitRolls();
-	bool LoadManaRolls();
-	bool LoadQuests();
-	bool HasPermissionToSnoop();
+	bool mysqlInsertQuery();
+	bool rollBash( Character *Victim, bool BashFaceoff );
+	bool rollBash( Character *Victim, int &off, int &def );
+	bool rollPrecStrike( Character *Victim );
+	bool rollPrecStrike( Character *Victim, int &off, int &def);
+	bool rollShieldBlock( Character *Victim, int attack_type );
+	bool loadSkills();
+	bool loadIgnores();
+	bool loadAliases();
+	bool loadClans();
+	bool loadTrophies();
+	bool loadHitRolls();
+	bool loadManaRolls();
+	bool loadQuests();
+	bool hasPermissionToSnoop();
 
 	void GrantPermissionToSnoop();
 	void ToggleSnoop();
@@ -2213,8 +2205,8 @@ public:
 	void StopFighting();
 	void SetFighting( Character *vict );
 	void Init();
-	void Send( const char *messg, ... );
-	void Send( const std::string s );
+	void send( const char *messg, ... );
+	void send( const std::string s );
 	void HitAllFighting();
 	void PerformFear( Character *victim );
 	void PerformPoison( Character *victim );
@@ -2248,7 +2240,6 @@ public:
 	void RemoveTaintDizzy();
 	void ListWarrants();
 	void KillAllGates();
-	void LoadWards();
 	void ResetAllSkills();
 	void ResetSkills();
 	void ResetTrades();
@@ -2278,20 +2269,19 @@ public:
 	void HuntVictim();
 	void Remember(Character *victim);
 	void Forget(Character *victim);
-	void ProcessForgets();
-	void ClearMemory();
-	void CreatePlayerIndex();
-	void BotDriver();
-	void Zero();
-	void WeaveGroupDistribution( Character* victim );
-	void GainWeave( sh_int wp );
-	void LookAtGate( class Gate* gate );
-	void StopSnooping();
-	void RollShadow();
-	void SetGateTimer();
-	void StopEavesdropping();
-	void StopWarding();
-	void SetBashState( const int nrPulses, bool cancelTimer=true, bool makeSit=true );
+	void processForgets();
+	void clearMemory();
+	void createPlayerIndex();
+	void zero();
+	void weaveGroupDistribution( Character* victim );
+	void gainWeave( sh_int wp );
+	void lookAtGate( class Gate* gate );
+	void stopSnooping();
+	void rollShadow();
+	void setGateTimer();
+	void stopEavesdropping();
+	void stopWarding();
+	void setBashState( const int nrPulses, bool cancelTimer=true, bool makeSit=true );
 
 	int getUserId();
 	UserType *getUserType();
@@ -2371,7 +2361,7 @@ class Kit
 		bool in_db;
 		class Kit *prev, *next; /* Doubly linked list */
 
-		void Save();
+		void save();
 		void AppendBlankKit();
 		void Boot(class sql::Row *MyRow, std::list<sql::Row> MyItems);
 		void CopyFrom( Kit *Source, bool full=true );
@@ -2803,7 +2793,7 @@ class Config
 		Config();
 		~Config(){}
 		void Load();
-		void Save();
+		void save();
 		void RenumberRooms();
 		const int GetReboots()
 		{

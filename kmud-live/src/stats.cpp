@@ -195,7 +195,7 @@ Stat* StatManager::StatByID( const int ID )
     return 0;
 }
 
-void StatManager::Save()
+void StatManager::save()
 {
 	gameDatabase->sendRawQuery("DROP TABLE IF EXISTS tempStatGroup");
 

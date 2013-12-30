@@ -425,23 +425,23 @@ SPECIAL(guild)
 
 	if( (ch->PlayerData->tradepracs - price < 0 && weave->classSet("Trade")) )
 	{
-		ch->Send("You do not seem to be able to practice now.\r\n");
+		ch->send("You do not seem to be able to practice now.\r\n");
 		return 1;
 	}
 	else if( weave->classSet("Trade") && GET_SKILL(ch, weave->getVnum()) > 0 )
 	{
-		ch->Send("You need to use this skill to get better at it!\r\n");
+		ch->send("You need to use this skill to get better at it!\r\n");
 		return 1;
 	}
 	else if ( (ch->PlayerData->skillpracs - price < 0 && !weave->isWeave() && !weave->isElement() && !weave->classSet("Trade")) )
 	{
-		ch->Send("You do not seem to be able to practice now.\r\n");
+		ch->send("You do not seem to be able to practice now.\r\n");
 		return 1;
 	}
 
 	if (GET_SKILL(ch, weave->getVnum()) >= LEARNED(ch) || weave->isElement() && ch->GetSkillLevel(weave->getVnum()) >= 10)
 	{
-		ch->Send("You are already learned in that area.\r\n");
+		ch->send("You are already learned in that area.\r\n");
 		return 1;
 	}
 
@@ -451,7 +451,7 @@ SPECIAL(guild)
 			ch->PlayerData->spellpracs -= price;
 		else
 		{
-			ch->Send("You cannot practice spells right now.\r\n");
+			ch->send("You cannot practice spells right now.\r\n");
 			return 1;
 		}
 	}
@@ -460,7 +460,7 @@ SPECIAL(guild)
 	else
 		ch->PlayerData->skillpracs -= price;
 
-	ch->Send("You practice for a while. ");
+	ch->send("You practice for a while. ");
 
 	percent = GET_SKILL(ch, weave->getVnum());
 
@@ -493,11 +493,11 @@ SPECIAL(guild)
 	SET_SKILL(ch, weave->getVnum(), MIN(LEARNED(ch), percent));
 
 	if( weave->isElement() )
-		ch->Send("Your %s skill level is now %d.\r\n", weave->getName().c_str(), ch->GetSkillLevel(weave->getVnum()));
+		ch->send("Your %s skill level is now %d.\r\n", weave->getName().c_str(), ch->GetSkillLevel(weave->getVnum()));
 	else if (GET_SKILL(ch, weave->getVnum()) >= LEARNED(ch))
-		ch->Send("You are now learned in that area.\r\n");
+		ch->send("You are now learned in that area.\r\n");
 	else
-		ch->Send("Your %s skill is now practiced to %d%%.\r\n", weave->getName().c_str(), GET_SKILL(ch, weave->getVnum()));
+		ch->send("Your %s skill is now practiced to %d%%.\r\n", weave->getName().c_str(), GET_SKILL(ch, weave->getVnum()));
 
 	return 1;
 }
@@ -660,7 +660,7 @@ SPECIAL(PokerDealer)
 
 			Table->AddPlayer( ch );
 
-			ch->Send("You sit down at the poker table and begin setting up.\r\n");
+			ch->send("You sit down at the poker table and begin setting up.\r\n");
 			Act("$n sits down at a poker table and begins setting up a game.", TRUE, ch, 0, 0, TO_ROOM);
 			GET_POS( ch ) = POS_SITTING;
 			return 1;
@@ -672,17 +672,17 @@ SPECIAL(PokerDealer)
 			if(!str_cmp(arg, "table"))
 			{
 				if(!Table)
-					ch->Send("You must setup a table first, because there are none currently in play.\r\n");
+					ch->send("You must setup a table first, because there are none currently in play.\r\n");
 				else if(Table->IsBanned( ch ))
-					ch->Send("You are banned from joining this table.\r\n");
+					ch->send("You are banned from joining this table.\r\n");
 				else if(Table->HasStarted())
-					ch->Send("The game has already begun.\r\n");
+					ch->send("The game has already begun.\r\n");
 				else if(ch->PokerData)
-					ch->Send("You are already at a table.\r\n");
+					ch->send("You are already at a table.\r\n");
 				else
 				{
 					Table->AddPlayer( ch );
-					ch->Send("You sit down at the poker table.\r\n");
+					ch->send("You sit down at the poker table.\r\n");
 					Act("$n joins the poker table.", TRUE, ch, 0, 0, TO_ROOM);
 					GET_POS( ch ) = POS_SITTING;
 				}
@@ -692,18 +692,18 @@ SPECIAL(PokerDealer)
 		else if(!str_cmp(cmd, "boot"))
 		{
 			if( Table->TableHost() != ch->PokerData )
-				ch->Send("Only the host, %s, can boot players.\r\n", Table->TableHost()->PlayerName().c_str());
+				ch->send("Only the host, %s, can boot players.\r\n", Table->TableHost()->PlayerName().c_str());
 			else if(!*arg)
-				ch->Send("Boot who?\r\n");
+				ch->send("Boot who?\r\n");
 			else if( !(Victim = get_char_room_vis(ch, arg)) )
-				ch->Send("That player is not in this room.\r\n");
+				ch->send("That player is not in this room.\r\n");
 			else if( Table->HasStarted() )
-				ch->Send("You cannot ban players now that the game has begun.\r\n");
+				ch->send("You cannot ban players now that the game has begun.\r\n");
 			else if( !Victim->PokerData || Victim->PokerData->Table != Table )
-				ch->Send("That player is not at this table.\r\n");
+				ch->send("That player is not at this table.\r\n");
 			else
 			{
-				Victim->Send("You have been booted from the table by %s.\r\n", GET_NAME(ch));
+				Victim->send("You have been booted from the table by %s.\r\n", GET_NAME(ch));
 				Table->RemovePlayer( Victim );
 				Table->SendToTable("%s has been booted from the table.\r\n", GET_NAME(Victim));
 			}
@@ -712,15 +712,15 @@ SPECIAL(PokerDealer)
 		else if(!str_cmp(cmd, "ban"))
 		{
 			if( Table->TableHost() != ch->PokerData )
-				ch->Send("Only the host, %s, can ban players.\r\n", Table->TableHost()->PlayerName().c_str());
+				ch->send("Only the host, %s, can ban players.\r\n", Table->TableHost()->PlayerName().c_str());
 			else if( Table->IsBanned( arg ) )
-				ch->Send("That player is already banned.\r\n");
+				ch->send("That player is already banned.\r\n");
 			else if( Table->HasStarted() )
-				ch->Send("You cannot ban players now that the game has begun.\r\n");
+				ch->send("You cannot ban players now that the game has begun.\r\n");
 			else if( (Victim = get_char_room_vis(ch, arg)) && Victim->PokerData
 			&& Victim->PokerData->Table == Table)
 			{
-				Victim->Send("You have been banned from the table by %s.\r\n", GET_NAME(ch));
+				Victim->send("You have been banned from the table by %s.\r\n", GET_NAME(ch));
 				Table->RemovePlayer( Victim );
 				Table->SendToTable("%s has been banned from the table.\r\n", GET_NAME(Victim));
 				Table->AddBan( Victim );//Better name format.
@@ -735,13 +735,13 @@ SPECIAL(PokerDealer)
 		else if(!str_cmp(cmd, "unban"))
 		{
 			if( Table->TableHost() != ch->PokerData )
-				ch->Send("Only the host, %s, can unban players.\r\n", Table->TableHost()->PlayerName().c_str());
+				ch->send("Only the host, %s, can unban players.\r\n", Table->TableHost()->PlayerName().c_str());
 			else if( !Table->IsBanned( arg ) )
-				ch->Send("That player is not currently banned.\r\n");
+				ch->send("That player is not currently banned.\r\n");
 			else if( (Victim = get_char_room_vis(ch, arg)) && Victim->PokerData
 			&& Victim->PokerData->Table == Table)
 			{
-				Victim->Send("Your ban from the poker table has been lifted by %s.\r\n", GET_NAME(ch));
+				Victim->send("Your ban from the poker table has been lifted by %s.\r\n", GET_NAME(ch));
 				Table->RemoveBan( Victim );
 				Table->SendToTable("%s's ban has been lifted by %s.\r\n", GET_NAME( Victim ), GET_NAME( ch ));
 			}
@@ -756,24 +756,24 @@ SPECIAL(PokerDealer)
 		{
 			if( !Table )
 			{
-				ch->Send("Someone first needs to setup the poker table.\r\n");
+				ch->send("Someone first needs to setup the poker table.\r\n");
 				return 1;
 			}
 			if( Table->IsWatching( ch ) )
 			{
-				ch->Send("You are already watching this table.\r\n");
+				ch->send("You are already watching this table.\r\n");
 				return 1;
 			}
 			if(!ch->PokerData)
 			{
-				ch->Send("You sit down at the table and watch the game.\r\n");
+				ch->send("You sit down at the table and watch the game.\r\n");
 				Act("$n sits down at the table and watches the game.", TRUE, ch, 0, 0, TO_ROOM);
 				Table->AddWatcher( ch );
 			}
 			else//This person is set as a player. Remove player data.
 			{
 				Table->RemovePlayer( ch );
-				ch->Send("You revoke your position as a player and begin watching the game.\r\n");
+				ch->send("You revoke your position as a player and begin watching the game.\r\n");
 				Act("$n revokes $s position as a player and begins watching the game.", TRUE, ch, 0, 0, TO_ROOM);
 				Table->AddWatcher( ch );
 			}
@@ -784,20 +784,20 @@ SPECIAL(PokerDealer)
 		{
 			if(!ch->PokerData)
 			{
-				ch->Send("You are not even at the table.\r\n");
+				ch->send("You are not even at the table.\r\n");
 				return 1;
 			}
 			if(!Table->HasStarted())
 			{
-				ch->Send("The game has not yet begun. Simply 'stand'\r\n");
+				ch->send("The game has not yet begun. Simply 'stand'\r\n");
 				return 1;
 			}
 			if(!ch->PokerData->Folded())
 			{
-				ch->Send("You must be folded in order to forfeit.\r\n");
+				ch->send("You must be folded in order to forfeit.\r\n");
 				return 1;
 			}
-			ch->Send("You forfeit your chips and leave the table.\r\n");
+			ch->send("You forfeit your chips and leave the table.\r\n");
 			Table->SendToTable("%s has forfeited, surrendering all chips.\r\n", GET_NAME(ch));
 			Table->RemovePlayer( ch );
 			return 1;
@@ -824,7 +824,7 @@ SPECIAL(PokerDealer)
 				return 0;
 			if(Table->IsWatching(ch))
 			{
-				ch->Send("You stop watching the poker game and stand up.\r\n");
+				ch->send("You stop watching the poker game and stand up.\r\n");
 				Table->RemoveWatcher(ch);
 				Table->SendToTable("%s stop watching the game and stands up.\r\n", GET_NAME(ch));
 				GET_POS(ch) = POS_STANDING;
@@ -832,7 +832,7 @@ SPECIAL(PokerDealer)
 			}
 			if(Table->HasStarted())
 			{
-				ch->Send("You cannot leave the game now that it's playing. You must forfeit.\r\n");
+				ch->send("You cannot leave the game now that it's playing. You must forfeit.\r\n");
 				return 1;
 			}
 			Table->RemovePlayer( ch );
@@ -852,7 +852,7 @@ SPECIAL(PokerDealer)
 			if( ch->PokerData && ch->PokerData == Table->TableHost() )
 			{
 				if(!*arg || !MiscUtil::isNumber( arg ))
-					ch->Send("What, in coppers, do you want to set the stakes to?\r\n");
+					ch->send("What, in coppers, do you want to set the stakes to?\r\n");
 				else
 				{
 					Table->Stakes( atoi(arg) );
@@ -860,21 +860,21 @@ SPECIAL(PokerDealer)
 				}
 			}
 			else
-				ch->Send("Only the table host can set the stakes.\r\n");
+				ch->send("Only the table host can set the stakes.\r\n");
 			return 1;
 		}
 		else if(!str_cmp(cmd, "confirm"))
 		{
 			if(Table->GetState() != CONFIRMING)
 			{
-				ch->Send("Confirm what?\r\n");
+				ch->send("Confirm what?\r\n");
 				return 1;
 			}
 
 			if(!ch->PokerData->Confirmed())
 				ch->PokerData->Confirm();
 			else
-				ch->Send("You have already confirmed.\r\n");
+				ch->send("You have already confirmed.\r\n");
 			Table->NextGameStep();
 			return 1;
 		}
@@ -890,9 +890,9 @@ SPECIAL(PokerDealer)
 			if( ch->PokerData && ch->PokerData == Table->TableHost() )
 			{
 				if( Table->NumOfPlayers() <= 1 )
-					ch->Send("You need at least two players to begin.\r\n");
+					ch->send("You need at least two players to begin.\r\n");
 				else if(Table->HasStarted())
-					ch->Send("The game has already begun.\r\n");
+					ch->send("The game has already begun.\r\n");
 				else if(!Table->CollectWagers())
 				{
 					return true;
@@ -903,7 +903,7 @@ SPECIAL(PokerDealer)
 				}
 			}
 			else
-				ch->Send("Only the host, %s, can begin the game.\r\n", Table->TableHost()->PlayerName().c_str());
+				ch->send("Only the host, %s, can begin the game.\r\n", Table->TableHost()->PlayerName().c_str());
 			return 1;
 		}
 		else
@@ -925,9 +925,9 @@ SPECIAL(bank)
 	if (CMD_IS(ch, "balance"))
 	{
 		if (GET_BANK_GOLD(ch) > 0)
-			ch->Send("Your current balance is %d coins.\r\n", GET_BANK_GOLD(ch));
+			ch->send("Your current balance is %d coins.\r\n", GET_BANK_GOLD(ch));
 		else
-			ch->Send("You currently have no money deposited.\r\n");
+			ch->send("You currently have no money deposited.\r\n");
 
 		return 1;
 	}
@@ -936,17 +936,17 @@ SPECIAL(bank)
 	{
 		if ((amount = atoi(argument)) <= 0)
 		{
-			ch->Send("How much do you want to deposit?\r\n");
+			ch->send("How much do you want to deposit?\r\n");
 			return 1;
 		}
 		if (ch->points.gold < amount)
 		{
-			ch->Send("You don't have that many coins!\r\n");
+			ch->send("You don't have that many coins!\r\n");
 			return 1;
 		}
 		ch->points.gold -= amount;
 		GET_BANK_GOLD(ch) += amount;
-		ch->Send("You deposit %d coins.\r\n", amount);
+		ch->send("You deposit %d coins.\r\n", amount);
 		Act("$n makes a bank transaction.", TRUE, ch, 0, FALSE, TO_ROOM);
 		return 1;
 	}
@@ -955,20 +955,20 @@ SPECIAL(bank)
 	{
 		if ((amount = atoi(argument)) <= 0)
 		{
-			ch->Send("How much do you want to withdraw?\r\n");
+			ch->send("How much do you want to withdraw?\r\n");
 			return 1;
 		}
 
 		if (GET_BANK_GOLD(ch) < amount)
 		{
-			ch->Send("You don't have that many coins deposited!\r\n");
+			ch->send("You don't have that many coins deposited!\r\n");
 			return 1;
 		}
 
 		//ADD_GOLD(ammount);
 		GET_BANK_GOLD(ch) -= amount;
 		ch->points.gold += amount;
-		ch->Send("You withdraw %d coins.\r\n", amount);
+		ch->send("You withdraw %d coins.\r\n", amount);
 		Act("$n makes a bank transaction.", TRUE, ch, 0, FALSE, TO_ROOM);
 		return 1;
 	}

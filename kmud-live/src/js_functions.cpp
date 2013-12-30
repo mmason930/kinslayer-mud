@@ -10,11 +10,6 @@
 //
 //
 
-
-
-#ifdef KINSLAYER_JAVASCRIPT
-
-
 #include "structs.h"
 #include "sysdep.h"
 #include "js.h"
@@ -1544,5 +1539,3 @@ flusspferd::object JS_createDatetime(const DateTime &dateTime)
 	buffer << "new Date(" << (dateTime.getTime() * 1000) << ");";
 	return flusspferd::evaluate(buffer.str()).to_object();
 }
-
-#endif

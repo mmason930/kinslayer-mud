@@ -10,8 +10,6 @@
 //
 //
 
-#ifdef KINSLAYER_JAVASCRIPT
-
 #ifndef KINSLAYER_JS_UTILS_H
 #define KINSLAYER_JS_UTILS_H
     
@@ -58,5 +56,4 @@ flusspferd::value lookupValue(Room * r);
 std::string getUniqueName();
 
 
-#endif
 #endif

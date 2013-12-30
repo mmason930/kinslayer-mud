@@ -1,6 +1,3 @@
-
-#ifdef KINSLAYER_JAVASCRIPT
-
 #include "JSCharacter.h"
 #include "JSRoom.h"
 #include "JSObject.h"
@@ -63,7 +60,7 @@ void JSCharacter::send( std::string message )
 {
 	if( !real || real->IsPurged() )
 		return;
-	real->Send(StringUtil::vaEscape(message + "\r\n"));
+	real->send(StringUtil::vaEscape(message + "\r\n"));
 }
 
 ACMD(do_say);
@@ -379,11 +376,9 @@ flusspferd::value JSCharacter::load_obj( const int vnum )
 
 	obj_to_char(obj,real);
 
-#ifdef KINSLAYER_JAVASCRIPT
 	if( !obj->IsPurged() ) {
 		js_load_triggers(obj);
 	}
-#endif
 
 	return lookupValue(obj);
 }
@@ -783,7 +778,3 @@ flusspferd::object JSCharacter::getCreatedDatetime()
 
 	return JS_createDatetime(real->player.time.birth);
 }
-
-
-#endif
-

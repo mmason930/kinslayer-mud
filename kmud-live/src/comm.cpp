@@ -77,7 +77,7 @@
 #include "HttpUtil.h"
 #include "HttpException.h"
 #include "HttpServer.h"
-#include <boost/regex.hpp>
+#include "ObjectMoveLogger.h"
 #include <boost/filesystem.hpp>
 
 extern HttpServer httpServer;
@@ -125,7 +125,8 @@ extern char *policies;
 extern char *startup;
 
 extern std::map<std::string, std::string> basicConfiguration;
-extern boost::thread *objectMoveLoggerThread;
+extern std::thread *objectMoveLoggerThread;
+extern ObjectMoveLogger objectMoveLogger;
 
 struct PendingSession
 {
@@ -591,7 +592,7 @@ void waitForGatewayConnection() {
 			}
 		}
 
-		boost::this_thread::yield();
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	}
 
 	//Kick out all connections except for our gateway.
@@ -675,7 +676,7 @@ void onAfterSocketWrite(void *data, kuListener *listener, kuDescriptor *descript
 
 		d->hadOutput = true;
 
-		if(d->snoop_by && d->snoop_by->descriptor && d->snoop_by->character && d->snoop_by->character->HasPermissionToSnoop()) {
+		if(d->snoop_by && d->snoop_by->descriptor && d->snoop_by->character && d->snoop_by->character->hasPermissionToSnoop()) {
 
 			d->snoop_by->descriptor->send((std::string("% ") + output).c_str());
 		}
@@ -700,7 +701,7 @@ void onSocketRead(void *data, kuDescriptor *descriptor, const std::string &input
 
 	if(d->snoop_by) {
 
-		d->snoop_by->Send(" % %d", input.c_str());
+		d->snoop_by->send(" % %d", input.c_str());
 	}
 **/
 }
@@ -820,7 +821,7 @@ void initiateGame( int port )
 					MobManager::GetManager().SavePrototypes(zone->getVnum());
 					break;
 				case OLC_SAVE_ZONE:
-					zone->Save();
+					zone->save();
 					break;
 				default:
 					Log( "Unexpected olc_save_list->type" );
@@ -957,9 +958,7 @@ void initiateGame( int port )
 	Log("Freeing Comm Manager...");
 	CommManager::GetManager().Free();
 
-#ifdef KINSLAYER_JAVASCRIPT
 	delete JSManager::get();
-#endif
 
 	Log( "Freeing menus/guides..." );
 	delete[] ( credits );
@@ -985,7 +984,8 @@ void initiateGame( int port )
 	dbContext.reset();
 
 	Log("Closing object movement log thread.");
-	objectMoveLoggerThread->interrupt();
+	objectMoveLogger.kill();
+	objectMoveLoggerThread->join();
 	delete objectMoveLoggerThread;
 
 	Log("~~~Summary~~~");
@@ -995,7 +995,6 @@ void initiateGame( int port )
 		Object::nr_alloc, Object::nr_dealloc, (Object::nr_alloc-Object::nr_dealloc));
 	Log("Characters  : Total Alloc: %d, Dealloc: %d, Rem: %d",
 		Character::nr_alloc, Character::nr_dealloc, (Character::nr_alloc-Character::nr_dealloc));
-#ifdef KINSLAYER_JAVASCRIPT
 	Log("JSCharacter : Total Alloc: %d, Dealloc: %d, Rem: %d",
 		JSCharacter::numberAllocated, JSCharacter::numberDeallocated, (JSCharacter::numberAllocated-JSCharacter::numberDeallocated));
 	Log("JSRow       : Total Alloc: %d, Dealloc: %d, Rem: %d",
@@ -1004,7 +1003,6 @@ void initiateGame( int port )
 		sql::_Query::getNumberOfAllocations(), sql::_Query::getNumberOfDeallocations(), sql::_Query::getRemainder());
 	Log("sql::Row      : Total Alloc: %d, Dealloc: %d, Rem: %d",
 		sql::Row::getNumberOfAllocations(), sql::Row::getNumberOfDeallocations(), sql::Row::getRemainder());
-#endif
 
 	Log( "Normal termination of game." );
 #if (defined WIN32 && defined _DEBUG && defined _MEM_LEAKS )
@@ -1055,7 +1053,7 @@ void gameLoop()
 
 	while ( !circle_shutdown )
 	{
-		boost::this_thread::sleep( boost::posix_time::microsec( OPT_USEC ) );
+		std::this_thread::sleep_for( std::chrono::microseconds( OPT_USEC ) );
 
 		//Make sure we're still connected to the database...
 		if( !gameDatabase->isConnected() && (time(0) - last_db_alert_time) > 15 )
@@ -1148,7 +1146,7 @@ void gameLoop()
 
 			if(command.length() > MAX_INPUT_LENGTH) {
 
-				d->Send("Input too long... Truncated.\r\n");
+				d->send("Input too long... Truncated.\r\n");
 
 				command.resize(MAX_INPUT_LENGTH);
 			}
@@ -1158,7 +1156,7 @@ void gameLoop()
 				StringUtil::replace(command, "$", "$$");
 			}
 
-			if(d->snoop_by && d->snoop_by->descriptor && d->snoop_by->character && d->snoop_by->character->HasPermissionToSnoop()) {
+			if(d->snoop_by && d->snoop_by->descriptor && d->snoop_by->character && d->snoop_by->character->hasPermissionToSnoop()) {
 
 				d->snoop_by->sendInstant(std::string("% ") + command + std::string("\n"));
 			}
@@ -1204,7 +1202,7 @@ void gameLoop()
 					string_add( d, comm );
 
 				else if ( STATE( d ) != CON_PLAYING )  /* In menus, etc. */
-					d->Nanny( comm );
+					d->nanny( comm );
 
 				else
 				{ /* else: we're playing normally. */
@@ -1257,7 +1255,7 @@ void gameLoop()
 			}
 			if(d->hadInput || d->hadOutput) {
 
-				d->sendInstant(d->MakePrompt());
+				d->sendInstant(d->makePrompt());
 			}
 
 			d->hadInput = false;
@@ -1363,7 +1361,7 @@ void Character::WaitEvents()
 		performFlee( this );
 }
 
-void AutoSave( void )
+void autoSave( void )
 {
 	sendToAll("Beginning autosave. Please wait...\r\n", true);
 	Clock clock1;
@@ -1387,7 +1385,7 @@ void AutoSave( void )
 			}
 			holderIdAndTypeToContentsMap[ std::pair<char, std::string>('P', MiscUtil::Convert<std::string>(ch->player.idnum)) ] = characterContents;
 
-			ch->Save();
+			ch->save();
 		}
 	}
 
@@ -1440,8 +1438,8 @@ void AutoSave( void )
 	{
 		if( STATE( d ) == CON_PLAYING )
 		{
-			strcpy(tmpBuf, d->MakePrompt());
-			d->sendInstant(d->MakePrompt());
+			strcpy(tmpBuf, d->makePrompt());
+			d->sendInstant(d->makePrompt());
 		}
 	}
 }
@@ -1601,8 +1599,8 @@ void invisiblePing()
 {
 	for(Descriptor *descriptor = descriptor_list;descriptor;descriptor = descriptor->next)
 	{
-		descriptor->sendInstant(std::string("\r\n") + std::string(descriptor->MakePrompt()));
-//		descriptor->SendRaw("\0");
+		descriptor->sendInstant(std::string("\r\n") + std::string(descriptor->makePrompt()));
+//		descriptor->sendRaw("\0");
 	}
 }
 
@@ -1653,17 +1651,13 @@ void heartbeat( int pulse )
 	lagMonitor.stopClock( LAG_MONITOR_THREADED_JOBS );
 
 	/* Get the wait states updates */
-#ifdef KINSLAYER_JAVASCRIPT
 	lagMonitor.startClock();
 	JSManager::get()->SocketEvents();
 	lagMonitor.stopClock( LAG_MONITOR_KJS_SOCKET_EVENTS );
-#endif
 
-#ifdef KINSLAYER_JAVASCRIPT
 	lagMonitor.startClock();
 	JSManager::get()->heartbeat();
 	lagMonitor.stopClock( LAG_MONITOR_KJS_HEARTBEAT );
-#endif
 
 	//Check to see if a new day has passed. If so, we need to update the boot high to reflect this.
 	if( !Time::SameDay(time_of_boot_high, time(0)) ) {
@@ -1674,11 +1668,9 @@ void heartbeat( int pulse )
 	}
 	if ( !( pulse % (13 RL_SEC) ) )
     {
-#ifdef KINSLAYER_JAVASCRIPT
 		lagMonitor.startClock();
         js_random_triggers();
 		lagMonitor.stopClock( LAG_MONITOR_KJS_RANDOM_TRIGGERS );
-#endif
     }
 
 	if( !( pulse % (3600 RL_SEC)) )
@@ -1706,7 +1698,7 @@ void heartbeat( int pulse )
 	}
 	if ( !( pulse % ( (60 RL_SEC) * (CONFIG_AUTOSAVE_TIME) ) ) ) {
 		lagMonitor.startClock();
-		AutoSave();
+		autoSave();
 		lagMonitor.stopClock( LAG_MONITOR_AUTO_SAVE );
 	}
 	if ( !( pulse % ( 60 * PASSES_PER_SEC * 5 ) ) ) {
@@ -1758,11 +1750,9 @@ void heartbeat( int pulse )
 		point_update();
 		lagMonitor.stopClock( LAG_MONITOR_POINT_UPDATE );
 
-#ifdef KINSLAYER_JAVASCRIPT
 		lagMonitor.startClock();
 		js_time_triggers();
 		lagMonitor.stopClock( LAG_MONITOR_KJS_TIME_TRIGGERS );
-#endif
 
 		lagMonitor.startClock();
 		DeleteOldTracks();
@@ -1891,40 +1881,6 @@ void recordUsage( void )
 	Log( "nusage: %-3d sockets connected, %-3d sockets playing", sockets_connected, sockets_playing );
 }
 
-/*
-* Turn off echoing (specific to telnet client)
-*/
-void Descriptor::EchoOff()
-{
-	char off_string[] =
-	    {
-	        ( char ) IAC,
-	        ( char ) WILL,
-	        ( char ) TELOPT_ECHO,
-	        ( char ) 0,
-	    };
-
-	SEND_TO_Q( off_string, this );
-}
-
-/*
-* Turn on echoing (specific to telnet client)
-*/
-void Descriptor::EchoOn()
-{
-	char on_string[] =
-	    {
-	        ( char ) IAC,
-	        ( char ) WONT,
-	        ( char ) TELOPT_ECHO,
-	        ( char ) TELOPT_NAOFFD,
-	        ( char ) TELOPT_NAOCRD,
-	        ( char ) 0,
-	    };
-
-	SEND_TO_Q( on_string, this );
-}
-
 const char *Character::Health()
 {
 	int percent = ( GET_MAX_HIT( this ) == 0 ) ? 0 : ( GET_HIT( this ) * 100 ) / GET_MAX_HIT( this );
@@ -1995,174 +1951,6 @@ const char *moves( int percent )
 		return "Burning";
 }
 
-const char *Descriptor::MakePrompt()
-{
-	static char prompt[ 256 ];
-	Character *victim;
-	*prompt = '\0';
-	/* Note, prompt is truncated at MAX_PROMPT_LENGTH chars (structs.h )*/
-
-	/*
-	 * These two checks were reversed to allow page_string() to work in the
-	 * online editor.
-	 */
-
-	if ( showstr_count )
-		sprintf( prompt, "\r[ Return to continue, (q)uit, (r)efresh, (b)ack, or page number (%d/%d) ]",
-		         showstr_page, showstr_count );
-	else if ( str )
-		strcpy( prompt, "] " );
-	else if ( STATE( this ) == CON_PLAYING )
-	{
-		*prompt = '\0';
-
-		if ( GET_INVIS_LEV( character ) )
-			sprintf( prompt, "i%d ", GET_INVIS_LEV( character ) );
-
-		if ( PRF_FLAGGED( character, PRF_DISPHP ) )
-			sprintf( prompt + strlen( prompt ), "HP:%s ", this->character->Health() );
-
-		if ( PRF_FLAGGED( character, PRF_DISPMANA ) && ( IS_CHANNELER( character ) || IS_DREADLORD( character ) || IS_DREADGUARD( character ) ) )
-			sprintf( prompt + strlen( prompt ), "SP:%s ", mana( GET_MAX_MANA( character ) > 0 ?
-			         100 * GET_MANA( character ) / ( GET_MAX_MANA( character ) ) : 1 ) );
-
-		if ( PRF_FLAGGED( character, PRF_DISPMANA ) && ( IS_FADE( character ) ) )
-			sprintf( prompt + strlen( prompt ), "SHP:%s ", mana( GET_MAX_SHADOW( character ) > 0 ?
-			         100 * GET_SHADOW( character ) / ( GET_MAX_SHADOW( character ) ) : 1 ) );
-
-		if ( PRF_FLAGGED( character, PRF_DISPMOVE ) )
-			sprintf( prompt + strlen( prompt ), "MV:%s ", moves( GET_MAX_MOVE( character ) > 0 ?
-			         100 * GET_MOVE( character ) / ( GET_MAX_MOVE( character ) ) : 1 ) );
-
-		victim = FIGHTING( character );
-
-		if ( victim )
-			sprintf( prompt + strlen( prompt ), "  - %s: %s",
-			         GET_NAME( victim ), victim->Health() );
-
-
-		if ( victim && FIGHTING( victim ) && FIGHTING( victim ) != character )
-			sprintf( prompt + strlen( prompt ), " --- %s: %s",
-			         GET_NAME( FIGHTING( victim ) ), FIGHTING( victim ) ->Health() );
-
-		if ( IS_NPC( this->character ) )
-		{
-			sprintf( prompt + strlen( prompt ), "  -%s%s%s%s", COLOR_BOLD( character, CL_COMPLETE ),
-			         COLOR_GREEN( character, CL_COMPLETE ), GET_NAME( this->character ), COLOR_NORMAL( character, CL_COMPLETE ) );
-		}
-
-		strcat( prompt, ">\r\n" );
-	}
-
-	else if ( STATE( this ) == CON_PLAYING && IS_NPC( character ) )
-		sprintf( prompt, "\n%s> \n", GET_NAME( character ) );
-
-
-//	if ( character && character->PokerData )
-//		sprintf( prompt + strlen( prompt ), "%s", character->PokerData->MakePrompt().c_str() );
-
-
-	return prompt;
-}
-
-std::string FormatEndlines( char* str )
-{
-	const unsigned int size = strlen(str);
-	static std::stringstream Buffer;
-
-	Buffer.str("");
-	for(unsigned int i = 0;i < size;i++)
-	{
-		if( str[i] == '\r' ) continue;
-		if( str[i] == '\n' ) Buffer << ("\r\n");
-		else Buffer << str[i];
-	}
-	return Buffer.str();
-}
-
-// Add a new string to a player's output queue
-void vwrite_to_output( Descriptor *t, int swap_args, const char *format, va_list args )
-{
-	if( !t )
-		return;
-
-	int bSize = LARGE_BUFSIZE;
-	char *cBuffer = new char[ bSize ];
-
-	// Galnor 12/21/2009 - Use dynamically allocated buffer and restrict buffer size
-	if ( swap_args )
-		vsnprintf( cBuffer, bSize-1, format, args );
-	else
-		strncpy( cBuffer, format, bSize-1 );
-	cBuffer[ bSize - 1 ]  = '\0';
-
-	std::string EndString = FormatEndlines( cBuffer );
-	for(std::string::size_type pos = 0;pos < EndString.size();)
-	{
-		if(EndString[ pos ] < 0)
-			EndString.erase(pos, 1);
-		else
-			++pos;
-	}
-	delete[]cBuffer;
-
-	
-	Character *loggerCharacter = t->character;
-
-	if(t->original)
-		loggerCharacter = t->original;
-
-	// if we have enough space, just write to buffer and that's it!
-	if ( t->descriptor->getOutputBufferSize() < LARGE_BUFSIZE )
-	{
-		if(t->getGatewayDescriptorType() == GatewayDescriptorType::websocket)
-			t->descriptor->send(t->encodeWebSocketOutputCommand(EndString.c_str()));
-		else if(t->getGatewayDescriptorType() == GatewayDescriptorType::rawTCP)
-			t->descriptor->send(EndString);
-		if(loggerCharacter)
-			loggerCharacter->LogOutput( EndString );
-	}
-	else
-	{
-		if(t->getGatewayDescriptorType() == GatewayDescriptorType::websocket)
-			t->descriptor->send(t->encodeWebSocketOutputCommand("***OVERFLOW***"));
-		else if(t->getGatewayDescriptorType() == GatewayDescriptorType::rawTCP)
-			t->descriptor->send("***OVERFLOW***");
-
-		if(loggerCharacter)
-			loggerCharacter->LogOutput( "***OVERFLOW***" );
-	}
-}
-
-void Descriptor::SendRaw( const char *messg )
-{
-#ifdef WIN32
-	va_list args=0;
-#else
-	va_list args;
-#endif
-	if( !messg ) return;
-	vwrite_to_output( this, FALSE, messg,args );
-}
-
-void Descriptor::Send( const char *messg, ... )
-{
-	if ( !messg )
-		return ;
-
-	va_list args;
-	va_start( args, messg );
-	vwrite_to_output( this, TRUE, messg, args );
-	va_end( args );
-}
-
-void write_to_output( Descriptor *t, const char *txt, ... )
-{
-	if ( !t || !txt )
-		return ;
-	vwrite_to_output( t, FALSE, txt, 0 );
-}
-
 /********************************************************************
  *  Socket Handling                                                 *
  ********************************************************************/
@@ -2212,7 +2000,7 @@ void checkTimers()
 		//If timer is still running, we move on to next person.
 		if ( ch->timer > 0.0f || !ch->command_ready )
 			continue;
-#ifdef KINSLAYER_JAVASCRIPT
+
 		// timer reached end
 		if (ch->delayed_command == "delayed_javascript") // special value to indicate it was caused by a script
 		{
@@ -2231,13 +2019,10 @@ void checkTimers()
 		}
 		else
 		{
-#endif
 			char dCommand[MAX_INPUT_LENGTH];
 			strcpy(dCommand, ch->delayed_command.c_str());
 			CommandInterpreter( ch, dCommand );
-#ifdef KINSLAYER_JAVASCRIPT
 		}
-#endif
 		if( !(ch->timer > 0) ) {
 			ch->CancelTimer( false );
 		}
@@ -2262,8 +2047,8 @@ void checkIdlePasswords( void )
 			d->idle_tics++;
 		else
 		{
-			d->EchoOn();
-			SEND_TO_Q( "\r\nTimed out... goodbye.\r\n", d );
+			d->echoOn();
+			d->sendRaw("\r\nTimed out... goodbye.\r\n");
 			STATE( d ) = CON_CLOSE;
 		}
 	}
@@ -2426,34 +2211,34 @@ void Character::LogOutput( const std::string &buffer )
 	fclose( outfile );
 }
 
-void Character::Send( const char *messg, ... )
+void Character::send( const char *messg, ... )
 {
 	if ( this->desc && messg && *messg )
 	{
 		va_list args;
 
 		va_start( args, messg );
-		vwrite_to_output( this->desc, TRUE, messg, args );
+		this->desc->writeToOutput(true, messg, args );
 		va_end( args );
 	}
 }
 
-void Character::Send( std::string s)
+void Character::send( std::string s)
 {
-    Send(s.c_str());
+    send(s.c_str());
 }
 
 
 // Character operator<< overloading
 Character& Character::operator<< ( const std::string &s)
 {
-	this->Send( s.c_str() );
+	this->send( s.c_str() );
 	return *this;
 }
 
 Character& Character::operator<< ( const char * s )
 {
-	this->Send( s );
+	this->send( s );
 	return *this;
 }
 
@@ -2463,77 +2248,32 @@ Character& Character::operator<< ( const char s )
 	std::stringstream strstrm;
 	strstrm << s;
 	strstrm >> str;
-	this->Send( str.c_str() );
+	this->send( str.c_str() );
 	return *this;
 
 }
 
 Character& Character::operator<< ( const int s )
 {
-	this->Send( ToString(s).c_str() );
+	this->send( ToString(s).c_str() );
 	return *this;
 }
 Character& Character::operator<< ( const float s )
 {
-	this->Send( ToString(s).c_str() );
+	this->send( ToString(s).c_str() );
 	return *this;
 }
 
 Character& Character::operator<< ( const double s )
 {
-	this->Send( ToString(s).c_str() );
+	this->send( ToString(s).c_str() );
 	return *this;
 }
 
 Character& Character::operator<< ( const bool s )
 {
-	this->Send( ToString(s).c_str() );
+	this->send( ToString(s).c_str() );
 	return *this;
-}
-
-// Descriptor operator<< overloading
-Descriptor& Descriptor::operator<< ( const std::string &s )
-{
-	this->Send( s.c_str() );
-	return *this;
-}
-
-Descriptor& Descriptor::operator<< ( const char * s )
-{
-	this->Send( s );
-	return *this;
-}
-
-Descriptor& Descriptor::operator<< ( const char s )
-{
-	this->Send( ToString(s).c_str() );
-	return *this;
-}
-
-Descriptor& Descriptor::operator<< ( const int s )
-{
-	this->Send( ToString(s).c_str() );
-	return *this;
-}
-Descriptor& Descriptor::operator<< ( const float s )
-{
-	this->Send( ToString(s).c_str() );
-	return *this;
-
-}
-
-Descriptor& Descriptor::operator<< ( const double s )
-{
-	this->Send( ToString(s).c_str() );
-	return *this;
-
-}
-
-Descriptor& Descriptor::operator<< ( const bool s )
-{
-	this->Send( ToString(s).c_str() );
-	return *this;
-
 }
 
 // Room operator<< overloading
@@ -2595,7 +2335,7 @@ void sendToZone(const char *messg, int zone_rnum)
 		if (!i->connected && i->character && AWAKE(i->character) &&
 		        (i->character->in_room->zone == zone_rnum))
 		{
-			SEND_TO_Q(messg, i);
+			i->sendRaw(messg);
 		}
 	}
 }
@@ -2613,7 +2353,7 @@ void sendToAll( const char* messg, bool instant )
 			if( instant == true )
 				i->sendInstant(messg);
 			else
-				SEND_TO_Q( messg, i );
+				i->sendRaw(messg);
 		}
 	}
 }
@@ -2632,7 +2372,7 @@ void sendToOutdoor( const char* messg )
 		if ( !AWAKE( i->character ) || !OUTSIDE( i->character ) )
 			continue;
 
-		SEND_TO_Q( messg, i );
+		i->sendRaw(messg);
 	}
 }
 
@@ -2645,7 +2385,7 @@ void sendToRoom( const std::string &s, Room *room )
 
 	for ( i = room->people; i; i = i->next_in_room )
 		if ( i->desc )
-			SEND_TO_Q( s.c_str(), i->desc );
+			i->desc->sendRaw(s.c_str());
 }
 
 void sendToRoom( const char* messg, Room *room )
@@ -2657,7 +2397,7 @@ void sendToRoom( const char* messg, Room *room )
 
 	for ( i = room->people; i; i = i->next_in_room )
 		if ( i->desc )
-			SEND_TO_Q( messg, i->desc );
+			i->desc->sendRaw(messg);
 }
 
 
@@ -2779,7 +2519,7 @@ void PerformAct( const char *orig, Character *ch, Object *obj,
 	*( ++buf ) = '\0';
 
 	if ( to->desc )
-		SEND_TO_Q( StringUtil::cap( lbuf ), to->desc );
+		to->desc->sendRaw(StringUtil::cap( lbuf ));
 }
 
 

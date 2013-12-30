@@ -9,7 +9,7 @@ CC = g++
 #-std=c++0x
 # Any special flags you want to pass to the compiler
 MYFLAGS =  -O -std=c++0x -DXP_UNIX -I/usr/local/include -Wformat-security -Wformat -Wpointer-arith -Wcast-align -Wredundant-decls \
- 		-L/usr/local/lib -DKINSLAYER_JAVASCRIPT -DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10 \
+ 		-L/usr/local/lib -DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10 \
               -I/usr/local/lib/pkgconfig/../../include -I/usr/local/include
 
 #-Werror

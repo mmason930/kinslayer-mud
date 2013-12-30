@@ -46,10 +46,8 @@
 #include "GatewayDescriptorType.h"
 #include "ObjectMoveLogger.h"
 
-#ifdef KINSLAYER_JAVASCRIPT
 #include "js.h"
 #include "js_trigger.h"
-#endif
 
 #include "StringUtil.h"
 #include <boost/filesystem.hpp>
@@ -59,7 +57,7 @@ boost::uuids::uuid u;
 std::list< std::pair< Character*, event_info* > * > BashStandQueue;
 std::list< Character * > CharPurgeList;
 std::list< Object *    > ObjPurgeList;
-boost::thread *objectMoveLoggerThread;
+std::thread *objectMoveLoggerThread;
 ObjectMoveLogger objectMoveLogger;
 
 
@@ -97,9 +95,7 @@ GameTime *mud_time_passed(time_t t2, time_t t1);
 Object *chest_head = NULL;					// Chest Log List
 std::vector<int> ItemCount;
 std::vector<std::string> MySQLTables;
-#ifdef KINSLAYER_JAVASCRIPT
 std::shared_ptr<std::vector<JSTrigger*> > globalJS_Scripts;
-#endif
 class Config *Conf;
 void BootKits();
 boost::uuids::random_generator Object::uuidGenerator = boost::uuids::random_generator();
@@ -338,14 +334,12 @@ ACMD(do_reboot)
 		BanManager::GetManager().Reload();
 	else
 	{
-		ch->Send("Unknown reload option. Available options: `all`, `mobs`, `playerindex`, `bans`\r\n");
+		ch->send("Unknown reload option. Available options: `all`, `mobs`, `playerindex`, `bans`\r\n");
 		return;
 	}
 
-	ch->Send(OK);
+	ch->send(OK);
 }
-
-#ifdef KINSLAYER_JAVASCRIPT
 
 /*** Galnor 01/24/2010 - Load all global JavaScripts into the MUD ***/
 void BootGlobalScripts()
@@ -389,7 +383,6 @@ void SaveGlobalScripts()
 		MudLog(BRF, LVL_APPR, TRUE, "Error saving global JavaScripts : %s", e.getMessage().c_str());
 	}
 }
-#endif
 
 void bootWorld(void)
 {
@@ -402,12 +395,10 @@ void bootWorld(void)
 	Log("Loading rooms.");
 	Room::BootWorld();
 
-#ifdef KINSLAYER_JAVASCRIPT
 	Log("Loading global scripts.");
 	BootGlobalScripts();
-#endif
 
-	objectMoveLoggerThread = new boost::thread(boost::bind(&ObjectMoveLogger::threadHandler, &objectMoveLogger));
+	objectMoveLoggerThread = new std::thread(&ObjectMoveLogger::threadHandler, &objectMoveLogger);
 
 	Log("Renumbering rooms.");
 	renum_world();
@@ -427,7 +418,6 @@ void bootWorld(void)
 	Log("Loading shops.");
 	boot_the_shops();
 
-#ifdef KINSLAYER_JAVASCRIPT
 	if( gamePort == 2230 )
 	{//Live MUD(most likely). Try to initiate the SciTE listening port.
 		JSManager::get()->SciteConnect( 2223 );
@@ -436,7 +426,6 @@ void bootWorld(void)
 	{
 		JSManager::get()->SciteConnect( 3334 );
 	}
-#endif
 
 //	flusspferd::value JSEnvironment::executeExpression( const std::string &expression )
 }
@@ -539,7 +528,7 @@ void boot_db(void)
 	Log("Booting the Configuration.");
 	Conf = new Config();
 	Conf->Load();
-	Conf->Save(); //Need to update the reboot count.
+	Conf->save(); //Need to update the reboot count.
 
 	Log("Running Boot Maintenance Queries...");
 	miscBootMaintenance();
@@ -547,14 +536,12 @@ void boot_db(void)
 	Log("Starting game session...");
 	startGameSession();
 
-#ifdef KINSLAYER_JAVASCRIPT
     Log("Booting JS Triggers");
     // get() forces the ctoring
     JSManager* temp = JSManager::get();
 
 	JSManager::get()->executeExpression("initGlobals();");
 	JSManager::get()->executeExpression("bootProcs();");
-#endif
 
 	//Log("Running Live Object Maintenance Queries...");
 	//ThreadedJobManager::get().addJob( new LiveObjectMaintenanceJob( dbContext->createConnection() ) );
@@ -670,7 +657,7 @@ void reset_time(void)
 	    time_info.day, time_info.month, time_info.year);
 }
 
-void Character::CreatePlayerIndex()
+void Character::createPlayerIndex()
 {
 	PlayerIndex *entry = new PlayerIndex();
 	entry->name = this->player.name;
@@ -839,9 +826,7 @@ void Room::BootWorld()
 		RoomQuery = gameDatabase->sendQuery( roomQueryBuffer.str() );
 		ExitQuery = gameDatabase->sendQuery( exitQueryBuffer.str() );
 		ObjectQuery=gameDatabase->sendQuery( objectQueryBuffer.str() );
-#ifdef KINSLAYER_JAVASCRIPT
 		jsQuery    =gameDatabase->sendQuery( "SELECT * FROM js_attachments WHERE type='R' ORDER BY target_vnum ASC,id ASC;" );
-#endif
 	} catch( sql::QueryException e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Could not send query in Room::BootWorld() : %s", e.getMessage().c_str());
 		exit(1);
@@ -866,10 +851,8 @@ void Room::BootWorld()
 				MyObjects.push_back( obj );
 			}
 		}
-#ifdef KINSLAYER_JAVASCRIPT
 		while( jsQuery->hasNextRow() && jsQuery->peekRow()["target_vnum"] == MyRow["vnum"] )
 			MyJS.push_back( jsQuery->getRow() );
-#endif
 
 		Room *r = Room::Boot( MyRow, MyExits, MyJS, MyObjects );
 
@@ -906,7 +889,7 @@ void Room::BootWorld()
 	ThreadedJobManager::get().addJob( cleanupJob );
 }
 
-void Room::Save()
+void Room::save()
 {
 	//TODO: Remove.
 }
@@ -1002,8 +985,6 @@ Room *Room::Boot(const sql::Row &MyRow,
 			//we'll just store it in the pointer until later.
 		}
 	}
-#ifdef KINSLAYER_JAVASCRIPT
-
     NewRoom->js_scripts = std::shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
 	for(std::list< sql::Row >::const_iterator jsIter = MyJS.begin();jsIter != MyJS.end();++jsIter )
 	{
@@ -1011,8 +992,6 @@ Room *Room::Boot(const sql::Row &MyRow,
 		JSTrigger* t = JSManager::get()->getTrigger(vnum);
 		NewRoom->js_scripts->push_back(t);
 	}
-
-#endif
 
 	if( !MyObjects.empty() )
 		NewRoom->loadItems( MyObjects );
@@ -1255,7 +1234,7 @@ int Character::VnumMobile(std::string SearchName)
 		}
 		else if( !isname(SearchName, Mob->player.name) )
 			continue;
-		Send("%3d. [%5d] %s\r\n", found++, MobManager::GetManager().GetIndex(i)->vnum, Mob->player.short_descr);
+		send("%3d. [%5d] %s\r\n", found++, MobManager::GetManager().GetIndex(i)->vnum, Mob->player.short_descr);
 	}
 	return (found);
 }
@@ -1268,7 +1247,7 @@ int Character::VnumObject(std::string SearchName)
 	{
 		if( !isname(SearchName, obj_proto[nr]->name) )
 			continue;
-		this->Send("%3d. [%5d] %s\r\n", ++found, obj_index[nr].vnum, obj_proto[nr]->short_description);
+		this->send("%3d. [%5d] %s\r\n", ++found, obj_index[nr].vnum, obj_proto[nr]->short_description);
 	}
 	return (found);
 }
@@ -1278,7 +1257,7 @@ int Character::VnumKit(std::string SearchName)
 	std::list<Kit *> KitList = KitManager::GetManager().GetAllKits();
 	for(std::list<Kit *>::iterator kIter = KitList.begin();kIter != KitList.end();++kIter) {
 		if( isname(SearchName, (*kIter)->Name) )
-			this->Send("%3d. [%5d] %s\r\n", ++found, (*kIter)->vnum, (*kIter)->Name.c_str());
+			this->send("%3d. [%5d] %s\r\n", ++found, (*kIter)->vnum, (*kIter)->Name.c_str());
 	}
 	return (found);
 }
@@ -1288,7 +1267,7 @@ int Character::VnumZone(std::string SearchName)
 	for(unsigned int i = 0;i < ZoneManager::GetManager().NumZones();++i) {
 		Zone *z = ZoneManager::GetManager().GetZoneByRnum(i);
 		if( isname(SearchName, (z)->getName()) )
-			this->Send("%3d. [%5d] %s\r\n", ++found, (z)->getVnum(), z->getName().c_str());
+			this->send("%3d. [%5d] %s\r\n", ++found, (z)->getVnum(), z->getName().c_str());
 	}
 	return (found);
 }
@@ -1322,7 +1301,7 @@ int Character::VnumRoom(std::string SearchName)
 		else if( !isname(SearchName, World[nr]->name) )
 			continue;
 
-		this->Send("%3d. [%5d] %s\r\n", ++found, World[nr]->vnum, World[nr]->name);
+		this->send("%3d. [%5d] %s\r\n", ++found, World[nr]->vnum, World[nr]->name);
 	}
 	return (found);
 }
@@ -1649,11 +1628,6 @@ std::string pLogin::Print()
 	return buffer.str();
 }
 
-void Character::LoadWards()
-{
-
-}
-
 /* Written by Galnor in 2005. Grab a list of files in a given directory. FileType may be specified
  * to filter specific file extensions. All filenames will be dumped in the 'Files' list.
  */
@@ -1795,7 +1769,7 @@ void Character::putUserDisabledCommand(UserDisabledCommand *userDisabledCommand)
 	}
 }
 
-bool Character::MySQLInsertQuery()
+bool Character::mysqlInsertQuery()
 {
 	std::string Query;
 	sql::Row Row;
@@ -1814,7 +1788,7 @@ bool Character::MySQLInsertQuery()
 	return true;
 }
 
-bool Character::BasicSave()
+bool Character::basicSave()
 {
 	std::stringstream Query;
 	if(IS_NPC(this))
@@ -1924,16 +1898,16 @@ bool Character::BasicSave()
 }
 
 //Galnor: 6-16-2006: MySQL Save
-bool Character::Save()
+bool Character::save()
 {
 	if( IS_NPC(this) )
 		return true;
-	bool retval = this->BasicSave();
-	this->SaveSkills();
-	this->SaveClans();
-	this->SaveTrophies();
-	this->SaveHitRolls();
-	this->SaveManaRolls();
+	bool retval = this->basicSave();
+	this->saveSkills();
+	this->saveClans();
+	this->saveTrophies();
+	this->saveHitRolls();
+	this->saveManaRolls();
 
 	Character::deleteUserDisabledCommands(this->player.idnum);
 	Character::saveUserDisabledCommands(this->player.idnum, this->PlayerData->userDisabledCommands);
@@ -1941,7 +1915,7 @@ bool Character::Save()
 	return retval;
 }
 
-bool Character::LoadSkills()
+bool Character::loadSkills()
 {
 	std::string queryStr = "SELECT percent, skill FROM skills WHERE user_id=" + MiscUtil::Convert<std::string>(this->player.idnum);
 	sql::Query query;
@@ -1963,7 +1937,7 @@ bool Character::LoadSkills()
 	return true;
 }
 
-bool Character::LoadIgnores()
+bool Character::loadIgnores()
 {
 	std::string query = "SELECT * FROM userIgnore WHERE user_id=" + MiscUtil::Convert<std::string>(this->player.idnum);
 	sql::Query MyQuery;
@@ -2026,7 +2000,7 @@ void MySQLDeleteAlias(const std::string &playername, const std::string &command)
 	}
 }
 
-bool Character::LoadAliases()
+bool Character::loadAliases()
 {
 	std::stringstream Query;
 	sql::Query MyQuery;
@@ -2037,7 +2011,7 @@ bool Character::LoadAliases()
 	try { MyQuery = gameDatabase->sendQuery(Query.str()); }
 	catch( sql::QueryException e )
 	{
-		MudLog(BRF, LVL_APPR, TRUE, "Character::LoadAliases : %s", e.getMessage().c_str());
+		MudLog(BRF, LVL_APPR, TRUE, "Character::loadAliases : %s", e.getMessage().c_str());
 		return false;
 	}
 	for(unsigned int i = 0;i < MyQuery->numRows();++i)
@@ -2047,7 +2021,7 @@ bool Character::LoadAliases()
 	}
 	return true;
 }
-bool Character::LoadClans()
+bool Character::loadClans()
 {
 	std::stringstream sql;
 	
@@ -2065,7 +2039,7 @@ bool Character::LoadClans()
 	}
 	catch( sql::QueryException e )
 	{
-		MudLog(BRF, LVL_APPR, TRUE, "Character::LoadClans : %s", e.getMessage().c_str());
+		MudLog(BRF, LVL_APPR, TRUE, "Character::loadClans : %s", e.getMessage().c_str());
 		return false;
 	}
 	
@@ -2077,7 +2051,7 @@ bool Character::LoadClans()
 	}
 	return true;
 }
-bool Character::LoadTrophies()
+bool Character::loadTrophies()
 {
 	std::string query = "SELECT * FROM trophies WHERE user_id=" + MiscUtil::Convert<std::string>(this->player.idnum);
 	sql::Query MyQuery;
@@ -2089,7 +2063,7 @@ bool Character::LoadTrophies()
 	try { MyQuery = gameDatabase->sendQuery(query); }
 	catch( sql::QueryException e )
 	{
-		MudLog(BRF, LVL_APPR, TRUE, "Character::LoadTrophies : %s", e.getMessage().c_str());
+		MudLog(BRF, LVL_APPR, TRUE, "Character::loadTrophies : %s", e.getMessage().c_str());
 		return false;
 	}
 	for(unsigned int i = 0;i < MyQuery->numRows();++i)
@@ -2217,21 +2191,21 @@ bool MySQLLoadRolls(const std::string &playername, const std::string TableName, 
 	return true;
 }
 
-bool Character::LoadHitRolls()
+bool Character::loadHitRolls()
 {
 	bool result = MySQLLoadRolls(this->player.name, "userHitRoll", this->LoadData->HitRolls);
 	this->points.HitRolls.insert(this->points.HitRolls.end(),
 		this->LoadData->HitRolls.begin(), this->LoadData->HitRolls.end());
 	return result;
 }
-bool Character::LoadManaRolls()
+bool Character::loadManaRolls()
 {
 	bool result = MySQLLoadRolls(this->player.name, "userManaRoll", this->LoadData->ManaRolls);
 	this->points.ManaRolls.insert(this->points.ManaRolls.end(),
 		this->LoadData->ManaRolls.begin(), this->LoadData->ManaRolls.end());
 	return result;
 }
-bool Character::LoadQuests()
+bool Character::loadQuests()
 {
 	std::string query = "SELECT quest_name, value FROM quests WHERE user_id=" + MiscUtil::Convert<std::string>(this->player.idnum);
 	sql::Query MyQuery;
@@ -2248,13 +2222,13 @@ bool Character::LoadQuests()
 	}
 	catch( sql::QueryException e )
 	{
-		MudLog(BRF, LVL_APPR, TRUE, "Character::LoadQuests : %s", e.getMessage().c_str());
+		MudLog(BRF, LVL_APPR, TRUE, "Character::loadQuests : %s", e.getMessage().c_str());
 		return false;
 	}
 	return true;
 }
 
-bool Character::SaveSkills()
+bool Character::saveSkills()
 {
 	std::stringstream queryBuffer;
 
@@ -2289,7 +2263,7 @@ bool Character::SaveSkills()
 	return true;
 }
 
-bool Character::SaveClans()
+bool Character::saveClans()
 {
 	for(auto iter = userClans.begin();iter != userClans.end();++iter)
 	{
@@ -2298,7 +2272,7 @@ bool Character::SaveClans()
 	return true;
 }
 
-bool Character::SaveTrophies()
+bool Character::saveTrophies()
 {
 	std::stringstream queryBuffer;
 	std::map<std::string, int>::iterator old_trophy, new_trophy;
@@ -2324,7 +2298,7 @@ bool Character::SaveTrophies()
 				}
 				catch( sql::QueryException e )
 				{
-					MudLog(BRF, LVL_APPR, TRUE, "Character::SaveTrophies : %s", e.getMessage().c_str());
+					MudLog(BRF, LVL_APPR, TRUE, "Character::saveTrophies : %s", e.getMessage().c_str());
 					return false;
 				}
 			}
@@ -2344,7 +2318,7 @@ bool Character::SaveTrophies()
 				gameDatabase->sendRawQuery(queryBuffer.str());
 			}
 			catch( sql::QueryException e ) {
-				MudLog(BRF, LVL_APPR, TRUE, "Character::SaveTrophies : %s", e.getMessage().c_str());
+				MudLog(BRF, LVL_APPR, TRUE, "Character::saveTrophies : %s", e.getMessage().c_str());
 				return false;
 			}
 		}
@@ -2354,11 +2328,11 @@ bool Character::SaveTrophies()
 	this->LoadData->Trophies.insert(this->kill_list.begin(), this->kill_list.end());
 	return true;
 }
-bool Character::SaveHitRolls()
+bool Character::saveHitRolls()
 {
 	return (MySQLSaveRolls(this->player.name, "userHitRoll", this->LoadData->HitRolls, this->points.HitRolls));
 }
-bool Character::SaveManaRolls()
+bool Character::saveManaRolls()
 {
 	return (MySQLSaveRolls(this->player.name, "userManaRoll", this->LoadData->ManaRolls, this->points.ManaRolls));
 }
@@ -2384,15 +2358,15 @@ bool Character::CreateDatabaseEntry()
 	return true;
 }
 
-void Room::Zero(bool free)
+void Room::zero(bool free)
 {
 	if(!free)
 	{
-		this->Zero();
+		this->zero();
 		return;
 	}
 }
-void Room::Zero()
+void Room::zero()
 {
 	this->vnum				= NOWHERE;
 	this->zone				= 0;
@@ -2409,10 +2383,7 @@ void Room::Zero()
 	this->auction_vnum		= -1;
 	this->room_flags		= 0;
 	this->func				= (NULL);
-
-#ifdef KINSLAYER_JAVASCRIPT
 	this->js_scripts		= std::shared_ptr<std::vector<JSTrigger*> >( new std::vector< JSTrigger* > );
-#endif
 
 	memset(&this->dir_option,	0, sizeof(dir_option));
 }
@@ -2444,10 +2415,7 @@ void Room::Copy(const Room *source, bool deep)
 	this->sector_type	= source->sector_type;
 	this->zone			= source->zone;
 	this->auction_vnum	= source->auction_vnum;
-
-#ifdef KINSLAYER_JAVASCRIPT
 	this->js_scripts	= source->js_scripts;
-#endif
 
 	this->name			= str_dup(source->name ? source->name : "undefined");
 	this->description	= str_dup(source->description ? source->description : "undefined\r\n");
@@ -2503,14 +2471,14 @@ Room *Room::operator =(Room &source)
 Room::Room(const Room &source)
 {
 	++Room::nr_alloc;
-	this->Zero();
+	this->zero();
 	this->Copy(&source);
 }
 
 Room::Room(const Room *source)
 {
 	Room::nr_alloc++;
-	this->Zero();
+	this->zero();
 	this->Copy(source);
 }
 
@@ -2518,16 +2486,14 @@ Room::Room(const Room *source)
 Room::Room()
 {
 	Room::nr_alloc++;
-	this->Zero();
+	this->zero();
 }
 
 //Room Destructor
 Room::~Room()
 {
 	Room::nr_dealloc++;
-#ifdef KINSLAYER_JAVASCRIPT
 	JSManager::get()->handleExtraction( this );
-#endif
 	std::list< Gate* > GatesInRoom = GateManager::GetManager().GetGatesInRoom(this);
 	for(std::list<Gate*>::iterator gIter = GatesInRoom.begin();gIter != GatesInRoom.end();++gIter)
 		GateManager::GetManager().RemoveGate( (*gIter) );
@@ -2653,9 +2619,7 @@ Object::~Object()
 		delete this->scalp;
 	}
 
-#ifdef KINSLAYER_JAVASCRIPT
 	JSManager::get()->handleExtraction( this );
-#endif
 	if( (this->item_number > -1 && this == obj_proto[this->item_number]) || item_number == -1 )
 	{
 		if( this->name )
@@ -2800,11 +2764,7 @@ Object::Object()
 	this->decayType			= -1;
 	this->decayTimer		= -1;
 	this->decayTimerType	= -1;
-
-#ifdef KINSLAYER_JAVASCRIPT
 	this->js_scripts		= std::shared_ptr<std::vector<JSTrigger*> >( new std::vector< JSTrigger* > );
-#endif
-
 }
 
 bool Character::IsProto()
@@ -2864,7 +2824,7 @@ int BootObjects()
 	}
 	return top_of_objt;
 }
-void Object::ProtoSave()
+void Object::protoSave()
 {
 	if( deleted ) return;
 
@@ -2935,8 +2895,6 @@ void Object::ProtoSave()
 		return;
 	}
 
-#ifdef KINSLAYER_JAVASCRIPT
-
 	Buffer.str("");
 	Buffer << "DELETE FROM js_attachments WHERE type='O' AND target_vnum='"
 	<<  obj_index[this->item_number].vnum << "';" << std::endl;
@@ -2960,8 +2918,6 @@ void Object::ProtoSave()
 			return;
 		}
 	}
-#endif
-
 	this->needs_save = false;
 }
 void Object::ProtoDelete()
@@ -3039,8 +2995,6 @@ void Object::ProtoBoot( sql::Row &MyRow, const int rnum, const std::list<int> &j
 	this->obj_flags.wear_flags = atoi(MyRow["wear"].c_str());
 	this->ex_description = extra_descr_data::Parse( MyRow["edescription"] );
 
-#ifdef KINSLAYER_JAVASCRIPT
-
 	// Find any js scripts that are listed as attached to this mob in the db, and attach them to it
 	this->js_scripts = std::shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
 	for(auto scriptVnumIter = jsAttachmentList.begin();scriptVnumIter != jsAttachmentList.end();++scriptVnumIter)
@@ -3048,7 +3002,6 @@ void Object::ProtoBoot( sql::Row &MyRow, const int rnum, const std::list<int> &j
 		JSTrigger* t = JSManager::get()->getTrigger((*scriptVnumIter));
 		this->js_scripts->push_back(t);
 	}
-#endif
 }
 
 /* Return a list of extra_descr_data, parsed from the string that is passed */
@@ -3315,11 +3268,9 @@ const char Character::GetType() const
 	return (IS_NPC(this) ? 'M' : 'C');
 }
 
-void Character::Zero()
+void Character::zero()
 {
-#ifdef KINSLAYER_JAVASCRIPT
 	this->js_scripts.reset();
-#endif
 	this->proto						=	false;
 	this->PermissionToSnoop			=	false;
 	this->purged					=	false;
@@ -3376,9 +3327,8 @@ void Character::Zero()
 	this->delayed_command.erase();
 	this->body_structure			=	STRUCT_LIGHT;
 	this->last_tell					=	NOBODY;
-#ifdef KINSLAYER_JAVASCRIPT
 	this->js_scripts				=	std::shared_ptr<std::vector<JSTrigger*> >( new std::vector< JSTrigger* > );
-#endif
+
 	for (int i = 0; i < NUM_WEARS; ++i)
 		this->equipment[i]			=	NULL;
 
@@ -3433,7 +3383,7 @@ Character::Character(const int nr, const int type, bool full_copy)
 		if ((i = MobManager::GetManager().RealMobile(nr)) < 0)
 		{
 			Log("Mobile (V) %d does not exist in database.", nr);
-			this->Zero();
+			this->zero();
 			this->player.idnum = Character::top_mob_id--;
 			return;
 		}
@@ -3503,11 +3453,7 @@ Character::Character(const int nr, const int type, bool full_copy)
 	this->next = character_list;
 	character_list = this;
 
-#ifdef KINSLAYER_JAVASCRIPT
-
     this->js_scripts = source->js_scripts;
-
-#endif
 
 	this->points.max_hit = MiscUtil::dice(this->points.hit, this->points.mana) + this->points.move;
 
@@ -3555,11 +3501,10 @@ Character::Character(const int nr, const int type, bool full_copy)
 						obj = read_object(ovnum, REAL, true);
 						equip_char(this, obj, tt);
 						obj->creator = "kit for " + this->player.name;
-#ifdef KINSLAYER_JAVASCRIPT
+
 						if( !obj->IsPurged() ) {
 							js_load_triggers(obj);
 						}
-#endif
 //					}
 //					else
 //						delete obj;
@@ -3580,11 +3525,10 @@ Character::Character(const int nr, const int type, bool full_copy)
 			obj = read_object(ovnum, REAL, true);
 			obj_to_char(obj, this);
 			obj->creator = "kit for " + this->player.name;
-#ifdef KINSLAYER_JAVASCRIPT
-					if( !obj->IsPurged() ) {
-						js_load_triggers(obj);
-					}
-#endif
+
+			if( !obj->IsPurged() ) {
+				js_load_triggers(obj);
+			}
 		}
 	}
 	++MobManager::GetManager().GetIndex((unsigned int)i)->number;
@@ -3594,7 +3538,7 @@ Character::Character(const int nr, const int type, bool full_copy)
 Character::Character(eCharType MyType)
 {
 	++Character::nr_alloc;
-	this->Zero();
+	this->zero();
 	switch(MyType)
 	{
 	case CharMob:
@@ -3619,7 +3563,7 @@ Character::Character(eCharType MyType)
 Character::Character()
 {
 	++Character::nr_alloc;
-	this->Zero();
+	this->zero();
 }
 
 void Character::DeleteAliases()
@@ -3702,9 +3646,7 @@ Character::~Character()
 	if(this->in_room)
 		this->RemoveFromRoom();
 
-#ifdef KINSLAYER_JAVASCRIPT
 	JSManager::get()->handleExtraction( this );
-#endif
 
 	Zone *zone;
 	for(i = 0;(zone = ZoneManager::GetManager().GetZoneByRnum(i)) != NULL;++i)
@@ -3810,9 +3752,16 @@ int file_to_string(const char *name, char *buf)
 
 	do
 	{
-		fgets(tmp, READ_SIZE, fl);
+		char *resultValue = fgets(tmp, READ_SIZE, fl);
 		tmp[strlen(tmp) - 1] = '\0'; /* take off the trailing \n */
 		strcat(tmp, "\r\n");
+
+		if(resultValue == NULL)
+		{
+			sprintf(tmp, "SYSERR: Error while reading file %s.", name);
+			perror(tmp);
+			return (-1);
+		}
 
 		if (!feof(fl))
 		{
@@ -4206,4 +4155,12 @@ int Character::getUserId()
 	if(userType == UserType::mob)
 		return this->getVnum();
 	return this->player.idnum;
+}
+
+bool Character::passwordMatches(const std::string &passwordInput)
+{
+	bool passwordUpdated = this->PasswordUpdated();
+
+	return !((!passwordUpdated && strncmp( CRYPT(passwordInput.c_str(), this->player.passwd.c_str()), GET_PASSWD(this).c_str(), 10 )) ||
+	(passwordUpdated &&	GET_PASSWD(this).compare( MD5::getHashFromString(passwordInput.c_str())) ));
 }

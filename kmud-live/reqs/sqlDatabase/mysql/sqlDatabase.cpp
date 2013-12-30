@@ -12,24 +12,6 @@ Author: Michael Mason - mikemason930@gmail.com (C) 01-26-2007
 
 void insertLetterBeforeLetter(std::string &str, const char letter_to_find, const char letter_to_lead);
 
-/***
-int main(void)
-{
-	sql::Context context = sql::createContext("localhost", "root", "bday930", "livemud");
-	sql::Connection connection = context->createConnection();
-
-	std::string queryBuffer = "SELECT id,syntax FROM helpFile WHERE id=100";
-	sql::Query query = connection->sendQuery(queryBuffer);
-
-	while(query->hasNextRow())
-	{
-		sql::Row row = query->getRow();
-
-		std::cout << "Syntax: " << (row.isFieldNull(1) ? "NULL" : row[ 1 ]);
-	}
-}
-***/
-
 namespace sql
 {
 

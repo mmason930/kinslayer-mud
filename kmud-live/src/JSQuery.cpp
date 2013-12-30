@@ -1,5 +1,3 @@
-#ifdef KINSLAYER_JAVASCRIPT
-
 #include "JSQuery.h"
 #include "JSRow.h"
 
@@ -61,6 +59,3 @@ flusspferd::value JSQuery::getRow()
 		return lookupValue( new class sqlJSRow( new sql::Row(real->MyQuery->getRow())) );
 	return lookupValue( 0 );
 }
-
-
-#endif

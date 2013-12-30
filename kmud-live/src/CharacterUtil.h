@@ -39,6 +39,7 @@ public:
 	static void deleteUserMacro(sql::Connection connection, int userMacroId);
 	static void putUserMacro(sql::Connection connection, class UserMacro *);
 	static void freeUserMacros(std::list<class UserMacro *> &userMacros);
+	static bool isValidUserName(const std::string username);
 };
 
 #endif

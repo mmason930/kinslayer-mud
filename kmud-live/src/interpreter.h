@@ -25,13 +25,15 @@ ACMD( do_move );
 #define IS_MOVE(cmdnum) (complete_cmd_info[cmdnum].command_pointer == do_move)
 
 void	CommandInterpreter( Character *ch, char *argument );
-int		search_block( char *arg, const char **listy, int exact );
+int		search_block( const char *arg, const char **listy, int exact );
+int		reserved_word(const char *argument);
+int		_parse_name(const char *arg, char *name);
 char	lower( char c );
 char	*OneArgument( char *argument, char *first_arg, bool conv_case=true );
 char	*OneWord( char *argument, char *first_arg );
 char	*AnyOneArg( char *argument, char *first_arg );
 char	*TwoArguments( char *argument, char *first_arg, char *second_arg, bool conv_case=true );
-int		fill_word( char *argument );
+int		fill_word( const char *argument );
 void	HalfChop( char *string, char *arg1, char *arg2 );
 int		IsAbbrev( const char *arg1, const char *arg2 );
 int		IsNumber( const char *str );

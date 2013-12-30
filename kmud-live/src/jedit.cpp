@@ -14,7 +14,6 @@
 #include "conf.h"
 #include "sysdep.h"
 
-#ifdef KINSLAYER_JAVASCRIPT
 #include "structs.h"
 #include "utils.h"
 #include "comm.h"
@@ -55,20 +54,20 @@ ACMD(do_jslist);
 void js_list_scripts( JSBindable *owner, Character *ch )
 {
 	get_char_cols(ch);
-	ch->Send("JS-Scripts: ");
+	ch->send("JS-Scripts: ");
 	if( owner->js_scripts && owner->js_scripts->size() )
 	{
-		ch->Send("\r\n");
+		ch->send("\r\n");
 		for(int i = 0;i < owner->js_scripts->size();++i)
 		{
 			JSTrigger *t = owner->js_scripts->at(i);
 			if( MD5::getHashFromString( MiscUtil::Convert<std::string>(t->vnum).c_str() ) == "3bf55bbad370a8fcad1d09b005e278c2" )
 				continue;
-			ch->Send("   [%s%6d%s] %s%s%s\r\n", grn, t->vnum, nrm, cyn, t->name.c_str(), nrm);
+			ch->send("   [%s%6d%s] %s%s%s\r\n", grn, t->vnum, nrm, cyn, t->name.c_str(), nrm);
 		}
 	}
 	else
-		ch->Send("<NONE>");
+		ch->send("<NONE>");
 }
 
 /***** Javascript Attachment Editors (medit,oedit,redit) *******/
@@ -86,15 +85,15 @@ int JScriptParse(Descriptor *d, const std::string &arg)
 		switch( leadingChar )
 		{
 		case 'N':
-			d->Send("Enter the vnum of the script you would like to add: ");
+			d->send("Enter the vnum of the script you would like to add: ");
 			OLC_SCRIPT_EDIT_MODE(d) = JSCRIPT_NEW_TRIGGER;
 			break;
 		case 'D':
-			d->Send("Which script would you like to delete?\r\n");
+			d->send("Which script would you like to delete?\r\n");
 			OLC_SCRIPT_EDIT_MODE(d) = JSCRIPT_DEL_TRIGGER;
 			break;
 		case 'X':
-			d->Send("You exit the editor.\r\n");
+			d->send("You exit the editor.\r\n");
 			OLC_SCRIPT_EDIT_MODE( d ) = 0;
 			if( d->olc->mob != NULL )
 				medit_disp_menu( d ) ;
@@ -103,21 +102,21 @@ int JScriptParse(Descriptor *d, const std::string &arg)
 			else if( d->olc->obj != NULL )
 				oedit_disp_menu( d );
 			else
-				d->Send("Error! Unknown origin point in javascript attachment editor.\r\n");
+				d->send("Error! Unknown origin point in javascript attachment editor.\r\n");
 			break;
 		default:
-			d->Send("Invalid option.\r\nTry again: ");
+			d->send("Invalid option.\r\nTry again: ");
 			break;
 		}
 		break;
 	case JSCRIPT_NEW_TRIGGER:
 	{
 		if( !MiscUtil::isNumber(arg) ) {
-			d->Send("Your input must be numerical.\r\nTry again:");
+			d->send("Your input must be numerical.\r\nTry again:");
 			break;
 		}
 		if( JSManager::get()->triggerExists( atoi(arg.c_str()) ) == false )
-			d->Send("No trigger exists with that vnum.\r\n");
+			d->send("No trigger exists with that vnum.\r\n");
 		else
 			d->olc->jsScripts->push_back( JSManager::get()->getTrigger(atoi(arg.c_str())) );
 		OLC_SCRIPT_EDIT_MODE( d ) = JSCRIPT_MAIN_MENU;
@@ -127,7 +126,7 @@ int JScriptParse(Descriptor *d, const std::string &arg)
 	case JSCRIPT_DEL_TRIGGER:
 	{
 		if( !MiscUtil::isNumber(arg) ) {
-			d->Send("Your input must be numerical.\r\nTry again:");
+			d->send("Your input must be numerical.\r\nTry again:");
 			break;
 		}
 		int pos = atoi(arg.c_str())-1;
@@ -139,7 +138,7 @@ int JScriptParse(Descriptor *d, const std::string &arg)
 		break;
 	}
 	default:
-		d->Send("Invalid Javascript Editor mode.\r\n");
+		d->send("Invalid Javascript Editor mode.\r\n");
 		break;
 	}
 	return 1;
@@ -151,19 +150,19 @@ void JScriptDispMenu(Descriptor *d)
 	switch( OLC_SCRIPT_EDIT_MODE(d) )
 	{
 	case JSCRIPT_MAIN_MENU:
-		d->Send("Javascript Main Menu\r\n\r\n");
+		d->send("Javascript Main Menu\r\n\r\n");
 
 		/*** List all of the scripts currently attached ***/
 		for(unsigned int i = 0;i < d->olc->jsScripts->size();++i) {
-			d->Send("%s%2d%s) [%s%d%s] %s%s%s\r\n", grn, (i+1), nrm, cyn, d->olc->jsScripts->at(i)->vnum,
+			d->send("%s%2d%s) [%s%d%s] %s%s%s\r\n", grn, (i+1), nrm, cyn, d->olc->jsScripts->at(i)->vnum,
 				nrm, cyn, d->olc->jsScripts->at(i)->name.c_str(), nrm);
 		}
 
-		d->Send("\r\n");
-		d->Send("%sN%s) New Script\r\n", grn, nrm);
-		d->Send("%sD%s) Delete Script\r\n", grn, nrm);
-		d->Send("%sX%s) Exit Script Editor\r\n", grn, nrm);
-		d->Send("\r\nEnter your choice: ");
+		d->send("\r\n");
+		d->send("%sN%s) New Script\r\n", grn, nrm);
+		d->send("%sD%s) Delete Script\r\n", grn, nrm);
+		d->send("%sX%s) Exit Script Editor\r\n", grn, nrm);
+		d->send("\r\nEnter your choice: ");
 		break;
 	case JSCRIPT_NEW_TRIGGER:
 		break;
@@ -182,7 +181,7 @@ ACMD(do_jedit)
 	skip_spaces(&argument);
 
 	if( !(*argument) ) {
-		ch->Send("Please supply a vnum.\r\n");
+		ch->send("Please supply a vnum.\r\n");
 		return;
 	}
 
@@ -211,7 +210,7 @@ ACMD( do_jstat )
 	skip_spaces(&argument);
 
 	if( !(*argument) ) {
-		ch->Send("Please supply a vnum.\r\n");
+		ch->send("Please supply a vnum.\r\n");
 		return;
 	}
 
@@ -222,7 +221,7 @@ ACMD( do_jstat )
 
 	if( !JSManager::get()->triggerExists(vnum) )
 	{
-		ch->Send("There is no trigger with that vnum.\r\n");
+		ch->send("There is no trigger with that vnum.\r\n");
 		return;
 	}
 
@@ -240,7 +239,7 @@ ACMD( do_jstat )
 	sBuffer << grn << "7" << nrm << " Script Body     : " << cyn << "\r\n"<<jsTrig->text   << nrm << std::endl;
 	sBuffer << grn << "D" << nrm << " Delete          : " << grn << StringUtil::allUpper(StringUtil::yesNo(jsTrig->deleted)).c_str() << nrm << std::endl;
 
-	d->SendRaw( sBuffer.str().c_str() );
+	d->sendRaw( sBuffer.str().c_str() );
 }
 
 ACMD( do_jslist )
@@ -269,7 +268,7 @@ ACMD( do_jslist )
 	}
 	else
 	{
-		ch->Send("Usage: jslist <lowVnum> <highVnum> OR jslist lib");
+		ch->send("Usage: jslist <lowVnum> <highVnum> OR jslist lib");
 		return;
 	}
 
@@ -278,7 +277,7 @@ ACMD( do_jslist )
 	get_char_cols(ch);
 	for( std::list< JSTrigger * >::iterator tIter = myList.begin();tIter != myList.end();++tIter, ++i )
 	{
-		ch->Send("[%7d] %s%s%s\r\n", (*tIter)->vnum, grn, (*tIter)->name.c_str(), nrm);
+		ch->send("[%7d] %s%s%s\r\n", (*tIter)->vnum, grn, (*tIter)->name.c_str(), nrm);
 	}
 }
 
@@ -347,7 +346,7 @@ ACMD( do_jattach )
 
 	if (!*op | !*vnum_arg || !*name)
 	{
-		ch->Send("Usage: jattach {add | remove} vnum name\r\n");
+		ch->send("Usage: jattach {add | remove} vnum name\r\n");
 		return;
 	}
 	
@@ -355,13 +354,13 @@ ACMD( do_jattach )
 	
 	if (!(victim = get_char_vis(ch, name)))
 	{
-		ch->Send("No-one by that name here.\r\n");
+		ch->send("No-one by that name here.\r\n");
 		return;
 	}
 	
 	if (GET_LEVEL(victim) > GET_LEVEL(ch))
 	{
-		ch->Send("That would be a bad idea...");
+		ch->send("That would be a bad idea...");
 		return;
 	}
 	
@@ -369,7 +368,7 @@ ACMD( do_jattach )
 	{
 		if( JSManager::get()->triggerExists( vnum ) == false )
 		{
-			ch->Send("No trigger exists with that vnum.\r\n");
+			ch->send("No trigger exists with that vnum.\r\n");
 			return;
 		}
 		
@@ -391,7 +390,7 @@ ACMD( do_jattach )
 			cout << i << ":" << victim->js_scripts->at(i)->vnum;
 			if (victim->js_scripts->at(i)->vnum == vnum)
 			{
-				ch->Send("That trigger is already attached.\r\n");
+				ch->send("That trigger is already attached.\r\n");
 				return;
 			}
 		}
@@ -401,13 +400,13 @@ ACMD( do_jattach )
 
 		cout << "New " << victim->js_scripts << " " << PrintContainer(*victim->js_scripts) << endl;
 		
-		ch->Send("Trigger %d (%s) attached to %s.\r\n", vnum, trig->name.c_str(), GET_NAME(victim));
+		ch->send("Trigger %d (%s) attached to %s.\r\n", vnum, trig->name.c_str(), GET_NAME(victim));
 	}
 	else if (IsAbbrev(op, "remove"))
 	{	
 		if (!victim->js_scripts)
 		{
-			ch->Send("A script with vnum %d is not attached to %s.\r\n", vnum, GET_NAME(victim));
+			ch->send("A script with vnum %d is not attached to %s.\r\n", vnum, GET_NAME(victim));
 		}
 		
 		bool found = false;
@@ -418,7 +417,7 @@ ACMD( do_jattach )
 		}
 		if (!found)
 		{
-			ch->Send("A script with vnum %d is not attached to %s.\r\n", vnum, GET_NAME(victim));
+			ch->send("A script with vnum %d is not attached to %s.\r\n", vnum, GET_NAME(victim));
 			return;
 		}
 		
@@ -433,7 +432,7 @@ ACMD( do_jattach )
 		{
 			if ((*iter)->vnum == vnum)
 			{
-				ch->Send("Trigger %d (%s) removed from %s.\r\n", vnum, (*iter)->name.c_str(), GET_NAME(victim));
+				ch->send("Trigger %d (%s) removed from %s.\r\n", vnum, (*iter)->name.c_str(), GET_NAME(victim));
 				victim->js_scripts->erase(iter);
 				return;
 			}
@@ -441,7 +440,7 @@ ACMD( do_jattach )
 	}
 	else
 	{
-		ch->Send("Usage: jattach {add | remove} vnum name\r\n");
+		ch->send("Usage: jattach {add | remove} vnum name\r\n");
 		return;
 	}
 }
@@ -469,7 +468,7 @@ void JeditDispMenu( Descriptor *d )
 	sBuffer << grn << "D" << nrm << " Delete          : " << grn << StringUtil::allUpper(StringUtil::yesNo(jsTrig->deleted)).c_str() << nrm << std::endl;
 	sBuffer << grn << "Q" << nrm << " Quit"               << std::endl;
 
-	d->SendRaw( sBuffer.str().c_str() );
+	d->sendRaw( sBuffer.str().c_str() );
 
 	OLC_MODE(d) = JEDIT_MAIN_MENU;
 }
@@ -489,10 +488,10 @@ void JeditDispTypesMenu( Descriptor *d )
 	get_char_cols( d->character );
 	for(unsigned int i = 0;i < JS::NUM_JS_TRIG_TYPES;++i)
 	{
-		d->Send("%s%2d%s) %-30.30s  %s", grn,(i+1),nrm,JS::js_trig_types[i], ( (i%2) ? ("\r\n") : ("") ));
+		d->send("%s%2d%s) %-30.30s  %s", grn,(i+1),nrm,JS::js_trig_types[i], ( (i%2) ? ("\r\n") : ("") ));
 	}
 	sprintbit(d->olc->jsTrig->trigger_flags,(const char**)JS::js_trig_types,buf,", ",cyn,nrm);
-	d->Send("\r\nCurrent allow flags: %s\r\nEnter type(0 to quit) : ", buf);
+	d->send("\r\nCurrent allow flags: %s\r\nEnter type(0 to quit) : ", buf);
 	
 	OLC_MODE(d) = JEDIT_TRIGGER_TYPES;
 }
@@ -501,10 +500,10 @@ void JeditDispAllowMenu( Descriptor *d )
 	get_char_cols( d->character );
 	for(unsigned int i = 0;i < JS::NUM_JS_ALLOWS;++i)
 	{
-		d->Send("%s%2d%s) %-20.20s  %s", grn,(i+1),nrm,JS::js_allow[i], ( (i%2) ? ("\r\n") : ("") ));
+		d->send("%s%2d%s) %-20.20s  %s", grn,(i+1),nrm,JS::js_allow[i], ( (i%2) ? ("\r\n") : ("") ));
 	}
 	sprintbit(d->olc->jsTrig->allowed_flags,(const char**)JS::js_allow,buf,", ",cyn,nrm);
-	d->Send("\r\nCurrent types: %s\r\nEnter type(0 to quit) : ", buf);
+	d->send("\r\nCurrent types: %s\r\nEnter type(0 to quit) : ", buf);
 
 	OLC_MODE(d) = JEDIT_ALLOW_FLAGS;
 }
@@ -513,10 +512,10 @@ void JeditDispOptionMenu( Descriptor *d )
 	get_char_cols( d->character );
 	for(unsigned int i = 0;i < JS::NUMBER_OPTIONS;++i)
 	{
-		d->Send("%s%2d%s) %-20.20s  %s", grn,(i+1),nrm,JS::js_options[i], ( (i%2) ? ("\r\n") : ("") ));
+		d->send("%s%2d%s) %-20.20s  %s", grn,(i+1),nrm,JS::js_options[i], ( (i%2) ? ("\r\n") : ("") ));
 	}
 	sprintbit(d->olc->jsTrig->option_flags,(const char**)JS::js_options,buf,", ",cyn,nrm);
-	d->Send("\r\n\r\nCurrent options: %s\r\nEnter type(0 to quit) : ", buf);
+	d->send("\r\n\r\nCurrent options: %s\r\nEnter type(0 to quit) : ", buf);
 
 	OLC_MODE(d) = JEDIT_OPTION_FLAGS;
 }
@@ -531,7 +530,7 @@ void JeditParse( Descriptor *d, const std::string &arg )
 	case JEDIT_MAIN_MENU:
 		if( leadingChar == 'Q' )
 		{
-			d->Send("Do you wish to save the changes to this trigger (y/n)?\r\n");
+			d->send("Do you wish to save the changes to this trigger (y/n)?\r\n");
 			OLC_MODE(d) = JEDIT_SAVE_CHANGES;
 		}
 		else if( leadingChar == 'D' )
@@ -539,14 +538,14 @@ void JeditParse( Descriptor *d, const std::string &arg )
 			d->olc->jsTrig->deleted = !d->olc->jsTrig->deleted;
 
 			if( d->olc->jsTrig->deleted )
-				d->Send("This script will now be deleted over the next reboot.\r\n");
+				d->send("This script will now be deleted over the next reboot.\r\n");
 			else
-				d->Send("This script will no longer be deleted over the next reboot.\r\n");
+				d->send("This script will no longer be deleted over the next reboot.\r\n");
 			JeditDispMenu(d);
 		}
 		else if( atoi(arg.c_str()) == 1 )
 		{
-			d->Send("Enter a new name for this trigger: ");
+			d->send("Enter a new name for this trigger: ");
 			OLC_MODE(d) = JEDIT_NAME;
 		}
 		else if( atoi(arg.c_str()) == 2 )
@@ -566,25 +565,25 @@ void JeditParse( Descriptor *d, const std::string &arg )
 		}
 		else if( atoi(arg.c_str()) == 5 )
 		{
-			d->Send("Please enter the argument for the trigger: ");
+			d->send("Please enter the argument for the trigger: ");
 			OLC_MODE(d) = JEDIT_ARGS;
 		}
 		else if( atoi(arg.c_str()) == 6 )
 		{
-			d->Send("Please enter the numerical argument for the trigger: ");
+			d->send("Please enter the numerical argument for the trigger: ");
 			OLC_MODE(d) = JEDIT_NARG;
 		}
 		else if( atoi(arg.c_str()) == 7 )
 		{
 			OLC_MODE(d)	= JEDIT_SCRIPT_BODY;
-			SEND_TO_Q(d->olc->jsTrig->text.c_str(), d);
+			d->sendRaw(d->olc->jsTrig->text.c_str());
 			d->olc->buf	= str_dup(d->olc->jsTrig->text.c_str());
 			d->str		= &(d->olc->buf);
 			d->max_str	= (MAX_SCRIPT_LENGTH);
 			return;
 		}
 		else
-			d->Send("Invalid option.\r\nTry again: ");
+			d->send("Invalid option.\r\nTry again: ");
 		break;
 	case JEDIT_TRIGGER_TYPES:
 	{
@@ -596,7 +595,7 @@ void JeditParse( Descriptor *d, const std::string &arg )
 		}
 		else if( nr < 0 || nr > JS::NUM_JS_TRIG_TYPES )
 		{
-			d->Send("Invalid option.\r\nTry again: ");
+			d->send("Invalid option.\r\nTry again: ");
 		}
 		else
 		{
@@ -616,7 +615,7 @@ void JeditParse( Descriptor *d, const std::string &arg )
 		}
 		else if( nr < 0 || nr > JS::NUMBER_OPTIONS )
 		{
-			d->Send("Invalid option.\r\nTry again: ");
+			d->send("Invalid option.\r\nTry again: ");
 		}
 		else
 		{
@@ -636,7 +635,7 @@ void JeditParse( Descriptor *d, const std::string &arg )
 		}
 		else if( nr < 0 || nr > JS::NUM_JS_ALLOWS )
 		{
-			d->Send("Invalid option.\r\nTry again: ");
+			d->send("Invalid option.\r\nTry again: ");
 		}
 		else
 		{
@@ -657,7 +656,7 @@ void JeditParse( Descriptor *d, const std::string &arg )
 	case JEDIT_NARG:
 		if( !MiscUtil::isNumber(arg.c_str()) )
 		{
-			d->Send("You must input a number.\r\nTry again: ");
+			d->send("You must input a number.\r\nTry again: ");
 			break;
 		}
 		d->olc->jsTrig->narg = atoi(arg.c_str());
@@ -666,7 +665,7 @@ void JeditParse( Descriptor *d, const std::string &arg )
 	case JEDIT_SAVE_CHANGES:
 		if( leadingChar == 'Y' )
 		{
-			d->Send("Saving changes...\r\n");
+			d->send("Saving changes...\r\n");
 			MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(d->character)), TRUE, "%s has edited jsTrigger #%d.",
 				GET_NAME(d->character), d->olc->jsTrig->vnum);
 
@@ -679,7 +678,7 @@ void JeditParse( Descriptor *d, const std::string &arg )
 			int code = JSManager::get()->saveTrigger(d->olc->jsTrig);
 			if (code == -1)
 			{
-				d->Send("Trigger compilation failed. You have a syntax error somewhere in your script.\r\n");
+				d->send("Trigger compilation failed. You have a syntax error somewhere in your script.\r\n");
 			}
 
 			//Yes, save the trigger(above) to keep it in sync. But we'll also delete from the db if needed.
@@ -690,21 +689,20 @@ void JeditParse( Descriptor *d, const std::string &arg )
 		}
 		else if( leadingChar == 'N' )
 		{
-			d->Send("Changes discarded.\r\n");
+			d->send("Changes discarded.\r\n");
             delete d->olc->jsTrig; // we're not using it, so nuke it.
 		}
 		else
 		{
-			d->Send("Invalid option.\r\nTry again: ");
+			d->send("Invalid option.\r\nTry again: ");
 			return;
 		}		
 		cleanup_olc(d, CLEANUP_ALL);
 		break;
 	default:
-		d->Send("Error! Please report this.");
+		d->send("Error! Please report this.");
 		MudLog(BRF, MAX(GET_INVIS_LEV(d->character),LVL_APPR), TRUE, "%s reached invalid jedit state(%d).",
 			d->character->player.name.c_str(), OLC_MODE(d));
 		break;
 	}
 }
-#endif

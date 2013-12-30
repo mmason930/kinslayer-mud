@@ -175,7 +175,7 @@ public:
 	HandValue* GetHandValue();
 
 	void PrintHand( void );
-	void Send(const char* message, ...);
+	void send(const char* message, ...);
 	void Fold();
 	void UnFold() { folded = false; }
 	void ResetHandValue() { HV = 0; }

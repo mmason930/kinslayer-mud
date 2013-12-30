@@ -1,7 +1,9 @@
 #ifndef OBJECT_MOVE_LOGGER_H
 #define OBJECT_MOVE_LOGGER_H
 
-#include <boost/thread.hpp>
+#include <thread>
+#include <mutex>
+#include <list>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -19,12 +21,15 @@ class ObjectMoveLogger
 {
 private:
 	std::list<ObjectMoveLogEntry> *objectMoveLogEntries;
-	boost::mutex objectMoveLogEntriesMutex;
+	std::mutex objectMoveLogEntriesMutex;
+	bool running;
 public:
 	ObjectMoveLogger();
 	~ObjectMoveLogger();
 	void logObjectMove(const boost::uuids::uuid &objectId, const std::string &message);
 	void threadHandler();
+
+	void kill();
 };
 
 #endif

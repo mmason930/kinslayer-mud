@@ -113,9 +113,7 @@ extern int parse_class(char arg);
 extern int parse_race(char arg);
 extern Character *find_char(long n);
 extern unsigned long int bandwidth;
-#ifdef KINSLAYER_JAVASCRIPT
 extern std::tr1::unordered_map<void*, pair<std::string, flusspferd::value> > mapper;
-#endif
 
 extern HttpServer httpServer;
 
@@ -199,11 +197,6 @@ int topUserId();
 /* Galnor - 11/24/2009 - Connect / disconnect Scintilla text editor's listening socket. */
 ACMD(do_scite)
 {
-
-#ifndef KINSLAYER_JAVASCRIPT
-	ch->Send("Kinslayer Javascript must be enabled in order for remote SciTE to be activated.\r\n");
-	return;
-#else
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 	int port;
 
@@ -211,7 +204,7 @@ ACMD(do_scite)
 
 	if( !argument || !*arg1 )
 	{
-		ch->Send("This command is used to connect the remote Scintilla text editor's listening socket.\r\n"
+		ch->send("This command is used to connect the remote Scintilla text editor's listening socket.\r\n"
 			"Syntax: scite connect|disconnect <port>\r\n"
 			"Syntax: scite port\r\n");
 		return;
@@ -219,42 +212,41 @@ ACMD(do_scite)
 	if( !str_cmp(arg1, "port") )
 	{
 		if( !JSManager::get()->SciteIsConnected() )
-			ch->Send("The socket is not listening.\r\n");
+			ch->send("The socket is not listening.\r\n");
 		else
-			ch->Send("The socket is listening on port %d\r\n", JSManager::get()->ScitePort());
+			ch->send("The socket is listening on port %d\r\n", JSManager::get()->ScitePort());
 		return;
 	}
 	else if( !str_cmp(arg1, "connect") )
 	{
 		if( !*arg2 )
 		{
-			ch->Send("To connect, you must specify a port.\r\n");
+			ch->send("To connect, you must specify a port.\r\n");
 			return;
 		}
 		if( !MiscUtil::isNumber(arg2) )
 		{
-			ch->Send("The port you specify must be numeric.\r\n");
+			ch->send("The port you specify must be numeric.\r\n");
 			return;
 		}
 		port = atoi(arg2);
 		JSManager::get()->SciteConnect( port );
 
-		ch->Send("Attempting to connect to port %d.\r\n", port);
+		ch->send("Attempting to connect to port %d.\r\n", port);
 	}
 	else if( !str_cmp(arg1, "disconnect") )
 	{
 		JSManager::get()->SciteDisconnect();
 
-		ch->Send("Disconnecting...");
+		ch->send("Disconnecting...");
 
 		return;
 	}
 	else
 	{
-		ch->Send("You must either connect to a port, or disconnect.\r\n");
+		ch->send("You must either connect to a port, or disconnect.\r\n");
 		return;
 	}
-#endif
 }
 
 void redit_save_to_disk( int lowVnum, int highVnum );
@@ -268,7 +260,7 @@ ACMD(do_saveall)
 
 	if(!argument || !*arg1)
 	{
-		ch->Send("Syntax: saveall <TYPE>. Possible Types: Zones, Mobs, Rooms, Objects, OLC.\r\n");
+		ch->send("Syntax: saveall <TYPE>. Possible Types: Zones, Mobs, Rooms, Objects, OLC.\r\n");
 		return;
 	}
 
@@ -276,8 +268,8 @@ ACMD(do_saveall)
 	{
 		Zone *zone;
 		for(i = 0;(zone=ZoneManager::GetManager().GetZoneByRnum(i)) != NULL;++i)
-			zone->Save();
-		ch->Send("All zones have been saved.\r\n");
+			zone->save();
+		ch->send("All zones have been saved.\r\n");
 		MudLog(CMP, LVL_GOD, TRUE, "%s saved all zones.", GET_NAME(ch));
 	}
 
@@ -288,7 +280,7 @@ ACMD(do_saveall)
 			Log("Saving mobs for zone: %d\r\n", ZoneManager::GetManager().GetZoneByRnum(i)->getVnum());
 			MobManager::GetManager().SavePrototypes(ZoneManager::GetManager().GetZoneByRnum(i)->getVnum());
 		}
-		ch->Send("All mobs have been saved.\r\n");
+		ch->send("All mobs have been saved.\r\n");
 		MudLog(CMP, LVL_GOD, TRUE, "%s saved all mobiles.", GET_NAME(ch));
 	}
 
@@ -296,7 +288,7 @@ ACMD(do_saveall)
 	{
 		for(i = 0;i < ZoneManager::GetManager().NumZones();++i)
 			oedit_save_to_disk(i);
-		ch->Send("All objects have been saved.\r\n");
+		ch->send("All objects have been saved.\r\n");
 		MudLog(CMP, LVL_GOD, TRUE, "%s saved all objects.", GET_NAME(ch));
 	}
 
@@ -312,7 +304,7 @@ ACMD(do_saveall)
 		}
 		ReditSaveClock.turnOff();
 		ReditSaveClock.print();
-		ch->Send("All rooms have been saved.\r\n");
+		ch->send("All rooms have been saved.\r\n");
 		MudLog(CMP, LVL_GOD, TRUE, "%s saved all rooms.",  GET_NAME(ch));
 	}
 
@@ -328,14 +320,14 @@ ACMD(do_saveall)
 			Zone *zone = ZoneManager::GetManager().GetZoneByRnum(i);
 			oedit_save_to_disk(i);
 			MobManager::GetManager().SavePrototypes(ZoneManager::GetManager().GetZoneByRnum(i)->getVnum());
-			zone->Save();
+			zone->save();
 		}
-		ch->Send("All of OLC has been saved.\r\n");
+		ch->send("All of OLC has been saved.\r\n");
 		MudLog(CMP, LVL_GOD, TRUE, "%s saved all OLC.",  GET_NAME(ch));
 	}
 	else
 	{
-		ch->Send("Invalid option. Possible Types: Zones, Mobs, Rooms, Objects, OLC.\r\n");
+		ch->send("Invalid option. Possible Types: Zones, Mobs, Rooms, Objects, OLC.\r\n");
 		return;
 	}
 }
@@ -352,7 +344,7 @@ ACMD(do_noreply)
 		if( teller->last_tell == ch->player.idnum && GET_LEVEL(teller) < GET_LEVEL(ch) )
 			teller->last_tell = 0;
 	}
-	ch->Send("You are no longer set as anyone's reply target.\r\n");
+	ch->send("You are no longer set as anyone's reply target.\r\n");
 }
 
 ACMD(do_test_roll)
@@ -365,7 +357,7 @@ ACMD(do_test_roll)
 
 	if( GET_LEVEL(ch) < LVL_GRGOD && !PLR_FLAGGED(ch, PLR_STAT_EDITOR) )
 	{
-		ch->Send("You do not have permission to use that command.\r\n");
+		ch->send("You do not have permission to use that command.\r\n");
 		return;
 	}
 
@@ -388,23 +380,23 @@ ACMD(do_test_roll)
 		n = atoi(arg2);
         if(!*arg2 || !*arg3 || !*arg4 || !*arg5)
         {
-            ch->Send("Syntax: Testroll stats <Number of Rolls> <Gender> <Race> <Class> <Show?>\r\n");
+            ch->send("Syntax: Testroll stats <Number of Rolls> <Gender> <Race> <Class> <Show?>\r\n");
         }
 	    if( (GET_SEX(Test) = SexByString(arg3)) == SEX_UNDEFINED)
         {
-            ch->Send("Invalid gender.\r\n");
+            ch->send("Invalid gender.\r\n");
             delete Test;
             return;
         }
 	    if( (GET_RACE(Test) = RaceByString(arg4)) == RACE_UNDEFINED)
         {
-            ch->Send("Invalid race.\r\n");
+            ch->send("Invalid race.\r\n");
             delete Test;
             return;
         }
 	    if( (GET_CLASS(Test) = ClassByString(arg5)) == CLASS_UNDEFINED)
         {
-            ch->Send("Invalid class.\r\n");
+            ch->send("Invalid class.\r\n");
             delete Test;
             return;
         }
@@ -424,12 +416,12 @@ ACMD(do_test_roll)
             else
                 ++missed;
             if(showStats)
-				ch->Send("Roll #%d: Str:%d, Int:%d, Wis:%d, Dex:%d, Con:%d\r\n", (i+1),
+				ch->send("Roll #%d: Str:%d, Int:%d, Wis:%d, Dex:%d, Con:%d\r\n", (i+1),
                 Test->GetStr(), Test->GetInt(), Test->GetWis(), Test->GetDex(), Test->GetCon());
 	    }
 	    delete Test;
 		perc = (n != 0) ? ( (float)landed / n * 100) : (0);
-		ch->Send("Superstat %%: %s%.2f%s%%, Total Superstats: %s%d%s. Total Non-Superstats: %s%d%s\r\n",
+		ch->send("Superstat %%: %s%.2f%s%%, Total Superstats: %s%d%s. Total Non-Superstats: %s%d%s\r\n",
 				 COLOR_CYAN(ch, CL_COMPLETE), perc, COLOR_NORMAL(ch, CL_COMPLETE), COLOR_CYAN(ch, CL_COMPLETE),
 				 landed, COLOR_NORMAL(ch, CL_COMPLETE), COLOR_CYAN(ch, CL_COMPLETE), missed, COLOR_NORMAL(ch, CL_COMPLETE));
 	    return;
@@ -438,7 +430,7 @@ ACMD(do_test_roll)
 
 	if(!argument || !*Type || !*VictName)
 	{
-		ch->Send("Format: Testroll <Test Type> <Char Name> <Victim Name> <Number of Rolls><Show (yes/no)\r\n"
+		ch->send("Format: Testroll <Test Type> <Char Name> <Victim Name> <Number of Rolls><Show (yes/no)\r\n"
 		         "*Note: Command shows 100 rolls max.\r\n");
 		return;
 	}
@@ -451,7 +443,7 @@ ACMD(do_test_roll)
 		n = atoi(Number);
 	if(n <= 0 || n > 100000)
 	{
-		ch->Send("Your range must be from 1 to 100000.\r\n");
+		ch->send("Your range must be from 1 to 100000.\r\n");
 		return;
 	}
 
@@ -463,17 +455,17 @@ ACMD(do_test_roll)
 		show = false;
 	else if(*Show)
 	{
-		ch->Send("You must either choose Yes or No, or leave this field blank.\r\n");
+		ch->send("You must either choose Yes or No, or leave this field blank.\r\n");
 		return;
 	}
 	if(!(test = get_char_vis(ch, CharName)))
 	{
-		ch->Send("Unable to find test character '%s'.\r\n", CharName);
+		ch->send("Unable to find test character '%s'.\r\n", CharName);
 		return;
 	}
 	if(!(victim = get_char_vis(ch, VictName)))
 	{
-		ch->Send("Unable to find victim '%s'.\r\n", VictName);
+		ch->send("Unable to find victim '%s'.\r\n", VictName);
 		return;
 	}
 
@@ -483,14 +475,14 @@ ACMD(do_test_roll)
 		{
 			bool roll;
 
-			if( (roll = test->RollBash( victim, offense, defense )) )
+			if( (roll = test->rollBash( victim, offense, defense )) )
 				++landed;
 			else
 				++missed;
 
 			if(show && i < 100)
 			{
-				ch->Send("Bash Roll: Tester's offense: %d, Victim's defense: %d, outcome: %s\r\n",
+				ch->send("Bash Roll: Tester's offense: %d, Victim's defense: %d, outcome: %s\r\n",
 					offense, defense, (roll ? "Bashed" : "Missed") );
 			}
 		}
@@ -509,7 +501,7 @@ ACMD(do_test_roll)
 
 			if(show && i < 100)
 			{
-				ch->Send("Charge Roll: Tester's offense: %d, Victim's defense: %d, outcome: %s\r\n",
+				ch->send("Charge Roll: Tester's offense: %d, Victim's defense: %d, outcome: %s\r\n",
 				         offense, defense, offense > defense ? "Charged" : "Missed");
 			}
 		}
@@ -529,7 +521,7 @@ ACMD(do_test_roll)
 
 			if(show && i < 100)
 			{
-				ch->Send("Melee Roll: Tester's Offense: %d, Victim's Defense: %d, outcome: %s\r\n",
+				ch->send("Melee Roll: Tester's Offense: %d, Victim's Defense: %d, outcome: %s\r\n",
 				         offense, defense, offense < defense ? "Missed" : "Hit");
 			}
 		}
@@ -545,7 +537,7 @@ ACMD(do_test_roll)
 
 			if(show && i < 100)
 			{
-				ch->Send("Stab Roll: outcome: %s\r\n",
+				ch->send("Stab Roll: outcome: %s\r\n",
 				         offense < defense ? "Missed" : "Hit");
 			}
 		}
@@ -556,21 +548,21 @@ ACMD(do_test_roll)
 		{
 			bool roll;
 
-			if( (roll = test->RollPrecStrike( victim, offense, defense )) )
+			if( (roll = test->rollPrecStrike( victim, offense, defense )) )
 				++landed;
 			else
 				++missed;
 
 			if(show && i < 100)
 			{
-				ch->Send("Strike Roll: Tester's offense: %d, Victim's defense: %d, outcome: %s\r\n",
+				ch->send("Strike Roll: Tester's offense: %d, Victim's defense: %d, outcome: %s\r\n",
 					offense, defense, (roll ? "Landed" : "Missed") );
 			}
 		}
 	}
 	else
 	{
-		ch->Send("Invalid option.\r\n");
+		ch->send("Invalid option.\r\n");
 		return;
 	}
 
@@ -578,7 +570,7 @@ ACMD(do_test_roll)
 		perc = 0;
 	else
 		perc = (float)((float)landed / n) * 100;
-	ch->Send("Land %%: %s%.1f%s%%, Total Landed: %s%d%s. Total Missed: %s%d%s\r\n",
+	ch->send("Land %%: %s%.1f%s%%, Total Landed: %s%d%s. Total Missed: %s%d%s\r\n",
 	         COLOR_CYAN(ch, CL_COMPLETE), perc, COLOR_NORMAL(ch, CL_COMPLETE), COLOR_CYAN(ch, CL_COMPLETE),
 	         landed, COLOR_NORMAL(ch, CL_COMPLETE), COLOR_CYAN(ch, CL_COMPLETE), missed, COLOR_NORMAL(ch, CL_COMPLETE));
 }
@@ -599,7 +591,7 @@ ACMD(do_copy)
 
 	if( !*type || !*sVnum1 || !*sVnum2 )
 	{
-		ch->Send("USAGE: copy [room|shop|mob|kit|trigger] [source vnum] [target vnum]\r\n");
+		ch->send("USAGE: copy [room|shop|mob|kit|trigger] [source vnum] [target vnum]\r\n");
 		return;
 	}
 	vnum1 = atoi(sVnum1);
@@ -611,7 +603,7 @@ ACMD(do_copy)
 
 		if( !(Source = KitManager::GetManager().GetKitByVnum(vnum1)) )
 		{
-			ch->Send("The source kit(#%d) does not exist.\r\n", vnum1);
+			ch->send("The source kit(#%d) does not exist.\r\n", vnum1);
 			return;
 		}
 		if( !(Destination = KitManager::GetManager().GetKitByVnum(vnum2)) )
@@ -634,7 +626,7 @@ ACMD(do_copy)
 			Destination->KitInventory[ index ].UnsetDeletion();
 		}
 		Destination->vnum = vnum2;
-		Destination->Save();
+		Destination->save();
 		KitManager::GetManager().AddKit(Destination);
 	}
 	else if( !strn_cmp(type, "mob", strlen(type)) )
@@ -642,13 +634,13 @@ ACMD(do_copy)
 		Zone *zone;
 		if( (zone = ZoneManager::GetManager().GetZoneByRoomVnum( vnum2 )) == NULL )
 		{
-			ch->Send("There is no zone which can contain that room!\r\n");
+			ch->send("There is no zone which can contain that room!\r\n");
 			return;
 		}
 		Character *Source, *Destination;
 		if( !(Source = MobManager::GetManager().GetPrototypeByVnum(vnum1)) )
 		{
-			ch->Send("The source MOB(#%d) does not exist.\r\n",vnum1);
+			ch->send("The source MOB(#%d) does not exist.\r\n",vnum1);
 			return;
 		}
 		if( !(Destination = MobManager::GetManager().GetPrototypeByVnum(vnum2)) )
@@ -668,12 +660,12 @@ ACMD(do_copy)
 		Zone *zone;
 		if( (zone = ZoneManager::GetManager().GetZoneByRoomVnum( vnum2 )) == NULL )
 		{
-			ch->Send("There is no zone which can contain that room!\r\n");
+			ch->send("There is no zone which can contain that room!\r\n");
 			return;
 		}
 		if( !zone->CanEdit(ch) )
 		{
-			ch->Send("You do not have permission to copy a room into that zone.\r\n");
+			ch->send("You do not have permission to copy a room into that zone.\r\n");
 			return;
 		}
 
@@ -681,7 +673,7 @@ ACMD(do_copy)
 
 		if( (real = real_room(vnum1)) == NOWHERE )
 		{
-			ch->Send("The source room(#%d) does not exist.\r\n", vnum1);
+			ch->send("The source room(#%d) does not exist.\r\n", vnum1);
 			return;
 		}
 		//Room exists.
@@ -699,15 +691,15 @@ ACMD(do_copy)
 	}
 	else if( !strn_cmp(type, "object", strlen(type)) )
 	{
-		ch->Send("Disabled.");
+		ch->send("Disabled.");
 		return;
 	}
 	else if( !strn_cmp(type, "script", strlen(type)) )
 	{
-		ch->Send("Disabled.");
+		ch->send("Disabled.");
 		return;
 	}
-	ch->Send("Copy was successful.\r\n");
+	ch->send("Copy was successful.\r\n");
 }
 
 // Serai - 06/18/04 - Copyover for Kinslayer.
@@ -719,7 +711,7 @@ ACMD(do_copyover)
 
 	if (str_cmp(argument, "now"))
 	{
-		ch->Send("To start a copyover, type \"copyover now\".  There is no timer.\r\n");
+		ch->send("To start a copyover, type \"copyover now\".  There is no timer.\r\n");
 		return;
 	}
 
@@ -869,7 +861,7 @@ ACMD(do_qval)
 	//Check to see if user input anything for the player name.
 	if(!*playerName)
 	{
-		ch->Send("Syntax: qval <Player Name> \'<Quest Name>\' <Value>\r\n");
+		ch->send("Syntax: qval <Player Name> \'<Quest Name>\' <Value>\r\n");
 		return;
 	}
 
@@ -879,7 +871,7 @@ ACMD(do_qval)
 	//Make sure the next character in argument is a quote
 	if(*argument != '\'')
 	{
-		ch->Send("Quest name must be surrounded by \'.\r\n", *argument);
+		ch->send("Quest name must be surrounded by \'.\r\n", *argument);
 		return;
 	}
 
@@ -891,7 +883,7 @@ ACMD(do_qval)
 
 		if(!*argument)
 		{
-			ch->Send("Quest name must be surrounded by \'\r\n");
+			ch->send("Quest name must be surrounded by \'\r\n");
 			return;
 		}
 
@@ -903,7 +895,7 @@ ACMD(do_qval)
 	//This checks to see if ch can see victim, based on his name.
 	if(!(victim = get_char_vis(ch, playerName)))
 	{
-		ch->Send(NOPERSON);
+		ch->send(NOPERSON);
 		return;
 	}
 	//Skip spaces
@@ -915,7 +907,7 @@ ACMD(do_qval)
 	//If there was nothing for val1, we send ch the syntax code.
 	if(!*val1)
 	{
-		ch->Send("Syntax: qval <Player Name> \'<Quest Name>\' <Value> OR\r\n qval <Player Name> SET <Value>\r\n");
+		ch->send("Syntax: qval <Player Name> \'<Quest Name>\' <Value> OR\r\n qval <Player Name> SET <Value>\r\n");
 		return;
 	}
 
@@ -935,7 +927,7 @@ ACMD(do_qval)
 			if(nquest)
 				delete q;
 
-			ch->Send("You must specify what value you are setting this quest variable to.\r\n");
+			ch->send("You must specify what value you are setting this quest variable to.\r\n");
 			return;
 		}
 		q->var = atoi(val2);
@@ -943,7 +935,7 @@ ACMD(do_qval)
 	else
 		q->var += atoi(val1);
 
-	ch->Send("Variable for \"%s\" set to %d for player %s.\r\n", q->name.c_str(), q->var, GET_NAME(victim));
+	ch->send("Variable for \"%s\" set to %d for player %s.\r\n", q->name.c_str(), q->var, GET_NAME(victim));
 	MySQLSaveQuest(victim->player.name, q, !nquest);
 	return;
 
@@ -970,7 +962,7 @@ ACMD(do_memory)
 	Object *obj;
 	get_char_cols( ch );
 
-	ch->Send("These are the different memory sizes for the game structures:\r\n\n", ch);
+	ch->send("These are the different memory sizes for the game structures:\r\n\n", ch);
 
 	for(number = 0, vict = character_list;vict;vict = vict->next)
 	{
@@ -978,9 +970,9 @@ ACMD(do_memory)
 		number++;
 	}
 
-	ch->Send("Bandidth used:    [%s%f%s] GB.\r\n", COLOR_GREEN(ch, CL_NORMAL), GB(bandwidth), COLOR_NORMAL(ch, CL_NORMAL));
+	ch->send("Bandidth used:    [%s%f%s] GB.\r\n", COLOR_GREEN(ch, CL_NORMAL), GB(bandwidth), COLOR_NORMAL(ch, CL_NORMAL));
 	/*CHARACTERS*/
-	ch->Send("Character:        Single: [%s%5i%s] bytes, Number: [%s%5d%s], Total: [%s%10f%s] MB.\r\n",
+	ch->send("Character:        Single: [%s%5i%s] bytes, Number: [%s%5d%s], Total: [%s%10f%s] MB.\r\n",
 	         COLOR_GREEN(ch, CL_NORMAL), sizeof(Character), COLOR_NORMAL(ch, CL_NORMAL),
 	         COLOR_GREEN(ch, CL_NORMAL), number, COLOR_NORMAL(ch, CL_NORMAL),
 	         COLOR_GREEN(ch, CL_NORMAL), MB(number * sizeof(Character)), COLOR_NORMAL(ch, CL_NORMAL));
@@ -992,7 +984,7 @@ ACMD(do_memory)
 	for(number = 0, obj = object_list;obj;obj = obj->next)
 		number++;
 
-	ch->Send("Object:           Single: [%s%5i%s] bytes, Number: [%s%5d%s], Total: [%s%10f%s] MB.\r\n",
+	ch->send("Object:           Single: [%s%5i%s] bytes, Number: [%s%5d%s], Total: [%s%10f%s] MB.\r\n",
 	         COLOR_GREEN(ch, CL_NORMAL), sizeof(Object), COLOR_NORMAL(ch, CL_NORMAL),
 	         COLOR_GREEN(ch, CL_NORMAL), number, COLOR_NORMAL(ch, CL_NORMAL),
 	         COLOR_GREEN(ch, CL_NORMAL), MB(number * sizeof(Object)), COLOR_NORMAL(ch, CL_NORMAL));
@@ -1001,7 +993,7 @@ ACMD(do_memory)
 
 
 	/*ROOMS*/
-	ch->Send("Room:             Single: [%s%5i%s] bytes, Number: [%s%5d%s], Total: [%s%10f%s] MB.\r\n",
+	ch->send("Room:             Single: [%s%5i%s] bytes, Number: [%s%5d%s], Total: [%s%10f%s] MB.\r\n",
 	         COLOR_GREEN(ch, CL_NORMAL), sizeof( Room), COLOR_NORMAL(ch, CL_NORMAL),
 	         COLOR_GREEN(ch, CL_NORMAL), World.size(), COLOR_NORMAL(ch, CL_NORMAL),
 	         COLOR_GREEN(ch, CL_NORMAL), MB(World.size() * sizeof( Room)),
@@ -1009,14 +1001,14 @@ ACMD(do_memory)
 
 	total += sizeof(Room) * World.size();
 
-	ch->Send("Track:            Single: [%s%5i%s] bytes, Number: [%s%5d%s], Total: [%s%10f%s] MB.\r\n",
+	ch->send("Track:            Single: [%s%5i%s] bytes, Number: [%s%5d%s], Total: [%s%10f%s] MB.\r\n",
 	         COLOR_GREEN(ch, CL_NORMAL), sizeof(Track), COLOR_NORMAL(ch, CL_NORMAL),
 	         COLOR_GREEN(ch, CL_NORMAL), TrackList.size(), COLOR_NORMAL(ch, CL_NORMAL),
 	         COLOR_GREEN(ch, CL_NORMAL), MB(TrackList.size() * sizeof(Track)), COLOR_NORMAL(ch, CL_NORMAL));
 
 	total += sizeof(Track) *number;
 
-	ch->Send("Gates:            Single: [%s%5i%s] bytes, Number: [%s%5d%s], Total: [%s%10f%s] MB.\r\n",
+	ch->send("Gates:            Single: [%s%5i%s] bytes, Number: [%s%5d%s], Total: [%s%10f%s] MB.\r\n",
 	         COLOR_GREEN(ch, CL_NORMAL), sizeof(Gate), COLOR_NORMAL(ch, CL_NORMAL),
 			 COLOR_GREEN(ch, CL_NORMAL), GateManager::GetManager().NumberOfGates(), COLOR_NORMAL(ch, CL_NORMAL),
 			 COLOR_GREEN(ch, CL_NORMAL), MB(GateManager::GetManager().NumberOfGates() * sizeof(Gate)), COLOR_NORMAL(ch, CL_NORMAL));
@@ -1032,14 +1024,13 @@ ACMD(do_memory)
 		}
 	}
 
-	ch->Send("Directions:       Single: [%s%5i%s] bytes, Number: [%s%5d%s], Total: [%s%10f%s] MB.\r\n",
+	ch->send("Directions:       Single: [%s%5i%s] bytes, Number: [%s%5d%s], Total: [%s%10f%s] MB.\r\n",
 	         COLOR_GREEN(ch, CL_NORMAL), sizeof(Direction), COLOR_NORMAL(ch, CL_NORMAL),
 	         COLOR_GREEN(ch, CL_NORMAL), number, COLOR_NORMAL(ch, CL_NORMAL),
 	         COLOR_GREEN(ch, CL_NORMAL), MB(number * sizeof(Direction)), COLOR_NORMAL(ch, CL_NORMAL));
 
 	total += sizeof(Direction) * number;
 
-#ifdef KINSLAYER_JAVASCRIPT
 	std::tr1::unordered_map<void*, pair<std::string, flusspferd::value> >::iterator iter;
 	int jsValues = mapper.size();
 	int jsCharacters = 0, jsObjects = 0, jsRooms = 0;
@@ -1052,19 +1043,18 @@ ACMD(do_memory)
 		if( flusspferd::is_native<JSRoom>( obj ) )
 			++jsRooms;
 	}
-	ch->Send("JS Values:                               Number: [%s%5d%s]\r\n", grn, jsValues, nrm);
-	ch->Send("JS Characters:                           Number: [%s%5d%s]\r\n", grn, jsCharacters, nrm);
-	ch->Send("JS Objects:                              Number: [%s%5d%s]\r\n", grn, jsObjects, nrm);
-	ch->Send("JS Rooms:                                Number: [%s%5d%s]\r\n", grn, jsRooms, nrm);
-#endif
+	ch->send("JS Values:                               Number: [%s%5d%s]\r\n", grn, jsValues, nrm);
+	ch->send("JS Characters:                           Number: [%s%5d%s]\r\n", grn, jsCharacters, nrm);
+	ch->send("JS Objects:                              Number: [%s%5d%s]\r\n", grn, jsObjects, nrm);
+	ch->send("JS Rooms:                                Number: [%s%5d%s]\r\n", grn, jsRooms, nrm);
 
 	/* TOTAL */
-	ch->Send("\r\nTotal:                    [%s%9d%s] bytes, [%s%13f%s] KB, [%s%10f%s] MB.\r\n\n",
+	ch->send("\r\nTotal:                    [%s%9d%s] bytes, [%s%13f%s] KB, [%s%10f%s] MB.\r\n\n",
 	         COLOR_GREEN(ch, CL_NORMAL), total, COLOR_NORMAL(ch, CL_NORMAL),
 	         COLOR_GREEN(ch, CL_NORMAL), KB(total), COLOR_NORMAL(ch, CL_NORMAL),
 	         COLOR_GREEN(ch, CL_NORMAL), MB(total), COLOR_NORMAL(ch, CL_NORMAL));
 
-	//	ch->Send("Other memory:\r\n");
+	//	ch->send("Other memory:\r\n");
 
 }
 
@@ -1082,7 +1072,7 @@ ACMD(do_ipfind)
 
 	if(!*namestr)
 	{
-		ch->Send("Who's alts do you wish to lookup?\r\n");
+		ch->send("Who's alts do you wish to lookup?\r\n");
 		return;
 	}
 
@@ -1090,7 +1080,7 @@ ACMD(do_ipfind)
 
 	if(index == NULL)
 	{
-		ch->Send(NOPERSON);
+		ch->send(NOPERSON);
 		return;
 	}
 
@@ -1106,12 +1096,12 @@ ACMD(do_ipfind)
 	catch( sql::QueryException e )
 	{
 		MudLog(BRF, LVL_IMPL, TRUE, "ipfind : %s", e.message.c_str());
-		ch->Send("There was an error with your request.\r\n");
+		ch->send("There was an error with your request.\r\n");
 		return;
 	}
 	if( !(num_rows = MyQuery->numRows()) )
 	{
-		ch->Send("This player has no logins recorded.\r\n");
+		ch->send("This player has no logins recorded.\r\n");
 	}
 	else
 	{
@@ -1126,7 +1116,7 @@ ACMD(do_ipfind)
 
 	if(Hosts.size() == 0)
 	{
-		ch->Send("No matches found.\r\n");
+		ch->send("No matches found.\r\n");
 		return;
 	}
 
@@ -1151,7 +1141,7 @@ ACMD(do_ipfind)
 	catch( sql::QueryException e )
 	{
 		MudLog(NRM, LVL_IMPL, TRUE, "ipfind : %s", e.message.c_str());
-		ch->Send("There was an error with your request.\r\n");
+		ch->send("There was an error with your request.\r\n");
 		return;
 	}
 	while(MyQuery->hasNextRow())
@@ -1175,7 +1165,7 @@ ACMD(do_ipfind)
 	catch( sql::QueryException e )
 	{
 		MudLog(BRF, LVL_IMPL, TRUE, "ipfind : %s", e.message.c_str());
-		ch->Send("There was an error with your request.\r\n");
+		ch->send("There was an error with your request.\r\n");
 		return;
 	}
 
@@ -1205,20 +1195,20 @@ ACMD(do_ipfind)
 		}
 	}
 	/****** PRINT ALL OF THE PLAYER'S ALTS *******/
-	ch->Send("%s's alts are(green = online): ", namestr);
+	ch->send("%s's alts are(green = online): ", namestr);
 	int i;
 	for(i = 0, name = Names.begin();name != Names.end();++name, ++i)
 	{
 		Character *boolean;
 		if( !(i % 10) )
-			ch->Send("\r\n");
+			ch->send("\r\n");
 		if(i)
-			ch->Send(", ");
+			ch->send(", ");
 		if( (boolean = get_player_vis(ch, (char*)(*name).c_str(), FALSE)) )
-			ch->Send("%s%s", COLOR_GREEN(ch, CL_NORMAL), COLOR_BOLD(ch, CL_NORMAL));
-		ch->Send( (*name).c_str() );
+			ch->send("%s%s", COLOR_GREEN(ch, CL_NORMAL), COLOR_BOLD(ch, CL_NORMAL));
+		ch->send( (*name).c_str() );
 		if(boolean)
-			ch->Send("%s", COLOR_NORMAL(ch, CL_NORMAL));
+			ch->send("%s", COLOR_NORMAL(ch, CL_NORMAL));
 	}
 }
 
@@ -1230,9 +1220,9 @@ void rebootCountdown();
 void SendInvisCharacter( void* data )
 {
 	Character *ch = (Character*)data;
-	ch->Send("\0");
+	ch->send("\0");
 }
-void AutoSave( void );
+void autoSave( void );
 
 
 
@@ -1252,7 +1242,6 @@ ACMD(do_extra)
 
 	try {
 		if(false);
-#ifdef KINSLAYER_JAVASCRIPT
 		else if( !str_cmp(vArgs.at(0), "websocket") )
 		{
 			std::string username = vArgs.at(1);
@@ -1291,7 +1280,7 @@ ACMD(do_extra)
 			DeleteOldTracks();
 			MyClock.turnOff();
 
-			ch->Send("Total Clocks: %d, Seconds: %f\r\n", MyClock.getClocks(), MyClock.getSeconds());
+			ch->send("Total Clocks: %d, Seconds: %f\r\n", MyClock.getClocks(), MyClock.getSeconds());
 		}
 		else if( !str_cmp(vArgs.at(0), "eval") )
 		{
@@ -1325,7 +1314,7 @@ ACMD(do_extra)
 		else if( !str_cmp(vArgs.at(0), "invischar"))
 		{
 			add_event( 26, SendInvisCharacter, (void*)ch );
-			ch->Send("\0");
+			ch->send("\0");
 		}
 		else if( !str_cmp(vArgs.at(0), "email"))
 		{
@@ -1336,10 +1325,10 @@ ACMD(do_extra)
 			ForumUtil::archiveAndRemoveDeletedForumUsers(gameDatabase);
 			ForumUtil::addUsersToForum(gameDatabase);
 		}
-#endif
+
 		else if( !str_cmp(vArgs.at(0), "autosave") )
 		{
-			AutoSave();
+			autoSave();
 		}
 		else if( !str_cmp(vArgs.at(0), "corpses") )
 		{
@@ -1349,7 +1338,7 @@ ACMD(do_extra)
 				ch->InterpCommand("at guard k guard");
 				Log("Number of corpses: %d", numberOfCorpses);
 			}
-			ch->Send(OK);
+			ch->send(OK);
 			return;
 		}
 		else if( !str_cmp(vArgs.at(0), "switch") )
@@ -1359,7 +1348,7 @@ ACMD(do_extra)
 				std::string name = vArgs.at(2);
 				std::string host = vArgs.at(3);
 				SwitchManager::GetManager().AddSwitch(host, name, time(0), -1);
-				ch->Send("Switch added.");
+				ch->send("Switch added.");
 			}
 		}
 		else if( !str_cmp(vArgs.at(0), "tic") ) {
@@ -1378,14 +1367,14 @@ ACMD(do_extra)
 	}
 	if( !bCorrectArgument )
 	{
-		ch->Send("Invalid argument.\r\n");
+		ch->send("Invalid argument.\r\n");
 		return;
 	}
 	return;
 
 
 #ifndef WIN32
-	ch->Send("Memory remaining: %lld\r\n", AvailableSystemMemory());
+	ch->send("Memory remaining: %lld\r\n", AvailableSystemMemory());
 #endif
 
 }
@@ -1402,7 +1391,7 @@ ACMD(do_lag)
 
 	if(!argument || !*arg1 || !*arg2 || atoi(arg2) <= 0)
 	{
-		ch->Send("Hmm...\r\n");
+		ch->send("Hmm...\r\n");
 		return;
 	}
 
@@ -1410,11 +1399,11 @@ ACMD(do_lag)
 
 	if(!(victim = get_char_vis(ch, arg1)))
 	{
-		ch->Send(NOPERSON);
+		ch->send(NOPERSON);
 		return;
 	}
 
-	ch->Send("%s lagged for %d seconds.\r\n", GET_NAME(victim), number);
+	ch->send("%s lagged for %d seconds.\r\n", GET_NAME(victim), number);
 
 	WAIT_STATE(victim, number * PASSES_PER_SEC);
 }
@@ -1439,12 +1428,12 @@ ACMD(do_disable)
 				if(!*arg3)
 				{
 					int count=0;
-					ch->Send(	" Num    Command             Disabled By\r\n"
+					ch->send(	" Num    Command             Disabled By\r\n"
 								"---------------------------------------\r\n\n");
 
 					for(count = 0, Dis = DisabledCommands.begin();Dis != DisabledCommands.end();++Dis)
 					{
-						ch->Send("%s%3d%s)    %s%-15s%s     %s%s%s%s\r\n",
+						ch->send("%s%3d%s)    %s%-15s%s     %s%s%s%s\r\n",
 						COLOR_YELLOW(ch, CL_COMPLETE), ++count, COLOR_NORMAL(ch, CL_COMPLETE),
 						COLOR_CYAN(ch, CL_COMPLETE), complete_cmd_info[(*Dis).first].command.c_str(), COLOR_NORMAL(ch, CL_COMPLETE),
 						COLOR_GREEN(ch, CL_COMPLETE), COLOR_BOLD(ch, CL_COMPLETE),
@@ -1458,18 +1447,18 @@ ACMD(do_disable)
 				
 					if(commandIndex == -1)
 					{
-						ch->Send("That command does not exist.\r\n");
+						ch->send("That command does not exist.\r\n");
 						return;
 					}
 
 					if( (Dis = DisabledCommands.find(commandIndex)) == DisabledCommands.end() )
 					{
-						ch->Send("Command %s is now disabled.\r\n", complete_cmd_info[commandIndex].command.c_str());
+						ch->send("Command %s is now disabled.\r\n", complete_cmd_info[commandIndex].command.c_str());
 						DisabledCommands[commandIndex] = std::pair<std::string,int>(ch->player.name,static_cast<int>(ch->player.level));
 					}
 					else
 					{
-						ch->Send("That command is already disabled.\r\n");
+						ch->send("That command is already disabled.\r\n");
 					}
 				}
 			}
@@ -1478,7 +1467,7 @@ ACMD(do_disable)
 
 				if(!*arg3 || !*arg4)
 				{
-					ch->Send("Usage: disable command user <username> <commandText>\r\n");
+					ch->send("Usage: disable command user <username> <commandText>\r\n");
 					return;
 				}
 
@@ -1497,7 +1486,7 @@ ACMD(do_disable)
 
 					if(playerIndex == NULL)
 					{
-						ch->Send(NOPERSON);
+						ch->send(NOPERSON);
 						return;
 					}
 
@@ -1517,7 +1506,7 @@ ACMD(do_disable)
 
 					if(!str_cmp(userDisabledCommand->getCommand(), commandText))
 					{
-						ch->Send("This command has already been disabled for %s\r\n", username.c_str());
+						ch->send("This command has already been disabled for %s\r\n", username.c_str());
 						return;
 					}
 				}
@@ -1533,17 +1522,17 @@ ACMD(do_disable)
 				Character::deleteUserDisabledCommands(userId);
 				Character::saveUserDisabledCommands(userId, *userDisabledCommandsPtr);
 
-				ch->Send("The command '%s' has been disabled for %s.\r\n", commandText.c_str(), username.c_str());
+				ch->send("The command '%s' has been disabled for %s.\r\n", commandText.c_str(), username.c_str());
 			}
 			else
 			{
-				ch->Send("For commands, you can disable: global OR user\r\n");
+				ch->send("For commands, you can disable: global OR user\r\n");
 				return;
 			}
 		}
 		else
 		{
-			ch->Send("You can disable the following: command\r\n");
+			ch->send("You can disable the following: command\r\n");
 		}
 	}
 	catch(sql::QueryException e) {
@@ -1568,7 +1557,7 @@ ACMD(do_enable)
 		{
 			if(!*arg3)
 			{
-				ch->Send("Usage: enable command global <command text>\r\n");
+				ch->send("Usage: enable command global <command text>\r\n");
 				return;
 			}
 			else
@@ -1578,17 +1567,17 @@ ACMD(do_enable)
 				
 				if(commandIndex == -1)
 				{
-					ch->Send("That command does not exist.\r\n");
+					ch->send("That command does not exist.\r\n");
 					return;
 				}
 
 				if( (Dis = DisabledCommands.find(commandIndex)) == DisabledCommands.end() )
 				{
-					ch->Send("That command is not disabled.\r\n");
+					ch->send("That command is not disabled.\r\n");
 				}
 				else
 				{
-					ch->Send("Command %s is now enabled.\r\n", complete_cmd_info[commandIndex].command.c_str());
+					ch->send("Command %s is now enabled.\r\n", complete_cmd_info[commandIndex].command.c_str());
 					DisabledCommands.erase(Dis);
 				}
 			}
@@ -1598,7 +1587,7 @@ ACMD(do_enable)
 
 			if(!*arg3 || !*arg4)
 			{
-				ch->Send("Usage: enable command user <username> <commandText>\r\n");
+				ch->send("Usage: enable command user <username> <commandText>\r\n");
 				return;
 			}
 
@@ -1617,7 +1606,7 @@ ACMD(do_enable)
 
 				if(playerIndex == NULL)
 				{
-					ch->Send(NOPERSON);
+					ch->send(NOPERSON);
 					return;
 				}
 
@@ -1637,7 +1626,7 @@ ACMD(do_enable)
 
 				if(!str_cmp(userDisabledCommand->getCommand(), commandText))
 				{
-					ch->Send("The command '%s' is now enabled for %s.\r\n", commandText.c_str(), username.c_str());
+					ch->send("The command '%s' is now enabled for %s.\r\n", commandText.c_str(), username.c_str());
 
 					userDisabledCommandsPtr->erase(iter);
 					Character::deleteUserDisabledCommands(userId);
@@ -1646,17 +1635,17 @@ ACMD(do_enable)
 				}
 			}
 
-			ch->Send("This command is not disabled for %s.\r\n", username.c_str());
+			ch->send("This command is not disabled for %s.\r\n", username.c_str());
 		}
 		else
 		{
-			ch->Send("For commands, you can enable: global OR user\r\n");
+			ch->send("For commands, you can enable: global OR user\r\n");
 			return;
 		}
 	}
 	else
 	{
-		ch->Send("You can enable the following: command\r\n");
+		ch->send("You can enable the following: command\r\n");
 	}
 
 /***
@@ -1668,7 +1657,7 @@ ACMD(do_enable)
 
 	if( !(*com) )
 	{
-		ch->Send("Syntax: Disable <Command>\r\n");
+		ch->send("Syntax: Disable <Command>\r\n");
 		return;
 	}
 
@@ -1680,23 +1669,23 @@ ACMD(do_enable)
 			{
 				if( (*Dis).second.second > GET_LEVEL(ch) )
 				{
-					ch->Send("That command was disabled by someone higher level than you.\r\n");
+					ch->send("That command was disabled by someone higher level than you.\r\n");
 					return;
 				}
 				else
 				{
-					ch->Send("Command %s is now enabled.\r\n", complete_cmd_info[number].command.c_str());
+					ch->send("Command %s is now enabled.\r\n", complete_cmd_info[number].command.c_str());
 					DisabledCommands.erase(Dis);
 				}
 			}
 			else
 			{
-				ch->Send("That command is already avaliable.\r\n");
+				ch->send("That command is already avaliable.\r\n");
 			}
 			return;
 		}
 	}
-	ch->Send("%s is not a valid command!\r\n", com);
+	ch->send("%s is not a valid command!\r\n", com);
 ***/
 }
 
@@ -1712,7 +1701,7 @@ ACMD(do_pardon)
 
 	if(GET_LEVEL(ch) < LVL_GOD && !IS_NPC(ch))
 	{
-		ch->Send("What!?!\r\n");
+		ch->send("What!?!\r\n");
 		return;
 	}
 
@@ -1720,7 +1709,7 @@ ACMD(do_pardon)
 	{
 		if( (victim = CharacterUtil::loadCharacter(arg)) == NULL )
 		{
-			ch->Send(NOPERSON);
+			ch->send(NOPERSON);
 			return;
 		}
 		else
@@ -1729,7 +1718,7 @@ ACMD(do_pardon)
 
 	if(!(clan = GetClanByString(arg2)))
 	{
-		ch->Send("Invalid clan.\r\n");
+		ch->send("Invalid clan.\r\n");
 		CLEANUP(victim, load);
 		return;
 	}
@@ -1760,14 +1749,14 @@ ACMD(do_warrant)
 
 	if(GET_LEVEL(ch) < LVL_GOD && !IS_NPC(ch))
 	{
-		ch->Send("What!?!\r\n");
+		ch->send("What!?!\r\n");
 		return;
 	}
 
 	TwoArguments(OneArgument(argument, arg), arg2, arg3);
 	if(!argument || !*arg || !*arg2)
 	{
-		ch->Send("Syntax: Warrant <PlayerName> <ClanName OR Vnum> HIDE\r\n");
+		ch->send("Syntax: Warrant <PlayerName> <ClanName OR Vnum> HIDE\r\n");
 		return;
 	}
 
@@ -1775,7 +1764,7 @@ ACMD(do_warrant)
 	{
 		if( (victim = CharacterUtil::loadCharacter(arg)) == NULL )
 		{
-			ch->Send(NOPERSON);
+			ch->send(NOPERSON);
 			return;
 		}
 		else
@@ -1791,7 +1780,7 @@ ACMD(do_warrant)
 
 		if(!(c = ClanUtil::getClan(count)) || !c->GetWarrant())
 		{
-			ch->Send("There is no warrant set for this clan.\r\n");
+			ch->send("There is no warrant set for this clan.\r\n");
 			return;
 		}
 
@@ -1799,7 +1788,7 @@ ACMD(do_warrant)
 		       GET_NAME(ch), GET_NAME(victim), c->Name.c_str(), c->GetWarrant()->Name.c_str());
 	}
 	else
-		ch->Send("That is an invalid clan.\r\n");
+		ch->send("That is an invalid clan.\r\n");
 
 	CLEANUP(victim, load);
 }
@@ -1813,7 +1802,7 @@ ACMD(do_zap)
 
 	if(!*argument)
 	{
-		ch->Send("Usage: Delevel player level\r\n");
+		ch->send("Usage: Delevel player level\r\n");
 		return;
 	}
 
@@ -1821,7 +1810,7 @@ ACMD(do_zap)
 
 	if(!*level)
 	{
-		ch->Send("You must input a level\r\n");
+		ch->send("You must input a level\r\n");
 		return;
 	}
 
@@ -1829,13 +1818,13 @@ ACMD(do_zap)
 	{
 		if( (victim = CharacterUtil::loadCharacter(arg)) == NULL )
 		{
-			ch->Send(NOPERSON);
+			ch->send(NOPERSON);
 			return;
 		}
 		else
 		{
-			victim->LoadHitRolls();
-			victim->LoadManaRolls();
+			victim->loadHitRolls();
+			victim->loadManaRolls();
 			load = true;
 		}
 	}
@@ -1851,21 +1840,21 @@ ACMD(do_zap)
 
 	if(ammount <= 0)
 	{
-		ch->Send("Level drop cannot be below 1.\r\n");
+		ch->send("Level drop cannot be below 1.\r\n");
 		CLEANUP(victim, load);
 		return;
 	}
 
 	if(GET_LEVEL(victim) > GET_LEVEL(ch))
 	{
-		ch->Send("You'd be better off not doing that...\r\n");
+		ch->send("You'd be better off not doing that...\r\n");
 		CLEANUP(victim, load);
 		return;
 	}
 
 	if(IS_NPC(victim))
 	{
-		ch->Send("Players only!!!\r\n");
+		ch->send("Players only!!!\r\n");
 		CLEANUP(victim, load);
 		return;
 	}
@@ -1879,10 +1868,10 @@ ACMD(do_zap)
 	GET_EXP(victim) = level_exp(GET_LEVEL(victim));
 
 
-	ch->Send("%s is now level %d.%s\r\n", GET_NAME(victim), GET_LEVEL(victim), load ? " (Offline)" : "");
+	ch->send("%s is now level %d.%s\r\n", GET_NAME(victim), GET_LEVEL(victim), load ? " (Offline)" : "");
 
-	victim->Send("ZAAAAP! You have been lowered to level %d!\r\n", GET_LEVEL(victim));
-	victim->Save();
+	victim->send("ZAAAAP! You have been lowered to level %d!\r\n", GET_LEVEL(victim));
+	victim->save();
 
 	CLEANUP(victim, load);
 }
@@ -1890,7 +1879,7 @@ ACMD(do_zap)
 /* Swap an item from an offline character with the third argument. Galnor, October 2003 */
 ACMD(do_swap)
 {
-	ch->Send("Disabled...\r\n");
+	ch->send("Disabled...\r\n");
 }
 
 ACMD(do_warn)
@@ -1902,25 +1891,25 @@ ACMD(do_warn)
 
 	if(!*arg)
 	{
-		ch->Send("Who are you trying to warn");
+		ch->send("Who are you trying to warn");
 		return;
 	}
 
 	if(!(victim = get_char_vis(ch, arg)))
 	{
-		ch->Send("Player '%s' was not found'\r\n", arg);
+		ch->send("Player '%s' was not found'\r\n", arg);
 		return;
 	}
 
 	if(GET_LEVEL(victim) >= GET_LEVEL(ch))
 	{
-		ch->Send("You can't do that to %s! Might be risky!\r\n", GET_NAME(victim));
+		ch->send("You can't do that to %s! Might be risky!\r\n", GET_NAME(victim));
 		return;
 	}
 
 	++GET_WARNINGS(victim);
-	ch->Send("%s now has %d warnings.\r\n", GET_NAME(victim), GET_WARNINGS(victim));
-	victim->Send("You have been warned! You now have %d warning%s!\r\n",
+	ch->send("%s now has %d warnings.\r\n", GET_NAME(victim), GET_WARNINGS(victim));
+	victim->send("You have been warned! You now have %d warning%s!\r\n",
 	             GET_WARNINGS(victim), GET_WARNINGS(victim) == 1 ? "" : "s");
 
 	MudLog(NRM, MAX(LVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s has warned %s --Warning Number %d--",
@@ -1940,7 +1929,7 @@ ACMD(do_find)
 
 	if( !*name )
 	{
-		ch->Send("Find what?\r\n");
+		ch->send("Find what?\r\n");
 		return;
 	}
 	Clock TheClock, TheClock2;
@@ -2035,7 +2024,7 @@ ACMD(do_find)
 		delete[](cBuffer);
 	}
 	else
-		ch->Send("No items found.\r\n");
+		ch->send("No items found.\r\n");
 }
 
 ACMD(do_countdown)
@@ -2045,7 +2034,7 @@ ACMD(do_countdown)
 
 	if( GET_LEVEL(ch) < LVL_GRGOD )
 	{
-		ch->Send("Access denied!\r\n");
+		ch->send("Access denied!\r\n");
 		return;
 	}
 
@@ -2053,7 +2042,7 @@ ACMD(do_countdown)
 
 	if(!str_cmp(arg1, "shutdown"))
 	{
-		ch->Send("The Gateway is now set to shut down when the MUD next boots.\r\n");
+		ch->send("The Gateway is now set to shut down when the MUD next boots.\r\n");
 		MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE, "Reboot mode to `shutdown` by %s.", GET_NAME(ch));
 
 		gatewayConnection->send("ShutdownOnReboot\n");
@@ -2061,7 +2050,7 @@ ACMD(do_countdown)
 	}
 	else if(!str_cmp(arg1, "restart"))
 	{
-		ch->Send("The Gateway is now set to restart when the MUD next boots.\r\n");
+		ch->send("The Gateway is now set to restart when the MUD next boots.\r\n");
 		MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE, "Reboot mode to `restart` by %s.", GET_NAME(ch));
 
 		gatewayConnection->send("RestartOnReboot\n");
@@ -2081,7 +2070,7 @@ ACMD(do_countdown)
 	}
 	else
 	{
-		ch->Send("Valid arguments:\r\n"
+		ch->send("Valid arguments:\r\n"
 				 "`shutdown` : Setting this option will result in the MUD shutting down and requiring a manual startup upon reboot.\r\n"
 				 "`restart` : Setting this option will result in the MUD attempting to automatically restart upon reboot.\r\n"
 				 "A positive integer: Supplying a positive integer will tell the MUD to reboot in the specified number of minutes.\r\n"
@@ -2102,19 +2091,19 @@ ACMD(do_rank)
 
 	if(GET_LEVEL(ch) < LVL_APPR && !IS_NPC(ch))
 	{
-		ch->Send("You cannot use this command!\r\n");
+		ch->send("You cannot use this command!\r\n");
 		return;
 	}
 
 	if(!*arg1)
 	{
-		ch->Send("Rank who?\r\n");
+		ch->send("Rank who?\r\n");
 		return;
 	}
 
 	if(!*arg2)
 	{
-		ch->Send("Rank for which clan?\r\n");
+		ch->send("Rank for which clan?\r\n");
 		return;
 	}
 
@@ -2122,19 +2111,19 @@ ACMD(do_rank)
 	{
 		if( (victim = CharacterUtil::loadCharacter(arg1)) == NULL )
 		{
-			ch->Send(NOPERSON);
+			ch->send(NOPERSON);
 			return;
 		}
 		else
 		{
-			victim->LoadClans();
+			victim->loadClans();
 			load = true;
 		}
 	}
 
 	if(!(i = GetClanByString(arg2)) || !ch->CanViewClan(i))
 	{
-		ch->Send("There is no such clan.\r\n");
+		ch->send("There is no such clan.\r\n");
 
 		if(load)
 			delete victim;
@@ -2143,7 +2132,7 @@ ACMD(do_rank)
 
 	if(!(userClan = victim->getUserClan(i)))
 	{
-		ch->Send("%s is not a member of that clan.\r\n", GET_NAME(victim));
+		ch->send("%s is not a member of that clan.\r\n", GET_NAME(victim));
 
 		if(load)
 			delete victim;
@@ -2152,7 +2141,7 @@ ACMD(do_rank)
 
 	if(userClan->getQuestPoints() < rank_req[userClan->getRank()])
 	{
-		ch->Send("They do not have enough quest points to rank.\r\n");
+		ch->send("They do not have enough quest points to rank.\r\n");
 
 		if(load)
 			delete victim;
@@ -2162,7 +2151,7 @@ ACMD(do_rank)
 	userClan->setRank(userClan->getRank() + 1);
 	MudLog(NRM, MAX(LVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "%s raised %s's rank to %d.%s", GET_NAME(ch), GET_NAME(victim), (int)userClan->getRank(), load ? " (Offline)" : "");
 
-	ch->Send("Ok.\r\n");
+	ch->send("Ok.\r\n");
 	ClanUtil::putUserClan(gameDatabase, userClan);
 	if(load)
 	{
@@ -2183,19 +2172,19 @@ ACMD(do_demote)
 
 	if(GET_LEVEL(ch) < LVL_GOD && !IS_NPC(ch))
 	{
-		ch->Send("You cannot use this command!\r\n");
+		ch->send("You cannot use this command!\r\n");
 		return;
 	}
 
 	if(!*arg1)
 	{
-		ch->Send("Demote who?\r\n");
+		ch->send("Demote who?\r\n");
 		return;
 	}
 
 	if(!*arg2)
 	{
-		ch->Send("Demote from which clan?\r\n");
+		ch->send("Demote from which clan?\r\n");
 		return;
 	}
 
@@ -2203,19 +2192,19 @@ ACMD(do_demote)
 	{
 		if( (victim = CharacterUtil::loadCharacter(arg1)) == NULL )
 		{
-			ch->Send(NOPERSON);
+			ch->send(NOPERSON);
 			return;
 		}
 		else
 		{
-			victim->LoadClans();
+			victim->loadClans();
 			load = true;
 		}
 	}
 
 	if(!(i = GetClanByString(arg2)) || !ch->CanViewClan(i))
 	{
-		ch->Send("There is no such clan.\r\n");
+		ch->send("There is no such clan.\r\n");
 
 		if(load)
 			delete victim;
@@ -2224,7 +2213,7 @@ ACMD(do_demote)
 
 	if(!(userClan = victim->getUserClan(i)))
 	{
-		ch->Send("%s is no in that clan.\r\n", GET_NAME(victim));
+		ch->send("%s is no in that clan.\r\n", GET_NAME(victim));
 
 		if(load)
 			delete victim;
@@ -2233,7 +2222,7 @@ ACMD(do_demote)
 
 	if(userClan->getRank() <= 0)
 	{
-		ch->Send("You cannot lower someone's rank any lower than zero.\r\n");
+		ch->send("You cannot lower someone's rank any lower than zero.\r\n");
 
 		if(load)
 			delete victim;
@@ -2242,12 +2231,12 @@ ACMD(do_demote)
 
 	userClan->setRank(userClan->getRank() - 1);
 	if(load)
-		victim->SaveClans();
+		victim->saveClans();
 
 	MudLog(NRM, MAX(LVL_GRGOD, GET_INVIS_LEV(ch)), TRUE,
 	       "%s lowered %s's rank to %d.%s",
 	       GET_NAME(ch), GET_NAME(victim), (int)userClan->getRank(), load ? " (Offline)" : "");
-	ch->Send(OK);
+	ch->send(OK);
 
 	if(load)
 		delete victim;
@@ -2265,7 +2254,7 @@ ACMD(do_council)
 
 	if(GET_LEVEL(ch) < LVL_APPR && !IS_NPC(ch))
 	{
-		ch->Send("You can't do that!\r\n");
+		ch->send("You can't do that!\r\n");
 		return;
 	}
 
@@ -2273,13 +2262,13 @@ ACMD(do_council)
 
 	if(!*player_name)
 	{
-		ch->Send("Make who Council?\r\n");
+		ch->send("Make who Council?\r\n");
 		return;
 	}
 
 	if(!*clan_name)
 	{
-		ch->Send("What clan?\r\n");
+		ch->send("What clan?\r\n");
 		return;
 	}
 
@@ -2287,12 +2276,12 @@ ACMD(do_council)
 	{
 		if(!playerExists(player_name) || (victim = CharacterUtil::loadCharacter(player_name)) == NULL)
 		{
-			ch->Send(NOPERSON);
+			ch->send(NOPERSON);
 			return;
 		}
 		else
 		{
-//			victim->LoadClans();
+//			victim->loadClans();
 			load = true;
 		}
 	}
@@ -2300,7 +2289,7 @@ ACMD(do_council)
 	//Get the clan
 	if(!(clan_num = GetClanByString(clan_name)))
 	{
-		ch->Send("Invalid clan name or number.\r\n");
+		ch->send("Invalid clan name or number.\r\n");
 
 		if(load)
 			delete victim;
@@ -2310,7 +2299,7 @@ ACMD(do_council)
 
 	if(!(userClan = victim->getUserClan(clan_num)))
 	{
-		ch->Send("%s is not a member of that clan.\r\n", GET_NAME(victim));
+		ch->send("%s is not a member of that clan.\r\n", GET_NAME(victim));
 
 		if(load)
 			delete victim;
@@ -2319,14 +2308,14 @@ ACMD(do_council)
 
 	userClan->setIsCouncil(!userClan->getIsCouncil());
 
-	ch->Send("%s has been %s from the Council.\r\n", GET_NAME(victim),
+	ch->send("%s has been %s from the Council.\r\n", GET_NAME(victim),
 		userClan->getIsCouncil() ? "added" : "removed");
 	MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE,
 		"%s %s %s's council flag for clan %s.%s", GET_NAME(ch), (userClan->getIsCouncil() ? "added" : "removed"),
 	       GET_NAME(victim), ClanUtil::getClan(clan_num)->Name.c_str(), load ? " (Offline)" : "");
 
 	if(load)
-		victim->SaveClans();
+		victim->saveClans();
 }
 
 ACMD(do_clan)
@@ -2338,7 +2327,7 @@ ACMD(do_clan)
 
 	if(GET_LEVEL(ch) < LVL_APPR && !IS_NPC(ch))
 	{
-		ch->Send("What!?!\r\n");
+		ch->send("What!?!\r\n");
 		return;
 	}
 
@@ -2346,12 +2335,12 @@ ACMD(do_clan)
 
 	if(!*playername)
 	{
-		ch->Send("Clan who?");
+		ch->send("Clan who?");
 		return;
 	}
 	if(!*clanstr)
 	{
-		ch->Send("Which clan?\r\n");
+		ch->send("Which clan?\r\n");
 		return;
 	}
 
@@ -2359,7 +2348,7 @@ ACMD(do_clan)
 	Clan *clan = NULL;
 	if(!(clanId = GetClanByString(clanstr)) || !(clan = ClanUtil::getClan(clanId)))
 	{
-		ch->Send("Invalid clan.\r\n");
+		ch->send("Invalid clan.\r\n");
 		return;
 	}
 
@@ -2368,7 +2357,7 @@ ACMD(do_clan)
 	{
 		if(!playerExists(playername) || !(victim = CharacterUtil::loadCharacter(playername)))
 		{
-			ch->Send(NOPERSON);
+			ch->send(NOPERSON);
 			return;
 		}
 		else
@@ -2377,7 +2366,7 @@ ACMD(do_clan)
 
 	if( (victim && victim->getUserClan(clanId)))
 	{
-		ch->Send("%s is already in that clan.\r\n", playername);
+		ch->send("%s is already in that clan.\r\n", playername);
 		return;
 	}
 
@@ -2386,7 +2375,7 @@ ACMD(do_clan)
 	if(!IS_NPC(victim))
 		ClanUtil::putUserClan(gameDatabase, userClan);
 
-	ch->Send("%s has been added to clan %s.\r\n", StringUtil::cap(StringUtil::allLower(playername)), clan->Name.c_str());
+	ch->send("%s has been added to clan %s.\r\n", StringUtil::cap(StringUtil::allLower(playername)), clan->Name.c_str());
 	MudLog(NRM, MAX(GET_INVIS_LEV(ch), LVL_GOD), TRUE, "%s clanned %s into clan %s.", ch->player.name.c_str(), StringUtil::cap(StringUtil::allLower(playername)), clan->Name.c_str());
 
 	if(victim)
@@ -2406,7 +2395,7 @@ ACMD(do_declan)
 
 	if(GET_LEVEL(ch) < LVL_APPR && !IS_NPC(ch))
 	{
-		ch->Send("What!?!\r\n");
+		ch->send("What!?!\r\n");
 		return;
 	}
 
@@ -2414,18 +2403,18 @@ ACMD(do_declan)
 
 	if(!*playername)
 	{
-		ch->Send("Declan who?");
+		ch->send("Declan who?");
 		return;
 	}
 	if(!*clanstr)
 	{
-		ch->Send("Which clan?\r\n");
+		ch->send("Which clan?\r\n");
 		return;
 	}
 
 	if((!(clanId = GetClanByString(clanstr)) || !(clan = ClanUtil::getClan(clanId))) && str_cmp(clanstr, "all"))
 	{
-		ch->Send("Invalid clan.\r\n");
+		ch->send("Invalid clan.\r\n");
 		return;
 	}
 
@@ -2434,7 +2423,7 @@ ACMD(do_declan)
 	{
 		if(!playerExists(playername) && !(victim = CharacterUtil::loadCharacter(playername)))
 		{
-			ch->Send(NOPERSON);
+			ch->send(NOPERSON);
 			return;
 		}
 		else
@@ -2443,7 +2432,7 @@ ACMD(do_declan)
 	UserClan *userClan = victim->getUserClan(clanId);
 	if(clanId && (victim && !userClan))
 	{
-		ch->Send("That player is not in that clan.\r\n");
+		ch->send("That player is not in that clan.\r\n");
 		return;
 	}
 
@@ -2451,7 +2440,7 @@ ACMD(do_declan)
 	//Therefore we are removing all of the player's clans.
 	if(clanId)
 	{
-		ch->Send("You have removed %s from clan %s.\r\n", playername, clan->Name.c_str());
+		ch->send("You have removed %s from clan %s.\r\n", playername, clan->Name.c_str());
 		MudLog(NRM, MAX(GET_INVIS_LEV(ch), LVL_GOD), TRUE, "%s removed %s from clan %s.", ch->player.name.c_str(), playername, clan->Name.c_str());
 		
 		//Remove from the database.
@@ -2468,7 +2457,7 @@ ACMD(do_declan)
 	else
 	{
 		ClanUtil::removeUserClansFromDatabase(gameDatabase, victim->userClans);
-		ch->Send("You have removed %s from all clans.\r\n", playername);
+		ch->send("You have removed %s from all clans.\r\n", playername);
 		MudLog(NRM, MAX(GET_INVIS_LEV(ch), LVL_GOD), TRUE, "%s removed %s from all clans.", ch->player.name.c_str(), playername);
 		if(victim)
 			victim->removeFromClan();
@@ -2487,7 +2476,7 @@ ACMD(do_reset)
 
 	if(!*argument)
 	{
-		ch->Send("Reset who?\r\n");
+		ch->send("Reset who?\r\n");
 		return;
 	}
 
@@ -2495,19 +2484,19 @@ ACMD(do_reset)
 	{
 		if( (victim = CharacterUtil::loadCharacter(argument)) == NULL )
 		{
-			ch->Send(NOPERSON);
+			ch->send(NOPERSON);
 			return;
 		}
 		else
 		{
-			victim->LoadSkills();
+			victim->loadSkills();
 			load = true;
 		}
 	}
 
 	if(GET_LEVEL(victim) > GET_LEVEL(ch))
 	{
-		ch->Send("Yeah right...\r\n");
+		ch->send("Yeah right...\r\n");
 
 		if(load)
 			delete victim;
@@ -2515,10 +2504,10 @@ ACMD(do_reset)
 	}
 
 	victim->ResetAllSkills();
-	victim->BasicSave();
-	victim->SaveSkills();
-	victim->Send("You feel the loss of skill.\r\n");
-	ch->Send("Done.\r\n");
+	victim->basicSave();
+	victim->saveSkills();
+	victim->send("You feel the loss of skill.\r\n");
+	ch->send("Done.\r\n");
 
 	MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE,
 	       "%s reset %s's practices.%s", GET_NAME(ch), GET_NAME(victim), load ? " (Offline)" : "");
@@ -2541,13 +2530,13 @@ ACMD(do_dig)
 
 	if (!*buf2)
 	{
-		ch->Send("Format: dig <dir> <room number>\r\n");
+		ch->send("Format: dig <dir> <room number>\r\n");
 		return;
 	}
 
 	else if (!*buf3)
 	{
-		ch->Send("Format: dig <dir> <room number>\r\n");
+		ch->send("Format: dig <dir> <room number>\r\n");
 		return;
 	}
 
@@ -2591,7 +2580,7 @@ ACMD(do_dig)
 
 	if (tzone == NULL)
 	{
-		ch->Send("You cannot link to a non-existing zone!\r\n");
+		ch->send("You cannot link to a non-existing zone!\r\n");
 		return;
 	}
 
@@ -2599,11 +2588,11 @@ ACMD(do_dig)
 	{
 		if( !mzone->CanEdit(ch) )
 		{
-			ch->Send("You do not have permission to edit room #%d.\r\n", ch->in_room->vnum);
+			ch->send("You do not have permission to edit room #%d.\r\n", ch->in_room->vnum);
 		}
 		if( !tzone->CanEdit(ch) )
 		{
-			ch->Send("You do not have permission to edit room #%d.\r\n", tvnum);
+			ch->send("You do not have permission to edit room #%d.\r\n", tvnum);
 			return;
 		}
 	}
@@ -2640,7 +2629,7 @@ ACMD(do_dig)
 		AddOlcLog( d->character, "room", d->olc->room->vnum );
 		OLC_VAL(d) = 0;
 
-		ch->Send("New room (%d) created.\r\n", tvnum);
+		ch->send("New room (%d) created.\r\n", tvnum);
 		cleanup_olc(d, CLEANUP_STRUCTS);
 
 		room = FindRoomByVnum(tvnum);
@@ -2648,7 +2637,7 @@ ACMD(do_dig)
 
 	if(!room)
 	{
-		ch->Send("Sorry, there was an error when attempting to create this room. Please report this!\r\n");
+		ch->send("Sorry, there was an error when attempting to create this room. Please report this!\r\n");
 		return;
 	}
 
@@ -2661,7 +2650,7 @@ ACMD(do_dig)
 	/* Only works if you have Oasis OLC */
 	olc_add_to_save_list(tzone->getVnum(), OLC_SAVE_ROOM);
 
-	ch->Send("You make an exit %s to room %d.\r\n", buf2, tvnum);
+	ch->send("You make an exit %s to room %d.\r\n", buf2, tvnum);
 }
 
 ACMD(do_echo)
@@ -2671,12 +2660,12 @@ ACMD(do_echo)
 	int count = 0;
 
 	if (!*argument)
-		ch->Send("Yes.. but what?\r\n");
+		ch->send("Yes.. but what?\r\n");
 	else
 	{
 		for(count = 0, vict = ch->in_room->people;vict;vict = vict->next_in_room, ++count)
 		{
-			vict->Send("%s\r\n", argument);
+			vict->send("%s\r\n", argument);
 			if(!count)
 			{
 				MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE,
@@ -2701,13 +2690,13 @@ ACMD(do_award)
 
 	if(!*targetUserName || !*clanName || !*questPointAmountString || !*argument)
 	{
-		ch->Send("Syntax: <Player Name> <Clan Name> <Quest Points> <Reason>\r\n");
+		ch->send("Syntax: <Player Name> <Clan Name> <Quest Points> <Reason>\r\n");
 		return;
 	}
 
 	if(!(targetUserPlayerIndex = CharacterUtil::getPlayerIndexByUserName(targetUserName)))
 	{
-		ch->Send("The target you have selected does not exist.\r\n");
+		ch->send("The target you have selected does not exist.\r\n");
 		return;
 	}
 
@@ -2715,19 +2704,19 @@ ACMD(do_award)
 
 	if(GET_LEVEL(ch) < LVL_IMMORT && targetUserId == ch->player.idnum)
 	{
-		ch->Send("You may not award yourself quest points.\r\n");
+		ch->send("You may not award yourself quest points.\r\n");
 		return;
 	}
 
 	if(!(clanId = GetClanByString(clanName)))
 	{
-		ch->Send("There is no such clan.\r\n");
+		ch->send("There is no such clan.\r\n");
 		return;
 	}
 
 	if(!MiscUtil::isInt(questPointAmountString))
 	{
-		ch->Send("The number of quest points you specify must be an integer.\r\n");
+		ch->send("The number of quest points you specify must be an integer.\r\n");
 		return;
 	}
 
@@ -2736,7 +2725,7 @@ ACMD(do_award)
 	questPointAmount = MAX(-30000,questPointAmount);
 	if(GET_LEVEL(ch) < LVL_IMMORT && !IS_NPC(ch) && (questPointAmount > 5 || questPointAmount < -5))
 	{
-		ch->Send("You may only award quest points in the range of -5 to 5.\r\n");
+		ch->send("You may only award quest points in the range of -5 to 5.\r\n");
 		return;
 	}
 
@@ -2753,7 +2742,7 @@ ACMD(do_award)
 
 	if(!isPermitted)
 	{
-		ch->Send("You are not permitted to perform this action.\r\n");
+		ch->send("You are not permitted to perform this action.\r\n");
 		return;
 	}
 
@@ -2763,23 +2752,23 @@ ACMD(do_award)
 	}
 	catch(Exception e)
 	{
-		ch->Send("%s\r\n", e.what());
+		ch->send("%s\r\n", e.what());
 	}
 	catch(std::exception e)
 	{
-		ch->Send("Could not award quest points.\r\n%s\r\n", e.what());
+		ch->send("Could not award quest points.\r\n%s\r\n", e.what());
 	}
 
 	if(clanQuestPointTransaction != NULL)
 	{//The operation succeeded.
-		ch->Send("You award %s %d quest points. Transaction ID: %d\r\n", targetUserPlayerIndex->name.c_str(), clanQuestPointTransaction->getAmount(), clanQuestPointTransaction->getId());
+		ch->send("You award %s %d quest points. Transaction ID: %d\r\n", targetUserPlayerIndex->name.c_str(), clanQuestPointTransaction->getAmount(), clanQuestPointTransaction->getId());
 		MudLog(BRF, MAX(GET_LEVEL(ch), LVL_APPR), TRUE, "%s has awarded %s %d quest points. Transaction ID: %d Reason given: `%s`", GET_NAME(ch), targetUserPlayerIndex->name.c_str(), clanQuestPointTransaction->getAmount(), clanQuestPointTransaction->getId(), clanQuestPointTransaction->getReason().c_str());
 
 		Character *targetUser = CharacterUtil::getOnlineCharacterById(targetUserId);
 		if(targetUser != NULL)
 		{
 			Clan *clan = ClanUtil::getClan(clanId);
-			targetUser->Send("You have been awarded %d quest points in %s.\r\n", clanQuestPointTransaction->getAmount(), clan->Name.c_str());
+			targetUser->send("You have been awarded %d quest points in %s.\r\n", clanQuestPointTransaction->getAmount(), clan->Name.c_str());
 		}
 
 		delete clanQuestPointTransaction;
@@ -2794,25 +2783,25 @@ ACMD(do_send)
 
 	if (!*::arg)
 	{
-		ch->Send("Send what to who?\r\n");
+		ch->send("Send what to who?\r\n");
 		return;
 	}
 
 	if (!(vict = get_char_vis(ch, ::arg)))
 	{
-		ch->Send(NOPERSON, ch);
+		ch->send(NOPERSON, ch);
 		return;
 	}
 
-	vict->Send(buf);
-	vict->Send("\r\n");
+	vict->send(buf);
+	vict->send("\r\n");
 
 	if (PRF_FLAGGED(ch, PRF_NOREPEAT))
-		ch->Send("Sent.\r\n");
+		ch->send("Sent.\r\n");
 
 	else
 	{
-		ch->Send("You send '%s' to %s.\r\n", buf, GET_NAME(vict));
+		ch->send("You send '%s' to %s.\r\n", buf, GET_NAME(vict));
 	}
 }
 
@@ -2829,7 +2818,7 @@ Room *FindTargetRoom(Character *ch, char *rawroomstr)
 
 	if (!*roomstr)
 	{
-		ch->Send("You must supply a room number or name.\r\n");
+		ch->send("You must supply a room number or name.\r\n");
 		return 0;
 	}
 
@@ -2839,7 +2828,7 @@ Room *FindTargetRoom(Character *ch, char *rawroomstr)
 
 		if (!(location = FindRoomByVnum(tmp)))
 		{
-			ch->Send("No room exists with that number.\r\n");
+			ch->send("No room exists with that number.\r\n");
 			return 0;
 		}
 	}
@@ -2852,16 +2841,16 @@ Room *FindTargetRoom(Character *ch, char *rawroomstr)
 
 		else
 		{
-			ch->Send("That object is not available.\r\n");
+			ch->send("That object is not available.\r\n");
 			return 0;
 		}
 	}
 	else
 	{
 //		if( !str_cmp(ch->player.name, "Fogel") )
-//			ch->Send("There's a private conversation going on in that room.\r\n");
+//			ch->send("There's a private conversation going on in that room.\r\n");
 //		else
-			ch->Send("No such creature or object around.\r\n");
+			ch->send("No such creature or object around.\r\n");
 		return 0;
 	}
 
@@ -2870,14 +2859,14 @@ Room *FindTargetRoom(Character *ch, char *rawroomstr)
 	{
 		if (ROOM_FLAGGED(location, ROOM_GODROOM))
 		{
-			ch->Send("You are not godly enough to use that room!\r\n");
+			ch->send("You are not godly enough to use that room!\r\n");
 			return 0;
 		}
 
 		if (ROOM_FLAGGED(location, ROOM_PRIVATE) &&
 		        location->people && location->people->next_in_room)
 		{
-			ch->Send("There's a private conversation going on in that room.\r\n");
+			ch->send("There's a private conversation going on in that room.\r\n");
 			return 0;
 		}
 	}
@@ -2894,13 +2883,13 @@ ACMD(do_at)
 
 	if (!*buf)
 	{
-		ch->Send("You must supply a room number or a name.\r\n");
+		ch->send("You must supply a room number or a name.\r\n");
 		return;
 	}
 
 	if (!*command)
 	{
-		ch->Send("What do you want to do there?\r\n");
+		ch->send("What do you want to do there?\r\n");
 		return;
 	}
 
@@ -2911,7 +2900,7 @@ ACMD(do_at)
 	{
 		if(!loc->GetZone()->CanEdit(ch))
 		{
-			ch->Send("You must be higher level to leave your zone!\r\n");
+			ch->send("You must be higher level to leave your zone!\r\n");
 			return;
 		}
 	}
@@ -2950,7 +2939,7 @@ ACMD(do_goto)
 	if(GET_LEVEL(ch) >= LVL_IMMORT && GET_LEVEL(ch) <= LVL_BLDER || PLR_FLAGGED(ch, PLR_ZONE_BAN))
 		if(!loc->GetZone()->CanEdit(ch))
 		{
-			ch->Send("You must be higher level to leave your zone!\r\n");
+			ch->send("You must be higher level to leave your zone!\r\n");
 			return;
 		}
 
@@ -2987,18 +2976,18 @@ ACMD(do_trans)
 	OneArgument(argument, buf);
 
 	if (!*buf)
-		ch->Send("Whom do you wish to transfer?\r\n");
+		ch->send("Whom do you wish to transfer?\r\n");
 	else if (str_cmp("all", buf) && str_cmp("t_all", buf))
 	{
 		if (!(victim = get_char_vis(ch, buf)))
-			ch->Send(NOPERSON);
+			ch->send(NOPERSON);
 		else if (victim == ch)
-			ch->Send("That doesn't make much sense, does it?\r\n");
+			ch->send("That doesn't make much sense, does it?\r\n");
 		else
 		{
 			if ((GET_LEVEL(ch) < GET_LEVEL(victim)) && !IS_NPC(victim))
 			{
-				ch->Send("Go transfer someone your own size.\r\n");
+				ch->send("Go transfer someone your own size.\r\n");
 				return;
 			}
 			Act("$n disappears in a mushroom cloud.", FALSE, victim, 0, 0, TO_ROOM);
@@ -3017,7 +3006,7 @@ ACMD(do_trans)
 	{
 		if (GET_LEVEL(ch) < LVL_GRGOD)
 		{
-			ch->Send("I think not.\r\n");
+			ch->send("I think not.\r\n");
 			return;
 		}
 
@@ -3033,13 +3022,13 @@ ACMD(do_trans)
 			Act("$n has transferred you!", FALSE, ch, 0, victim, TO_VICT);
 			look_at_room(victim, 0);
 		}
-		ch->Send(OK);
+		ch->send(OK);
 	}
 	else if(!str_cmp(buf, "all"))
 	{			/* Trans All */
 		if (GET_LEVEL(ch) < LVL_GRGOD)
 		{
-			ch->Send("I think not.\r\n");
+			ch->send("I think not.\r\n");
 			return;
 		}
 
@@ -3059,7 +3048,7 @@ ACMD(do_trans)
 				look_at_room(victim, 0);
 			}
 
-		ch->Send(OK);
+		ch->send(OK);
 	}
 }
 
@@ -3071,18 +3060,18 @@ ACMD(do_teleport)
 	TwoArguments(argument, buf, buf2);
 
 	if (!*buf)
-		ch->Send("Whom do you wish to teleport?\r\n");
+		ch->send("Whom do you wish to teleport?\r\n");
 	else if (!(victim = get_char_vis(ch, buf)))
-		ch->Send(NOPERSON);
+		ch->send(NOPERSON);
 	else if (victim == ch)
-		ch->Send("Use 'goto' to teleport yourself.\r\n");
+		ch->send("Use 'goto' to teleport yourself.\r\n");
 	else if (GET_LEVEL(victim) >= GET_LEVEL(ch))
-		ch->Send("Maybe you shouldn't do that.\r\n");
+		ch->send("Maybe you shouldn't do that.\r\n");
 	else if (!*buf2)
-		ch->Send("Where do you wish to send this person?\r\n");
+		ch->send("Where do you wish to send this person?\r\n");
 	else if ((target = FindTargetRoom(ch, buf2)))
 	{
-		ch->Send(OK);
+		ch->send(OK);
 		Act("$n disappears in a puff of smoke.", FALSE, victim, 0, 0, TO_ROOM);
 		victim->RemoveFromRoom();
 		victim->MoveToRoom(target);
@@ -3105,26 +3094,26 @@ ACMD(do_vnum)
 	if (!*buf || !*buf2 || (!IsAbbrev(buf, "mob") && !IsAbbrev(buf, "obj")
 		&& !IsAbbrev(buf, "kit") && !IsAbbrev(buf, "room") && !IsAbbrev(buf, "js") && !IsAbbrev(buf, "zone")))
 	{
-		ch->Send("Usage: vnum { obj | trig | mob | kit | room | js | zone } <name>\r\n");
+		ch->send("Usage: vnum { obj | trig | mob | kit | room | js | zone } <name>\r\n");
 		return;
 	}
 
 	if (IsAbbrev(buf, "mob"))
 		if (!ch->VnumMobile(buf2))
-			ch->Send("No mobiles by that name.\r\n");
+			ch->send("No mobiles by that name.\r\n");
 	if (IsAbbrev(buf, "obj"))
 		if (!ch->VnumObject(buf2))
-			ch->Send("No objects by that name.\r\n");
+			ch->send("No objects by that name.\r\n");
 	if (IsAbbrev(buf, "kit"))
 		if (!ch->VnumKit(buf2))
-			ch->Send("No kit by that name.\r\n");
+			ch->send("No kit by that name.\r\n");
 	if (IsAbbrev(buf, "zone"))
 		if (!ch->VnumZone(buf2))
-			ch->Send("No zone by that name.\r\n");
+			ch->send("No zone by that name.\r\n");
 	if (IsAbbrev(buf, "room"))
 		if (!ch->VnumRoom(buf2))
-			ch->Send("No room by that name.\r\n");
-#ifdef KINSLAYER_JAVASCRIPT
+			ch->send("No room by that name.\r\n");
+
     if (IsAbbrev(buf, "js"))
     {
         std::vector<JSTrigger*> results= JSManager::get()->searchTrigger(buf2);
@@ -3132,13 +3121,12 @@ ACMD(do_vnum)
         {
             for(int i = 0; i < results.size(); ++i)
             {
-                ch->Send("%3d. [%5d] %s\r\n", i+1, results[i]->vnum, results[i]->name.c_str());
+                ch->send("%3d. [%5d] %s\r\n", i+1, results[i]->vnum, results[i]->name.c_str());
             }
         }
         else
-            ch->Send("No JS Trigger by that name.\r\n");
+            ch->send("No JS Trigger by that name.\r\n");
     }
-#endif
 }
 
 void do_stat_room(Character * ch)
@@ -3153,7 +3141,7 @@ void do_stat_room(Character * ch)
 	sprintf(buf, "Room name: %s%s%s\r\n", COLOR_CYAN(ch, CL_NORMAL), rm->name,
 	        COLOR_NORMAL(ch, CL_NORMAL));
 
-	ch->Send(buf);
+	ch->send(buf);
 
 	type = rm->sector_type;
 
@@ -3161,20 +3149,20 @@ void do_stat_room(Character * ch)
 	        rm->GetZone()->getVnum(), COLOR_GREEN(ch, CL_NORMAL), rm->vnum,
 	        COLOR_NORMAL(ch, CL_NORMAL), real_room(rm->vnum), sector_types[type]);
 
-	ch->Send(buf);
+	ch->send(buf);
 
 	sprintbit((long)rm->room_flags, (const char**)room_bits, buf2);
 	sprintf(buf, "SpecProc: %s, Flags: %s\r\n",
 	        (rm->func == NULL) ? "None" : "Exists", buf2);
 
-	ch->Send(buf);
+	ch->send(buf);
 
-	ch->Send("Description:\r\n");
+	ch->send("Description:\r\n");
 
 	if (rm->description)
-		ch->Send(rm->description);
+		ch->send(rm->description);
 	else
-		ch->Send("  None.\r\n");
+		ch->send("  None.\r\n");
 
 	if (rm->ex_description)
 	{
@@ -3186,7 +3174,7 @@ void do_stat_room(Character * ch)
 		}
 
 		strcat(buf, COLOR_NORMAL(ch, CL_NORMAL));
-		ch->Send(strcat(buf, "\r\n"));
+		ch->send(strcat(buf, "\r\n"));
 	}
 
 	sprintf(buf, "Chars present:%s", COLOR_YELLOW(ch, CL_NORMAL));
@@ -3202,17 +3190,17 @@ void do_stat_room(Character * ch)
 		if (strlen(buf) >= 62)
 		{
 			if (k->next_in_room)
-				ch->Send(strcat(buf, ",\r\n"));
+				ch->send(strcat(buf, ",\r\n"));
 			else
-				ch->Send(strcat(buf, "\r\n"));
+				ch->send(strcat(buf, "\r\n"));
 			*buf = found = 0;
 		}
 	}
 
 	if (*buf)
-		ch->Send(strcat(buf, "\r\n"));
+		ch->send(strcat(buf, "\r\n"));
 
-	ch->Send(COLOR_NORMAL(ch, CL_NORMAL));
+	ch->send(COLOR_NORMAL(ch, CL_NORMAL));
 
 	if (rm->contents)
 	{
@@ -3228,17 +3216,17 @@ void do_stat_room(Character * ch)
 			if (strlen(buf) >= 62)
 			{
 				if (j->next_content)
-					ch->Send(strcat(buf, ",\r\n"));
+					ch->send(strcat(buf, ",\r\n"));
 
 				else
-					ch->Send(strcat(buf, "\r\n"));
+					ch->send(strcat(buf, "\r\n"));
 				*buf = found = 0;
 			}
 		}
 
 		if (*buf)
-			ch->Send(strcat(buf, "\r\n"));
-		ch->Send(COLOR_NORMAL(ch, CL_NORMAL));
+			ch->send(strcat(buf, "\r\n"));
+		ch->send(COLOR_NORMAL(ch, CL_NORMAL));
 	}
 
 	for (i = 0; i < NUM_OF_DIRS; ++i)
@@ -3257,7 +3245,7 @@ void do_stat_room(Character * ch)
 			sprintf(buf, "Exit %s%-5s%s:  To: [%s], Key: [%5d], Keywrd: %s, Type: %s\r\n ",
 			        COLOR_CYAN(ch, CL_NORMAL), dirs[i], COLOR_NORMAL(ch, CL_NORMAL), buf1, rm->dir_option[i]->key,
 			        rm->dir_option[i]->keyword ? rm->dir_option[i]->keyword : "None", sBuf);
-			ch->Send(buf);
+			ch->send(buf);
 
 
 			if (rm->dir_option[i]->general_description)
@@ -3265,12 +3253,10 @@ void do_stat_room(Character * ch)
 			else
 				strcpy(buf, "  No exit description.\r\n");
 
-			ch->Send(buf);
+			ch->send(buf);
 		}
 	}
-#ifdef KINSLAYER_JAVASCRIPT
 	js_list_scripts(ch->in_room,ch);
-#endif
 }
 
 void do_stat_object(Character * ch, Object * j)
@@ -3287,7 +3273,7 @@ void do_stat_object(Character * ch, Object * j)
 	        ((j->GetSDesc()) ? j->GetSDesc() : "<None>"),
 	        COLOR_NORMAL(ch, CL_NORMAL), j->getName());
 
-	ch->Send(buf);
+	ch->send(buf);
 
 	if (GET_OBJ_RNUM(j) >= 0)
 		strcpy(buf2, (obj_index[GET_OBJ_RNUM(j)].func ? "Exists" : "None"));
@@ -3298,9 +3284,9 @@ void do_stat_object(Character * ch, Object * j)
 	        COLOR_GREEN(ch, CL_NORMAL), vnum, COLOR_NORMAL(ch, CL_NORMAL), GET_OBJ_RNUM(j), item_types[(int)GET_OBJ_TYPE(j)],
 	        buf2, (j->item_number < (int) ItemCount.size() && j->item_number > -1) ? itos(ItemCount[j->item_number]).c_str() : "Unknown");
 
-	ch->Send(buf);
+	ch->send(buf);
 	sprintf(buf, "L-Des: %s\r\n", ((j->description) ? j->description : "None"));
-	ch->Send(buf);
+	ch->send(buf);
 
 	if (j->ex_description)
 	{
@@ -3313,35 +3299,35 @@ void do_stat_object(Character * ch, Object * j)
 		}
 
 		strcat(buf, COLOR_NORMAL(ch, CL_NORMAL));
-		ch->Send(strcat(buf, "\r\n"), ch);
+		ch->send(strcat(buf, "\r\n"), ch);
 	}
-	ch->Send("Item ID: %s%s%s%s\r\n", COLOR_BOLD(ch, CL_COMPLETE), COLOR_GREEN(ch, CL_COMPLETE),
+	ch->send("Item ID: %s%s%s%s\r\n", COLOR_BOLD(ch, CL_COMPLETE), COLOR_GREEN(ch, CL_COMPLETE),
 		ToString(j->objID).c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
 
-	ch->Send("Created: %s%s%s%s\r\n", COLOR_BOLD(ch, CL_COMPLETE), COLOR_GREEN(ch, CL_COMPLETE),
+	ch->send("Created: %s%s%s%s\r\n", COLOR_BOLD(ch, CL_COMPLETE), COLOR_GREEN(ch, CL_COMPLETE),
 		DateTime::parse("%m-%d-%Y %H:%M:%S", j->createdDatetime).c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
-	ch->Send("Creator: %s%s%s%s\r\n", COLOR_BOLD(ch, CL_COMPLETE),
+	ch->send("Creator: %s%s%s%s\r\n", COLOR_BOLD(ch, CL_COMPLETE),
 	         COLOR_GREEN(ch, CL_COMPLETE), j->creator.c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
 
-	ch->Send("Can be worn on: ");
+	ch->send("Can be worn on: ");
 	sprintbit(j->obj_flags.wear_flags, wear_bits, buf);
 	strcat(buf, "\r\n");
-	ch->Send(buf, ch);
+	ch->send(buf, ch);
 
-	ch->Send("Set char bits : ");
+	ch->send("Set char bits : ");
 	sprintbitarray( (int *) j->obj_flags.bitvector, affected_bits, TW_ARRAY_MAX, buf);
 	strcat(buf, "\r\n");
-	ch->Send(buf);
+	ch->send(buf);
 
-	ch->Send("Extra flags   : ");
+	ch->send("Extra flags   : ");
 	sprintbit(GET_OBJ_EXTRA(j), extra_bits, buf);
 	strcat(buf, "\r\n");
-	ch->Send(buf);
+	ch->send(buf);
 
 	sprintf(buf, "Weight: %d, Value: %d, Cost/day: %d, Timer: %d, Purged: %s%s%s\r\n",
 	        (int) j->Weight(), GET_OBJ_COST(j), GET_OBJ_RENT(j), GET_OBJ_TIMER(j),
 			COLOR_GREEN(ch, CL_COMPLETE), (j->IsPurged() ? "Yes" : "No"), COLOR_NORMAL(ch, CL_COMPLETE));
-	ch->Send(buf);
+	ch->send(buf);
 
 	strcpy(buf, "In room: ");
 	if (!j->in_room)
@@ -3364,7 +3350,7 @@ void do_stat_object(Character * ch, Object * j)
 	strcat(buf, ", Worn by: ");
 	strcat(buf, j->worn_by ? GET_NAME(j->worn_by) : "Nobody");
 	strcat(buf, "\r\n");
-	ch->Send(buf);
+	ch->send(buf);
 
 	switch (GET_OBJ_TYPE(j))
 	{
@@ -3432,7 +3418,7 @@ void do_stat_object(Character * ch, Object * j)
 
 	}
 
-	ch->Send(strcat(buf, "\r\n"));
+	ch->send(strcat(buf, "\r\n"));
 
 	/*
 	 * I deleted the "equipment status" code from here because it seemed
@@ -3451,10 +3437,10 @@ void do_stat_object(Character * ch, Object * j)
 			if (strlen(buf) >= 62)
 			{
 				if (j2->next_content)
-					ch->Send(strcat(buf, ",\r\n"));
+					ch->send(strcat(buf, ",\r\n"));
 
 				else
-					ch->Send(strcat(buf, "\r\n"));
+					ch->send(strcat(buf, "\r\n"));
 
 				*buf = found = 0;
 
@@ -3462,14 +3448,14 @@ void do_stat_object(Character * ch, Object * j)
 		}
 
 		if (*buf)
-			ch->Send(strcat(buf, "\r\n"));
+			ch->send(strcat(buf, "\r\n"));
 
-		ch->Send(COLOR_NORMAL(ch, CL_NORMAL));
+		ch->send(COLOR_NORMAL(ch, CL_NORMAL));
 
 	}
 
 	found = 0;
-	ch->Send("Affections:");
+	ch->send("Affections:");
 
 	for (i = 0; i < MAX_OBJ_AFFECT; ++i)
 		if (j->affected[i].modifier)
@@ -3477,18 +3463,16 @@ void do_stat_object(Character * ch, Object * j)
 			sprinttype(j->affected[i].location, (const char **) apply_types, buf2);
 			sprintf(buf, "%s %+d to %s", found++ ? "," : "",
 			        j->affected[i].modifier, buf2);
-			ch->Send(buf);
+			ch->send(buf);
 		}
 
 	if (!found)
-		ch->Send(" None");
+		ch->send(" None");
 
-	//ch->Send("\r\nVAL1: %d\r\n", GET_OBJ_VAL(j, 1));
-	ch->Send("\r\n");
+	//ch->send("\r\nVAL1: %d\r\n", GET_OBJ_VAL(j, 1));
+	ch->send("\r\n");
 
-#ifdef KINSLAYER_JAVASCRIPT
 	js_list_scripts(j,ch);
-#endif
 }
 
 void do_stat_character(Character * ch, Character * k)
@@ -3506,13 +3490,13 @@ void do_stat_character(Character * ch, Character * k)
 
 	if( GET_LEVEL(ch) < GET_LEVEL(k) )
 	{
-		ch->Send("You can't do that.\r\n");
+		ch->send("You can't do that.\r\n");
 		return;
 	}
 
 	if( !IS_NPC(k) && GET_LEVEL(ch) < LVL_GRGOD )
 	{
-		ch->Send("You can't statfind other players.\r\n");
+		ch->send("You can't statfind other players.\r\n");
 		return;
 	}
 
@@ -3542,16 +3526,16 @@ void do_stat_character(Character * ch, Character * k)
 			yel, (k->in_room ? k->in_room->vnum : -1), nrm,
 			yel, (k->StartRoom() ? k->StartRoom()->vnum : -1), nrm,
 			yel, k->wait, nrm);
-	ch->Send(strcat(buf, buf2));
+	ch->send(strcat(buf, buf2));
 
 	if (IS_MOB(k))
-		ch->Send("Alias: %s%s%s, VNum: [%s%5d%s], RNum: [%s%5d%s], Purged: %s%s%s\r\n",
+		ch->send("Alias: %s%s%s, VNum: [%s%5d%s], RNum: [%s%5d%s], Purged: %s%s%s\r\n",
 		         grn, k->player.name.c_str(), nrm, yel, GET_MOB_VNUM(k), nrm, yel, GET_MOB_RNUM(k), nrm,
 				 grn, (k->IsPurged() ? "Yes" : "No"), nrm);
 
-	ch->Send("Title: %s%s%s\r\n", grn, (!k->player.title.empty() ? k->player.title.c_str() : "<None>"), nrm);
+	ch->send("Title: %s%s%s\r\n", grn, (!k->player.title.empty() ? k->player.title.c_str() : "<None>"), nrm);
 
-	ch->Send("L-Des: %s%s%s", grn, (k->player.long_descr ? k->player.long_descr : "<None>\r\n"), nrm);
+	ch->send("L-Des: %s%s%s", grn, (k->player.long_descr ? k->player.long_descr : "<None>\r\n"), nrm);
 
 	strcpy(buf, "Class: ");
 	sprinttype(k->player.chclass, pc_class_types, buf2);
@@ -3566,19 +3550,19 @@ void do_stat_character(Character * ch, Character * k)
 	        COLOR_YELLOW(ch, CL_NORMAL), GET_DEATH_WAIT(k), COLOR_NORMAL(ch, CL_NORMAL),
 	        COLOR_YELLOW(ch, CL_NORMAL), FLEE_LAG(k), COLOR_NORMAL(ch, CL_NORMAL));
 	strcat(buf, buf2);
-	ch->Send(buf);
+	ch->send(buf);
 
 	if (!IS_NPC(k))
 	{
 		strcpy(buf1, DateTime::parse("%m-%d-%Y", k->player.time.birth).c_str());
 		strcpy(buf2, DateTime::parse("%m-%d-%Y", k->points.last_logon).c_str());
 
-		ch->Send("Created: [%s%s%s], Last Logon: [%s%s%s], Played [%s%d%sh %s%d%sm], Age [%s%d%s]\r\n",
+		ch->send("Created: [%s%s%s], Last Logon: [%s%s%s], Played [%s%d%sh %s%d%sm], Age [%s%d%s]\r\n",
 				grn, buf1, nrm, grn, buf2, nrm, yel, (k->player.time.played / 3600), nrm,
 				yel, ((k->player.time.played % 3600) / 60), nrm, yel, age(k)->year, nrm);
 	}
 
-	ch->Send("Str: [%s%d%s]  Int: [%s%d%s]  Wis: [%s%d%s]  "
+	ch->send("Str: [%s%d%s]  Int: [%s%d%s]  Wis: [%s%d%s]  "
 	         "Dex: [%s%d%s]  Con: [%s%d%s]  Luck: [%s%d%s]\r\n",
 	         cyn, k->GetStr(), nrm,
 	         cyn, k->GetInt(), nrm,
@@ -3587,18 +3571,18 @@ void do_stat_character(Character * ch, Character * k)
 	         cyn, k->GetCon(), nrm,
 	         cyn, k->GetLuck(),nrm);
 
-	ch->Send("Total Quest Points [%s%d%s], Weave Points [%s%d%s], Legend [%s%d%s].\r\n",
+	ch->send("Total Quest Points [%s%d%s], Weave Points [%s%d%s], Legend [%s%d%s].\r\n",
 	         grn, k->TotalQP(), nrm,
 	         grn, GET_WP(k), nrm,
 	         grn, k->GetLegend(), nrm);
 
-	ch->Send("Hit p.:[%s%d/%d+%d%s]  Spell p.:[%s%d/%d+%d%s]  Move p.:[%s%d/%d(%d)+%d%s]  Shadow[%s%d/%d+%d%s]\r\n",
+	ch->send("Hit p.:[%s%d/%d+%d%s]  Spell p.:[%s%d/%d+%d%s]  Move p.:[%s%d/%d(%d)+%d%s]  Shadow[%s%d/%d+%d%s]\r\n",
 	         COLOR_GREEN(ch, CL_NORMAL), (int)GET_HIT(k), (int)GET_MAX_HIT(k), k->HitGain(), COLOR_NORMAL(ch, CL_NORMAL),
 	         COLOR_GREEN(ch, CL_NORMAL), (int)GET_MANA(k),(int)GET_MAX_MANA(k), k->ManaGain(), COLOR_NORMAL(ch, CL_NORMAL),
 	         COLOR_GREEN(ch, CL_NORMAL), (int)GET_MOVE(k), (int)GET_MAX_MOVE(k), k->BaseMoves(), k->MoveGain(), COLOR_NORMAL(ch, CL_NORMAL),
 	         COLOR_GREEN(ch, CL_NORMAL), (int)GET_SHADOW(k), (int)GET_MAX_SHADOW(k), k->ShadowGain(), COLOR_NORMAL(ch, CL_NORMAL));
 
-	ch->Send("Strain: [%s%d%s], Taint: [%s%d%s], Dizzy Time: [%s%d%s]\r\n",
+	ch->send("Strain: [%s%d%s], Taint: [%s%d%s], Dizzy Time: [%s%d%s]\r\n",
              COLOR_GREEN(ch, CL_NORMAL), (int)k->points.strain, COLOR_NORMAL(ch, CL_NORMAL),
 	         COLOR_GREEN(ch, CL_NORMAL), (int)k->points.taint, COLOR_NORMAL(ch, CL_NORMAL),
 	         COLOR_GREEN(ch, CL_NORMAL), k->dizzy_time, COLOR_NORMAL(ch, CL_NORMAL));
@@ -3612,11 +3596,11 @@ void do_stat_character(Character * ch, Character * k)
 			UserClan *userClan = (*userClanIter);
 			if(!ClanUtil::getClan(userClan->getClanId()))
 			{
-				ch->Send("Invalid clan: [%s%d%s]", COLOR_GREEN(ch, CL_NORMAL), userClan->getClanId(), COLOR_NORMAL(ch, CL_NORMAL));
+				ch->send("Invalid clan: [%s%d%s]", COLOR_GREEN(ch, CL_NORMAL), userClan->getClanId(), COLOR_NORMAL(ch, CL_NORMAL));
 				return;
 			}
 			time_t rt = userClan->getLastRankedDatetime().getTime(), ct = userClan->getClannedDatetime().getTime();
-			ch->Send("Clan [%s%s%s], Rank [%s%d%s], Clanned [%s%s%s], Ranked [%s%s%s], Quest Points [%s%d%s], To Rank [%s%d%s]\r\n",
+			ch->send("Clan [%s%s%s], Rank [%s%d%s], Clanned [%s%s%s], Ranked [%s%s%s], Quest Points [%s%d%s], To Rank [%s%d%s]\r\n",
 			         COLOR_GREEN(ch, CL_NORMAL), ClanUtil::getClan(userClan->getClanId())->Name.c_str(), COLOR_NORMAL(ch, CL_NORMAL),
 			         COLOR_GREEN(ch, CL_NORMAL), (int)userClan->getRank(), COLOR_NORMAL(ch, CL_NORMAL),
 					 COLOR_GREEN(ch, CL_NORMAL), Time::FormatDate("%m-%d-%Y",ct).c_str(), COLOR_NORMAL(ch, CL_NORMAL),
@@ -3626,26 +3610,26 @@ void do_stat_character(Character * ch, Character * k)
 		}
 	}
 
-	ch->Send("Warrants: ");
+	ch->send("Warrants: ");
 	for(w = Warrants.begin();w != Warrants.end();++w)
 	{
 		if(IS_SET_AR(GET_WARRANTS(k), (*w)->vnum))
 		{
 			if(passed)
-				ch->Send(", ");
+				ch->send(", ");
 			else
 				passed = true;
-			ch->Send("%s%s%s", COLOR_GREEN(ch, CL_COMPLETE), (*w)->Name.c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
+			ch->send("%s%s%s", COLOR_GREEN(ch, CL_COMPLETE), (*w)->Name.c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
 		}
 	}
 	if(!passed)
-		ch->Send("%sNone%s", COLOR_GREEN(ch, CL_COMPLETE), COLOR_NORMAL(ch, CL_COMPLETE));
-	ch->Send("\r\n");
+		ch->send("%sNone%s", COLOR_GREEN(ch, CL_COMPLETE), COLOR_NORMAL(ch, CL_COMPLETE));
+	ch->send("\r\n");
 
-	ch->Send("Gold: [%9d], Bank: [%9d] (Total: %d)\r\n",
+	ch->send("Gold: [%9d], Bank: [%9d] (Total: %d)\r\n",
              (int) k->points.gold, (int) GET_BANK_GOLD(k), (int) k->points.gold + (int) GET_BANK_GOLD(k));
 
-	ch->Send("ABS: [%d], Offense: [%2d], Dodge: [%2d], Parry: [%2d], Damroll: [%2d]\r\n",
+	ch->send("ABS: [%d], Offense: [%2d], Dodge: [%2d], Parry: [%2d], Damroll: [%2d]\r\n",
              k->Absorb(), k->Offense(), k->Dodge(), k->Parry(),(int) k->points.damroll);
 
 	sprinttype(GET_POS(k), (const char **) position_types, buf2);
@@ -3673,23 +3657,23 @@ void do_stat_character(Character * ch, Character * k)
 	}
 	sprintf(buf2, ", Idle Timer (in tics) [%d]\r\n", k->player.timer);
 	strcat(buf, buf2);
-	ch->Send(buf);
+	ch->send(buf);
 
 	if (IS_NPC(k))
 	{
 		sprintbit(MOB_FLAGS(k), action_bits, buf2);
 		sprintf(buf, "NPC flags: %s%s%s\r\n", COLOR_CYAN(ch, CL_NORMAL), buf2, COLOR_NORMAL(ch, CL_NORMAL));
-		ch->Send(buf);
+		ch->send(buf);
 	}
 
 	else
 	{
 		sprintbit(PLR_FLAGS(k), player_bits, buf2);
 		sprintf(buf, "PLR: %s%s%s\r\n", COLOR_CYAN(ch, CL_NORMAL), buf2, COLOR_NORMAL(ch, CL_NORMAL));
-		ch->Send(buf);
+		ch->send(buf);
 		sprintbitarray(PRF_FLAGS(k), preference_bits, PM_ARRAY_MAX, buf2);
 		sprintf(buf, "PRF: %s%s%s\r\n", COLOR_GREEN(ch, CL_NORMAL), buf2, COLOR_NORMAL(ch, CL_NORMAL));
-		ch->Send(buf);
+		ch->send(buf);
 	}
 
 	if(IS_MOB(k))
@@ -3697,7 +3681,7 @@ void do_stat_character(Character * ch, Character * k)
 		sprintf(buf, "Mob Spec-Proc: %s, NPC Bare Hand Dam: %dd%d\r\n",
 			(MobManager::GetManager().GetIndex(k->nr)->func ? "Exists" : "None"),
 			k->MobData->damnodice, k->MobData->damsizedice);
-		ch->Send(buf);
+		ch->send(buf);
 	}
 
 	sprintf(buf, "Carried: weight: %d, items: %d; ",
@@ -3713,14 +3697,14 @@ void do_stat_character(Character * ch, Character * k)
 
 	sprintf(buf2, "eq: %d\r\n", i2);
 	strcat(buf, buf2);
-	ch->Send(buf);
+	ch->send(buf);
 
 	if (!IS_NPC(k))
 	{
 		sprintf(buf, "Hunger: %d, Thirst: %d, Drunk: %d\r\n",
 			k->PlayerData->conditions[ FULL ], k->PlayerData->conditions[ THIRST ],
 			k->PlayerData->conditions[ DRUNK ]);
-		ch->Send(buf);
+		ch->send(buf);
 	}
 
 	sprintf(buf, "Master is: %s, Followers are:",
@@ -3734,22 +3718,22 @@ void do_stat_character(Character * ch, Character * k)
 		if (strlen(buf) >= 62)
 		{
 			if (fol->next)
-				ch->Send(strcat(buf, ",\r\n"));
+				ch->send(strcat(buf, ",\r\n"));
 
 			else
-				ch->Send(strcat(buf, "\r\n"));
+				ch->send(strcat(buf, "\r\n"));
 
 			*buf = found = 0;
 		}
 	}
 
 	if (*buf)
-		ch->Send(strcat(buf, "\r\n"));
+		ch->send(strcat(buf, "\r\n"));
 
 	/* Showing the bitvector*/
 	sprintbitarray(AFF_FLAGS(k), affected_bits, AF_ARRAY_MAX, buf2);
 	sprintf(buf, "AFF: %s%s%s\r\n", COLOR_YELLOW(ch, CL_NORMAL), buf2, COLOR_NORMAL(ch, CL_NORMAL));
-	ch->Send(buf);
+	ch->send(buf);
 
 	/* Routine to show what spells a char is affected by */
 
@@ -3780,12 +3764,10 @@ void do_stat_character(Character * ch, Character * k)
 				strcat(buf, buf2);
 			}
 
-			ch->Send(strcat(buf, "\r\n"));
+			ch->send(strcat(buf, "\r\n"));
 		}
 	}
-#ifdef KINSLAYER_JAVASCRIPT
 	js_list_scripts( k, ch );
-#endif
 }
 
 ACMD(do_statfind)
@@ -3798,7 +3780,7 @@ ACMD(do_statfind)
 
 	if (!*buf1)
 	{
-		ch->Send("Stats on who or what?\r\n");
+		ch->send("Stats on who or what?\r\n");
 		return;
 	}
 	else if (IsAbbrev(buf1, "room"))
@@ -3808,41 +3790,41 @@ ACMD(do_statfind)
 	else if (IsAbbrev(buf1, "mob"))
 	{
 		if (!*buf2)
-			ch->Send("Stats on which mobile?\r\n");
+			ch->send("Stats on which mobile?\r\n");
 		else
 		{
 			if ((victim = get_char_vis(ch, buf2)))
 				do_stat_character(ch, victim);
 			else
-				ch->Send("No such mobile around.\r\n");
+				ch->send("No such mobile around.\r\n");
 		}
 	}
 	else if (IsAbbrev(buf1, "player"))
 	{
 		if (!*buf2)
 		{
-			ch->Send("Stats on which player?\r\n");
+			ch->send("Stats on which player?\r\n");
 		}
 		else
 		{
 			if ((victim = get_player_vis(ch, buf2, 0)) && GET_LEVEL(victim) < GET_LEVEL(ch))
 				do_stat_character(ch, victim);
 			else
-				ch->Send("No such player around.\r\n");
+				ch->send("No such player around.\r\n");
 		}
 	}
 	else if (IsAbbrev(buf1, "file"))
 	{
 		if (!*buf2)
 		{
-			ch->Send("Stats on which player?\r\n");
+			ch->send("Stats on which player?\r\n");
 		}
 		else
 		{
 			if( (victim = CharacterUtil::loadCharacter(buf2)) != NULL )
 			{
 				if (GET_LEVEL(victim) > GET_LEVEL(ch))
-					ch->Send("Sorry, you can't do that.\r\n");
+					ch->send("Sorry, you can't do that.\r\n");
 				else {
 					do_stat_character(ch, victim);
 				}
@@ -3850,7 +3832,7 @@ ACMD(do_statfind)
 			}
 			else
 			{
-				ch->Send("There is no such player.\r\n");
+				ch->send("There is no such player.\r\n");
 			}
 			victim = NULL;
 		}
@@ -3858,7 +3840,7 @@ ACMD(do_statfind)
 	else if (IsAbbrev(buf1, "object"))
 	{
 		if (!*buf2)
-			ch->Send("Stats on which object?\r\n");
+			ch->send("Stats on which object?\r\n");
 		else
 		{
 			try {
@@ -3879,16 +3861,16 @@ ACMD(do_statfind)
 						object->Extract();
 					}
 					else {
-						ch->Send("No such object around.\r\n");
+						ch->send("No such object around.\r\n");
 					}
 				}
 				else {
-					ch->Send("No such object around.\r\n");
+					ch->send("No such object around.\r\n");
 				}
 			}
 			catch(...) {
 
-				ch->Send("wtferror\r\n");
+				ch->send("wtferror\r\n");
 				return;
 			}
 		}
@@ -3908,37 +3890,37 @@ ACMD(do_statfind)
 		else if ((object = get_obj_vis(ch, buf1)))
 			do_stat_object(ch, object);
 		else
-			ch->Send("Nothing around by that name.\r\n");
+			ch->send("Nothing around by that name.\r\n");
 	}
 }
 
-void Character::StopSnooping()
+void Character::stopSnooping()
 {
 	if( !desc || !desc->snooping )
-		this->Send("You aren't snooping anyone.\r\n");
+		this->send("You aren't snooping anyone.\r\n");
 	else
 	{
-		if( !this->HasPermissionToSnoop() )
+		if( !this->hasPermissionToSnoop() )
 		{
-			this->Send("You drop your snooping request.\r\n");
-			this->desc->snooping->Send("%s has dropped the snooping request.\r\n",
+			this->send("You drop your snooping request.\r\n");
+			this->desc->snooping->send("%s has dropped the snooping request.\r\n",
 				PERS(this, this->desc->snooping->character));
 			MudLog(BRF, MAX(GET_LEVEL(this), LVL_APPR), TRUE, "%s has dropped %s snooping request", GET_NAME(this),
 				HSHR(this));
 		}
 		else
 		{
-			this->Send("You stop snooping.\r\n");
+			this->send("You stop snooping.\r\n");
 			if( GET_LEVEL(this) < LVL_IMPL )
 			{
-				this->desc->snooping->Send("%s has stopped snooping you.\r\n", PERS(this, this->desc->snooping->character));
+				this->desc->snooping->send("%s has stopped snooping you.\r\n", PERS(this, this->desc->snooping->character));
 				MudLog(BRF, MAX(GET_LEVEL(this), LVL_APPR), TRUE, "%s has stopped snooping %s.", GET_NAME(this),
 					GET_NAME(this->desc->snooping->character));
 			}
 		}
 		this->desc->snooping->snoop_by = NULL;
 		this->desc->snooping = NULL;
-		if( this->HasPermissionToSnoop() ) this->ToggleSnoop();
+		if( this->hasPermissionToSnoop() ) this->ToggleSnoop();
 	}
 }
 
@@ -3948,7 +3930,7 @@ ACMD(do_shutdown)
 
 	if (subcmd != SCMD_SHUTDOWN)
 	{
-		ch->Send("If you want to shut something down, say so!\r\n");
+		ch->send("If you want to shut something down, say so!\r\n");
 		return;
 	}
 
@@ -3957,7 +3939,7 @@ ACMD(do_shutdown)
 	if (!*arg)
 	{
 		Log("(GC) Shutdown by %s.", GET_NAME(ch));
-		ch->Send("Shutdown by %s.\r\n", GET_NAME(ch));
+		ch->send("Shutdown by %s.\r\n", GET_NAME(ch));
 		circle_shutdown = 1;
 	}
 }
@@ -3967,14 +3949,14 @@ ACMD(do_deny)
 
 	Character *Snooper;
 	if( !ch->desc || !ch->desc->snoop_by || (ch->desc && ch->desc->snoop_by && ch->desc->snoop_by->character &&
-	ch->desc->snoop_by->character->HasPermissionToSnoop() ) )
+	ch->desc->snoop_by->character->hasPermissionToSnoop() ) )
 	{
-		ch->Send("But nobody is requesting to snoop you.\r\n");
+		ch->send("But nobody is requesting to snoop you.\r\n");
 		return;
 	}
 	Snooper = ch->desc->snoop_by->character;
-	ch->Send("You have denied %s permission to snoop you.\r\n", PERS(Snooper,ch));
-	Snooper->Send("%s has denied you permission to snoop.\r\n", PERS(ch,Snooper));
+	ch->send("You have denied %s permission to snoop you.\r\n", PERS(Snooper,ch));
+	Snooper->send("%s has denied you permission to snoop.\r\n", PERS(ch,Snooper));
 	MudLog(BRF, MAX(GET_LEVEL(ch), LVL_APPR), TRUE, "%s has denied %s permission to snoop.",
 		GET_NAME(ch), GET_NAME(Snooper));
 
@@ -3986,32 +3968,30 @@ ACMD(do_deny)
 ACMD(do_grant)
 {
 	if( !ch->desc || !ch->desc->snoop_by || (ch->desc && ch->desc->snoop_by && ch->desc->snoop_by->character &&
-	ch->desc->snoop_by->character->HasPermissionToSnoop() ) )
+	ch->desc->snoop_by->character->hasPermissionToSnoop() ) )
 	{
-		ch->Send("But nobody is requesting to snoop you.\r\n");
+		ch->send("But nobody is requesting to snoop you.\r\n");
 		return;
 	}
 	Character *Snooper = ch->desc->snoop_by->character;
-	ch->Send("You have granted %s permission to snoop you.\r\n", PERS(Snooper,ch));
-	Snooper->Send("%s has granted you permission to snoop.\r\n", PERS(ch,Snooper));
+	ch->send("You have granted %s permission to snoop you.\r\n", PERS(Snooper,ch));
+	Snooper->send("%s has granted you permission to snoop.\r\n", PERS(ch,Snooper));
 	Snooper->GrantPermissionToSnoop();
 
 	MudLog(BRF, MAX(GET_LEVEL(ch), LVL_APPR), TRUE, "%s has granted %s permission to snoop.",
 		GET_NAME(ch), GET_NAME(Snooper));
 }
 
-bool Character::HasPermissionToSnoop()
+bool Character::hasPermissionToSnoop()
 {
 	return this->PermissionToSnoop;
 }
-bool Descriptor::HasPermissionToSnoop()
-{
-	return (character && character->PermissionToSnoop);
-}
+
 void Character::GrantPermissionToSnoop()
 {
 	this->PermissionToSnoop = true;
 }
+
 void Character::ToggleSnoop()
 {
 	this->PermissionToSnoop = !this->PermissionToSnoop;
@@ -4027,17 +4007,17 @@ ACMD(do_snoop)
 	OneArgument(argument, ::arg);
 
 	if (!*::arg)
-		ch->StopSnooping();
+		ch->stopSnooping();
 	else if (!(victim = get_char_vis(ch, ::arg)))
-		ch->Send("No such person around.\r\n");
+		ch->send("No such person around.\r\n");
 	else if (!victim->desc)
-		ch->Send("There's no link.. nothing to snoop.\r\n");
+		ch->send("There's no link.. nothing to snoop.\r\n");
 	else if (victim == ch)
-		ch->StopSnooping();
+		ch->stopSnooping();
 	else if (victim->desc->snoop_by)
-		ch->Send("Busy already. \r\n");
+		ch->send("Busy already. \r\n");
 	else if (victim->desc->snooping == ch->desc)
-		ch->Send("Don't be stupid.\r\n");
+		ch->send("Don't be stupid.\r\n");
 	else
 	{
 		if (victim->desc->original)
@@ -4047,15 +4027,15 @@ ACMD(do_snoop)
 
 		if( GET_LEVEL(ch) < LVL_IMPL && GET_LEVEL(tch) > 5 )
 		{
-			if( ch->HasPermissionToSnoop() )
+			if( ch->hasPermissionToSnoop() )
 				ch->ToggleSnoop();//Unset the snooper's permission if it is set. They need to be granted permission again.
-			ch->Send("Requesting permission from %s...\r\n", PERS(tch, ch));
-			tch->Send("%s has requested permission to snoop you.\r\n", PERS(ch, tch));
+			ch->send("Requesting permission from %s...\r\n", PERS(tch, ch));
+			tch->send("%s has requested permission to snoop you.\r\n", PERS(ch, tch));
 		}
 		else
 		{
-			ch->Send(OK);
-			if( !ch->HasPermissionToSnoop() )
+			ch->send(OK);
+			if( !ch->hasPermissionToSnoop() )
 				ch->GrantPermissionToSnoop();
 		}
 
@@ -4076,20 +4056,20 @@ ACMD(do_switch)
 	OneArgument(argument, ::arg);
 
 	if (ch->desc->original)
-		ch->Send("You're already switched.\r\n");
+		ch->send("You're already switched.\r\n");
 	else if (!*::arg)
-		ch->Send("Switch with who?\r\n");
+		ch->send("Switch with who?\r\n");
 	else if (!(victim = get_char_vis(ch, ::arg)))
-		ch->Send("No such character.\r\n");
+		ch->send("No such character.\r\n");
 	else if (ch == victim)
-		ch->Send("Hee hee... we are jolly funny today, eh?\r\n");
+		ch->send("Hee hee... we are jolly funny today, eh?\r\n");
 	else if (victim->desc)
-		ch->Send("You can't do that, the body is already in use!\r\n");
+		ch->send("You can't do that, the body is already in use!\r\n");
 	else if ((GET_LEVEL(ch) < LVL_IMPL) && !IS_NPC(victim))
-		ch->Send("You aren't holy enough to use a mortal's body.\r\n");
+		ch->send("You aren't holy enough to use a mortal's body.\r\n");
 	else
 	{
-		ch->Send(OK);
+		ch->send(OK);
 
 		MudLog(NRM, MAX(LVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "%s has switched into %s.",
 		       GET_NAME(ch), GET_NAME(victim));
@@ -4107,7 +4087,7 @@ ACMD(do_return)
 {
 	if (ch->desc && ch->desc->original)
 	{
-		ch->Send("You return to your original body.\r\n");
+		ch->send("You return to your original body.\r\n");
 
 		/* JE 2/22/95 */
 		/* if someone switched into your original body, disconnect them */
@@ -4131,19 +4111,19 @@ ACMD(do_mbload)
 
 	if (!*buf || !isdigit(*buf))
 	{
-		ch->Send("Usage: mbload <number>\r\n");
+		ch->send("Usage: mbload <number>\r\n");
 		return;
 	}
 
 	if ((number = atoi(buf)) < 0)
 	{
-		ch->Send("A NEGATIVE number??\r\n");
+		ch->send("A NEGATIVE number??\r\n");
 		return;
 	}
 
 	if ((r_num = MobManager::GetManager().RealMobile(number)) < 0)
 	{
-		ch->Send("There is no monster with that number.\r\n");
+		ch->send("There is no monster with that number.\r\n");
 		return;
 	}
 
@@ -4158,9 +4138,7 @@ ACMD(do_mbload)
 
 	if( mob->IsPurged() ) return;
 
-#ifdef KINSLAYER_JAVASCRIPT
 	js_load_triggers(mob);
-#endif
 }
 
 ACMD(do_oload)
@@ -4172,24 +4150,24 @@ ACMD(do_oload)
 
 	if (!*buf || !isdigit(*buf))
 	{
-		ch->Send("Usage: oload <number>\r\n");
+		ch->send("Usage: oload <number>\r\n");
 		return;
 	}
 
 	if ((number = atoi(buf)) < 0)
 	{
-		ch->Send("A NEGATIVE number??\r\n");
+		ch->send("A NEGATIVE number??\r\n");
 		return;
 	}
 	if ((r_num = real_object(number)) < 0)
 	{
-		ch->Send("There is no object with that number.\r\n");
+		ch->send("There is no object with that number.\r\n");
 		return;
 	}
 
 	if( GET_OBJ_TYPE(obj_proto[r_num]) == ITEM_SPECIAL && GET_LEVEL(ch) < LVL_GRGOD )
 	{
-		ch->Send("That item is flagged as special. You may not load it.\r\n");
+		ch->send("That item is flagged as special. You may not load it.\r\n");
 		return;
 	}
 
@@ -4207,9 +4185,7 @@ ACMD(do_oload)
 		obj->MoveToRoom(ch->in_room);
 	if( obj->IsPurged() ) return;
 
-#ifdef KINSLAYER_JAVASCRIPT
 	js_load_triggers(obj);
-#endif
 }
 
 ACMD(do_vstat)
@@ -4222,13 +4198,13 @@ ACMD(do_vstat)
 
 	if (!*buf || !*buf2 || !isdigit(*buf2))
 	{
-		ch->Send("Usage: vstat { obj | mob } <number>\r\n");
+		ch->send("Usage: vstat { obj | mob } <number>\r\n");
 		return;
 	}
 
 	if ((number = atoi(buf2)) < 0)
 	{
-		ch->Send("A NEGATIVE number??\r\n");
+		ch->send("A NEGATIVE number??\r\n");
 		return;
 	}
 
@@ -4236,7 +4212,7 @@ ACMD(do_vstat)
 	{
 		if ((r_num = MobManager::GetManager().RealMobile(number)) < 0)
 		{
-			ch->Send("There is no monster with that number.\r\n");
+			ch->send("There is no monster with that number.\r\n");
 			return;
 		}
 
@@ -4250,7 +4226,7 @@ ACMD(do_vstat)
 	{
 		if ((r_num = real_object(number)) < 0)
 		{
-			ch->Send("There is no object with that number.\r\n");
+			ch->send("There is no object with that number.\r\n");
 			return;
 		}
 
@@ -4260,7 +4236,7 @@ ACMD(do_vstat)
 	}
 
 	else
-		ch->Send("That'll have to be either 'obj' or 'mob'.\r\n");
+		ch->send("That'll have to be either 'obj' or 'mob'.\r\n");
 }
 
 /* clean a room of all mobiles and objects */
@@ -4277,12 +4253,12 @@ ACMD(do_purge)
 		{
 			if (!IS_NPC(vict) && (GET_LEVEL(ch) <= GET_LEVEL(vict)) && !IS_KING(vict))
 			{
-				ch->Send("Fuuuuuuuuu!\r\n");
+				ch->send("Fuuuuuuuuu!\r\n");
 				return;
 			}
 			if(IS_KING(vict))
 			{
-				ch->Send("You can't strike the dictator! He is just much more... superb than you!\r\n");
+				ch->send("You can't strike the dictator! He is just much more... superb than you!\r\n");
 				return;
 			}
 			Act("$n disintegrates $N.", FALSE, ch, 0, vict, TO_NOTVICT);
@@ -4311,11 +4287,11 @@ ACMD(do_purge)
 
 		else
 		{
-			ch->Send("Nothing here by that name.\r\n");
+			ch->send("Nothing here by that name.\r\n");
 			return;
 		}
 
-		ch->Send(OK);
+		ch->send(OK);
 	}
 
 	else
@@ -4364,13 +4340,13 @@ ACMD(do_syslog)
 	{
 		tp = ((PRF_FLAGGED(ch, PRF_LOG1) ? 1 : 0) +
 		      (PRF_FLAGGED(ch, PRF_LOG2) ? 2 : 0));
-		ch->Send("Your syslog is currently %s.\r\n", logtypes[tp]);
+		ch->send("Your syslog is currently %s.\r\n", logtypes[tp]);
 		return;
 	}
 
 	if (((tp = search_block(::arg, ((const char **) logtypes), FALSE)) == -1))
 	{
-		ch->Send("Usage: syslog { Off | Brief | Normal | Complete }\r\n");
+		ch->send("Usage: syslog { Off | Brief | Normal | Complete }\r\n");
 		return;
 	}
 
@@ -4382,7 +4358,7 @@ ACMD(do_syslog)
 	if (tp & 2)
 		SET_BIT_AR(PRF_FLAGS(ch), PRF_LOG2);
 
-	ch->Send("Your syslog is now %s.\r\n", logtypes[tp]);
+	ch->send("Your syslog is now %s.\r\n", logtypes[tp]);
 }
 
 
@@ -4398,25 +4374,25 @@ ACMD(do_advance)
 
 	if(!*name)
 	{
-		ch->Send("Advance who?\r\n");
+		ch->send("Advance who?\r\n");
 		return;
 	}
 
 	if (!*level || (newlevel = atoi(level)) <= 0)
 	{
-		ch->Send("That's not a level!\r\n");
+		ch->send("That's not a level!\r\n");
 		return;
 	}
 
 	if (newlevel > LVL_IMPL)
 	{
-		ch->Send("%d is the highest possible level.\r\n", LVL_IMPL);
+		ch->send("%d is the highest possible level.\r\n", LVL_IMPL);
 		return;
 	}
 
 	if (newlevel > GET_LEVEL(ch))
 	{
-		ch->Send("Yeah, right.\r\n");
+		ch->send("Yeah, right.\r\n");
 		return;
 	}
 
@@ -4424,30 +4400,30 @@ ACMD(do_advance)
 	{
 		if( (victim = CharacterUtil::loadCharacter(name)) == NULL )
 		{
-			ch->Send(NOPERSON);
+			ch->send(NOPERSON);
 			return;
 		}
 		else
 		{
-			victim->LoadManaRolls();
-			victim->LoadHitRolls();
+			victim->loadManaRolls();
+			victim->loadHitRolls();
 			load = true;
 		}
 	}
 
 	if (GET_LEVEL(ch) <= GET_LEVEL(victim))
 	{
-		ch->Send("Maybe that's not such a great idea.\r\n");
+		ch->send("Maybe that's not such a great idea.\r\n");
 		CLEANUP(victim, load);
 	}
 	if (IS_NPC(victim))
 	{
-		ch->Send("NO!  Not on NPC's.\r\n");
+		ch->send("NO!  Not on NPC's.\r\n");
 		CLEANUP(victim, load);
 	}
 	if (newlevel == GET_LEVEL(victim))
 	{
-		ch->Send("They are already at that level.\r\n");
+		ch->send("They are already at that level.\r\n");
 		CLEANUP(victim, load);
 	}
 
@@ -4455,7 +4431,7 @@ ACMD(do_advance)
 
 	if (newlevel < GET_LEVEL(victim))
 	{
-		ch->Send("%s's level is higher than %d.\r\n", GET_NAME(victim), newlevel);
+		ch->send("%s's level is higher than %d.\r\n", GET_NAME(victim), newlevel);
 		CLEANUP(victim, load);
 	}
 	else
@@ -4463,7 +4439,7 @@ ACMD(do_advance)
 		Act("You gain some levels thanks to some nice immortal!", FALSE, ch, 0, victim, TO_VICT);
 	}
 
-	ch->Send(OK);
+	ch->send(OK);
 
 	for(i = GET_LEVEL(victim);i < newlevel;++i)
 	{
@@ -4472,11 +4448,11 @@ ACMD(do_advance)
 	}
 	GET_EXP(victim) = level_exp(GET_LEVEL(victim));
 
-	ch->Send("You raise %s's level from %d to %d.%s\r\n", GET_NAME(victim), oldlevel, newlevel,
+	ch->send("You raise %s's level from %d to %d.%s\r\n", GET_NAME(victim), oldlevel, newlevel,
 	         load ? " (Offline)" : "");
-	victim->BasicSave();
-	victim->SaveManaRolls();
-	victim->SaveHitRolls();
+	victim->basicSave();
+	victim->saveManaRolls();
+	victim->saveHitRolls();
 
 	MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE,
 	       "%s raised %s's level from %d to %d.%s", GET_NAME(ch), GET_NAME(victim), oldlevel, newlevel,
@@ -4493,10 +4469,10 @@ ACMD(do_restore)
 	OneArgument(argument, buf);
 
 	if (!*buf)
-		ch->Send("Whom do you wish to restore?\r\n");
+		ch->send("Whom do you wish to restore?\r\n");
 
 	else if (!(vict = get_char_vis(ch, buf)))
-		ch->Send(NOPERSON);
+		ch->send(NOPERSON);
 
 	else
 	{
@@ -4523,7 +4499,7 @@ ACMD(do_restore)
 		}
 
 		update_pos(vict);
-		ch->Send(OK);
+		ch->send(OK);
 		Act("You have been fully healed by $N!", FALSE, vict, 0, ch, TO_CHAR);
 
 		MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE, "%s restored %s's status points.",
@@ -4536,13 +4512,13 @@ void perform_immort_vis(Character *ch)
 {
 	if (GET_INVIS_LEV(ch) == 0 && !AFF_FLAGGED(ch, AFF_HIDE | AFF_INVISIBLE))
 	{
-		ch->Send("You are already fully visible.\r\n");
+		ch->send("You are already fully visible.\r\n");
 		return;
 	}
 
 	GET_INVIS_LEV(ch) = 0;
 	ch->Appear();
-	ch->Send("You are now fully visible.\r\n");
+	ch->send("You are now fully visible.\r\n");
 }
 
 
@@ -4569,7 +4545,7 @@ void perform_immort_invis(Character *ch, int level)
 	}
 
 	GET_INVIS_LEV(ch) = level;
-	ch->Send("Your invisibility level is %d.\r\n", level);
+	ch->send("Your invisibility level is %d.\r\n", level);
 }
 
 ACMD(do_invis)
@@ -4578,7 +4554,7 @@ ACMD(do_invis)
 
 	if (IS_NPC(ch))
 	{
-		ch->Send("You can't do that!\r\n");
+		ch->send("You can't do that!\r\n");
 		return;
 	}
 
@@ -4598,7 +4574,7 @@ ACMD(do_invis)
 		level = atoi(::arg);
 
 		if (level > GET_LEVEL(ch))
-			ch->Send("You can't go invisible above your own level.\r\n");
+			ch->send("You can't go invisible above your own level.\r\n");
 
 		else if (level < 1)
 			perform_immort_vis(ch);
@@ -4616,7 +4592,7 @@ ACMD(do_gecho)
 	delete_doubledollar(argument);
 
 	if (!*argument)
-		ch->Send("That must be a mistake...\r\n");
+		ch->send("That must be a mistake...\r\n");
 
 	else
 	{
@@ -4627,12 +4603,12 @@ ACMD(do_gecho)
 		for (pt = descriptor_list; pt; pt = pt->next)
 		{
 			if (STATE(pt) == CON_PLAYING && pt->character && pt->character != ch)
-				pt->Send(buf);
+				pt->send(buf);
 		}
 		if (PRF_FLAGGED(ch, PRF_NOREPEAT))
-			ch->Send(OK);
+			ch->send(OK);
 		else
-			ch->Send(buf);
+			ch->send(buf);
 	}
 }
 
@@ -4647,7 +4623,7 @@ ACMD(do_poofset)
 	else
 		return;
 
-	ch->Send(OK);
+	ch->send(OK);
 }
 
 ACMD(do_dc)
@@ -4659,7 +4635,7 @@ ACMD(do_dc)
 
 	if (!(num_to_dc = atoi(::arg)))
 	{
-		ch->Send("Usage: DC <user number> (type USERS for a list)\r\n");
+		ch->send("Usage: DC <user number> (type USERS for a list)\r\n");
 		return;
 	}
 
@@ -4668,16 +4644,16 @@ ACMD(do_dc)
 
 	if (!d)
 	{
-		ch->Send("No such connection.\r\n");
+		ch->send("No such connection.\r\n");
 		return;
 	}
 
 	if (d->character && GET_LEVEL(d->character) >= GET_LEVEL(ch))
 	{
 		if (!CAN_SEE(ch, d->character))
-			ch->Send("No such connection.\r\n");
+			ch->send("No such connection.\r\n");
 		else
-			ch->Send("Umm.. maybe that's not such a good idea...\r\n");
+			ch->send("Umm.. maybe that's not such a good idea...\r\n");
 
 		return;
 	}
@@ -4694,7 +4670,7 @@ ACMD(do_dc)
 	 * neater in appearance. -gg 12/1/97
 	 */
 	STATE(d) = CON_DISCONNECT;
-	ch->Send("Connection #%d closed.\r\n", num_to_dc);
+	ch->send("Connection #%d closed.\r\n", num_to_dc);
 	Log("(GC) Connection closed by %s.", GET_NAME(ch));
 
 	if(d->character)
@@ -4718,7 +4694,7 @@ ACMD(do_wizlock)
 
 		if (value < 0 || value > GET_LEVEL(ch))
 		{
-			ch->Send("Invalid wizlock value.\r\n");
+			ch->send("Invalid wizlock value.\r\n");
 			return;
 		}
 
@@ -4733,19 +4709,19 @@ ACMD(do_wizlock)
 	{
 
 		case 0:
-			ch->Send("The game is %s completely open.\r\n", when);
+			ch->send("The game is %s completely open.\r\n", when);
 			break;
 
 		case 1:
-			ch->Send("The game is %s closed to new players.\r\n", when);
+			ch->send("The game is %s closed to new players.\r\n", when);
 			break;
 
 		default:
-			ch->Send("Only level %d and above may enter the game %s.\r\n",
+			ch->send("Only level %d and above may enter the game %s.\r\n",
 			         circle_restrict, when);
 			break;
 	}
-	Conf->Save();
+	Conf->save();
 }
 
 ACMD(do_date)
@@ -4764,7 +4740,7 @@ ACMD(do_date)
 	*(tmstr + strlen(tmstr) - 1) = '\0';
 
 	if (subcmd == SCMD_DATE)
-		ch->Send("Current machine time: %s\r\n", tmstr);
+		ch->send("Current machine time: %s\r\n", tmstr);
 
 	else
 	{
@@ -4775,7 +4751,7 @@ ACMD(do_date)
 
 		std::stringstream displayBuffer;
 		displayBuffer << "Up since " << tmstr << ": " << d << " day" << ((d == 1) ? "" : "s") << ", " << h << ":" << m;
-		ch->Send("%s\r\n", displayBuffer.str().c_str());
+		ch->send("%s\r\n", displayBuffer.str().c_str());
 	}
 }
 
@@ -4788,32 +4764,32 @@ ACMD(do_last)
 
 	if (!*::arg)
 	{
-		ch->Send("For whom do you wish to search?\r\n");
+		ch->send("For whom do you wish to search?\r\n");
 		return;
 	}
 
 	if(!playerExists(::arg))
 	{
-		ch->Send("There is no such player.\r\n");
+		ch->send("There is no such player.\r\n");
 		return;
 	}
 
 	if( (vict = CharacterUtil::loadCharacter(::arg)) == NULL || !Character::LoadLogins(Logins,vict->player.name,1))
 	{
-		ch->Send("Error loading player.");
+		ch->send("Error loading player.");
 		return;
 	}
 	else if ((GET_LEVEL(vict) > GET_LEVEL(ch)) && (GET_LEVEL(ch) < LVL_IMPL))
 	{
-		ch->Send("You are not sufficiently godly enough for that!\r\n");
+		ch->send("You are not sufficiently godly enough for that!\r\n");
 	}
 	else if(!Logins.size())
 	{
-		ch->Send("Player does not have any logins recorded.\r\n");
+		ch->send("Player does not have any logins recorded.\r\n");
 	}
 	else
 	{
-		ch->Send("[%5ld] %-12s : %-18s : %-12s : %-20s\r\n", vict->player.idnum, GET_NAME(vict),
+		ch->send("[%5ld] %-12s : %-18s : %-12s : %-20s\r\n", vict->player.idnum, GET_NAME(vict),
 			GET_LEVEL(ch) >= LVL_GRGOD ? Logins.front().Host.c_str() : "", Logins.front().gatewayDescriptorType->getStandardName().c_str(),
 			Logins.front().time.toString().c_str() );
 		MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE, "%s checked %s's last login.",
@@ -4833,20 +4809,20 @@ ACMD(do_force)
 	sprintf(buf1, "$n has forced you to '%s'.", to_force);
 
 	if (!*::arg || !*to_force)
-		ch->Send("Whom do you wish to force do what?\r\n");
+		ch->send("Whom do you wish to force do what?\r\n");
 
 	else if ((GET_LEVEL(ch) < LVL_GRGOD) || (str_cmp("all", ::arg) && str_cmp("room", ::arg) && str_cmp("t_all", ::arg)))
 	{
 
 		if (!(vict = get_char_vis(ch, ::arg)))
-			ch->Send(NOPERSON);
+			ch->send(NOPERSON);
 
 		else if (GET_LEVEL(ch) <= GET_LEVEL(vict))
-			ch->Send("No, no, no!\r\n");
+			ch->send("No, no, no!\r\n");
 
 		else
 		{
-			ch->Send(OK);
+			ch->send(OK);
 			Act(buf1, TRUE, ch, NULL, vict, TO_VICT);
 
 			MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE,
@@ -4858,7 +4834,7 @@ ACMD(do_force)
 
 	else if (!str_cmp("room", ::arg))
 	{
-		ch->Send(OK);
+		ch->send(OK);
 
 		MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE,
 		       "(GC) %s forced room %d to %s", GET_NAME(ch), ch->in_room->vnum, to_force);
@@ -4878,7 +4854,7 @@ ACMD(do_force)
 	}
 	else if( !str_cmp(::arg, "all") )
 	{
-		ch->Send(OK);
+		ch->send(OK);
 		MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s forced all to %s", GET_NAME(ch), to_force);
 		for (i = descriptor_list; i; i = next_desc)
 		{
@@ -4893,7 +4869,7 @@ ACMD(do_force)
 	}
 	else if( !str_cmp(::arg, "t_all") )
 	{
-		ch->Send(OK);
+		ch->send(OK);
 		MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s forced all(mobs & players) to %s", GET_NAME(ch), to_force);
 		for( Character *vict = character_list;vict;vict = vict->next )
 		{
@@ -4922,13 +4898,13 @@ ACMD(do_gcomm)
 	
 	if (!*::arg)
 	{
-		ch->Send("Your current gcomm preference is set to: %s.\r\n", gcommtypes[GCOMM_LEV(ch)]);
+		ch->send("Your current gcomm preference is set to: %s.\r\n", gcommtypes[GCOMM_LEV(ch)]);
 		return;
 	}
 
 	if (((tp = search_block(::arg, (const char **) gcommtypes, FALSE)) == -1))
 	{
-		ch->Send("Usage: gcomm { Off | Colors | Flags | All }\r\n");
+		ch->send("Usage: gcomm { Off | Colors | Flags | All }\r\n");
 		return;
 	}
 	
@@ -4940,7 +4916,7 @@ ACMD(do_gcomm)
 	if (tp & 2)
 		SET_BIT_AR(PRF_FLAGS(ch), PRF_GCOMM_2);
 
-	ch->Send("Your gcomm preference is now set to %s%s%s.\r\n", COLOR_RED(ch, CL_SPARSE),
+	ch->send("Your gcomm preference is now set to %s%s%s.\r\n", COLOR_RED(ch, CL_SPARSE),
 	         gcommtypes[tp], COLOR_NORMAL(ch, CL_OFF));
 }
 
@@ -4956,7 +4932,7 @@ ACMD(do_wiznet)
 
 	if (!*argument)
 	{
-		ch->Send(	"Usage: wiznet <text> | #<level> <text> | *<emotetext> |\r\n "
+		ch->send(	"Usage: wiznet <text> | #<level> <text> | *<emotetext> |\r\n "
 		          "       wiznet @@<level> *<emotetext> | wiz @@\r\n");
 		return;
 	}
@@ -4977,7 +4953,7 @@ ACMD(do_wiznet)
 
 				if (level > GET_LEVEL(ch))
 				{
-					ch->Send("You can't wizline above your own level.\r\n");
+					ch->send("You can't wizline above your own level.\r\n");
 					return;
 				}
 			}
@@ -5035,7 +5011,7 @@ ACMD(do_wiznet)
 				}
 			}
 
-			ch->Send(buf1);
+			ch->send(buf1);
 			return;
 
 		case '\\':
@@ -5048,7 +5024,7 @@ ACMD(do_wiznet)
 
 	if (PRF_FLAGGED(ch, PRF_NOWIZ))
 	{
-		ch->Send("You are offline!\r\n");
+		ch->send("You are offline!\r\n");
 		return;
 	}
 
@@ -5057,7 +5033,7 @@ ACMD(do_wiznet)
 
 	if (!*argument)
 	{
-		ch->Send("Don't bother the gods like that!\r\n");
+		ch->send("Don't bother the gods like that!\r\n");
 		return;
 	}
 
@@ -5087,19 +5063,19 @@ ACMD(do_wiznet)
 		        && (d != ch->desc || !(PRF_FLAGGED(d->character, PRF_NOREPEAT))))
 		{
 
-			d->Send(COLOR_CYAN(d->character, CL_NORMAL));
+			d->send(COLOR_CYAN(d->character, CL_NORMAL));
 
 			if (CAN_SEE(d->character, ch))
-				SEND_TO_Q(buf1, d);
+				d->sendRaw(buf1);
 			else
-				SEND_TO_Q(buf2, d);
+				d->sendRaw(buf2);
 
-			d->Send(COLOR_NORMAL(d->character, CL_NORMAL));
+			d->send(COLOR_NORMAL(d->character, CL_NORMAL));
 		}
 	}
 
 	if (PRF_FLAGGED(ch, PRF_NOREPEAT))
-		ch->Send(OK);
+		ch->send(OK);
 }
 
 ACMD(do_zreset)
@@ -5111,7 +5087,7 @@ ACMD(do_zreset)
 
 	if (!*::arg)
 	{
-		ch->Send("You must specify a zone.\r\n");
+		ch->send("You must specify a zone.\r\n");
 		return;
 	}
 
@@ -5120,7 +5096,7 @@ ACMD(do_zreset)
 		for (i = 0; i < ZoneManager::GetManager().NumZones();++i)
 			ZoneManager::GetManager().GetZoneByRnum(i)->Reset();
 
-		ch->Send("Reset world.\r\n");
+		ch->send("Reset world.\r\n");
 		MudLog(NRM, MAX(LVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s reset entire world.", GET_NAME(ch));
 		return;
 	}
@@ -5132,12 +5108,12 @@ ACMD(do_zreset)
 	if (zone)
 	{
 		zone->Reset();
-		ch->Send("Reset zone %d (#%d): %s.\r\n", zone->GetRnum(), zone->getVnum(), zone->getName().c_str());
+		ch->send("Reset zone %d (#%d): %s.\r\n", zone->GetRnum(), zone->getVnum(), zone->getName().c_str());
 		MudLog(NRM, MAX(LVL_GRGOD, GET_INVIS_LEV(ch)), TRUE,
 		       "(GC) %s reset zone %d (%s)", GET_NAME(ch), zone->getVnum(), zone->getName().c_str());
 	}
 	else
-		ch->Send("Invalid zone number.\r\n");
+		ch->send("Invalid zone number.\r\n");
 }
 
 ACMD(do_global_mute)
@@ -5150,19 +5126,19 @@ ACMD(do_global_mute)
 
 	if(!*arg)
 	{
-		ch->Send("But who are you wanting to do this to?\r\n");
+		ch->send("But who are you wanting to do this to?\r\n");
 		return;
 	}
 
 	if(!(vict = get_char_vis(ch, arg)))
 	{
-		ch->Send("There is no player by that name.\r\n");
+		ch->send("There is no player by that name.\r\n");
 		return;
 	}
 
 	if (GET_LEVEL(vict) >= GET_LEVEL(ch))
 	{
-		ch->Send("That isn't such a good idea...\r\n");
+		ch->send("That isn't such a good idea...\r\n");
 		return;
 	}
 
@@ -5172,13 +5148,13 @@ ACMD(do_global_mute)
 
 	if(result == TRUE)
 	{
-		ch->Send("%s is now unable to use the global channel.\r\n", GET_NAME(vict));
-		vict->Send("You have lost your ability to use the global channel.\r\n");
+		ch->send("%s is now unable to use the global channel.\r\n", GET_NAME(vict));
+		vict->send("You have lost your ability to use the global channel.\r\n");
 	}
 	else
 	{
-		ch->Send("%s is now able to use the global channel.\r\n", GET_NAME(vict));
-		vict->Send("Your ability to use the global channel has been restored.\r\n");
+		ch->send("%s is now able to use the global channel.\r\n", GET_NAME(vict));
+		vict->send("Your ability to use the global channel has been restored.\r\n");
 	}
 }
 
@@ -5192,19 +5168,19 @@ ACMD(do_tell_mute)
 
 	if(!*arg)
 	{
-		ch->Send("But who are you wanting to do this to?\r\n");
+		ch->send("But who are you wanting to do this to?\r\n");
 		return;
 	}
 
 	if(!(vict = get_char_vis(ch, arg)))
 	{
-		ch->Send("There is no player by that name.\r\n");
+		ch->send("There is no player by that name.\r\n");
 		return;
 	}
 
 	if (GET_LEVEL(vict) >= GET_LEVEL(ch))
 	{
-		ch->Send("That isn't such a good idea...\r\n");
+		ch->send("That isn't such a good idea...\r\n");
 		return;
 	}
 
@@ -5214,13 +5190,13 @@ ACMD(do_tell_mute)
 
 	if(result == TRUE)
 	{
-		ch->Send("%s is now mute to tells, and cannot send them.\r\n", GET_NAME(vict));
-		vict->Send("You have lost your ability to send tells.\r\n");
+		ch->send("%s is now mute to tells, and cannot send them.\r\n", GET_NAME(vict));
+		vict->send("You have lost your ability to send tells.\r\n");
 	}
 	else
 	{
-		ch->Send("%s is now able to use tells.\r\n", GET_NAME(vict));
-		vict->Send("Your ability to send and receive tells has been restored.\r\n");
+		ch->send("%s is now able to use tells.\r\n", GET_NAME(vict));
+		vict->send("Your ability to send and receive tells has been restored.\r\n");
 	}
 }
 
@@ -5235,7 +5211,7 @@ ACMD(do_reroll)
 
 	if(!argument || !*name || !*type)
 	{
-		ch->Send("You can reroll: Moves, Hit, Mana, Stats, Height, Weight(Height/Weight rolls both), or Shadow.\r\n");
+		ch->send("You can reroll: Moves, Hit, Mana, Stats, Height, Weight(Height/Weight rolls both), or Shadow.\r\n");
 		return;
 	}
 
@@ -5243,7 +5219,7 @@ ACMD(do_reroll)
 	{
 		if( (vict = CharacterUtil::loadCharacter(name)) == NULL )
 		{
-			ch->Send(NOPERSON);
+			ch->send(NOPERSON);
 			return;
 		}
 		else
@@ -5253,13 +5229,13 @@ ACMD(do_reroll)
 	if(!strn_cmp(type, "stats", strlen(type)))
 	{
 		type_name = "stats";
-		ch->Send("Stats rerolled...\r\n");
+		ch->send("Stats rerolled...\r\n");
 		StatManager::GetManager().RollStats( vict );
 
 		MudLog(NRM, MAX(LVL_BLDER, GET_INVIS_LEV(ch)), TRUE,
 		       "(GC) %s has rerolled %s's stats.", GET_NAME(ch), GET_NAME(vict));
 
-		ch->Send("New stats: Str %d, Int %d, Wis %d, Dex %d, Con %d, Luck %d.\r\n",
+		ch->send("New stats: Str %d, Int %d, Wis %d, Dex %d, Con %d, Luck %d.\r\n",
 		         vict->GetStr(), vict->GetInt(), vict->GetWis(),
 				 vict->GetDex(), vict->GetCon(), vict->GetLuck());
 	}
@@ -5267,56 +5243,56 @@ ACMD(do_reroll)
 	else if(!strn_cmp(type, "moves", strlen(type)))
 	{
 		type_name = "moves";
-		ch->Send("Moves rerolled...\r\n");
+		ch->send("Moves rerolled...\r\n");
 		vict->RollMoves();
 
 		MudLog(NRM, MAX(LVL_BLDER, GET_INVIS_LEV(ch)), TRUE,
 		       "(GC) %s has rerolled %s's moves.", GET_NAME(ch), GET_NAME(vict));
 
-        ch->Send("Rerolled moves to %d.\r\n", (int) vict->BaseMoves());
+        ch->send("Rerolled moves to %d.\r\n", (int) vict->BaseMoves());
 	}
 	else if(!strn_cmp(type, "hit", strlen(type)))
 	{
-		vict->LoadHitRolls();
+		vict->loadHitRolls();
 		type_name = "health";
-		ch->Send("Hit Points re-rolled...\r\n");
+		ch->send("Hit Points re-rolled...\r\n");
 		vict->ResetHitRolls(true);
 
-        ch->Send("New max hit: %d.\r\n", (int) vict->points.max_hit);
-		vict->SaveHitRolls();
+        ch->send("New max hit: %d.\r\n", (int) vict->points.max_hit);
+		vict->saveHitRolls();
 	}
 
 	else if(!strn_cmp(type, "mana", strlen(type)))
 	{
-		vict->LoadManaRolls();
+		vict->loadManaRolls();
 		type_name = "spell points";
-		ch->Send("Spell Points(mana) rerolled...\r\n");
+		ch->send("Spell Points(mana) rerolled...\r\n");
 		vict->ResetManaRolls(true);
 
-        ch->Send("New max spell points: %d.\r\n", (int) vict->points.max_mana);
-		vict->SaveManaRolls();
+        ch->send("New max spell points: %d.\r\n", (int) vict->points.max_mana);
+		vict->saveManaRolls();
 	}
 	else if(!strn_cmp(type, "height", strlen(type)) || !strn_cmp(type, "weight", strlen(type)))
 	{
 		type_name = "height and weight";
-		ch->Send("Height and Weight rerolled...\r\n");
+		ch->send("Height and Weight rerolled...\r\n");
 		vict->RollWeightAndHeight();
 
-		ch->Send("New Height: %s, Weight: %d\r\n", vict->HeightToFeetAndInches().c_str(), GET_WEIGHT(ch));
+		ch->send("New Height: %s, Weight: %d\r\n", vict->HeightToFeetAndInches().c_str(), GET_WEIGHT(ch));
 	}
 	else if(!strn_cmp(type, "shadow", strlen(type)))
 	{
 		type_name = "shadow";
-		ch->Send("Shadow Points re-rolled...\r\n");
-		vict->RollShadow();
+		ch->send("Shadow Points re-rolled...\r\n");
+		vict->rollShadow();
 		MudLog(NRM, MAX(LVL_BLDER, GET_INVIS_LEV(ch)), TRUE,
 		       "(GC) %s has rerolled %s's shadow points.", GET_NAME(ch), GET_NAME(vict));
 
-        ch->Send("Rerolled shadow points to %d.\r\n", (int) GET_MAX_SHADOW(vict));
+        ch->send("Rerolled shadow points to %d.\r\n", (int) GET_MAX_SHADOW(vict));
 	}
 	else
 	{
-		ch->Send("Possible reroll options: Moves, Hit, Mana, Stats, Shadow.\r\n");
+		ch->send("Possible reroll options: Moves, Hit, Mana, Stats, Shadow.\r\n");
 		if(load)
 			delete vict;
 		return;
@@ -5325,7 +5301,7 @@ ACMD(do_reroll)
 	MudLog(NRM, MAX(LVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "%s rerolled %s's %s.%s",
 	       GET_NAME(ch), GET_NAME(vict), type_name.c_str(), load ? "(offline)" : "");
 
-	vict->BasicSave();
+	vict->basicSave();
 
 	if(load)
 		delete vict;
@@ -5343,23 +5319,23 @@ ACMD(do_wizutil)
 
 	if (!*::arg)
 	{
-		ch->Send("Yes, but for whom?!?\r\n");
+		ch->send("Yes, but for whom?!?\r\n");
 		return;
 	}
 	else if (!(vict = get_char_vis(ch, ::arg)))
 	{
 		if( (vict = CharacterUtil::loadCharacter(::arg)) == NULL )
 		{
-			ch->Send("There is no such player.\r\n");
+			ch->send("There is no such player.\r\n");
 			return;
 		}
 		else
 			load = true;
 	}
 	if (IS_NPC(vict))
-		ch->Send("You can't do that to a mob!\r\n");
+		ch->send("You can't do that to a mob!\r\n");
 	else if (GET_LEVEL(vict) > GET_LEVEL(ch))
-		ch->Send("Hmmm...you'd better not.\r\n");
+		ch->send("Hmmm...you'd better not.\r\n");
 	else
 	{
 		switch (subcmd)
@@ -5370,7 +5346,7 @@ ACMD(do_wizutil)
 				        GET_NAME(vict), GET_NAME(ch));
 				MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE, buf);
 				strcat(buf, "\r\n");
-				ch->Send(buf);
+				ch->send(buf);
 				break;
 			case SCMD_SQUELCH:
 			{
@@ -5379,25 +5355,25 @@ ACMD(do_wizutil)
 				        GET_NAME(vict), GET_NAME(ch));
 				MudLog(BRF, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE, buf);
 				strcat(buf, "\r\n");
-				ch->Send(buf);
+				ch->send(buf);
 				break;
 			}
 			case SCMD_FREEZE:
 
 				if (ch == vict)
 				{
-					ch->Send("Oh, yeah, THAT'S real smart...\r\n", ch);
+					ch->send("Oh, yeah, THAT'S real smart...\r\n", ch);
 					return;
 				}
 				if (PLR_FLAGGED(vict, PLR_FROZEN))
 				{
-					ch->Send("Your victim is already pretty cold.\r\n", ch);
+					ch->send("Your victim is already pretty cold.\r\n", ch);
 					return;
 				}
 				SET_BITK(PLR_FLAGS(vict), Q_BIT(PLR_FROZEN));
 				vict->PlayerData->freeze_level = GET_LEVEL(ch);
-				vict->Send("A bitter wind suddenly rises and drains the heat from your body!\r\nYou feel frozen!\r\n");
-				ch->Send("Frozen.\r\n");
+				vict->send("A bitter wind suddenly rises and drains the heat from your body!\r\nYou feel frozen!\r\n");
+				ch->send("Frozen.\r\n");
 				Act("A sudden cold wind conjured from nowhere freezes $n!", FALSE, vict, 0, 0, TO_ROOM);
 				MudLog(BRF, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s frozen by %s.",
 				       GET_NAME(vict), GET_NAME(ch));
@@ -5406,7 +5382,7 @@ ACMD(do_wizutil)
 
 				if (!PLR_FLAGGED(vict, PLR_FROZEN))
 				{
-					ch->Send("Sorry, your victim is not morbidly encased in ice at the moment.\r\n");
+					ch->send("Sorry, your victim is not morbidly encased in ice at the moment.\r\n");
 					return;
 				}
 
@@ -5414,15 +5390,15 @@ ACMD(do_wizutil)
 				{
 					sprintf(buf, "Sorry, a level %d God froze %s... you can't unfreeze %s.\r\n",
 						vict->PlayerData->freeze_level, GET_NAME(vict), HMHR(vict));
-					ch->Send(buf);
+					ch->send(buf);
 					return;
 				}
 
 				MudLog(BRF, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE, "(GC) %s un-frozen by %s.",
 				       GET_NAME(vict), GET_NAME(ch));
 				REMOVE_BIT(PLR_FLAGS(vict), Q_BIT(PLR_FROZEN));
-				vict->Send("A fireball suddenly explodes in front of you, melting the ice!\r\nYou feel thawed.\r\n");
-				ch->Send("Thawed.\r\n");
+				vict->send("A fireball suddenly explodes in front of you, melting the ice!\r\nYou feel thawed.\r\n");
+				ch->send("Thawed.\r\n");
 				Act("A sudden fireball conjured from nowhere thaws $n!", FALSE, vict, 0, 0, TO_ROOM);
 				break;
 			case SCMD_UNAFFECT:
@@ -5434,13 +5410,13 @@ ACMD(do_wizutil)
 					vict->points.temp_taint = 0;
 					vict->SlowedBy = 0;
 
-					vict->Send(	"There is a brief flash of light!\r\n"
+					vict->send(	"There is a brief flash of light!\r\n"
 					            "You feel slightly different.\r\n");
-					ch->Send("All spells removed.\r\n");
+					ch->send("All spells removed.\r\n");
 				}
 				else
 				{
-					ch->Send("Your victim does not have any affections!\r\n");
+					ch->send("Your victim does not have any affections!\r\n");
 					return;
 				}
 
@@ -5449,20 +5425,20 @@ ACMD(do_wizutil)
 
 				if(GET_LEVEL(vict) < LVL_IMMORT || GET_LEVEL(vict) >= LVL_IMPL)
 				{
-					ch->Send("The level range must be between 100 and 104.\r\n");
+					ch->send("The level range must be between 100 and 104.\r\n");
 					return;
 				}
 
 				if(!PLR_FLAGGED(vict, PLR_ZONE_BAN))
 				{
-					ch->Send("%s now cannot leave %s zones.\r\n", GET_NAME(vict), HSHR(vict));
+					ch->send("%s now cannot leave %s zones.\r\n", GET_NAME(vict), HSHR(vict));
 					SET_BITK(PLR_FLAGS(vict), Q_BIT(PLR_ZONE_BAN));
 					MudLog(BRF, MAX(LVL_GRGOD, GET_INVIS_LEV(ch)), TRUE,
 					       "%s has zone banned %s from leaving %s zones.", GET_NAME(ch), GET_NAME(vict), HSHR(vict));
 				}
 				else
 				{
-					ch->Send("%s can now leave %s zones.\r\n", GET_NAME(vict), HSHR(vict));
+					ch->send("%s can now leave %s zones.\r\n", GET_NAME(vict), HSHR(vict));
 					REMOVE_BIT(PLR_FLAGS(vict), Q_BIT(PLR_ZONE_BAN));
 					MudLog(BRF, MAX(LVL_GRGOD, GET_INVIS_LEV(ch)), TRUE,
 					       "%s has removed %s's zone ban.", GET_NAME(ch), GET_NAME(vict));
@@ -5474,7 +5450,7 @@ ACMD(do_wizutil)
 				break;
 		}
 
-		vict->BasicSave();
+		vict->basicSave();
 		if(load)
 			delete vict;
 	}
@@ -5581,7 +5557,7 @@ ACMD(do_wshow)
 			}
 		}
 		strcat(buf, "\r\n");
-		ch->Send(buf);
+		ch->send(buf);
 		return;
 	}
 
@@ -5596,7 +5572,7 @@ ACMD(do_wshow)
 	}
 	if (GET_LEVEL(ch) < fields[l].level)
 	{
-		ch->Send("You are not godly enough for that!\r\n");
+		ch->send("You are not godly enough for that!\r\n");
 		return;
 	}
 
@@ -5648,18 +5624,18 @@ ACMD(do_wshow)
 		{
 			if (!*value)
 			{
-				ch->Send("A name would help.\r\n");
+				ch->send("A name would help.\r\n");
 				return;
 			}
 
 			if( (vict = CharacterUtil::loadCharacter(value)) == NULL)
 			{
-				ch->Send("There is no such player.\r\n");
+				ch->send("There is no such player.\r\n");
 				return;
 			}
 			if( vict->player.level > ch->player.level )
 			{
-				ch->Send("You can't\r\n");
+				ch->send("You can't\r\n");
 				return;
 			}
 
@@ -5678,7 +5654,7 @@ ACMD(do_wshow)
 			        birth, ctime(&ch->points.last_logon), (int) (vict->player.time.played / 3600),
 			        (int) (vict->player.time.played / 60 % 60));
 
-			ch->Send(buf);
+			ch->send(buf);
 
 			delete vict;
 			break;
@@ -5744,15 +5720,13 @@ ACMD(do_wshow)
 			sprintf(buf + strlen(buf), " Database: %s\r\n", (gameDatabase->isConnected() ? "Connected" : "Not Connected"));
 
 			std::string sConnected = "Not Connected";
-#ifdef KINSLAYER_JAVASCRIPT
+
 			sConnected = (JSManager::get()->SciteIsConnected() ? "Connected" : "Not Connected");
-#endif
+
 			sprintf(buf + strlen(buf), " Kinpad: %s\r\n", sConnected.c_str());
 			sprintf(buf + strlen(buf), " Switch: %s\r\n", Conf->play.switch_restriction ? "Restricted" : "Not Restricted");
-
-#ifdef KINSLAYER_JAVASCRIPT
 			sprintf(buf + strlen(buf), " Flusspferd Garbage Collections: %lld\r\n", JSManager::get()->getGC_Count());
-#endif
+
 			int iSecondsSinceBoot = time( 0 ) - bootTime;
 			float fPulsesPerSec = (float)pulse / (float)iSecondsSinceBoot;
 
@@ -5761,7 +5735,7 @@ ACMD(do_wshow)
 #ifndef WIN32
 			sprintf(buf + strlen(buf), "  Remaining system memory : %.2f MB\r\n", (float)AvailableSystemMemory() / 1024 / 1024);
 #endif
-			ch->Send(buf);
+			ch->send(buf);
 			break;
 		}
 		case 5:
@@ -5812,45 +5786,45 @@ ACMD(do_wshow)
 			break;
 
 		case 9:
-			ch->Send("This has been removed.\r\n");
+			ch->send("This has been removed.\r\n");
 			break;
 
 		case 10:
-			ch->Send("This has been removed.\r\n");
+			ch->send("This has been removed.\r\n");
 			break;
 		case 11:
 
 			if (!*value)
 			{
-				ch->Send("A name would help.\r\n");
+				ch->send("A name would help.\r\n");
 				return;
 			}
 
 			if( (vict = CharacterUtil::loadCharacter(value)) == NULL )
 			{
-				ch->Send("There is no such player.\r\n");
+				ch->send("There is no such player.\r\n");
 				return;
 			}
-			vict->LoadSkills();
+			vict->loadSkills();
 
-			ch->Send("%s knows the following skills, has %d practices and %d Spell Practices:\r\n",
+			ch->send("%s knows the following skills, has %d practices and %d Spell Practices:\r\n",
 			         GET_NAME(vict), vict->PlayerData->skillpracs, vict->PlayerData->spellpracs);
 
 			for(i = 0;i < MAX_SKILLS;++i)
 			{
 				if(GET_SKILL(vict, i) && WeaveManager::GetManager().GetWeave(i))
-					ch->Send("%s: %d\r\n", WeaveManager::GetManager().GetWeaveName(i).c_str(), GET_SKILL(vict, i));
+					ch->send("%s: %d\r\n", WeaveManager::GetManager().GetWeaveName(i).c_str(), GET_SKILL(vict, i));
 			}
 			break;
 		case 12:
 
 			if( atoi(arg3) < 0 )
 			{
-				ch->Send("You can only submit a positive number of lines.\r\n");
+				ch->send("You can only submit a positive number of lines.\r\n");
 				return;
 			}
 
-			ch->Send("Rooms with %d lines: \r\n", atoi(arg3));
+			ch->send("Rooms with %d lines: \r\n", atoi(arg3));
 			for(j = 0, i = 0;i < (int)World.size();++i)
 			{
 				Zone *zone = World[i]->GetZone();
@@ -5858,14 +5832,14 @@ ACMD(do_wshow)
 				        && World[i]->LinesInDesc() == atoi(arg3))
 				{
 					if(j)
-						ch->Send(", ");
+						ch->send(", ");
 					if(!(j % 10))
-						ch->Send("\r\n");
+						ch->send("\r\n");
 					if( !World[i]->GetZone()->IsClosed() )
-						ch->Send("%s%s", COLOR_BOLD(ch, CL_COMPLETE), COLOR_GREEN(ch, CL_COMPLETE));
-					ch->Send("%d", World[i]->vnum);
+						ch->send("%s%s", COLOR_BOLD(ch, CL_COMPLETE), COLOR_GREEN(ch, CL_COMPLETE));
+					ch->send("%d", World[i]->vnum);
 					if( !World[i]->GetZone()->IsClosed() )
-						ch->Send("%s", COLOR_NORMAL(ch, CL_COMPLETE));
+						ch->send("%s", COLOR_NORMAL(ch, CL_COMPLETE));
 					++j;
 				}
 			}
@@ -5873,9 +5847,9 @@ ACMD(do_wshow)
 		case 13:
 			vict = NULL;
 			if( (vict = CharacterUtil::loadCharacter(value)) == NULL )
-				ch->Send(NOPERSON);
+				ch->send(NOPERSON);
 			else if(vict->player.level > GET_LEVEL(ch))
-				ch->Send("You aren't big brother... yet...\r\n");
+				ch->send("You aren't big brother... yet...\r\n");
 			else
 				vict->ShowZones(ch);
 
@@ -5883,12 +5857,12 @@ ACMD(do_wshow)
 				delete vict;
 			break;
 		case 14:
-			ch->Send("Weaves for Kinslayer:\r\n");
-			ch->Send("Weave Name          Earth   Fire   Water   Air   Spirit\r\n");
-			ch->Send(WeaveManager::GetManager().ListWeaves(2).c_str());
+			ch->send("Weaves for Kinslayer:\r\n");
+			ch->send("Weave Name          Earth   Fire   Water   Air   Spirit\r\n");
+			ch->send(WeaveManager::GetManager().ListWeaves(2).c_str());
 			break;
 		case 15:
-			ch->Send("Removed.");//Unused as of 06/02/2010
+			ch->send("Removed.");//Unused as of 06/02/2010
 			break;
 		case 16:
 		{
@@ -5916,16 +5890,16 @@ ACMD(do_wshow)
 			}
 			else if(PlayerName.empty() == true)
 			{
-				ch->Send(NOPERSON);
+				ch->send(NOPERSON);
 				return;
 			}
 			else
 			{
-				ch->Send("Usage: show logins <playername(?)> <last|during|range> <arguments>\r\n");
+				ch->send("Usage: show logins <playername(?)> <last|during|range> <arguments>\r\n");
 				return;
 			}
-			ch->Send("      Login Time                Host        Socket Type    Player Name\r\n");
-			ch->Send("----------------------------------------------------------------------\r\n");
+			ch->send("      Login Time                Host        Socket Type    Player Name\r\n");
+			ch->send("----------------------------------------------------------------------\r\n");
 			//We should have all the parameters at this point. Now grab the logins.
 			Character::LoadLogins(Logins, PlayerName, iLimit, tLow, tHigh);
 
@@ -5954,11 +5928,11 @@ ACMD(do_wshow)
 			{//List account for certain player.
 				Account a = SwitchManager::GetManager().GetAccountByPlayerName( value );
 				if( !a.IsValid() )
-					ch->Send("%s does not belong to an account.\r\n", StringUtil::cap(value));
+					ch->send("%s does not belong to an account.\r\n", StringUtil::cap(value));
 				else {
 					std::string playerName = StringUtil::cap(value);
 					std::string accountName = StringUtil::cap(a.getName());
-					ch->Send("%s's account is %s.\r\n", playerName.c_str(), accountName.c_str());
+					ch->send("%s's account is %s.\r\n", playerName.c_str(), accountName.c_str());
 				}
 			}
 			break;
@@ -6008,9 +5982,10 @@ ACMD(do_wshow)
 		}
 		case 19:
 		{
-			std::string sBackupDirectory = "/kinslayer/cache/";
-			if( !boost::filesystem::exists( sBackupDirectory ) ) {
-				ch->Send("The directory holding the MUD backups could not be found.\r\n");
+		   std::string sBackupDirectory = "/kinslayer/cache/";
+		   //if( !std::tr2::sys::exists( std::tr2::sys::path(sBackupDirectory) ) ) {
+			if (!boost::filesystem::exists(sBackupDirectory)) {
+				ch->send("The directory holding the MUD backups could not be found.\r\n");
 				return;
 			}
 			std::list< std::string > lBackupFileNames;
@@ -6021,7 +5996,7 @@ ACMD(do_wshow)
 			{
 				//kmud\.\d{4}-\d\d-\d\d\.bak\.tar\.bz2
 				get_char_cols(ch);
-				ch->Send(" - %s%s%s%s\r\n", bld, grn, StripFilePath((*fIter)).c_str(), nrm);
+				ch->send(" - %s%s%s%s\r\n", bld, grn, StripFilePath((*fIter)).c_str(), nrm);
 			}
 			break;
 		}
@@ -6030,7 +6005,7 @@ ACMD(do_wshow)
 			std::stringstream SwitchBuffer;
 			SwitchManager::GetManager().PrintSwitchesToBuffer( SwitchBuffer );
 
-			ch->Send( StringUtil::vaEscape(SwitchBuffer.str()) );
+			ch->send( StringUtil::vaEscape(SwitchBuffer.str()) );
 			break;
 		}
 		case 21:
@@ -6048,7 +6023,7 @@ ACMD(do_wshow)
 					<< std::setprecision(3) << std::setw(11) << std::showpoint << std::fixed << std::right << entry.runTime
 					<< ",  " << std::setw(11) << std::setprecision(3) << std::showpoint << std::fixed << std::right << (average) << std::endl;
 			}
-			ch->Send("%s", buffer.str().c_str());
+			ch->send("%s", buffer.str().c_str());
 			break;
 		}
 		case 22:
@@ -6241,85 +6216,13 @@ ACMD(do_wshow)
 			break;
 		}
 		default:
-			ch->Send("Sorry, I don't understand that.\r\n");
+			ch->send("Sorry, I don't understand that.\r\n");
 			break;
 	}
 }
 
-class InstallBackupJob : public Job
-{
-	__int64 llUserID;
-	std::string sFileName;
-	std::string sMessage;
-public:
-	InstallBackupJob( const __int64 _llUserID, const std::string &_sFileName )
-	{
-		llUserID = _llUserID;
-		sFileName = _sFileName;
-	}
-	void performRoutine()
-	{
-		std::string sBackupDirectory = "/kinslayer/cache/";
-		std::string sBackupMountedDirectory = "/var/lib/mysql/livemud_bak/";
-		char sCommandBuffer[MAX_INPUT_LENGTH+1024];//enough room for input + raw text
-
-		sprintf(sCommandBuffer, "rm -r %svar/", sBackupDirectory.c_str());
-		std::cout << "Executing: " << sCommandBuffer << std::endl;
-		system(sCommandBuffer);
-
-		sprintf(sCommandBuffer, "tar -xvjf %s%s -C %s var/lib/mysql/", sBackupDirectory.c_str(), sFileName.c_str(), sBackupDirectory.c_str());
-		std::cout << "Executing: " << sCommandBuffer << std::endl;
-		system(sCommandBuffer);
-
-		if( !boost::filesystem::exists( "/kinslayer/cache/var" ) ) {
-			sMessage = "The backup could not be unpacked.";
-			return;
-		}
-
-		sprintf(sCommandBuffer, "rm /var/lib/mysql/livemud_bak/*");
-		std::cout << "Executing: " << sCommandBuffer << std::endl;
-		system(sCommandBuffer);
-
-		sprintf(sCommandBuffer, "mv %svar/lib/mysql/livemud/* %s", sBackupDirectory.c_str(), sBackupMountedDirectory.c_str());
-		std::cout << "Executing: " << sCommandBuffer << std::endl;
-		system(sCommandBuffer);
-
-		sprintf(sCommandBuffer, "chown mysql:mysql %s*", sBackupMountedDirectory.c_str());
-		std::cout << "Executing: " << sCommandBuffer << std::endl;
-		system(sCommandBuffer);
-		
-		sMessage = "The backup( " + sFileName + " ) has been installed successfully.";
-//		tar -xvjf kmud.2010-04-17.bak.tar.bz2 -C ./ var/lib/mysql/
-	}
-	void performPostJobRoutine()
-	{
-		Character *ch = CharacterUtil::getOnlineCharacterById( (int)llUserID );
-
-		if( ch ) {
-			ch->Send("%s\r\n", sMessage.c_str());
-		}
-		MudLog(BRF, (ch?MAX(LVL_APPR,GET_INVIS_LEV(ch)):LVL_APPR), TRUE, sMessage.c_str());
-	}
-};
-
 ACMD( do_install )
 {
-	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-	*arg1 = *arg2 = '\0';
-	TwoArguments(argument, arg1, arg2);
-
-	if( !*arg1 ) {
-		ch->Send("Install what?\r\n");
-		return;
-	}
-	if( !str_cmp(arg1, "backup") ) {
-		if( !*arg2 ) {
-			ch->Send("Which backup(filename) would you like to install? Use wshow backups to see all available options.\r\n");
-			return;
-		}
-		InstallBackupJob *job = new InstallBackupJob( ch->player.idnum, arg2 );
-		ThreadedJobManager::get().addJob( job );
-	}
 }
 
 
@@ -6434,7 +6337,7 @@ void list_set(Character *ch)
 		if(GET_LEVEL(ch) >= set_fields[i].level)
 		{
 			sprintf(buf, "Field: %s,    Min Level: %d\r\n", set_fields[i].cmd, set_fields[i].level);
-			ch->Send(buf);
+			ch->send(buf);
 		}
 }
 
@@ -6459,14 +6362,14 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 	{
 		if (!IS_NPC(vict) && GET_LEVEL(ch) <= GET_LEVEL(vict) && vict != ch)
 		{
-			ch->Send("Maybe that's not such a great idea...\r\n");
+			ch->send("Maybe that's not such a great idea...\r\n");
 			return 0;
 		}
 	}
 
 	if (ch && GET_LEVEL(ch) < set_fields[mode].level)
 	{
-		ch->Send("You are not godly enough for that!\r\n");
+		ch->send("You are not godly enough for that!\r\n");
 		return 0;
 	}
 
@@ -6474,14 +6377,14 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 	if (IS_NPC(vict) && !(set_fields[mode].pcnpc & NPC))
 	{
 		if( ch )
-			ch->Send("You can't do that to a beast!\r\n");
+			ch->send("You can't do that to a beast!\r\n");
 		return 0;
 	}
 
 	else if (!IS_NPC(vict) && !(set_fields[mode].pcnpc & PC))
 	{
 		if( ch )
-			ch->Send("That can only be done to a beast!\r\n");
+			ch->send("That can only be done to a beast!\r\n");
 		return 0;
 	}
 
@@ -6497,7 +6400,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 		if (!(on || off))
 		{
 			if( ch )
-				ch->Send("Value must be 'on' or 'off'.\r\n");
+				ch->send("Value must be 'on' or 'off'.\r\n");
 			return 0;
 		}
 
@@ -6619,7 +6522,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 		case 19:
 			if (ch && GET_LEVEL(ch) < LVL_IMPL && ch != vict)
 			{
-				ch->Send("You aren't godly enough for that!\r\n");
+				ch->send("You aren't godly enough for that!\r\n");
 				return 0;
 			}
 			GET_INVIS_LEV(vict) = RANGE(0, GET_LEVEL(vict));
@@ -6627,7 +6530,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 		case 20:
 			if (ch && GET_LEVEL(ch) < LVL_IMPL && ch != vict)
 			{
-				ch->Send("You aren't godly enough for that!\r\n");
+				ch->send("You aren't godly enough for that!\r\n");
 				return 0;
 			}
 
@@ -6636,7 +6539,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 		case 21:
 			if (ch && ch == vict)
 			{
-				ch->Send("Better not -- could be a long winter!\r\n");
+				ch->send("Better not -- could be a long winter!\r\n");
 				return 0;
 			}
 
@@ -6665,7 +6568,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			else
 			{
 				if( ch )
-					ch->Send("Must be 'off' or a value from 0 to 24.\r\n");
+					ch->send("Must be 'off' or a value from 0 to 24.\r\n");
 				return 0;
 			}
 
@@ -6680,7 +6583,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			if ( (ch && value > GET_LEVEL(ch)) || value > LVL_IMPL)
 			{
 				if( ch )
-					ch->Send("You can't do that.\r\n");
+					ch->send("You can't do that.\r\n");
 				return 0;
 			}
 
@@ -6692,7 +6595,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			if ( !(room = FindRoomByVnum(value)) )
 			{
 				if( ch )
-					ch->Send("No room exists with that number.\r\n");
+					ch->send("No room exists with that number.\r\n");
 				return 0;
 			}
 
@@ -6713,7 +6616,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			if ((i = parse_class(*val_arg)) == RACE_UNDEFINED)
 			{
 				if( ch ) 
-					ch->Send("That is not a class.\r\n");
+					ch->send("That is not a class.\r\n");
 				return 0;
 			}
 
@@ -6754,7 +6657,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			else
 			{
 				if( ch )
-					ch->Send("Must be 'male', 'female', or 'neutral'.\r\n");
+					ch->send("Must be 'male', 'female', or 'neutral'.\r\n");
 				return 0;
 			}
 			break;
@@ -6762,7 +6665,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			if (value < 2 || value > 200)
 			{	/* Arbitrary limits. */
 				if( ch )
-					ch->Send("Ages 2 to 200 accepted.\r\n");
+					ch->send("Ages 2 to 200 accepted.\r\n");
 				return 0;
 			}
 
@@ -6776,13 +6679,13 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			break;
 		case 42:
 			if( ch )
-				ch->Send("Command disabled.\r\n");
+				ch->send("Command disabled.\r\n");
 			break;
 		case 43:
 			if ((i = parse_race(*val_arg)) == RACE_UNDEFINED)
 			{
 				if( ch )
-					ch->Send("That is not a race.\r\n");
+					ch->send("That is not a race.\r\n");
 				return 0;
 			}
 
@@ -6802,7 +6705,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			break;
 		case 48:
 			if( ch )
-				ch->Send("Command disabled.\r\n");
+				ch->send("Command disabled.\r\n");
 			break;
 		case 49:
 			vict->PlayerData->mood = atoi(val_arg);
@@ -6810,7 +6713,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 		case 50:
 			SET_OR_REMOVE(PRF_FLAGS(vict), PRF_NOTELL);
 			if( ch )
-				ch->Send("Ok.\r\n");
+				ch->send("Ok.\r\n");
 			break;
 		case 51:
 			GET_WP(vict) = RANGE(0, 100000);
@@ -6825,7 +6728,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			if(atoi(val_arg) < 0)
 			{
 				if( ch )
-					ch->Send("The value must be above zero\r\n");
+					ch->send("The value must be above zero\r\n");
 				return 0;
 			}
 			else
@@ -6836,7 +6739,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			if (value < 0 || value > TAINT_MAX)
 			{
 				if( ch )
-					ch->Send("Taint must be above 0 and below TAINT_MAX.\r\n");
+					ch->send("Taint must be above 0 and below TAINT_MAX.\r\n");
 				return (0);
 			}
 
@@ -6850,13 +6753,13 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			{
 				GET_WHOIS_EXTRA(vict).erase();
 				if( ch )
-					ch->Send("%s's whois extra is now empty.\r\n", GET_NAME(vict));
+					ch->send("%s's whois extra is now empty.\r\n", GET_NAME(vict));
 			}
 			else
 			{
 				GET_WHOIS_EXTRA(vict) = val_arg;
 				if( ch )
-					ch->Send("%s's whois extra is now: %s", GET_NAME(vict), GET_WHOIS_EXTRA(vict).c_str());
+					ch->send("%s's whois extra is now: %s", GET_NAME(vict), GET_WHOIS_EXTRA(vict).c_str());
 			}
 
 			break;
@@ -6864,7 +6767,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			if(value <= 0)
 			{
 				if( ch )
-					ch->Send("Weight must be above 0.\r\n");
+					ch->send("Weight must be above 0.\r\n");
 				return 0;
 			}
 
@@ -6874,7 +6777,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			if(value <= 0)
 			{
 				if(ch)
-					ch->Send("Height must be above 0.\r\n");
+					ch->send("Height must be above 0.\r\n");
 				return 0;
 			}
 
@@ -6899,7 +6802,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			else
 			{
 				if(ch)
-					ch->Send("Body structure must be 'light', 'medium', 'heavy'\r\n");
+					ch->send("Body structure must be 'light', 'medium', 'heavy'\r\n");
 				return 0;
 			}
 			break;
@@ -6910,7 +6813,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			if(real_room(value) == -1)
 			{
 				if(ch)
-					ch->Send("Room is invalid. Try again.\r\n");
+					ch->send("Room is invalid. Try again.\r\n");
 				return 0;
 			}
 			vict->was_in_room = FindRoomByVnum(value);
@@ -6921,7 +6824,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			if (value < 0 )
 			{
 				if(ch)
-					ch->Send("Practices must be above 0.\r\n");
+					ch->send("Practices must be above 0.\r\n");
 				return (0);
 			}
 
@@ -6945,7 +6848,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			if (value < 0 )
 			{
 				if(ch)
-					ch->Send("Trade practices must be non-negative.\r\n");
+					ch->send("Trade practices must be non-negative.\r\n");
 				return (0);
 			}
 			vict->PlayerData->tradepracs = value;
@@ -6956,12 +6859,12 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			if( !a.IsValid() )
 			{
 				if( ch )
-					ch->Send("There is no account by that name.\r\n");
+					ch->send("There is no account by that name.\r\n");
 				return 0;
 			}
 			vict->SetAccount( a.GetID() );
 			if( ch )
-				ch->Send("%s's account has been set to %s.\r\n", vict->player.name.c_str(), a.getName().c_str());
+				ch->send("%s's account has been set to %s.\r\n", vict->player.name.c_str(), a.getName().c_str());
 			break;
 		}
 		case 76:
@@ -6969,14 +6872,14 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			break;
 		default:
 			if(ch)
-				ch->Send("Can't set that!\r\n");
+				ch->send("Can't set that!\r\n");
 			return 0;
 	}
 
 	strcat(output, "\r\n");
 
 	if(ch) {
-		ch->Send(StringUtil::cap(output));
+		ch->send(StringUtil::cap(output));
 		sprintf(buf, "%s: \"set %s%s %s %s\"",
 		        GET_NAME(ch), file ? "file " : "", GET_NAME(vict), set_fields[mode].cmd, val_arg);
 		MudLog(NRM, MAX(LVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, buf);
@@ -7019,7 +6922,7 @@ ACMD(do_set)
 
 	if (!*name || !*field)
 	{
-		ch->Send("Usage: set <victim> <field> <value>\r\n");
+		ch->send("Usage: set <victim> <field> <value>\r\n");
 		list_set(ch);
 		return;
 	}
@@ -7031,7 +6934,7 @@ ACMD(do_set)
 		{
 			if (!(vict = get_player_vis(ch, name, 0)))
 			{
-				ch->Send("There is no such player.\r\n");
+				ch->send("There is no such player.\r\n");
 				return;
 			}
 		}
@@ -7040,7 +6943,7 @@ ACMD(do_set)
 		{
 			if (!(vict = get_char_vis(ch, name)))
 			{
-				ch->Send("There is no such creature.\r\n");
+				ch->send("There is no such creature.\r\n");
 				return;
 			}
 		}
@@ -7055,7 +6958,7 @@ ACMD(do_set)
 			if (GET_LEVEL(cbuf) >= GET_LEVEL(ch))
 			{
 				delete cbuf;
-				ch->Send("Sorry, you can't do that.\r\n");
+				ch->send("Sorry, you can't do that.\r\n");
 				return;
 			}
 
@@ -7064,7 +6967,7 @@ ACMD(do_set)
 		else
 		{
 			delete cbuf;
-			ch->Send("There is no such player.\r\n");
+			ch->send("There is no such player.\r\n");
 			return;
 		}
 	}
@@ -7081,7 +6984,7 @@ ACMD(do_set)
 	/* save the character if a change was made */
 	if (retval && !IS_NPC(vict))
 	{
-		vict->Save();
+		vict->save();
 	}
 
 	/* free the memory if we allocated it earlier */
@@ -7100,7 +7003,7 @@ ACMD(do_retool)
 	HalfChop( buf, name, buf );
 
 	if( (obj = get_obj_in_list_vis( ch, name, ch->carrying )) == NULL ) {
-		ch->Send("Retool what? You don't see %s %s anywhere.\r\n", AN(name), name);
+		ch->send("Retool what? You don't see %s %s anywhere.\r\n", AN(name), name);
 		return;
 	}
 	//obj is guaranteed to be valid.
@@ -7120,7 +7023,7 @@ ACMD(do_retool)
 		sBufPtr = &obj->retool_ex_desc->description;
 	}
 	else {
-		ch->Send("retool [name | desc | sdesc | exdesc] [object name] [new text]\r\n");
+		ch->send("retool [name | desc | sdesc | exdesc] [object name] [new text]\r\n");
 		return;
 	}
 	if( !(*buf) )
@@ -7145,7 +7048,7 @@ ACMD(do_retool)
 		else
 			strcpy((*sBufPtr), buf);
 	}
-	ch->Send("You successfully retool( %s ) %s.\r\n", StringUtil::allLower(mode), obj->short_description);
+	ch->send("You successfully retool( %s ) %s.\r\n", StringUtil::allLower(mode), obj->short_description);
 }
 
 class CheckWotmudStatusJob : public Job
@@ -7190,7 +7093,7 @@ public:
 			return;
 		}
 
-		boost::this_thread::sleep(boost::posix_time::millisec(5000));
+		std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
 		std::stringstream buffer;
 
@@ -7212,14 +7115,14 @@ public:
 
 		std::string upOrDown = isUp ? "online" : "offline";
 
-		ch->Send("WoTMUD is %s.\r\n", upOrDown.c_str());
+		ch->send("WoTMUD is %s.\r\n", upOrDown.c_str());
 	}
 
 };
 
 ACMD(do_wotmud)
 {
-	ch->Send("Checking wotmud status...\r\n");
+	ch->send("Checking wotmud status...\r\n");
 
 	CheckWotmudStatusJob *job = new CheckWotmudStatusJob(ch->player.idnum);
 	ThreadedJobManager::get().addJob(job);

@@ -67,7 +67,7 @@ ACMD(do_cedit)
 	if (GET_LEVEL(ch) < LVL_GRGOD && !PLR_FLAGGED(ch, PLR_WEAVE_EDITOR) && !PLR_FLAGGED(ch, PLR_CHARGE_EDITOR)
 		&& !PLR_FLAGGED(ch, PLR_GLOBAL_SCRIPTS))
 	{
-		ch->Send("You can't modify the game configuration.\r\n");
+		ch->send("You can't modify the game configuration.\r\n");
 		return;
 	}
 
@@ -87,17 +87,17 @@ ACMD(do_cedit)
 	}
 	else if (str_cmp("save", buf1) != 0)
 	{
-		ch->Send("Yikes!  Stop that, someone will get hurt!\r\n");
+		ch->send("Yikes!  Stop that, someone will get hurt!\r\n");
 		return;
 	}
 	else
 	{
 
-		ch->Send("Saving the game configuration.\r\n");
+		ch->send("Saving the game configuration.\r\n");
 		MudLog(CMP, MAX(LVL_BUILDER, GET_INVIS_LEV(ch)), TRUE,
 		       "OLC: %s saves the game configuration.", GET_NAME(ch));
 
-		Conf->Save();
+		Conf->save();
 	}
 }
 
@@ -529,7 +529,7 @@ void Config::Load()
 	}
 }
 
-void Config::Save()
+void Config::save()
 {
 	int i = 0;
 	std::list<std::string>::iterator si;
@@ -697,13 +697,11 @@ void cedit_disp_menu(Descriptor *d)
 	/*
 	 * Menu header
 	 */
-	d->Send(
+	d->send(
 	    "OasisOLC MUD Configuration Editor\r\n"
 		"%sA%s) Auction Houses\r\n"
 	    "%sG%s) Game Play Options\r\n"
-#ifdef KINSLAYER_JAVASCRIPT
 		"%sJ%s) Global JavaScripts\r\n"
-#endif
 	    "%sC%s) Crashsave/Rent Options\r\n"
 	    "%sR%s) Room Numbers\r\n"
 	    "%sO%s) Operation Options\r\n"
@@ -712,9 +710,7 @@ void cedit_disp_menu(Descriptor *d)
 	    "%sQ%s) Quit\r\n"
 	    "Enter your choice : ",
 
-#ifdef KINSLAYER_JAVASCRIPT
 	    grn, nrm,
-#endif
 		grn, nrm,
 		grn, nrm,
 	    grn, nrm,
@@ -734,7 +730,7 @@ void CeditTimeMenu(Descriptor *d)
 {
 	get_char_cols(d->character);
 
-	d->Send("\r\n"
+	d->send("\r\n"
 	        "%s1%s)  Seconds per MUD Hour/Tic     : %s%d\r\n"
 	        "%sQ%s)  Exit to Main Menu\r\n",
 	        grn, nrm, cyn, time_info.SecondsPerTic,
@@ -750,7 +746,7 @@ void CeditSkillMenu(Descriptor *d)
 	get_char_cols(d->character);
 	//clear_screen(d);
 
-	d->Send("\r\n\r\n"
+	d->send("\r\n\r\n"
 	        "%s1%s)  Bash\r\n"
 	        "%s2%s)  Charge\r\n"
 	        "%s3%s)  Backstab\r\n"
@@ -786,12 +782,12 @@ void CeditWeaveMenu(Descriptor *d)
 {
 	get_char_cols(d->character);
 
-	d->Send("\r\n\r\n");
-	d->Send( WeaveManager::GetManager().ListWeaves( 0, d->character ).c_str() );
-	d->Send("\r\n");
-	d->Send("%sA%s) Add Skill\r\n", grn, nrm);
-	d->Send("%sD%s) Delete Skill\r\n", grn, nrm);
-	d->Send("%sQ%s) Quit\r\nEnter your choice: ", grn, nrm);
+	d->send("\r\n\r\n");
+	d->send( WeaveManager::GetManager().ListWeaves( 0, d->character ).c_str() );
+	d->send("\r\n");
+	d->send("%sA%s) Add Skill\r\n", grn, nrm);
+	d->send("%sD%s) Delete Skill\r\n", grn, nrm);
+	d->send("%sQ%s) Quit\r\nEnter your choice: ", grn, nrm);
 
 	OLC_MODE(d) = CEDIT_WEAVE_MENU;
 }
@@ -800,11 +796,11 @@ void CeditDisplayWeave(Descriptor* d)
 {
 	get_char_cols(d->character);
 
-	d->Send("\r\n\r\n");
-	d->Send( d->olc->weave->listAttributes(d, "Vnum").c_str() );
-	d->Send("\r\n%sA%s) Add Attribute", grn, nrm);
-	d->Send("\r\n%sD%s) Delete Attribute", grn, nrm);
-	d->Send("\r\n%sQ%s) Quit\r\nEnter your choice: ", grn, nrm);
+	d->send("\r\n\r\n");
+	d->send( d->olc->weave->listAttributes(d, "Vnum").c_str() );
+	d->send("\r\n%sA%s) Add Attribute", grn, nrm);
+	d->send("\r\n%sD%s) Delete Attribute", grn, nrm);
+	d->send("\r\n%sQ%s) Quit\r\nEnter your choice: ", grn, nrm);
 
 	OLC_MODE(d) = CEDIT_WEAVE_VIEW;	
 }
@@ -814,8 +810,8 @@ void CeditFleeMenu(Descriptor *d)
 	get_char_cols(d->character);
 	//clear_screen(d);
 
-	d->Send("NOTE: 1 PULSE = 1/%d of a second\r\n", PASSES_PER_SEC);
-	d->Send("\r\n\r\n"
+	d->send("NOTE: 1 PULSE = 1/%d of a second\r\n", PASSES_PER_SEC);
+	d->send("\r\n\r\n"
 	        "%s1%s)  Unengaged Flee Pulse Increment          : %s%d\r\n"
 	        "%s2%s)  Engaged Flee Pulse Increment            : %s%d\r\n"
 	        "%s3%s)  Auto Flee Pulse Increment               : %s%d\r\n"
@@ -842,7 +838,7 @@ void CeditTaintMenu(Descriptor *d)
 	get_char_cols(d->character);
 	//clear_screen(d);
 
-	d->Send("\r\n\r\n"
+	d->send("\r\n\r\n"
 	        "%s1%s)  Taint For Random Command          : %s%d\r\n"
 	        "%s2%s)  Taint For Random Weave            : %s%d\r\n"
 	        "%s3%s)  Taint For Random Social           : %s%d\r\n"
@@ -886,14 +882,14 @@ void CeditTipMenu(Descriptor *d)
 	std::list<std::string>::iterator si;
 	int i = 1;
 
-	d->Send("Newbie Tip Menu\r\n\n");
+	d->send("Newbie Tip Menu\r\n\n");
 
 	for(i = 1, si = Tips->begin();si != Tips->end();++si, ++i)
 	{
-		d->Send("%s%d%s)  %s%s%s%s\r\n",
+		d->send("%s%d%s)  %s%s%s%s\r\n",
 		        cyn, i, nrm, grn, bld, (*si).c_str(), nrm);
 	}
-	d->Send("\r\n%sN%s) New Tip   %sD%s) Delete Tip\r\n"
+	d->send("\r\n%sN%s) New Tip   %sD%s) Delete Tip\r\n"
 	        "%sQ%s) Quit\r\n", grn, nrm, grn, nrm, grn, nrm);
 
 	OLC_MODE(d) = CEDIT_TIP_MENU;
@@ -904,7 +900,7 @@ void CeditBodyPercentsMenu(Descriptor *d)
 	get_char_cols(d->character);
 	//clear_screen(d);
 
-	d->Send("\r\n"
+	d->send("\r\n"
 	        "%s1%s)  Head         : %s%d%%\r\n"
 	        "%s2%s)  Shoulders    : %s%d%%\r\n"
 	        "%s3%s)  Arms         : %s%d%%\r\n"
@@ -933,7 +929,7 @@ void CeditChargeMenu(Descriptor *d)
 	get_char_cols(d->character);
 	//clear_screen(d);
 
-	d->Send("\r\n"
+	d->send("\r\n"
 	        "Current Formula:\r\n"
 			"if( ( ((OB * %f) + (BMI * %f) - (Weapon Weight * %f)) * Skill %% * Weapon Skill %%) >\r\n"
 			"    ( (%d + (DB * %f)) * Dodge Skill %%))\r\n"
@@ -978,7 +974,7 @@ void CeditBashMenu(Descriptor *d)
 	get_char_cols(d->character);
 	//clear_screen(d);
 
-	d->Send("\r\n"
+	d->send("\r\n"
 	        "Current Formula:\r\n"
 	        "if( ( (OB * %f) + (BMI * %f + %d) + (Weapon Weight * %f) * Skill %% * Weapon Skill %%) >\r\n"
 			"    ( (%d + (DB * %f)) * Dodge Skill %%))\r\n"
@@ -1014,7 +1010,7 @@ void CeditMeleeMenu(Descriptor *d)
 	get_char_cols(d->character);
 	//clear_screen(d);
 
-	d->Send("\r\n"
+	d->send("\r\n"
 	        "%s1%s)  Ward Multiplier            : %s%.2f\r\n"
 	        "%s2%s)  Parry Split                : %s%.2f\r\n"
 	        "%s3%s)  Dodge Multiplier           : %s%.2f\r\n"
@@ -1040,7 +1036,7 @@ void CeditPrecStrikeMenu(Descriptor *d)
 {
 	get_char_cols(d->character);
 	
-	d->Send("\r\n"
+	d->send("\r\n"
 			"%s1%s)  Offensive Bonus Multiplier : %s%f\r\n"
 			"%s2%s)  Offensive Roll Factor      : %s%f\r\n"
 			"%s3%s)  Weapon Weight Multiplier   : %s%f\r\n"
@@ -1067,23 +1063,23 @@ void CeditAuctionMenu(Descriptor *d)
 
 	std::list< Auction * > AList = AuctionManager::GetManager().GetListOfAuctions();
 
-	d->Send("The auctions are listed below:\r\n");
+	d->send("The auctions are listed below:\r\n");
 
 	if( !AList.empty() )
 	{
 		unsigned int i = 1;
 		for( std::list< Auction * >::iterator aIter = AList.begin(); aIter != AList.end();++aIter, ++i )
 		{
-			d->Send("%s%5d%s) %s%s%s\r\n", grn, (*aIter)->getVnum(), nrm, cyn, (*aIter)->getName().c_str(), nrm);
+			d->send("%s%5d%s) %s%s%s\r\n", grn, (*aIter)->getVnum(), nrm, cyn, (*aIter)->getName().c_str(), nrm);
 		}
 	}
 	else
-		d->Send(" <No Auctions Exist> \r\n");
-	d->Send("\r\n");
-	d->Send("%sA%s) Add Auction\r\n", grn, nrm);
-	d->Send("%sE%s) Edit Auction\r\n", grn, nrm);
-	d->Send("%sD%s) Delete Auction\r\n", grn, nrm);
-	d->Send("%sQ%s) Quit\r\n", grn, nrm);
+		d->send(" <No Auctions Exist> \r\n");
+	d->send("\r\n");
+	d->send("%sA%s) Add Auction\r\n", grn, nrm);
+	d->send("%sE%s) Edit Auction\r\n", grn, nrm);
+	d->send("%sD%s) Delete Auction\r\n", grn, nrm);
+	d->send("%sQ%s) Quit\r\n", grn, nrm);
 
 	OLC_MODE(d) = CEDIT_AUCTION_MENU;
 }
@@ -1092,12 +1088,12 @@ void CeditAuctionEditMenu(Descriptor *d)
 {
 	get_char_cols(d->character);
 
-	d->Send("\r\n");
-	d->Send("Auction Vnum: %s%d%s\r\n", cyn, d->olc->auction->getVnum(), nrm);
-	d->Send("%sN%s)ame   : %s%s%s\r\n", grn, nrm, cyn, d->olc->auction->getName().c_str(), nrm);
-	d->Send("%sR%s)aces  : %s%s%s\r\n", grn, nrm, cyn, d->olc->auction->aRacesStr(d->character).c_str(), nrm);
-	d->Send("%sC%s)lans  : %s%s%s\r\n", grn, nrm, cyn, d->olc->auction->dClansStr(d->character).c_str(), nrm);
-	d->Send("%sQ%s)uit", grn, nrm);
+	d->send("\r\n");
+	d->send("Auction Vnum: %s%d%s\r\n", cyn, d->olc->auction->getVnum(), nrm);
+	d->send("%sN%s)ame   : %s%s%s\r\n", grn, nrm, cyn, d->olc->auction->getName().c_str(), nrm);
+	d->send("%sR%s)aces  : %s%s%s\r\n", grn, nrm, cyn, d->olc->auction->aRacesStr(d->character).c_str(), nrm);
+	d->send("%sC%s)lans  : %s%s%s\r\n", grn, nrm, cyn, d->olc->auction->dClansStr(d->character).c_str(), nrm);
+	d->send("%sQ%s)uit", grn, nrm);
 	OLC_MODE(d) = CEDIT_AUCTION_EDIT_MENU;
 }
 void CeditAuctionRaces(Descriptor *d)
@@ -1105,24 +1101,23 @@ void CeditAuctionRaces(Descriptor *d)
 	get_char_cols(d->character);
 
 	for(unsigned int i = 0;i < NUM_RACES;++i)
-		d->Send("%s%d%s) %s%s%s\r\n", grn, (i+1), nrm, cyn, pc_race_types[i], nrm);
-	d->Send("%sQ%s)uit\r\n", grn, nrm);
-	d->Send("\r\n");
-	d->Send("Allowed Clans: %s", d->olc->auction->aRacesStr(d->character).c_str());
+		d->send("%s%d%s) %s%s%s\r\n", grn, (i+1), nrm, cyn, pc_race_types[i], nrm);
+	d->send("%sQ%s)uit\r\n", grn, nrm);
+	d->send("\r\n");
+	d->send("Allowed Clans: %s", d->olc->auction->aRacesStr(d->character).c_str());
 	OLC_MODE(d) = CEDIT_AUCTION_EDIT_RACES;
 }
 void CeditAuctionClans(Descriptor *d)
 {
 	get_char_cols(d->character);
-	d->Send("\r\n");
+	d->send("\r\n");
 	for(Clan *c = ClanList;c;c = c->Next)
-		d->Send("%s%d%s) %s%s%s\r\n", grn, c->vnum, nrm, cyn, c->Name.c_str(), nrm);
-	d->Send("\r\n");
-	d->Send("Allowed Races: %s", d->olc->auction->dClansStr(d->character).c_str());
-	d->Send("%sQ%s)uit\r\n\r\n", grn, nrm);
+		d->send("%s%d%s) %s%s%s\r\n", grn, c->vnum, nrm, cyn, c->Name.c_str(), nrm);
+	d->send("\r\n");
+	d->send("Allowed Races: %s", d->olc->auction->dClansStr(d->character).c_str());
+	d->send("%sQ%s)uit\r\n\r\n", grn, nrm);
 	OLC_MODE(d) = CEDIT_AUCTION_EDIT_CLANS;
 }
-#ifdef KINSLAYER_JAVASCRIPT
 void CeditGlobalScriptMenu(Descriptor *d)
 {
 	get_char_cols(d->character);
@@ -1142,11 +1137,11 @@ void CeditGlobalScriptMenu(Descriptor *d)
 	sBuffer << bld << yel << "D" << nrm << ") Delete Global Trigger" << std::endl;
 	sBuffer << bld << yel << "Q" << nrm << ") Save and Quit" << std::endl;
 
-	d->SendRaw( sBuffer.str().c_str() );
+	d->sendRaw( sBuffer.str().c_str() );
 
 	OLC_MODE(d) = CEDIT_GLOBAL_SCRIPT_MENU;
 }
-#endif
+
 void CeditGameOptionsMenu(Descriptor *d)
 {
 	get_char_cols(d->character);
@@ -1158,7 +1153,7 @@ void CeditGameOptionsMenu(Descriptor *d)
 	RestatString = OLC_CONFIG(d)->play.restat_time.toString();
 	RestatString.resize(RestatString.size() - 1);
 
-	d->Send("\r\n\r\n"
+	d->send("\r\n\r\n"
 	        "%sA%s) OK Message Text               : %s%s\r\n"
 	        "%sB%s) NOPERSON Message Text         : %s%s\r\n"
 	        "%sC%s) NOEFFECT Message Text         : %s%s\r\n"
@@ -1210,7 +1205,7 @@ void cedit_disp_crash_save_options(Descriptor *d)
 	get_char_cols(d->character);
 	////clear_screen(d);
 
-	d->Send("\r\n\r\n"
+	d->send("\r\n\r\n"
 	        "%sA%s) Free Rent          : %s%s\r\n"
 	        "%sB%s) Max Objects Saved  : %s%d\r\n"
 	        "%sC%s) Auto Save          : %s%s\r\n"
@@ -1234,7 +1229,7 @@ void cedit_disp_room_numbers(Descriptor *d)
 	get_char_cols(d->character);
 	////clear_screen(d);
 
-	d->Send("\r\n\r\n"
+	d->send("\r\n\r\n"
 	        "%sA%s) Human Start Room     :	%s%d\r\n"
 	        "%sB%s) Trolloc Start Room   :	%s%d\r\n"
 	        "%sC%s) Aiel Start Room      :  %s%d\r\n"
@@ -1262,7 +1257,7 @@ void cedit_disp_operation_options(Descriptor *d)
 	get_char_cols(d->character);
 	////clear_screen(d);
 
-	d->Send("\r\n\r\n"
+	d->send("\r\n\r\n"
 	        "%sA%s) Default Port : %s%d\r\n"
 	        "%sB%s) Logfile Name        : %s%s\r\n"
 	        "%sC%s) Max Players         : %s%d\r\n"
@@ -1333,21 +1328,21 @@ void cedit_parse(Descriptor *d, char *arg)
 
 					if (CONFIG_AUTO_SAVE)
 					{
-						Conf->Save();
-						WeaveManager::GetManager().SaveWeaves();
-						d->Send("Game configuration saved to disk.\r\n");
+						Conf->save();
+						WeaveManager::GetManager().saveWeaves();
+						d->send("Game configuration saved to disk.\r\n");
 					}
 					else
-						d->Send("Game configuration saved to memory.\r\n");
+						d->send("Game configuration saved to memory.\r\n");
 					return;
 				case 'n':
 				case 'N':
-					d->Send("Game configuration not saved to memory.\r\n");
+					d->send("Game configuration not saved to memory.\r\n");
 					cleanup_olc(d, CLEANUP_CONFIG);
 					return;
 				default :
-					d->Send("\r\nThat is an invalid choice!\r\n");
-					d->Send("Do you wish to save the configuration? (y/n) : ");
+					d->send("\r\nThat is an invalid choice!\r\n");
+					d->send("Do you wish to save the configuration? (y/n) : ");
 					return;
 			}
 
@@ -1359,7 +1354,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				case 'A':
 					if( GET_LEVEL(d->character) < LVL_GRGOD )
 					{
-						d->Send("You can't edit that!\r\n");
+						d->send("You can't edit that!\r\n");
 						return;
 					}
 					CeditAuctionMenu(d);
@@ -1368,27 +1363,25 @@ void cedit_parse(Descriptor *d, char *arg)
 				case 'G':
 					if( GET_LEVEL(d->character) < LVL_GRGOD  && !PLR_FLAGGED(d->character, PLR_CHARGE_EDITOR))
 					{
-						d->Send("You can't edit that!\r\n");
+						d->send("You can't edit that!\r\n");
 						return;
 					}
 					CeditGameOptionsMenu(d);
 					OLC_MODE(d) = CEDIT_GAME_OPTIONS_MENU;
 					break;
-#ifdef KINSLAYER_JAVASCRIPT
 				case 'J':
 					if( GET_LEVEL(d->character) < LVL_GRGOD && !PLR_FLAGGED(d->character, PLR_GLOBAL_SCRIPTS) )
 					{
-						d->Send("You can't edit that!\r\n");
+						d->send("You can't edit that!\r\n");
 						return;
 					}
 					CeditGlobalScriptMenu(d);
 					OLC_MODE(d) = CEDIT_GLOBAL_SCRIPT_MENU;
 					break;
-#endif
 				case 'C':
 					if( GET_LEVEL(d->character) < LVL_GRGOD )
 					{
-						d->Send("You can't edit that!\r\n");
+						d->send("You can't edit that!\r\n");
 						return;
 					}
 					cedit_disp_crash_save_options(d);
@@ -1397,7 +1390,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				case 'R':
 					if( GET_LEVEL(d->character) < LVL_GRGOD )
 					{
-						d->Send("You can't edit that!\r\n");
+						d->send("You can't edit that!\r\n");
 						return;
 					}
 					cedit_disp_room_numbers(d);
@@ -1406,7 +1399,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				case 'O':
 					if( GET_LEVEL(d->character) < LVL_GRGOD )
 					{
-						d->Send("You can't edit that!\r\n");
+						d->send("You can't edit that!\r\n");
 						return;
 					}
 					cedit_disp_operation_options(d);
@@ -1416,7 +1409,7 @@ void cedit_parse(Descriptor *d, char *arg)
 					if( GET_LEVEL(d->character) < LVL_GRGOD && !PLR_FLAGGED(d->character, PLR_WEAVE_EDITOR) &&
 						!PLR_FLAGGED(d->character, PLR_CHARGE_EDITOR))
 					{
-						d->Send("You can't edit that!\r\n");
+						d->send("You can't edit that!\r\n");
 						return;
 					}
 					CeditSkillMenu(d);
@@ -1425,18 +1418,18 @@ void cedit_parse(Descriptor *d, char *arg)
 				case 'T':
 					if( GET_LEVEL(d->character) < LVL_GRGOD )
 					{
-						d->Send("You can't edit that!\r\n");
+						d->send("You can't edit that!\r\n");
 						return;
 					}
 					CeditTimeMenu(d);
 					OLC_MODE(d) = CEDIT_TIME_MENU;
 					break;
 				case 'Q':
-					d->Send("Do you wish to save the configuration? (y/n) : ");
+					d->send("Do you wish to save the configuration? (y/n) : ");
 					OLC_MODE(d) = CEDIT_CONFIRM_SAVESTRING;
 					break;
 				default:
-					d->Send("That is an invalid choice!\r\n");
+					d->send("That is an invalid choice!\r\n");
 					cedit_disp_menu(d);
 					break;
 			}
@@ -1446,39 +1439,39 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_AUCTION_MENU:
 			if( toupper( *arg ) == 'A' )
 			{
-				d->Send("Enter the vnum of the auction you wish to add: ");
+				d->send("Enter the vnum of the auction you wish to add: ");
 				OLC_MODE(d) = CEDIT_AUCTION_ADD;
 			}
 			else if( toupper( *arg ) == 'E' )
 			{
-				d->Send("Enter the vnum of the auction you wish to edit: ");
+				d->send("Enter the vnum of the auction you wish to edit: ");
 				OLC_MODE(d) = CEDIT_AUCTION_EDIT;
 			}
 			else if( toupper( *arg ) == 'D' )
 			{
 				if( AuctionManager::GetManager().NumAuctions() == 0 )
-					d->Send("There are no auctions to delete.\r\n");
+					d->send("There are no auctions to delete.\r\n");
 				else
 				{
-					d->Send("Enter the vnum of the auction you wish to delete: ");
+					d->send("Enter the vnum of the auction you wish to delete: ");
 					OLC_MODE(d) = CEDIT_AUCTION_DELETE;
 				}
 			}
 			else if( toupper( *arg ) == 'Q' )
 			{
-				AuctionManager::GetManager().Save();
+				AuctionManager::GetManager().save();
 				cedit_disp_menu( d );
 			}
 			break;
 		case CEDIT_AUCTION_ADD:
 			if( !MiscUtil::isNumber( arg ) )
 			{
-				d->Send("Your input must be numeric.\r\nTry again: ");
+				d->send("Your input must be numeric.\r\nTry again: ");
 				return;
 			}
 			if( AuctionManager::GetManager().GetAuction( atoi(arg) ) != NULL )
 			{
-				d->Send("An auction with that vnum already exists. Try editing it.\r\n");
+				d->send("An auction with that vnum already exists. Try editing it.\r\n");
 				CeditAuctionMenu(d);
 				return;
 			}
@@ -1489,13 +1482,13 @@ void cedit_parse(Descriptor *d, char *arg)
 		{
 			if( !MiscUtil::isNumber( arg ) )
 			{
-				d->Send("Your input must be numeric.\r\nTry again: ");
+				d->send("Your input must be numeric.\r\nTry again: ");
 				return;
 			}
 			Auction *a = AuctionManager::GetManager().GetAuction( atoi(arg) );
 			if( (a == NULL) )
 			{
-				d->Send("No auction with that vnum exists. Try adding it.\r\n");
+				d->send("No auction with that vnum exists. Try adding it.\r\n");
 				CeditAuctionMenu(d);
 				return;
 			}
@@ -1507,13 +1500,13 @@ void cedit_parse(Descriptor *d, char *arg)
 		{
 			if( !MiscUtil::isNumber( arg ) )
 			{
-				d->Send("Your input must be numeric.\r\nTry again: ");
+				d->send("Your input must be numeric.\r\nTry again: ");
 				return;
 			}
 			Auction *a = AuctionManager::GetManager().GetAuction( atoi(arg) );
 			if( a == NULL )
 			{
-				d->Send("That auction does not exist.");
+				d->send("That auction does not exist.");
 				CeditAuctionMenu(d);
 			}
 			AuctionManager::GetManager().RemoveAuction( a );
@@ -1523,7 +1516,7 @@ void cedit_parse(Descriptor *d, char *arg)
 			switch( toupper( *arg ) )
 			{
 			case 'N':
-				d->Send("Enter a new name for the auction: ");
+				d->send("Enter a new name for the auction: ");
 				OLC_MODE(d) = CEDIT_AUCTION_EDIT_NAME;
 				break;
 			case 'C':
@@ -1555,7 +1548,7 @@ void cedit_parse(Descriptor *d, char *arg)
 			int race = atoi(arg)-1;
 			if( race < 0 || race >= NUM_RACES )
 			{
-				d->Send("Invalid race.\r\nTry again: ");
+				d->send("Invalid race.\r\nTry again: ");
 				return;
 			}
 			if( d->olc->auction->raceIsAllowed(race) )
@@ -1575,7 +1568,7 @@ void cedit_parse(Descriptor *d, char *arg)
 			Clan *clan = ClanUtil::getClan( atoi(arg) );
 			if( clan == NULL )
 			{
-				d->Send("That clan does not exist.\r\nTry again: ");
+				d->send("That clan does not exist.\r\nTry again: ");
 				return;
 			}
 			if( d->olc->auction->clanIsAllowed( clan->vnum ) )
@@ -1586,12 +1579,12 @@ void cedit_parse(Descriptor *d, char *arg)
 			break;
 		}
 			/*-------------------------------------------------------------------*/
-#ifdef KINSLAYER_JAVASCRIPT
+
 		case CEDIT_GLOBAL_SCRIPT_ADD_VNUM:
 		{
 			if( !MiscUtil::isNumber( arg ) )
 			{
-				d->Send("Input must be numeric.\r\nTry again: ");
+				d->send("Input must be numeric.\r\nTry again: ");
 				return;
 			}
 			if( toupper(*arg) == 'Q' )
@@ -1601,11 +1594,11 @@ void cedit_parse(Descriptor *d, char *arg)
 			}
 			if( !JSManager::get()->triggerExists( atoi(arg) ) )
 			{
-				d->Send("There is no JSTrigger with that vnum.\r\nTry again, or enter 'Q' to quit out: ");
+				d->send("There is no JSTrigger with that vnum.\r\nTry again, or enter 'Q' to quit out: ");
 				return;
 			}
 			if( atoi(arg) < 0 ) {
-				d->Send("You must specify a trigger, not a library function.\r\n");
+				d->send("You must specify a trigger, not a library function.\r\n");
 				return;
 			}
 			JSTrigger *t = JSManager::get()->getTrigger( atoi(arg) );
@@ -1619,13 +1612,13 @@ void cedit_parse(Descriptor *d, char *arg)
 		{
 			if( !MiscUtil::isNumber( arg ) )
 			{
-				d->Send("Input must be numeric.\r\nTry again: ");
+				d->send("Input must be numeric.\r\nTry again: ");
 				return;
 			}
 			int pos = atoi(arg)-1;
 			if( pos < 0 || pos >= globalJS_Scripts->size() )
 			{
-				d->Send("You must enter a number from the ordered list(NOT the vnum).\r\nTry again: ");
+				d->send("You must enter a number from the ordered list(NOT the vnum).\r\nTry again: ");
 				return;
 			}
 			//It's a valid index. Let's remove it.
@@ -1638,16 +1631,16 @@ void cedit_parse(Descriptor *d, char *arg)
 		{
 			if( toupper(*arg) == 'N' )
 			{
-				d->Send("Enter the vnum of the script you wish to add: ");
+				d->send("Enter the vnum of the script you wish to add: ");
 				OLC_MODE(d) = CEDIT_GLOBAL_SCRIPT_ADD_VNUM;
 			}
 			else if( toupper(*arg) == 'D' )
 			{
 				if( globalJS_Scripts->size() == 0 ) {
-					d->Send("There are no global scripts to remove!\r\n");
+					d->send("There are no global scripts to remove!\r\n");
 					return;
 				}
-				d->Send("Which script, from the list, do you wish to remove?");
+				d->send("Which script, from the list, do you wish to remove?");
 				OLC_MODE(d) = CEDIT_GLOBAL_SCRIPT_REMOVE_VNUM;
 			}
 			else if( toupper(*arg) == 'Q' )
@@ -1656,22 +1649,21 @@ void cedit_parse(Descriptor *d, char *arg)
 				cedit_disp_menu(d);
 			}
 			else {
-				d->Send("Invalid option.\r\nTry again: ");
+				d->send("Invalid option.\r\nTry again: ");
 			}
 			break;
 		}
-#endif
 			/*-------------------------------------------------------------------*/
 		case CEDIT_GAME_OPTIONS_MENU:
 			switch (toupper(*arg))
 			{
 				case 'A':
-					d->Send("Enter the OK message : ");
+					d->send("Enter the OK message : ");
 					//OLC_MODE(d) = CEDIT_OK;
 
 					if (OLC_CONFIG(d)->play.OK)
 					{
-						d->Send(OLC_CONFIG(d)->play.OK);
+						d->send(OLC_CONFIG(d)->play.OK);
 						d->backstr = str_dup(OLC_CONFIG(d)->play.OK);
 					}
 
@@ -1681,12 +1673,12 @@ void cedit_parse(Descriptor *d, char *arg)
 					return;
 
 				case 'B':
-					d->Send("Enter the NOPERSON message : ");
+					d->send("Enter the NOPERSON message : ");
 					//OLC_MODE(d) = CEDIT_NOPERSON;
 
 					if (OLC_CONFIG(d)->play.NOPERSON)
 					{
-						d->Send(OLC_CONFIG(d)->play.NOPERSON);
+						d->send(OLC_CONFIG(d)->play.NOPERSON);
 						d->backstr = str_dup(OLC_CONFIG(d)->play.NOPERSON);
 					}
 
@@ -1696,12 +1688,12 @@ void cedit_parse(Descriptor *d, char *arg)
 					return;
 
 				case 'C':
-					d->Send("Enter the NOEFFECT message : ");
+					d->send("Enter the NOEFFECT message : ");
 					//OLC_MODE(d) = CEDIT_NOEFFECT;
 
 					if (OLC_CONFIG(d)->play.NOEFFECT)
 					{
-						d->Send(OLC_CONFIG(d)->play.NOEFFECT);
+						d->send(OLC_CONFIG(d)->play.NOEFFECT);
 						d->backstr = str_dup(OLC_CONFIG(d)->play.NOEFFECT);
 					}
 
@@ -1710,69 +1702,69 @@ void cedit_parse(Descriptor *d, char *arg)
 
 					return;
 				case 'D':
-					d->Send("Enter the required level for a player to shout : ");
+					d->send("Enter the required level for a player to shout : ");
 					OLC_MODE(d) = CEDIT_LEVEL_SHOUT;
 					return;
 				case 'E':
-					d->Send("Enter the maximum number of players in a tunnel room : ");
+					d->send("Enter the maximum number of players in a tunnel room : ");
 					OLC_MODE(d) = CEDIT_TUNNEL_SIZE;
 					return;
 				case 'F':
-					d->Send("Enter the maximum gain of experience per kill for players : ");
+					d->send("Enter the maximum gain of experience per kill for players : ");
 					OLC_MODE(d) = CEDIT_MAX_EXP_GAIN;
 					return;
 				case 'G':
-					d->Send("Enter the number of tics before PC corpses decompose : ");
+					d->send("Enter the number of tics before PC corpses decompose : ");
 					OLC_MODE(d) = CEDIT_MAX_PC_CORPSE_TIME;
 					return;
 				case 'H':
-					d->Send("Enter the number of tics before NPC corpses decompose : ");
+					d->send("Enter the number of tics before NPC corpses decompose : ");
 					OLC_MODE(d) = CEDIT_MAX_NPC_CORPSE_TIME;
 					return;
 				case 'I':
-					d->Send("Enter the number of tics before PC's are sent to the void (idle) : ");
+					d->send("Enter the number of tics before PC's are sent to the void (idle) : ");
 					OLC_MODE(d) = CEDIT_IDLE_VOID;
 					return;
 				case 'J':
-					d->Send("Enter the number of tics before PC's are automatically rented and forced to quit : ");
+					d->send("Enter the number of tics before PC's are automatically rented and forced to quit : ");
 					OLC_MODE(d) = CEDIT_IDLE_RENT_TIME;
 					return;
 				case 'K':
 					TOGGLE_VAR(OLC_CONFIG(d)->play.load_into_inventory);
 					break;
 				case 'L':
-					d->Send("Enter the new max hit exp gain(level EXP divided by your input) : ");
+					d->send("Enter the new max hit exp gain(level EXP divided by your input) : ");
 					OLC_MODE(d) = CEDIT_MAX_HIT_EXP;
 					return;
 				case 'M':
-					d->Send("Enter the new hit exp multiplier : ");
+					d->send("Enter the new hit exp multiplier : ");
 					OLC_MODE(d) = CEDIT_HIT_EXP_MULT;
 					return;
 				case 'N':
-					d->Send("Enter the new EXP Multipler: ");
+					d->send("Enter the new EXP Multipler: ");
 					OLC_MODE(d) = CEDIT_EXP_MULTIPLIER;
 					return;
 				case 'O':
-					d->Send("Enter the new WP Gain Multiplier: ");
+					d->send("Enter the new WP Gain Multiplier: ");
 					OLC_MODE(d) = CEDIT_WPGAIN_MULTIPLIER;
 					return;
 				case 'P':
-					d->Send("Enter the new WP Loss Multiplier: ");
+					d->send("Enter the new WP Loss Multiplier: ");
 					OLC_MODE(d) = CEDIT_WPLOSS_MULTIPLIER;
 					return;
 				case 'R':
-					d->Send("Enter the date to set for global restat(MONTH-DAY-YEAR): ");
+					d->send("Enter the date to set for global restat(MONTH-DAY-YEAR): ");
 					OLC_MODE(d) = CEDIT_RESTAT;
 					return;
 				case 'S':
-					d->Send("Enter the date to set for global reset(MONTH-DAY-YEAR): ");
+					d->send("Enter the date to set for global reset(MONTH-DAY-YEAR): ");
 					OLC_MODE(d) = CEDIT_RESET;
 					return;
 				case 'Q':
 					cedit_disp_menu(d);
 					return;
 				default:
-					d->Send("\r\nThat is an invalid choice!\r\n");
+					d->send("\r\nThat is an invalid choice!\r\n");
 					break;
 			}
 
@@ -1790,7 +1782,7 @@ void cedit_parse(Descriptor *d, char *arg)
 					break;
 				case 'b':
 				case 'B':
-					d->Send("Enter the maximum number of items players can rent : ");
+					d->send("Enter the maximum number of items players can rent : ");
 					OLC_MODE(d) = CEDIT_MAX_OBJ_SAVE;
 					return;
 				case 'c':
@@ -1799,7 +1791,7 @@ void cedit_parse(Descriptor *d, char *arg)
 					break;
 				case 'd':
 				case 'D':
-					d->Send("Enter how often (in minutes) should the MUD save players : ");
+					d->send("Enter how often (in minutes) should the MUD save players : ");
 					OLC_MODE(d) = CEDIT_AUTOSAVE_TIME;
 					return;
 				case 'q':
@@ -1807,7 +1799,7 @@ void cedit_parse(Descriptor *d, char *arg)
 					cedit_disp_menu(d);
 					return;
 				default:
-					d->Send("\r\nThat is an invalid choice!\r\n");
+					d->send("\r\nThat is an invalid choice!\r\n");
 					break;
 			}
 
@@ -1820,34 +1812,34 @@ void cedit_parse(Descriptor *d, char *arg)
 			switch (toupper(*arg))
 			{
 				case 'A':
-					d->Send("Enter the room's vnum where humans should load into : ");
+					d->send("Enter the room's vnum where humans should load into : ");
 					OLC_MODE(d) = CEDIT_HUMAN_START_ROOM;
 					return;
 				case 'B':
-					d->Send("Enter the room's vnum where trollocs should load into : ");
+					d->send("Enter the room's vnum where trollocs should load into : ");
 					OLC_MODE(d) = CEDIT_TROLLOC_START_ROOM;
 					return;
 				case 'C':
-					d->Send("Enter the room's vnum where aiel should load into : ");
+					d->send("Enter the room's vnum where aiel should load into : ");
 					OLC_MODE(d) = CEDIT_AIEL_START_ROOM;
 					return;
 				case 'D':
-					d->Send("Enter the room's vnum where seanchan should load into : ");
+					d->send("Enter the room's vnum where seanchan should load into : ");
 					OLC_MODE(d) = CEDIT_SEANCHAN_START_ROOM;
 					return;
 				case 'E':
-					d->Send("Enter the room's vnum where immortals should load into : ");
+					d->send("Enter the room's vnum where immortals should load into : ");
 					OLC_MODE(d) = CEDIT_IMMORT_START_ROOM;
 					return;
 				case 'F':
-					d->Send("Enter the room's vnum where frozen people should load into : ");
+					d->send("Enter the room's vnum where frozen people should load into : ");
 					OLC_MODE(d) = CEDIT_FROZEN_START_ROOM;
 					return;
 				case 'Q':
 					cedit_disp_menu(d);
 					return;
 				default:
-					d->Send("\r\nThat is an invalid choice!\r\n");
+					d->send("\r\nThat is an invalid choice!\r\n");
 			}
 
 			cedit_disp_room_numbers(d);
@@ -1857,24 +1849,24 @@ void cedit_parse(Descriptor *d, char *arg)
 			switch (toupper(*arg))
 			{
 				case 'A':
-					d->Send("Enter the default port number : ");
+					d->send("Enter the default port number : ");
 					OLC_MODE(d) = CEDIT_DFLT_PORT;
 					return;
 				case 'B':
-					d->Send("Enter the name of the logfile : ");
+					d->send("Enter the name of the logfile : ");
 					OLC_MODE(d) = CEDIT_LOGNAME;
 					return;
 				case 'C':
-					d->Send("Enter the maximum number of players : ");
+					d->send("Enter the maximum number of players : ");
 					OLC_MODE(d) = CEDIT_MAX_PLAYING;
 					return;
 				case 'D':
-					d->Send("Enter the maximum number of password attempts : ");
+					d->send("Enter the maximum number of password attempts : ");
 					OLC_MODE(d) = CEDIT_MAX_BAD_PWS;
 					return;
 				case 'E':
 					TOGGLE_VAR(OLC_CONFIG(d)->operation.use_new_socials);
-					d->Send( "Please note that using the stock social file will disable AEDIT.\r\n");
+					d->send( "Please note that using the stock social file will disable AEDIT.\r\n");
 					break;
 				case 'F':
 					TOGGLE_VAR(OLC_CONFIG(d)->operation.auto_save_olc);
@@ -1882,11 +1874,11 @@ void cedit_parse(Descriptor *d, char *arg)
 				case 'G':
 					OLC_MODE(d) = CEDIT_WELC_MESSG;
 
-					d->Send("Enter the new welcome message :\r\n\r\n");
+					d->send("Enter the new welcome message :\r\n\r\n");
 
 					if (OLC_CONFIG(d)->operation.WELC_MESSG)
 					{
-						d->Send(OLC_CONFIG(d)->operation.WELC_MESSG);
+						d->send(OLC_CONFIG(d)->operation.WELC_MESSG);
 						d->backstr = str_dup(OLC_CONFIG(d)->operation.WELC_MESSG);
 					}
 
@@ -1895,11 +1887,11 @@ void cedit_parse(Descriptor *d, char *arg)
 					return;
 				case 'H':
 					//OLC_MODE(d) = CEDIT_START_MESSG;
-					d->Send("Enter the new newbie start message :\r\n\r\n");
+					d->send("Enter the new newbie start message :\r\n\r\n");
 
 					if (OLC_CONFIG(d)->operation.START_MESSG)
 					{
-						d->Send(OLC_CONFIG(d)->operation.START_MESSG);
+						d->send(OLC_CONFIG(d)->operation.START_MESSG);
 						d->backstr = str_dup(OLC_CONFIG(d)->operation.START_MESSG);
 					}
 
@@ -1909,11 +1901,11 @@ void cedit_parse(Descriptor *d, char *arg)
 				case 'n':
 				case 'N':
 					//OLC_MODE(d) = CEDIT_START_MESSG;
-					d->Send("Enter the new newbie start message :\r\n\r\n");
+					d->send("Enter the new newbie start message :\r\n\r\n");
 
 					if (OLC_CONFIG(d)->operation.NEWBIE_MSG)
 					{
-						d->Send(OLC_CONFIG(d)->operation.NEWBIE_MSG);
+						d->send(OLC_CONFIG(d)->operation.NEWBIE_MSG);
 						d->backstr = str_dup(OLC_CONFIG(d)->operation.NEWBIE_MSG);
 					}
 
@@ -1929,7 +1921,7 @@ void cedit_parse(Descriptor *d, char *arg)
 					cedit_disp_menu(d);
 					return;
 				default:
-					d->Send("\r\nThat is an invalid choice!\r\n");
+					d->send("\r\nThat is an invalid choice!\r\n");
 			}
 			cedit_disp_operation_options(d);
 			return;
@@ -1940,7 +1932,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				case 1:
 					if( GET_LEVEL(d->character) < LVL_GRGOD && !PLR_FLAGGED(d->character,PLR_CHARGE_EDITOR) )
 					{
-						d->Send("You can't edit that!\r\n");
+						d->send("You can't edit that!\r\n");
 						return;
 					}
 					CeditBashMenu(d);
@@ -1948,7 +1940,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				case 2:
 					if( GET_LEVEL(d->character) < LVL_GRGOD && !PLR_FLAGGED(d->character,PLR_CHARGE_EDITOR) )
 					{
-						d->Send("You can't edit that!\r\n");
+						d->send("You can't edit that!\r\n");
 						return;
 					}
 					CeditChargeMenu(d);
@@ -1965,7 +1957,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				case 6:
 					if( GET_LEVEL(d->character) < LVL_GRGOD && !PLR_FLAGGED(d->character,PLR_CHARGE_EDITOR) )
 					{
-						d->Send("You can't edit that!\r\n");
+						d->send("You can't edit that!\r\n");
 						return;
 					}
 					CeditMeleeMenu(d);
@@ -1973,7 +1965,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				case 7:
 					if( GET_LEVEL(d->character) < LVL_GRGOD && !PLR_FLAGGED(d->character,PLR_CHARGE_EDITOR) )
 					{
-						d->Send("You can't edit that!\r\n");
+						d->send("You can't edit that!\r\n");
 						return;
 					}
 					CeditBodyPercentsMenu(d);
@@ -1981,7 +1973,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				case 8:
 					if( GET_LEVEL(d->character) < LVL_GRGOD && !PLR_FLAGGED(d->character,PLR_CHARGE_EDITOR) )
 					{
-						d->Send("You can't edit that!\r\n");
+						d->send("You can't edit that!\r\n");
 						return;
 					}
 					CeditTaintMenu(d);
@@ -1989,7 +1981,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				case 9:
 					if( GET_LEVEL(d->character) < LVL_GRGOD && !PLR_FLAGGED(d->character,PLR_CHARGE_EDITOR) )
 					{
-						d->Send("You can't edit that!\r\n");
+						d->send("You can't edit that!\r\n");
 						return;
 					}
 					CeditFleeMenu(d);
@@ -1997,7 +1989,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				case 10:
 					if( GET_LEVEL(d->character) < LVL_GRGOD && !PLR_FLAGGED(d->character, PLR_WEAVE_EDITOR) )
 					{
-						d->Send("You can't edit that!\r\n");
+						d->send("You can't edit that!\r\n");
 						return;
 					}
 					CeditWeaveMenu(d);
@@ -2005,7 +1997,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				case 11:
 					if( GET_LEVEL(d->character) < LVL_GRGOD && !PLR_FLAGGED(d->character, PLR_CHARGE_EDITOR) )
 					{
-						d->Send("You can't edit that!\r\n");
+						d->send("You can't edit that!\r\n");
 						return;
 					}
 					CeditPrecStrikeMenu(d);
@@ -2014,7 +2006,7 @@ void cedit_parse(Descriptor *d, char *arg)
 					if(toupper(*arg) == 'Q')
 						cedit_disp_menu(d);
 					else
-						d->Send("Invalid option. Try again: ");
+						d->send("Invalid option. Try again: ");
 					break;
 			}
 			return;
@@ -2026,62 +2018,62 @@ void cedit_parse(Descriptor *d, char *arg)
 			}
 			if( toupper(arg[0]) == 'A' )
 			{
-				d->Send("Enter a vnum for the new skill: ");
+				d->send("Enter a vnum for the new skill: ");
 				OLC_MODE(d) = CEDIT_ADD_WEAVE_VNUM;
 				return;
 			}
 			if( toupper(arg[0]) == 'D' )
 			{
-				d->Send("Enter the vnum of the skill you wish to delete: ");
+				d->send("Enter the vnum of the skill you wish to delete: ");
 				OLC_MODE(d) = CEDIT_DELETE_WEAVE;
 				return;
 			}
 			if( !(d->olc->weave = WeaveManager::GetManager().GetWeave( atoi(arg) )) )
-				d->Send("Weave not found. Try again: ");
+				d->send("Weave not found. Try again: ");
 			else
 				CeditDisplayWeave(d);
 			break;
 		case CEDIT_ADD_WEAVE_VNUM:
 			if( !MiscUtil::isNumber(arg) ) {
-				d->Send("Your input must be numeric.\r\nTry again: ");
+				d->send("Your input must be numeric.\r\nTry again: ");
 				return;
 			} else if( atoi(arg) < 0 ) {
-				d->Send("Your input must not be negative.\r\nTry again: ");
+				d->send("Your input must not be negative.\r\nTry again: ");
 				return;
 			} else if( WeaveManager::GetManager().GetWeave( atoi(arg) ) != NULL ) {
-				d->Send("A weave with that vnum already exists.\r\nTry again: ");
+				d->send("A weave with that vnum already exists.\r\nTry again: ");
 				return;
 			} else {
 				d->olc->weave = new Weave();
 				d->olc->weave->setAttribute("Vnum", MiscUtil::Convert<std::string>(MiscUtil::Convert<int>(arg)));
-				d->Send("Enter a name for this skill: ");
+				d->send("Enter a name for this skill: ");
 				OLC_MODE(d) = CEDIT_ADD_WEAVE_NAME;
 			}
 			break;
 		case CEDIT_ADD_WEAVE_NAME:
 			if( WeaveManager::GetManager().GetWeave(arg) != (NULL) ) {
-				d->Send("A skill with that name already exists.\r\nPlease enter a name for this skill: ");
+				d->send("A skill with that name already exists.\r\nPlease enter a name for this skill: ");
 				return;
 			} else {
 				d->olc->weave->setName( arg );
 				WeaveManager::GetManager().AddWeave( d->olc->weave );
 				d->olc->weave = (NULL);
-				d->Send("Weave added.\r\n");
-				WeaveManager::GetManager().SaveWeaves();
+				d->send("Weave added.\r\n");
+				WeaveManager::GetManager().saveWeaves();
 				CeditWeaveMenu(d);
 			}
 			break;
 		case CEDIT_DELETE_WEAVE:
 			if( !MiscUtil::isNumber( arg ) ) {
-				d->Send("You must enter a numerical argument.\r\nTry again: ");
+				d->send("You must enter a numerical argument.\r\nTry again: ");
 				return;
 			} else if( (weave = WeaveManager::GetManager().GetWeave(atoi(arg))) == NULL ) {
-				d->Send("No weave by that vnum.");
+				d->send("No weave by that vnum.");
 				CeditWeaveMenu(d);
 			} else {
 				WeaveManager::GetManager().RemoveWeave( atoi(arg) );
-				WeaveManager::GetManager().SaveWeaves();
-				d->Send("Weave removed.\r\n");
+				WeaveManager::GetManager().saveWeaves();
+				d->send("Weave removed.\r\n");
 				CeditWeaveMenu(d);
 			}
 			break;
@@ -2094,13 +2086,13 @@ void cedit_parse(Descriptor *d, char *arg)
 			}
 			if( toupper( arg[0] ) == 'A' )
 			{
-				d->Send("Enter a name for the attribute: ");
+				d->send("Enter a name for the attribute: ");
 				OLC_MODE(d) = CEDIT_WEAVE_ADD_ATTRIBUTE;
 				return;
 			}
 			if( toupper( arg[0] ) == 'D' )
 			{
-				d->Send("Enter the name of the attribute you wish to delete: ");
+				d->send("Enter the name of the attribute you wish to delete: ");
 				OLC_MODE(d) = CEDIT_WEAVE_DELETE_ATTRIBUTE;
 				return;
 			}
@@ -2108,32 +2100,32 @@ void cedit_parse(Descriptor *d, char *arg)
 			std::pair<std::string, std::string> Attribute = d->olc->weave->GetNthAttribute( atoi(arg) );
 			if( !Attribute.first.compare("Invalid") )
 			{
-				d->Send("That attribute isn't valid.\r\nTry again: ");
+				d->send("That attribute isn't valid.\r\nTry again: ");
 				return;
 			}
 			d->olc->WeaveAttribute = Attribute.first;
 			d->olc->mode = CEDIT_WEAVE_ATTR_EDIT;
-			d->Send("Enter a new value for this weave's attribute: ");
+			d->send("Enter a new value for this weave's attribute: ");
 			break;
 		}
 		case CEDIT_WEAVE_ADD_ATTRIBUTE:
 			if( d->olc->weave->hasAttribute( arg, false ) )
 			{
-				d->Send("That attribute already exists.\r\nTry another name:");
+				d->send("That attribute already exists.\r\nTry another name:");
 				return;
 			}
 			d->olc->weave->addAttribute( arg );
-			d->Send("Attribute has been added.\r\n");
+			d->send("Attribute has been added.\r\n");
 			CeditDisplayWeave( d );
 			break;
 		case CEDIT_WEAVE_DELETE_ATTRIBUTE:
 			if( d->olc->weave->hasAttribute( arg, false ) )
 			{
 				d->olc->weave->removeAttribute( arg, false );
-				d->Send("Attribute has been removed.\r\n");
+				d->send("Attribute has been removed.\r\n");
 			}
 			else
-				d->Send("Attribute not found.\r\n");
+				d->send("Attribute not found.\r\n");
 			CeditDisplayWeave(d);
 			break;
 		case CEDIT_WEAVE_ATTR_EDIT:
@@ -2171,14 +2163,14 @@ void cedit_parse(Descriptor *d, char *arg)
 						CeditSkillMenu(d);
 						return;
 					}
-					d->Send("Invalid option. Try again(Q to quit): ");
+					d->send("Invalid option. Try again(Q to quit): ");
 			}
-			d->Send("Input new value : ");
+			d->send("Input new value : ");
 			return;
 		case CEDIT_FLEE_UNENGAGED:
 			if(atoi(arg) < 0)
 			{
-				d->Send("Value must not be negative. Try again : ");
+				d->send("Value must not be negative. Try again : ");
 				return;
 			}
 			FleeData.PulsesPerUnengagedFlee = atoi(arg);
@@ -2187,7 +2179,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_FLEE_ENGAGED:
 			if(atoi(arg) < 0)
 			{
-				d->Send("Value must not be negative. Try again : ");
+				d->send("Value must not be negative. Try again : ");
 				return;
 			}
 			FleeData.PulsesPerEngagedFlee = atoi(arg);
@@ -2196,7 +2188,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_FLEE_AUTO:
 			if(atoi(arg) < 0)
 			{
-				d->Send("Value must not be negative. Try again : ");
+				d->send("Value must not be negative. Try again : ");
 				return;
 			}
 			FleeData.PulsesPerAutoFlee = atoi(arg);
@@ -2205,7 +2197,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_FLEE_REGAIN:
 			if(atoi(arg) <= 0)
 			{
-				d->Send("Value must be greater than zero. Try again : ");
+				d->send("Value must be greater than zero. Try again : ");
 				return;
 			}
 			FleeData.PulsesRemovedPerTic = atoi(arg);
@@ -2214,7 +2206,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_FLEE_BASE:
 			if(atoi(arg) < 0)
 			{
-				d->Send("Value must not be negative. Try again : ");
+				d->send("Value must not be negative. Try again : ");
 				return;
 			}
 			FleeData.PulsesForFirstFlee = atoi(arg);
@@ -2223,7 +2215,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_FLEE_MAX_LAG:
 			if(atoi(arg) < 0)
 			{
-				d->Send("Value must not be negative. Try again : ");
+				d->send("Value must not be negative. Try again : ");
 				return;
 			}
 			FleeData.MaxFleeLag = atoi(arg);
@@ -2232,7 +2224,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_FLEE_EXITS:
 			if(atoi(arg) < 0)
 			{
-				d->Send("Value must not be negative. Try again : ");
+				d->send("Value must not be negative. Try again : ");
 				return;
 			}
 			FleeData.PulsesPerExit = atoi(arg);
@@ -2293,10 +2285,10 @@ void cedit_parse(Descriptor *d, char *arg)
 						CeditSkillMenu(d);
 						return;
 					}
-					d->Send("Invalid option. Try again : ");
+					d->send("Invalid option. Try again : ");
 					return;
 			}
-			d->Send("Insert the new value : ");
+			d->send("Insert the new value : ");
 			return;
 		case CEDIT_TAINT_RANDOM_COMMAND:
 			TaintData.TaintForRandomCommand = atoi(arg);
@@ -2389,10 +2381,10 @@ void cedit_parse(Descriptor *d, char *arg)
 						CeditSkillMenu(d);
 						return;
 					}
-					d->Send("Invalid option. Try again : ");
+					d->send("Invalid option. Try again : ");
 					return;
 			}
-			d->Send("Input new value : ");
+			d->send("Input new value : ");
 			return;
 
 		case CEDIT_MELEE_WARDMULTIPLIER:
@@ -2455,10 +2447,10 @@ void cedit_parse(Descriptor *d, char *arg)
 						CeditSkillMenu(d);
 						return;
 					}
-					d->Send("Invalid option. Try again : ");
+					d->send("Invalid option. Try again : ");
 					return;
 			}
-			d->Send("Input new value : ");
+			d->send("Input new value : ");
 			return;
 		case CEDIT_PRECSTRIKE_OBMULT:
 			PreciseStrikeData.O_OBMultiplier = atof(arg);
@@ -2523,15 +2515,15 @@ void cedit_parse(Descriptor *d, char *arg)
 						CeditSkillMenu(d);
 						return;
 					}
-					d->Send("Invalid option. Try again : ");
+					d->send("Invalid option. Try again : ");
 					return;
 			}
-			d->Send("Input the new percent to represent how often this body part is hit : ");
+			d->send("Input the new percent to represent how often this body part is hit : ");
 			return;
 		case CEDIT_BODY_PERCENT_HEAD:
 			if(atoi(arg) < 0 || atoi(arg) > 100)
 			{
-				d->Send("The percentage must be between 0 and 100.\r\nTry again : ");
+				d->send("The percentage must be between 0 and 100.\r\nTry again : ");
 				return;
 			}
 			BodyPercents[WEAR_HEAD] = atoi(arg);
@@ -2540,7 +2532,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_BODY_PERCENT_SHOULDERS:
 			if(atoi(arg) < 0 || atoi(arg) > 100)
 			{
-				d->Send("The percentage must be between 0 and 100.\r\nTry again : ");
+				d->send("The percentage must be between 0 and 100.\r\nTry again : ");
 				return;
 			}
 			BodyPercents[WEAR_SHOULDERS] = atoi(arg);
@@ -2549,7 +2541,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_BODY_PERCENT_ARMS:
 			if(atoi(arg) < 0 || atoi(arg) > 100)
 			{
-				d->Send("The percentage must be between 0 and 100.\r\nTry again : ");
+				d->send("The percentage must be between 0 and 100.\r\nTry again : ");
 				return;
 			}
 			BodyPercents[WEAR_ARMS] = atoi(arg);
@@ -2558,7 +2550,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_BODY_PERCENT_HANDS:
 			if(atoi(arg) < 0 || atoi(arg) > 100)
 			{
-				d->Send("The percentage must be between 0 and 100.\r\nTry again : ");
+				d->send("The percentage must be between 0 and 100.\r\nTry again : ");
 				return;
 			}
 			BodyPercents[WEAR_HANDS] = atoi(arg);
@@ -2567,7 +2559,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_BODY_PERCENT_BODY:
 			if(atoi(arg) < 0 || atoi(arg) > 100)
 			{
-				d->Send("The percentage must be between 0 and 100.\r\nTry again : ");
+				d->send("The percentage must be between 0 and 100.\r\nTry again : ");
 				return;
 			}
 			BodyPercents[WEAR_BODY] = atoi(arg);
@@ -2576,7 +2568,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_BODY_PERCENT_WAIST:
 			if(atoi(arg) < 0 || atoi(arg) > 100)
 			{
-				d->Send("The percentage must be between 0 and 100.\r\nTry again : ");
+				d->send("The percentage must be between 0 and 100.\r\nTry again : ");
 				return;
 			}
 			BodyPercents[WEAR_WAIST] = atoi(arg);
@@ -2585,7 +2577,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_BODY_PERCENT_LEGS:
 			if(atoi(arg) < 0 || atoi(arg) > 100)
 			{
-				d->Send("The percentage must be between 0 and 100.\r\nTry again : ");
+				d->send("The percentage must be between 0 and 100.\r\nTry again : ");
 				return;
 			}
 			BodyPercents[WEAR_LEGS] = atoi(arg);
@@ -2594,7 +2586,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_BODY_PERCENT_FEET:
 			if(atoi(arg) < 0 || atoi(arg) > 100)
 			{
-				d->Send("The percentage must be between 0 and 100.\r\nTry again : ");
+				d->send("The percentage must be between 0 and 100.\r\nTry again : ");
 				return;
 			}
 			BodyPercents[WEAR_FEET] = atoi(arg);
@@ -2638,10 +2630,10 @@ void cedit_parse(Descriptor *d, char *arg)
 						CeditSkillMenu(d);
 						return;
 					}
-					d->Send("Invalid option. Try again : ");
+					d->send("Invalid option. Try again : ");
 					return;
 			}
-			d->Send("Enter the new value: ");
+			d->send("Enter the new value: ");
 			return;
 		case CEDIT_CHARGE:
 			switch(toupper(*arg))
@@ -2694,10 +2686,10 @@ void cedit_parse(Descriptor *d, char *arg)
 						CeditSkillMenu(d);
 						return;
 					}
-					d->Send("Invalid option. Try again : ");
+					d->send("Invalid option. Try again : ");
 					return;
 			}
-			d->Send("Enter the new value: ");
+			d->send("Enter the new value: ");
 			return;
 		case CEDIT_BASH_OMULTIPLIER:
 			BashData.O_OBMultiplier = atof(arg);
@@ -2780,7 +2772,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				ChargeData.CanStartOnFightingVict = false;
 			else
 			{
-				d->Send("Invalid option. Please either choose 'Y' or 'N': ");
+				d->send("Invalid option. Please either choose 'Y' or 'N': ");
 				return;
 			}
 			CeditChargeMenu(d);
@@ -2792,7 +2784,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				ChargeData.CanStartWhileFighting = false;
 			else
 			{
-				d->Send("Invalid option. Please either choose 'Y' or 'N': ");
+				d->send("Invalid option. Please either choose 'Y' or 'N': ");
 				return;
 			}
 			CeditChargeMenu(d);
@@ -2804,7 +2796,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				ChargeData.CanFinishWhileFighting = false;
 			else
 			{
-				d->Send("Invalid option. Please either choose 'Y' or 'N': ");
+				d->send("Invalid option. Please either choose 'Y' or 'N': ");
 				return;
 			}
 			CeditChargeMenu(d);
@@ -2827,17 +2819,17 @@ void cedit_parse(Descriptor *d, char *arg)
 			switch(toupper(*arg))
 			{
 				case 'N':
-					d->Send("Enter the new tip: ");
+					d->send("Enter the new tip: ");
 					OLC_MODE(d) = CEDIT_TIP_NEW;
 					return;
 				case 'D':
 					if(!Tips->size())
 					{
-						d->Send("There are no tips to delete!\r\n");
+						d->send("There are no tips to delete!\r\n");
 					}
 					else
 					{
-						d->Send("Enter the tip number to have deleted: ");
+						d->send("Enter the tip number to have deleted: ");
 						OLC_MODE(d) = CEDIT_TIP_DELETE;
 					}
 					return;
@@ -2845,13 +2837,13 @@ void cedit_parse(Descriptor *d, char *arg)
 					cedit_disp_operation_options(d);
 					return;
 				default:
-					d->Send("Invalid option. Try again: ");
+					d->send("Invalid option. Try again: ");
 					return;
 			}
 		case CEDIT_TIP_NEW:
 			if(!*arg)
 			{
-				d->Send("No tip added.\r\n");
+				d->send("No tip added.\r\n");
 				CeditTipMenu(d);
 				return;
 			}
@@ -2861,7 +2853,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_TIP_DELETE:
 			if(!GetTip(atoi(arg)).size())
 			{
-				d->Send("That tip does not exist. Try again(Q to quit): ");
+				d->send("That tip does not exist. Try again(Q to quit): ");
 				return;
 			}
 			if(toupper(*arg) == 'Q')
@@ -2876,7 +2868,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_TUNNEL_SIZE:
 			if (!*arg)
 			{
-				d->Send("That is an invalid choice!\r\n"
+				d->send("That is an invalid choice!\r\n"
 				        "Enter the maximum number of people allowed in a tunnel : ");
 			}
 			else
@@ -2900,7 +2892,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_EXP_MULTIPLIER:
 			if(!*arg || !MiscUtil::isNumber(arg))
 			{
-				d->Send("Must be numerical. Try again : ");
+				d->send("Must be numerical. Try again : ");
 				return;
 			}
 			OLC_CONFIG(d)->play.ExpMultiplier = atof(arg);
@@ -2912,7 +2904,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_WPGAIN_MULTIPLIER:
 			if(!*arg || !MiscUtil::isNumber(arg))
 			{
-				d->Send("Must be numerical. Try again : ");
+				d->send("Must be numerical. Try again : ");
 				return;
 			}
 			OLC_CONFIG(d)->play.WpGainMultiplier = atof(arg);
@@ -2924,7 +2916,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_WPLOSS_MULTIPLIER:
 			if(!*arg || !MiscUtil::isNumber(arg))
 			{
-				d->Send("Must be numerical. Try again : ");
+				d->send("Must be numerical. Try again : ");
 				return;
 			}
 			OLC_CONFIG(d)->play.WpLossMultiplier = atof(arg);
@@ -2941,7 +2933,7 @@ void cedit_parse(Descriptor *d, char *arg)
 			}
 			if(Time::DateToTime(arg) <= 0)
 			{
-				d->Send("The date must in the following format: MONTH-DAY-YEAR (Q to quit)\r\nTry again");
+				d->send("The date must in the following format: MONTH-DAY-YEAR (Q to quit)\r\nTry again");
 				return;
 			}
 			d->olc->config->play.restat_time.setTime(Time::DateToTime(arg));
@@ -2958,7 +2950,7 @@ void cedit_parse(Descriptor *d, char *arg)
 			}
 			if(Time::DateToTime(arg) <= 0)
 			{
-				d->Send("The date must in the following format: MONTH-DAY-YEAR (Q to quit)\r\nTry again");
+				d->send("The date must in the following format: MONTH-DAY-YEAR (Q to quit)\r\nTry again");
 				return;
 			}
 			d->olc->config->play.reset_time = Time::DateToTime(arg);
@@ -2970,7 +2962,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_MAX_NPC_CORPSE_TIME:
 			if (!*arg)
 			{
-				d->Send("That is an invalid choice!\r\n"
+				d->send("That is an invalid choice!\r\n"
 				        "Enter the number of tics before NPC corpses decompose : ");
 			}
 			else
@@ -2985,7 +2977,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_MAX_PC_CORPSE_TIME:
 			if (!*arg)
 			{
-				d->Send("That is an invalid choice!\r\n"
+				d->send("That is an invalid choice!\r\n"
 				        "Enter the number of tics before PC corpses decompose : ");
 			}
 			else
@@ -3000,7 +2992,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_IDLE_VOID:
 			if (!*arg)
 			{
-				d->Send("That is an invalid choice!\r\n"
+				d->send("That is an invalid choice!\r\n"
 				        "Enter the number of tics before PC's are sent to the void (idle) : ");
 			}
 			else
@@ -3015,12 +3007,12 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_MAX_HIT_EXP:
 			if (!*arg)
 			{
-				d->Send("That is an invalid choice!\r\n"
+				d->send("That is an invalid choice!\r\n"
 				        "Enter the new max hit exp(level exp divided by your input): ");
 			}
 			else if(atoi(arg) <= 0)
 			{
-				d->Send("Input MUST be above zero.\r\nTry again : ");
+				d->send("Input MUST be above zero.\r\nTry again : ");
 			}
 			else
 			{
@@ -3034,12 +3026,12 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_HIT_EXP_MULT:
 			if (!*arg)
 			{
-				d->Send("That is an invalid choice!\r\n"
+				d->send("That is an invalid choice!\r\n"
 				        "Enter the new hit exp multiplier: ");
 			}
 			else if(atoi(arg) <= 0)
 			{
-				d->Send("Input MUST be above zero.\r\nTry again : ");
+				d->send("Input MUST be above zero.\r\nTry again : ");
 			}
 			else
 			{
@@ -3051,7 +3043,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_IDLE_RENT_TIME:
 			if (!*arg)
 			{
-				d->Send("That is an invalid choice!\r\n"
+				d->send("That is an invalid choice!\r\n"
 				        "Enter the number of tics before PC's are automatically rented and forced to quit : ");
 			}
 			else
@@ -3081,7 +3073,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_MAX_OBJ_SAVE:
 			if (!*arg)
 			{
-				d->Send("That is an invalid choice!\r\n"
+				d->send("That is an invalid choice!\r\n"
 				        "Enter the maximum objects a player can save : ");
 			}
 			else
@@ -3096,7 +3088,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_AUTOSAVE_TIME:
 			if (!*arg)
 			{
-				d->Send("That is an invalid choice!\r\n"
+				d->send("That is an invalid choice!\r\n"
 				        "Enter the interval for player's being autosaved : ");
 			}
 			else
@@ -3111,12 +3103,12 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_IMMORT_START_ROOM:
 			if (!*arg)
 			{
-				d->Send("That is an invalid choice!\r\n"
+				d->send("That is an invalid choice!\r\n"
 				        "Enter the room's vnum where immortals should load into : ");
 			}
 			else if (real_room(atoi(arg)) == NOWHERE)
 			{
-				d->Send("That room doesn't exist!\r\n"
+				d->send("That room doesn't exist!\r\n"
 				        "Enter the room's vnum where immortals should load into : ");
 			}
 			else
@@ -3131,12 +3123,12 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_AIEL_START_ROOM:
 			if (!*arg)
 			{
-				d->Send("That is an invalid choice!\r\n"
+				d->send("That is an invalid choice!\r\n"
 				        "Enter the room's vnum where aiel should load into : ");
 			}
 			else if (real_room(atoi(arg)) == NOWHERE)
 			{
-				d->Send("That room doesn't exist!\r\n"
+				d->send("That room doesn't exist!\r\n"
 				        "Enter the room's vnum where aiel should load into : ");
 			}
 			else
@@ -3151,12 +3143,12 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_SEANCHAN_START_ROOM:
 			if (!*arg)
 			{
-				d->Send("That is an invalid choice!\r\n"
+				d->send("That is an invalid choice!\r\n"
 				        "Enter the room's vnum where seanchan should load into : ");
 			}
 			else if (real_room(atoi(arg)) == NOWHERE)
 			{
-				d->Send("That room doesn't exist!\r\n"
+				d->send("That room doesn't exist!\r\n"
 				        "Enter the room's vnum where seanchan should load into : ");
 			}
 			else
@@ -3171,12 +3163,12 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_TROLLOC_START_ROOM:
 			if (!*arg)
 			{
-				d->Send("That is an invalid choice!\r\n"
+				d->send("That is an invalid choice!\r\n"
 				        "Enter the room's vnum where trollocs should load into : ");
 			}
 			else if (real_room(atoi(arg)) == NOWHERE)
 			{
-				d->Send("That room doesn't exist!\r\n"
+				d->send("That room doesn't exist!\r\n"
 				        "Enter the room's vnum where trollocs should load into : ");
 			}
 			else
@@ -3191,12 +3183,12 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_HUMAN_START_ROOM:
 			if (!*arg)
 			{
-				d->Send("That is an invalid choice!\r\n"
+				d->send("That is an invalid choice!\r\n"
 				        "Enter the room's vnum where humans should load into : ");
 			}
 			else if (real_room(atoi(arg)) == NOWHERE)
 			{
-				d->Send("That room doesn't exist!\r\n"
+				d->send("That room doesn't exist!\r\n"
 				        "Enter the room's vnum where humans should load into : ");
 			}
 			else
@@ -3211,12 +3203,12 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_FROZEN_START_ROOM:
 			if (!*arg)
 			{
-				d->Send("That is an invalid choice!\r\n"
+				d->send("That is an invalid choice!\r\n"
 				        "Enter the room's vnum where frozen people should load into : ");
 			}
 			else if (real_room(atoi(arg)) == NOWHERE)
 			{
-				d->Send("That room doesn't exist!\r\n"
+				d->send("That room doesn't exist!\r\n"
 				        "Enter the room's vnum where frozen people should load into : ");
 			}
 			else
@@ -3238,7 +3230,7 @@ void cedit_parse(Descriptor *d, char *arg)
 		case CEDIT_LOGNAME:
 			if (!*arg)
 			{
-				d->Send("That is an invalid choice!\r\n"
+				d->send("That is an invalid choice!\r\n"
 				        "Enter the name of the logfile : ");
 			}
 			else
@@ -3270,7 +3262,7 @@ void cedit_parse(Descriptor *d, char *arg)
 			 */
 			cleanup_olc(d, CLEANUP_CONFIG);
 			MudLog(BRF, LVL_BUILDER, TRUE, "SYSERR: OLC: cedit_parse(): Reached default case!");
-			d->Send("Oops...\r\n");
+			d->send("Oops...\r\n");
 			break;
 	}
 }

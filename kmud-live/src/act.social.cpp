@@ -77,7 +77,7 @@ ACMD(do_action)
 
 	if ((act_nr = find_action(cmd)) < 0)
 	{
-		ch->Send("That action is not supported.\r\n", ch);
+		ch->send("That action is not supported.\r\n", ch);
 		return;
 	}
 
@@ -87,7 +87,7 @@ ACMD(do_action)
 
 	if ((!action->char_body_found) && (*buf2))
 	{
-		ch->Send("Sorry, this social does not support body parts.\r\n", ch);
+		ch->send("Sorry, this social does not support body parts.\r\n", ch);
 		return;
 	}
 
@@ -102,8 +102,8 @@ ACMD(do_action)
 
 	if (!*buf)
 	{
-		ch->Send(action->char_no_arg);
-		ch->Send("\r\n");
+		ch->send(action->char_no_arg);
+		ch->send("\r\n");
 		Act(action->others_no_arg, action->hide, ch, 0, 0, TO_ROOM);
 		return;
 	}
@@ -120,12 +120,12 @@ ACMD(do_action)
 		}
 
 		if (action->not_found)
-			ch->Send(action->not_found);
+			ch->send(action->not_found);
 
 		else
-			ch->Send("I don't see anything by that name here.");
+			ch->send("I don't see anything by that name here.");
 
-		ch->Send("\r\n");
+		ch->send("\r\n");
 		return;
 	}
 
@@ -133,12 +133,12 @@ ACMD(do_action)
 	{
 
 		if (action->char_auto)
-			ch->Send(action->char_auto);
+			ch->send(action->char_auto);
 
 		else
-			ch->Send("Erm, no.");
+			ch->send("Erm, no.");
 
-		ch->Send("\r\n", ch);
+		ch->send("\r\n", ch);
 		Act(action->others_auto, action->hide, ch, 0, 0, TO_ROOM);
 	}
 
@@ -175,13 +175,13 @@ ACMD(do_insult)
 	if (*arg)
 	{
 		if (!(victim = get_char_room_vis(ch, arg)))
-			ch->Send("Can't hear you!\r\n");
+			ch->send("Can't hear you!\r\n");
 
 		else
 		{
 			if (victim != ch)
 			{
-				ch->Send("You insult %s.\r\n", GET_NAME(victim));
+				ch->send("You insult %s.\r\n", GET_NAME(victim));
 
 				switch (MiscUtil::random(0, 2))
 				{
@@ -224,13 +224,13 @@ ACMD(do_insult)
 
 			else
 			{			/* ch == victim */
-				ch->Send("You feel insulted.\r\n");
+				ch->send("You feel insulted.\r\n");
 			}
 		}
 	}
 
 	else
-		ch->Send("I'm sure you don't want to insult *everybody*...\r\n");
+		ch->send("I'm sure you don't want to insult *everybody*...\r\n");
 }
 
 
@@ -238,11 +238,17 @@ char *fread_action(FILE * fl, int nr)
 {
 	char buf[MAX_STRING_LENGTH], *rslt;
 
-	fgets(buf, MAX_STRING_LENGTH, fl);
+	char *returnValue = fgets(buf, MAX_STRING_LENGTH, fl);
 
 	if (feof(fl))
 	{
 		Log("SYSERR: fread_action: unexpected EOF near action #%d", nr);
+		exit(1);
+	}
+
+	if (returnValue == NULL)
+	{
+		Log("SYSERR: fread_action: null pointer returned unexpectedly near action #%d.", nr);
 		exit(1);
 	}
 

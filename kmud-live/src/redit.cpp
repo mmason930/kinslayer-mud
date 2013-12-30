@@ -135,10 +135,10 @@ int buildwalk(Character *ch, int dir)
 		//get_char_colors(ch);
 		if ( !ch->in_room->GetZone()->CanEdit(ch) )
 		{
-			ch->Send("You do not have build permissions in this zone.\r\n");
+			ch->send("You do not have build permissions in this zone.\r\n");
 		}
 		else if ((vnum = ch->in_room->GetZone()->FindUnusedRoomVnum()) == NOWHERE)
-			ch->Send("No free vnums are available in this zone!\r\n");
+			ch->send("No free vnums are available in this zone!\r\n");
 		else
 		{
 
@@ -181,7 +181,7 @@ int buildwalk(Character *ch, int dir)
 			room->dir_option[rev_dir[dir]]->to_room = ch->in_room;
 
 			/* Report room creation to user */
-			ch->Send("%s%sRoom #%d created by BuildWalk.%s\r\n", COLOR_BOLD(ch, CL_COMPLETE),
+			ch->send("%s%sRoom #%d created by BuildWalk.%s\r\n", COLOR_BOLD(ch, CL_COMPLETE),
 			         COLOR_CYAN(ch, CL_COMPLETE), vnum, COLOR_NORMAL(ch, CL_COMPLETE));
 			cleanup_olc(d, CLEANUP_STRUCTS);
 
@@ -339,7 +339,6 @@ void Room::AddToBatch( sql::BatchInsertStatement &roomInsert,
 		exitInsert.endEntry();
 	}
 
-#ifdef KINSLAYER_JAVASCRIPT
 	for(unsigned int i = 0;i < this->js_scripts->size();++i) {
 		jsInsert.beginEntry();
 
@@ -349,7 +348,6 @@ void Room::AddToBatch( sql::BatchInsertStatement &roomInsert,
 
 		jsInsert.endEntry();
 	}
-#endif
 }
 
 void reditSaveFinalizationQueryProcessor( sql::Connection connection, std::string query1, std::string query2 )
@@ -471,18 +469,22 @@ void redit_save_to_disk( int lowVnum, int highVnum )
 		query6 = queryBuffer.str();
 		
 		//Distribute the workload.
-		boost::thread thread1( boost::bind( reditSaveFinalizationQueryProcessor, dbContext->createConnection(), query1, query2 ) );
-		boost::thread thread2( boost::bind( reditSaveFinalizationQueryProcessor, dbContext->createConnection(), query3, query4 ) );
-		boost::thread thread3( boost::bind( reditSaveFinalizationQueryProcessor, dbContext->createConnection(), query5, query6 ) );
+		std::thread thread1(reditSaveFinalizationQueryProcessor, dbContext->createConnection(), query1, query2);
+		std::thread thread2(reditSaveFinalizationQueryProcessor, dbContext->createConnection(), query3, query4);
+		std::thread thread3(reditSaveFinalizationQueryProcessor, dbContext->createConnection(), query5, query6);
 
 		//Resynchronize.
 		thread1.join();
 		thread2.join();
 		thread3.join();
 
-		boost::thread( boost::bind(reditSaveFinalizationQueryProcessor, dbContext->createConnection(), "DROP TABLE IF EXISTS " + tempRoomTableName, "") );
-		boost::thread( boost::bind(reditSaveFinalizationQueryProcessor, dbContext->createConnection(), "DROP TABLE IF EXISTS " + tempExitTableName, "") );
-		boost::thread( boost::bind(reditSaveFinalizationQueryProcessor, dbContext->createConnection(), "DROP TABLE IF EXISTS " + tempJSAttachmentTable, "") );
+		std::thread thread4(reditSaveFinalizationQueryProcessor, dbContext->createConnection(), "DROP TABLE IF EXISTS " + tempRoomTableName, "");
+		std::thread thread5(reditSaveFinalizationQueryProcessor, dbContext->createConnection(), "DROP TABLE IF EXISTS " + tempExitTableName, "");
+		std::thread thread6(reditSaveFinalizationQueryProcessor, dbContext->createConnection(), "DROP TABLE IF EXISTS " + tempJSAttachmentTable, "");
+
+		thread4.detach();
+		thread5.detach();
+		thread6.detach();
 
 	} catch( sql::QueryException e ) {
 		MudLog(BRF, TRUE, LVL_APPR, "Failed to save rooms : %s", e.getErrorMessage().c_str());
@@ -576,7 +578,7 @@ void redit_disp_extradesc_menu(Descriptor *d)
 
 	strcat(buf, !extra_desc->next ? "<NOT SET>\r\n" : "Set.\r\n");
 	strcat(buf, "Enter choice (0 to quit) : ");
-	d->Send(buf);
+	d->send(buf);
 	OLC_MODE(d) = REDIT_EXTRADESC_MENU;
 }
 
@@ -602,7 +604,7 @@ void redit_disp_exit_menu(Descriptor *d)
 		strcpy(buf2, "No door");
 
 	get_char_cols(d->character);
-	d->Send(
+	d->send(
 #if defined(CLEAR_SCREEN)
 	    "[H[J"
 #endif
@@ -635,7 +637,7 @@ void redit_disp_exit_menu(Descriptor *d)
 void redit_disp_exit_flag_menu(Descriptor *d)
 {
 	get_char_cols(d->character);
-	d->Send("%s1%s) Door Exists: %s\r\n"
+	d->send("%s1%s) Door Exists: %s\r\n"
 			"%s2%s) Rammable: %s\r\n"
 			"%s3%s) Exit\r\n"
 			"	Enter choice : ", grn, nrm, StringUtil::yesNo(IS_SET(OLC_EXIT(d)->exit_info, EX_ISDOOR)).c_str(), grn, nrm,
@@ -652,16 +654,16 @@ void redit_disp_flag_menu(Descriptor *d)
 	get_char_cols(d->character);
 #if defined(CLEAR_SCREEN)
 
-	d->Send("[H[J");
+	d->send("[H[J");
 #endif
 
 	for (counter = 0; counter < NUM_ROOM_FLAGS; ++counter)
 	{
-		d->Send("%s%2d%s) %-20.20s %s", grn, counter + 1, nrm,
+		d->send("%s%2d%s) %-20.20s %s", grn, counter + 1, nrm,
 		        room_bits[counter], !(++columns % 2) ? "\r\n" : "");
 	}
 	sprintbit(OLC_ROOM(d)->room_flags, (const char**)room_bits, buf1);
-	d->Send("\r\nRoom flags: %s%s%s\r\n"
+	d->send("\r\nRoom flags: %s%s%s\r\n"
 	        "Enter room flags, 0 to quit : ", cyn, buf1, nrm);
 	OLC_MODE(d) = REDIT_FLAGS;
 }
@@ -675,15 +677,15 @@ void redit_disp_sector_menu(Descriptor *d)
 
 #if defined(CLEAR_SCREEN)
 
-	d->Send("[H[J");
+	d->send("[H[J");
 #endif
 
 	for (counter = 0; counter < NUM_ROOM_SECTORS; ++counter)
 	{
-		d->Send("%s%2d%s) %-20.20s %s", grn, counter, nrm,
+		d->send("%s%2d%s) %-20.20s %s", grn, counter, nrm,
 		        sector_types[counter], !(++columns % 2) ? "\r\n" : "");
 	}
-	d->Send("\r\nEnter sector type : ");
+	d->send("\r\nEnter sector type : ");
 	OLC_MODE(d) = REDIT_SECTOR;
 }
 
@@ -709,7 +711,7 @@ void redit_disp_menu(Descriptor *d)
 	else
 		sprintf(aBuffer, "%s< NONE >%s", cyn, nrm);
 
-	d->Send(
+	d->send(
 
 #if defined(CLEAR_SCREEN)
 	    "[H[J"
@@ -728,9 +730,7 @@ void redit_disp_menu(Descriptor *d)
 		"%sB%s) Auction     : %s\r\n"
 	    "%sC%s) Extra descriptions menu\r\n"
 	    "%sD%s) Delete      : %s%s\r\n"
-#ifdef KINSLAYER_JAVASCRIPT
 		"%sJ%s) JavaScript  : %s%s\r\n"
-#endif
 	    "%sQ%s) Quit\r\n"
 	    "Enter choice : ",
 
@@ -761,9 +761,7 @@ void redit_disp_menu(Descriptor *d)
 		grn, nrm, aBuffer.c_str(),
 	    grn, nrm,
 	    grn, nrm, cyn, room->deleted ? "Yes" : "No",
-#ifdef KINSLAYER_JAVASCRIPT
 		grn, nrm, cyn, (room->js_scripts->size() ? "Set." : "Not Set."),
-#endif
 	    grn, nrm
 	);
 
@@ -793,7 +791,7 @@ void redit_parse(Descriptor *d, char *arg)
 					 * Do NOT free strings! Just the room structure.
 					 */
 					cleanup_olc(d, CLEANUP_STRUCTS);
-					d->Send("Room saved to memory.\r\n");
+					d->send("Room saved to memory.\r\n");
 					break;
 				case 'n':
 				case 'N':
@@ -803,7 +801,7 @@ void redit_parse(Descriptor *d, char *arg)
 					cleanup_olc(d, CLEANUP_ALL);
 					break;
 				default:
-					d->Send("Invalid choice!\r\nDo you wish to save this room internally? : ");
+					d->send("Invalid choice!\r\nDo you wish to save this room internally? : ");
 					break;
 			}
 			return;
@@ -815,28 +813,28 @@ void redit_parse(Descriptor *d, char *arg)
 				case 'Q':
 					if (OLC_VAL(d))
 					{ /* Something has been modified. */
-						d->Send("Do you wish to save this room internally? : ");
+						d->send("Do you wish to save this room internally? : ");
 						OLC_MODE(d) = REDIT_CONFIRM_SAVESTRING;
 					}
 					else
 						cleanup_olc(d, CLEANUP_ALL);
 					return;
 				case '1':
-					d->Send("Enter room name:-\r\n] ");
+					d->send("Enter room name:-\r\n] ");
 					OLC_MODE(d) = REDIT_NAME;
 					break;
 				case '2':
 					OLC_MODE(d) = REDIT_DESC;
 #if defined(CLEAR_SCREEN)
 
-					d->Send("\x1B[H\x1B[J");
+					d->send("\x1B[H\x1B[J");
 #endif
 
-					d->Send("Enter room description: (/s saves /h for help)\r\n\r\n");
+					d->send("Enter room description: (/s saves /h for help)\r\n\r\n");
 					d->backstr = NULL;
 					if (OLC_ROOM(d)->description)
 					{
-						d->Send(OLC_ROOM(d)->description);
+						d->send(OLC_ROOM(d)->description);
 						d->backstr = str_dup(OLC_ROOM(d)->description);
 					}
 					d->str = &OLC_ROOM(d)->description;
@@ -876,7 +874,7 @@ void redit_parse(Descriptor *d, char *arg)
 					break;
 				case 'b':
 				case 'B':
-					d->Send("Enter the vnum of the auction to be used for this room : ");
+					d->send("Enter the vnum of the auction to be used for this room : ");
 					OLC_MODE(d) = REDIT_AUCTION_VNUM;
 					break;
 				case 'c':
@@ -898,18 +896,17 @@ void redit_parse(Descriptor *d, char *arg)
 				case 'D':
 					if(OLC_ROOM(d)->deleted)
 					{
-						d->Send("This room will no longer be deleted.\r\n");
+						d->send("This room will no longer be deleted.\r\n");
 						OLC_ROOM(d)->deleted = false;
 					}
 					else
 					{
-						d->Send("This room will be deleted after the next reboot.\r\n");
+						d->send("This room will be deleted after the next reboot.\r\n");
 						OLC_ROOM(d)->deleted = true;
 					}
 					OLC_VAL(d) = 1;
 					redit_disp_menu(d);
 					return;
-#ifdef KINSLAYER_JAVASCRIPT
 				case 'j':
 				case 'J':
 					OLC_SCRIPT_EDIT_MODE(d) = JSCRIPT_MAIN_MENU;
@@ -917,19 +914,16 @@ void redit_parse(Descriptor *d, char *arg)
 					d->olc->jsScripts = d->olc->room->js_scripts;
 					JScriptDispMenu(d);
 					return;
-#endif
 				default:
-					d->Send("Invalid choice!");
+					d->send("Invalid choice!");
 					redit_disp_menu(d);
 					break;
 			}
 			return;
-#ifdef KINSLAYER_JAVASCRIPT
 		case OLC_JSCRIPT_EDIT:
 			if( JScriptParse(d, arg) )
 				return;
 			break;
-#endif
 		case REDIT_NAME:
 			if (OLC_ROOM(d)->name)
 				delete[] (OLC_ROOM(d)->name);
@@ -949,7 +943,7 @@ void redit_parse(Descriptor *d, char *arg)
 			number = atoi(arg);
 			if ((number < 0) || (number > NUM_ROOM_FLAGS))
 			{
-				d->Send("That is not a valid choice!\r\n");
+				d->send("That is not a valid choice!\r\n");
 				redit_disp_flag_menu(d);
 			}
 			else if (number == 0)
@@ -968,7 +962,7 @@ void redit_parse(Descriptor *d, char *arg)
 			number = atoi(arg);
 			if (number < 0 || number >= NUM_ROOM_SECTORS)
 			{
-				d->Send("Invalid choice!");
+				d->send("Invalid choice!");
 				redit_disp_sector_menu(d);
 				return;
 			}
@@ -982,15 +976,15 @@ void redit_parse(Descriptor *d, char *arg)
 					break;
 				case '1':
 					OLC_MODE(d) = REDIT_EXIT_NUMBER;
-					d->Send("Exit to room number : ");
+					d->send("Exit to room number : ");
 					return;
 				case '2':
 					OLC_MODE(d) = REDIT_EXIT_DESCRIPTION;
-					SEND_TO_Q("Enter exit description: (/s saves /h for help)\r\n\r\n", d);
+					d->sendRaw("Enter exit description: (/s saves /h for help)\r\n\r\n");
 					d->backstr = NULL;
 					if (OLC_EXIT(d)->general_description)
 					{
-						SEND_TO_Q(OLC_EXIT(d)->general_description, d);
+						d->sendRaw(OLC_EXIT(d)->general_description);
 						d->backstr = str_dup(OLC_EXIT(d)->general_description);
 					}
 					d->str = &OLC_EXIT(d)->general_description;
@@ -998,22 +992,22 @@ void redit_parse(Descriptor *d, char *arg)
 					return;
 				case '3':
 					OLC_MODE(d) = REDIT_EXIT_KEYWORD;
-					d->Send("Enter keywords : ");
+					d->send("Enter keywords : ");
 					return;
 				case '4':
 					OLC_MODE(d) = REDIT_EXIT_KEY;
-					d->Send("Enter key number : ");
+					d->send("Enter key number : ");
 					return;
 				case '5':
 					redit_disp_exit_flag_menu(d);
 					OLC_MODE(d) = REDIT_EXIT_DOORFLAGS;
 					return;
 				case '6':
-					d->Send("Enter a hidden level for this door: ");
+					d->send("Enter a hidden level for this door: ");
 					OLC_MODE(d) = REDIT_HIDDEN;
 					return;
 				case '7':
-					d->Send("Enter the pick requirement for this door: ");
+					d->send("Enter the pick requirement for this door: ");
 					OLC_MODE(d) = REDIT_EXIT_PICKREQ;
 					return;
 				case '8':
@@ -1022,7 +1016,7 @@ void redit_parse(Descriptor *d, char *arg)
 					OLC_EXIT(d) = NULL;
 					break;
 				default:
-					d->Send("Try again : ");
+					d->send("Try again : ");
 					return;
 			}
 			break;
@@ -1030,7 +1024,7 @@ void redit_parse(Descriptor *d, char *arg)
 			if ((number = atoi(arg)) != -1)
 				if ((number = real_room(number)) < 0)
 				{
-					d->Send("That room does not exist, try again : ");
+					d->send("That room does not exist, try again : ");
 					return;
 				}
 			OLC_EXIT(d)->to_room = FindRoomByVnum(atoi(arg));
@@ -1057,8 +1051,8 @@ void redit_parse(Descriptor *d, char *arg)
 
 			if(number < 0 || number > 99)
 			{
-				d->Send("Exit's hidden level must be between 0 and 99.\r\n");
-				d->Send("Try again: ");
+				d->send("Exit's hidden level must be between 0 and 99.\r\n");
+				d->send("Try again: ");
 				return;
 			}
 			else
@@ -1072,8 +1066,8 @@ void redit_parse(Descriptor *d, char *arg)
 
 			if(number < -1 || number > 100)
 			{
-				d->Send("Pick requirement must be between 0 and 100, or -1 for pickproof.\r\n");
-				d->Send("Try again: ");
+				d->send("Pick requirement must be between 0 and 100, or -1 for pickproof.\r\n");
+				d->send("Try again: ");
 				return;
 			}
 			else
@@ -1100,7 +1094,7 @@ void redit_parse(Descriptor *d, char *arg)
 			}
 			else
 			{
-				d->Send("That's not a valid choice!\r\n");
+				d->send("That's not a valid choice!\r\n");
 				redit_disp_exit_flag_menu(d);
 			}
 			return;
@@ -1145,15 +1139,15 @@ void redit_parse(Descriptor *d, char *arg)
 					break;
 				case 1:
 					OLC_MODE(d) = REDIT_EXTRADESC_KEY;
-					d->Send("Enter keywords, separated by spaces : ");
+					d->send("Enter keywords, separated by spaces : ");
 					return;
 				case 2:
 					OLC_MODE(d) = REDIT_EXTRADESC_DESCRIPTION;
-					d->Send("Enter extra description: (/s saves /h for help)\r\n\r\n");
+					d->send("Enter extra description: (/s saves /h for help)\r\n\r\n");
 					d->backstr = NULL;
 					if (OLC_DESC(d)->description)
 					{
-						SEND_TO_Q(OLC_DESC(d)->description, d);
+						d->sendRaw(OLC_DESC(d)->description);
 						d->backstr = str_dup(OLC_DESC(d)->description);
 					}
 					d->str = &OLC_DESC(d)->description;
@@ -1163,7 +1157,7 @@ void redit_parse(Descriptor *d, char *arg)
 				case 3:
 					if (!OLC_DESC(d)->keyword || !OLC_DESC(d)->description)
 					{
-						d->Send("You can't edit the next extra desc without completing this one.\r\n");
+						d->send("You can't edit the next extra desc without completing this one.\r\n");
 						redit_disp_extradesc_menu(d);
 					}
 					else

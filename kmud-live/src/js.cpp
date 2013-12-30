@@ -10,8 +10,6 @@
 *
 */
 
-#ifdef KINSLAYER_JAVASCRIPT
-
 #include "JSCharacter.h"
 #include "JSObject.h"
 #include "JSRoom.h"
@@ -388,15 +386,15 @@ void JSManager::test( class Character *ch )
 	for( iter = scripts.begin();iter != scripts.end();++iter )
 	{
 		if( (*iter).second->state.has_property( "ivy" ) )
-			ch->Send("Script #%d\r\n", (*iter).first);
+			ch->send("Script #%d\r\n", (*iter).first);
 		if( (*iter).second->self.to_object().has_property( "ivy" ) )
-			ch->Send("Script #%d\r\n", (*iter).first);
+			ch->send("Script #%d\r\n", (*iter).first);
 		if( (*iter).second->self.to_object().parent().has_property( "ivy" ) )
-			ch->Send("Script #%d\r\n", (*iter).first);
+			ch->send("Script #%d\r\n", (*iter).first);
 	}
 	if( global().has_property("ivy") )
-		ch->Send("Global scope has the variable.\r\n");
-	ch->Send("Scanned %d scripts.\r\n", scripts.size());
+		ch->send("Global scope has the variable.\r\n");
+	ch->send("Scanned %d scripts.\r\n", scripts.size());
 }
 
 /*
@@ -680,13 +678,13 @@ void JSManager::SocketEvents()
 }
 
 extern bool keepTriggerOperationalCallbackFunctionAlive;
-extern boost::mutex keepTriggerOperationalCallbackFunctionAliveMutex;
-extern boost::thread triggerOperationalCallbackThread;
+extern std::mutex keepTriggerOperationalCallbackFunctionAliveMutex;
+extern std::thread triggerOperationalCallbackThread;
 
 JSManager::~JSManager()
 {
 	{
-		boost::mutex::scoped_lock(keepTriggerOperationalCallbackFunctionAliveMutex);
+		std::lock_guard<std::mutex> lock(keepTriggerOperationalCallbackFunctionAliveMutex);
 		keepTriggerOperationalCallbackFunctionAlive = false;
 	}
 	triggerOperationalCallbackThread.join();
@@ -699,5 +697,3 @@ JSManager::~JSManager()
 
 	delete env;
 }
-
-#endif

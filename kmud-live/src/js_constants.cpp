@@ -13,8 +13,6 @@
 #include "conf.h"
 #include "sysdep.h"
 
-#ifdef KINSLAYER_JAVASCRIPT
-
 #include "structs.h"
 #include "sysdep.h"
 #include "js.h"
@@ -488,5 +486,3 @@ namespace JS
 		"\n"
 	};
 }
-
-#endif

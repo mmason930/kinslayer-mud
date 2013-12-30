@@ -1,7 +1,3 @@
-
-
-#ifdef KINSLAYER_JAVASCRIPT
-
 #ifndef KINSLAYER_JS_TRIGGER_H
 #define KINSLAYER_JS_TRIGGER_H
 
@@ -87,5 +83,3 @@ struct JSTrigger
 };
 
 #endif
-#endif
-

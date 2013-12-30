@@ -108,7 +108,7 @@ void PokerTable::SendToPlayers(const char* message, ...)
 
 	for( std::list< PokerPlayer* >::iterator P = Players.begin();P != Players.end();++P)
 	{
-		(*P)->Send(buffer);
+		(*P)->send(buffer);
 	}
 }
 void PokerTable::SendToWatchers( const char* message, ... )
@@ -121,7 +121,7 @@ void PokerTable::SendToWatchers( const char* message, ... )
 
 	for( std::list< Character* >::iterator W = Watchers.begin();W != Watchers.end();++W)
 	{
-		(*W)->Send(buffer);
+		(*W)->send(buffer);
 	}
 }
 void PokerTable::SendToTable( const char* message, ... )
@@ -242,12 +242,12 @@ void PokerTable::RemovePlayer( class Character* ch )
 {
 	RemovePlayer( ch->PokerData );
 
-	ch->Save();
+	ch->save();
 
 	delete ch->PokerData;
 	ch->PokerData = 0;
 
-	ch->Send("You leave the table.\r\n");
+	ch->send("You leave the table.\r\n");
 	SendToTable("%s has left the table.\r\n", ch->player.name.c_str());
 	GET_POS( ch ) = POS_STANDING;
 
@@ -306,7 +306,7 @@ bool PokerTable::ProcessGameInput( PokerPlayer* Player, std::string Command, std
 		!Command.compare("raise") || !Command.compare("fold") ||
 		!Command.compare("bet") )
 		{
-			Player->Send("It is not your turn.\r\n");
+			Player->send("It is not your turn.\r\n");
 			return true;
 		}
 		return false;
@@ -316,7 +316,7 @@ bool PokerTable::ProcessGameInput( PokerPlayer* Player, std::string Command, std
 	{
 		if(Player->Bet() < Player->Table->CurrentBet())
 		{
-			Player->Send("You must either call, raise, or fold, because your wager does not match the current bet.\r\n");
+			Player->send("You must either call, raise, or fold, because your wager does not match the current bet.\r\n");
 			return true;
 		}
 		this->SendToTable("%s checks.\r\n", TurnCycle.front()->PlayerName().c_str());
@@ -326,24 +326,24 @@ bool PokerTable::ProcessGameInput( PokerPlayer* Player, std::string Command, std
 	{
 		if(CurrentBet() > Player->Chips())
 		{
-			Player->Send("You do not have enough chips to raise. You must either call or fold.\r\n");
+			Player->send("You do not have enough chips to raise. You must either call or fold.\r\n");
 			return true;
 		}
 		if(atoi(Argument.c_str()) + CurrentBet() > Player->Bet() + Player->Chips())
 		{
-			Player->Send("You do not have enough chips to raise that high.\r\n");
+			Player->send("You do not have enough chips to raise that high.\r\n");
 			return true;
 		}
 		if(atoi(Argument.c_str()) < MinimumRaise)
 		{
 			if(Player->Chips() < MinimumRaise && atoi(Argument.c_str()) != Player->Chips())
 			{
-				Player->Send("You must raise by a minimum of %d.\r\n", Player->Chips());
+				Player->send("You must raise by a minimum of %d.\r\n", Player->Chips());
 				return true;
 			}
 			else if(Player->Chips() >= MinimumRaise)
 			{
-				Player->Send("You must raise by a minimum of %d.\r\n", MinimumRaise);
+				Player->send("You must raise by a minimum of %d.\r\n", MinimumRaise);
 				return true;
 			}
 		}
@@ -370,7 +370,7 @@ bool PokerTable::ProcessGameInput( PokerPlayer* Player, std::string Command, std
 	{
 		if( Player->Bet() >= CurrentBet() )
 		{
-			Player->Send("Your bet already matches the pot. Simply check.\r\n");
+			Player->send("Your bet already matches the pot. Simply check.\r\n");
 			return true;
 		}
 		else
@@ -709,7 +709,7 @@ void PokerTable::PrintBoard( Character *ch, const int wait_time )
 	sprintf( Buffer + strlen( Buffer ), "\r\n");
 
 	if( ch != NULL )
-		ch->Send( Buffer );
+		ch->send( Buffer );
 	else
 		SendToTable( Buffer );
 
@@ -893,7 +893,7 @@ void PokerTable::CloseTable()
 	reward = (int)(reward * 0.9000f);
 
 	Players.front()->RewardWithGold( reward );
-	Players.front()->Send("You have been rewarded %d coppers.\r\n", reward);
+	Players.front()->send("You have been rewarded %d coppers.\r\n", reward);
 	RemovePlayer( Players.front()->GetPlayer() );
 }
 bool PokerTable::CollectWagers()
@@ -1035,22 +1035,22 @@ void PokerTable::PrintPlayers(Character *ch)
 {
 	if( !this->Players.size() )
 	{
-		ch->Send("The poker table currently is empty.\r\n");
+		ch->send("The poker table currently is empty.\r\n");
 		return;
 	}
 	else
 	{
 		int nr = 1;
-		ch->Send("Players currently seated as players at the table:\r\n\r\n");
+		ch->send("Players currently seated as players at the table:\r\n\r\n");
 		for( std::list<PokerPlayer*>::iterator P = Players.begin();P != Players.end();++P, ++nr )
 		{
-			ch->Send("%d) %s\r\n", nr, (*P)->PlayerName().c_str());
+			ch->send("%d) %s\r\n", nr, (*P)->PlayerName().c_str());
 		}
 		nr = 1;
-		ch->Send("Players currently watching the table:\r\n\r\n");
+		ch->send("Players currently watching the table:\r\n\r\n");
 		for( std::list<Character*>::iterator W = Watchers.begin();W != Watchers.end();++W, ++nr )
 		{
-			ch->Send("%d) %s\r\n", nr, (*W)->player.name.c_str());
+			ch->send("%d) %s\r\n", nr, (*W)->player.name.c_str());
 		}
 	}
 }
@@ -1240,7 +1240,7 @@ std::string PokerPlayer::BetStr( bool board )
 
 	return Output;
 }
-void PokerPlayer::Send(const char* message, ...)
+void PokerPlayer::send(const char* message, ...)
 {
 	char buffer[MAX_STRING_LENGTH];
 	va_list args;
@@ -1248,7 +1248,7 @@ void PokerPlayer::Send(const char* message, ...)
 	vsprintf( buffer, message, args );
 	va_end( args );
 
-	this->Player->Send( buffer );
+	this->Player->send( buffer );
 }
 void PokerPlayer::RaiseBetTo( const int _amt )
 {
@@ -1302,7 +1302,7 @@ void PokerPlayer::PrintHand( void )
 	Output += ",";
 	Output += this->GetCard( 2 )->ToString();
 
-	this->Send("Your Hand: %s\r\n", Output.c_str());
+	this->send("Your Hand: %s\r\n", Output.c_str());
 }
 
 

@@ -871,13 +871,13 @@ void crashListRent(Character *ch, char *name)
 
 	if( !name || !playerExists(name) )
 	{
-		ch->Send( NOPERSON );
+		ch->send( NOPERSON );
 		return;
 	}
 
 	if( (vict = CharacterUtil::loadCharacter(name)) == NULL )
 	{
-		ch->Send(NOPERSON);
+		ch->send(NOPERSON);
 		return;
 	}
 
@@ -1097,7 +1097,7 @@ int genReceptionist(Character * ch, Character * recep, char *cmd, char *arg, int
 
 	if (!AWAKE(recep))
 	{
-		ch->Send("She is unable to talk to you...\r\n");
+		ch->send("She is unable to talk to you...\r\n");
 		return TRUE;
 	}
 
@@ -1108,13 +1108,13 @@ int genReceptionist(Character * ch, Character * recep, char *cmd, char *arg, int
 	}
 	if(AFF_FLAGGED(ch, AFF_NOQUIT))
 	{
-		ch->Send("Can't you feel the speed of your heartbeat?\r\n");
+		ch->send("Can't you feel the speed of your heartbeat?\r\n");
 		return TRUE;
 	}
 
 	if (GET_POS(ch) == POS_FIGHTING)
 	{
-		ch->Send("No way!  You're fighting for your life!\r\n");
+		ch->send("No way!  You're fighting for your life!\r\n");
 		return FALSE;
 	}
 
@@ -1155,7 +1155,7 @@ int genReceptionist(Character * ch, Character * recep, char *cmd, char *arg, int
 		else
 			MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "%s has rented(free).", GET_NAME(ch));
 		Act("$n helps $N into $S private chamber.", FALSE, recep, 0, ch, TO_NOTVICT);
-		ch->Save();
+		ch->save();
 		ch->rentSave();
 		ch->Extract(UserLogoutType::rent);
 	}
@@ -1172,7 +1172,7 @@ int genReceptionist(Character * ch, Character * recep, char *cmd, char *arg, int
 void Character::saveAll()
 {
 	this->rentSave();
-	this->Save();
+	this->save();
 }
 
 void Character::rentSave()
@@ -1237,13 +1237,13 @@ ACMD( do_insert )
 
 	if( !*arg1 || !*arg2 || !*arg3 )
 	{//Usage...
-		ch->Send("Usage: insert <objectName> <o | p> <targetID>\r\n");
+		ch->send("Usage: insert <objectName> <o | p> <targetID>\r\n");
 		return;
 	}
 
 	if( !(obj = get_obj_in_list_vis(ch, arg1, ch->carrying)) )
 	{
-		ch->Send("You don't seem to be carrying that item.\r\n");
+		ch->send("You don't seem to be carrying that item.\r\n");
 		return;
 	}
 	//Item is found.
@@ -1268,7 +1268,7 @@ ACMD( do_insert )
 			tID = uuidGenerator(arg3);
 		}
 		catch(...) {
-			ch->Send("Invalid object id supplied.\r\n");
+			ch->send("Invalid object id supplied.\r\n");
 			return;
 		}
 		if( (oHolder = get_obj_by_id( tID )) )
@@ -1282,7 +1282,7 @@ ACMD( do_insert )
 	}
 	else
 	{//Invalid owner type.
-		ch->Send("Owner type must be 'O' or 'P'\r\n");
+		ch->send("Owner type must be 'O' or 'P'\r\n");
 		return;
 	}
 
@@ -1295,7 +1295,7 @@ ACMD( do_insert )
 		found = true;
 		needExtraction = true;
 	}
-	ch->Send("You create a tear in spacetime, and place %s inside.\r\n", obj->short_description);
+	ch->send("You create a tear in spacetime, and place %s inside.\r\n", obj->short_description);
 	Act("$n creates a tear in spacetime, and places $p inside.", TRUE, ch, obj, NULL, TO_ROOM);
 
 	if( needExtraction ) {
@@ -1311,7 +1311,7 @@ ACMD( do_retrieve )
 
 	if( !*type || !*arg2 )
 	{
-		ch->Send("Retrieve: [object <objID>]\r\n");
+		ch->send("Retrieve: [object <objID>]\r\n");
 		return;
 	}
 
@@ -1333,18 +1333,18 @@ ACMD( do_retrieve )
 				(obj = Object::loadSingleItem(objID, true)) == 0
 			))
 		{
-			ch->Send("No item exists with that identification number.\r\n");
+			ch->send("No item exists with that identification number.\r\n");
 			return;
 		}
 		obj->RemoveFromAll();
 		obj_to_char(obj, ch);
 
-		ch->Send("You create a tear in spacetime, reach in, and retrieve %s.\r\n", obj->short_description);
+		ch->send("You create a tear in spacetime, reach in, and retrieve %s.\r\n", obj->short_description);
 		Act("$n creates a tear in spacetime, reaches in, and retrieves $p.", TRUE, ch, obj, NULL, TO_ROOM);
 		return;
 	}
 	else
 	{
-		ch->Send("Retrieve what?\r\n");
+		ch->send("Retrieve what?\r\n");
 	}
 }

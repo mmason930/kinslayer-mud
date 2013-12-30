@@ -10,8 +10,6 @@
 //
 //
 
-#ifdef KINSLAYER_JAVASCRIPT
-
 #ifndef KINSLAYER_JS_H
 #define KINSLAYER_JS_H
 
@@ -127,5 +125,4 @@ struct JSSocketInfo
 	JSSocketInfo( class kuDescriptor *d = 0 );
 };
 
-#endif
 #endif

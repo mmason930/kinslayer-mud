@@ -789,7 +789,7 @@ const int SEEK_END = 2;
 #endif
 
 
-#define STM(ch, till)			ch->Send("%s%sTICK IN %d SECONDS.%s\r\n", COLOR_BOLD(ch, CL_COMPLETE), \
+#define STM(ch, till)			ch->send("%s%sTICK IN %d SECONDS.%s\r\n", COLOR_BOLD(ch, CL_COMPLETE), \
 COLOR_GREEN(ch, CL_COMPLETE), till, COLOR_NORMAL(ch, CL_COMPLETE))
 
 /*

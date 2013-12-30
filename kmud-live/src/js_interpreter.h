@@ -10,8 +10,6 @@
 //
 //
 
-#ifdef KINSLAYER_JAVASCRIPT
-
 #ifndef KINSLAYER_JS_INTERPRETER_H
 #define KINSLAYER_JS_INTERPRETER_H
 
@@ -94,5 +92,4 @@ class JSEnvironment
 };
 
 
-#endif
 #endif

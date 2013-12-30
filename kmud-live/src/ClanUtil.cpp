@@ -160,7 +160,7 @@ ClanQuestPointTransaction *ClanUtil::performQuestPointTransaction(sql::Connectio
 
 	ClanUtil::putClanQuestPointTransaction(connection, clanQuestPointTransaction.get());
 	
-	character->SaveClans();
+	character->saveClans();
 
 	if(characterLoadedFromDatabase)
 		delete character;

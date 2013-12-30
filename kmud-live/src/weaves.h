@@ -93,7 +93,7 @@ public:
 	std::list< std::pair<int, std::string> > GetListOfWeavePairs();
 
 	bool LoadWeaves();
-	bool SaveWeaves();
+	bool saveWeaves();
 
 	void Free();
 	int NumWeaves();

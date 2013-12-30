@@ -8,7 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include <boost/thread/mutex.hpp>
+#include <mutex>
 #include "conf.h"
 #include "sysdep.h"
 
@@ -37,13 +37,14 @@ std::string Execute( const char *command )
 {
 	std::stringstream strCommandBuffer;
 	strCommandBuffer << command << " > output";
-	system(strCommandBuffer.str().c_str());
+	int retVal = system(strCommandBuffer.str().c_str());
 
 	FILE* fp = fopen( "output", "r" );
 	std::string cppBuffer;
 	char result[ 1024 ];
 	while( !feof( fp ) ) {
-		fread(result,1,1024,fp);
+		size_t bytesRead = fread(result, 1, 1024, fp);
+
 		cppBuffer += result;
 	}
 	fclose (fp);
@@ -77,7 +78,13 @@ __int64 AvailableSystemMemory()
 	std::string str;
 	while(!feof(processPipe))
 	{
-		fgets(buffer, 1023, processPipe);
+		char *returnValue = fgets(buffer, 1023, processPipe);
+
+		if(returnValue == NULL)
+		{
+			Log("SYSERROR: AvailableSystemMemory() : Error while reading from pipe.");
+			return 0;
+		}
 
 		str += std::string(buffer);
 	}
@@ -561,7 +568,7 @@ std::string &strcat(std::string &str, const char *format, ...)
  */
 void BasicMudLog(const char *format, ...)
 {
-	static boost::mutex logMutex;
+	static std::mutex logMutex;
 
 	va_list args;
 	time_t ct = time(0);
@@ -573,7 +580,7 @@ void BasicMudLog(const char *format, ...)
 		abort();
 
 	{//Lock mutex
-		boost::mutex::scoped_lock( logMutex );
+		std::lock_guard<std::mutex> lock(logMutex);
 		fprintf(logfile, "%-15.15s :: ", time_s + 4);
 
 		va_start(args, format);
@@ -650,9 +657,9 @@ void MudLog(int type, int level, int file, const char *str, ...)
 
 			if ((GET_LEVEL(i->character) >= level) && (tp >= type))
 			{
-				i->Send(COLOR_GREEN(i->character, CL_NORMAL));
-				i->Send(StringUtil::vaEscape(buf).c_str());
-				i->Send(COLOR_NORMAL(i->character, CL_NORMAL));
+				i->send(COLOR_GREEN(i->character, CL_NORMAL));
+				i->send(StringUtil::vaEscape(buf).c_str());
+				i->send(COLOR_NORMAL(i->character, CL_NORMAL));
 			}
 		}
 	}
@@ -787,7 +794,13 @@ int get_line(FILE * fl, char *buf)
 	do
 	{
 		++lines;
-		fgets(temp, 256, fl);
+		char *returnValue = fgets(temp, 256, fl);
+
+		if(returnValue == NULL)
+		{
+			Log("SYSERR: get_line(): Error while reading file.");
+			return 0;
+		}
 
 		if (*temp)
 			temp[strlen(temp) - 1] = '\0';

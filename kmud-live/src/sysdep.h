@@ -128,8 +128,6 @@
 #endif
 */
 
-#ifdef KINSLAYER_JAVASCRIPT
-
 #ifndef WIN32
 #include <tr1/unordered_map>
 #include <tr1/memory>
@@ -138,7 +136,6 @@
 #include <memory>
 #endif
 using std::tr1::unordered_map;
-#endif
 
 
 #ifdef CIRCLE_UNIX

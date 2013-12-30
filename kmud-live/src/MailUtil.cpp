@@ -7,8 +7,7 @@
 #include "kuSockets.h"
 #include "kuClient.h"
 
-#include <boost/thread.hpp>
-#include <boost/bind.hpp>
+#include <thread>
 
 const int WAITING_HELO_REPLY = 0;
 const int WAITING_MAIL_FROM_REPLY = 1;
@@ -16,7 +15,7 @@ const int WAITING_RCPT_TO_REPLY = 2;
 const int WAITING_DATA_REPLY = 3;
 const int WAITING_MESSAGE_REPLY = 4;
 
-void MailUtil::sendEmail(std::string smtpName, short int smtpPort, std::string fromEmailAddress, std::string fromDisplayName, std::string toEmailAddress, std::string subject, std::string message)
+void MailUtil::send(std::string smtpName, short int smtpPort, std::string fromEmailAddress, std::string fromDisplayName, std::string toEmailAddress, std::string subject, std::string message)
 {
 	std::stringstream ehloBuffer;
 	std::stringstream mailFromBuffer;
@@ -134,13 +133,22 @@ void MailUtil::sendEmail(std::string smtpName, short int smtpPort, std::string f
 			}
 		}
 
-		boost::this_thread::yield();
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	}
 
 	smtpServerConnection.disconnect();
 }
 
+/***
+void MailUtil::aaa(std::string smtpName, short int smtpPort, std::string fromEmailAddress, std::string fromDisplayName, std::string toEmailAddress, std::string subject, std::string message)
+{
+
+}
+***/
+
 void MailUtil::sendEmail(const std::string &fromEmailAddress, const std::string &fromDisplayName, const std::string &toEmailAddress, const std::string &subject, const std::string &message)
 {
-	boost::thread thread( boost::bind( &MailUtil::sendEmail, "127.0.0.1", 25, fromEmailAddress, fromDisplayName, toEmailAddress, subject, message ) );
+	std::thread thread(&MailUtil::send, "127.0.0.1", 25, fromEmailAddress, fromDisplayName, toEmailAddress, subject, message);
+
+	thread.detach();
 }

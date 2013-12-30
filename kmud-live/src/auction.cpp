@@ -97,10 +97,10 @@ void AuctionManager::Boot()
 	}
 }
 /* Save all of the auctions in the manager to the database */
-void AuctionManager::Save()
+void AuctionManager::save()
 {
 	for( std::map<int,Auction*>::iterator aIter = MyAuctions.begin();aIter != MyAuctions.end();++aIter )
-		(*aIter).second->Save();
+		(*aIter).second->save();
 }
 /* Return the auction whose vnum is equal to _vnum. Otherwise, return NULL if no match is found. */
 Auction *AuctionManager::GetAuction( const int _vnum )
@@ -196,7 +196,7 @@ void AuctionManager::UpdateAuctions()
 				Character *winner;
 				if( (winner = CharacterUtil::getOnlineCharacterById(winnerID)) != 0 )
 				{//Notify the winner(they are logged in)
-					winner->Send("You have won an auction that has recently ended.\r\n");
+					winner->send("You have won an auction that has recently ended.\r\n");
 				}
 				AuctionManager::GetManager().ReimburseLosers( auctionID, winnerID );
 				AuctionManager::GetManager().RewardOwner( auctionID );
@@ -207,7 +207,7 @@ void AuctionManager::UpdateAuctions()
 				Character *owner;
 				if( (owner = CharacterUtil::getOnlineCharacterById(ownerID)) != 0 )
 				{//Notify the owner if they are loged in.
-					owner->Send("%s%sOne of your auctions has ended without any bidders\r\n"
+					owner->send("%s%sOne of your auctions has ended without any bidders\r\n"
 						"You may retrieve your item at the auction house.%s\r\n",
 						COLOR_BOLD(owner,CL_COMPLETE),COLOR_MAGENTA(owner,CL_COMPLETE),
 						COLOR_NORMAL(owner,CL_COMPLETE));
@@ -265,7 +265,7 @@ void AuctionManager::RewardOwner( const int ai_id )
 	}
 	else
 	{//Owner IS online. Let's notify them of their sale!
-		owner->Send("%s%sAn auction of yours has completed. You have earned %lld coppers!%s\r\n",
+		owner->send("%s%sAn auction of yours has completed. You have earned %lld coppers!%s\r\n",
 			COLOR_BOLD(owner,CL_COMPLETE), COLOR_MAGENTA(owner,CL_COMPLETE),
 			bid_amount, COLOR_NORMAL(owner,CL_COMPLETE));
 		owner->points.bank_gold += bid_amount;
@@ -307,7 +307,7 @@ void AuctionManager::ReimburseLosers( const int ai_id, const int winnerID )
 			else
 			{
 				bidder->points.bank_gold += MiscUtil::Convert<long long>(MyRow["bid_amount"].c_str());
-				bidder->Send("%s%sYou have been reimbursed %lld coppers from a recently completed auction.%s\r\n",
+				bidder->send("%s%sYou have been reimbursed %lld coppers from a recently completed auction.%s\r\n",
 					bld, mag, MiscUtil::Convert<long long>(MyRow["bid_amount"].c_str()), nrm);
 			}
 		}
@@ -399,7 +399,7 @@ void Auction::disallowClan( const int cl_num )
 }
 
 /* Save individual auction to the database */
-void Auction::Save()
+void Auction::save()
 {
 	std::stringstream QueryBuffer;
 	unsigned long long ar=0, dc=0;
@@ -493,7 +493,7 @@ bool Auction::placeAuction( Character *ch, AuctionData *ad )
 		MudLog(BRF, MAX(GET_INVIS_LEV(ch), LVL_APPR), TRUE, "%s failed to place item into auction #%d (item: %s): %s",
 			GET_NAME(ch), this->getVnum(), obj->GetSDesc(), e.getMessage().c_str());
 		obj_to_char(obj, ch);
-		ch->Send("There was an error with your request. Please report this!");
+		ch->send("There was an error with your request. Please report this!");
 		return true;//Red herring, but the error has been dealt with.
 	}
 	obj->Extract(false);
@@ -689,7 +689,7 @@ std::list< Object* > Auction::loadItemList( bool recursive )
 	return Object::loadItemList( recursive, 'A', ToString(this->getVnum()) );
 }
 
-void AuctionItem::Zero()
+void AuctionItem::zero()
 {
 	starting	= (0);
 	endTime		= (0);
@@ -700,11 +700,11 @@ void AuctionItem::Zero()
 }
 AuctionItem::AuctionItem()
 {
-	Zero();
+	zero();
 }
 AuctionItem::AuctionItem( const sql::Row &MyRow )
 {
-	Zero();
+	zero();
 
 	std::stringstream QueryBuffer;
 	sql::Query MyQuery;
@@ -792,7 +792,7 @@ void AuctionItem::Refresh()
 	}
 	else
 	{//This is bad. The item no longer exists in the database?
-		this->Zero();//This will render the auction invalid.
+		this->zero();//This will render the auction invalid.
 	}
 }
 bool AuctionItem::CanBeRetrievedBy( Character *user )
@@ -823,14 +823,14 @@ const int AuctionItem::GetTopBidderID()
 void AuctionDispMenu( Descriptor *d )
 {
 	get_char_cols(d->character);
-	d->Send("Welcome to %s!\r\n\r\n", StringUtil::vaEscape(d->olc->auction->getName()).c_str());
+	d->send("Welcome to %s!\r\n\r\n", StringUtil::vaEscape(d->olc->auction->getName()).c_str());
 
-//	d->Send("%s1%s) Search Items\r\n" , grn, nrm);
-	d->Send("%s1%s) View Your Bids\r\n", grn, nrm);
-	d->Send("%s2%s) View Your Auctions\r\n", grn, nrm);
-	d->Send("%s3%s) Sell an Item\r\n", grn, nrm);
-	d->Send("%s4%s) Browse\r\n", grn, nrm);
-	d->Send("\r\n%sQ%s)uit\r\n", grn, nrm);
+//	d->send("%s1%s) Search Items\r\n" , grn, nrm);
+	d->send("%s1%s) View Your Bids\r\n", grn, nrm);
+	d->send("%s2%s) View Your Auctions\r\n", grn, nrm);
+	d->send("%s3%s) Sell an Item\r\n", grn, nrm);
+	d->send("%s4%s) Browse\r\n", grn, nrm);
+	d->send("\r\n%sQ%s)uit\r\n", grn, nrm);
 
 	OLC_MODE(d) = AUCTION_MENU;
 
@@ -840,12 +840,12 @@ void AuctionDispBuyMenu( Descriptor *d )
 {
 	char atStr[1024];
 	sprintbit(d->olc->auction_data->item_types.to_ulong(), atTypeStr, atStr, ", ", cyn, nrm);
-	d->Send("%s1%s) Item Type     : %s\r\n", grn, nrm, atStr);
-	d->Send("%s2%s) Search Term   : %s%s%s\r\n", grn, nrm, cyn, d->olc->auction_data->GetSearchTerm().c_str(), nrm);
-	d->Send("%s3%s) Search\r\n", grn, nrm);
-	d->Send("%s4%s) Quit\r\n", grn, nrm);
+	d->send("%s1%s) Item Type     : %s\r\n", grn, nrm, atStr);
+	d->send("%s2%s) Search Term   : %s%s%s\r\n", grn, nrm, cyn, d->olc->auction_data->GetSearchTerm().c_str(), nrm);
+	d->send("%s3%s) Search\r\n", grn, nrm);
+	d->send("%s4%s) Quit\r\n", grn, nrm);
 
-	d->Send("\r\nMoney: %s%s%s\r\n", cyn, d->character->GoldString(d->character->points.gold,false).c_str(),nrm);
+	d->send("\r\nMoney: %s%s%s\r\n", cyn, d->character->GoldString(d->character->points.gold,false).c_str(),nrm);
 	OLC_MODE(d) = AUCTION_BUY_MENU;
 }
 void AuctionDispBuyTypeMenu( Descriptor *d )
@@ -857,12 +857,12 @@ void AuctionDispBuyTypeMenu( Descriptor *d )
 
 	for(int i = 0;i < d->olc->auction_data->item_types.size();++i)
 	{
-		d->Send("%s%d%s) %s%s%s\r\n", grn, (i+1), nrm, cyn, atTypeStr[i], nrm);
+		d->send("%s%d%s) %s%s%s\r\n", grn, (i+1), nrm, cyn, atTypeStr[i], nrm);
 	}
 
 	sprintbit(d->olc->auction_data->item_types.to_ulong(), atTypeStr, typesSet, ", ", cyn);
-	d->Send("\r\n%sQ%s) %sExit%s\r\n", grn, nrm, cyn, nrm);
-	d->Send("Types: %s\r\n", typesSet);
+	d->send("\r\n%sQ%s) %sExit%s\r\n", grn, nrm, cyn, nrm);
+	d->send("Types: %s\r\n", typesSet);
 
 	OLC_MODE(d) = AUCTION_BUY_TYPE;
 }
@@ -874,64 +874,64 @@ void AuctionDispSellMenu( Descriptor *d )
 
 	DurationStr << Duration.dDays() << " day(s), " << Duration.dHours() << " hour(s)";
 
-	d->Send("~~Sell an Item~~\r\n\r\n");
-	d->Send("%sI%s)tem to Sell   : %s%s%s\r\n", grn, nrm, cyn,
+	d->send("~~Sell an Item~~\r\n\r\n");
+	d->send("%sI%s)tem to Sell   : %s%s%s\r\n", grn, nrm, cyn,
 		(itemToSell == NULL ? "<NONE>" : itemToSell->GetSDesc()), nrm);
-	d->Send("%sD%s)uration       : %s%s%s\r\n", grn, nrm, cyn, DurationStr.str().c_str(), nrm);
-	d->Send("%sB%s)uyout Price   : %s%s%s\r\n", grn, nrm, cyn,
+	d->send("%sD%s)uration       : %s%s%s\r\n", grn, nrm, cyn, DurationStr.str().c_str(), nrm);
+	d->send("%sB%s)uyout Price   : %s%s%s\r\n", grn, nrm, cyn,
 		d->character->GoldString(d->olc->auction_data->GetBuyoutPrice(), false).c_str(), nrm);
-	d->Send("%sS%s)tarting Price : %s%s%s\r\n", grn, nrm, cyn,
+	d->send("%sS%s)tarting Price : %s%s%s\r\n", grn, nrm, cyn,
 		d->character->GoldString(d->olc->auction_data->GetStartingPrice(), false).c_str(), nrm);
-	d->Send("%sP%s)lace Auction\r\n", grn, nrm);
-	d->Send("%sQ%s)uit\r\n", grn, nrm);
-	d->Send("\r\nYour option: ");
+	d->send("%sP%s)lace Auction\r\n", grn, nrm);
+	d->send("%sQ%s)uit\r\n", grn, nrm);
+	d->send("\r\nYour option: ");
 
 	OLC_MODE(d) = AUCTION_SELL_MENU;
 }
 
 void AuctionDispDurationMenu( Descriptor *d )
 {
-	d->Send("Please select a duration for the auction:\r\n");
+	d->send("Please select a duration for the auction:\r\n");
 	for(unsigned int i = 0;i < Auction::DurationList.size();++i)
 	{
 		Time Duration = Time(Auction::DurationList[i]);
 
-		d->Send("%s%d%s) %s%d%s day(s), %s%2d%s hour(s)\r\n",
+		d->send("%s%d%s) %s%d%s day(s), %s%2d%s hour(s)\r\n",
 			grn, i+1, nrm, cyn, (int)Duration.dDays(), nrm, cyn, (int)Duration.dHours(), nrm);
 	}
 	OLC_MODE(d) = AUCTION_DURATION_MENU;
 }
 void AuctionDispBuyoutMenu( Descriptor *d )
 {
-	d->Send("Buyout Price:\r\n");
-	d->Send("%sG%s)old     : %s%d%s\r\n", grn, nrm, cyn, CalcGold(d->olc->auction_data->GetBuyoutPrice()), nrm);
-	d->Send("%sS%s)ilver   : %s%d%s\r\n", grn, nrm, cyn, CalcSilver(d->olc->auction_data->GetBuyoutPrice()), nrm);
-	d->Send("%sC%s)opper   : %s%d%s\r\n", grn, nrm, cyn, CalcCopper(d->olc->auction_data->GetBuyoutPrice()), nrm);
-	d->Send("%sQ%s)uit\r\n", grn, nrm);
-	d->Send("Your option : ");
+	d->send("Buyout Price:\r\n");
+	d->send("%sG%s)old     : %s%d%s\r\n", grn, nrm, cyn, CalcGold(d->olc->auction_data->GetBuyoutPrice()), nrm);
+	d->send("%sS%s)ilver   : %s%d%s\r\n", grn, nrm, cyn, CalcSilver(d->olc->auction_data->GetBuyoutPrice()), nrm);
+	d->send("%sC%s)opper   : %s%d%s\r\n", grn, nrm, cyn, CalcCopper(d->olc->auction_data->GetBuyoutPrice()), nrm);
+	d->send("%sQ%s)uit\r\n", grn, nrm);
+	d->send("Your option : ");
 
 	OLC_MODE(d) = AUCTION_SELL_BUYOUT;
 }
 void AuctionDispStartingPriceMenu( Descriptor *d )
 {
-	d->Send("Buyout Price:\r\n");
-	d->Send("%sG%s)old     : %s%d%s\r\n", grn, nrm, cyn, CalcGold(d->olc->auction_data->GetStartingPrice()), nrm);
-	d->Send("%sS%s)ilver   : %s%d%s\r\n", grn, nrm, cyn, CalcSilver(d->olc->auction_data->GetStartingPrice()), nrm);
-	d->Send("%sC%s)opper   : %s%d%s\r\n", grn, nrm, cyn, CalcCopper(d->olc->auction_data->GetStartingPrice()), nrm);
-	d->Send("%sQ%s)uit\r\n", grn, nrm);
-	d->Send("Your option : ");
+	d->send("Buyout Price:\r\n");
+	d->send("%sG%s)old     : %s%d%s\r\n", grn, nrm, cyn, CalcGold(d->olc->auction_data->GetStartingPrice()), nrm);
+	d->send("%sS%s)ilver   : %s%d%s\r\n", grn, nrm, cyn, CalcSilver(d->olc->auction_data->GetStartingPrice()), nrm);
+	d->send("%sC%s)opper   : %s%d%s\r\n", grn, nrm, cyn, CalcCopper(d->olc->auction_data->GetStartingPrice()), nrm);
+	d->send("%sQ%s)uit\r\n", grn, nrm);
+	d->send("Your option : ");
 
 	OLC_MODE(d) = AUCTION_SELL_STARTING_PRICE;
 }
 void AuctionItemToSellMenu( Descriptor *d )
 {
 	get_char_cols(d->character);
-	d->Send("You have the following items in your inventory:\r\n");
+	d->send("You have the following items in your inventory:\r\n");
 	unsigned int i = 0;
 	for(Object *o = d->character->carrying;o;o = o->next_content)
 	{
 		++i;
-		d->Send("%s%2d%s) %s%s%s\r\n", grn, i, nrm, cyn, o->short_description, nrm);
+		d->send("%s%2d%s) %s%s%s\r\n", grn, i, nrm, cyn, o->short_description, nrm);
 	}
 
 	OLC_MODE(d) = AUCTION_ITEM_TO_SELL;
@@ -947,14 +947,14 @@ void AuctionDispBrowseMenu( Descriptor *d )
 
 	get_char_cols(d->character);
 
-	d->Send("\r\n");
-	d->Send("PAGE %s%d%s OF %s%d%s\r\n\r\n", grn, d->olc->auction_data->GetPage(), nrm, grn,
+	d->send("\r\n");
+	d->send("PAGE %s%d%s OF %s%d%s\r\n\r\n", grn, d->olc->auction_data->GetPage(), nrm, grn,
 		d->olc->auction_data->NumPages(), nrm);
 
-	d->Send("              Item Name                            |  Min Bid    |  Buyout     | Rem Time    | Top Bidder |\r\n");
-	d->Send("-----------------------------------------------------------------------------------------------------------\r\n");
-	d->Send("                                                   |             |             |             |            |\r\n");
-//	d->Send("\r\n");
+	d->send("              Item Name                            |  Min Bid    |  Buyout     | Rem Time    | Top Bidder |\r\n");
+	d->send("-----------------------------------------------------------------------------------------------------------\r\n");
+	d->send("                                                   |             |             |             |            |\r\n");
+//	d->send("\r\n");
 
 	std::stringstream OutBuf;
 	std::string tStr;
@@ -993,19 +993,19 @@ void AuctionDispBrowseMenu( Descriptor *d )
 			<< std::setw(11) << std::left << tStr << " | "
 			<< std::setw(10) << std::left << UserName << " |"
 			<< std::endl;
-		d->Send(StringUtil::vaEscape(OutBuf.str()).c_str());
+		d->send(StringUtil::vaEscape(OutBuf.str()).c_str());
 		OutBuf.str("");
 	}
 	/*** Display pagination ***/
-	d->Send("\r\n");
-	d->Send("To bid on an item, enter its number from the list above.");
-	d->Send("\r\n\r\n");
+	d->send("\r\n");
+	d->send("To bid on an item, enter its number from the list above.");
+	d->send("\r\n\r\n");
 
-	d->Send("[%sN%s] Next Page\r\n", grn, nrm);
-	d->Send("[%sP%s] Previous page\r\n", grn, nrm);
-//	d->Send("[%sB%s] Bid on Item\r\n", grn, nrm);
-//	d->Send("[%sU%s] Buyout\r\n", grn, nrm);
-	d->Send("[%sQ%s] Quit\r\n", grn, nrm);
+	d->send("[%sN%s] Next Page\r\n", grn, nrm);
+	d->send("[%sP%s] Previous page\r\n", grn, nrm);
+//	d->send("[%sB%s] Bid on Item\r\n", grn, nrm);
+//	d->send("[%sU%s] Buyout\r\n", grn, nrm);
+	d->send("[%sQ%s] Quit\r\n", grn, nrm);
 	OLC_MODE(d) = AUCTION_BROWSE;
 }
 void AuctionDispItemBidMenu( Descriptor *d )
@@ -1018,21 +1018,21 @@ void AuctionDispItemBidMenu( Descriptor *d )
 	Time t( tmpT );
 	RemTimeStr = MiscUtil::Convert<std::string>(t.dDays()) + "D " + MiscUtil::Convert<std::string>(t.dHours()) + "H " +
 		MiscUtil::Convert<std::string>(t.dMinutes()) + "M";
-	d->Send("Selected Item : %s%s%s\r\n", cyn, ai->GetObjShortDesc().c_str(), nrm);
-	d->Send("Time remaining: %s%s%s\r\n", cyn, RemTimeStr.c_str(), nrm);
-	d->Send("Minimum Bid   : %s%s%s\r\n", cyn, d->character->GoldString(ai->GetNextMinBid(),false).c_str(), nrm);
-	d->Send("Buyout        : %s%s%s\r\n", cyn, d->character->GoldString(ai->GetBuyout(),false).c_str(), nrm);
+	d->send("Selected Item : %s%s%s\r\n", cyn, ai->GetObjShortDesc().c_str(), nrm);
+	d->send("Time remaining: %s%s%s\r\n", cyn, RemTimeStr.c_str(), nrm);
+	d->send("Minimum Bid   : %s%s%s\r\n", cyn, d->character->GoldString(ai->GetNextMinBid(),false).c_str(), nrm);
+	d->send("Buyout        : %s%s%s\r\n", cyn, d->character->GoldString(ai->GetBuyout(),false).c_str(), nrm);
 
-	d->Send("\r\n");
+	d->send("\r\n");
 
-	d->Send("%s1%s) Place Bid\r\n", cyn, nrm);
-	d->Send("%s2%s) Buyout\r\n", cyn, nrm);
-	d->Send("%s3%s) Quit\r\n", cyn, nrm);
+	d->send("%s1%s) Place Bid\r\n", cyn, nrm);
+	d->send("%s2%s) Buyout\r\n", cyn, nrm);
+	d->send("%s3%s) Quit\r\n", cyn, nrm);
 
 	if( !ai->IsActive() && ai->CanBeRetrievedBy(d->character) )
 	{//Auction has ended and the browser is the winner. Let them retrieve the item.
-		d->Send("\r\n");
-		d->Send("%s4%s) Retrieve Item\r\n",cyn,nrm);
+		d->send("\r\n");
+		d->send("%s4%s) Retrieve Item\r\n",cyn,nrm);
 	}
 
 	d->olc->auction_data->SetBidRequest(0);
@@ -1040,7 +1040,7 @@ void AuctionDispItemBidMenu( Descriptor *d )
 }
 void AuctionDispBidConfirmationMenu( Descriptor *d )
 {
-	d->Send("You are about to bid %lld coppers(%lld coppers more than your last bid).\r\n"
+	d->send("You are about to bid %lld coppers(%lld coppers more than your last bid).\r\n"
 		"Are you sure you want to do this? (Y/N) : ",
 		d->olc->auction_data->GetBidRequest(),
 		d->olc->auction_data->GetBidRequest() - d->olc->auction_data->GetSelectedItem()->GetLastBid(d->character->player.idnum));
@@ -1080,7 +1080,7 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 			AuctionDispBrowseMenu(d);
 		}
 		else
-			d->Send("Invalid option.\r\nTry again: ");
+			d->send("Invalid option.\r\nTry again: ");
 		break;
 	case AUCTION_AUCTION_OVER_DIALOG:
 		//...Any input will return us to the browser.
@@ -1097,7 +1097,7 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 		}
 		else
 		{
-			d->Send("Please enter 'Y' or 'N' : ");
+			d->send("Please enter 'Y' or 'N' : ");
 		}
 		break;
 	case AUCTION_CONFIRM_BID:
@@ -1120,7 +1120,7 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 			if( !d->olc->auction_data->GetSelectedItem()->IsActive() ||
 				d->olc->auction_data->GetSelectedItem()->GetEndTime() <= time(0))
 			{
-				d->Send("The auction has already ended. Press return to go to the auction browser: ");
+				d->send("The auction has already ended. Press return to go to the auction browser: ");
 				OLC_MODE(d) = AUCTION_AUCTION_OVER_DIALOG;
 				return;
 			}
@@ -1128,7 +1128,7 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 			//Make sure the bid is still acceptable(meets minimum bid requirement)
 			if( nrBidsNow > nrBidsBefore )
 			{//Someone has placed a bid on this item while we were browsing.
-				d->Send("Someone has placed a bid since you selected this bid. The minimum bid is now %d.\r\n"
+				d->send("Someone has placed a bid since you selected this bid. The minimum bid is now %d.\r\n"
 					"Would you like to place a new bid? (Y/N) : ", d->olc->auction_data->GetSelectedItem()->GetNextMinBid());
 				OLC_MODE(d) = AUCTION_PLACE_NEW_BID_DIALOG;
 				return;
@@ -1137,13 +1137,13 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 			bool res = d->olc->auction->placeBid(d->character, d->olc->auction_data);
 
 			if( res == true )
-				d->Send("%s%sYour bid has been placed.%s\r\n", bld, mag, nrm);
+				d->send("%s%sYour bid has been placed.%s\r\n", bld, mag, nrm);
 			else
-				d->Send("An error occured when we tried to place your bid. Please report this!\r\n");
+				d->send("An error occured when we tried to place your bid. Please report this!\r\n");
 			AuctionDispMenu(d);
 		}
 		else
-			d->Send("Invalid option.\r\nTry again: ");
+			d->send("Invalid option.\r\nTry again: ");
 		break;
 	case AUCTION_PLACE_BID:
 		if( toupper(arg[0]) == 'Q' )
@@ -1159,29 +1159,29 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 			}
 			if( bid < d->olc->auction_data->GetSelectedItem()->GetNextMinBid() )
 			{//Bid is too small
-				d->Send("You entered a value that is less than the minimum bid.\r\n");
+				d->send("You entered a value that is less than the minimum bid.\r\n");
 				return;
 			}
 			if( d->character->points.gold < bid )
 			{//Bidder does not have sufficient gold
-				d->Send("You do not have enough gold to match that bid.\r\n");
+				d->send("You do not have enough gold to match that bid.\r\n");
 				return;
 			}
 			d->olc->auction_data->SetBidRequest( bid );
 			AuctionDispBidConfirmationMenu(d);
 			return;
 		}
-		d->Send("Your input must be numeric.\r\nTry again: ");
+		d->send("Your input must be numeric.\r\nTry again: ");
 		break;
 	case AUCTION_PLACE_BID_MENU:
 		if( atoi(arg.c_str()) == 1 )
 		{//Manual Bid
 			if( d->olc->auction_data->GetSelectedItem()->GetOwnerID() == d->character->player.idnum )
 			{
-				d->Send("You may not bid on your own item.\r\n");
+				d->send("You may not bid on your own item.\r\n");
 				return;
 			}
-			d->Send("Enter your bid in coppers(100 C = 1 S, 100S = 1G)\r\nYou may enter 'Q' to exit: ");
+			d->send("Enter your bid in coppers(100 C = 1 S, 100S = 1G)\r\nYou may enter 'Q' to exit: ");
 			OLC_MODE(d) = AUCTION_PLACE_BID;
 			return;
 		}
@@ -1189,17 +1189,17 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 		{//Buyout
 			if( d->olc->auction_data->GetSelectedItem()->GetOwnerID() == d->character->player.idnum )
 			{
-				d->Send("You may not bid on your own item.\r\n");
+				d->send("You may not bid on your own item.\r\n");
 				return;
 			}
 			if( d->olc->auction_data->GetSelectedItem()->GetBuyout() <= 0 )
 			{
-				d->Send("This auction does not have a buyout price.\r\n");
+				d->send("This auction does not have a buyout price.\r\n");
 				return;
 			}
 			if( d->character->points.gold < d->olc->auction_data->GetSelectedItem()->GetBuyout() )
 			{
-				d->Send("You don't have enough gold to match the buyout price.\r\n");
+				d->send("You don't have enough gold to match the buyout price.\r\n");
 				return;
 			}
 			d->olc->auction_data->SetBidRequest( d->olc->auction_data->GetSelectedItem()->GetBuyout() );
@@ -1213,18 +1213,18 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 		}
 		else if( atoi(arg.c_str()) == 4 && ad->GetSelectedItem()->CanBeRetrievedBy(d->character) )
 		{//User has won. Let them pick up the item.
-			d->Send("%s%sYou have retrieved %s.%s\r\n", bld,mag,ad->GetSelectedItem()->GetObjShortDesc().c_str(),nrm);
+			d->send("%s%sYou have retrieved %s.%s\r\n", bld,mag,ad->GetSelectedItem()->GetObjShortDesc().c_str(),nrm);
 			a->retrieveItem(d,ad);
 			AuctionDispBrowseMenu(d);
 			return;
 		}
-		d->Send("Invalid option.\r\nTry again: ");
+		d->send("Invalid option.\r\nTry again: ");
 		break;
 	case AUCTION_BROWSE:
 		if( toupper(arg[0]) == 'N' )
 		{
 			if( (d->olc->auction_data->GetPage() + 1) > d->olc->auction_data->NumPages() )
-				d->Send("There is no next page.\r\n");
+				d->send("There is no next page.\r\n");
 			else
 			{
 				d->olc->auction_data->SetPage( d->olc->auction_data->GetPage()+1 );
@@ -1235,7 +1235,7 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 		else if( toupper(arg[0]) == 'P' )
 		{
 			if( (d->olc->auction_data->GetPage() ) == 1 )
-				d->Send("There is no previous page.\r\n");
+				d->send("There is no previous page.\r\n");
 			else
 			{
 				d->olc->auction_data->SetPage( d->olc->auction_data->GetPage()-1 );
@@ -1258,7 +1258,7 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 				return;
 			}
 		}
-		d->Send("Invalid option.\r\nTry again: ");
+		d->send("Invalid option.\r\nTry again: ");
 		break;
 	case AUCTION_SELL_MENU:
 		if( toupper(arg[0]) == 'B' )
@@ -1275,38 +1275,38 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 		{
 			if( ad->GetBuyoutPrice() > 0 && ad->GetBuyoutPrice() < ad->GetStartingPrice() )
 			{//The buyout price is invalid...
-				d->Send("You have set a buyout that is lower than the minimum bid.\r\n"
+				d->send("You have set a buyout that is lower than the minimum bid.\r\n"
 					"Your buyout must either be set to zero, or it must be greater than the starting price.\r\n");
-				d->Send("Your option : ");
+				d->send("Your option : ");
 				return;
 			}
 			if( ad->GetItemToSell() == 0 )
 			{//No item has been selected...
-				d->Send("You have not selected an item to sell. You must do this in order to submit an auction\r\n");
-				d->Send("Your option : ");
+				d->send("You have not selected an item to sell. You must do this in order to submit an auction\r\n");
+				d->send("Your option : ");
 				return;
 			}
 			if( ad->GetSellDuration() == 0 )
 			{//Invalid sell duration...
-				d->Send("You haven't selected a duration for your auction's sale.\r\n");
-				d->Send("Your option : ");
+				d->send("You haven't selected a duration for your auction's sale.\r\n");
+				d->send("Your option : ");
 				return;
 			}
 			if( ad->GetItemToSell()->carried_by != d->character )
 			{//Seller is no longer holding the item they were trying to sell. Stolen?
-				d->Send("You are no longer carrying the item you were trying to sell!\r\n");
-				d->Send("Your option : ");
+				d->send("You are no longer carrying the item you were trying to sell!\r\n");
+				d->send("Your option : ");
 				return;
 			}
 			if( !d->olc->auction->placeAuction( d->character, d->olc->auction_data ) )
-				d->Send("Oops! It appears that you no longer have that item!\r\n");
+				d->send("Oops! It appears that you no longer have that item!\r\n");
 			else
-				d->Send("Auction submitted.\r\n");
+				d->send("Auction submitted.\r\n");
 			d->olc->auction_data->ClearSellData();
 			AuctionDispMenu(d);
 		}
 		else
-			d->Send("Invalid opton.\r\nTry again: ");
+			d->send("Invalid opton.\r\nTry again: ");
 		break;
 	case AUCTION_ITEM_TO_SELL:
 	{
@@ -1317,16 +1317,16 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 		}
 		if( !MiscUtil::isNumber( arg.c_str() ) || atoi(arg.c_str()) <= 0 )
 		{
-			d->Send("Your input must be numeric and greater than zero, or 'Q' to quit.\r\nTry again: ");
+			d->send("Your input must be numeric and greater than zero, or 'Q' to quit.\r\nTry again: ");
 			return;
 		}
 		int nr = atoi( arg.c_str() );
 		Object *o;
 		for( o = d->character->carrying;o && --nr > 0;o = o->next_content );
 		if( o == NULL )
-			d->Send("That item does not exist.\r\n");
+			d->send("That item does not exist.\r\n");
 		else if( o->contains != NULL )
-			d->Send("You must select an item which is not carrying other items.\r\n");
+			d->send("You must select an item which is not carrying other items.\r\n");
 		else
 			d->olc->auction_data->SetItemToSell(o);
 		AuctionDispSellMenu(d);
@@ -1335,7 +1335,7 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 	case AUCTION_DURATION_MENU:
 		if( atoi(arg.c_str())-1 < 0 || atoi(arg.c_str())-1 >= Auction::DurationList.size() )
 		{
-			d->Send("You must choose a duration from the list.\r\nTry again: ");
+			d->send("You must choose a duration from the list.\r\nTry again: ");
 			return;
 		}
 		d->olc->auction_data->SetSellDuration( Auction::DurationList[atoi(arg.c_str())-1] );
@@ -1344,23 +1344,23 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 	case AUCTION_SELL_BUYOUT:
 		if( toupper(arg[0]) == 'G' )
 		{
-			d->Send("Enter a value for gold: ");
+			d->send("Enter a value for gold: ");
 			OLC_MODE(d) = AUCTION_BUYOUT_GOLD;
 		}
 		else if( toupper(arg[0]) == 'S' )
 		{
-			d->Send("Enter a value for silver: ");
+			d->send("Enter a value for silver: ");
 			OLC_MODE(d) = AUCTION_BUYOUT_SILVER;
 		}
 		else if( toupper(arg[0]) == 'C' )
 		{
-			d->Send("Enter a value for coppers: ");
+			d->send("Enter a value for coppers: ");
 			OLC_MODE(d) = AUCTION_BUYOUT_COPPER;
 		}
 		else if( toupper(arg[0]) == 'Q' )
 			AuctionDispSellMenu(d);
 		else
-			d->Send("Invalid option.\r\nTry again: ");
+			d->send("Invalid option.\r\nTry again: ");
 		break;
 	case AUCTION_BUYOUT_GOLD:
 		d->olc->auction_data->SetBuyoutPrice(atoi(arg.c_str()), 'G');
@@ -1377,23 +1377,23 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 	case AUCTION_SELL_STARTING_PRICE:
 		if( toupper(arg[0]) == 'G' )
 		{
-			d->Send("Enter a value for gold: ");
+			d->send("Enter a value for gold: ");
 			OLC_MODE(d) = AUCTION_STARTING_GOLD;
 		}
 		else if( toupper(arg[0]) == 'S' )
 		{
-			d->Send("Enter a value for silver: ");
+			d->send("Enter a value for silver: ");
 			OLC_MODE(d) = AUCTION_STARTING_SILVER;
 		}
 		else if( toupper(arg[0]) == 'C' )
 		{
-			d->Send("Enter a value for coppers: ");
+			d->send("Enter a value for coppers: ");
 			OLC_MODE(d) = AUCTION_STARTING_COPPER;
 		}
 		else if( toupper(arg[0]) == 'Q' )
 			AuctionDispSellMenu(d);
 		else
-			d->Send("Invalid option.\r\nTry again: ");
+			d->send("Invalid option.\r\nTry again: ");
 		break;
 	case AUCTION_STARTING_GOLD:
 		d->olc->auction_data->SetStartingPrice(atoi(arg.c_str()), 'G');
@@ -1412,7 +1412,7 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 			AuctionDispBuyTypeMenu(d);
 		else if( arg == "2" )
 		{
-			d->Send("Enter a word to act as a filter for your search results: ");
+			d->send("Enter a word to act as a filter for your search results: ");
 			OLC_MODE(d) = AUCTION_BUY_SEARCH_TERM;
 		}
 		else if( arg == "3" ){}
@@ -1420,14 +1420,14 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 			AuctionDispMenu(d);
 		else
 		{
-			d->Send("Invalid option.\r\nTry again: ");
+			d->send("Invalid option.\r\nTry again: ");
 			return;
 		}
 		break;
 	case AUCTION_BUY_SEARCH_TERM:
 		if( arg.size() >= 32 )
 		{
-			d->Send("Search term too long.\r\nPlease submit a shorter term: ");
+			d->send("Search term too long.\r\nPlease submit a shorter term: ");
 			return;
 		}
 		d->olc->auction_data->SetSearchTerm( arg );
@@ -1443,7 +1443,7 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 		int narg = atoi(arg.c_str())-1;
 		if( narg < 0 || narg > NUM_ATYPES )
 		{
-			d->Send("Invalid option.\r\nTry again: ");
+			d->send("Invalid option.\r\nTry again: ");
 			return;
 		}
 		d->olc->auction_data->item_types.flip(narg);

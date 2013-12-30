@@ -90,19 +90,19 @@ int PerformWeave( Character* caster, Character* cvict, Object* ovict, char* argu
 		switch ( GET_POS( caster ) )
 		{
 			case POS_SLEEPING:
-				caster->Send( "You dream about great magical powers.\r\n" );
+				caster->send( "You dream about great magical powers.\r\n" );
 				break;
 			case POS_RESTING:
-				caster->Send( "You cannot concentrate while resting.\r\n" );
+				caster->send( "You cannot concentrate while resting.\r\n" );
 				break;
 			case POS_SITTING:
-				caster->Send( "You can't do this sitting!\r\n" );
+				caster->send( "You can't do this sitting!\r\n" );
 				break;
 			case POS_FIGHTING:
-				caster->Send( "Impossible!  You can't concentrate enough!\r\n" );
+				caster->send( "Impossible!  You can't concentrate enough!\r\n" );
 				break;
 			default:
-				caster->Send( "You can't do much of anything like this!\r\n" );
+				caster->send( "You can't do much of anything like this!\r\n" );
 				break;
 		}
 
@@ -112,30 +112,30 @@ int PerformWeave( Character* caster, Character* cvict, Object* ovict, char* argu
 	//Does the caster fail the weave?
 	if( MiscUtil::random(0,100) > GET_SKILL(caster, weave->getVnum()) )
 	{
-		caster->Send("You lose your concentration.\r\n");
+		caster->send("You lose your concentration.\r\n");
 		return 0;
 	}
 
 	if ( ( cvict != caster ) && ( weave->targetSet("SelfOnly") ) )
 	{
-		caster->Send( "You can only channel this spell upon yourself!\r\n" );
+		caster->send( "You can only channel this spell upon yourself!\r\n" );
 		return 0;
 	}
 
 	if ( ( cvict == caster ) && weave->targetSet("NotSelf") )
 	{
-		caster->Send( "You cannot channel this spell upon yourself!\r\n" );
+		caster->send( "You cannot channel this spell upon yourself!\r\n" );
 		return 0;
 	}
 
 	if ( weave->routineSet("Groups") && !AFF_FLAGGED( caster, AFF_GROUP ) )
 	{
-		caster->Send( "You can't channel this spell if you're not in a group!\r\n" );
+		caster->send( "You can't channel this spell if you're not in a group!\r\n" );
 		return 0;
 	}
 	if (ROOM_FLAGGED(caster->in_room, ROOM_NOMAGIC))
 	{
-		caster->Send("Your magic fizzles out and dies.\r\n");
+		caster->send("Your magic fizzles out and dies.\r\n");
 		Act("$n's weave fizzles out and dies.", FALSE, caster, 0, 0, TO_ROOM);
 		return 0;
 	}
@@ -143,12 +143,12 @@ int PerformWeave( Character* caster, Character* cvict, Object* ovict, char* argu
 	if (ROOM_FLAGGED(caster->in_room, ROOM_PEACEFUL) &&
       (weave->isViolent() || weave->routineSet("Damage")))
 	{
-		caster->Send( "A flash of white light fills the room, dispelling your violent weave!\r\n");
+		caster->send( "A flash of white light fills the room, dispelling your violent weave!\r\n");
 		Act("White light from no particular source suddenly fills the room, then vanishes.", 0, caster, 0, 0, TO_ROOM);
 		return 0;
 	}
 
-	caster->Send( OK );
+	caster->send( OK );
 
 	if( weave->routineSet("Damage") )
 		mag_damage(caster, cvict, spellnum);
@@ -237,29 +237,29 @@ ACMD( do_cast )
 
 	if( !ch->ChannelingAbility() && !IS_NPC(ch) && GET_LEVEL(ch) < LVL_APPR )
 	{
-		ch->Send("You have no idea how to channel the One Power.\r\n");
+		ch->send("You have no idea how to channel the One Power.\r\n");
 		return;
 	}
 
 	if( !PRF_FLAGGED(ch, PRF_SOURCE) )
 	{
-		ch->Send("You are not in touch with the True Source.\r\n");
+		ch->send("You are not in touch with the True Source.\r\n");
 		return;
 	}
 	if( AFF_FLAGGED(ch, AFF_SHIELD) || ShieldManager::GetManager().ShieldedBy(ch) != NULL )
 	{
-		ch->Send("Your connection to the True Source is blocked!\r\n");
+		ch->send("Your connection to the True Source is blocked!\r\n");
 		return;
 	}
 
 	if( !*argument )
 	{
-		ch->Send("Channel what and where?\r\n");
+		ch->send("Channel what and where?\r\n");
 		return;
 	}
 	if( !s )
 	{
-		ch->Send("You must type the weave name surrounded by single quotes:\r\nchannel 'weave name' <target>\r\n");
+		ch->send("You must type the weave name surrounded by single quotes:\r\nchannel 'weave name' <target>\r\n");
 		return;
 	}
 
@@ -268,19 +268,19 @@ ACMD( do_cast )
 
 	if( !weave || GET_SKILL(ch, spellnum) <= 0 )
 	{
-		ch->Send("You are unfamiliar with that weave.\r\n");
+		ch->send("You are unfamiliar with that weave.\r\n");
 		return;
 	}
 
 	if( weave->disabled() )
 	{
-		ch->Send("This weave has been disabled by the administration.\r\n");
+		ch->send("This weave has been disabled by the administration.\r\n");
 		return;
 	}
 
 	if( ch->points.mana < MiscUtil::Convert<int>(weave->getAttribute("Cost")) )
 	{
-		ch->Send("You are too drained to complete the weave.\r\n");
+		ch->send("You are too drained to complete the weave.\r\n");
 		return;
 	}
 
@@ -340,31 +340,31 @@ ACMD( do_cast )
 
 		if( !target )
 		{
-			ch->Send("Who do you wish to channel this weave upon?\r\n");
+			ch->send("Who do you wish to channel this weave upon?\r\n");
 			return;
 		}
 		if( cvict == ch && weave->isViolent() )
 		{
-			ch->Send("You want to use that weave on yourself? Are you mad?!\r\n");
+			ch->send("You want to use that weave on yourself? Are you mad?!\r\n");
 			return;
 		}
 	}
 
 	if( !target )
 	{
-		ch->Send("Your target could not be found.\r\n");
+		ch->send("Your target could not be found.\r\n");
 		return;
 	}
 
 	if(weave->getName() == "Quicksand" && IS_BASHED(cvict))
 	{
-		ch->Send("They already seem to be stunned!\r\n");
+		ch->send("They already seem to be stunned!\r\n");
 		return;
 	}
 
 	if(weave->getName() == "Eavesdrop" && (ch->in_room->DistanceToRoom(cvict->in_room) > atoi(WeaveManager::GetManager().GetWeave("Eavesdrop")->getAttribute("MaxDistance").c_str())))
 	{
-		ch->Send("Your target could not be found.\r\n");
+		ch->send("Your target could not be found.\r\n");
 		return;
 	}
 	/*** And that should be it! The target should either be found, or any conflict taken care of. ***/
@@ -373,12 +373,12 @@ ACMD( do_cast )
 	/** All prerequisites passed. Time to get on with the channeling. ***/
 	if( !ch->command_ready )
 	{
-		ch->Send("You begin channeling the appropriate flows...\r\n");
+		ch->send("You begin channeling the appropriate flows...\r\n");
 		sendElementMessages(ch, weave);
 		ch->command_ready = true;
 		ch->timer = MiscUtil::Convert<float>(weave->getAttribute("Timer"));
 		if(weave->getName() == "Gate")
-			ch->SetGateTimer();
+			ch->setGateTimer();
 		ch->player.target = cvict;
 		ch->player.otarget = ovict;
 		return;
@@ -506,7 +506,7 @@ void Character::AddChannelingStrain( bool Failure, int spell )
 	}
 }
 
-void Character::SetGateTimer()
+void Character::setGateTimer()
 {
 	UserClan *userClan;
 

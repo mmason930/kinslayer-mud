@@ -271,11 +271,8 @@ OLC::OLC()
 	this->auction			= (NULL);
 	this->auction_data		= (NULL);
 	this->userEmailAddress	= NULL;
-
-#ifdef KINSLAYER_JAVASCRIPT
 	this->jsTrig			= (NULL);
 //	this->jsScripts			= (NULL);
-#endif
 }
 
 /*------------------------------------------------------------*/
@@ -288,7 +285,7 @@ ACMD( do_myzones )
 
 	if ( GET_LEVEL( ch ) > LVL_GRGOD )
 	{
-		ch->Send( "You have access to all zones.\r\n" );
+		ch->send( "You have access to all zones.\r\n" );
 		return ;
 	}
 
@@ -302,9 +299,9 @@ ACMD( do_myzones )
 	}
 
 	if ( *buf == '\0')//Buffer is empty, meaning no zones are to be displayed.
-		ch->Send( "You have no zones assigned to you.\r\n" );
+		ch->send( "You have no zones assigned to you.\r\n" );
 	else
-		ch->Send( "You are assigned to the following zones:\r\n%s", buf );
+		ch->send( "You are assigned to the following zones:\r\n%s", buf );
 }
 
 /*
@@ -351,10 +348,10 @@ ACMD( do_olc )
 		case SCMD_OLC_MEDIT:
 		case SCMD_OLC_SEDIT:
 		case SCMD_OLC_KEDIT:
-			ch->Send( "Specify a %s VNUM to edit.\r\n", olc_scmd_info[ subcmd ].text );
+			ch->send( "Specify a %s VNUM to edit.\r\n", olc_scmd_info[ subcmd ].text );
 			return ;
 		case SCMD_OLC_AEDIT:
-			ch->Send( "Specify an action to edit.\r\n" );
+			ch->send( "Specify an action to edit.\r\n" );
 			return;
 		}
 	}
@@ -365,7 +362,7 @@ ACMD( do_olc )
 		{
 			if(subcmd == SCMD_OLC_SEDIT) {
 
-				ch->Send("Shops are saved immediately upon exiting the editor. No need to save manually.\r\n");
+				ch->send("Shops are saved immediately upon exiting the editor. No need to save manually.\r\n");
 				//return;
 			}
 			if(( subcmd == SCMD_OLC_AEDIT ) || (subcmd == SCMD_OLC_SGEDIT))
@@ -375,7 +372,7 @@ ACMD( do_olc )
 			}
 			else if ( !*buf2 )
 			{
-				ch->Send( "Save which zone?\r\n" );
+				ch->send( "Save which zone?\r\n" );
 				return ;
 			}
 			else
@@ -393,12 +390,12 @@ ACMD( do_olc )
 			if ( ( strn_cmp( "new", buf1, 3 ) == 0 ) && *buf2 )
 				zedit_new_zone( ch, atoi( buf2 ) );
 			else
-				ch->Send( "Specify a new zone number.\r\n" );
+				ch->send( "Specify a new zone number.\r\n" );
 			return ;
 		}
 		else
 		{
-			ch->Send( "Yikes!  Stop that, someone will get hurt!\r\n" );
+			ch->send( "Yikes!  Stop that, someone will get hurt!\r\n" );
 			return ;
 		}
 	}
@@ -429,7 +426,7 @@ ACMD( do_olc )
 				else
 					sprintf( buf, "That %s is currently being edited by %s.\r\n",
 					         olc_scmd_info[ subcmd ].text, GET_NAME( d->character ) );
-				ch->Send( buf, ch );
+				ch->send( buf, ch );
 
 				return ;
 			}
@@ -447,7 +444,7 @@ ACMD( do_olc )
 	{
 		if ( ( zone = ZoneManager::GetManager().GetZoneByRoomVnum(num) ) == NULL )
 		{
-			ch->Send( "Sorry, there is no zone for that number!\r\n" );
+			ch->send( "Sorry, there is no zone for that number!\r\n" );
 			cleanup_olc(d, CLEANUP_ALL);
 			return ;
 		}
@@ -461,7 +458,7 @@ ACMD( do_olc )
 		{
 			if ( ( subcmd != SCMD_OLC_AEDIT ) && (!zone->CanEdit(ch)) )
 			{
-				ch->Send( "You do not have permission to edit this zone.\r\n" );
+				ch->send( "You do not have permission to edit this zone.\r\n" );
 				MudLog( NRM, MAX( LVL_GRGOD, GET_INVIS_LEV( ch ) ), TRUE,
 				        "%s tried editing zone %d without permission.", GET_NAME( ch ), zone->getVnum() );
 				cleanup_olc(d, CLEANUP_ALL);
@@ -501,17 +498,17 @@ ACMD( do_olc )
 
 		if ( !type )
 		{
-			ch->Send( "Oops, I forgot what you wanted to save.\r\n" );
+			ch->send( "Oops, I forgot what you wanted to save.\r\n" );
 			return ;
 		}
 		if ( subcmd == SCMD_OLC_AEDIT )
 		{
-			ch->Send( "Saving all actions.\r\n" );
+			ch->send( "Saving all actions.\r\n" );
 			MudLog( NRM, MAX( LVL_BUILDER, GET_INVIS_LEV( ch ) ), TRUE, "OLC: %s saves all actions.", GET_NAME( ch ) );
 		}
 		else
 		{
-			ch->Send( "Saving all %ss in zone %d.\r\n", type, zone->getVnum() );
+			ch->send( "Saving all %ss in zone %d.\r\n", type, zone->getVnum() );
 
 			MudLog( CMP, MAX( LVL_BUILDER, GET_INVIS_LEV( ch ) ), TRUE,
 			        "OLC: %s saves %s info for zone %d.", GET_NAME( ch ), type, zone->getVnum() );
@@ -522,13 +519,13 @@ ACMD( do_olc )
 		case SCMD_OLC_REDIT:
 			if ( zone->IsDeleted() )
 			{
-				d->Send( "This zone is set to delete after the next reboot. Not saving...\r\n" );
+				d->send( "This zone is set to delete after the next reboot. Not saving...\r\n" );
 				break;
 			}
 			redit_save_to_disk( OLC_ZNUM( d ) );
 			break;
 		case SCMD_OLC_ZEDIT:
-			ZoneManager::GetManager().GetZoneByRnum( OLC_ZNUM(d) )->Save();
+			ZoneManager::GetManager().GetZoneByRnum( OLC_ZNUM(d) )->save();
 			break;
 		case SCMD_OLC_OEDIT:
 			oedit_save_to_disk( OLC_ZNUM( d ) );
@@ -558,19 +555,19 @@ ACMD( do_olc )
 			if ( FindCommand( OLC_STORAGE( d ) ) > NOTHING )
 			{
 				cleanup_olc( d, CLEANUP_ALL );
-				ch->Send( "That command already exists.\r\n" );
+				ch->send( "That command already exists.\r\n" );
 				return ;
 			}
 
 			sprintf( buf, "Do you wish to add the '%s' action? ", OLC_STORAGE( d ) );
-			ch->Send( buf, ch );
+			ch->send( buf, ch );
 			OLC_MODE( d ) = AEDIT_CONFIRM_ADD;
 		}
 
 		else
 		{
 			sprintf( buf, "Do you wish to edit the '%s' action? ", soc_mess_list[ OLC_ZNUM( d ) ].command );
-			ch->Send( buf, ch );
+			ch->send( buf, ch );
 			OLC_MODE( d ) = AEDIT_CONFIRM_EDIT;
 		}
 	}
@@ -598,7 +595,7 @@ ACMD( do_olc )
 	case SCMD_OLC_ZEDIT:
 		if ( ( real_num = real_room( num ) ) < 0 )
 		{
-			ch->Send( "That room does not exist.\r\n" );
+			ch->send( "That room does not exist.\r\n" );
 			cleanup_olc(d, CLEANUP_ALL);
 			return ;
 		}
@@ -653,9 +650,9 @@ void olc_saveinfo( Character *ch )
 	struct olc_save_info * entry;
 
 	if ( olc_save_list )
-		ch->Send( "The following OLC components need saving:-\r\n" );
+		ch->send( "The following OLC components need saving:-\r\n" );
 	else
-		ch->Send( "The database is up to date.\r\n" );
+		ch->send( "The database is up to date.\r\n" );
 
 	for ( entry = olc_save_list; entry; entry = entry->next )
 	{
@@ -670,7 +667,7 @@ void olc_saveinfo( Character *ch )
 		else
 			sprintf( buf, " - %s for zone %d.\r\n",
 			         save_info_msg[ ( int ) entry->type ], entry->zone );
-		ch->Send( buf, ch );
+		ch->send( buf, ch );
 	}
 }
 
@@ -783,8 +780,6 @@ void cleanup_olc( Descriptor *d, byte cleanup_type )
 		if ( OLC_KIT( d ) )
 			delete ( OLC_KIT( d ) );
 
-#ifdef KINSLAYER_JAVASCRIPT
-#endif
 		//Check for a room.
 		if ( OLC_ROOM( d ) )
 		{
@@ -1033,7 +1028,7 @@ ACMD( do_rlist )
 
 	if ( !argument )
 	{
-		ch->Send( "Syntax: rstd::list <Bottom Room Number> <Top Room Number>\r\n" );
+		ch->send( "Syntax: rstd::list <Bottom Room Number> <Top Room Number>\r\n" );
 		return ;
 	}
 
@@ -1043,13 +1038,13 @@ ACMD( do_rlist )
 
 	if ( r1 < 0 || r2 < 0 )
 	{
-		ch->Send( "Both numbers must be above zero.\r\n" );
+		ch->send( "Both numbers must be above zero.\r\n" );
 		return ;
 	}
 
 	if ( r2 < r1 )
 	{
-		ch->Send( "The second room number must be greater than or equal to the first. %d %d, not %d %d\r\n", r2, r1, r1, r2 );
+		ch->send( "The second room number must be greater than or equal to the first. %d %d, not %d %d\r\n", r2, r1, r1, r2 );
 		return ;
 	}
 
@@ -1061,13 +1056,13 @@ ACMD( do_rlist )
 		if ( World[ i ] ->vnum >= r1 )
 		{
 			found = true;
-			ch->Send( "[%s%s%d%s]%s\r\n", COLOR_BOLD( ch, CL_COMPLETE ), COLOR_GREEN( ch, CL_COMPLETE ),
+			ch->send( "[%s%s%d%s]%s\r\n", COLOR_BOLD( ch, CL_COMPLETE ), COLOR_GREEN( ch, CL_COMPLETE ),
 			          World[ i ] ->vnum, COLOR_NORMAL( ch, CL_COMPLETE ), World[ i ] ->name );
 		}
 	}
 
 	if ( !found )
-		ch->Send( "No rooms found within that range.\r\n" );
+		ch->send( "No rooms found within that range.\r\n" );
 
 }
 
@@ -1098,7 +1093,7 @@ ACMD( do_mlist )
 
 	if ( !argument )
 	{
-		ch->Send( "Syntax: mlist <Bottom Room Number> <Top Room Number> <Sort Type>\r\n" );
+		ch->send( "Syntax: mlist <Bottom Room Number> <Top Room Number> <Sort Type>\r\n" );
 		return ;
 	}
 
@@ -1106,7 +1101,7 @@ ACMD( do_mlist )
 	//Only one numeric boundary provided.
 	if( (MiscUtil::isNumber(arg1) && !MiscUtil::isNumber(arg2)) || (MiscUtil::isNumber(arg2) && !MiscUtil::isNumber(arg1)) )
 	{
-		ch->Send( "Syntax: mlist <Bottom Room Number> <Top Room Number> <Sort Type>\r\n" );
+		ch->send( "Syntax: mlist <Bottom Room Number> <Top Room Number> <Sort Type>\r\n" );
 		return;
 	}
 
@@ -1136,20 +1131,20 @@ ACMD( do_mlist )
 		}
 		if( !found )
 		{
-			ch->Send("Invalid sort type. Choose from the following: %s\r\n", strSortTypes.c_str());
+			ch->send("Invalid sort type. Choose from the following: %s\r\n", strSortTypes.c_str());
 			return;
 		}
 	}
 
 	if ( m1 < 0 || m2 < 0 )
 	{
-		ch->Send( "Both numbers must be above zero.\r\n" );
+		ch->send( "Both numbers must be above zero.\r\n" );
 		return ;
 	}
 
 	if ( m2 < m1 )
 	{
-		ch->Send( "The second room number must be greater than or equal to the first. %d %d, not %d %d\r\n", m2, m1, m1, m2 );
+		ch->send( "The second room number must be greater than or equal to the first. %d %d, not %d %d\r\n", m2, m1, m1, m2 );
 		return ;
 	}
 
@@ -1245,7 +1240,7 @@ ACMD( do_mlist )
 
 	if( OrderedList.empty() )
 	{
-		ch->Send("No mobs were found.\r\n");
+		ch->send("No mobs were found.\r\n");
 		return;
 	}
 	OutBuf << " Vnum               Name                                    Exp      Lvl      HP       OB        PB        DB       Kit       Gold     Zloads" << std::endl;
@@ -1417,7 +1412,7 @@ ACMD( do_olist )
 
 	if ( !*arg1 )
 	{
-		ch->Send( "Syntax: olist <Bottom Obj Number> <Top Obj Number> <Sort Type(optional)>  OR\r\n"
+		ch->send( "Syntax: olist <Bottom Obj Number> <Top Obj Number> <Sort Type(optional)>  OR\r\n"
 		          "        olist <Item Type> <Sort Type(optional)>" );
 		return ;
 	}
@@ -1428,13 +1423,13 @@ ACMD( do_olist )
 
 		if ( atoi( arg1 ) < 0 || atoi( arg2 ) < 0 )
 		{
-			ch->Send( "Both numbers must be above zero.\r\n" );
+			ch->send( "Both numbers must be above zero.\r\n" );
 			return ;
 		}
 
 		if ( atoi( arg2 ) < atoi( arg1 ) )
 		{
-			ch->Send( "The second obj number must be greater than or equal to the first. %d %d, not %d %d\r\n",
+			ch->send( "The second obj number must be greater than or equal to the first. %d %d, not %d %d\r\n",
 			          atoi( arg2 ), atoi( arg1 ), atoi( arg1 ), atoi( arg2 ) );
 			return ;
 		}
@@ -1549,7 +1544,7 @@ ACMD( do_olist )
 					}
 					else
 					{
-						ch->Send( "Item value must be one of the following:\r\n"
+						ch->send( "Item value must be one of the following:\r\n"
 						          "WEAPONS: weight, ob, dmg1, dmg2, pb, db%s\r\n"
 						          "ARMOR:   weight, on, pb, db, defense\r\n"
 						          "MISC:    weight, pb, db, ob, defense\r\n",
@@ -1565,7 +1560,7 @@ ACMD( do_olist )
 			break;
 	}
 	if ( !weapons.size() && !armor.size() && !misc.size() )
-		ch->Send( "No items matched your search request.\r\n" );
+		ch->send( "No items matched your search request.\r\n" );
 	else
 	{
 		if ( armor.size() )

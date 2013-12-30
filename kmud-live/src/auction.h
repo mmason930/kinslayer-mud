@@ -24,7 +24,7 @@ public:
 	static AuctionManager &GetManager();
 	void Free();
 	void Boot();
-	void Save();
+	void save();
 	
 	Auction *BootOneAuction( sql::Row MyRow );
 	Auction *GetAuction( const int _vnum );
@@ -86,6 +86,6 @@ public:
 	std::vector< AuctionItem* > loadMyBids(Descriptor *d, class AuctionData *ad);
 	std::vector< AuctionItem* > loadMyAuctions(Descriptor *d, class AuctionData *ad);
 
-	void Save();
+	void save();
 };
 

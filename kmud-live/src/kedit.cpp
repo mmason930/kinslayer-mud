@@ -157,14 +157,14 @@ ACMD(do_klist)
 		}
 		else
 		{
-			ch->Send("Usage: klist [{\"all\" | <start kit #>} [<end kit #>]]\r\n");
+			ch->send("Usage: klist [{\"all\" | <start kit #>} [<end kit #>]]\r\n");
 			return;
 		}
 	}
 
 	if (lo < 0 || hi < 0 || lo > 99999 || hi > 99999 || lo > hi)
 	{
-		ch->Send("Usage: klist [{\"all\" | <start kit #>} [<end kit #>]]\r\n");
+		ch->send("Usage: klist [{\"all\" | <start kit #>} [<end kit #>]]\r\n");
 		return;
 	}
 
@@ -175,7 +175,7 @@ ACMD(do_klist)
 	}
 
 	if (!found)
-		ch->Send("No kits were found in those parameters.\r\n");
+		ch->send("No kits were found in those parameters.\r\n");
 
 	else if (ch->desc)
 		page_string(ch->desc, buf2, 1);
@@ -183,18 +183,18 @@ ACMD(do_klist)
 
 void kedit_disp_inventory_menu( Descriptor *d )
 {
-	d->Send("----- Inventory -----\r\n\r\n");
+	d->send("----- Inventory -----\r\n\r\n");
 	get_char_cols(d->character);
 	OLC_VAL(d) = 1;
 
 	unsigned int i = 0;
 	for( std::vector<KitItem>::iterator kIter = d->olc->kit->KitInventory.begin();kIter != d->olc->kit->KitInventory.end();++kIter )
 	{
-		d->Send("%s%2d%s) [%s%3d%s%%] [%s%6d%s] %s%s%s\r\n", grn, ++i, nrm, cyn, (*kIter).GetPercent(), nrm,
+		d->send("%s%2d%s) [%s%3d%s%%] [%s%6d%s] %s%s%s\r\n", grn, ++i, nrm, cyn, (*kIter).GetPercent(), nrm,
 			grn, (*kIter).GetItemVnum(), nrm, yel, obj_proto[ (*kIter).GetItemRnum() ]->short_description, nrm );
 	}
-	d->SendRaw("\r\n");
-	d->Send("%sA%s) Add Item\r\n"
+	d->sendRaw("\r\n");
+	d->send("%sA%s) Add Item\r\n"
 			"%sD%s) Delete Item\r\n"
 			"%sQ%s) Quit\r\n", grn, nrm, grn, nrm, grn, nrm);
 
@@ -247,7 +247,7 @@ void kedit_disp_menu(Descriptor *d)
 
 	strcat(buf, buf2);
 
-	d->Send("%s", buf);
+	d->send("%s", buf);
 
 	OLC_MODE(d) = KEDIT_MAIN_MENU;
 
@@ -293,7 +293,7 @@ void kedit_parse(Descriptor *d, char *arg)
 				case 'q':
 					if (OLC_VAL(d))
 					{
-						d->Send("Do you wish to save this kit? : ");
+						d->send("Do you wish to save this kit? : ");
 						OLC_MODE(d) = KEDIT_CONFIRM_SAVESTRING;
 					}
 					else
@@ -303,7 +303,7 @@ void kedit_parse(Descriptor *d, char *arg)
 
 				case 'N':
 				case 'n':
-					d->Send("Enter kit name:-\r\n]");
+					d->send("Enter kit name:-\r\n]");
 					OLC_MODE(d) = KEDIT_NAME;
 					return;
 				case 'I':
@@ -343,12 +343,12 @@ void kedit_parse(Descriptor *d, char *arg)
 					//Galnor - 3-29-2005 Toggle delete for kit.
 					if(OLC_KIT(d)->deleted)
 					{
-						d->Send("This kit will no longer be deleted when the game reboots.\r\n");
+						d->send("This kit will no longer be deleted when the game reboots.\r\n");
 						OLC_KIT(d)->deleted = false;
 					}
 					else
 					{
-						d->Send("This kit will be deleted when the game reboots.\r\n");
+						d->send("This kit will be deleted when the game reboots.\r\n");
 						OLC_KIT(d)->deleted = true;
 					}
 
@@ -364,7 +364,7 @@ void kedit_parse(Descriptor *d, char *arg)
 
 						if (pos < 0 || pos >= NUM_WEARS)
 						{
-							d->Send("Invalid position!\r\n");
+							d->send("Invalid position!\r\n");
 							break;
 						}
 						int rnum = OLC_KIT(d)->KitItems[OLC_KNUM(d)][pos].GetItemRnum();
@@ -377,8 +377,8 @@ void kedit_parse(Descriptor *d, char *arg)
 								? obj_proto[rnum]->short_description : "Nothing."), nrm
 						       );
 
-						d->Send("%s", buf);
-						d->Send("Enter object vnum (0 for Nothing) : ");
+						d->send("%s", buf);
+						d->send("Enter object vnum (0 for Nothing) : ");
 
 						// WARNING:  The below is a hack.  It saves (NUM_WEARS * 3) + 3 lines of code at the minimum.
 						// Well, not + 3 anymore because of these two comments and the one-line hack.  :p  Serai.
@@ -388,7 +388,7 @@ void kedit_parse(Descriptor *d, char *arg)
 						return;
 					}
 					// Will break out to the kedit_disp_menu() at the end of kedit_parse()
-					d->Send("Invalid option!\r\n");
+					d->send("Invalid option!\r\n");
 					break;
 				}
 			}
@@ -398,7 +398,7 @@ void kedit_parse(Descriptor *d, char *arg)
 		{
 			if( !MiscUtil::isNumber( arg ) )
 			{
-				d->Send("Your input must be numeric or 'Q' to quit.\r\nTry again : ");
+				d->send("Your input must be numeric or 'Q' to quit.\r\nTry again : ");
 				return;
 			}
 			if( toupper( arg[0] ) == 'Q' )
@@ -410,11 +410,11 @@ void kedit_parse(Descriptor *d, char *arg)
 			int iVnum = atoi( arg );
 			if( real_object( iVnum ) == -1 )
 			{
-				d->Send("That item does not exist.\r\nTry again: ");
+				d->send("That item does not exist.\r\nTry again: ");
 				return;
 			}
 			d->olc->value2 = iVnum;
-			d->Send("Percent chance to load object : ");
+			d->send("Percent chance to load object : ");
 			OLC_MODE( d ) = KEDIT_ITEM_PERCENT;
 			return;
 		}
@@ -422,7 +422,7 @@ void kedit_parse(Descriptor *d, char *arg)
 		{
 			if( !MiscUtil::isNumber( arg ) )
 			{
-				d->Send("Your input must be numeric or 'Q' to quit.\r\nTry again : ");
+				d->send("Your input must be numeric or 'Q' to quit.\r\nTry again : ");
 				return;
 			}
 			if( toupper( arg[0] ) == 'Q' )
@@ -437,7 +437,7 @@ void kedit_parse(Descriptor *d, char *arg)
 			if( vIndex < 0 )
 				vIndex = 0;
 			d->olc->value = vIndex;
-			d->Send("Enter the vnum of the item you'd like to load : ");
+			d->send("Enter the vnum of the item you'd like to load : ");
 			OLC_MODE( d ) = KEDIT_ITEM_VNUM_INVENTORY;
 			return;
 		}
@@ -445,7 +445,7 @@ void kedit_parse(Descriptor *d, char *arg)
 		{
 			if( !MiscUtil::isNumber( arg ) )
 			{
-				d->Send("Your input must be numeric or 'Q' to quit.\r\nTry again : ");
+				d->send("Your input must be numeric or 'Q' to quit.\r\nTry again : ");
 				return;
 			}
 			if( toupper( arg[0] ) == 'Q' )
@@ -456,7 +456,7 @@ void kedit_parse(Descriptor *d, char *arg)
 			int vIndex = atoi(arg)-1;
 			if( vIndex >= d->olc->kit->KitInventory.size() || vIndex < 0 )
 			{
-				d->Send("That item isn't on the list.\r\nTry again, or choose 'Q' to quit : ");
+				d->send("That item isn't on the list.\r\nTry again, or choose 'Q' to quit : ");
 				return;
 			}
 			d->olc->kit->KitInventory.erase( d->olc->kit->KitInventory.begin() + vIndex );
@@ -466,12 +466,12 @@ void kedit_parse(Descriptor *d, char *arg)
 		case KEDIT_INVENTORY:
 		{
 			if( toupper(arg[0]) == 'A' ) {
-				d->Send("Where on thie list do you want to place this item : ");
+				d->send("Where on thie list do you want to place this item : ");
 				OLC_MODE( d ) = KEDIT_ADD_ITEM_POS;
 				return;
 			}
 			else if( toupper(arg[0]) == 'D' ) {
-				d->Send("Which item would you like to delete : ");
+				d->send("Which item would you like to delete : ");
 				OLC_MODE( d ) = KEDIT_DELETE_ITEM;
 				return;
 			}
@@ -481,7 +481,7 @@ void kedit_parse(Descriptor *d, char *arg)
 				return;
 			}
 			else {
-				d->Send("Invalid option.\r\nTry again : ");
+				d->send("Invalid option.\r\nTry again : ");
 				return;
 			}
 			break;
@@ -490,7 +490,7 @@ void kedit_parse(Descriptor *d, char *arg)
 		case KEDIT_ITEM_PERCENT:
 			if (!IsNumber(arg))
 			{
-				d->Send("Must be a numeric value, try again : ");
+				d->send("Must be a numeric value, try again : ");
 				return;
 			}
 
@@ -498,7 +498,7 @@ void kedit_parse(Descriptor *d, char *arg)
 
 			if (pos < 0 || pos > 100)
 			{
-				d->Send("Must be from 0 to 100 : ");
+				d->send("Must be from 0 to 100 : ");
 				return;
 			}
 
@@ -531,7 +531,7 @@ void kedit_parse(Descriptor *d, char *arg)
 			{
 				case 'Y':
 				case 'y':
-					d->olc->kit->Save();
+					d->olc->kit->save();
 					kedit_save_internally(d);
 					/* fall through */
 
@@ -541,7 +541,7 @@ void kedit_parse(Descriptor *d, char *arg)
 					return;
 
 				default:
-					d->Send("Invalid option!\r\nDo you wish to save this kit? : ");
+					d->send("Invalid option!\r\nDo you wish to save this kit? : ");
 					return;
 			}
 
@@ -580,7 +580,7 @@ void kedit_parse(Descriptor *d, char *arg)
 		case KEDIT_WEAR_FEET:
 			if (!IsNumber(arg))
 			{
-				d->Send("Must be a numeric value, try again : ");
+				d->send("Must be a numeric value, try again : ");
 				return;
 			}
 
@@ -602,7 +602,7 @@ void kedit_parse(Descriptor *d, char *arg)
 			{
 				if (!CAN_WEAR(obj_proto[pos], wear_bitvectors[OLC_POS(d)]))
 				{
-					d->Send("That object can't be worn in this position, try again : ");
+					d->send("That object can't be worn in this position, try again : ");
 					return;
 				}
 
@@ -610,7 +610,7 @@ void kedit_parse(Descriptor *d, char *arg)
 				{
 					if (GET_OBJ_TYPE(obj_proto[pos]) != ITEM_LIGHT)
 					{
-						d->Send("That object can't be used as a light, try again : ");
+						d->send("That object can't be used as a light, try again : ");
 						return;
 					}
 				}
@@ -620,7 +620,7 @@ void kedit_parse(Descriptor *d, char *arg)
 					// From Act.item.cpp
 					if (!CAN_WEAR(obj_proto[pos], ITEM_WEAR_HOLD) && GET_OBJ_TYPE(obj_proto[pos]) != ITEM_POTION)
 					{
-						d->Send("That object can't be held, try again : ");
+						d->send("That object can't be held, try again : ");
 						return;
 					}
 				}
@@ -634,13 +634,13 @@ void kedit_parse(Descriptor *d, char *arg)
 
 				// Lets load items on percent
 				OLC_MODE(d) = KEDIT_ITEM_PERCENT;
-				d->Send("Percent chance to load object : ");
+				d->send("Percent chance to load object : ");
 
 				return;
 			}
 			else
 			{
-				d->Send("That object does not exist, try again : ");
+				d->send("That object does not exist, try again : ");
 				return;
 			}
 
@@ -676,7 +676,7 @@ void kedit_save_internally(Descriptor *d)
 	}
 }
 
-void Kit::Save()
+void Kit::save()
 {
 	std::stringstream Query;
 

@@ -94,7 +94,7 @@ void affect_update(void)
 				{
 					std::string WearOffMsg = weave->getAttribute("WearOffMsg");
 					if( WearOffMsg != "<None>" )
-						i->Send("%s\r\n", WearOffMsg.c_str());
+						i->send("%s\r\n", WearOffMsg.c_str());
 					if( af->bitvector == AFF_INSANE )
 						i->points.temp_taint = 0;
 				}
@@ -227,7 +227,7 @@ void mag_affects(Character *ch, Character *victim, int spellnum)
 	{
 		if (MOB_FLAGGED(victim,MOB_NOBLIND) || WeaveManager::GetManager().SavingRoll(ch, victim) )
 		{
-			ch->Send("You fail to blind %s.\r\n", GET_NAME(victim));
+			ch->send("You fail to blind %s.\r\n", GET_NAME(victim));
 			return;
 		}
 	}
@@ -236,7 +236,7 @@ void mag_affects(Character *ch, Character *victim, int spellnum)
 		if(!victim->ChannelingAbility() || WeaveManager::GetManager().SavingRoll(ch, victim) ||
 			(AFF_FLAGGED(victim, AFF_SHIELD) || ShieldManager::GetManager().ShieldedBy(victim) != NULL) )
 		{
-			ch->Send("You fail to cut %s off from the True Source.\r\n", GET_NAME(victim));
+			ch->send("You fail to cut %s off from the True Source.\r\n", GET_NAME(victim));
 			return;
 		}
 
@@ -257,12 +257,12 @@ void mag_affects(Character *ch, Character *victim, int spellnum)
 
 		if(FIGHTING(victim))
 		{
-			ch->Send("%s is fighting... You might hit the wrong target!\r\n");
+			ch->send("%s is fighting... You might hit the wrong target!\r\n");
 			return;
 		}
 		if (MOB_FLAGGED(victim, MOB_NOSLEEP) || WeaveManager::GetManager().SavingRoll(ch, victim))
 		{
-			ch->Send("You fail to put %s to sleep.\r\n", GET_NAME(victim));
+			ch->send("You fail to put %s to sleep.\r\n", GET_NAME(victim));
 			return;
 		}
 
@@ -343,7 +343,7 @@ void mag_affects(Character *ch, Character *victim, int spellnum)
 		for (i = 0; i < MAX_SPELL_AFFECTS; ++i)
 			if (AFF_FLAGGED(victim, af[i].bitvector))
 			{
-				ch->Send(NOEFFECT);
+				ch->send(NOEFFECT);
 				return;
 			}
 
@@ -354,7 +354,7 @@ void mag_affects(Character *ch, Character *victim, int spellnum)
 
 	if (affected_by_spell(victim,spellnum) && !(accum_duration||accum_affect))
 	{
-		ch->Send(NOEFFECT);
+		ch->send(NOEFFECT);
 		return;
 	}
 
@@ -504,7 +504,7 @@ void mag_points(Character * ch, Character * victim, int spellnum)
 
 	if (victim == ch)
 	{
-		ch->Send("You can't heal yourself!\r\n");
+		ch->send("You can't heal yourself!\r\n");
 		return;
 	}
 
@@ -569,7 +569,7 @@ void mag_unaffects(Character * ch, Character * victim, int spellnum)
 
 	if ( !AFF_FLAGGED(victim, aff) )
 	{
-		ch->Send(NOEFFECT);
+		ch->send(NOEFFECT);
 		return;
 	}
 
@@ -613,7 +613,7 @@ void mag_alter_objs(Character * ch, Object * obj, int spellnum)
 	}
 
 	if (to_char == NULL)
-		ch->Send(NOEFFECT);
+		ch->send(NOEFFECT);
 
 	else
 		Act(to_char, TRUE, ch, obj, 0, TO_CHAR);
@@ -649,13 +649,13 @@ void mag_creations(Character * ch, int spellnum)
 	}
 	else
 	{
-		ch->Send("Spell unimplemented, it would seem.\r\n");
+		ch->send("Spell unimplemented, it would seem.\r\n");
 		return;
 	}
 
 	if (!(tobj = read_object(z, VIRTUAL, true)))
 	{
-		ch->Send("I seem to have goofed.\r\n");
+		ch->send("I seem to have goofed.\r\n");
 		Log("SYSERR: spell_creations, spell %d, obj %d: obj not found",
 		    spellnum, z);
 		return;
@@ -666,11 +666,10 @@ void mag_creations(Character * ch, int spellnum)
 	obj_to_char(tobj, ch);
 	Act("$n creates $p.", FALSE, ch, tobj, 0, TO_ROOM);
 	Act("You create $p.", FALSE, ch, tobj, 0, TO_CHAR);
-#ifdef KINSLAYER_JAVASCRIPT
+	
 	if( !tobj->IsPurged() ) {
 		js_load_triggers(tobj);
 	}
-#endif
 }
 
 void Character::KillAllGates()
@@ -690,24 +689,24 @@ ACMD(do_untie)
 
 	if(!*arg)
 	{
-		ch->Send("Currently tied to you: \r\n");
+		ch->send("Currently tied to you: \r\n");
 		std::list<Gate*> TempGateList = GateManager::GetManager().GetGatesByCreator(ch);
 
 		n = 1;
 		for(std::list<Gate*>::iterator gIter = TempGateList.begin();gIter != TempGateList.end();++gIter, ++n)
 		{
 			anything_tied = true;
-			ch->Send("%d) a gate\r\n", n);
+			ch->send("%d) a gate\r\n", n);
 		}
 		if( anything_tied == false )
-			ch->Send("...Nothing is tied to you...\r\n");
+			ch->send("...Nothing is tied to you...\r\n");
 		else
-			ch->Send("\r\nIf you wish to untie something, type: untie <item> <number>\r\n");
+			ch->send("\r\nIf you wish to untie something, type: untie <item> <number>\r\n");
 		return;
 	}
 	if(!*arg2)
 	{
-		ch->Send("Which do you wish to untie? Supply a number or \"all\".\r\n");
+		ch->send("Which do you wish to untie? Supply a number or \"all\".\r\n");
 		return;
 	}
 
@@ -717,7 +716,7 @@ ACMD(do_untie)
 		n = -1;
 	else
 	{
-		ch->Send("You must supply a number or \"all\" when untying something.\r\n");
+		ch->send("You must supply a number or \"all\" when untying something.\r\n");
 		return;
 	}
 
@@ -734,17 +733,17 @@ ACMD(do_untie)
 				{
 					(*g)->Close();
 					delete (*g);
-					ch->Send("Successfully untied.\r\n");
+					ch->send("Successfully untied.\r\n");
 					untie = true;
 					break;
 				}
 			}
 			if(!untie)//Gate was not found.
-				ch->Send("Which gate is that?\r\n");
+				ch->send("Which gate is that?\r\n");
 		}
 	}
 	else
-		ch->Send("You can untie the following: Gate");
+		ch->send("You can untie the following: Gate");
 }
 
 void DisplayWeaveMessages(Weave *weave, Character *ch, Character *victim)
@@ -899,7 +898,7 @@ int PerformPeriodicEffects(Character *ch, affected_type *af)
 	if( af->bitvector == AFF_INSANE )
 	{
 		ch->points.temp_taint -= abs(atoi(WeaveManager::GetManager().GetWeave("Insanity")->getAttribute("InitTaint").c_str()) - ch->points.taint) / (atoi(WeaveManager::GetManager().GetWeave("Insanity")->getAttribute("Duration").c_str()) + 1);
-		ch->Send("You feel a bit more sane.\r\n");
+		ch->send("You feel a bit more sane.\r\n");
 	}
 	return rv;//-1 is ch has died.
 }

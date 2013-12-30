@@ -30,7 +30,7 @@ ACMD(do_wedit)
 	{
 		if(STATE(d) == CON_WEDIT)
 		{
-			ch->Send("%s is currently editing the warrants.\r\n", GET_NAME(d->character));
+			ch->send("%s is currently editing the warrants.\r\n", GET_NAME(d->character));
 			return;
 		}
 	}
@@ -110,15 +110,15 @@ void WeditDispMenu(Descriptor *d)
 	std::list<Warrant *>::iterator iter;
 	get_char_cols(d->character);
 
-	d->Send("--Warrant Edit Main Menu--\r\n");
-	d->Send("\r\nCurrent warrants:\r\n");
+	d->send("--Warrant Edit Main Menu--\r\n");
+	d->send("\r\nCurrent warrants:\r\n");
 
 	for(iter = d->olc->WarrantList.begin();iter != d->olc->WarrantList.end();++iter)
 	{
-		d->Send("%s%d. %s%s\r\n", grn, (*iter)->vnum, cyn, (*iter)->Name.c_str());
+		d->send("%s%d. %s%s\r\n", grn, (*iter)->vnum, cyn, (*iter)->Name.c_str());
 	}
 
-	d->Send(
+	d->send(
 	    "------------------ Options ------------------\r\n"
 	    "%sN%s) New Warrant     %sD%s) Delete Warrant\r\n"
 	    "%sE%s) Edit Warrant    %sQ%s) Exit Editor\r\n",
@@ -137,73 +137,73 @@ void WeditParse(Descriptor *d, const std::string &arg)
 			switch(toupper(arg[0]))
 			{
 				case 'Q':
-					d->Send("Would you like to save your changes? 'Y' for yes, 'N' for no : ");
+					d->send("Would you like to save your changes? 'Y' for yes, 'N' for no : ");
 					OLC_MODE(d) = WEDIT_CONFIRM_SAVE;
 					return;
 				case 'N':
-					d->Send("Enter the number for this warrant : ");
+					d->send("Enter the number for this warrant : ");
 					OLC_MODE(d) = WEDIT_NEW_NUMBER;
 					return;
 				case 'D':
 					if(!(d->olc->WarrantList.size()))
 					{
-						d->Send("There are no warrants to delete.\r\n");
+						d->send("There are no warrants to delete.\r\n");
 						return;
 					}
-					d->Send("Enter the number for the warrant you wish to delete : ");
+					d->send("Enter the number for the warrant you wish to delete : ");
 					OLC_MODE(d) = WEDIT_DELETE_NUMBER;
 					return;
 				case 'E':
-					d->Send("Enter the number for the warrant you wish to edit : ");
+					d->send("Enter the number for the warrant you wish to edit : ");
 					OLC_MODE(d) = WEDIT_EDIT_NUMBER;
 					return;
 				default:
-					d->Send("Invalid option. Try again : ");
+					d->send("Invalid option. Try again : ");
 					return;
 			}
 		case WEDIT_CONFIRM_SAVE:
 			switch(toupper(arg[0]))
 			{
 				case 'Y':
-					d->Send("Saving warrants...\r\n");
+					d->send("Saving warrants...\r\n");
 					d->olc->WarrantList.swap(Warrants);
 					SaveWarrants();
 					cleanup_olc(d, CLEANUP_ALL);
 					return;
 				case 'N':
-					d->Send("Exited without saving.\r\n");
+					d->send("Exited without saving.\r\n");
 					cleanup_olc(d, CLEANUP_ALL);
 					return;
 				default:
-					d->Send("You must specify 'Y' or 'N' for saving.\r\n");
+					d->send("You must specify 'Y' or 'N' for saving.\r\n");
 					return;
 			}
 		case WEDIT_NEW_NUMBER:
 			if(WarrantByVnum(d->olc->WarrantList, num))
 			{
-				d->Send("A warrant with that virtual number already exists. Try again : ");
+				d->send("A warrant with that virtual number already exists. Try again : ");
 				return;
 			}
 			if(num <= 0)
 			{
-				d->Send("Must specify virtual number above zero. Try again : ");
+				d->send("Must specify virtual number above zero. Try again : ");
 				return;
 			}
 			OLC_WARRANT(d) = new Warrant;
 			d->olc->warrant->vnum = num;
 			d->olc->warrant->Insert(d->olc->WarrantList);
 
-			d->Send("Enter the name for this new warrant : ");
+			d->send("Enter the name for this new warrant : ");
 			OLC_MODE(d) = WEDIT_NEW_NAME;
 			return;
 		case WEDIT_NEW_NAME:
 			d->olc->warrant->Name = arg;
-			d->Send("New warrant created.\r\n");
+			d->send("New warrant created.\r\n");
 			break;
 		case WEDIT_DELETE_NUMBER:
 			if(!(d->olc->warrant = WarrantByVnum(d->olc->WarrantList, num)))
 			{
-				d->Send("There is no warrant with that number. Try again : ");
+				d->send("There is no warrant with that number. Try again : ");
 				return;
 			}
 
@@ -213,7 +213,7 @@ void WeditParse(Descriptor *d, const std::string &arg)
 		case WEDIT_EDIT_NUMBER:
 			if(!(d->olc->warrant = WarrantByVnum(d->olc->WarrantList, num)))
 			{
-				d->Send("There is no warrant with that number. Try again : ");
+				d->send("There is no warrant with that number. Try again : ");
 				return;
 			}
 
@@ -223,11 +223,11 @@ void WeditParse(Descriptor *d, const std::string &arg)
 			d->olc->warrant->vnum = num;
 			d->olc->warrant->Insert(d->olc->WarrantList);
 
-			d->Send("Enter the new name for this warrant : ");
+			d->send("Enter the new name for this warrant : ");
 			OLC_MODE(d) = WEDIT_NEW_NAME;
 			return;
 		default:
-			d->Send("Illegal wedit mode of %d. Please report this.\r\n");
+			d->send("Illegal wedit mode of %d. Please report this.\r\n");
 			MudLog(BRF, MAX(GET_INVIS_LEV(d->character), LVL_APPR), TRUE, "%s has illegal wedit state of %d.", GET_NAME(d->character), OLC_MODE(d));
 			cleanup_olc(d, CLEANUP_ALL);
 			return;

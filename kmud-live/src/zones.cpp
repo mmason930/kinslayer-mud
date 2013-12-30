@@ -12,7 +12,7 @@
 #include "weather.h"
 #include "js.h"
 
-boost::recursive_mutex ZoneManager::SingletonMutex;
+std::recursive_mutex ZoneManager::SingletonMutex;
 extern Index *obj_index;
 void add_follower(Character * ch, Character * leader);
 int perform_group( Character *ch, Character *vict );
@@ -216,11 +216,9 @@ void Zone::Reset()
 						add_follower(mob, fol);
 						perform_group(fol, mob);
 					}
-#ifdef KINSLAYER_JAVASCRIPT
 					if( !mob->IsPurged() ) {
 						js_load_triggers(mob);
 					}
-#endif
 				}
 				else
 				{
@@ -246,11 +244,10 @@ void Zone::Reset()
 
 						if(IS_OBJ_STAT(obj, ITEM_CHEST))
 							obj->loadItems();
-#ifdef KINSLAYER_JAVASCRIPT
-					if( !obj->IsPurged() ) {
-						js_load_triggers(obj);
-					}
-#endif
+
+						if( !obj->IsPurged() ) {
+							js_load_triggers(obj);
+						}
 						last_cmd = 1;
 						obj_load = TRUE;
 					}
@@ -292,11 +289,11 @@ void Zone::Reset()
 					obj = read_object(cmd[cmd_no]->arg1, REAL, true);
 
 					obj_to_obj(obj, obj_to);
-#ifdef KINSLAYER_JAVASCRIPT
+
 					if( !obj->IsPurged() ) {
 						js_load_triggers(obj);
 					}
-#endif
+
 					last_cmd = 1;
 				}
 				else
@@ -324,11 +321,11 @@ void Zone::Reset()
 					obj = read_object(cmd[cmd_no]->arg1, REAL, true);
 					sprintf(obj->creator, "zone load -inventory- on mob %d", mob->nr);
 					obj_to_char(obj, mob);
-#ifdef KINSLAYER_JAVASCRIPT
+
 					if( !obj->IsPurged() ) {
 						js_load_triggers(obj);
 					}
-#endif
+
 					last_cmd = 1;
 				}
 				else
@@ -359,11 +356,11 @@ void Zone::Reset()
 						{
 							sprintf(obj->creator, "zone load -equip- on mob %d", mob->nr);
 							equip_char(mob, obj, cmd[cmd_no]->arg3);
-#ifdef KINSLAYER_JAVASCRIPT
+
 							if( !obj->IsPurged() ) {
 								js_load_triggers(obj);
 							}
-#endif
+
 							last_cmd = 1;
 						}
 					}
@@ -425,9 +422,7 @@ void Zone::Reset()
 
 		if (room_rnum != NOWHERE)
 		{
-#ifdef KINSLAYER_JAVASCRIPT
 			js_zone_reset(World[room_rnum]);
-#endif
 		}
 		++room_vnum;
 	}
@@ -473,7 +468,7 @@ void ZoneManager::SaveZones()
 {
 	for(unsigned int i = 0;i < ZoneList.size();++i)
 	{
-		ZoneList[i]->Save();
+		ZoneList[i]->save();
 	}
 }
 void ZoneManager::Free()
@@ -482,7 +477,7 @@ void ZoneManager::Free()
 		delete Self;
 }
 
-void Zone::Save()
+void Zone::save()
 {
 	std::stringstream Query, DeleteQuery;
 
@@ -587,20 +582,21 @@ ZoneManager *ZoneManager::Self = NULL;
 ZoneManager::~ZoneManager()
 {
 	{
-		boost::recursive_mutex::scoped_lock lock( this->ZoneListMutex );
+		std::lock_guard< std::recursive_mutex > lock(this->ZoneListMutex);
 		for( unsigned int i = 0;i < ZoneList.size();++i )
 		{
 			delete ZoneList[i];
 		}
 	}
 	{
-		boost::recursive_mutex::scoped_lock lock( ZoneManager::SingletonMutex );
-		Self = NULL;
+	
+	std::lock_guard<std::recursive_mutex > lock(ZoneManager::SingletonMutex);
+	Self = NULL;
 	}
 }
 ZoneManager &ZoneManager::GetManager()
 {
-	boost::recursive_mutex::scoped_lock lock( ZoneManager::SingletonMutex );
+	std::lock_guard<std::recursive_mutex > lock(ZoneManager::SingletonMutex);
 	if( !Self ) Self = new ZoneManager();
 	return (*Self);
 }
@@ -608,7 +604,7 @@ ZoneManager &ZoneManager::GetManager()
 
 Zone *ZoneManager::AddNewZone( const unsigned int vnum )
 {
-	boost::recursive_mutex::scoped_lock lock( this->ZoneListMutex );
+	std::lock_guard<std::recursive_mutex > lock(this->ZoneListMutex);
 	std::vector< Zone * >::iterator zIter;
 	for( zIter = ZoneList.begin();zIter != ZoneList.end();++zIter )
 	{
@@ -628,7 +624,7 @@ Zone *ZoneManager::AddNewZone( const unsigned int vnum )
 
 Zone *ZoneManager::GetZoneByVnum( const unsigned int vnum )
 {
-	boost::recursive_mutex::scoped_lock lock( this->ZoneListMutex );
+	std::lock_guard<std::recursive_mutex > lock(this->ZoneListMutex);
 	for(unsigned int i = 0;i < ZoneList.size();++i)
 	{
 		if( ZoneList[i]->getVnum() == vnum )
@@ -638,12 +634,12 @@ Zone *ZoneManager::GetZoneByVnum( const unsigned int vnum )
 }
 Zone *ZoneManager::GetZoneByRnum( const unsigned int rnum )
 {
-	boost::recursive_mutex::scoped_lock lock( this->ZoneListMutex );
+	std::lock_guard<std::recursive_mutex > lock(this->ZoneListMutex);
 	return (rnum >= 0 && rnum < ZoneList.size()) ? (ZoneList[rnum]) : (NULL);
 }
 Zone *ZoneManager::GetZoneByRoomVnum( const unsigned int rvnum )
 {
-	boost::recursive_mutex::scoped_lock lock( this->ZoneListMutex );
+	std::lock_guard<std::recursive_mutex > lock(this->ZoneListMutex);
 	for( unsigned int i = 0;i < ZoneList.size();++i )
 	{
 		if( rvnum >= ZoneList[i]->GetBottom() && rvnum <= ZoneList[i]->GetTop() )
@@ -653,12 +649,12 @@ Zone *ZoneManager::GetZoneByRoomVnum( const unsigned int rvnum )
 }
 const size_t ZoneManager::NumZones()
 {
-	boost::recursive_mutex::scoped_lock lock( this->ZoneListMutex );
+	std::lock_guard<std::recursive_mutex > lock(this->ZoneListMutex);
 	return ZoneList.size();
 }
 void ZoneManager::RenumberZones()
 {
-	boost::recursive_mutex::scoped_lock lock( this->ZoneListMutex );
+	std::lock_guard<std::recursive_mutex > lock(this->ZoneListMutex);
 	for(unsigned int i = 0;i < NumZones();++i)
 		ZoneList[i]->SetRnum(i);
 }
@@ -749,7 +745,7 @@ void ZoneManager::BootZones()
 	const int SIZE_OF_THREAD_POOL = 4;
 	int zoneIndexTableSize = 0;
 	sql::Query query;
-	std::list< boost::thread* > threadPool;
+	std::list< std::thread* > threadPool;
 
 	query = gameDatabase->sendQuery("SELECT COUNT(*) AS size FROM zoneIndex;");
 	zoneIndexTableSize = atoi(query->getRow()[ "size" ].c_str());
@@ -761,7 +757,7 @@ void ZoneManager::BootZones()
 	for(int threadNumber = 0;threadNumber < SIZE_OF_THREAD_POOL;++threadNumber)
 	{
 		sql::Connection connection = dbContext->createConnection();
-		threadPool.push_back( new boost::thread( boost::bind( &ZoneManager::LoadThreadedZoneBatch, this, connection, zoneIndexOffset, zoneIndexFetchSize ) ) );
+		threadPool.push_back( new std::thread(&ZoneManager::LoadThreadedZoneBatch, this, connection, zoneIndexOffset, zoneIndexFetchSize) );
 
 		zoneIndexOffset += zoneIndexFetchSize;
 	}

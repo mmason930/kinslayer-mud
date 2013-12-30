@@ -11,8 +11,8 @@
 #ifndef DB_H
 #define DB_H
 
-#include <boost/thread.hpp>
-#include <boost/thread/mutex.hpp>
+#include <thread>
+#include <mutex>
 
 extern std::list< Character * > CharPurgeList;
 extern std::list< Object *    > ObjPurgeList;
@@ -54,11 +54,9 @@ int	CountMobsTotal(int mob_no);
 int	CountObjectsInv(int number, Character *target);
 int	CountObjectsRoom(int number, int room);
 
-#ifdef KINSLAYER_JAVASCRIPT
 extern std::shared_ptr<std::vector<JSTrigger*> > globalJS_Scripts;
 void BootGlobalScripts();
 void SaveGlobalScripts();
-#endif
 
 Room *FindRoomByVnum(unsigned int vnum);
 
@@ -155,7 +153,7 @@ public:
 	BanType GetTypeByString( const std::string &Type );
 
 	void Boot();
-	void Save();
+	void save();
 	void Reload();
 
 	void AddBan( BanElement *MyNewElement );

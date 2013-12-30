@@ -1,7 +1,3 @@
-
-
-#ifdef KINSLAYER_JAVASCRIPT
-
 #include "JSObject.h"
 
 #include "JSCharacter.h"
@@ -115,11 +111,9 @@ flusspferd::value JSObject::load_obj( const int vnum )
 
 	obj_to_obj(obj,real);
 
-#ifdef KINSLAYER_JAVASCRIPT
 	if( !obj->IsPurged() ) {
 		js_load_triggers(obj);
 	}
-#endif
 
 	return lookupValue(obj);
 }
@@ -350,5 +344,3 @@ flusspferd::array JSObject::getAffects()
 
 	return a;
 }
-
-#endif

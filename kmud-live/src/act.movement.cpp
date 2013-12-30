@@ -239,7 +239,7 @@ int fade_distance(Character *ch)
 
 void perform_actual_fade(Character *ch, Room *room)
 {
-	ch->Send("You reach out for the shadows as they surround you completely.\r\n");
+	ch->send("You reach out for the shadows as they surround you completely.\r\n");
 	Act("$n is surrounded by shadows and vanishes.", TRUE, ch, 0, 0, TO_ROOM);
 
 	ch->RemoveFromRoom();
@@ -271,19 +271,19 @@ ACMD(do_sense)
 	{
 		if(!IS_FADE(ch))
 		{
-			ch->Send("Sense?! What?! You want to sense something?\r\n");
+			ch->send("Sense?! What?! You want to sense something?\r\n");
 			return;
 		}
 
 		if(GET_LEVEL(ch) >= LVL_IMMORT && GET_LEVEL(ch) <= LVL_GRGOD)
 		{
-			ch->Send("Should you be trying this?\r\n");
+			ch->send("Should you be trying this?\r\n");
 			return;
 		}
 
 		if(ROOM_FLAGGED(ch->in_room, ROOM_NOPORT))
 		{
-			ch->Send("You try with all of your might, but you can't seem to sense the shadows here.\r\n");
+			ch->send("You try with all of your might, but you can't seem to sense the shadows here.\r\n");
 			return;
 		}
 
@@ -298,11 +298,11 @@ ACMD(do_sense)
 		{
 			if(!IS_DARK(ch->in_room))
 			{
-				ch->Send("There is no darkness to sense here.\r\n");
+				ch->send("There is no darkness to sense here.\r\n");
 				return;
 			}
 
-			ch->Send("This room: [%s%s%s]\r\n", COLOR_GREEN(ch, CL_COMPLETE),
+			ch->send("This room: [%s%s%s]\r\n", COLOR_GREEN(ch, CL_COMPLETE),
 			         ch->in_room->FadeCode().c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
 		}
 	}
@@ -321,25 +321,25 @@ ACMD(do_fade)
 
 	if(!IS_FADE(ch))
 	{
-		ch->Send("Do you really think you can reach for the shadows?\r\n");
+		ch->send("Do you really think you can reach for the shadows?\r\n");
 		return;
 	}
 
 	if(!IS_DARK(ch->in_room) || ROOM_FLAGGED(ch->in_room, ROOM_NOPORT))
 	{
-		ch->Send("There are no shadows to reach out to.\r\n");
+		ch->send("There are no shadows to reach out to.\r\n");
 		return;
 	}
 
 	if(!*arg)
 	{
-		ch->Send("Where is it you want the shadows to take you?\r\n");
+		ch->send("Where is it you want the shadows to take you?\r\n");
 		return;
 	}
 
 	if(MOUNT(ch))
 	{
-		ch->Send("You can't do this while mounted!\r\n");
+		ch->send("You can't do this while mounted!\r\n");
 		return;
 	}
 
@@ -362,14 +362,14 @@ ACMD(do_fade)
 	//		GET_SHADOW(ch) -= 10;
 	//	}
 	//	else
-	//		ch->Send("But you aren't leading a mount!\r\n");
+	//		ch->send("But you aren't leading a mount!\r\n");
 	//}
 	else
 	{
 		// This means the room was either not found, or found and unreachable //
 		if( !(room = FindFadingRoom(arg)) || ROOM_FLAGGED(room, ROOM_NOPORT))
 		{
-			ch->Send("You begin to reach for the shadows, but realize the other end cannot be reached!\r\n");
+			ch->send("You begin to reach for the shadows, but realize the other end cannot be reached!\r\n");
 			return;
 		}
 
@@ -383,20 +383,20 @@ ACMD(do_fade)
 		if(GET_SHADOW(ch) + cost < 0)
 		{
 			GET_SHADOW(ch) = 0;
-			ch->Send("You do not have enough strength to reach out for the shadows.\r\n");
+			ch->send("You do not have enough strength to reach out for the shadows.\r\n");
 			return;
 		}
 
 		if(MiscUtil::random(1, 110) > GET_SKILL(ch, SKILL_FADE))
 		{
-			ch->Send("You pull the shadows towards you and lose control!\r\n");
+			ch->send("You pull the shadows towards you and lose control!\r\n");
 			GET_SHADOW(ch) += cost * .5;
 			return;
 		}
 
 		if(distance > fade_distance(ch))
 		{
-			ch->Send("You cannot control the shadows to pull you so far.\r\n");
+			ch->send("You cannot control the shadows to pull you so far.\r\n");
 //			GET_SHADOW(ch) += cost * .5;
 			return;
 		}
@@ -427,13 +427,13 @@ ACMD(do_compel)
 
 	if(!ch->GetSkillLevel(SKILL_COMPEL) || !IS_FADE(ch))
 	{
-		ch->Send("You have no idea how.\r\n");
+		ch->send("You have no idea how.\r\n");
 		return;
 	}
 
 	if(!*::arg || !(vict = get_char_room_vis(ch, ::arg)))
 	{
-		ch->Send("How can you compel someone who isn't here?\r\n");
+		ch->send("How can you compel someone who isn't here?\r\n");
 		return;
 	}
 
@@ -441,19 +441,19 @@ ACMD(do_compel)
 
 	if(vict->master != ch && GET_POS(vict) != POS_DEAD)
 	{
-		ch->Send("You can only compel those who are following you!\r\n");
+		ch->send("You can only compel those who are following you!\r\n");
 		return;
 	}
 
 	if(FIGHTING(ch))
 	{
-		ch->Send("You are too concerned with your own survival to worry about them!\r\n");
+		ch->send("You are too concerned with your own survival to worry about them!\r\n");
 		return;
 	}
 
 	if(FIGHTING(vict))
 	{
-		ch->Send("You can't get close enough without putting yourself at risk!\r\n");
+		ch->send("You can't get close enough without putting yourself at risk!\r\n");
 		return;
 	}
 	
@@ -502,7 +502,7 @@ int can_move(Character *ch, int dir, int need_specials_check, bool flee)
 	if(GET_DEATH_WAIT(ch) > 0 && ch->in_room == ch->StartRoom())
 	{
 		if( !flee )
-			ch->Send("You must wait %d more minutes to regain strength.\r\n", GET_DEATH_WAIT(ch));
+			ch->send("You must wait %d more minutes to regain strength.\r\n", GET_DEATH_WAIT(ch));
 		return 0;
 	}
 
@@ -512,7 +512,7 @@ int can_move(Character *ch, int dir, int need_specials_check, bool flee)
 	{
 		if (!ch->HasBoat())
 		{
-			ch->Send("You need a boat to go there.\r\n");
+			ch->send("You need a boat to go there.\r\n");
 			return 0;
 		}
 	}
@@ -520,7 +520,7 @@ int can_move(Character *ch, int dir, int need_specials_check, bool flee)
 	if(MOUNT(ch) && SECT(ch->in_room->dir_option[dir]->to_room) == SECT_INSIDE )
 	{
 		if(!flee)
-			ch->Send("You cannot ride in there!\r\n");
+			ch->send("You cannot ride in there!\r\n");
 		return 0;
 	}
 
@@ -528,7 +528,7 @@ int can_move(Character *ch, int dir, int need_specials_check, bool flee)
 		if(!ch->in_room->dir_option[dir]->to_room->GetZone()->CanEdit(ch)
 		&& ch->in_room->dir_option[dir]->to_room->zone != 0)
 		{
-			ch->Send("You must be higher level to leave your zone!\r\n");
+			ch->send("You must be higher level to leave your zone!\r\n");
 			return 0;
 		}
 
@@ -550,7 +550,7 @@ int can_move(Character *ch, int dir, int need_specials_check, bool flee)
 		{
 			if( !flee )
 			{
-				ch->Send("Your mount is too exhausted.\r\n");
+				ch->send("Your mount is too exhausted.\r\n");
 				Act("$N is too exhausted to move $n any further.", FALSE, ch, 0, MOUNT(ch), TO_NOTVICT);
 			}
 			return 0;
@@ -558,14 +558,14 @@ int can_move(Character *ch, int dir, int need_specials_check, bool flee)
 
 		if(GET_POS(MOUNT(ch)) < POS_FIGHTING)
 		{
-			ch->Send("Your mount is unable to move!\r\n");
+			ch->send("Your mount is unable to move!\r\n");
 			Act("$n is unable to move $s mount.", FALSE, ch, 0, 0, TO_ROOM);
 			return 0;
 		}
 
 		if(!flee && GET_POS(MOUNT(ch)) == POS_FIGHTING)
 		{
-			ch->Send("Your mount is currently engaged in combat!\r\n");
+			ch->send("Your mount is currently engaged in combat!\r\n");
 			Act("$n is unable to move $s mount.", FALSE, ch, 0, 0, TO_ROOM);
 			return 0;
 		}
@@ -574,9 +574,9 @@ int can_move(Character *ch, int dir, int need_specials_check, bool flee)
 	if (GET_MOVE(ch) < need_movement && (IS_HORSE(ch) || !IS_NPC(ch)))
 	{
 		if (need_specials_check && ch->master)
-			ch->Send("You are too exhausted to follow.\r\n");
+			ch->send("You are too exhausted to follow.\r\n");
 		else
-			ch->Send("You are too exhausted.\r\n");
+			ch->send("You are too exhausted.\r\n");
 
 		return 0;
 	}
@@ -585,7 +585,7 @@ int can_move(Character *ch, int dir, int need_specials_check, bool flee)
 	if (ROOM_FLAGGED(EXIT(ch, dir)->to_room, ROOM_GODROOM) &&
 	        GET_LEVEL(ch) < LVL_IMMORT)
 	{
-		ch->Send("You aren't godly enough to use that room!\r\n");
+		ch->send("You aren't godly enough to use that room!\r\n");
 		return 0;
 	}
 
@@ -665,17 +665,13 @@ int Character::SimpleMove(int dir, int need_specials_check, bool flee)
 	char mount_message[MAX_STRING_LENGTH];
 
 	was_in = this->in_room;
-#ifdef KINSLAYER_JAVASCRIPT
 	if(this->IsPurged() || !js_leave_triggers(this->in_room, this, dir) || this->IsPurged())
 		return 0;
-#endif
 	//Script moved us! Could cause problems.
 	if(this->in_room != was_in)
 		return 0;
-#ifdef KINSLAYER_JAVASCRIPT
 	if (EXIT(this, dir) && (!js_enter_triggers(EXIT(this, dir)->to_room, this, dir) || this->IsPurged()) )
 		return 0;
-#endif
 	//Script moved us! Could cause problems.
 	if(this->in_room != was_in)
 		return 0;
@@ -733,12 +729,12 @@ int Character::SimpleMove(int dir, int need_specials_check, bool flee)
 
 	//Fade Shadow Sensing
 	if(IS_FADE(this) && IS_DARK(this->in_room))
-		this->Send("%s\r\nYou feel the presence of shadows all around you.%s\r\n", COLOR_RED(this, CL_COMPLETE),
+		this->send("%s\r\nYou feel the presence of shadows all around you.%s\r\n", COLOR_RED(this, CL_COMPLETE),
 		           COLOR_NORMAL(this, CL_COMPLETE));
 
 	if(ROOM_FLAGGED(was_in, ROOM_NOSOURCE) && !ROOM_FLAGGED(this->in_room, ROOM_NOSOURCE) && this->ChannelingAbility())
 	{
-		this->Send("The True Source comes back into sight.\r\n");
+		this->send("The True Source comes back into sight.\r\n");
 	}
 	/***************************/
 
@@ -766,20 +762,20 @@ int perform_move(Character *ch, int dir, int need_specials_check)
 	if (ch == NULL || dir < 0 || dir >= NUM_OF_DIRS || FIGHTING(ch))
 		return 0;
 	else if(ch->PokerData || ch->PokerTable)
-		ch->Send("You must leave the table before you can leave the room.\r\n");
+		ch->send("You must leave the table before you can leave the room.\r\n");
 	else if ((!EXIT(ch, dir) && !buildwalk(ch, dir)) || !EXIT(ch, dir)->to_room)
-		ch->Send("Alas, you cannot go that way...\r\n");
+		ch->send("Alas, you cannot go that way...\r\n");
 	else if( (EXIT(ch, dir)->HiddenLevel() > 0 && EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED))
 	|| EXIT(ch,dir)->IsDisabled())
-		ch->Send("Alas, you cannot go that way...\r\n");
+		ch->send("Alas, you cannot go that way...\r\n");
 	else if (EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED))
 	{
 		if (EXIT(ch, dir)->keyword)
 		{
-			ch->Send("The %s seems to be closed.\r\n", fname(EXIT(ch, dir)->keyword));
+			ch->send("The %s seems to be closed.\r\n", fname(EXIT(ch, dir)->keyword));
 		}
 		else
-			ch->Send("It seems to be closed.\r\n");
+			ch->send("It seems to be closed.\r\n");
 	}
 	else
 	{
@@ -804,7 +800,7 @@ int perform_move(Character *ch, int dir, int need_specials_check)
 			{
 				if(k->follower->timer)
 					k->follower->CancelTimer(true);
-				k->follower->Send("You follow %s.\r\n", GET_NAME(ch));
+				k->follower->send("You follow %s.\r\n", GET_NAME(ch));
 				perform_move(k->follower, dir, 1);
 
 				REMOVE_BIT(PLR_FLAGS(k->follower), Q_BIT(PLR_NOTRACK));
@@ -826,7 +822,7 @@ ACMD(do_lead)
 
 	if(!(target = get_char_room_vis(ch, arg)))
 	{
-		ch->Send("You don't see them here.\r\n");
+		ch->send("You don't see them here.\r\n");
 		return;
 	}
 
@@ -842,7 +838,7 @@ ACMD(do_lead)
 			Act("You are already leading $M.", FALSE, ch, 0, target, TO_CHAR);
 		else
 		{
-			ch->Send("%s is already following %s.\r\n", GET_NAME(target), GET_NAME(target->master));
+			ch->send("%s is already following %s.\r\n", GET_NAME(target), GET_NAME(target->master));
 			Act("$n refuses to follow $N.", TRUE, target, 0, ch, TO_NOTVICT);
 		}
 		return;
@@ -853,7 +849,7 @@ ACMD(do_lead)
 	if( (!MOB_FLAGGED(target, MOB_MOUNT) && !MOB_FLAGGED(target, MOB_SHADOW_MOUNT) && !MOB_FLAGGED(target, MOB_OGIER_MOUNT)) ||
 	        ( MOB_FLAGGED(target, MOB_MOUNT) && IS_TROLLOC(ch)) || (MOB_FLAGGED(target, MOB_SHADOW_MOUNT) && !IS_TROLLOC(ch)) || (MOB_FLAGGED(target, MOB_OGIER_MOUNT) && !IS_OGIER(ch)) )
 	{
-		ch->Send("Why would you think they would follow you?\r\n");
+		ch->send("Why would you think they would follow you?\r\n");
 		return;
 	}
 
@@ -874,7 +870,7 @@ ACMD(do_move)
 	perform_move(ch, subcmd - 1, 0);
 }
 
-void Character::StopEavesdropping()
+void Character::stopEavesdropping()
 {
 	Room *eaves = this->Eavesdropping;
 	for(std::vector<Character*>::iterator eIter = eaves->eavesdropping.begin();eIter != eaves->eavesdropping.end();)
@@ -885,13 +881,13 @@ void Character::StopEavesdropping()
 			++eIter;
 	}
 	this->Eavesdropping = 0;
-	this->Send("You stop eavesdropping.\r\n");
+	this->send("You stop eavesdropping.\r\n");
 }
 
-void Character::StopWarding()
+void Character::stopWarding()
 {
 	this->in_room->EavesWarder = NULL;
-	this->Send("You release your ward.\r\n");
+	this->send("You release your ward.\r\n");
 }
 	
 int Character::FindDoor(const char *type, char *dir, const char *cmdname)
@@ -899,7 +895,7 @@ int Character::FindDoor(const char *type, char *dir, const char *cmdname)
 	int door;
 	if(!*type)
 	{
-		this->Send("What is it you want to %s?\r\n", cmdname);
+		this->send("What is it you want to %s?\r\n", cmdname);
 		return -1;
 	}
 	for(door = 0;door < NUM_OF_DIRS;++door)
@@ -1133,7 +1129,7 @@ ACMD(do_gen_door)
 
 	if (!*argument)
 	{
-		ch->Send("%s what?\r\n", StringUtil::cap(cmd_door[subcmd]));
+		ch->send("%s what?\r\n", StringUtil::cap(cmd_door[subcmd]));
 		return;
 	}
 
@@ -1146,12 +1142,12 @@ ACMD(do_gen_door)
 
 		if(!exit->IsOpen() && !exit->CanBeSeen(ch))
 		{
-			ch->Send("%s what?\r\n", StringUtil::cap(cmd_door[subcmd]));
+			ch->send("%s what?\r\n", StringUtil::cap(cmd_door[subcmd]));
 			return;
 		}
 		if(!(exit->CanOpen()))
 		{
-			ch->Send("You can't %s that.\r\n", cmd_door[subcmd]);
+			ch->send("You can't %s that.\r\n", cmd_door[subcmd]);
 			return;
 		}
 		switch(subcmd)
@@ -1159,12 +1155,12 @@ ACMD(do_gen_door)
 			case SCMD_OPEN:
 				if(exit->IsLocked())
 				{
-					ch->Send("But it's locked!\r\n");
+					ch->send("But it's locked!\r\n");
 					return;
 				}
 				if(exit->IsOpen())
 				{
-					ch->Send("It's already open!\r\n");
+					ch->send("It's already open!\r\n");
 					return;
 				}
 				ch->in_room->RemoveDoorBit(door, EX_CLOSED);
@@ -1177,7 +1173,7 @@ ACMD(do_gen_door)
 			case SCMD_CLOSE:
 				if(exit->IsClosed())
 				{
-					ch->Send("It's already closed!\r\n");
+					ch->send("It's already closed!\r\n");
 					return;
 				}
 				ch->in_room->SetDoorBit(door, EX_CLOSED);
@@ -1190,22 +1186,22 @@ ACMD(do_gen_door)
 			case SCMD_LOCK:
 				if(!exit->CanLock())
 				{
-					ch->Send("You can't seem to find the keyhole.\r\n");
+					ch->send("You can't seem to find the keyhole.\r\n");
 					return;
 				}
 				if(exit->IsLocked())
 				{
-					ch->Send("It's already locked.\r\n");
+					ch->send("It's already locked.\r\n");
 					return;
 				}
 				if(exit->IsOpen())
 				{
-					ch->Send("It needs to be closed first!\r\n");
+					ch->send("It needs to be closed first!\r\n");
 					return;
 				}
 				if(!ch->HasKey(exit->key))
 				{
-					ch->Send("You don't have the proper key.\r\n");
+					ch->send("You don't have the proper key.\r\n");
 					return;
 				}
 				ch->in_room->SetDoorBit(door, EX_LOCKED);
@@ -1218,22 +1214,22 @@ ACMD(do_gen_door)
 			case SCMD_UNLOCK:
 				if(!exit->CanLock())
 				{
-					ch->Send("You can't seem to find the keyhole.\r\n");
+					ch->send("You can't seem to find the keyhole.\r\n");
 					return;
 				}
 				if(!exit->IsLocked())
 				{
-					ch->Send("It's not even locked!\r\n");
+					ch->send("It's not even locked!\r\n");
 					return;
 				}
 				if(!exit->IsClosed())
 				{
-					ch->Send("It needs to be closed first!\r\n");
+					ch->send("It needs to be closed first!\r\n");
 					return;
 				}
 				if(!ch->HasKey(exit->key))
 				{
-					ch->Send("You don't have the proper key.\r\n");
+					ch->send("You don't have the proper key.\r\n");
 					return;
 				}
 
@@ -1279,29 +1275,29 @@ ACMD(do_gen_door)
 			case SCMD_PICK:
 				if(exit->IsOpen())
 				{
-					ch->Send("But it's open!\r\n");
+					ch->send("But it's open!\r\n");
 					return;
 				}
 				if(!exit->IsLocked())
 				{
-					ch->Send("It's not even locked!\r\n");
+					ch->send("It's not even locked!\r\n");
 					return;
 				}
 				if(exit->IsPickProof())
 				{
-					ch->Send("It resists your attempt to pick it.\r\n");
+					ch->send("It resists your attempt to pick it.\r\n");
 					return;
 				}
 				if(!exit->CanPick(ch))
 				{
-					ch->Send("You fail to pick the lock.\r\n");
+					ch->send("You fail to pick the lock.\r\n");
 					return;
 				}
 				ch->in_room->RemoveDoorBit(door, EX_LOCKED);
-				ch->Send("The lock quickly gives way to your skills.\r\n");
+				ch->send("The lock quickly gives way to your skills.\r\n");
 				return;
 			default:
-				ch->Send("Do what now?\r\n");
+				ch->send("Do what now?\r\n");
 				return;
 		}
 	}
@@ -1316,12 +1312,12 @@ ACMD(do_gen_door)
 			case SCMD_OPEN:
 				if(obj->IsLocked())
 				{
-					ch->Send("But it's locked!\r\n");
+					ch->send("But it's locked!\r\n");
 					return;
 				}
 				if(obj->IsOpen())
 				{
-					ch->Send("It's already open!\r\n");
+					ch->send("It's already open!\r\n");
 					return;
 				}
 				TOGGLE_BIT(GET_OBJ_VAL(obj, 1), CONT_CLOSED);
@@ -1329,7 +1325,7 @@ ACMD(do_gen_door)
 			case SCMD_CLOSE:
 				if(obj->IsClosed())
 				{
-					ch->Send("It's already closed!\r\n");
+					ch->send("It's already closed!\r\n");
 					return;
 				}
 				TOGGLE_BIT(GET_OBJ_VAL(obj, 1), CONT_CLOSED);
@@ -1337,22 +1333,22 @@ ACMD(do_gen_door)
 			case SCMD_LOCK:
 				if(!obj->CanLock())
 				{
-					ch->Send("You can't seem to find a keyhole.\r\n");
+					ch->send("You can't seem to find a keyhole.\r\n");
 					return;
 				}
 				if(obj->IsOpen())
 				{
-					ch->Send("But it's open!\r\n");
+					ch->send("But it's open!\r\n");
 					return;
 				}
 				if(obj->IsLocked())
 				{
-					ch->Send("It's already locked.\r\n");
+					ch->send("It's already locked.\r\n");
 					return;
 				}
 				if(!ch->HasKey(obj->KeyNum()))
 				{
-					ch->Send("You don't have the proper key.\r\n");
+					ch->send("You don't have the proper key.\r\n");
 					return;
 				}
 				TOGGLE_BIT(GET_OBJ_VAL(obj, 1), CONT_LOCKED);
@@ -1361,22 +1357,22 @@ ACMD(do_gen_door)
 			{
 				if(!obj->CanLock())
 				{
-					ch->Send("You can't seem to find a keyhole.\r\n");
+					ch->send("You can't seem to find a keyhole.\r\n");
 					return;
 				}
 				if(obj->IsOpen())
 				{
-					ch->Send("But it's open!\r\n");
+					ch->send("But it's open!\r\n");
 					return;
 				}
 				if(!obj->IsLocked())
 				{
-					ch->Send("It's not even locked!\r\n");
+					ch->send("It's not even locked!\r\n");
 					return;
 				}
 				if(!ch->HasKey(obj->KeyNum()))
 				{
-					ch->Send("You don't have the proper key.\r\n");
+					ch->send("You don't have the proper key.\r\n");
 					return;
 				}
 
@@ -1404,38 +1400,38 @@ ACMD(do_gen_door)
 			{
 				if(obj->IsOpen())
 				{
-					ch->Send("But it's open!\r\n");
+					ch->send("But it's open!\r\n");
 					return;
 				}
 				if(!obj->IsLocked())
 				{
-					ch->Send("It's not even locked!\r\n");
+					ch->send("It's not even locked!\r\n");
 					return;
 				}
 				if(!obj->CanPick(ch))
 				{
-					ch->Send("You fail to pick the lock.\r\n");
+					ch->send("You fail to pick the lock.\r\n");
 					return;
 				}
 				TOGGLE_BIT(GET_OBJ_VAL(obj, 1), CONT_LOCKED);
 				break;
 			}
 			default:
-				ch->Send("Do what now?\r\n");
+				ch->send("Do what now?\r\n");
 				return;
 		}
 	}
 	else
 	{
-		ch->Send("You don't see a %s here.\r\n", type);
+		ch->send("You don't see a %s here.\r\n", type);
 		return;
 	}
 
 	//Success!
 	if( subcmd == SCMD_PICK )
-		ch->Send("The lock quickly gives way to your skills.\r\n");
+		ch->send("The lock quickly gives way to your skills.\r\n");
 	else
-		ch->Send("You %s %s%s.\r\n", cmd_door[subcmd], exit ? "the " : "", obj ? obj->GetSDesc() : exit->keyword);
+		ch->send("You %s %s%s.\r\n", cmd_door[subcmd], exit ? "the " : "", obj ? obj->GetSDesc() : exit->keyword);
 
 	//Notify the room.
 	sprintf(buf, "%s %ss %s%s.", GET_NAME(ch), cmd_door[subcmd], exit ? "the " : "", obj ? obj->GetSDesc() : exit->keyword);
@@ -1490,7 +1486,7 @@ ACMD(do_enter)
 			ch->StepThroughGate( (*g) );
 		}
 		else
-			ch->Send("Which gate is that?\r\n");
+			ch->send("Which gate is that?\r\n");
 		return;
 	}
 
@@ -1509,12 +1505,12 @@ ACMD(do_enter)
 						return;
 					}
 
-		ch->Send("There is no %s here.\r\n", buf);
+		ch->send("There is no %s here.\r\n", buf);
 		return;
 	}
 
 	else if (ROOM_FLAGGED(ch->in_room, ROOM_INDOORS))
-		ch->Send("You are already indoors.\r\n");
+		ch->send("You are already indoors.\r\n");
 
 	else
 	{
@@ -1535,7 +1531,7 @@ ACMD(do_enter)
 			}
 		}
 	}
-	ch->Send("You can't seem to find anything to enter.\r\n");
+	ch->send("You can't seem to find anything to enter.\r\n");
 
 }
 
@@ -1545,7 +1541,7 @@ ACMD(do_leave)
 	int door;
 
 	if (!ROOM_FLAGGED(ch->in_room, ROOM_INDOORS))
-		ch->Send("You are outside.. where do you want to go?\r\n");
+		ch->send("You are outside.. where do you want to go?\r\n");
 
 	else
 	{
@@ -1564,7 +1560,7 @@ ACMD(do_leave)
 				}
 			}
 		}
-		ch->Send("I see no obvious exits to the outside.\r\n");
+		ch->send("I see no obvious exits to the outside.\r\n");
 	}
 }
 
@@ -1620,17 +1616,17 @@ ACMD(do_sit)
 			{
 				if( (target = get_obj_in_list_vis(ch, arg1, ch->in_room->contents)) == NULL )
 				{
-					ch->Send("You don't see that here.\r\n");
+					ch->send("You don't see that here.\r\n");
 					return;
 				}
 				if( GET_OBJ_TYPE(target) != ITEM_CHAIR )
 				{
-					ch->Send("You can't sit on that!\r\n");
+					ch->send("You can't sit on that!\r\n");
 					return;
 				}
 				if( target->SatOnBy != NULL )
 				{
-					ch->Send("%s is already seated there.\r\n", GET_NAME(target->SatOnBy));
+					ch->send("%s is already seated there.\r\n", GET_NAME(target->SatOnBy));
 					return;
 				}
 				ch->SitOnChair(target, true);
@@ -1643,7 +1639,7 @@ ACMD(do_sit)
 			GET_POS(ch) = POS_SITTING;
 			break;
 		case POS_SITTING:
-			ch->Send("You're sitting already.\r\n");
+			ch->send("You're sitting already.\r\n");
 			break;
 		case POS_RESTING:
 			Act("You stop resting, and sit up.", FALSE, ch, 0, 0, TO_CHAR);
@@ -1680,7 +1676,7 @@ ACMD(do_rest)
 		case POS_SITTING:
 			if( ch->SittingOn() != NULL )
 			{
-				ch->Send("You cannot rest while sitting on %s.\r\n", ch->SittingOn()->GetSDesc());
+				ch->send("You cannot rest while sitting on %s.\r\n", ch->SittingOn()->GetSDesc());
 				return;
 			}
 			Act("You rest your tired bones.", FALSE, ch, 0, 0, TO_CHAR);
@@ -1714,18 +1710,18 @@ ACMD(do_sleep)
 		case POS_RESTING:
 			if( ch->SittingOn() != NULL )
 			{
-				ch->Send("You cannot go to sleep while sitting on %s.\r\n", ch->SittingOn()->GetSDesc());
+				ch->send("You cannot go to sleep while sitting on %s.\r\n", ch->SittingOn()->GetSDesc());
 				return;
 			}
-			ch->Send("You go to sleep.\r\n");
+			ch->send("You go to sleep.\r\n");
 			Act("$n lies down and falls asleep.", TRUE, ch, 0, 0, TO_ROOM);
 			GET_POS(ch) = POS_SLEEPING;
 			break;
 		case POS_SLEEPING:
-			ch->Send("You are already sound asleep.\r\n");
+			ch->send("You are already sound asleep.\r\n");
 			break;
 		case POS_FIGHTING:
-			ch->Send("Sleep while fighting?  Are you MAD?\r\n");
+			ch->send("Sleep while fighting?  Are you MAD?\r\n");
 			break;
 
 		default:
@@ -1748,9 +1744,9 @@ ACMD(do_wake)
 	if (*::arg)
 	{
 		if (GET_POS(ch) == POS_SLEEPING)
-			ch->Send("Maybe you should wake yourself up first.\r\n");
+			ch->send("Maybe you should wake yourself up first.\r\n");
 		else if ((vict = get_char_room_vis(ch, ::arg)) == NULL)
-			ch->Send(NOPERSON);
+			ch->send(NOPERSON);
 		else if (vict == ch)
 			self = 1;
 		else if (GET_POS(vict) > POS_SLEEPING)
@@ -1772,12 +1768,12 @@ ACMD(do_wake)
 	}
 
 	if (AFF_FLAGGED(ch, AFF_SLEEP))
-		ch->Send("You can't wake up!\r\n");
+		ch->send("You can't wake up!\r\n");
 	else if (GET_POS(ch) > POS_SLEEPING)
-		ch->Send("You are already awake...\r\n");
+		ch->send("You are already awake...\r\n");
 	else
 	{
-		ch->Send("You awaken, and sit up.\r\n");
+		ch->send("You awaken, and sit up.\r\n");
 		Act("$n awakens.", TRUE, ch, 0, 0, TO_ROOM);
 		GET_POS(ch) = POS_SITTING;
 	}
@@ -1794,7 +1790,7 @@ ACMD(do_knock)
 
 	if( !*doorName )
 	{//User didn't enter a door name.
-		ch->Send("What door do you wish to knock on?\r\n");
+		ch->send("What door do you wish to knock on?\r\n");
 		return;
 	}
 
@@ -1812,16 +1808,16 @@ ACMD(do_knock)
 
 	if( !dir || (IS_DARK(ch->in_room) && !CAN_SEE_IN_DARK(ch)) )
 	{//Door was not found / can't be seen.
-		ch->Send("You don't see a '%s' here.\r\n", doorName);
+		ch->send("You don't see a '%s' here.\r\n", doorName);
 		return;
 	}
 	if( dir->IsOpen() )
 	{
-		ch->Send("The %s appears to be open.\r\n", dir->keyword);
+		ch->send("The %s appears to be open.\r\n", dir->keyword);
 		return;
 	}
 
-	ch->Send("You knock on the %s.\r\n", dir->keyword);
+	ch->send("You knock on the %s.\r\n", dir->keyword);
 
 	for(Character *onLooker = ch->in_room->people;onLooker;onLooker = onLooker->next_in_room)
 	{//Show each person in the room that a door has been knocked on.
@@ -1835,9 +1831,9 @@ ACMD(do_knock)
 
 		//If they can't see the door, show them that 'something' was knocked on.
 		if( !dir->CanBeSeen( onLooker ) || (IS_DARK(ch->in_room) && !CAN_SEE_IN_DARK(onLooker)) )
-			onLooker->Send("%s knocks on something %s.\r\n", PERS(ch, onLooker), dirText.c_str());
+			onLooker->send("%s knocks on something %s.\r\n", PERS(ch, onLooker), dirText.c_str());
 		else
-			onLooker->Send("%s knocks on the %s.\r\n", PERS(ch, onLooker), dir->keyword);
+			onLooker->send("%s knocks on the %s.\r\n", PERS(ch, onLooker), dir->keyword);
 	}
 
 	Room *OtherRoom;
@@ -1852,11 +1848,11 @@ ACMD(do_knock)
 			{
 				if( revDir->CanBeSeen( onLooker ) && (!IS_DARK(OtherRoom) || CAN_SEE_IN_DARK(onLooker)) )
 				{
-					onLooker->Send("Someone knocks on the %s from the other side.\r\n", dir->keyword);
+					onLooker->send("Someone knocks on the %s from the other side.\r\n", dir->keyword);
 				}
 				else
 				{
-					onLooker->Send("A knock comes from somewhere nearby.\r\n");
+					onLooker->send("A knock comes from somewhere nearby.\r\n");
 				}
 			}
 		}
@@ -1873,25 +1869,25 @@ ACMD(do_follow)
 	{
 		if (!(leader = get_char_room_vis(ch, buf)))
 		{
-			ch->Send(NOPERSON);
+			ch->send(NOPERSON);
 			return;
 		}
 	}
 	else
 	{
-		ch->Send("Whom do you wish to follow?\r\n");
+		ch->send("Whom do you wish to follow?\r\n");
 		return;
 	}
 
 	if( !isInArena(ch) && GET_RACE(leader) != GET_RACE(ch) && GET_LEVEL(ch) < LVL_IMMORT && GET_LEVEL(leader) < LVL_IMMORT && !IS_NPC(ch))
 	{
-		ch->Send("What?! Don't you think they'd betray you?\r\n");
+		ch->send("What?! Don't you think they'd betray you?\r\n");
 		return;
 	}
 
 	if(IS_NPC(leader) && !leader->desc && leader != ch && !IS_NPC(ch))
 	{
-		ch->Send("%s doesn't want you to follow.\r\n", GET_NAME(leader));
+		ch->send("%s doesn't want you to follow.\r\n", GET_NAME(leader));
 		return;
 	}
 
@@ -1915,7 +1911,7 @@ ACMD(do_follow)
 
 /*	if(IS_FADE(ch))
 	{
-		ch->Send("Myrddraal are leaders, not followers!\r\n");
+		ch->send("Myrddraal are leaders, not followers!\r\n");
 		return;
 	}
 */
@@ -1925,7 +1921,7 @@ ACMD(do_follow)
 		{
 			if (!ch->master)
 			{
-				ch->Send("You are already following yourself.\r\n");
+				ch->send("You are already following yourself.\r\n");
 				return;
 			}
 
@@ -1947,33 +1943,6 @@ ACMD(do_follow)
 			add_follower(ch, leader);
 		}
 	}
-}
-
-void Character::BotDriver()
-{
-	//Don't want a linkless bot now do we?
-	if(!this->desc)
-		return;
-	/****
-	if(this->Bots[ChaseBot] && this->player.hunting)
-	{
-		//We need conditions to see if we SHOULD chase.
-		if(0)
-		{
-		}
-		//We need to chase.
-		else
-		{
-			int direction;
-			if( !(direction = find_first_step(this->in_room, this->player.hunting->in_room)) )
-			{
-				this->Send("Unable to continue hunting: Target not found!\r\n");
-				this->Bots[ChaseBot] = false;
-			}
-			perform_move(this, direction, 0);
-		}
-	}
-		****/
 }
 
 bool Character::check_if_pc_in_group()

@@ -33,7 +33,6 @@ const int TO_NOTVICT = 3;
 const int TO_CHAR = 4;
 const int TO_SLEEP = 128; // to char, even if sleeping
 
-void write_to_output(Descriptor *t, const char *txt, ...);
 void page_string(Descriptor *d, char *str, int keep_internal);
 
 const char *health(int percent);
@@ -42,7 +41,6 @@ const char *moves(int percent);
 void SetClock();
 clock_t GetClockDifference();
 extern clock_t GlobalClock;
-#define SEND_TO_Q(messg, desc)  write_to_output(desc, (messg))
 
 typedef RETSIGTYPE sigfunc(int);
 

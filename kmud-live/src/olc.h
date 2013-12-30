@@ -95,11 +95,9 @@ void	CleditDisplayWarrants(Descriptor *d);
 void	WeditParse(Descriptor *d, const std::string &arg);
 void	WeditDispMenu(Descriptor *d);
 
-#ifdef KINSLAYER_JAVASCRIPT
 void JeditDispMenu( Descriptor *d );
 int JScriptParse(Descriptor *d, const std::string &arg);
 void JScriptDispMenu(Descriptor *d);
-#endif
 
 int		DeleteZone(int vnum);
 /*
@@ -128,7 +126,7 @@ class AuctionItem
 	bool is_retrieved;
 	int ownerID;
 
-	void Zero();
+	void zero();
 public:
 	sql::Query BidQuery;
 	AuctionItem();
@@ -244,10 +242,9 @@ class OLC
 		struct mob_prog_data *mprogl;
 #endif
 
-#ifdef KINSLAYER_JAVASCRIPT
 		class JSTrigger *jsTrig;
 		std::shared_ptr<std::vector<JSTrigger*> > jsScripts;
-#endif
+
 		class Kit *kit;
 		int trigger_position;
 		int item_type;
@@ -882,7 +879,6 @@ const int USER_EMAIL_EDITOR_CONFIRM_EMAIL_SELECT		= 3;
 const int USER_EMAIL_EDITOR_CONFIRM_EMAIL_CODE			= 4;
 const int USER_EMAIL_EDITOR_RESEND_CONFIRMATION_SELECT	= 5;
 
-#ifdef KINSLAYER_JAVASCRIPT
 /* Javascript Editor States */
 const int JEDIT_MAIN_MENU					= 0;
 const int JEDIT_NAME						= 1;
@@ -900,6 +896,4 @@ const int OLC_JSCRIPT_EDIT = 82866;
 const int JSCRIPT_MAIN_MENU = 0;
 const int JSCRIPT_NEW_TRIGGER = 1;
 const int JSCRIPT_DEL_TRIGGER = 2;
-#endif
-
 #endif

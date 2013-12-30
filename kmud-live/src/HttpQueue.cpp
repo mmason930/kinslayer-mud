@@ -4,7 +4,7 @@
 
 HttpRequest *HttpQueue::getNextRequest()
 {
-	boost::mutex::scoped_lock lock(requestQueueMutex);
+	std::lock_guard<std::mutex> lock(requestQueueMutex);
 
 	if(requestQueue.empty())
 		return NULL;
@@ -16,7 +16,7 @@ HttpRequest *HttpQueue::getNextRequest()
 
 HttpResponse *HttpQueue::getNextResponse()
 {
-	boost::mutex::scoped_lock lock(responseQueueMutex);
+	std::lock_guard<std::mutex> lock(responseQueueMutex);
 
 	if(responseQueue.empty())
 		return NULL;
@@ -28,12 +28,12 @@ HttpResponse *HttpQueue::getNextResponse()
 
 void HttpQueue::putRequest(HttpRequest *request)
 {
-	boost::mutex::scoped_lock lock(requestQueueMutex);
+	std::lock_guard<std::mutex> lock(requestQueueMutex);
 	requestQueue.push_back(request);
 }
 
 void HttpQueue::putResponse(HttpResponse *response)
 {
-	boost::mutex::scoped_lock lock(responseQueueMutex);
+	std::lock_guard<std::mutex> lock(responseQueueMutex);
 	responseQueue.push_back(response);
 }

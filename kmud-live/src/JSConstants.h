@@ -1,6 +1,3 @@
-
-#ifdef KINSLAYER_JAVASCRIPT
-
 #ifndef KJSCONSTANTS_H
 #define JSSCONSTANTS_H
 
@@ -9,6 +6,3 @@
 flusspferd::object makeConstants();
 
 #endif
-
-#endif
-

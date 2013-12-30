@@ -93,7 +93,7 @@ EVENT(BashStand)
 	BashStandQueue.remove( myTuple );
 }
 /*** Galnor 12/22/2009 - Place character in a bashed state for x pulses ***/
-void Character::SetBashState( const int nrPulses, bool cancelTimer, bool makeSit )
+void Character::setBashState( const int nrPulses, bool cancelTimer, bool makeSit )
 {
 	if( makeSit )
 		GET_POS( this ) = POS_SITTING;
@@ -209,7 +209,7 @@ bool Bash::BashSucceedWeapon( Character *Basher, Character *Victim )
 	float WeightDifference = GET_EQ(Basher, WEAR_WIELD)->GetTotalWeight() - GET_EQ(Victim, WEAR_WIELD)->GetTotalWeight();
 	return ( MiscUtil::random(0, 10000) < (BashData.WeaponDifferenceMultiplier * WeightDifference * 100) );
 }
-bool Character::RollBash( Character *Victim, bool BashFaceoff )
+bool Character::rollBash( Character *Victim, bool BashFaceoff )
 {
 	int chance = MiscUtil::random(1,20);
 
@@ -235,7 +235,7 @@ bool Character::RollBash( Character *Victim, bool BashFaceoff )
 	return true;
 }
 
-bool Character::RollBash( Character *Victim, int &off, int &def )
+bool Character::rollBash( Character *Victim, int &off, int &def )
 {
 	int chance = MiscUtil::random(1,20);
 	off = this->BashOffenseRoll();
@@ -307,7 +307,7 @@ void perform_bash(Character *ch, Character *vict)
 
 	if(!vict || vict->IsPurged() || vict->in_room != ch->in_room)
 	{
-		ch->Send("They must have already left...\r\n");
+		ch->send("They must have already left...\r\n");
 		return;
 	}
 	if( ch->IsPurged() )
@@ -328,8 +328,8 @@ void perform_bash(Character *ch, Character *vict)
 		//Do 100 rolls, whoever wins first gets the bash.
 		for(i = 100;i;--i)
 		{
-			bool cLand = ch->RollBash( vict, true );
-			bool vLand = vict->RollBash( ch, true );
+			bool cLand = ch->rollBash( vict, true );
+			bool vLand = vict->rollBash( ch, true );
 			//Both landed! Try again...
 			if(cLand && vLand)
 				continue;
@@ -360,7 +360,7 @@ void perform_bash(Character *ch, Character *vict)
 	}
 	else
 	{
-		if (ch->RollBash( vict, false ))
+		if (ch->rollBash( vict, false ))
 		{
 			if (damage(ch, vict, 1, SKILL_BASH, -1) == -1)
 				return;
@@ -387,22 +387,22 @@ Character *Character::CanBash(char *argument)
 		return 0;
 	if (!GET_SKILL(this, SKILL_BASH))
 	{
-		this->Send("You have no idea how.\r\n");
+		this->send("You have no idea how.\r\n");
 		return 0;
 	}
 	if (ROOM_FLAGGED(this->in_room, ROOM_PEACEFUL))
 	{
-		this->Send("This room just has such a peaceful, easy feeling...\r\n");
+		this->send("This room just has such a peaceful, easy feeling...\r\n");
 		return 0;
 	}
 	if (!GET_EQ(this, WEAR_WIELD))
 	{
-		this->Send("You need to wield a weapon to make it a success.\r\n");
+		this->send("You need to wield a weapon to make it a success.\r\n");
 		return 0;
 	}
 	if(MOUNT(this) && this->GetSkillLevel(SKILL_RIDE) < 6)
 	{
-		this->Send("Your riding skills are too low to do this while mounted.\r\n");
+		this->send("Your riding skills are too low to do this while mounted.\r\n");
 		return 0;
 	}
 	if(!*arg && FIGHTING(this) && this->in_room == FIGHTING(this)->in_room && !GET_TARGET2(this))
@@ -413,7 +413,7 @@ Character *Character::CanBash(char *argument)
 		vict = GET_TARGET2(this);
 	else if (!*arg || !(vict = get_char_room_vis(this, arg)))
 	{
-		this->Send("Bash who?\r\n");
+		this->send("Bash who?\r\n");
 		this->WaitState(MAX(2, this->wait + 1));
 		return 0;
 	}
@@ -421,27 +421,27 @@ Character *Character::CanBash(char *argument)
 	// Galnor: 02-17-2004 : Fixed a target bug dealing with bashing without a name.
 	if (FIGHTING(this) && FIGHTING(this) != vict && FIGHTING(vict) != this)
 	{
-		this->Send("You can't bash someone else while engaged!\r\n");
+		this->send("You can't bash someone else while engaged!\r\n");
 		return 0;
 	}
 	if(!vict || !room_visibility(this, vict))
 	{ //Checks to see if ch can see vict in ch's room //
-		this->Send("They must have left already...\r\n");
+		this->send("They must have left already...\r\n");
 		return 0;
 	}
 	if (vict == this)
 	{
-		this->Send("Aren't we funny today...\r\n");
+		this->send("Aren't we funny today...\r\n");
 		return 0;
 	}
 	if(IS_BASHED(vict))
 	{
-		this->Send("They already seem stunned!\r\n");
+		this->send("They already seem stunned!\r\n");
 		return 0;
 	}
 	if(GET_POS(vict) == POS_FLYING)
 	{
-		Send("They're too high off the ground to reach!\r\n");
+		send("They're too high off the ground to reach!\r\n");
 		return 0;
 	}
 	return vict;
@@ -557,7 +557,7 @@ void perform_backstab(Character *ch, Character *vict)
 
 	if(!vict)
 	{
-		ch->Send("They must have already left...\r\n");
+		ch->send("They must have already left...\r\n");
 		return;
 	}
 
@@ -569,7 +569,7 @@ void perform_backstab(Character *ch, Character *vict)
 			Act("You take a long look at $n, who falls to the ground convulsing.", TRUE, ch, NULL, vict, TO_VICT);
 			Act("$n drops to the ground shaking violently as $N locks eyes with $m.", TRUE, ch, NULL, vict, TO_NOTVICT);
 
-			ch->SetBashState( PULSE_VIOLENCE * 2, false );
+			ch->setBashState( PULSE_VIOLENCE * 2, false );
 		}
 		else
 		{
@@ -619,14 +619,14 @@ void perform_assist(Character *ch, Character *helpee)
 	else
 	{
 		opponent = faceoff(ch, opponent);
-		ch->Send("You join the fight!\r\n");
+		ch->send("You join the fight!\r\n");
 		Act("$N assists you!", 0, helpee, 0, ch, TO_CHAR);
 		Act("$n assists $N.", FALSE, ch, 0, helpee, TO_NOTVICT);
 
 		if(( (opponent->NumFighting() >= 3 && !IS_NPC(ch)) ||
 		        (ROOM_FLAGGED(ch->in_room, ROOM_TUNNEL) && opponent->NumFighting() >= 2)))
 		{
-			ch->Send("You'd probably get killed before you reached the fight because it is so crowded!\r\n");
+			ch->send("You'd probably get killed before you reached the fight because it is so crowded!\r\n");
 			return;
 		}
 		ch->SetFighting(opponent);
@@ -688,7 +688,7 @@ void perform_charge(Character *ch, Character *victim, int type)
 
 	if(!victim || victim->IsPurged())
 	{
-		ch->Send("They must have left already...\r\n");
+		ch->send("They must have left already...\r\n");
 		return;
 	}
 	if( ch->IsPurged() )
@@ -734,19 +734,19 @@ ACMD(do_charge)
 
 	if(IS_TROLLOC(ch) && subcmd == SCMD_CHARGE && !IS_FADE(ch) && !IS_DREADLORD(ch))
 	{
-		ch->Send("You can't charge! You would need a mount for that.\r\n");
+		ch->send("You can't charge! You would need a mount for that.\r\n");
 		return;
 	}
 
 	if(((!IS_TROLLOC(ch) && !ch->getUserClan(CLAN_WOLFBROTHER)) || IS_FADE(ch)) && (subcmd == SCMD_SKEWER))
 	{
-		ch->Send("You can't run fast enough to do that.\r\n");
+		ch->send("You can't run fast enough to do that.\r\n");
 		return;
 	}
 
 	if ( (!*argument || !(victim = get_char_room_vis(ch, arg)) || victim->IsPurged()) && !ch->command_ready )
 	{
-		ch->Send("To whom do you wish to do this?\r\n");
+		ch->send("To whom do you wish to do this?\r\n");
 		ch->WaitState(MAX(4, ch->wait + 1));
 		return;
 	}
@@ -756,25 +756,25 @@ ACMD(do_charge)
 
 	if(!room_visibility(ch, victim))
 	{ //Checks to see if ch can see vict in ch's room //
-		ch->Send("They must have left already...\r\n");
+		ch->send("They must have left already...\r\n");
 		return;
 	}
 
 	if(MOUNT(ch) && ch->GetSkillLevel(SKILL_RIDE) < 6)
 	{
-		ch->Send("Your riding skills are too low to do this while mounted.\r\n");
+		ch->send("Your riding skills are too low to do this while mounted.\r\n");
 		return;
 	}
 
 	if(GET_POS(victim) == POS_FLYING)
 	{
-		ch->Send("They're too high off the ground to reach!\r\n");
+		ch->send("They're too high off the ground to reach!\r\n");
 		return;
 	}
 
 	if(victim == MOUNT(ch))
 	{
-		ch->Send("You cannot charge your own mount!\r\n");
+		ch->send("You cannot charge your own mount!\r\n");
 		return;
 	}
 
@@ -783,28 +783,28 @@ ACMD(do_charge)
 
 	if(subcmd == SCMD_CHARGE && !MOUNT(ch))
 	{
-		ch->Send("You will need to be riding to even attempt this.\r\n");
+		ch->send("You will need to be riding to even attempt this.\r\n");
 		return;
 	}
 
 	/* Fogel 5/7/09 - Added to disallow trollocs from skewering indoors and humans from charging indoors should they get ported indoors while mounted*/
 	if(SECT( ch->in_room ) == SECT_INSIDE)
 	{
-		ch->Send("There isn't enough room for you to do that.\r\n");
+		ch->send("There isn't enough room for you to do that.\r\n");
 		return;
 	}
 	/* End of changes from 5/7/09 */
 
 	if (victim == ch)
 	{
-		ch->Send("You want to try to charge yourself?\r\n");
+		ch->send("You want to try to charge yourself?\r\n");
 		return;
 	}
 
 	if(FIGHTING(ch) && ((!ch->command_ready && !ChargeData.CanStartWhileFighting)
 	|| (ch->command_ready && !ChargeData.CanFinishWhileFighting) ))
 	{
-		ch->Send("No way! You're fighting for your life here!\r\n");
+		ch->send("No way! You're fighting for your life here!\r\n");
 		return;
 	}
 
@@ -817,7 +817,7 @@ ACMD(do_charge)
 
 	if(ch->command_ready && ch->CannotFinishCharge)
 	{
-		ch->Send("No way! You're fighting for your life here!\r\n");
+		ch->send("No way! You're fighting for your life here!\r\n");
 		ch->CannotFinishCharge = false;
 		return;
 	}
@@ -825,21 +825,21 @@ ACMD(do_charge)
 
 	if (!GET_EQ(ch, WEAR_WIELD))
 	{
-		ch->Send("You need to wield a weapon to make it a success.\r\n");
+		ch->send("You need to wield a weapon to make it a success.\r\n");
 		return;
 	}
 
 	/* Fogel 5/7/09 - Changed to allow spears and lances to both charge and skewer */
 	if ((subcmd == SCMD_CHARGE || subcmd == SCMD_SKEWER) && ((GET_EQ(ch, WEAR_WIELD)->GetTotalVal0() != WEAPON_LANCE) && (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD), 0) != WEAPON_SPEAR)))
 	{
-		ch->Send("You will need a lance or spear to even attempt this.\r\n");
+		ch->send("You will need a lance or spear to even attempt this.\r\n");
 		return;
 	}
 	/* End of changes from 5/7/09 */
 
 	if(FIGHTING(victim) && (!ChargeData.CanStartOnFightingVict || ch->command_ready))
 	{
-		ch->Send("You might hit the wrong target!\r\n");
+		ch->send("You might hit the wrong target!\r\n");
 		return;
 	}
 
@@ -849,7 +849,7 @@ ACMD(do_charge)
 		{
 			if( aff->bitvector == AFF_NOQUIT && aff->duration > 3 && !IS_NPC(FIGHTING(victim)))
 			{
-				ch->Send("You might hit the wrong target!\r\n", GET_NAME(victim));
+				ch->send("You might hit the wrong target!\r\n", GET_NAME(victim));
 				return;
 			}
 		}
@@ -857,7 +857,7 @@ ACMD(do_charge)
 
 	if(IS_BASHED(victim))
 	{
-		ch->Send("%s is stunned... You can't seem to reach the right spot!\r\n", GET_NAME(victim));
+		ch->send("%s is stunned... You can't seem to reach the right spot!\r\n", GET_NAME(victim));
 		return;
 	}
 
@@ -903,7 +903,7 @@ int find_first_step( Room *src, Room *target );
 
 void Character::RemoveTaintDizzy()
 {
-	this->Send("The vileness of the taint slowly fades away.\r\n");
+	this->send("The vileness of the taint slowly fades away.\r\n");
 	this->dizzy_time = 0;
 }
 
@@ -917,7 +917,7 @@ EVENT(SendTaintDizzyMessage)
 	{
 		if(!ch->IsPurged() && idnum == ch->player.idnum && ch->dizzy_time <= 0)
 		{
-			ch->Send("A strong wave of dizziness hits you. You feel as if you are about to vomit!\r\n");
+			ch->send("A strong wave of dizziness hits you. You feel as if you are about to vomit!\r\n");
 			ch->dizzy_time += (ch->points.taint / 10);
 		}
 		else if(ch->dizzy_time > 0)
@@ -933,47 +933,47 @@ ACMD(do_source)
 	if( !CAN_CHANNEL(ch) && GET_LEVEL(ch) < LVL_GRGOD)
 	{
 		if(subcmd == SCMD_SEIZE)
-			ch->Send("You come out empty handed.\r\n");
+			ch->send("You come out empty handed.\r\n");
 		else if(subcmd == SCMD_EMBRACE)
-			ch->Send("There is nothing for you to embrace!\r\n");
+			ch->send("There is nothing for you to embrace!\r\n");
 		return;
 	}
 
 	if(subcmd == SCMD_EMBRACE && GET_SEX(ch) == SEX_MALE)
 	{
 
-		ch->Send("If you did that, saidin would burn you alive!\r\n");
+		ch->send("If you did that, saidin would burn you alive!\r\n");
 		return;
 	}
 	if(subcmd == SCMD_SEIZE && GET_SEX(ch) == SEX_FEMALE)
 	{
-		ch->Send("You have to embrace saidar, not seize it!\r\n");
+		ch->send("You have to embrace saidar, not seize it!\r\n");
 		return;
 	}
 	if( AFF_FLAGGED(ch, AFF_SHIELD) || ShieldManager::GetManager().ShieldedBy(ch) != NULL)
 	{
-		ch->Send("You fumble for access to the True Source, but you're blocked off!\r\n");
+		ch->send("You fumble for access to the True Source, but you're blocked off!\r\n");
 		return;
 	}
 	if(PRF_FLAGGED(ch, PRF_SOURCE))
 	{
-		ch->Send("You are in touch with the True Source already. Can you not feel the surge of power through you?\r\n");
+		ch->send("You are in touch with the True Source already. Can you not feel the surge of power through you?\r\n");
 		return;
 	}
 	if( ROOM_FLAGGED(ch->in_room, ROOM_NOSOURCE) )
 	{
-		ch->Send("The True Source seems to be unreachable here!\r\n");
+		ch->send("The True Source seems to be unreachable here!\r\n");
 		return;
 	}
 
 	if(subcmd == SCMD_EMBRACE)
-		ch->Send("You surrender yourself to saidar as you embrace the True Source.\r\n");
+		ch->send("You surrender yourself to saidar as you embrace the True Source.\r\n");
 	else if(subcmd == SCMD_SEIZE)
 	{
-		ch->Send("You grasp for saidin and feel it surge through your body.\r\n");
+		ch->send("You grasp for saidin and feel it surge through your body.\r\n");
 		if(ch->CanTaint())
 		{
-			ch->Send("You feel the filth of the taint seep through your body.\r\n");
+			ch->send("You feel the filth of the taint seep through your body.\r\n");
 /*
 			if(ch->points.taint >= TaintData.TaintForSeizeDizziness)
 			{
@@ -984,7 +984,7 @@ ACMD(do_source)
 	}
 	else
 	{
-		ch->Send("What's that? How did you get here? Please report this!\r\n");
+		ch->send("What's that? How did you get here? Please report this!\r\n");
 		return;
 	}
 
@@ -995,7 +995,7 @@ ACMD(do_source)
 		if(GET_SEX(ch) == GET_SEX(victim) && victim != ch &&
 		        (victim->ChannelingAbility() || GET_LEVEL(victim) >= LVL_GRGOD))
 		{
-			victim->Send("You feel a strange sensation from somewhere nearby.\r\n");
+			victim->send("You feel a strange sensation from somewhere nearby.\r\n");
 		}
 	}
 }
@@ -1008,7 +1008,7 @@ void Character::RemoveSource()
 
 	if(this->CanTaint())
 	{
-		this->Send("You feel the taint slowly fade away.\r\n");
+		this->send("You feel the taint slowly fade away.\r\n");
 		this->dizzy_time /= 2;
 	}
 
@@ -1021,7 +1021,7 @@ void Character::RemoveSource()
 		if(GET_SEX(this) == GET_SEX(victim) && victim != this &&
 		        (victim->ChannelingAbility() || GET_LEVEL(victim) >= LVL_GRGOD))
 		{
-			victim->Send("A strange sensation from nearby gets weaker.\r\n");
+			victim->send("A strange sensation from nearby gets weaker.\r\n");
 		}
 	}
 }
@@ -1030,24 +1030,24 @@ ACMD(do_release)
 {
 	if( !ch->ChannelingAbility() && GET_LEVEL(ch) < LVL_GRGOD)
 	{
-		ch->Send("And you want to release what?\r\n");
+		ch->send("And you want to release what?\r\n");
 		return;
 	}
 
 	if(!PRF_FLAGGED(ch, PRF_SOURCE))
 	{
-		ch->Send("You aren't even connected to the True Source.\r\n");
+		ch->send("You aren't even connected to the True Source.\r\n");
 		return;
 	}
 
 	if(ch->Eavesdropping)
-		ch->StopEavesdropping();
+		ch->stopEavesdropping();
 	if(ch->in_room->EavesWarder == ch)
-		ch->StopWarding();
+		ch->stopWarding();
 	if(ch->InvertNextWeave)
 		ch->InvertNextWeave = false;
 
-	ch->Send("You release the One Power.\r\n");
+	ch->send("You release the One Power.\r\n");
 	ch->RemoveSource();
 
 }
@@ -1058,23 +1058,23 @@ ACMD(do_assist)
 
 	if (FIGHTING(ch))
 	{
-		ch->Send("You're already fighting!  How can you assist someone else?\r\n");
+		ch->send("You're already fighting!  How can you assist someone else?\r\n");
 		return;
 	}
 
 	OneArgument(argument, arg);
 
 	if (!*arg)
-		ch->Send("Whom do you wish to assist?\r\n");
+		ch->send("Whom do you wish to assist?\r\n");
 
 	else if (!(helpee = get_char_room_vis(ch, arg)))
-		ch->Send(NOPERSON);
+		ch->send(NOPERSON);
 
 /*	else if(too_scared(ch))
 		return;
 */
 	else if (helpee == ch)
-		ch->Send("You can't help yourself any more than this!\r\n");
+		ch->send("You can't help yourself any more than this!\r\n");
 
 	else
 		perform_assist(ch, helpee);
@@ -1088,19 +1088,19 @@ ACMD(do_hit)
 	OneArgument(argument, arg);
 
 	if (!*arg)
-		ch->Send("Hit who?\r\n");
+		ch->send("Hit who?\r\n");
 	else if (!(vict = get_char_room_vis(ch, arg)))
-		ch->Send("They don't seem to be here.\r\n");
+		ch->send("They don't seem to be here.\r\n");
 /*	else if(too_scared(ch))
 		return;
 */	else if (vict == ch)
 	{
-		ch->Send("You hit yourself...OUCH!.\r\n");
+		ch->send("You hit yourself...OUCH!.\r\n");
 		Act("$n hits $mself, and says OUCH!", FALSE, ch, 0, vict, TO_ROOM);
 	}
 	else if( GET_POS(vict) == POS_FLYING )
 	{
-		ch->Send("They're too high off the ground to reach!\r\n");
+		ch->send("They're too high off the ground to reach!\r\n");
 		return;
 	}
 	else
@@ -1117,7 +1117,7 @@ ACMD(do_hit)
 			Act("$n squares up with $N and begins to attack $M.", FALSE, ch, 0, vict, TO_NOTVICT);
 		}
 		else
-			ch->Send("You do the best you can!\r\n");
+			ch->send("You do the best you can!\r\n");
 	}
 }
 
@@ -1137,21 +1137,21 @@ ACMD(do_kill)
 	TwoArguments(argument, arg, arg2);
 
 	if (!*arg)
-		ch->Send("Kill who?\r\n");
+		ch->send("Kill who?\r\n");
 	else
 	{
 		if (!(vict = get_char_room_vis(ch, arg)))
-			ch->Send("They aren't here.\r\n");
+			ch->send("They aren't here.\r\n");
 		else if (ch == vict)
-			ch->Send("Your mother would be so sad.. :(\r\n");
+			ch->send("Your mother would be so sad.. :(\r\n");
 		else if(IS_KING(vict))
 		{
-			ch->Send("You can't strike the dictator! He is just much more... superb than you!\r\n"); //We know it's true! :)
+			ch->send("You can't strike the dictator! He is just much more... superb than you!\r\n"); //We know it's true! :)
 			return;
 		}
 		else if( GET_POS(vict) == POS_FLYING )
 		{
-			ch->Send("They're too high off the ground to reach!\r\n");
+			ch->send("They're too high off the ground to reach!\r\n");
 			return;
 		}
 		else
@@ -1161,11 +1161,11 @@ ACMD(do_kill)
 				weap = GET_EQ(ch, WEAR_WIELD);
 				if(!weap || !IS_SHORT_BLADE(weap))
 				{
-					ch->Send("You need to be wielding a dagger to do this.\r\n");
+					ch->send("You need to be wielding a dagger to do this.\r\n");
 					return;
 				}
-				ch->Send("You blick %s!\r\n", GET_NAME(vict));
-				vict->Send("%sSuddenly Someone stabs you in the back, R.I.P....%s\r\n", COLOR_RED(vict, CL_COMPLETE),
+				ch->send("You blick %s!\r\n", GET_NAME(vict));
+				vict->send("%sSuddenly Someone stabs you in the back, R.I.P....%s\r\n", COLOR_RED(vict, CL_COMPLETE),
 				           COLOR_NORMAL(vict, CL_COMPLETE));
 				vict->Die(ch);
 				return;
@@ -1190,7 +1190,7 @@ ACMD(do_backstab)
 
 	if ( (!*argument || !(vict = get_char_room_vis(ch, buf))) && !ch->command_ready )
 	{
-		ch->Send("Backstab who?\r\n");
+		ch->send("Backstab who?\r\n");
 		ch->WaitState(MAX(4, ch->wait + 1));
 		return;
 	}
@@ -1200,43 +1200,43 @@ ACMD(do_backstab)
 
 	if(!room_visibility(ch, vict))
 	{ //Checks to see if ch can see vict in ch's room //
-		ch->Send("They must have left already...\r\n");
+		ch->send("They must have left already...\r\n");
 		return;
 	}
 
 	if(MOUNT(ch))
 	{
-		ch->Send("You can't do that while riding!\r\n");
+		ch->send("You can't do that while riding!\r\n");
 		return;
 	}
 
 	if (vict == ch)
 	{
-		ch->Send("How can you sneak up on yourself?\r\n");
+		ch->send("How can you sneak up on yourself?\r\n");
 		return;
 	}
 
 	if(FIGHTING(ch) && !ch->command_ready)
 	{
-		ch->Send("No way! You're fighting for your life here!\r\n");
+		ch->send("No way! You're fighting for your life here!\r\n");
 		return;
 	}
 
 	if (!GET_EQ(ch, WEAR_WIELD))
 	{
-		ch->Send("You need to wield a weapon to make it a success.\r\n");
+		ch->send("You need to wield a weapon to make it a success.\r\n");
 		return;
 	}
 
 	if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD), 0 ) != WEAPON_SHORT_BLADE)
 	{
-		ch->Send("Only short blades weapons can be used for backstabbing.\r\n");
+		ch->send("Only short blades weapons can be used for backstabbing.\r\n");
 		return;
 	}
 
 	if(FIGHTING(vict) && (ch->command_ready))
 	{
-		ch->Send("You can't sneak up on a fighting target.\r\n", GET_NAME(vict));
+		ch->send("You can't sneak up on a fighting target.\r\n", GET_NAME(vict));
 		return;
 	}
 
@@ -1247,7 +1247,7 @@ ACMD(do_backstab)
 		{
 			if( aff->bitvector == AFF_NOQUIT && aff->duration > 3 && !IS_NPC(FIGHTING(vict)))
 			{
-				ch->Send("You can't sneak up on a fighting target.\r\n", GET_NAME(vict));
+				ch->send("You can't sneak up on a fighting target.\r\n", GET_NAME(vict));
 				return;
 			}
 		}
@@ -1255,12 +1255,12 @@ ACMD(do_backstab)
 
 	if(IS_BASHED(vict))
 	{
-		ch->Send("%s is stunned... You can't seem to reach the right spot!\r\n", GET_NAME(vict));
+		ch->send("%s is stunned... You can't seem to reach the right spot!\r\n", GET_NAME(vict));
 		return;
 	}
 	if(GET_POS(vict) == POS_FLYING)
 	{
-		ch->Send("They're too high off the ground to reach!\r\n");
+		ch->send("They're too high off the ground to reach!\r\n");
 		return;
 	}
 
@@ -1327,17 +1327,17 @@ ACMD(do_order)
 	HalfChop(argument, name, message);
 
 	if (!*name || !*message)
-		ch->Send("Order who to do what?\r\n");
+		ch->send("Order who to do what?\r\n");
 	else if (!(vict = get_char_room_vis(ch, name)))
-		ch->Send("That person isn't here.\r\n");
+		ch->send("That person isn't here.\r\n");
 	else if (ch == vict)
-		ch->Send("You obviously suffer from skitzofrenia.\r\n");
+		ch->send("You obviously suffer from skitzofrenia.\r\n");
 	else
 	{
 		if (vict)
 		{
 			strcpy(message, ch->ScrambleSpeech(message, vict).c_str());
-			vict->Send("%s orders you to '%s'", GET_NAME(ch), message);
+			vict->send("%s orders you to '%s'", GET_NAME(ch), message);
 			Act("$n gives $N an order.", FALSE, ch, 0, vict, TO_ROOM);
 
 			if (!order_ok(ch, vict, message))
@@ -1345,7 +1345,7 @@ ACMD(do_order)
 
 			else
 			{
-				ch->Send(OK);
+				ch->send(OK);
 				CommandInterpreter(vict, message);
 			}
 		}
@@ -1367,9 +1367,9 @@ ACMD(do_order)
 			}
 
 			if (found)
-				ch->Send(OK);
+				ch->send(OK);
 			else
-				ch->Send("Nobody here is a loyal subject of yours!\r\n");
+				ch->send("Nobody here is a loyal subject of yours!\r\n");
 		}
 	}
 }
@@ -1395,7 +1395,7 @@ void performFlee(Character *ch)
 
 	if (GET_POS(ch) < POS_FIGHTING)
 	{
-		ch->Send("You are in pretty bad shape, unable to flee!\r\n");
+		ch->send("You are in pretty bad shape, unable to flee!\r\n");
 		return;
 	}
 	attempt = GET_DIRECTION(ch);	/* Select a random direction */
@@ -1407,7 +1407,7 @@ void performFlee(Character *ch)
 
 		if (ch->SimpleMove(attempt, FALSE, true))
 		{
-			ch->Send("You flee head over heels.\r\n");
+			ch->send("You flee head over heels.\r\n");
 
 			if (was_fighting)
 			{
@@ -1417,7 +1417,7 @@ void performFlee(Character *ch)
 					gain_exp(ch, -loss);
 				}
 				if(was_fighting->points.is_bashed && !FIGHTING(was_fighting))
-					was_fighting->SetBashState( -PULSE_VIOLENCE );
+					was_fighting->setBashState( -PULSE_VIOLENCE );
 			}
 		}
 
@@ -1427,7 +1427,7 @@ void performFlee(Character *ch)
 		return;
 	}
 
-	ch->Send("PANIC!  You couldn't escape!\r\n");
+	ch->send("PANIC!  You couldn't escape!\r\n");
 }
 
 ACMD(do_flee)
@@ -1446,12 +1446,12 @@ ACMD(do_flee)
 
 	if(!IS_NPC(ch) && ch->PlayerData->mood == MOOD_BERSERK)
 	{
-		ch->Send("You are BERSERK! Can you not feel the MADNESS?!");
+		ch->send("You are BERSERK! Can you not feel the MADNESS?!");
 		return;
 	}
 	if(GET_DEATH_WAIT(ch) > 0 && ch->in_room == ch->StartRoom())
 	{
-		ch->Send("You must wait %d more minutes to regain strength.\r\n", GET_DEATH_WAIT(ch));
+		ch->send("You must wait %d more minutes to regain strength.\r\n", GET_DEATH_WAIT(ch));
 		return;
 	}
 
@@ -1480,7 +1480,7 @@ ACMD(do_flee)
 	//			//We'll check specially to see if they cannot move due to movement points being too low.
 	//			if(GET_MOVE(ch) < ch->NeededToMove(GET_DIRECTION(ch)))
 	//			{
-	//				ch->Send("You attempt to flee, but are too exhausted to move.\r\n");
+	//				ch->send("You attempt to flee, but are too exhausted to move.\r\n");
 	//				Act("$n attempts to flee, but is too exhausted to move.", TRUE, ch, 0, 0, TO_ROOM);
 	//				return;
 	//			}
@@ -1507,7 +1507,7 @@ ACMD(do_flee)
 				// We'll check specially to see if they cannot move due to movement points being too low.
 				if( GET_MOVE(ch) < ch->NeededToMove(fleeDir) )
 				{
-					ch->Send("You attempt to flee, but are too exhausted to move.\r\n");
+					ch->send("You attempt to flee, but are too exhausted to move.\r\n");
 					Act("$n attempts to flee, but is too exhausted to move.", TRUE, ch, 0, 0, TO_ROOM);
 					return;
 				}
@@ -1541,7 +1541,7 @@ ACMD(do_flee)
 
 	if(room_found == TRUE)
 	{
-		ch->Send("You panic and attempt to flee!\r\n");
+		ch->send("You panic and attempt to flee!\r\n");
 		FLEE_GO(ch) = true;
 
 		if(FLEE_LAG(ch) <= 0)
@@ -1557,7 +1557,7 @@ ACMD(do_flee)
 		return;
 	}
 
-	ch->Send("PANIC!  You couldn't escape!\r\n");
+	ch->send("PANIC!  You couldn't escape!\r\n");
 }
 
 ACMD(do_choke)
@@ -1567,40 +1567,40 @@ ACMD(do_choke)
 
 	if( !GET_SKILL(ch, SKILL_CHOKE) )
 	{
-		ch->Send("You would, but you don't know how!\r\n");
+		ch->send("You would, but you don't know how!\r\n");
 		return;
 	}
 	if (ROOM_FLAGGED(ch->in_room, ROOM_PEACEFUL))
 	{
-		ch->Send("This room just has such a peaceful, easy feeling...\r\n");
+		ch->send("This room just has such a peaceful, easy feeling...\r\n");
 		return;
 	}
 	if(!*arg && FIGHTING(ch) && ch->in_room == FIGHTING(ch)->in_room)
 		vict = FIGHTING(ch);
 	else if (!*arg || !(vict = get_char_room_vis(ch, arg)))
 	{
-		ch->Send("Choke who?\r\n");
+		ch->send("Choke who?\r\n");
 		ch->WaitState(MAX(2, ch->wait + 1));
 		return;
 	}
 	if (FIGHTING(ch) && FIGHTING(ch) != vict && FIGHTING(vict) != ch)
 	{
-		ch->Send("You can't choke someone else while engaged!\r\n");
+		ch->send("You can't choke someone else while engaged!\r\n");
 		return;
 	}
 	if(!vict || !room_visibility(ch, vict))
 	{ //Checks to see if ch can see vict in ch's room 
-		ch->Send("They must have left already...\r\n");
+		ch->send("They must have left already...\r\n");
 		return;
 	}
 	if (vict == ch)
 	{
-		ch->Send("And what would that accomplish?\r\n");
+		ch->send("And what would that accomplish?\r\n");
 		return;
 	}
 	if(GET_POS(vict) == POS_FLYING)
 	{
-		ch->Send("They're too high off the ground to reach!\r\n");
+		ch->send("They're too high off the ground to reach!\r\n");
 		return;
 	}
 	if( !ch->command_ready )
@@ -1626,7 +1626,7 @@ ACMD(do_choke)
 				af.bitvector= AFF_SHIELD;
 				affect_to_char( vict, &af );
 
-				vict->Send("You stumble and lose your connection to the True Source!\r\n");
+				vict->send("You stumble and lose your connection to the True Source!\r\n");
 				vict->RemoveSource();
 			}
 		}
@@ -1649,25 +1649,25 @@ ACMD(do_rescue)
 
 	if (!(vict = get_char_room_vis(ch, arg)))
 	{
-		ch->Send("Whom do you want to rescue?\r\n");
+		ch->send("Whom do you want to rescue?\r\n");
 		return;
 	}
 
 	if(GET_RACE(vict) != GET_RACE(ch))
 	{
-		ch->Send("Why would you rescue someone that is not of your kind?\r\n");
+		ch->send("Why would you rescue someone that is not of your kind?\r\n");
 		return;
 	}
 
 	if (vict == ch)
 	{
-		ch->Send("How about fleeing instead?\r\n");
+		ch->send("How about fleeing instead?\r\n");
 		return;
 	}
 
 	if (FIGHTING(ch) == vict)
 	{
-		ch->Send("How can you rescue someone you are trying to kill?\r\n");
+		ch->send("How can you rescue someone you are trying to kill?\r\n");
 		return;
 	}
 
@@ -1685,7 +1685,7 @@ ACMD(do_rescue)
 	}
 
 	if (!GET_SKILL(ch, SKILL_RESCUE))
-		ch->Send("But you have no idea how!\r\n");
+		ch->send("But you have no idea how!\r\n");
 
 	else
 	{
@@ -1694,11 +1694,11 @@ ACMD(do_rescue)
 
 		if (percent > prob)
 		{
-			ch->Send("You fail the rescue!\r\n");
+			ch->send("You fail the rescue!\r\n");
 			return;
 		}
 
-		ch->Send("Banzai!  To the rescue...\r\n");
+		ch->send("Banzai!  To the rescue...\r\n");
 		Act("You are rescued by $N, you are confused!", FALSE, vict, 0, ch, TO_CHAR);
 		Act("$n heroically rescues $N!", FALSE, ch, 0, vict, TO_NOTVICT);
 
@@ -1761,7 +1761,7 @@ ACMD(do_kick)
 
 	if (!GET_SKILL(ch, SKILL_KICK))
 	{
-		ch->Send("You have no idea how.\r\n");
+		ch->send("You have no idea how.\r\n");
 		return;
 	}
 
@@ -1770,14 +1770,14 @@ ACMD(do_kick)
 	/*Added by Fogel 5/1/09 to fix targeting*/
 	if ((!*arg && !FIGHTING(ch)) || (!get_char_room_vis(ch, arg) && !FIGHTING(ch)))
 	{
-		ch->Send("Kick who?\r\n");
+		ch->send("Kick who?\r\n");
 		ch->WaitState(ch->wait + 1);
 		return;
 	}
 
 	if (ROOM_FLAGGED(ch->in_room, ROOM_PEACEFUL))
 	{
-		ch->Send("This room just has such a peaceful, easy feeling...\r\n");
+		ch->send("This room just has such a peaceful, easy feeling...\r\n");
 		return;
 	}
 
@@ -1790,24 +1790,24 @@ ACMD(do_kick)
 
 	if (vict == ch)
 	{
-		ch->Send("Aren't we funny today...\r\n");
+		ch->send("Aren't we funny today...\r\n");
 		return;
 	}
 	/* Added by Galnor on 05/07/2009 - fixes some crashes we had */
 	if( vict == NULL )
 	{
-		ch->Send(NOPERSON);
+		ch->send(NOPERSON);
 		return;
 	}
 	if( GET_POS(vict) >= POS_FLYING )
 	{
-		ch->Send("They're too high off the ground to reach!\r\n");
+		ch->send("They're too high off the ground to reach!\r\n");
 		return;
 	}
 
 	if (FIGHTING(ch) && FIGHTING(ch) != vict && FIGHTING(vict) != ch)
 	{
-		ch->Send("You can't kick someone you aren't fighting!\r\n");
+		ch->send("You can't kick someone you aren't fighting!\r\n");
 		return;
 	}
 
@@ -1846,7 +1846,7 @@ void perform_precisestrike(Character *ch, Character *vict)
 
 	GET_TARGET(ch) = NULL;
 	
-	if (!ch->RollPrecStrike( vict ))
+	if (!ch->rollPrecStrike( vict ))
 		damage(ch, vict, 0, SKILL_PRECISESTRIKE, -1);
 	else
 	{
@@ -1861,7 +1861,7 @@ void perform_precisestrike(Character *ch, Character *vict)
 	}
 }
 
-bool Character::RollPrecStrike( Character *Victim )
+bool Character::rollPrecStrike( Character *Victim )
 {
 	int chance = MiscUtil::random(1,20);
 
@@ -1875,7 +1875,7 @@ bool Character::RollPrecStrike( Character *Victim )
 	return true;
 }
 
-bool Character::RollPrecStrike( Character *Victim, int &off, int &def )
+bool Character::rollPrecStrike( Character *Victim, int &off, int &def )
 {
 	int chance = MiscUtil::random(1,20);
 	off = this->PrecStrikeOffenseRoll();
@@ -1926,19 +1926,19 @@ ACMD(do_precisestrike)
 
 	if (!GET_SKILL(ch, SKILL_PRECISESTRIKE))
 	{
-		ch->Send("You aren't skilled enough to do this!\r\n");
+		ch->send("You aren't skilled enough to do this!\r\n");
 		return;
 	}
 
 	if (!GET_EQ(ch, WEAR_WIELD))
 	{
-		ch->Send("How do you plan on doing this without a weapon?!\r\n");
+		ch->send("How do you plan on doing this without a weapon?!\r\n");
 		return;
 	}
 
 	if (ROOM_FLAGGED(ch->in_room, ROOM_PEACEFUL))
 	{
-		ch->Send("This room just has such a peaceful, easy feeling...\r\n");
+		ch->send("This room just has such a peaceful, easy feeling...\r\n");
 		return;
 	}
 
@@ -1946,7 +1946,7 @@ ACMD(do_precisestrike)
 
 	if(!*buf && !*buf1 && !FIGHTING(ch))
 	{
-		ch->Send(NOPERSON);
+		ch->send(NOPERSON);
 		ch->ps_tgt = -1;
 		return;
 	}
@@ -1988,41 +1988,41 @@ ACMD(do_precisestrike)
 
 	if(!room_visibility(ch, vict))
 	{
-		ch->Send("They must have left already...\r\n");
+		ch->send("They must have left already...\r\n");
 		ch->ps_tgt = -1;
 		return;
 	}
 
 	if( vict == NULL )
 	{
-		ch->Send(NOPERSON);
+		ch->send(NOPERSON);
 		ch->ps_tgt = -1;
 		return;
 	}
 
 	if (vict == ch)
 	{
-		ch->Send("You can only strike others who are in the room!\r\n");
+		ch->send("You can only strike others who are in the room!\r\n");
 		ch->ps_tgt = -1;
 		return;
 	}
 
 	if (ch->ps_tgt == -1)
 	{
-		ch->Send("That spot is impossible to hit!\r\n");
+		ch->send("That spot is impossible to hit!\r\n");
 		ch->ps_tgt = -1;
 		return;
 	}
 
 	if (FIGHTING(ch) && FIGHTING(ch) != vict && FIGHTING(vict) != ch)
 	{
-		ch->Send("You can't strike someone you aren't fighting!\r\n");
+		ch->send("You can't strike someone you aren't fighting!\r\n");
 		ch->ps_tgt = -1;
 		return;
 	}
 	if(GET_POS(vict) == POS_FLYING)
 	{
-		ch->Send("They're too high off the ground to reach!\r\n");
+		ch->send("They're too high off the ground to reach!\r\n");
 		ch->ps_tgt = -1;
 		return;
 	}
@@ -2095,7 +2095,7 @@ int Character::ShieldBlockOffenseRoll()
 	return off;
 }
 
-bool Character::RollShieldBlock( Character *attacker, int attack_type )
+bool Character::rollShieldBlock( Character *attacker, int attack_type )
 {
 	if( this->ShieldBlockOffenseRoll() > attacker->ShieldBlockDefenseRoll( attack_type ) )
 		return true;
@@ -2111,7 +2111,7 @@ void perform_shieldblock(Character *ch, Character *vict, int attack_type, int su
 
 	ch->ShieldBlock = false;
 
-	if( ch->RollShieldBlock( vict, attack_type ) )
+	if( ch->rollShieldBlock( vict, attack_type ) )
 	{//	Landed. Varied effects may be added later, but for now vict will always have a bashed state of PULSE_VIOLENCE applied in damage()
 		if( !AFF_FLAGGED( ch, AFF_SHIELD_BLOCK ) )
 			apply_shieldblock( ch );
@@ -2145,13 +2145,13 @@ ACMD(do_shieldblock)
 
 	if(!GET_EQ(ch, WEAR_SHIELD))
 	{
-		ch->Send("You need to be using a shield for this to work.\r\n");
+		ch->send("You need to be using a shield for this to work.\r\n");
 		return;
 	}
 
 	if(!ch->GetSkillLevel(SKILL_PARRY))
 	{
-		ch->Send("You don't know how to do this!\r\n");
+		ch->send("You don't know how to do this!\r\n");
 		return;
 	}
 
@@ -2214,13 +2214,13 @@ ACMD(do_hamstring)
 
 	if (!GET_SKILL(ch, SKILL_HAMSTRING) || !IS_BLADEMASTER(ch))
 	{
-		ch->Send("You have no idea how.\r\n");
+		ch->send("You have no idea how.\r\n");
 		return;
 	}
 
 	if (GET_EQ(ch, WEAR_WIELD) && GET_OBJ_VAL( GET_EQ(ch, WEAR_WIELD), 0 ) != WEAPON_LONG_BLADE)
 	{
-		ch->Send("You need to be wielding a sword to do that!\r\n");
+		ch->send("You need to be wielding a sword to do that!\r\n");
 		return;
 	}
 
@@ -2228,7 +2228,7 @@ ACMD(do_hamstring)
 
 	if ((!*arg && !FIGHTING(ch)) || (!get_char_room_vis(ch, arg) && !FIGHTING(ch)))
 	{
-		ch->Send("Who do you wish to do this to?\r\n");
+		ch->send("Who do you wish to do this to?\r\n");
 		ch->WaitState(ch->wait + 1);
 		return;
 	}
@@ -2240,18 +2240,18 @@ ACMD(do_hamstring)
 
 	if (vict == ch)
 	{
-		ch->Send("Why would you want to hamstring yourself?\r\n");
+		ch->send("Why would you want to hamstring yourself?\r\n");
 		return;
 	}
 	
 	if( vict == NULL )
 	{
-		ch->Send(NOPERSON);
+		ch->send(NOPERSON);
 		return;
 	}
 	if( GET_POS(vict) >= POS_FLYING )
 	{
-		ch->Send("They're too high off the ground to reach!\r\n");
+		ch->send("They're too high off the ground to reach!\r\n");
 		return;
 	}
 
@@ -2307,19 +2307,19 @@ ACMD(do_whirlwind)
 {
 	if (!GET_SKILL(ch, SKILL_WHIRLWIND) || !IS_BLADEMASTER(ch))
 	{
-		ch->Send("You have no idea how.\r\n");
+		ch->send("You have no idea how.\r\n");
 		return;
 	}
 
 	if (GET_EQ(ch, WEAR_WIELD) && GET_OBJ_VAL( GET_EQ(ch, WEAR_WIELD), 0 ) != WEAPON_LONG_BLADE)
 	{
-		ch->Send("You need to be wielding a sword to do that!\r\n");
+		ch->send("You need to be wielding a sword to do that!\r\n");
 		return;
 	}
 
 	if (MOUNT(ch))
 	{
-		ch->Send("You can't do this while mounted!\r\n");
+		ch->send("You can't do this while mounted!\r\n");
 		return;
 	}
 
@@ -2327,7 +2327,7 @@ ACMD(do_whirlwind)
 
 	if (!FIGHTING(ch))
 	{
-		ch->Send("You spin around, making yourself quite dizzy.\r\n");
+		ch->send("You spin around, making yourself quite dizzy.\r\n");
 		return;
 	}
 
@@ -2378,25 +2378,25 @@ ACMD(do_invert)
 
 	if( !ch->ChannelingAbility() && !IS_NPC(ch) && GET_LEVEL(ch) < LVL_APPR )
 	{
-		ch->Send("You have no idea how to channel the One Power.\r\n");
+		ch->send("You have no idea how to channel the One Power.\r\n");
 		return;
 	}
 
 	if( !weave || GET_SKILL(ch, weave->getVnum()) <= 0 )
 	{
-		ch->Send("You don't know how to do that.\r\n");
+		ch->send("You don't know how to do that.\r\n");
 		return;
 	}
 	
 	if( !PRF_FLAGGED(ch, PRF_SOURCE) )
 	{
-		ch->Send("You are not in touch with the True Source.\r\n");
+		ch->send("You are not in touch with the True Source.\r\n");
 		return;
 	}
 
 	if( AFF_FLAGGED(ch, AFF_SHIELD) || ShieldManager::GetManager().ShieldedBy(ch) != NULL )
 	{
-		ch->Send("Your connection to the True Source is blocked!\r\n");
+		ch->send("Your connection to the True Source is blocked!\r\n");
 		return;
 	}
 
@@ -2412,7 +2412,7 @@ ACMD(do_invert)
 	{
 		if( MiscUtil::random(0,105) > GET_SKILL(ch, weave->getVnum()) )
 		{
-			ch->Send("You lose your concentration.\r\n");
+			ch->send("You lose your concentration.\r\n");
 			return;
 		}
 		ch->InvertNextWeave = true;
@@ -2427,7 +2427,7 @@ ACMD(do_shadowstep)
 
 	if( GET_CLASS(ch) != CLASS_GREYMAN )
 	{
-		ch->Send("You have no idea how.\r\n");
+		ch->send("You have no idea how.\r\n");
 		return;
 	}
 
@@ -2435,7 +2435,7 @@ ACMD(do_shadowstep)
 
 	if ( !get_char_room_vis(ch, arg) )
 	{
-		ch->Send("Who do you wish to do this to?\r\n");
+		ch->send("Who do you wish to do this to?\r\n");
 		ch->WaitState(ch->wait + 1);
 		return;
 	}
@@ -2447,13 +2447,13 @@ ACMD(do_shadowstep)
 
 	if (vict == ch)
 	{
-		ch->Send("What would be the point of that?\r\n");
+		ch->send("What would be the point of that?\r\n");
 		return;
 	}
 	
 	if( vict && GET_POS(vict) >= POS_FLYING )
 	{
-		ch->Send("They're too high off the ground to reach!\r\n");
+		ch->send("They're too high off the ground to reach!\r\n");
 		return;
 	}
 
@@ -2477,7 +2477,7 @@ void perform_shadowstep(Character *ch, Character *vict)
 
 		if ( GET_POS(ch) < POS_FIGHTING )
 		{
-			ch->Send("You are in pretty bad shape, unable to flee!\r\n");
+			ch->send("You are in pretty bad shape, unable to flee!\r\n");
 			return;
 		}
 
@@ -2497,7 +2497,7 @@ void perform_shadowstep(Character *ch, Character *vict)
 		if ( MiscUtil::random( 1, 101 ) < GET_SKILL( ch, SKILL_HIDE ) && !ROOM_FLAGGED(ch->in_room, ROOM_NOHIDE))
 			SET_BIT_AR( AFF_FLAGS( ch ), AFF_HIDE );
 		else
-			ch->Send("You can't find a good place to hide!\r\n");
+			ch->send("You can't find a good place to hide!\r\n");
 	}
 	else
 	{
@@ -2517,7 +2517,7 @@ ACMD(do_pulverize)
 {
 	if (!GET_SKILL(ch, SKILL_PULVERIZE) || !IS_OGIER(ch))
 	{
-		ch->Send("You have no idea how.\r\n");
+		ch->send("You have no idea how.\r\n");
 		return;
 	}
 
@@ -2525,7 +2525,7 @@ ACMD(do_pulverize)
 	{
 		std::stringstream Buffer;
 		Buffer << "You must wait another " << ch->pulverizeCooldown << " seconds before you can do that again.\r\n";
-		ch->Send(Buffer.str());
+		ch->send(Buffer.str());
 		return;
 	}
 

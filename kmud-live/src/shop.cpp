@@ -609,13 +609,13 @@ void shopping_buy(char *arg, Character *ch, Character *keeper, int shop_nr)
 
 	if ((IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)))
 	{
-		ch->Send("%s: You can't carry any more items.\r\n", fname(obj->name));
+		ch->send("%s: You can't carry any more items.\r\n", fname(obj->name));
 		return;
 	}
 
 	if ((ch->CarriedWeight() + obj->Weight()) > CAN_CARRY_W(ch))
 	{
-		ch->Send("%s: You can't carry that much weight.\r\n", fname(obj->name));
+		ch->send("%s: You can't carry that much weight.\r\n", fname(obj->name));
 		return;
 	}
 
@@ -630,11 +630,9 @@ void shopping_buy(char *arg, Character *ch, Character *keeper, int shop_nr)
 		{
 			obj = read_object(GET_OBJ_RNUM(obj), REAL, true);
 			sprintf(obj->creator, "Shopkeeper %s", GET_NAME(keeper));
-#ifdef KINSLAYER_JAVASCRIPT
 			if( !obj->IsPurged() ) {
 				js_load_triggers(obj);
 			}
-#endif
 		}
 		else
 		{
@@ -681,7 +679,7 @@ void shopping_buy(char *arg, Character *ch, Character *keeper, int shop_nr)
 
 	sprintf(buf, shop_index[shop_nr].message_buy.c_str(), GET_NAME(ch), goldamt);
 	do_tell(keeper, buf, cmd_tell, 0);
-	ch->Send("You now have %s.\r\n", tempstr);
+	ch->send("You now have %s.\r\n", tempstr);
 }
 
 Object *get_selling_obj(Character *ch, char *name, Character *keeper, int shop_nr, int msg)
@@ -870,8 +868,8 @@ void shopping_sell(char *arg, Character *ch, Character *keeper, int shop_nr)
 
 	sprintf(buf, shop_index[shop_nr].message_sell.c_str(), GET_NAME(ch), goldamt);
 	do_tell(keeper, buf, 0, 0);
-	ch->Send("You sell %s\r\n", tempstr);
-	ch->Send("The shopkeeper now has %s.\r\n", tempstr);
+	ch->send("You sell %s\r\n", tempstr);
+	ch->send("The shopkeeper now has %s.\r\n", tempstr);
 	Act("$n tucks some coins into $s pockets.", FALSE, keeper, 0, 0, TO_ROOM);
 }
 
@@ -1106,7 +1104,13 @@ void Shop::BootTypes( FILE* file )
 	
 	do
 	{
-		fgets( Buffer, sizeof(Buffer), file );
+		char *returnValue = fgets( Buffer, sizeof(Buffer), file );
+
+		if(returnValue == NULL)
+		{
+			Log("SYSERR: Shop::BootTypes : Unknown error occurred while reading file.");
+			exit(1);
+		}
 
 		Keywords[0] = '\0';
 		sscanf( Buffer, "%d", &nr );
@@ -1130,7 +1134,13 @@ void Shop::BootProducing( FILE* file )
 
 	do
 	{
-		fgets( Buffer, sizeof(Buffer), file );
+		char *returnValue = fgets( Buffer, sizeof(Buffer), file );
+
+		if(returnValue == NULL)
+		{
+			Log("SYSERROR: Shop::BootProducing() : Unknown error occurred while reading file.");
+			exit(1);
+		}
 
 		sscanf( Buffer, "%d", &nr );
 		if( nr != -1 && (vnum = real_object( nr )) != -1 )
@@ -1328,7 +1338,7 @@ void handle_detailed_list(char *buf, char *buf1, Character * ch)
 
 	else
 	{
-		ch->Send("\r\n");
+		ch->send("\r\n");
 		sprintf(buf, "            %s", buf1);
 	}
 }
@@ -1341,7 +1351,7 @@ void list_detailed_shop(Character * ch, int shop_nr)
 	Room *temp;
 	unsigned int index;
 
-	ch->Send("Vnum:       [%5d], Rnum: [%5d]\r\n", SHOP_NUM(shop_nr), shop_nr + 1);
+	ch->send("Vnum:       [%5d], Rnum: [%5d]\r\n", SHOP_NUM(shop_nr), shop_nr + 1);
 	strcpy(buf, "Rooms:      ");
 
 	for (index = 0; index < shop_index[shop_nr].in_room.size(); ++index)
@@ -1355,11 +1365,11 @@ void list_detailed_shop(Character * ch, int shop_nr)
 		handle_detailed_list(buf, buf1, ch);
 	}
 	if (!index)
-		ch->Send("Rooms:      None!\r\n");
+		ch->send("Rooms:      None!\r\n");
 	else
 	{
 		strcat(buf, "\r\n");
-		ch->Send(buf);
+		ch->send(buf);
 	}
 
 	strcpy(buf, "Shopkeeper: ");
@@ -1372,7 +1382,7 @@ void list_detailed_shop(Character * ch, int shop_nr)
 			StringUtil::allUpper(StringUtil::yesNo(SHOP_FUNC(shop_nr))).c_str());
 		if ((k = get_char_num(SHOP_KEEPER(shop_nr))))
 		{
-			ch->Send(buf);
+			ch->send(buf);
 			sprintf(buf, "Coins:      [%9d], Bank: [%9d] (Total: %d)\r\n",
 			        k->points.gold, SHOP_BANK(shop_nr), (int)k->points.gold + SHOP_BANK(shop_nr));
 		}
@@ -1380,10 +1390,10 @@ void list_detailed_shop(Character * ch, int shop_nr)
 	else
 		strcat(buf, "<NONE>\r\n");
 
-	ch->Send(buf);
+	ch->send(buf);
 
 	strcpy(buf1, customer_string(shop_nr, TRUE));
-	ch->Send("Customers:  %s\r\n", (*buf1) ? buf1 : "None");
+	ch->send("Customers:  %s\r\n", (*buf1) ? buf1 : "None");
 
 	strcpy(buf, "Produces:   ");
 
@@ -1400,11 +1410,11 @@ void list_detailed_shop(Character * ch, int shop_nr)
 	}
 
 	if (!index)
-		ch->Send("Produces:   Nothing!\r\n");
+		ch->send("Produces:   Nothing!\r\n");
 	else
 	{
 		strcat(buf, "\r\n");
-		ch->Send(buf);
+		ch->send(buf);
 	}
 	strcpy(buf, "Buys:       ");
 
@@ -1424,21 +1434,21 @@ void list_detailed_shop(Character * ch, int shop_nr)
 	}
 
 	if (!index)
-		ch->Send("Buys:       Nothing!\r\n");
+		ch->send("Buys:       Nothing!\r\n");
 	else
 	{
 		strcat(buf, "\r\n");
-		ch->Send(buf);
+		ch->send(buf);
 	}
 	sprintf(buf, "Buy at:     [%4.2f], Sell at: [%4.2f], Open: [%d-%d, %d-%d]%s",
 	        SHOP_SELLPROFIT(shop_nr), SHOP_BUYPROFIT(shop_nr), SHOP_OPEN1(shop_nr),
 	        SHOP_CLOSE1(shop_nr), SHOP_OPEN2(shop_nr), SHOP_CLOSE2(shop_nr), "\r\n");
 
-	ch->Send(buf);
+	ch->send(buf);
 
 	sprintbit((long) SHOP_BITVECTOR(shop_nr), shop_bits, buf1);
 	sprintf(buf, "Bits:       %s\r\n", buf1);
-	ch->Send(buf);
+	ch->send(buf);
 }
 
 
@@ -1462,7 +1472,7 @@ void show_shops(Character * ch, char *arg)
 
 			if (shop_nr == top_shop)
 			{
-				ch->Send("This isn't a shop!\r\n");
+				ch->send("This isn't a shop!\r\n");
 				return;
 			}
 		}
@@ -1474,7 +1484,7 @@ void show_shops(Character * ch, char *arg)
 
 		if ((shop_nr < 0) || (shop_nr >= top_shop))
 		{
-			ch->Send("Illegal shop number.\r\n");
+			ch->send("Illegal shop number.\r\n");
 			return;
 		}
 

@@ -1,5 +1,3 @@
-#ifdef KINSLAYER_JAVASCRIPT
-
 #include "js_interpreter.h"
 
 #include <csignal>
@@ -142,14 +140,14 @@ JSBool kjsOperationalCallback(JSContext * cx)
 }
 
 bool keepTriggerOperationalCallbackFunctionAlive = true;
-boost::mutex keepTriggerOperationalCallbackFunctionAliveMutex;
-boost::thread triggerOperationalCallbackThread;
+std::mutex keepTriggerOperationalCallbackFunctionAliveMutex;
+std::thread triggerOperationalCallbackThread;
 void triggerOperationalCallback(flusspferd::context context)
 {
 	while(true)
 	{
 		{
-			boost::mutex::scoped_lock(keepTriggerOperationalCallbackFunctionAliveMutex);
+			std::lock_guard<std::mutex> lock(keepTriggerOperationalCallbackFunctionAliveMutex);
 			if(!keepTriggerOperationalCallbackFunctionAlive)
 				break;
 		}
@@ -159,7 +157,7 @@ void triggerOperationalCallback(flusspferd::context context)
 			JS_TriggerOperationCallback(Impl::get_context(context));
 		}
 
-		boost::this_thread::sleep(boost::posix_time::seconds(1));
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 }
 
@@ -230,7 +228,7 @@ JSEnvironment::JSEnvironment()
 
     JS_SetOperationCallback(Impl::get_context(current_context()), &kjsOperationalCallback);
     
-	triggerOperationalCallbackThread = boost::thread( boost::bind(&triggerOperationalCallback, current_context()) );
+	triggerOperationalCallbackThread = std::thread( &triggerOperationalCallback, current_context() );
 
 	env = this;
 }
@@ -662,6 +660,4 @@ __int64 JSEnvironment::timeSinceLastGC()
 {
 	return Clock::getTick() - timeOfLastGC;
 }
-
-#endif
 

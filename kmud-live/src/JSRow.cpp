@@ -1,5 +1,3 @@
-#ifdef KINSLAYER_JAVASCRIPT
-
 #include "JSQuery.h"
 #include "JSRow.h"
 
@@ -38,5 +36,3 @@ bool JSRow::getIsFieldNullByIndex(int fieldIndex)
 {
 	return (*(real->MyRow)).isFieldNull(fieldIndex);
 }
-
-#endif

@@ -204,15 +204,15 @@ void medit_save_internally(Descriptor *d)
 void MeditWarrantsMenu(Descriptor *d)
 {
 	std::list<Warrant *>::iterator iter;
-	d->Send("----Current Warrants----\r\n\n");
+	d->send("----Current Warrants----\r\n\n");
 
 	for(iter = Warrants.begin();iter != Warrants.end();++iter)
 	{
 		if(IS_SET_AR(d->olc->mob->points.warrants, (*iter)->vnum))
-			d->Send("  %s%d. %s%s\r\n", grn, (*iter)->vnum, yel, (*iter)->Name.c_str());
+			d->send("  %s%d. %s%s\r\n", grn, (*iter)->vnum, yel, (*iter)->Name.c_str());
 	}
 
-	d->Send("\r\n%sN%s) Add Warrant    %sD%s) Delete Warrant\r\n"
+	d->send("\r\n%sN%s) Add Warrant    %sD%s) Delete Warrant\r\n"
 	        "%sQ%s) Exit Warrant Menu\r\n"
 	        "Choose an option : ",
 	        grn, nrm, grn, nrm,
@@ -226,25 +226,25 @@ void MeditDispNsects(Descriptor *d)
 	Character *mob = OLC_MOB(d);
 	int i = 0, c = 0;
 
-	d->Send("Setup for room sectors in which this MOB cannot wander to.\r\n");
+	d->send("Setup for room sectors in which this MOB cannot wander to.\r\n");
 	for(i = 0;i < NUM_ROOM_SECTORS;++i)
 	{
-		d->Send("%s%2d%s) %-20.20s %s", grn, i, nrm,
+		d->send("%s%2d%s) %-20.20s %s", grn, i, nrm,
 		        sector_types[i], !(++c % 2) ? "\r\n" : "");
 	}
-	d->Send("\r\nCurrently Set: ");
+	d->send("\r\nCurrently Set: ");
 	for(c  = 0, i = 0;i < NUM_ROOM_SECTORS;++i)
 	{
 		if(IS_SET(mob->MobData->nsects, Q_BIT(i)))
 		{
 			if(c++)
-				d->Send(", ");
+				d->send(", ");
 			else
-				d->Send(" ");
-			d->Send("%s%s%s", cyn, sector_types[i], nrm);
+				d->send(" ");
+			d->send("%s%s%s", cyn, sector_types[i], nrm);
 		}
 	}
-	d->Send("\r\n\n%sQ%s) Quit", grn, nrm);
+	d->send("\r\n\n%sQ%s) Quit", grn, nrm);
 
 	OLC_MODE(d) = MEDIT_NSECTS;
 }
@@ -255,15 +255,15 @@ void MeditDispAssists(Descriptor *d)
 	int rnum = 0, count = 1;
 	std::list<int>::iterator ai;
 
-	d->Send("  Mobile Assists\r\n");
+	d->send("  Mobile Assists\r\n");
 	for(ai = mob->MobData->assists.begin();ai != mob->MobData->assists.end();++ai, ++count)
 	{
 		if( (rnum = MobManager::GetManager().RealMobile((*ai))) != -1)
-			d->Send("%d. %s%s%s[%s%d%s]\r\n", count, cyn,
+			d->send("%d. %s%s%s[%s%d%s]\r\n", count, cyn,
 			MobManager::GetManager().GetPrototype(rnum)->player.short_descr,
 			nrm, grn, MobManager::GetManager().GetIndex(rnum)->vnum, nrm);
 	}
-	d->Send("%sN%s) New Assists      %sD%s) Delete Assist\r\n"
+	d->send("%sN%s) New Assists      %sD%s) Delete Assist\r\n"
 	        "%sQ%s) Quit\r\n", cyn, nrm, cyn, nrm, cyn, nrm);
 
 }
@@ -277,7 +277,7 @@ void medit_food_menu(Descriptor *d)
 		OLC_MOB(d)->MobData->Food->quantity = 0;
 	}
 
-	d->Send("%sA%s) Food Item Vnum   : %s%d\r\n"
+	d->send("%sA%s) Food Item Vnum   : %s%d\r\n"
 	        "%sB%s) Food Quantity    : %s%d\r\n"
 	        "%sD%s) Delete Food Unit\r\n"
 	        "%sS%s) Save Food Unit\r\n",
@@ -297,7 +297,7 @@ void medit_skin_menu(Descriptor *d)
 		OLC_MOB(d)->MobData->Skin->skinned = false;
 	}
 
-	d->Send("%sA%s) Skin Item Vnum   : %s%d\r\n"
+	d->send("%sA%s) Skin Item Vnum   : %s%d\r\n"
 	        "%sB%s) Skinning Requirement   : %s%d\r\n"
 	        "%sD%s) Delete Skin Unit\r\n"
 	        "%sS%s) Save Skin Unit\r\n",
@@ -319,15 +319,15 @@ void medit_disp_positions(Descriptor *d)
 
 #if defined(CLEAR_SCREEN)
 
-	d->Send(".[H.[J");
+	d->send(".[H.[J");
 #endif
 
 	for (i = 0; *position_types[i] != '\n';++i)
 	{
-		d->Send("%s%2d%s) %s\r\n", grn, i, nrm, position_types[i]);
+		d->send("%s%2d%s) %s\r\n", grn, i, nrm, position_types[i]);
 	}
 
-	d->Send("Enter position number : ");
+	d->send("Enter position number : ");
 }
 
 void medit_display_aggros(Descriptor *d)
@@ -339,23 +339,23 @@ void medit_display_aggros(Descriptor *d)
 
 #if defined(CLEAR_SCREEN)
 
-	d->Send(".[H.[J");
+	d->send(".[H.[J");
 
 #endif
 
 
 	for(i = 0;i < NUM_AGGROS;++i)
-		d->Send("%d) %s%s%s\r\n", i + 1, grn, aggros[i], nrm);
+		d->send("%d) %s%s%s\r\n", i + 1, grn, aggros[i], nrm);
 
-	d->Send("Current aggros:");
+	d->send("Current aggros:");
 	for(i = 0;i < NUM_AGGROS;++i)
 	{
 		if(GET_AGGRO(OLC_MOB(d), i))
 		{
 			if(i)
-				d->Send(" ,");
+				d->send(" ,");
 
-			d->Send("%s%s%s", cyn, aggros[i], nrm);
+			d->send("%s%s%s", cyn, aggros[i], nrm);
 		}
 	}
 }
@@ -369,16 +369,16 @@ void medit_race(Descriptor *d)
 
 #if defined(CLEAR_SCREEN)
 
-	d->Send(".[H.[J");
+	d->send(".[H.[J");
 
 #endif
 
 	for (i = 0; *pc_race_types[i] != '\n'; i++)
 	{
-		d->Send("%s%2d%s) %s\r\n", grn, i, nrm, pc_race_types[i]);
+		d->send("%s%2d%s) %s\r\n", grn, i, nrm, pc_race_types[i]);
 	}
 
-	d->Send("Enter a race :");
+	d->send("Enter a race :");
 }
 
 void medit_class(Descriptor *d)
@@ -389,16 +389,16 @@ void medit_class(Descriptor *d)
 
 #if defined(CLEAR_SCREEN)
 
-	d->Send(".[H.[J");
+	d->send(".[H.[J");
 
 #endif
 
 	for (i = 0; *class_types[i] != '\n'; ++i)
 	{
-		d->Send("%s%2d%s) %s\r\n", grn, i, nrm, class_types[i]);
+		d->send("%s%2d%s) %s\r\n", grn, i, nrm, class_types[i]);
 	}
 
-	d->Send("Enter a race :");
+	d->send("Enter a race :");
 }
 
 void medit_clan(Descriptor *d)
@@ -409,16 +409,16 @@ void medit_clan(Descriptor *d)
 
 #if defined(CLEAR_SCREEN)
 
-	d->Send(".[H.[J");
+	d->send(".[H.[J");
 
 #endif
 
 	for (clan = ClanList;clan;clan = clan->Next)
 	{
-		d->Send("%s%2d%s) %s\r\n", grn, clan->vnum, nrm, clan->Name.c_str());
+		d->send("%s%2d%s) %s\r\n", grn, clan->vnum, nrm, clan->Name.c_str());
 	}
 
-	d->Send("Enter a clan(0 for none, Q to quit) :");
+	d->send("Enter a clan(0 for none, Q to quit) :");
 }
 
 /*-------------------------------------------------------------------*/
@@ -486,7 +486,7 @@ void medit_disp_mprog(Descriptor *d)
 
 #if defined(CLEAR_SCREEN)
 
-	d->Send("^[[H^[[J");
+	d->send("^[[H^[[J");
 #endif
 
 	while (mprog)
@@ -514,7 +514,7 @@ void medit_disp_mprog(Descriptor *d)
               {
 
 #if defined(CLEAR_SCREEN)
-	              d->Send("^[[H^[[J");
+	              d->send("^[[H^[[J");
 #endif
 
 	              d->character	"1) Type: %s\r\n"
@@ -540,7 +540,7 @@ void medit_disp_mprog(Descriptor *d)
 
 #if defined(CLEAR_SCREEN)
 
-	                            d->Send("^[[H^[[J");
+	                            d->send("^[[H^[[J");
 #endif
 
 	                            for (i = 0; i < NUM_PROGS-1;++i)
@@ -548,7 +548,7 @@ void medit_disp_mprog(Descriptor *d)
 		                            d->character"%s%2d%s) %s\r\n", grn, i, nrm, mobprog_types[i]);
 	                            }
 
-	                            d->Send("Enter mob prog type : ");
+	                            d->send("Enter mob prog type : ");
 	                            OLC_MODE(d) = MEDIT_MPROG_TYPE;
 }
 #endif
@@ -566,15 +566,15 @@ void medit_disp_sex(Descriptor *d)
 
 #if defined(CLEAR_SCREEN)
 
-	d->Send(".[H.[J");
+	d->send(".[H.[J");
 #endif
 
 	for (i = 0; i < NUM_GENDERS; ++i)
 	{
-		d->Send("%s%2d%s) %s\r\n", grn, i, nrm, genders[i]);
+		d->send("%s%2d%s) %s\r\n", grn, i, nrm, genders[i]);
 	}
 
-	d->Send("Enter gender number : ");
+	d->send("Enter gender number : ");
 }
 
 /*-------------------------------------------------------------------*/
@@ -590,15 +590,15 @@ void medit_disp_attack_types(Descriptor *d)
 
 #if defined(CLEAR_SCREEN)
 
-	d->Send(".[H.[J");
+	d->send(".[H.[J");
 #endif
 
 	for (i = 0; i < NUM_ATTACK_TYPES; ++i)
 	{
-		d->Send("%s%2d%s) %s\r\n", grn, i, nrm, attack_hit_text[i].singular);
+		d->send("%s%2d%s) %s\r\n", grn, i, nrm, attack_hit_text[i].singular);
 	}
 
-	d->Send("Enter attack type : ");
+	d->send("Enter attack type : ");
 }
 
 /*-------------------------------------------------------------------*/
@@ -614,17 +614,17 @@ void medit_disp_mob_flags(Descriptor *d)
 
 #if defined(CLEAR_SCREEN)
 
-	d->Send(".[H.[J");
+	d->send(".[H.[J");
 #endif
 
 	for (i = 0; i < NUM_MOB_FLAGS;++i)
 	{
-		d->Send("%s%2d%s) %-20.20s  %s", grn, i + 1, nrm, action_bits[i],
+		d->send("%s%2d%s) %-20.20s  %s", grn, i + 1, nrm, action_bits[i],
 		        !(++columns % 2) ? "\r\n" : "");
 	}
 
 	sprintbit(MOB_FLAGS(OLC_MOB(d)), (const char **) action_bits, buf1);
-	d->Send("\r\nCurrent flags : %s%s%s\r\nEnter mob flags (0 to quit) : ",
+	d->send("\r\nCurrent flags : %s%s%s\r\nEnter mob flags (0 to quit) : ",
 	        cyn, buf1, nrm);
 }
 
@@ -639,17 +639,17 @@ void medit_disp_aff_flags(Descriptor *d)
 
 #if defined(CLEAR_SCREEN)
 
-	d->Send("[H[J");
+	d->send("[H[J");
 #endif
 
 	for (i = 0; i < NUM_AFF_FLAGS;++i)
 	{
-		d->Send("%s%2d%s) %-20.20s  %s", grn, i + 1, nrm, affected_bits[i+1],
+		d->send("%s%2d%s) %-20.20s  %s", grn, i + 1, nrm, affected_bits[i+1],
 		        !(++columns % 2) ? "\r\n" : "");
 	}
 
 	sprintbitarray(AFF_FLAGS(OLC_MOB(d)), (const char **) affected_bits, AF_ARRAY_MAX, buf1);
-	d->Send("\r\nCurrent flags   : %s%s%s\r\nEnter aff flags (0 to quit) : ",
+	d->send("\r\nCurrent flags   : %s%s%s\r\nEnter aff flags (0 to quit) : ",
 	        cyn, buf1, nrm);
 }
 
@@ -726,7 +726,7 @@ void medit_disp_menu(Descriptor *d)
 			clanName = clan->Name;
 	}
 
-	d->Send(
+	d->send(
 
 #if defined(CLEAR_SCREEN)
 	    "[H[J"
@@ -766,7 +766,7 @@ void medit_disp_menu(Descriptor *d)
 
 	sprintbit(MOB_FLAGS(mob), (const char **) action_bits, buf1);
 	sprintbitarray( (int *) AFF_FLAGS(mob), (const char **) affected_bits, AF_ARRAY_MAX, buf2);
-	d->Send(
+	d->send(
 
 	    "%sA%s) Position  : %s%s\r\n"
 	    "%sB%s) Default   : %s%s\r\n"
@@ -791,9 +791,7 @@ void medit_disp_menu(Descriptor *d)
 #if defined(OASIS_MPROG)
 	    "%sP%s) Mob Progs : %s%s\r\n"
 #endif
-#ifdef KINSLAYER_JAVASCRIPT
 		"%sJ%s) JavaScript: %s%s\r\n"
-#endif
 	    "%sQ%s) Quit\r\n"
 	    "Enter choice : ",
 
@@ -817,9 +815,7 @@ void medit_disp_menu(Descriptor *d)
 	    grn, nrm, FoodString.c_str(),
 		grn, nrm, SkinString.c_str(),
 	    grn, nrm, cyn, WarrantStr.c_str(),
-#ifdef KINSLAYER_JAVASCRIPT
 		grn, nrm, cyn, (mob->js_scripts->size() ? "Set." : "Not Set."),
-#endif
 	    grn, nrm
 	);
 
@@ -842,7 +838,7 @@ void medit_parse(Descriptor *d, char *arg)
 	{
 		if (!*arg || (!isdigit(arg[0]) && ((*arg == '-') && (!isdigit(arg[1])))))
 		{
-			d->Send("Field must be numerical, try again : ");
+			d->send("Field must be numerical, try again : ");
 			return;
 		}
 	}
@@ -865,7 +861,7 @@ void medit_parse(Descriptor *d, char *arg)
 					 * Save the mob in memory and to disk.
 					 */
 
-					d->Send("Saving mobile to memory.\r\n");
+					d->send("Saving mobile to memory.\r\n");
 					AddOlcLog( d->character, "mob", d->olc->mob->getVnum() );
 					medit_save_internally(d);
 					MudLog(CMP, MAX(LVL_BUILDER, GET_INVIS_LEV(d->character)), TRUE,
@@ -878,8 +874,8 @@ void medit_parse(Descriptor *d, char *arg)
 					return;
 
 				default:
-					d->Send("Invalid choice!\r\n");
-					d->Send("Do you wish to save the mobile? : ");
+					d->send("Invalid choice!\r\n");
+					d->send("Do you wish to save the mobile? : ");
 					return;
 			}
 
@@ -912,12 +908,12 @@ void medit_parse(Descriptor *d, char *arg)
 						break;
 					case 5:
 						OLC_MODE(d) = MEDIT_D_DESC;
-						d->Send("Enter mob description: (/s saves /h for help)\r\n\r\n");
+						d->send("Enter mob description: (/s saves /h for help)\r\n\r\n");
 						d->backstr = NULL;
 
 						if (OLC_MOB(d)->player.description)
 						{
-							d->Send(OLC_MOB(d)->player.description);
+							d->send(OLC_MOB(d)->player.description);
 							d->backstr = str_dup(OLC_MOB(d)->player.description);
 						}
 
@@ -987,7 +983,7 @@ void medit_parse(Descriptor *d, char *arg)
 					case 'Q':
 						if (OLC_VAL(d))
 						{	/* Anything been changed? */
-							d->Send("Do you wish to save the changes to the mobile? (y/n) : ");
+							d->send("Do you wish to save the changes to the mobile? (y/n) : ");
 							OLC_MODE(d) = MEDIT_CONFIRM_SAVESTRING;
 						}
 
@@ -1018,15 +1014,15 @@ void medit_parse(Descriptor *d, char *arg)
 						return;
 					case 'F':
 						OLC_MODE(d) = MEDIT_KITS;
-						d->Send("Enter the number of a kit for this mob (0 for nothing) : ");
+						d->send("Enter the number of a kit for this mob (0 for nothing) : ");
 						return;
 					case 'G':
 						OLC_MODE(d) = MEDIT_ARRIVE;
-						d->Send("Enter the special entrance message (press enter for default) : ");
+						d->send("Enter the special entrance message (press enter for default) : ");
 						return;
 					case 'H':
 						OLC_MODE(d) = MEDIT_EXIT;
-						d->Send("Enter the special exit message (press enter for default) : ");
+						d->send("Enter the special exit message (press enter for default) : ");
 						return;
 					case 'I':
 						OLC_MODE(d) = MEDIT_RACE;
@@ -1055,12 +1051,12 @@ void medit_parse(Descriptor *d, char *arg)
 					case 'O':
 						if(OLC_MOB(d)->MobData->deleted)
 						{
-							d->Send("This MOB will no longer be deleted.\r\n");
+							d->send("This MOB will no longer be deleted.\r\n");
 							OLC_MOB(d)->MobData->deleted = false;
 						}
 						else
 						{
-							d->Send("This MOB will be deleted after the next reboot.\r\n");
+							d->send("This MOB will be deleted after the next reboot.\r\n");
 							OLC_MOB(d)->MobData->deleted = true;
 						}
 						OLC_VAL(d) = 1;
@@ -1082,14 +1078,12 @@ void medit_parse(Descriptor *d, char *arg)
 						OLC_MODE(d) = MEDIT_ASSISTS;
 						MeditDispAssists(d);
 						return;
-#ifdef KINSLAYER_JAVASCRIPT
 					case 'J':
 						OLC_SCRIPT_EDIT_MODE(d) = JSCRIPT_MAIN_MENU;
 						OLC_MODE(d) = OLC_JSCRIPT_EDIT;
 						d->olc->jsScripts = d->olc->mob->js_scripts;
 						JScriptDispMenu(d);
 						return;
-#endif
 					case 'R':
 						OLC_MODE(d) = MEDIT_FOOD_UNIT;
 						medit_food_menu(d);
@@ -1110,7 +1104,7 @@ void medit_parse(Descriptor *d, char *arg)
 
 			if (i != 0)
 			{
-				d->Send(i == 1 ? "\r\nEnter new value : " :
+				d->send(i == 1 ? "\r\nEnter new value : " :
 				        i == -1 ? "\r\nEnter new text :\r\n] " :
 				        "\r\nOops...:\r\n");
 
@@ -1125,7 +1119,7 @@ void medit_parse(Descriptor *d, char *arg)
 			}
 			else if(atoi(arg) < 0 && atoi(arg) >= NUM_ROOM_SECTORS)
 			{
-				d->Send("That number is out of range. Try again(Q to quit) : ");
+				d->send("That number is out of range. Try again(Q to quit) : ");
 				return;
 			}
 			TOGGLE_BIT(OLC_MOB(d)->MobData->nsects, Q_BIT(atoi(arg)));
@@ -1135,24 +1129,24 @@ void medit_parse(Descriptor *d, char *arg)
 			switch(toupper(*arg))
 			{
 				case 'N':
-					d->Send("Enter the virtual number of the mobile to have added to the assist list :");
+					d->send("Enter the virtual number of the mobile to have added to the assist list :");
 					OLC_MODE(d) = MEDIT_NEW_ASSIST;
 					return;
 				case 'D':
 					if(OLC_MOB(d)->MobData->assists.size() <= 0)
 					{
-						d->Send("There mob assists are empty already.\r\n");
+						d->send("There mob assists are empty already.\r\n");
 					}
 					else
 					{
-						d->Send("Enter the number on the list to have removed :");
+						d->send("Enter the number on the list to have removed :");
 						OLC_MODE(d) = MEDIT_DELETE_ASSIST;
 					}
 					return;
 				case 'Q':
 					break;
 				default:
-					d->Send("Invalid option.\r\nTry again : ");
+					d->send("Invalid option.\r\nTry again : ");
 					return;
 			}
 			break;
@@ -1165,7 +1159,7 @@ void medit_parse(Descriptor *d, char *arg)
 			}
 			if(MobManager::GetManager().RealMobile(atoi(arg)) == -1)
 			{
-				d->Send("Invalid mobile. Try again('Q' to quit) :");
+				d->send("Invalid mobile. Try again('Q' to quit) :");
 			}
 			else
 			{
@@ -1173,7 +1167,7 @@ void medit_parse(Descriptor *d, char *arg)
 				{
 					if(atoi(arg) == (*ai))
 					{
-						d->Send("That mobile is already on the assist list.\r\n Try again('Q' to quit) : ");
+						d->send("That mobile is already on the assist list.\r\n Try again('Q' to quit) : ");
 						return;
 					}
 				}
@@ -1199,7 +1193,7 @@ void medit_parse(Descriptor *d, char *arg)
 					return;
 				}
 			}
-			d->Send("Invalid number. Try again('Q' to quit) :");
+			d->send("Invalid number. Try again('Q' to quit) :");
 			return;
 		case MEDIT_WARRANTS:
 			switch(toupper(*arg))
@@ -1207,14 +1201,14 @@ void medit_parse(Descriptor *d, char *arg)
 				case 'N':
 					if(!(Warrants.size()))
 					{
-						d->Send("There are no warrants made. Ask a 104+ to add one for you.\r\n");
+						d->send("There are no warrants made. Ask a 104+ to add one for you.\r\n");
 						return;
 					}
-					d->Send("Enter the virtual number of the warrant you wish to add(-1 to quit) : ");
+					d->send("Enter the virtual number of the warrant you wish to add(-1 to quit) : ");
 					OLC_MODE(d) = MEDIT_WARRANTS_NEW;
 					return;
 				case 'D':
-					d->Send("Enter the warrant you wish to remove(-1 to quit) : ");
+					d->send("Enter the warrant you wish to remove(-1 to quit) : ");
 					OLC_MODE(d) = MEDIT_WARRANTS_DELETE;
 					return;
 				case 'Q':
@@ -1229,7 +1223,7 @@ void medit_parse(Descriptor *d, char *arg)
 			}
 			if(!(WarrantByVnum(atoi(arg))))
 			{
-				d->Send("That warrant does not exit. Try another : ");
+				d->send("That warrant does not exit. Try another : ");
 				return;
 			}
 			SET_BIT_AR(d->olc->mob->points.warrants, atoi(arg));
@@ -1243,19 +1237,17 @@ void medit_parse(Descriptor *d, char *arg)
 			}
 			if(!(IS_SET_AR(d->olc->mob->points.warrants, atoi(arg))))
 			{
-				d->Send("This MOB does not have that warrant set.\r\n");
+				d->send("This MOB does not have that warrant set.\r\n");
 				break;
 			}
 			REMOVE_BIT_AR(d->olc->mob->points.warrants, atoi(arg));
 			MeditWarrantsMenu(d);
 			return;
 			/*-------------------------------------------------------------------*/
-#ifdef KINSLAYER_JAVASCRIPT
 		case OLC_JSCRIPT_EDIT:
 			if( JScriptParse(d, arg) )
 				return;
 			break;
-#endif
 			/*-------------------------------------------------------------------*/
 		case MEDIT_ALIAS:
 			if (!GET_ALIAS(OLC_MOB(d)).empty())
@@ -1310,7 +1302,7 @@ void medit_parse(Descriptor *d, char *arg)
 			 */
 			cleanup_olc(d, CLEANUP_ALL);
 			MudLog(BRF, LVL_BUILDER, TRUE, "SYSERR: OLC: medit_parse(): Reached D_DESC case!");
-			d->Send("Oops...\r\n");
+			d->send("Oops...\r\n");
 			break;
 			/*-------------------------------------------------------------------*/
 #if defined(OASIS_MPROG)
@@ -1353,7 +1345,7 @@ void medit_parse(Descriptor *d, char *arg)
 			else
 			{
 				if ( (OLC_MOB(d)->MobData->primary_kit = KitManager::GetManager().GetKitByVnum(i)) == NULL)
-					d->Send("That kit does not exist!  What kit? (0 for nothing) : ");
+					d->send("That kit does not exist!  What kit? (0 for nothing) : ");
 				else
 					break;
 			}
@@ -1381,12 +1373,12 @@ void medit_parse(Descriptor *d, char *arg)
 
 			if (i > NumClans())
 			{
-				write_to_output(d, "That clan does not exist.\r\n");
+				d->sendRaw("That clan does not exist.\r\n");
 				return;
 			}
 			else if(i == 0)
 			{
-				write_to_output(d, "No clan assigned.\r\n");
+				d->sendRaw("No clan assigned.\r\n");
 				ClanUtil::freeUserClans(OLC_MOB(d)->userClans);
 				break;
 			}
@@ -1398,7 +1390,7 @@ void medit_parse(Descriptor *d, char *arg)
 			{
 				if(!ClanUtil::getClan(i))
 				{
-					d->Send("That clan does not exit.\r\n");
+					d->send("That clan does not exit.\r\n");
 					return;
 				}
 				else if(OLC_MOB(d)->userClans.empty() == false)
@@ -1419,10 +1411,10 @@ void medit_parse(Descriptor *d, char *arg)
 			{
 				case 'A':
 					OLC_MODE(d) = MEDIT_FOOD_VNUM;
-					d->Send("Enter the vnum of the item that will be butchered from this MOB's corpse, 'Q' to quit: ");
+					d->send("Enter the vnum of the item that will be butchered from this MOB's corpse, 'Q' to quit: ");
 					return;
 				case 'B':
-					d->Send("Enter the quantity of this item that can be butchered from this MOB, 'Q' to quit : ");
+					d->send("Enter the quantity of this item that can be butchered from this MOB, 'Q' to quit : ");
 					OLC_MODE(d) = MEDIT_FOOD_QUANTITY;
 					return;
 				case 'D':
@@ -1431,14 +1423,14 @@ void medit_parse(Descriptor *d, char *arg)
 						delete OLC_MOB(d)->MobData->Food;
 						OLC_MOB(d)->MobData->Food = NULL;
 					}
-					d->Send("Food unit deleted.\r\n");
+					d->send("Food unit deleted.\r\n");
 					break;
 				case 'S':
 					OLC_MODE(d) = MEDIT_MAIN_MENU;
-					d->Send("Food unit saved!\r\n");
+					d->send("Food unit saved!\r\n");
 					break;
 				default:
-					d->Send("Invalid option.\r\n");
+					d->send("Invalid option.\r\n");
 					medit_food_menu(d);
 					return;
 			}
@@ -1452,12 +1444,12 @@ void medit_parse(Descriptor *d, char *arg)
 				return;
 			}
 			else if(i == -1)
-				d->Send("Invalid item number!\r\n");
+				d->send("Invalid item number!\r\n");
 			else if( GET_OBJ_TYPE(obj_proto[ i ]) != ITEM_FOOD)
-				d->Send("Invalid food type: Must be a food item.\r\n");
+				d->send("Invalid food type: Must be a food item.\r\n");
 			else
 			{
-				d->Send("Item set to %d.\r\n", atoi(arg));
+				d->send("Item set to %d.\r\n", atoi(arg));
 				OLC_MOB(d)->MobData->Food->vnum = atoi(arg);
 				OLC_MODE(d) = MEDIT_FOOD_UNIT;
 				medit_food_menu(d);
@@ -1472,10 +1464,10 @@ void medit_parse(Descriptor *d, char *arg)
 				return;
 			}
 			else if(i < 0)
-				d->Send("Quantity must be zero or above.\r\n");
+				d->send("Quantity must be zero or above.\r\n");
 			else
 			{
-				d->Send("Quantity set to %d.\r\n", atoi(arg));
+				d->send("Quantity set to %d.\r\n", atoi(arg));
 				OLC_MOB(d)->MobData->Food->quantity = atoi(arg);
 				OLC_MODE(d) = MEDIT_FOOD_UNIT;
 				medit_food_menu(d);
@@ -1488,10 +1480,10 @@ void medit_parse(Descriptor *d, char *arg)
 			{
 				case 'A':
 					OLC_MODE(d) = MEDIT_SKIN_VNUM;
-					d->Send("Enter the vnum of the item that will be skinned from this MOB's corpse, 'Q' to quit: ");
+					d->send("Enter the vnum of the item that will be skinned from this MOB's corpse, 'Q' to quit: ");
 					return;
 				case 'B':
-					d->Send("Enter the Skinning rating needed to skin this MOB, 'Q' to quit : ");
+					d->send("Enter the Skinning rating needed to skin this MOB, 'Q' to quit : ");
 					OLC_MODE(d) = MEDIT_SKIN_REQUIRED;
 					return;
 				case 'D':
@@ -1500,14 +1492,14 @@ void medit_parse(Descriptor *d, char *arg)
 						delete OLC_MOB(d)->MobData->Skin;
 						OLC_MOB(d)->MobData->Skin = NULL;
 					}
-					d->Send("Skin unit deleted.\r\n");
+					d->send("Skin unit deleted.\r\n");
 					break;
 				case 'S':
 					OLC_MODE(d) = MEDIT_MAIN_MENU;
-					d->Send("Skin unit saved!\r\n");
+					d->send("Skin unit saved!\r\n");
 					break;
 				default:
-					d->Send("Invalid option.\r\n");
+					d->send("Invalid option.\r\n");
 					medit_skin_menu(d);
 					return;
 			}
@@ -1521,12 +1513,12 @@ void medit_parse(Descriptor *d, char *arg)
 				return;
 			}
 			else if(i == -1)
-				d->Send("Invalid item number!\r\n");
+				d->send("Invalid item number!\r\n");
 			else if( GET_OBJ_TYPE(obj_proto[ i ]) != ITEM_SKIN)
-				d->Send("Invalid skin type: Must be a skin item.\r\n");
+				d->send("Invalid skin type: Must be a skin item.\r\n");
 			else
 			{
-				d->Send("Item set to %d.\r\n", atoi(arg));
+				d->send("Item set to %d.\r\n", atoi(arg));
 				OLC_MOB(d)->MobData->Skin->vnum = atoi(arg);
 				OLC_MODE(d) = MEDIT_SKIN_UNIT;
 				medit_skin_menu(d);
@@ -1541,10 +1533,10 @@ void medit_parse(Descriptor *d, char *arg)
 				return;
 			}
 			else if(i < 0)
-				d->Send("Skinning requirement must be zero or above.\r\n");
+				d->send("Skinning requirement must be zero or above.\r\n");
 			else
 			{
-				d->Send("Skinning requirement set to %d.\r\n", atoi(arg));
+				d->send("Skinning requirement set to %d.\r\n", atoi(arg));
 				OLC_MOB(d)->MobData->Skin->required = atoi(arg);
 				OLC_MODE(d) = MEDIT_SKIN_UNIT;
 				medit_skin_menu(d);
@@ -1584,7 +1576,7 @@ void medit_parse(Descriptor *d, char *arg)
 			}
 			else if (i == OLC_MTOTAL(d) + 1)
 			{
-				d->Send("Which mob prog do you want to purge? ");
+				d->send("Which mob prog do you want to purge? ");
 				OLC_MODE(d) = MEDIT_PURGE_MPROG;
 			}
 			else
@@ -1616,12 +1608,12 @@ void medit_parse(Descriptor *d, char *arg)
 					medit_disp_mprog_types(d);
 				else if (i == 2)
 				{
-					d->Send ("Enter new arg list: ");
+					d->send ("Enter new arg list: ");
 					OLC_MODE(d) = MEDIT_MPROG_ARGS;
 				}
 				else if (i == 3)
 				{
-					d->Send("Enter new mob prog commands:\r\n");
+					d->send("Enter new mob prog commands:\r\n");
 
 					/*
 					* Pass control to modify.c for typing.
@@ -1632,7 +1624,7 @@ void medit_parse(Descriptor *d, char *arg)
 
 					if (OLC_MPROG(d)->comlist)
 					{
-						d->Send((OLC_MPROG(d)->comlist);
+						d->send((OLC_MPROG(d)->comlist);
 						        d->backstr = str_dup(OLC_MPROG(d)->comlist);
 					        }
 					        d->str = &OLC_MPROG(d)->comlist;
@@ -1749,7 +1741,7 @@ void medit_parse(Descriptor *d, char *arg)
 				* We should never get here.
 				*/
 				MudLog(BRF, LVL_BUILDER, TRUE, "SYSERR: OLC: medit_parse(): Reached default case of %d!", OLC_MODE(d));
-				d->Send("Oops...\r\n");
+				d->send("Oops...\r\n");
 				cleanup_olc(d, CLEANUP_ALL);
 				return;
 			}

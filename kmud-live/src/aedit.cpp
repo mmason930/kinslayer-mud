@@ -300,7 +300,7 @@ void aedit_disp_menu(Descriptor * d)
 	strcat(buf,"\r\n");
 	strcat(buf, "Enter choice: ");
 
-	d->Send(buf);
+	d->send(buf);
 	OLC_MODE(d) = AEDIT_MAIN_MENU;
 }
 
@@ -325,7 +325,7 @@ void aedit_parse(Descriptor * d, char *arg)
 					MudLog(CMP, LVL_IMPL, TRUE, "OLC: %s edits action %s", GET_NAME(d->character), OLC_ACTION(d)->command);
 					/* do not free the strings.. just the structure */
 					cleanup_olc(d, CLEANUP_STRUCTS);
-					d->Send("Action saved to memory.\r\n");
+					d->send("Action saved to memory.\r\n");
 					break;
 				case 'n':
 				case 'N':
@@ -333,7 +333,7 @@ void aedit_parse(Descriptor * d, char *arg)
 					cleanup_olc(d, CLEANUP_ALL);
 					break;
 				default:
-					d->Send("Invalid choice!\r\nDo you wish to save this action internally? ");
+					d->send("Invalid choice!\r\nDo you wish to save this action internally? ");
 					break;
 			}
 			return; /* end of AEDIT_CONFIRM_SAVESTRING */
@@ -364,17 +364,17 @@ void aedit_parse(Descriptor * d, char *arg)
 							cleanup_olc(d, CLEANUP_ALL);
 							break;
 						}
-						d->Send("Do you wish to add the '%s' action? ", OLC_STORAGE(d));
+						d->send("Do you wish to add the '%s' action? ", OLC_STORAGE(d));
 						OLC_MODE(d) = AEDIT_CONFIRM_ADD;
 					}
 					else
 					{
-						d->Send("Do you wish to edit the '%s' action? ", soc_mess_list[OLC_ZNUM(d)].command);
+						d->send("Do you wish to edit the '%s' action? ", soc_mess_list[OLC_ZNUM(d)].command);
 						OLC_MODE(d) = AEDIT_CONFIRM_EDIT;
 					}
 					break;
 				default:
-					d->Send("Invalid choice!\r\nDo you wish to edit the '%s' action? ", soc_mess_list[OLC_ZNUM(d)].command);
+					d->send("Invalid choice!\r\nDo you wish to edit the '%s' action? ", soc_mess_list[OLC_ZNUM(d)].command);
 					break;
 			}
 			return;
@@ -392,7 +392,7 @@ void aedit_parse(Descriptor * d, char *arg)
 					cleanup_olc(d, CLEANUP_ALL);
 					break;
 				default:
-					d->Send("Invalid choice!\r\nDo you wish to add the '%s' action? ", OLC_STORAGE(d));
+					d->send("Invalid choice!\r\nDo you wish to add the '%s' action? ", OLC_STORAGE(d));
 					break;
 			}
 			return;
@@ -403,30 +403,30 @@ void aedit_parse(Descriptor * d, char *arg)
 				case 'Q':
 					if (OLC_VAL(d))
 					{ /* Something was modified */
-						d->Send("Do you wish to save this action internally? ");
+						d->send("Do you wish to save this action internally? ");
 						OLC_MODE(d) = AEDIT_CONFIRM_SAVESTRING;
 					}
 					else
 						cleanup_olc(d, CLEANUP_ALL);
 					break;
 				case 'n':
-					d->Send("Enter action name: ");
+					d->send("Enter action name: ");
 					OLC_MODE(d) = AEDIT_ACTION_NAME;
 					return;
 				case '1':
-					d->Send("Enter sort info for this action (for the command listing): ");
+					d->send("Enter sort info for this action (for the command listing): ");
 					OLC_MODE(d) = AEDIT_SORT_AS;
 					return;
 				case '2':
-					d->Send("Enter the minimum position the Character has to be in to Activate social [0 - 8]: ");
+					d->send("Enter the minimum position the Character has to be in to Activate social [0 - 8]: ");
 					OLC_MODE(d) = AEDIT_MIN_CHAR_POS;
 					return;
 				case '3':
-					d->Send("Enter the minimum position the Victim has to be in to Activate social [0 - 8]: ");
+					d->send("Enter the minimum position the Victim has to be in to Activate social [0 - 8]: ");
 					OLC_MODE(d) = AEDIT_MIN_VICT_POS;
 					return;
 				case '4':
-					d->Send("Enter new minimum level for social: ");
+					d->send("Enter new minimum level for social: ");
 					OLC_MODE(d) = AEDIT_MIN_CHAR_LEVEL;
 					return;
 				case '5':
@@ -436,79 +436,79 @@ void aedit_parse(Descriptor * d, char *arg)
 					break;
 				case 'a':
 				case 'A':
-					d->Send("Enter social shown to the Character when there is no argument supplied.\r\n[OLD]: %s\r\n[NEW]: ",
+					d->send("Enter social shown to the Character when there is no argument supplied.\r\n[OLD]: %s\r\n[NEW]: ",
 					        ((OLC_ACTION(d)->char_no_arg)?OLC_ACTION(d)->char_no_arg:"NULL"));
 					OLC_MODE(d) = AEDIT_NOVICT_CHAR;
 					return;
 				case 'b':
 				case 'B':
-					d->Send("Enter social shown to Others when there is no argument supplied.\r\n[OLD]: %s\r\n[NEW]: ",
+					d->send("Enter social shown to Others when there is no argument supplied.\r\n[OLD]: %s\r\n[NEW]: ",
 					        ((OLC_ACTION(d)->others_no_arg)?OLC_ACTION(d)->others_no_arg:"NULL"));
 					OLC_MODE(d) = AEDIT_NOVICT_OTHERS;
 					return;
 				case 'c':
 				case 'C':
-					d->Send("Enter text shown to the Character when his victim isnt found.\r\n[OLD]: %s\r\n[NEW]: ",
+					d->send("Enter text shown to the Character when his victim isnt found.\r\n[OLD]: %s\r\n[NEW]: ",
 					        ((OLC_ACTION(d)->not_found)?OLC_ACTION(d)->not_found:"NULL"));
 					OLC_MODE(d) = AEDIT_VICT_NOT_FOUND;
 					return;
 				case 'd':
 				case 'D':
-					d->Send("Enter social shown to the Character when it is its own victim.\r\n[OLD]: %s\r\n[NEW]: ",
+					d->send("Enter social shown to the Character when it is its own victim.\r\n[OLD]: %s\r\n[NEW]: ",
 					        ((OLC_ACTION(d)->char_auto)?OLC_ACTION(d)->char_auto:"NULL"));
 					OLC_MODE(d) = AEDIT_SELF_CHAR;
 					return;
 				case 'e':
 				case 'E':
-					d->Send("Enter social shown to Others when the Char is its own victim.\r\n[OLD]: %s\r\n[NEW]: ",
+					d->send("Enter social shown to Others when the Char is its own victim.\r\n[OLD]: %s\r\n[NEW]: ",
 					        ((OLC_ACTION(d)->others_auto)?OLC_ACTION(d)->others_auto:"NULL"));
 					OLC_MODE(d) = AEDIT_SELF_OTHERS;
 					return;
 				case 'f':
 				case 'F':
-					d->Send("Enter normal social shown to the Character when the victim is found.\r\n[OLD]: %s\r\n[NEW]: ",
+					d->send("Enter normal social shown to the Character when the victim is found.\r\n[OLD]: %s\r\n[NEW]: ",
 					        ((OLC_ACTION(d)->char_found)?OLC_ACTION(d)->char_found:"NULL"));
 					OLC_MODE(d) = AEDIT_VICT_CHAR_FOUND;
 					return;
 				case 'g':
 				case 'G':
-					d->Send("Enter normal social shown to Others when the victim is found.\r\n[OLD]: %s\r\n[NEW]: ",
+					d->send("Enter normal social shown to Others when the victim is found.\r\n[OLD]: %s\r\n[NEW]: ",
 					        ((OLC_ACTION(d)->others_found)?OLC_ACTION(d)->others_found:"NULL"));
 					OLC_MODE(d) = AEDIT_VICT_OTHERS_FOUND;
 					return;
 				case 'h':
 				case 'H':
-					d->Send("Enter normal social shown to the Victim when the victim is found.\r\n[OLD]: %s\r\n[NEW]: ",
+					d->send("Enter normal social shown to the Victim when the victim is found.\r\n[OLD]: %s\r\n[NEW]: ",
 					        ((OLC_ACTION(d)->vict_found)?OLC_ACTION(d)->vict_found:"NULL"));
 					OLC_MODE(d) = AEDIT_VICT_VICT_FOUND;
 					return;
 				case 'i':
 				case 'I':
-					d->Send("Enter 'body part' social shown to the Character when the victim is found.\r\n[OLD]: %s\r\n[NEW]: ",
+					d->send("Enter 'body part' social shown to the Character when the victim is found.\r\n[OLD]: %s\r\n[NEW]: ",
 					        ((OLC_ACTION(d)->char_body_found)?OLC_ACTION(d)->char_body_found:"NULL"));
 					OLC_MODE(d) = AEDIT_VICT_CHAR_BODY_FOUND;
 					return;
 				case 'j':
 				case 'J':
-					d->Send("Enter 'body part' social shown to Others when the victim is found.\r\n[OLD]: %s\r\n[NEW]: ",
+					d->send("Enter 'body part' social shown to Others when the victim is found.\r\n[OLD]: %s\r\n[NEW]: ",
 					        ((OLC_ACTION(d)->others_body_found)?OLC_ACTION(d)->others_body_found:"NULL"));
 					OLC_MODE(d) = AEDIT_VICT_OTHERS_BODY_FOUND;
 					return;
 				case 'k':
 				case 'K':
-					d->Send("Enter 'body part' social shown to the Victim when the victim is found.\r\n[OLD]: %s\r\n[NEW]: ",
+					d->send("Enter 'body part' social shown to the Victim when the victim is found.\r\n[OLD]: %s\r\n[NEW]: ",
 					        ((OLC_ACTION(d)->vict_body_found)?OLC_ACTION(d)->vict_body_found:"NULL"));
 					OLC_MODE(d) = AEDIT_VICT_VICT_BODY_FOUND;
 					return;
 				case 'l':
 				case 'L':
-					d->Send("Enter 'object' social shown to the Character when the object is found.\r\n[OLD]: %s\r\n[NEW]: ",
+					d->send("Enter 'object' social shown to the Character when the object is found.\r\n[OLD]: %s\r\n[NEW]: ",
 					        ((OLC_ACTION(d)->char_obj_found)?OLC_ACTION(d)->char_obj_found:"NULL"));
 					OLC_MODE(d) = AEDIT_OBJ_CHAR_FOUND;
 					return;
 				case 'm':
 				case 'M':
-					d->Send("Enter 'object' social shown to the Room when the object is found.\r\n[OLD]: %s\r\n[NEW]: ",
+					d->send("Enter 'object' social shown to the Room when the object is found.\r\n[OLD]: %s\r\n[NEW]: ",
 					        ((OLC_ACTION(d)->others_obj_found)?OLC_ACTION(d)->others_obj_found:"NULL"));
 					OLC_MODE(d) = AEDIT_OBJ_OTHERS_FOUND;
 					return;

@@ -216,7 +216,7 @@ ACMD(do_say)
 
 	if (!*argument)
     {
-		ch->Send("Yes, but WHAT do you want to say?\r\n");
+		ch->send("Yes, but WHAT do you want to say?\r\n");
         return;
     }
 	else if(!AFF_FLAGGED(ch, AFF_SILENCE) || GET_LEVEL(ch) >= LVL_IMMORT)
@@ -227,7 +227,7 @@ ACMD(do_say)
 		{
 			if(vict != ch && GET_POS(vict) > POS_SLEEPING && (!AFF_FLAGGED(vict, AFF_DEAF) || GET_LEVEL(ch) >= LVL_IMMORT || GET_LEVEL(vict) >= LVL_IMMORT))
 			{
-				vict->Send("%s %s '%s'\r\n", StringUtil::cap(PERS(ch, vict)), SayType.c_str(), ch->ScrambleSpeech(argument, vict).c_str());
+				vict->send("%s %s '%s'\r\n", StringUtil::cap(PERS(ch, vict)), SayType.c_str(), ch->ScrambleSpeech(argument, vict).c_str());
 			}
 			else if(AFF_FLAGGED(vict, AFF_DEAF))
 			{
@@ -240,28 +240,26 @@ ACMD(do_say)
 			vict = ch->in_room->eavesdropping.at(i);
 			if(GET_POS(vict) > POS_SLEEPING)
 			{
-				vict->Send("%s %s '%s'\r\n", StringUtil::cap(PERS(ch, vict)), SayType.c_str(), ch->ScrambleSpeech(argument, vict).c_str());
+				vict->send("%s %s '%s'\r\n", StringUtil::cap(PERS(ch, vict)), SayType.c_str(), ch->ScrambleSpeech(argument, vict).c_str());
 			}
 		}
 
 		if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_NOREPEAT))
-			ch->Send(OK);
+			ch->send(OK);
 		else
 		{
 			SayType.resize(SayType.size() - 1);
-			ch->Send("You %s '%s'\r\n", SayType.c_str(), argument);
+			ch->send("You %s '%s'\r\n", SayType.c_str(), argument);
 		}
 	}
 	else
 	{
-		ch->Send("You try to speak, but nothing comes out!\r\n");
+		ch->send("You try to speak, but nothing comes out!\r\n");
 		return;
 	}
 
-	/* trigger check */
-#ifdef KINSLAYER_JAVASCRIPT
+	// trigger check
     js_speech_triggers(ch, argument);
-#endif
 }
 
 ACMD(do_speak)
@@ -289,7 +287,7 @@ ACMD(do_speak)
 
 	if(!*arg1)
 	{
-		ch->Send("Valid Choices: Light, Dark, All\r\n");
+		ch->send("Valid Choices: Light, Dark, All\r\n");
 		delete[] speech;
 		return;
 	}
@@ -309,13 +307,13 @@ ACMD(do_speak)
 	}
 	else
 	{
-		ch->Send("Valid Choices: Light, Dark, All\r\n");
+		ch->send("Valid Choices: Light, Dark, All\r\n");
 		delete[] speech;
 		return;
 	}
 
 	if (!*speech)
-		ch->Send("You begin to speak, but have nothing to say...\r\n");
+		ch->send("You begin to speak, but have nothing to say...\r\n");
 	else
 	{
 		CommManager::GetManager().SaveComm(std::string("speak_") + spokenTo.at(0), speech, ch, ch->in_room->vnum);
@@ -362,9 +360,9 @@ ACMD(do_speak)
 		}
 
 		if (PRF_FLAGGED(ch, PRF_NOREPEAT))
-			ch->Send(OK);
+			ch->send(OK);
 		else
-			ch->Send("%s%sYou speak loudly to %s '%s'%s\r\n",
+			ch->send("%s%sYou speak loudly to %s '%s'%s\r\n",
 			         COLOR_BOLD(ch, CL_SPARSE), COLOR_CYAN(ch, CL_NORMAL), race == -1 ? "all creation" : to[race],
 			         speech, COLOR_NORMAL(ch, CL_NORMAL));
 	}
@@ -386,16 +384,16 @@ void Character::NewbieTip(const char *msg, ...)
 
 	sprintf(FinalMessage, "%s%sTip: %s%s\r\n", COLOR_BOLD(this, CL_NORMAL), COLOR_CYAN(this, CL_NORMAL),
 	        TempMessage, COLOR_NORMAL(this, CL_NORMAL));
-	this->Send(FinalMessage);
+	this->send(FinalMessage);
 	va_end(args);
 }
 
 void Character::SendTell(Character *target, char *arg)
 {
-	target->Send(COLOR_RED(target, CL_NORMAL));
+	target->send(COLOR_RED(target, CL_NORMAL));
 	sprintf(buf, "$n tells you, '%s'", (char*)this->ScrambleSpeech(arg, target).c_str());
 	Act(buf, FALSE, this, 0, target, TO_VICT | TO_SLEEP);
-	target->Send(COLOR_NORMAL(target, CL_NORMAL));
+	target->send(COLOR_NORMAL(target, CL_NORMAL));
 
 	if(!IS_NPC(target) && NEWB_FLAGGED(target, NEW_TELL) && !IS_NPC(this))
 	{
@@ -405,7 +403,7 @@ void Character::SendTell(Character *target, char *arg)
 	}
 
 	if (!IS_NPC(this) && PRF_FLAGGED(this, PRF_NOREPEAT))
-		this->Send(OK);
+		this->send(OK);
 	else
 	{
 		CommManager::GetManager().SaveComm(std::string("tell"), arg, this, this->in_room->vnum, target);
@@ -431,26 +429,26 @@ int is_tell_ok(Character *ch, Character *vict)
 	if( ch->IsPurged() )
 		return FALSE;
 	else if( vict->IsPurged() )
-		ch->Send(NOPERSON);
+		ch->send(NOPERSON);
 	else if(GET_RACE(vict) != GET_RACE(ch) && GET_LEVEL(ch) < LVL_IMMORT && GET_LEVEL(vict) < LVL_IMMORT && !IS_NPC(ch))
-		ch->Send(NOPERSON);
+		ch->send(NOPERSON);
 	else if (ch == vict)
-		ch->Send("You try to tell yourself something.\r\n");
+		ch->send("You try to tell yourself something.\r\n");
 	else if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_NOTELL))
-		ch->Send("You can't tell other people while you have notell on.\r\n");
+		ch->send("You can't tell other people while you have notell on.\r\n");
 	else if ( AFF_FLAGGED(ch, AFF_SILENCE) && GET_LEVEL(ch) <= LVL_IMMORT )
-		ch->Send("You try to speak, but nothing comes out!\r\n");
+		ch->send("You try to speak, but nothing comes out!\r\n");
 	/*else if(ch->in_room == ch->StartRoom() && GET_LEVEL(ch) < LVL_IMMORT && GET_LEVEL(vict) < LVL_IMMORT &&
 	        GET_LEVEL(ch) > 5)
-		ch->Send("Your attempt to communicate into the Pattern fails.\r\n");*/
+		ch->send("Your attempt to communicate into the Pattern fails.\r\n");*/
 	//	else if(vict->in_room == vict->StartRoom() && GET_LEVEL(vict) < LVL_IMMORT && GET_LEVEL(ch) < LVL_IMMORT)
-	//		ch->Send("Your attempt to communicate outside of the Pattern fails.\r\n");
+	//		ch->send("Your attempt to communicate outside of the Pattern fails.\r\n");
 	else if (ROOM_FLAGGED(ch->in_room, ROOM_SOUNDPROOF))
-		ch->Send("The walls seem to absorb your words.\r\n");
+		ch->send("The walls seem to absorb your words.\r\n");
 	else if (!IS_NPC(vict) && !vict->desc)        /* linkless */
 		Act("$E's linkless at the moment.", FALSE, ch, 0, vict, TO_CHAR | TO_SLEEP);
 	else if (PRF_FLAGGED(ch, PRF_TELL_MUTE))
-		ch->Send("You are mute to tells. You need an immortal to remove this.\r\n");
+		ch->send("You are mute to tells. You need an immortal to remove this.\r\n");
 	else if (PRF_FLAGGED(vict, PRF_TELL_MUTE))
 		Act("$E's is mute to tells... Try again later.", FALSE, ch, 0, vict, TO_CHAR | TO_SLEEP);
 	else if (PLR_FLAGGED(vict, PLR_WRITING))
@@ -476,9 +474,9 @@ ACMD(do_tell)
 
 	HalfChop(argument, buf, buf2);
 	if (!*buf || !*buf2)
-		ch->Send("Who do you wish to tell what??\r\n");
+		ch->send("Who do you wish to tell what??\r\n");
 	else if (!(vict = get_char_vis(ch, buf)))
-		ch->Send(NOPERSON);
+		ch->send(NOPERSON);
 	else if (is_tell_ok(ch, vict))
 		ch->SendTell(vict, buf2);
 }
@@ -493,10 +491,10 @@ ACMD(do_reply)
 	skip_spaces(&argument);
 
 	if (ch->last_tell == NOBODY)
-		ch->Send("You have no-one to reply to!\r\n");
+		ch->send("You have no-one to reply to!\r\n");
 
 	else if (!*argument)
-		ch->Send("What is your reply?\r\n");
+		ch->send("What is your reply?\r\n");
 
 	else
 	{
@@ -517,7 +515,7 @@ ACMD(do_reply)
 			tch = tch->next;
 
 		if (tch == NULL)
-			ch->Send("They are no longer playing.\r\n");
+			ch->send("They are no longer playing.\r\n");
 
 		else if (is_tell_ok(ch, tch))
 			ch->SendTell(tch, argument);
@@ -548,19 +546,19 @@ ACMD(do_spec_comm)
 
 	if (!*buf || !*buf2)
 	{
-		ch->Send("Whom do you want to %s.. and what??\r\n", action_sing);
+		ch->send("Whom do you want to %s.. and what??\r\n", action_sing);
 	}
 	else if (!(vict = get_char_room_vis(ch, buf)))
-		ch->Send(NOPERSON);
+		ch->send(NOPERSON);
 	else if (vict == ch)
-		ch->Send("You can't get your mouth close enough to your ear...\r\n");
+		ch->send("You can't get your mouth close enough to your ear...\r\n");
 	else
 	{
 		sprintf(buf, "$n %s you, '%s'", action_plur, ch->ScrambleSpeech(buf2, vict).c_str());
 		Act(buf, FALSE, ch, 0, vict, TO_VICT);
 
 		if (PRF_FLAGGED(ch, PRF_NOREPEAT))
-			ch->Send(OK);
+			ch->send(OK);
 		else
 		{
 			sprintf(buf, "You %s %s, '%s'\r\n", action_sing, GET_NAME(vict), buf2);
@@ -600,7 +598,7 @@ ACMD(do_write)
 	}
 	if (!*papername)
 	{		/* nothing was delivered */
-		ch->Send("Write?  With what?  ON what?  What are you trying to do?!?\r\n");
+		ch->send("Write?  With what?  ON what?  What are you trying to do?!?\r\n");
 		return;
 	}
 
@@ -608,13 +606,13 @@ ACMD(do_write)
 	{		/* there were two arguments */
 		if (!(paper = get_obj_in_list_vis(ch, papername, ch->carrying)))
 		{
-			ch->Send("You have no %s.\r\n", papername);
+			ch->send("You have no %s.\r\n", papername);
 			return;
 		}
 
 		if (!(pen = get_obj_in_list_vis(ch, penname, ch->carrying)))
 		{
-			ch->Send("You have no %s.\r\n", penname);
+			ch->send("You have no %s.\r\n", penname);
 			return;
 		}
 	}
@@ -623,7 +621,7 @@ ACMD(do_write)
 	{		/* there was one arg.. let's see what we can find */
 		if (!(paper = get_obj_in_list_vis(ch, papername, ch->carrying)))
 		{
-			ch->Send("There is no %s in your inventory.\r\n", papername);
+			ch->send("There is no %s in your inventory.\r\n", papername);
 			return;
 		}
 
@@ -635,21 +633,21 @@ ACMD(do_write)
 
 		else if (GET_OBJ_TYPE(paper) != ITEM_NOTE)
 		{
-			ch->Send("That thing has nothing to do with writing.\r\n");
+			ch->send("That thing has nothing to do with writing.\r\n");
 			return;
 		}
 
 		/* One object was found.. now for the other one. */
 		if (!GET_EQ(ch, WEAR_HOLD))
 		{
-			ch->Send("You can't write with %s %s alone.\r\n", AN(papername),
+			ch->send("You can't write with %s %s alone.\r\n", AN(papername),
 			         papername);
 			return;
 		}
 
 		if (!CAN_SEE_OBJ(ch, GET_EQ(ch, WEAR_HOLD)))
 		{
-			ch->Send("The stuff in your hand is invisible!  Yeech!!\r\n");
+			ch->send("The stuff in your hand is invisible!  Yeech!!\r\n");
 			return;
 		}
 
@@ -669,7 +667,7 @@ ACMD(do_write)
 		Act("You can't write on $p.", FALSE, ch, paper, 0, TO_CHAR);
 
 	else if (paper->action_description && ch->desc && !IS_NPC(ch))
-		ch->Send("There's something written on it already.\r\n");
+		ch->send("There's something written on it already.\r\n");
 
 	else
 	{
@@ -685,7 +683,7 @@ ACMD(do_write)
 		{
 			if(!*msg)
 			{
-				ch->Send("You must write a message right away if you are a mob!");
+				ch->send("You must write a message right away if you are a mob!");
 				return;
 			}
 
@@ -706,7 +704,7 @@ ACMD(do_write)
 		}
 
 		ch->desc->backstr = NULL;
-		ch->Send("Write your note.  (/s saves /h for help)\r\n");
+		ch->send("Write your note.  (/s saves /h for help)\r\n");
 
 		/* ok, here we check for a message ALREADY on the paper */
 
@@ -716,7 +714,7 @@ ACMD(do_write)
 			ch->desc->backstr = str_dup(paper->action_description);
 			/* send to the player what was on the paper (cause this is already */
 			/* loaded into the editor) */
-			ch->Send(paper->action_description);
+			ch->send(paper->action_description);
 		}
 
 		Act("$n begins to jot down a note.", TRUE, ch, 0, 0, TO_ROOM);
@@ -738,9 +736,9 @@ ACMD(do_page)
 	HalfChop(argument, arg, buf2);
 
 	if (IS_NPC(ch))
-		ch->Send("Monsters can't page.. go away.\r\n");
+		ch->send("Monsters can't page.. go away.\r\n");
 	else if (!*arg)
-		ch->Send("Whom do you wish to page?\r\n");
+		ch->send("Whom do you wish to page?\r\n");
 	else
 	{
 		sprintf(buf, "\007*%s* %s\r\n", GET_NAME(ch), buf2);
@@ -755,7 +753,7 @@ ACMD(do_page)
 						Act(buf, FALSE, ch, 0, d->character, TO_VICT);
 			}
 			else
-				ch->Send("You will never be godly enough to do that!\r\n");
+				ch->send("You will never be godly enough to do that!\r\n");
 			return;
 		}
 
@@ -763,13 +761,13 @@ ACMD(do_page)
 		{
 			Act(buf, FALSE, ch, 0, vict, TO_VICT);
 			if (PRF_FLAGGED(ch, PRF_NOREPEAT))
-				ch->Send(OK);
+				ch->send(OK);
 			else
 				Act(buf, FALSE, ch, 0, vict, TO_CHAR);
 			return;
 		}
 		else
-			ch->Send("There is no such person in the game!\r\n");
+			ch->send("There is no such person in the game!\r\n");
 	}
 }
 
@@ -835,51 +833,51 @@ ACMD(do_gen_comm)
 
 	if(GET_LEVEL(ch) >= LVL_IMMORT)
 	{
-		ch->Send("Use speak!\r\n");
+		ch->send("Use speak!\r\n");
 		return;
 	}
 
 	if (PLR_FLAGGED(ch, PLR_NOSHOUT))
 	{
-		ch->Send(com_msgs[subcmd][0]);
+		ch->send(com_msgs[subcmd][0]);
 		return;
 	}
 
 	if(PLR_FLAGGED(ch, PLR_NOGLOBAL) && subcmd == SCMD_GLOBAL)
 	{
-		ch->Send("Your global channel privileges have been revoked.\r\n");
+		ch->send("Your global channel privileges have been revoked.\r\n");
 		return;
 	}
 
 	if (ROOM_FLAGGED(ch->in_room, ROOM_SOUNDPROOF))
 	{
-		ch->Send("The walls seem to absorb your words.\r\n");
+		ch->send("The walls seem to absorb your words.\r\n");
 		return;
 	}
 
 	/* level_can_shout defined in config.c */
 	if (GET_LEVEL(ch) < CONFIG_LEVEL_CAN_SHOUT)
 	{
-		ch->Send("You must be at least level %d before you can %s.\r\n",
+		ch->send("You must be at least level %d before you can %s.\r\n",
 		         CONFIG_LEVEL_CAN_SHOUT, com_msgs[subcmd][1]);
 		return;
 	}
 	if(ch->in_room == ch->StartRoom() && GET_LEVEL(ch) < LVL_IMMORT)
 	{
-		ch->Send("Your attempt to communicate into the Pattern fails.\r\n");
+		ch->send("Your attempt to communicate into the Pattern fails.\r\n");
 		return;
 	}
 	/* make sure the char is on the channel */
 	if (PRF_FLAGGED(ch, channels[subcmd]))
 	{
-		ch->Send(com_msgs[subcmd][2]);
+		ch->send(com_msgs[subcmd][2]);
 		return;
 	}
 
 	/* prevent speaking if silenced */
 	if (AFF_FLAGGED(ch, AFF_SILENCE) && GET_LEVEL(ch) <= LVL_IMMORT)
 	{
-		ch->Send("You try to speak, but nothing comes out!\r\n");
+		ch->send("You try to speak, but nothing comes out!\r\n");
 		return;
 	}
 
@@ -890,7 +888,7 @@ ACMD(do_gen_comm)
 		{
 			if(af->bitvector == AFF_NOQUIT && af->duration > 2)
 			{
-				ch->Send("You are too distracted to do that. Kill! Kill! Kill!\r\n");
+				ch->send("You are too distracted to do that. Kill! Kill! Kill!\r\n");
 				return;
 			}
 		}
@@ -901,7 +899,7 @@ ACMD(do_gen_comm)
 	/* make sure that there is something there to say! */
 	if (!*argument)
 	{
-		ch->Send("Yes, %s, fine, %s we must, but WHAT???\r\n",
+		ch->send("Yes, %s, fine, %s we must, but WHAT???\r\n",
 		         com_msgs[subcmd][1], com_msgs[subcmd][1]);
 		return;
 	}
@@ -910,7 +908,7 @@ ACMD(do_gen_comm)
 	{
 		if (GET_HIT(ch) <= (GET_MAX_HIT(ch) * SHOUT_HEALTH_PERCENT) )
 		{
-//			ch->Send("You are too exhausted to shout.\r\n");
+//			ch->send("You are too exhausted to shout.\r\n");
 //			return;
 		}
 		else
@@ -922,7 +920,7 @@ ACMD(do_gen_comm)
 
 	/* first, set up strings to be given to the communicator */
 	if (PRF_FLAGGED(ch, PRF_NOREPEAT))
-		ch->Send(OK);
+		ch->send(OK);
 	else
 	{
 		if (COLOR_LEV(ch) >= CL_COMPLETE)
@@ -1018,13 +1016,13 @@ ACMD(do_gen_comm)
 			}
 
 			if (COLOR_LEV(i->character) >= CL_NORMAL)
-			//	i->Send(color_on); // original code
-				i->Send(commColor); // new code for colors
+			//	i->send(color_on); // original code
+				i->send(commColor); // new code for colors
 
 			Act(buf, FALSE, ch, 0, i->character, TO_VICT | TO_SLEEP);
 
 			if (COLOR_LEV(i->character) >= CL_NORMAL)
-				i->Send(NORMAL);
+				i->send(NORMAL);
 		}
 	}
 }

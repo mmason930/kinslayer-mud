@@ -13,8 +13,6 @@
 #ifndef KINSLAYER_JSOBJECT_H
 #define KINSLAYER_JSOBJECT_H
 
-#ifdef KINSLAYER_JAVASCRIPT
-
 #include <flusspferd.hpp>
 #include <string>
 #include <iostream>
@@ -236,5 +234,4 @@ private:
     Object * real;
 };
 
-#endif
 #endif

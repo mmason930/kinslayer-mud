@@ -886,13 +886,13 @@ void Character::GainLevel( int show )
 		this->body_structure = MiscUtil::random( STRUCT_LIGHT, STRUCT_HEAVY );
 		this->RollWeightAndHeight();
 		if( IS_FADE( this ) )
-			this->RollShadow();
+			this->rollShadow();
 
 		this->NewbieTip( "Your skills have reset! You may now practice different"
 		                 " skills at the trainers. This is the only time this will happen for free." );
 		this->ResetAllSkills();
 		StatManager::GetManager().RollStats( this );
-		this->Save();//Important enough that we save for this big of an event.
+		this->save();//Important enough that we save for this big of an event.
 
 		//	GET_LUC(this) = MiscUtil::random(0, 20);
 
@@ -1274,7 +1274,7 @@ void Character::RandomTaintVoices()
 		for( Msg = RandomVoices.begin();voice;++Msg, --voice );
 	}
 	while ( count < 1000 && !( GET_POS( this ) != (*Msg).second || (*Msg).second ) );
-	this->Send( ((*Msg).first).c_str() );
+	this->send( ((*Msg).first).c_str() );
 }
 
 void Character::ShowZones( Character *ch )
@@ -1288,11 +1288,11 @@ void Character::ShowZones( Character *ch )
 		{
 			if ( !n )
 			{
-				ch->Send( "%s is working on the following zones:\r\n\n", GET_NAME( this ) );
-				ch->Send( "Vnum              Name\r\n" );
-				ch->Send( "--------------------------------------------\r\n" );
+				ch->send( "%s is working on the following zones:\r\n\n", GET_NAME( this ) );
+				ch->send( "Vnum              Name\r\n" );
+				ch->send( "--------------------------------------------\r\n" );
 			}
-			ch->Send( "%-5d      %s%s%s%s\r\n", zone->getVnum(), COLOR_BOLD( ch, CL_COMPLETE ),
+			ch->send( "%-5d      %s%s%s%s\r\n", zone->getVnum(), COLOR_BOLD( ch, CL_COMPLETE ),
 			          COLOR_GREEN( ch, CL_COMPLETE ), zone->getName().c_str(),
 			          COLOR_NORMAL( ch, CL_COMPLETE ) );
 
@@ -1301,7 +1301,7 @@ void Character::ShowZones( Character *ch )
 	}
 
 	if ( !n )
-		ch->Send( "%s is not currently assigned to any zones.\r\n", GET_NAME( this ) );
+		ch->send( "%s is not currently assigned to any zones.\r\n", GET_NAME( this ) );
 }
 
 byte RaceByString( const std::string &str)
@@ -1332,4 +1332,28 @@ byte SexByString( const std::string &str)
             return i;
     }
     return SEX_UNDEFINED;
+}
+
+bool isRaceOpen(int raceValue)
+{
+	return raceValue == RACE_HUMAN || raceValue == RACE_TROLLOC;
+}
+
+bool isGenderOpen(int genderValue)
+{
+	return genderValue == SEX_MALE || genderValue == SEX_FEMALE;
+}
+
+bool isClassOpen(int classValue, int raceValue)
+{
+	if (raceValue == RACE_HUMAN)
+	{
+		return classValue == CLASS_WARRIOR || classValue == CLASS_RANGER || classValue == CLASS_THIEF || classValue == CLASS_CHANNELER;
+	}
+	else if (raceValue == RACE_TROLLOC)
+	{
+		return classValue == CLASS_WARRIOR || classValue == CLASS_RANGER || classValue == CLASS_THIEF || classValue == CLASS_DREADGUARD;
+	}
+
+	return false;
 }

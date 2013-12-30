@@ -103,7 +103,7 @@ void parse_action(int command, char *str, Descriptor *d)
 			        "              usage: /r[a] 'pattern' 'replacement'\r\n"
 			        "/s         -  saves text\r\n");
 
-			d->Send(buf);
+			d->send(buf);
 			break;
 
 		case PARSE_FORMAT:
@@ -132,7 +132,7 @@ void parse_action(int command, char *str, Descriptor *d)
 			}
 
 			format_text(d->str, flags, d, d->max_str);
-			d->Send("Text formatted with%s indent.\r\n", (indent ? "" : "out"));
+			d->send("Text formatted with%s indent.\r\n", (indent ? "" : "out"));
 			break;
 
 		case PARSE_REPLACE:
@@ -159,24 +159,24 @@ void parse_action(int command, char *str, Descriptor *d)
 
 			if ((s = strtok(str, "'")) == NULL)
 			{
-				d->Send("Invalid format.\r\n");
+				d->send("Invalid format.\r\n");
 				return;
 			}
 			else if ((s = strtok(NULL, "'")) == NULL)
 			{
-				d->Send("Target string must be enclosed in single quotes.\r\n");
+				d->send("Target string must be enclosed in single quotes.\r\n");
 				return;
 			}
 
 			else if ((t = strtok(NULL, "'")) == NULL)
 			{
-				d->Send("No replacement string.\r\n");
+				d->send("No replacement string.\r\n");
 				return;
 			}
 
 			else if ((t = strtok(NULL, "'")) == NULL)
 			{
-				d->Send("Replacement string must be enclosed in single quotes.\r\n");
+				d->send("Replacement string must be enclosed in single quotes.\r\n");
 				return;
 			}
 
@@ -184,20 +184,20 @@ void parse_action(int command, char *str, Descriptor *d)
 			{
 				if ((replaced = StringUtil::replace(d->str, s, t, rep_all, d->max_str)) > 0)
 				{
-					d->Send("Replaced %d occurance%sof '%s' with '%s'.\r\n", replaced, ((replaced != 1) ? "s " : " "), s, t);
+					d->send("Replaced %d occurance%sof '%s' with '%s'.\r\n", replaced, ((replaced != 1) ? "s " : " "), s, t);
 				}
 
 				else if (replaced == 0)
 				{
-					d->Send("String '%s' not found.\r\n", s);
+					d->send("String '%s' not found.\r\n", s);
 				}
 
 				else
-					d->Send("ERROR: Replacement string causes buffer overflow, aborted replace.\r\n");
+					d->send("ERROR: Replacement string causes buffer overflow, aborted replace.\r\n");
 			}
 
 			else
-				d->Send("Not enough space left in buffer.\r\n");
+				d->send("Not enough space left in buffer.\r\n");
 
 			break;
 
@@ -207,7 +207,7 @@ void parse_action(int command, char *str, Descriptor *d)
 			{
 
 				case 0:
-					d->Send("You must specify a line number or range to delete.\r\n");
+					d->send("You must specify a line number or range to delete.\r\n");
 					return;
 
 				case 1:
@@ -218,7 +218,7 @@ void parse_action(int command, char *str, Descriptor *d)
 
 					if (line_high < line_low)
 					{
-						d->Send("That range is invalid.\r\n");
+						d->send("That range is invalid.\r\n");
 						return;
 					}
 
@@ -230,7 +230,7 @@ void parse_action(int command, char *str, Descriptor *d)
 
 			if ((s = *d->str) == NULL)
 			{
-				d->Send("Buffer is empty.\r\n");
+				d->send("Buffer is empty.\r\n");
 				return;
 			}
 
@@ -246,7 +246,7 @@ void parse_action(int command, char *str, Descriptor *d)
 
 				if ((i < line_low) || (s == NULL))
 				{
-					d->Send("Line(s) out of range; not deleting.\r\n");
+					d->send("Line(s) out of range; not deleting.\r\n");
 					return;
 				}
 
@@ -279,12 +279,12 @@ void parse_action(int command, char *str, Descriptor *d)
 
 				sprintf(buf, "%d line%sdeleted.\r\n", total_len,
 				        ((total_len != 1) ? "s " : " "));
-				d->Send(buf);
+				d->send(buf);
 			}
 
 			else
 			{
-				d->Send("Invalid line numbers to delete must be higher than 0.\r\n");
+				d->send("Invalid line numbers to delete must be higher than 0.\r\n");
 				return;
 			}
 
@@ -320,13 +320,13 @@ void parse_action(int command, char *str, Descriptor *d)
 
 			if (line_low < 1)
 			{
-				d->Send("Line numbers must be greater than 0.\r\n");
+				d->send("Line numbers must be greater than 0.\r\n");
 				return;
 			}
 
 			else if (line_high < line_low)
 			{
-				d->Send("That range is invalid.\r\n");
+				d->send("That range is invalid.\r\n");
 				return;
 			}
 
@@ -348,7 +348,7 @@ void parse_action(int command, char *str, Descriptor *d)
 
 			if ((i < line_low) || (s == NULL))
 			{
-				d->Send("Line(s) out of range; no buffer listing.\r\n");
+				d->send("Line(s) out of range; no buffer listing.\r\n");
 				return;
 			}
 
@@ -417,13 +417,13 @@ void parse_action(int command, char *str, Descriptor *d)
 
 			if (line_low < 1)
 			{
-				d->Send("Line numbers must be greater than 0.\r\n");
+				d->send("Line numbers must be greater than 0.\r\n");
 				return;
 			}
 
 			if (line_high < line_low)
 			{
-				d->Send("That range is invalid.\r\n");
+				d->send("That range is invalid.\r\n");
 				return;
 			}
 
@@ -441,7 +441,7 @@ void parse_action(int command, char *str, Descriptor *d)
 
 			if ((i < line_low) || (s == NULL))
 			{
-				d->Send("Line(s) out of range; no buffer listing.\r\n");
+				d->send("Line(s) out of range; no buffer listing.\r\n");
 				return;
 			}
 
@@ -489,7 +489,7 @@ void parse_action(int command, char *str, Descriptor *d)
 
 			if (*buf == '\0')
 			{
-				d->Send("You must specify a line number before which to insert text.\r\n");
+				d->send("You must specify a line number before which to insert text.\r\n");
 				return;
 			}
 
@@ -501,7 +501,7 @@ void parse_action(int command, char *str, Descriptor *d)
 
 			if ((s = *d->str) == NULL)
 			{
-				d->Send("Buffer is empty, nowhere to insert.\r\n");
+				d->send("Buffer is empty, nowhere to insert.\r\n");
 				return;
 			}
 
@@ -516,7 +516,7 @@ void parse_action(int command, char *str, Descriptor *d)
 
 				if ((i < line_low) || (s == NULL))
 				{
-					d->Send("Line number out of range; insert aborted.\r\n");
+					d->send("Line number out of range; insert aborted.\r\n");
 					return;
 				}
 
@@ -526,7 +526,7 @@ void parse_action(int command, char *str, Descriptor *d)
 				if ((strlen(*d->str) + strlen(buf2) + strlen(s + 1) + 3) > d->max_str)
 				{
 					*s = temp;
-					d->Send("Insert text pushes buffer over maximum size, insert aborted.\r\n");
+					d->send("Insert text pushes buffer over maximum size, insert aborted.\r\n");
 					return;
 				}
 
@@ -543,12 +543,12 @@ void parse_action(int command, char *str, Descriptor *d)
 				strcpy(nStr, buf);
 				delete[] *d->str;
 				*d->str = nStr;
-				d->Send("Line inserted.\r\n");
+				d->send("Line inserted.\r\n");
 			}
 
 			else
 			{
-				d->Send("Line number must be higher than 0.\r\n");
+				d->send("Line number must be higher than 0.\r\n");
 				return;
 			}
 
@@ -559,7 +559,7 @@ void parse_action(int command, char *str, Descriptor *d)
 
 			if (*buf == '\0')
 			{
-				d->Send("You must specify a line number at which to change text.\r\n");
+				d->send("You must specify a line number at which to change text.\r\n");
 				return;
 			}
 
@@ -571,7 +571,7 @@ void parse_action(int command, char *str, Descriptor *d)
 
 			if ((s = *d->str) == NULL)
 			{
-				d->Send("Buffer is empty, nothing to change.\r\n");
+				d->send("Buffer is empty, nothing to change.\r\n");
 				return;
 			}
 
@@ -594,7 +594,7 @@ void parse_action(int command, char *str, Descriptor *d)
 
 				if ((i < line_low) || (s == NULL))
 				{
-					d->Send("Line number out of range; change aborted.\r\n");
+					d->send("Line number out of range; change aborted.\r\n");
 					return;
 				}
 
@@ -650,7 +650,7 @@ void parse_action(int command, char *str, Descriptor *d)
 
 				if (strlen(buf) > d->max_str)
 				{
-					d->Send("Change causes new length to exceed buffer maximum size, aborted.\r\n");
+					d->send("Change causes new length to exceed buffer maximum size, aborted.\r\n");
 					return;
 				}
 
@@ -662,26 +662,26 @@ void parse_action(int command, char *str, Descriptor *d)
 				strcpy( nStr, buf );
 				delete[] *d->str;
 				*d->str = nStr;
-				d->Send("Line changed.\r\n");
+				d->send("Line changed.\r\n");
 			}
 
 			else
 			{
-				SEND_TO_Q("Line number must be higher than 0.\r\n", d);
+				d->sendRaw("Line number must be higher than 0.\r\n");
 				return;
 			}
 
 			break;
 
 		default:
-			d->Send("Invalid option.\r\n");
+			d->send("Invalid option.\r\n");
 			MudLog(BRF, LVL_IMPL, TRUE, "SYSERR: invalid command passed to parse_action");
 			return;
 	}
 }
 
 //Galnor, 03/20/2009 - Add this string to Descriptor::str if there is enough room for it.
-bool Descriptor::AddToString( const char *txt )
+bool Descriptor::addToString( const char *txt )
 {//Returns true if the string was added.
 	if( (strlen( *(this->str) ) + strlen(txt)) >= (this->max_str) )
 	{
@@ -756,10 +756,10 @@ void string_add(Descriptor *d, char *str)
 				{
 					delete [](*(d->str));
 					*(d->str) = NULL;
-					d->Send("Current buffer cleared.\r\n");
+					d->send("Current buffer cleared.\r\n");
 				}
 				else
-					d->Send("Current buffer empty.\r\n");
+					d->send("Current buffer empty.\r\n");
 				break;
 			case 'd':
 				parse_action(PARSE_DELETE, actions, d);
@@ -771,13 +771,13 @@ void string_add(Descriptor *d, char *str)
 				if (*(d->str))
 					parse_action(PARSE_FORMAT, actions, d);
 				else
-					d->Send("Current buffer empty.\r\n");
+					d->send("Current buffer empty.\r\n");
 				break;
 			case 'i':
 				if (*(d->str))
 					parse_action(PARSE_INSERT, actions, d);
 				else
-					d->Send("Current buffer empty.\r\n");
+					d->send("Current buffer empty.\r\n");
 				break;
 			case 'h':
 				parse_action(PARSE_HELP, actions, d);
@@ -786,13 +786,13 @@ void string_add(Descriptor *d, char *str)
 				if (*d->str)
 					parse_action(PARSE_LIST_NORM, actions, d);
 				else
-					d->Send("Current buffer empty.\r\n");
+					d->send("Current buffer empty.\r\n");
 				break;
 			case 'n':
 				if (*d->str)
 					parse_action(PARSE_LIST_NUM, actions, d);
 				else
-					d->Send("Current buffer empty.\r\n");
+					d->send("Current buffer empty.\r\n");
 				break;
 			case 'r':
 				parse_action(PARSE_REPLACE, actions, d);
@@ -802,7 +802,7 @@ void string_add(Descriptor *d, char *str)
 				*str = '\0';
 				break;
 			default:
-				d->Send("Invalid option.\r\n");
+				d->send("Invalid option.\r\n");
 				break;
 		}
 	}
@@ -812,20 +812,19 @@ void string_add(Descriptor *d, char *str)
 	{
 		if (strlen(str) > d->max_str)
 		{
-			d->Send("String too long - Truncated.\r\n");
+			d->send("String too long - Truncated.\r\n");
 			*(str + d->max_str) = '\0';
 			/* Changed this to NOT abort out.. just give warning. */
 			/* terminator = 1; */
 		}
 		(*d->str) = new char[d->max_str];
 		*(*d->str) = '\0';
-//		CREATE(*d->str, char, strlen(str) + 3);
-		d->AddToString(str);
+		d->addToString(str);
 	}
 	else
 	{
-		if( !d->AddToString( str ) )
-			d->Send("String too long, limit reached on message. Last line ignored.\r\n");
+		if( !d->addToString( str ) )
+			d->send("String too long, limit reached on message. Last line ignored.\r\n");
 	}
 
 	if (terminator)
@@ -922,7 +921,6 @@ void string_add(Descriptor *d, char *str)
 					break;
 			}
 		}
-#ifdef KINSLAYER_JAVASCRIPT
 		else if(STATE(d) == CON_JEDIT)
 		{
 			switch(OLC_MODE(d))
@@ -943,7 +941,6 @@ void string_add(Descriptor *d, char *str)
 				break;
 			}
 		}
-#endif
 		else if(STATE(d) == CON_CEDIT)
 		{
 			switch(OLC_MODE(d))
@@ -974,7 +971,7 @@ void string_add(Descriptor *d, char *str)
 				else
 					*d->str = NULL;
 				d->backstr = NULL;
-				SEND_TO_Q("Message aborted.\r\n", d);
+				d->sendRaw("Message aborted.\r\n");
 			}
 		}
 		if (d->character && !IS_NPC(d->character))
@@ -992,7 +989,7 @@ void string_add(Descriptor *d, char *str)
 
 	//Add a newline only if able -Galnor, 03/20/2009
 	else if (!action)
-		d->AddToString("\r\n");
+		d->addToString("\r\n");
 }
 
 
@@ -1015,16 +1012,16 @@ ACMD(do_skillset)
 	 */
 	if (!*name)
 	{
-		ch->Send("Syntax: skillset <name> '<skill>' <value>\r\n");
-		ch->Send("Skill being one of the following:\r\n");
-		ch->Send(WeaveManager::GetManager().ListWeaves(1,ch).c_str());
-		ch->Send("\r\n");
+		ch->send("Syntax: skillset <name> '<skill>' <value>\r\n");
+		ch->send("Skill being one of the following:\r\n");
+		ch->send(WeaveManager::GetManager().ListWeaves(1,ch).c_str());
+		ch->send("\r\n");
 		return;
 	}
 
 	if (!(vict = get_char_vis(ch, name)))
 	{
-		ch->Send(NOPERSON);
+		ch->send(NOPERSON);
 		return;
 	}
 	skip_spaces(&argument);
@@ -1032,12 +1029,12 @@ ACMD(do_skillset)
 	/* If there is no chars in argument */
 	if (!*argument)
 	{
-		ch->Send("Skill name expected.\r\n");
+		ch->send("Skill name expected.\r\n");
 		return;
 	}
 	if (*argument != '\'')
 	{
-		ch->Send("Skill must be enclosed in: ''\r\n");
+		ch->send("Skill must be enclosed in: ''\r\n");
 		return;
 	}
 	/* Locate the last quote && lowercase the magic words (if any) */
@@ -1047,7 +1044,7 @@ ACMD(do_skillset)
 
 	if (*(argument + qend) != '\'')
 	{
-		ch->Send("Skill must be enclosed in: ''\r\n");
+		ch->send("Skill must be enclosed in: ''\r\n");
 		return;
 	}
 	strcpy(help, (argument + 1));
@@ -1055,7 +1052,7 @@ ACMD(do_skillset)
 
 	if ((skill = WeaveManager::GetManager().GetWeaveVnum( StringUtil::cap(StringUtil::allLower(help)) )) <= 0)
 	{
-		ch->Send("Unrecognized skill.\r\n");
+		ch->send("Unrecognized skill.\r\n");
 		return;
 	}
 
@@ -1064,23 +1061,23 @@ ACMD(do_skillset)
 
 	if (!*buf)
 	{
-		ch->Send("Learned value expected.\r\n");
+		ch->send("Learned value expected.\r\n");
 		return;
 	}
 	value = atoi(buf);
 	if (value < 0)
 	{
-		ch->Send("Minimum value for learned is 0.\r\n");
+		ch->send("Minimum value for learned is 0.\r\n");
 		return;
 	}
 	if (value > 100)
 	{
-		ch->Send("Max value for learned is 100.\r\n");
+		ch->send("Max value for learned is 100.\r\n");
 		return;
 	}
 	if (IS_NPC(vict))
 	{
-		ch->Send("You can't set NPC skills.\r\n");
+		ch->send("You can't set NPC skills.\r\n");
 		return;
 	}
 
@@ -1089,7 +1086,7 @@ ACMD(do_skillset)
 
 	SET_SKILL(vict, skill, value);
 
-	ch->Send("You change %s's %s to %d.\r\n", GET_NAME(vict), WeaveManager::GetManager().GetWeaveName(skill).c_str(), value);
+	ch->send("You change %s's %s to %d.\r\n", GET_NAME(vict), WeaveManager::GetManager().GetWeaveName(skill).c_str(), value);
 }
 
 
@@ -1210,7 +1207,7 @@ void page_string(Descriptor *d, char *str, int keep_internal)
 
 	if (!str || !*str)
 	{
-		d->Send("");
+		d->send("");
 		return;
 	}
 
@@ -1281,7 +1278,7 @@ void show_string(Descriptor *d, char *input)
 
 	else if (*buf)
 	{
-		d->Send("Valid commands while paging are RETURN, Q, R, B, or a numeric value.\r\n");
+		d->send("Valid commands while paging are RETURN, Q, R, B, or a numeric value.\r\n");
 		return;
 	}
 	/*
@@ -1290,7 +1287,7 @@ void show_string(Descriptor *d, char *input)
 	 */
 	if (d->showstr_page + 1 >= d->showstr_count)
 	{
-		SEND_TO_Q(d->showstr_vector[d->showstr_page],d);
+		d->sendRaw(d->showstr_vector[d->showstr_page]);
 
 		if (d->showstr_count != 1)
 			delete[] (d->showstr_vector);
@@ -1316,7 +1313,7 @@ void show_string(Descriptor *d, char *input)
 
 		strncpy(buffer, d->showstr_vector[d->showstr_page], diff);
 		buffer[diff] = '\0';
-		write_to_output(d, buffer);
+		d->sendRaw(buffer);
 		++d->showstr_page;
 	}
 }

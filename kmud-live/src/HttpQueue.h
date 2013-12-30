@@ -2,7 +2,8 @@
 #define HTTP_QUEUE_H
 
 #include <list>
-#include <boost/thread.hpp>
+#include <thread>
+#include <mutex>
 
 #include "HttpRequest.h"
 #include "HttpResponse.h"
@@ -13,8 +14,8 @@ protected:
 	std::list<HttpRequest *> requestQueue;
 	std::list<HttpResponse *> responseQueue;
 
-	boost::mutex requestQueueMutex;
-	boost::mutex responseQueueMutex;
+	std::mutex requestQueueMutex;
+	std::mutex responseQueueMutex;
 	
 public:
 	HttpRequest *getNextRequest();

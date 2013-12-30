@@ -28,8 +28,8 @@ void userEmailAddressEditorDisplayMainMenu(Descriptor *descriptor)
 	OLC *olc = descriptor->olc;
 	int counter = 1;
 
-	descriptor->Send("Nr  Email Address           Confirmed   Created Date  Confirmed Date\r\n");
-	descriptor->Send("----------------------------------------------------------------------\r\n");
+	descriptor->send("Nr  Email Address           Confirmed   Created Date  Confirmed Date\r\n");
+	descriptor->send("----------------------------------------------------------------------\r\n");
 	for(auto iter = olc->userEmailAddresses.begin();iter != olc->userEmailAddresses.end();++iter)
 	{
 		UserEmailAddress *userEmailAddress = (*iter);
@@ -37,16 +37,16 @@ void userEmailAddressEditorDisplayMainMenu(Descriptor *descriptor)
 		std::string isConfirmedString = StringUtil::yesNo(isConfirmed);
 		std::string createdDateString = DateTime::parse("%Y-%m-%d", userEmailAddress->getCreatedDatetime());
 		std::string confirmedDateString = userEmailAddress->getConfirmed() ? DateTime::parse("%Y-%m-%d", userEmailAddress->getConfirmedDatetime()) : "";
-        descriptor->Send("%s%s%2d%s  %-23s   %s%s%-3s%s       %s    %s\r\n", bld, yel, counter, nrm, StringUtil::truncateWithEllipses(userEmailAddress->getEmailAddress(), 23).c_str(), bld, (isConfirmed ? grn : red), isConfirmedString.c_str(), nrm, createdDateString.c_str(), confirmedDateString.c_str());
+        descriptor->send("%s%s%2d%s  %-23s   %s%s%-3s%s       %s    %s\r\n", bld, yel, counter, nrm, StringUtil::truncateWithEllipses(userEmailAddress->getEmailAddress(), 23).c_str(), bld, (isConfirmed ? grn : red), isConfirmedString.c_str(), nrm, createdDateString.c_str(), confirmedDateString.c_str());
 
 		++counter;
 	}
-	descriptor->Send("\r\n");
-	descriptor->Send("%sA%s) Add Email\r\n", grn, nrm);
-	descriptor->Send("%sC%s) Confirm Email\r\n", grn, nrm);
-	descriptor->Send("%sR%s) Resend Confirmation\r\n", grn, nrm);
-	descriptor->Send("%sQ%s) Quit\r\n", grn, nrm);
-	descriptor->Send("Choose an option:");
+	descriptor->send("\r\n");
+	descriptor->send("%sA%s) Add Email\r\n", grn, nrm);
+	descriptor->send("%sC%s) Confirm Email\r\n", grn, nrm);
+	descriptor->send("%sR%s) Resend Confirmation\r\n", grn, nrm);
+	descriptor->send("%sQ%s) Quit\r\n", grn, nrm);
+	descriptor->send("Choose an option:");
 
 	OLC_MODE( descriptor ) = USER_EMAIL_EDITOR_MAIN;
 }
@@ -61,15 +61,15 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 		switch( UPPER( arg[0] ) )
 		{
 		case 'A':
-			descriptor->Send("Enter the email address you wish to add:\r\n");
+			descriptor->send("Enter the email address you wish to add:\r\n");
 			OLC_MODE(descriptor) = USER_EMAIL_EDITOR_ADD_EMAIL;
 			break;
 		case 'C':
-			descriptor->Send("Which email address are you confirming?\r\n");
+			descriptor->send("Which email address are you confirming?\r\n");
 			OLC_MODE(descriptor) = USER_EMAIL_EDITOR_CONFIRM_EMAIL_SELECT;
 			break;
 		case 'R':
-			descriptor->Send("Which email address confirmation code would you like to have resent?(choose the email number from the main menu): \r\n");
+			descriptor->send("Which email address confirmation code would you like to have resent?(choose the email number from the main menu): \r\n");
 			OLC_MODE(descriptor) = USER_EMAIL_EDITOR_RESEND_CONFIRMATION_SELECT;
 			break;
 		case 'Q':
@@ -77,7 +77,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 			break;
 		default:
 			userEmailAddressEditorDisplayMainMenu(descriptor);
-			descriptor->Send("Invalid option. Try again:\r\n");
+			descriptor->send("Invalid option. Try again:\r\n");
 			break;
 		}
 		break;
@@ -86,7 +86,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 		int emailNumber = atoi(arg.c_str()) - 1;
 		if(!MiscUtil::isInt(arg) || emailNumber < 0 || emailNumber >= olc->userEmailAddresses.size())
 		{
-			descriptor->Send("%s%sThe email you selected is invalid. You must select the email number from the list on the main menu.%s\r\n", bld, red, nrm);
+			descriptor->send("%s%sThe email you selected is invalid. You must select the email number from the list on the main menu.%s\r\n", bld, red, nrm);
 			userEmailAddressEditorDisplayMainMenu(descriptor);
 			break;
 		}
@@ -100,7 +100,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 		//Only resend the confirmation if the email has not been confirmed yet.
 		if(userEmailAddress->getConfirmed() == true)
 		{
-			descriptor->Send("%s%sThis email address has already been confirmed.%s\r\n", bld, red, nrm);
+			descriptor->send("%s%sThis email address has already been confirmed.%s\r\n", bld, red, nrm);
 			userEmailAddressEditorDisplayMainMenu(descriptor);
 			break;
 		}
@@ -117,7 +117,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 		CharacterUtil::sendUserEmailAddressConfirmationEmail(gameDatabase, descriptor->character, userEmailAddress, userEmailAddressConfirmation);
 		delete userEmailAddressConfirmation;
 		
-		descriptor->Send("%s%sAn email has been sent to %s with a confirmation code.%s\r\n", bld, grn, userEmailAddress->getEmailAddress().c_str(), nrm);
+		descriptor->send("%s%sAn email has been sent to %s with a confirmation code.%s\r\n", bld, grn, userEmailAddress->getEmailAddress().c_str(), nrm);
 		userEmailAddressEditorDisplayMainMenu(descriptor);
 		break;
 	}
@@ -126,7 +126,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 		//Confirm that the email address they entered is valid.
 		if(!MiscUtil::isValidEmailAddress(arg))
 		{
-			descriptor->Send("%s%sYou have entered an invalid email address%s\r\n", bld, red, nrm);
+			descriptor->send("%s%sYou have entered an invalid email address%s\r\n", bld, red, nrm);
 			userEmailAddressEditorDisplayMainMenu(descriptor);
 			break;
 		}
@@ -138,7 +138,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 			UserEmailAddress *userEmailAddress = (*iter);
 			if(!str_cmp(userEmailAddress->getEmailAddress(), arg))
 			{
-				descriptor->Send("%s%sThis email address is already registered to this account.%s\r\n", bld, red, nrm);
+				descriptor->send("%s%sThis email address is already registered to this account.%s\r\n", bld, red, nrm);
 				userEmailAddressEditorDisplayMainMenu(descriptor);
 				alreadyRegistered = true;
 				break;
@@ -155,7 +155,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 		olc->userEmailAddress->setUserId(descriptor->character->getUserId());
 		olc->userEmailAddress->setEmailAddress(arg);
 
-		descriptor->Send("Enter your email a second time to confirm that it is correct:\r\n");
+		descriptor->send("Enter your email a second time to confirm that it is correct:\r\n");
 		OLC_MODE(descriptor) = USER_EMAIL_EDITOR_ADD_EMAIL_CONFIRM;
 		break;
 	}
@@ -163,12 +163,12 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 
 		if(olc->userEmailAddress->getEmailAddress() != arg)
 		{
-			descriptor->Send("%s%sThe emails you entered did not match. Your email has not been added.%s\r\n", bld, red, nrm);
+			descriptor->send("%s%sThe emails you entered did not match. Your email has not been added.%s\r\n", bld, red, nrm);
 			delete olc->userEmailAddress;
 		}
 		else
 		{
-			descriptor->Send("%s%sYour email has been added to the system. You should receive an email with a confirmation number.\r\n"
+			descriptor->send("%s%sYour email has been added to the system. You should receive an email with a confirmation number.\r\n"
 							 "You can enter your confirmation number by choosing option 'C' in the main menu.%s\r\n", bld, grn, nrm);
 
 			CharacterUtil::putUserEmailAddress(gameDatabase, olc->userEmailAddress);
@@ -191,7 +191,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 		int emailNumber = atoi(arg.c_str()) - 1;
 		if(!MiscUtil::isInt(arg) || emailNumber < 0 || emailNumber >= olc->userEmailAddresses.size())
 		{
-			descriptor->Send("%s%sThe email you selected is invalid. You must select the email number from the list on the main menu.%s\r\n", bld, red, nrm);
+			descriptor->send("%s%sThe email you selected is invalid. You must select the email number from the list on the main menu.%s\r\n", bld, red, nrm);
 			userEmailAddressEditorDisplayMainMenu(descriptor);
 			break;
 		}
@@ -203,7 +203,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 		}
 
 		olc->userEmailAddress = userEmailAddress;
-		descriptor->Send("Please enter the verification code: \r\n");
+		descriptor->send("Please enter the verification code: \r\n");
 		OLC_MODE(descriptor) = USER_EMAIL_EDITOR_CONFIRM_EMAIL_CODE;
 		break;
 	}
@@ -215,11 +215,11 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 		//If the confirmation is null, then no email confirmation exists with this verification code.
 		if(userEmailAddressConfirmation == NULL || userEmailAddress->getId() != userEmailAddressConfirmation->getUserEmailAddressId())
 		{
-			descriptor->Send("%s%sThe verification code you entered is incorrect.%s\r\n", bld, red, nrm);
+			descriptor->send("%s%sThe verification code you entered is incorrect.%s\r\n", bld, red, nrm);
 		}
 		else
 		{
-			descriptor->Send("%s%sYour email addess has been confirmed!%s\r\n", bld, grn, nrm);
+			descriptor->send("%s%sYour email addess has been confirmed!%s\r\n", bld, grn, nrm);
 			userEmailAddress->setConfirmed(true);
 			userEmailAddress->setConfirmedDatetime(DateTime());
 			CharacterUtil::putUserEmailAddress(gameDatabase, userEmailAddress);

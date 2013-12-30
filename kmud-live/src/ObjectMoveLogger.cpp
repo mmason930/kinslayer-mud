@@ -8,6 +8,7 @@
 ObjectMoveLogger::ObjectMoveLogger()
 {
 	this->objectMoveLogEntries = new std::list<ObjectMoveLogEntry>();
+	this->running = true;
 }
 
 ObjectMoveLogger::~ObjectMoveLogger()
@@ -24,21 +25,25 @@ void ObjectMoveLogger::logObjectMove(const boost::uuids::uuid &objectId, const s
 	objectMoveLogEntry.timestamp = time(0);
 
 	{
-		boost::mutex::scoped_lock(objectMoveLogEntriesMutex);
+		std::lock_guard<std::mutex> lock(objectMoveLogEntriesMutex);
 		objectMoveLogEntries->push_back(objectMoveLogEntry);
 	}
+}
+
+void ObjectMoveLogger::kill()
+{
+	this->running = false;
 }
 
 void ObjectMoveLogger::threadHandler()
 {
 	std::list<ObjectMoveLogEntry> *threadObjectMoveLogEntries;
 
-	while(true)
+	while(running)
 	{
-
 		threadObjectMoveLogEntries = NULL;
 		{
-			boost::mutex::scoped_lock(objectMoveLogEntriesMutex);
+			std::lock_guard<std::mutex> lock(objectMoveLogEntriesMutex);
 			if(this->objectMoveLogEntries->size() > 0)
 			{
 				threadObjectMoveLogEntries = this->objectMoveLogEntries;
@@ -69,6 +74,6 @@ void ObjectMoveLogger::threadHandler()
 			delete threadObjectMoveLogEntries;
 		}
 
-		boost::this_thread::sleep( boost::posix_time::seconds(1) );
+		std::this_thread::sleep_for( std::chrono::milliseconds(100) );
 	}
 }

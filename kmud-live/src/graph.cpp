@@ -463,7 +463,7 @@ ACMD( do_track )
 
 	if ( !ch->CanTrack(ch->in_room) )
 	{
-		ch->Send( "You can't seem to make out any tracks here.\r\n" );
+		ch->send( "You can't seem to make out any tracks here.\r\n" );
 		return ;
 	}
 

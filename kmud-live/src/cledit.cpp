@@ -32,7 +32,7 @@ ACMD(do_cledit)
 	{
 		if(STATE(d) == CON_CLEDIT && d->olc && d->olc->clan && d->olc->clan->vnum == atoi(buf1))
 		{
-			ch->Send("%s is currently editing data for %s.\r\n", d->character ? GET_NAME(d->character) : "Someone",
+			ch->send("%s is currently editing data for %s.\r\n", d->character ? GET_NAME(d->character) : "Someone",
 			         d->olc->clan->Name.c_str());
 			return;
 		}
@@ -40,7 +40,7 @@ ACMD(do_cledit)
 
 	if (GET_LEVEL(ch) < LVL_GRGOD && !(IS_AWESOME(ch) || IS_QUEEN(ch) || IS_GAY(ch)))
 	{
-		ch->Send("You can't edit the clans.\r\n");
+		ch->send("You can't edit the clans.\r\n");
 		return;
 	}
 
@@ -64,7 +64,7 @@ ACMD(do_cledit)
 	}
 	else
 	{
-		d->Send("Which clan is it you wish to edit?\r\n");
+		d->send("Which clan is it you wish to edit?\r\n");
 	}
 }
 
@@ -184,13 +184,13 @@ void CleditSaveToDisk(Descriptor *d)
 	gameDatabase->sendRawQuery("DROP TABLE IF EXISTS tempClan");
 	gameDatabase->sendRawQuery("DROP TABLE IF EXISTS tempClanRank");
 
-	d->Send("Clan data saved successfully.\r\n");
+	d->send("Clan data saved successfully.\r\n");
 }
 
 void CleditDispMenu(Descriptor *d)
 {
 	get_char_cols(d->character);
-	d->Send("%sClan #%s%d\r\n"
+	d->send("%sClan #%s%d\r\n"
 	        "%s1%s)  Name:          %s%s\r\n"
 	        "%s2%s)  Secret:        %s%s\r\n"
 	        "%s3%s)  Warrant:       %s%s\r\n"
@@ -216,13 +216,13 @@ void CleditRankMenu(Descriptor *d)
 	int i = 0;
 	get_char_cols(d->character);
 
-	d->Send("\r\nRanks for %s\r\n", OLC_CLAN(d)->Name.c_str());
+	d->send("\r\nRanks for %s\r\n", OLC_CLAN(d)->Name.c_str());
 
 	for(i = 0;i < (int) OLC_CLAN(d)->RankNames.size();++i)
 	{
-		d->Send("    %s%d%s. %s%s\r\n", grn, i + 1, nrm, yel, OLC_CLAN(d)->RankNames[i].c_str());
+		d->send("    %s%d%s. %s%s\r\n", grn, i + 1, nrm, yel, OLC_CLAN(d)->RankNames[i].c_str());
 	}
-	d->Send("\r\n%sI%s) %sInsert Rank Name\r\n"
+	d->send("\r\n%sI%s) %sInsert Rank Name\r\n"
 	        "%sD%s) %sDelete Rank Name\r\n"
 	        "%sE%s) %sEdit Rank Name\r\n"
 	        "%sQ%s) %sExit Rank Menu\r\n"
@@ -241,19 +241,19 @@ void CleditDisplayWarrants(Descriptor *d)
 	std::list<Warrant *>::iterator iter;
 
 	get_char_cols(d->character);
-	d->Send("Warrants:\r\n");
+	d->send("Warrants:\r\n");
 
 	for(iter = Warrants.begin();iter != Warrants.end();++iter)
 	{
-		d->Send("%d. %s\r\n", (*iter)->vnum, (*iter)->Name.c_str());
+		d->send("%d. %s\r\n", (*iter)->vnum, (*iter)->Name.c_str());
 	}
 }
 
 void CleditDispBonusSkills(Descriptor *d)
 {
 	get_char_cols(d->character);
-	d->Send("Choose from the following skills, or 0 for none:\r\n\r\n");
-	d->Send( WeaveManager::GetManager().ListWeaves( 0, d->character ).c_str() );
+	d->send("Choose from the following skills, or 0 for none:\r\n\r\n");
+	d->send( WeaveManager::GetManager().ListWeaves( 0, d->character ).c_str() );
 }
 
 void CleditParse(Descriptor *d, const std::string &arg)
@@ -270,7 +270,7 @@ void CleditParse(Descriptor *d, const std::string &arg)
 			{
 				case 1:
 					OLC_MODE(d) = CLEDIT_NAME;
-					d->Send("Enter the new name for this clan: ");
+					d->send("Enter the new name for this clan: ");
 					return;
 				case 2:
 					TOGGLE_VAR(OLC_CLAN(d)->secret);
@@ -278,15 +278,15 @@ void CleditParse(Descriptor *d, const std::string &arg)
 				case 3:
 					CleditDisplayWarrants(d);
 					OLC_MODE(d) = CLEDIT_WARRANT;
-					d->Send("Enter the warrant for this clan(-1 for none) : ");
+					d->send("Enter the warrant for this clan(-1 for none) : ");
 					return;
 				case 4:
-					d->Send("Enter the new minimum level required to view this clan: ");
+					d->send("Enter the new minimum level required to view this clan: ");
 					OLC_MODE(d) = CLEDIT_HIDDEN_LEVEL;
 					return;
 				case 5:
 					CleditDispBonusSkills(d);
-					d->Send("Enter the new bonus skill:\r\n");
+					d->send("Enter the new bonus skill:\r\n");
 					OLC_MODE(d) = CLEDIT_BONUS_SKILL;
 					return;
 				case 6:
@@ -294,17 +294,17 @@ void CleditParse(Descriptor *d, const std::string &arg)
 					OLC_MODE(d) = CLEDIT_RANK_MENU;
 					return;
 				case 7:
-					d->Send("Are you SURE that you want to delete this clan? There is no going back.\r\n");
+					d->send("Are you SURE that you want to delete this clan? There is no going back.\r\n");
 					OLC_MODE(d) = CLEDIT_CONFIRM_DELETE;
 					return;
 				default:
 					if(toupper(arg[0]) == 'Q')
 					{
 						OLC_MODE(d) = CLEDIT_CONFIRM_SAVE;
-						d->Send("Would you like to save your changes to the clans? 'Y' or 'N' : ");
+						d->send("Would you like to save your changes to the clans? 'Y' or 'N' : ");
 						return;
 					}
-					d->Send("Invalid option. Try again: ");
+					d->send("Invalid option. Try again: ");
 					return;
 			}
 			break;
@@ -317,10 +317,10 @@ void CleditParse(Descriptor *d, const std::string &arg)
 					CleditSaveToDisk(d);
 					break;
 				case 'N':
-					d->Send("Exited without saving.\r\n");
+					d->send("Exited without saving.\r\n");
 					break;
 				default:
-					d->Send("Invalid option. Enter 'Y' or 'N' : ");
+					d->send("Invalid option. Enter 'Y' or 'N' : ");
 					return;
 			}
 			cleanup_olc(d, CLEANUP_ALL);
@@ -333,21 +333,21 @@ void CleditParse(Descriptor *d, const std::string &arg)
 			num = atoi(arg.c_str());
 			if(num == -1)
 			{
-				d->Send("Warrant set to none.\r\n");
+				d->send("Warrant set to none.\r\n");
 				break;
 			}
 			else if(!(WarrantByVnum(num)))
 			{
-				d->Send("Invalid warrant. Try again : ");
+				d->send("Invalid warrant. Try again : ");
 				return;
 			}
 			d->olc->clan->warrant = num;
-			d->Send("Warrant set to %s.", WarrantByVnum(num)->Name.c_str());
+			d->send("Warrant set to %s.", WarrantByVnum(num)->Name.c_str());
 			break;
 		case CLEDIT_HIDDEN_LEVEL:
 			if(atoi(arg.c_str()) < 0 || atoi(arg.c_str()) > d->character->player.level)
 			{
-				d->Send("\r\nLevel range must be between your level and 0. Try again: ");
+				d->send("\r\nLevel range must be between your level and 0. Try again: ");
 				return;
 			}
 			OLC_CLAN(d)->hidden_level = atoi(arg.c_str());
@@ -362,14 +362,14 @@ void CleditParse(Descriptor *d, const std::string &arg)
 						delete c;
 					}
 					cleanup_olc(d, CLEANUP_ALL);
-					d->Send("This clan has been deleted.\r\n");
+					d->send("This clan has been deleted.\r\n");
 					CleditSaveToDisk(d);
 					return;
 				case 'N':
-					d->Send("Clan not deleted.\r\n");
+					d->send("Clan not deleted.\r\n");
 					break;
 				default:
-					d->Send("You must type 'Y' or 'N'.\r\n");
+					d->send("You must type 'Y' or 'N'.\r\n");
 					return;
 			}
 			break;
@@ -377,26 +377,26 @@ void CleditParse(Descriptor *d, const std::string &arg)
 			switch(toupper(arg[0]))
 			{
 				case 'I':
-					d->Send("Where would you like to insert this new rank? : ");
+					d->send("Where would you like to insert this new rank? : ");
 					OLC_MODE(d) = CLEDIT_RANK_INSERT_NUMBER;
 					return;
 				case 'D':
-					d->Send("Which rank would you like to remove? : ");
+					d->send("Which rank would you like to remove? : ");
 					OLC_MODE(d) = CLEDIT_RANK_DELETE;
 					return;
 				case 'E':
 					if(!(d->olc->clan->RankNames.size()))
 					{
-						d->Send("There are no existing ranks. Use the insert option.\r\n");
+						d->send("There are no existing ranks. Use the insert option.\r\n");
 						return;
 					}
-					d->Send("Which rank would you like to edit? : ");
+					d->send("Which rank would you like to edit? : ");
 					OLC_MODE(d) = CLEDIT_RANK_EDIT_NUMBER;
 					return;
 				case 'Q':
 					break;
 				default:
-					d->Send("Invalid option.\r\n");
+					d->send("Invalid option.\r\n");
 					CleditRankMenu(d);
 					return;
 			}
@@ -405,14 +405,14 @@ void CleditParse(Descriptor *d, const std::string &arg)
 			num = atoi(arg.c_str());
 			if(num <= 0 || num > (int) OLC_CLAN(d)->RankNames.size())
 			{
-				d->Send("That rank does not exist. Try again : ");
+				d->send("That rank does not exist. Try again : ");
 				return;
 			}
 			//Remove the rank
 			d->olc->clan->RemoveRank(num);
 			OLC_VAL(d) = num;
 
-			d->Send("Insert the new name for this rank : ");
+			d->send("Insert the new name for this rank : ");
 
 			OLC_MODE(d) = CLEDIT_RANK_INSERT_NAME;
 			return;
@@ -420,12 +420,12 @@ void CleditParse(Descriptor *d, const std::string &arg)
 			num = atoi(arg.c_str());
 			if(num <= 0 || num > (int) OLC_CLAN(d)->RankNames.size() + 1)
 			{
-				d->Send("To insert rank before givin number, range must be between 1 and %d. Try again : ",
+				d->send("To insert rank before givin number, range must be between 1 and %d. Try again : ",
 				        OLC_CLAN(d)->RankNames.size() + 1);
 				return;
 			}
 			OLC_VAL(d) = num;
-			d->Send("Insert the name for this rank : ");
+			d->send("Insert the name for this rank : ");
 			OLC_MODE(d) = CLEDIT_RANK_INSERT_NAME;
 			return;
 		case CLEDIT_RANK_INSERT_NAME:
@@ -436,13 +436,13 @@ void CleditParse(Descriptor *d, const std::string &arg)
 			num = atoi(arg.c_str());
 			if(num <= 0 || num > (int) OLC_CLAN(d)->RankNames.size())
 			{
-				d->Send("That rank does not exist!\r\n");
+				d->send("That rank does not exist!\r\n");
 				return;
 			}
 
 			d->olc->clan->FindRankIterator(num, iter);
 
-			d->Send("Rank %d has been removed.\r\n", num);
+			d->send("Rank %d has been removed.\r\n", num);
 			OLC_CLAN(d)->RankNames.erase(iter);
 			CleditRankMenu(d);
 			return;
@@ -450,44 +450,44 @@ void CleditParse(Descriptor *d, const std::string &arg)
 			num = atoi(arg.c_str());
 			if (num == 0)
 			{
-				d->Send("Bonus skill set to none.\r\n");
+				d->send("Bonus skill set to none.\r\n");
 				OLC_CLAN(d)->bonus_skill = 0;
 				break;
 			}
 			if (!WeaveManager::GetManager().GetWeave(num))
 			{
-				d->Send("Invalid skill, try again : ");
+				d->send("Invalid skill, try again : ");
 				return;
 			}
-			d->Send("Bonus skill set to %s.\r\n", WeaveManager::GetManager().GetWeaveName(num).c_str());
+			d->send("Bonus skill set to %s.\r\n", WeaveManager::GetManager().GetWeaveName(num).c_str());
 			OLC_CLAN(d)->bonus_skill = num;
 			OLC_MODE(d) = CLEDIT_BONUS_SKILL_VAL;
-			d->Send("Enter the desired practice bonus for the skill: ");
+			d->send("Enter the desired practice bonus for the skill: ");
 			return;
 		case CLEDIT_BONUS_SKILL_VAL:
 			num = atoi(arg.c_str());
 			if ( num < 0 || num > 99)
 			{
-				d->Send("The bonus must be between 0 and 99, try again : ");
+				d->send("The bonus must be between 0 and 99, try again : ");
 				return;
 			}
-			d->Send("Practice bonus set to %d.\r\n", num);
+			d->send("Practice bonus set to %d.\r\n", num);
 			OLC_CLAN(d)->bonus_skill_val = num;
 			OLC_MODE(d) = CLEDIT_BONUS_SKILL_RANK;
-			d->Send("Enter the rank at which this bonus will become active: ");
+			d->send("Enter the rank at which this bonus will become active: ");
 			return;
 		case CLEDIT_BONUS_SKILL_RANK:
 			num = atoi(arg.c_str());
 			if ( num < 0 || num > 10 )
 			{
-				d->Send("The rank must be between 0 and 10, try again : ");
+				d->send("The rank must be between 0 and 10, try again : ");
 				return;
 			}
-			d->Send("Rank set to %d.\r\n", num);
+			d->send("Rank set to %d.\r\n", num);
 			OLC_CLAN(d)->bonus_skill_rank = num;
 			break;
 		default:
-			d->Send("Invalid Cledit mode of %d. Tell a coder about this!\r\n");
+			d->send("Invalid Cledit mode of %d. Tell a coder about this!\r\n");
 			MudLog(BRF, MAX(GET_INVIS_LEV(d->character), LVL_APPR), TRUE,
 			       "Argh! %s entered an invalid Cledit state of %d!", GET_NAME(d->character), OLC_MODE(d));
 			cleanup_olc(d, CLEANUP_ALL);

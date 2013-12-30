@@ -45,18 +45,19 @@ public:
 	bool hadInput;
 	bool hadOutput;
 
-	const char *MakePrompt();
-	void Send( const char *messg, ... );
-	void Send( const std::string s );
-	void SendRaw( const char *messg );
+	const char *makePrompt();
+	void send( const char *messg, ... );
+	void send( const std::string s );
+	void sendRaw( const char *messg );
 	void sendInstant( const std::string &str );
 	void socketWriteInstant( const std::string &str, bool recordToUserLog );
-	void NewbieMenuFinish();
-	void EchoOn();
-	void EchoOff();
-	void Nanny( char* arg);
-	bool AddToString( const char *txt );
-	bool HasPermissionToSnoop();
+	void newbieMenuFinish();
+	void echoOn();
+	void echoOff();
+	void nanny( char* arg);
+	bool addToString( const char *txt );
+	void writeToOutput(bool swapArguments, const char *format, va_list args);
+	bool hasPermissionToSnoop();
 
 	void disconnect();
 	void persistentDisconnect();
@@ -74,11 +75,18 @@ public:
 
 	void sendWebSocketUsernameCommand(const std::string &username, const std::list<class UserMacro *> &userMacros);
 	void sendWebSocketPlayersOnlineCommand(const int playersOnline);
+	void sendWebSocketDisplaySignInLightboxMessage();
+	void sendWebSocketErrorMessage(Json::Value &command, const std::string &errorMessage);
 	std::string encodeWebSocketOutputCommand(const char *output);
 	std::string encodeWebSocketCommand(const std::string &command);
 
 	void processWebSocketSaveUserMacroCommand(Json::Value &commandObject);
 	void processWebSocketDeleteUserMacroCommand(Json::Value &commandObject);
+	void processWebSocketSignInCommand(Json::Value &commandObject);
+	void processWebSocketUserRegistrationDetailsCommand(Json::Value &commandObject);
+	void processWebSocketUserCreationCommand(Json::Value &commandObject);
+
+	void completeEnterGame();
 
 	std::string getEmailAddress();
 	void setEmailAddress(const std::string &emailAddress);

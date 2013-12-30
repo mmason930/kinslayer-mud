@@ -2,7 +2,8 @@
 #ifndef THREADED_JOBS_H
 #define THREADED_JOBS_H
 
-#include <boost/thread.hpp>
+#include <thread>
+#include <mutex>
 #include <boost/uuid/uuid.hpp>
 #include <string>
 #include <list>
@@ -26,9 +27,9 @@ class ThreadedJobManager
 	std::list< Job* > lFinishedJobs;
 	std::queue< std::string > qResults;
 
-	boost::mutex resultMutex;
-	boost::mutex jobsMutex;
-	boost::mutex finishedJobsMutex;
+	std::mutex resultMutex;
+	std::mutex jobsMutex;
+	std::mutex finishedJobsMutex;
 
 	void runJob( Job *job );
 public:

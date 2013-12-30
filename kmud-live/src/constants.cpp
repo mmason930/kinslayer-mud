@@ -445,63 +445,64 @@ const char *affected_bits[] =
 
 const int LENGTH_OF_AFFECTED_BITS = 51;
 
-/* CON_x */
+// CON_x
 const char *connected_types[] =
 {
-	"Playing", /* 0 */
+	"Playing",						//0
 	"Disconnecting",
 	"Get name",
 	"Confirm name",
 	"Get password",
-	"Get new PW", /* 5 */
+	"Get new PW",					//5
 	"Confirm new PW",
 	"Select sex",
 	"Select class",
 	"Reading MOTD",
-	"Main Menu", /* 10 */
+	"Main Menu",					//10
 	"Get descript.",
 	"Changing PW 1",
 	"Changing PW 2",
 	"Changing PW 3",
-	"Self-Delete 1", /* 15 */
+	"Self-Delete 1",				//15
 	"Self-Delete 2",
 	"Disconnecting",
 	"Newbie message",
 	"Choosing stats",
-	"Choosing race", /* 20 */
+	"Choosing race",				//20
 	"Resolving hostname",
-	"Auction browsing",
 	"Stat editor",
+	"Auction interface",
 	"Object editor",
-	"Room editor", /* 25 */
+	"Room editor",					//25
 	"Zone editor",
 	"Mobile editor",
 	"Shop editor",
-	"Trigger editor",
-	"Help editor", /* 30 */
-	"Action editor",
-	"Text editor",
-	"Kit editor",
+	"DG editor",
+	"Kit editor",					//30
 	"Config editor",
-	"Clan editor", /* 35 */
+	"Clan editor",
 	"Warrant editor",
-	"Stat-Group edit",
-	"Javascript editor",
+	"Stat editor",
+	"JavaScript editor",			//35
+	"Gateway handshaking",
+	"Configuring email",
+	"Entering email",
+	"Websocket login",
 	"\n"
 };
 
 const char *weapon_types[] = {
+	"LONG BLADE",
+	"SHORT BLADE",
+	"CLUB",
+	"STAFF",
+	"SPEAR",
+	"AXE",
+	"CHAIN",
+	"BOW",
+	"LANCE"
+};
 
-                           "LONG BLADE",
-                           "SHORT BLADE",
-                           "CLUB",
-                           "STAFF",
-                           "SPEAR",
-                           "AXE",
-                           "CHAIN",
-                           "BOW",
-                           "LANCE"
-                       };
 const int NUM_WEAPON_TYPES = 9;
 
 /*

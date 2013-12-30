@@ -28,10 +28,8 @@
 #include "UserLogoutType.h"
 #include "Descriptor.h"
 
-#ifdef KINSLAYER_JAVASCRIPT
 #include "js.h"
 #include "js_trigger.h"
-#endif
 
 #include "StringUtil.h"
 #include "ForumUtil.h"
@@ -107,7 +105,7 @@ void perform_steal( Character *ch, Character *vict, Object *obj, char *obj_name 
 
 	if ( FIGHTING( vict ) )
 	{
-		ch->Send( "%s is fighting! He'll surely notice you trying that!\r\n", GET_NAME( vict ) );
+		ch->send( "%s is fighting! He'll surely notice you trying that!\r\n", GET_NAME( vict ) );
 		return ;
 	}
 
@@ -139,7 +137,7 @@ void perform_steal( Character *ch, Character *vict, Object *obj, char *obj_name 
 
 			if ( ( GET_POS( vict ) > POS_STUNNED ) )
 			{
-				ch->Send( "Steal the equipment now?  Impossible!\r\n" );
+				ch->send( "Steal the equipment now?  Impossible!\r\n" );
 				return ;
 			}
 
@@ -173,12 +171,12 @@ void perform_steal( Character *ch, Character *vict, Object *obj, char *obj_name 
 				{
 					obj_from_char( obj );
 					obj_to_char( obj, ch );
-					ch->Send( "Got it!\r\n", ch );
+					ch->send( "Got it!\r\n", ch );
 				}
 			}
 
 			else
-				ch->Send( "You cannot carry that much.\r\n" );
+				ch->send( "You cannot carry that much.\r\n" );
 		}
 	}
 
@@ -197,7 +195,7 @@ void Character::AddIgnore(const std::string &name)
 			format += LOWER(name[i]);
 	}
 
-	this->Send("You will now ignore %s.\r\n", format.c_str());
+	this->send("You will now ignore %s.\r\n", format.c_str());
 	MudLog(NRM, MAX(GET_INVIS_LEV(this), LVL_GOD), TRUE, "%s is now ignoring %s.", GET_NAME(this), format.c_str());
 
 	this->ignores.push_back(format);
@@ -242,11 +240,11 @@ ACMD( do_restat )
 {
 	if( GET_LEVEL(ch) != 5 )
 	{
-		ch->Send("You must be level five in order to restat.\r\n");
+		ch->send("You must be level five in order to restat.\r\n");
 		return;
 	}
 	MudLog(CMP, LVL_GRGOD, TRUE, "%s has initiated a restat.", GET_NAME(ch));
-	ch->Send("A bright flash of light momentarily consumes your vision. When you regain focus, you feel slightly different.\r\n");
+	ch->send("A bright flash of light momentarily consumes your vision. When you regain focus, you feel slightly different.\r\n");
 	ch->Init();
 	REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_STATTED);
 }
@@ -260,15 +258,15 @@ ACMD( do_ignore )
 
 	if ( !argument || !*arg )
 	{
-		ch->Send( "You are ignoring the following people:\r\n" );
+		ch->send( "You are ignoring the following people:\r\n" );
 
 		for (std::list<std::string>::iterator i = ch->ignores.begin();i != ch->ignores.end();++i, ++count )
 		{
 			if ( count )
-				ch->Send( ", " );
+				ch->send( ", " );
 			if ( !( count % 5 ) )
-				ch->Send( "\r\n" );
-			ch->Send( "%s", (*i).c_str());
+				ch->send( "\r\n" );
+			ch->send( "%s", (*i).c_str());
 		}
 		return;
 	}
@@ -276,7 +274,7 @@ ACMD( do_ignore )
 	if(ch->IsIgnoring(arg))
 	{
 		ch->RemoveIgnore(arg);
-		ch->Send("You will no longer ignore %s.\r\n", arg);
+		ch->send("You will no longer ignore %s.\r\n", arg);
 	}
 	else
 		ch->AddIgnore(arg);
@@ -289,18 +287,18 @@ ACMD( do_self_delete )
 	{
 		if ( GET_LEVEL( ch ) > 30 )
 		{
-			ch->Send( "You must be level 30 or below in order to self delete.\r\n" );
+			ch->send( "You must be level 30 or below in order to self delete.\r\n" );
 			return ;
 		}
 
-		ch->Send( "Your delete flag is now set.\r\n"
+		ch->send( "Your delete flag is now set.\r\n"
 		          "Warning: Once you re-create this character, this cannot be un-done.\r\n" );
 		REMOVE_BIT( PLR_FLAGS( ch ), Q_BIT(PLR_DELETED) );
 	}
 
 	else
 	{
-		ch->Send( "Your delete flag has been removed.\r\n" );
+		ch->send( "Your delete flag has been removed.\r\n" );
 		REMOVE_BIT( PLR_FLAGS( ch ), Q_BIT(PLR_DELETED) );
 	}
 }
@@ -315,26 +313,26 @@ ACMD( do_mark )
 
 	if ( !IS_GREYMAN( ch ) )
 	{
-		ch->Send( "You don't seem to have that kind of power...\r\n" );
+		ch->send( "You don't seem to have that kind of power...\r\n" );
 		return ;
 	}
 
 	if ( !*argument && !*person )
 	{
-		ch->Send( "Who do you wish to mark?\r\n" );
+		ch->send( "Who do you wish to mark?\r\n" );
 		return ;
 	}
 
 	if ( !( victim = get_char_room_vis( ch, person ) ) )
 	{
-		ch->Send( "There is no one by that name here.\r\n" );
+		ch->send( "There is no one by that name here.\r\n" );
 		return ;
 	}
 
 	if ( GET_MARKED( ch ) )
-		ch->Send( "You release your focus on %s's location.\r\n", GET_NAME( GET_MARKED( ch ) ) );
+		ch->send( "You release your focus on %s's location.\r\n", GET_NAME( GET_MARKED( ch ) ) );
 
-	ch->Send( "You now focus on %s's location.\r\n", GET_NAME( victim ) );
+	ch->send( "You now focus on %s's location.\r\n", GET_NAME( victim ) );
 	GET_MARKED( ch ) = victim;
 }
 
@@ -345,16 +343,16 @@ ACMD( do_effuse )
 
 	if ( !GET_SKILL( ch, SKILL_EFFUSION ) )
 	{
-		ch->Send( "You do not know that skill.\r\n" );
+		ch->send( "You do not know that skill.\r\n" );
 		return ;
 	}
 
 	if ( !AFF_FLAGGED( ch, AFF_EFFUSION ) )
-		ch->Send( "You will now move unseen.\r\n" );
+		ch->send( "You will now move unseen.\r\n" );
 
 	else if ( AFF_FLAGGED( ch, AFF_EFFUSION ) )
 	{
-		ch->Send( "You will stop moving unnoticed.\n\r" );
+		ch->send( "You will stop moving unnoticed.\n\r" );
 		affect_from_char( ch, 0, AFF_EFFUSION );
 		return ;
 	}
@@ -374,11 +372,11 @@ ACMD( do_notice )
 	struct affected_type af;
 
 	if ( !AFF_FLAGGED( ch, AFF_NOTICE ) )
-		ch->Send( "You will now look around more carefully.\r\n" );
+		ch->send( "You will now look around more carefully.\r\n" );
 
 	else if ( AFF_FLAGGED( ch, AFF_NOTICE ) )
 	{
-		ch->Send( "You look around less carefully.\n\r" );
+		ch->send( "You look around less carefully.\n\r" );
 		affect_from_char( ch, 0, AFF_NOTICE );
 		return ;
 	}
@@ -427,13 +425,13 @@ ACMD( do_butcher )
 
 	if ( !corpse )
 	{
-		ch->Send( "You don't see that here.\r\n" );
+		ch->send( "You don't see that here.\r\n" );
 		return ;
 	}
 
 	if ( !IS_CORPSE( corpse ) || !corpse->scalp )
 	{
-		ch->Send( "That isn't a corpse!\r\n" );
+		ch->send( "That isn't a corpse!\r\n" );
 		return ;
 	}
 
@@ -441,25 +439,25 @@ ACMD( do_butcher )
 	{
 		if ( !wielded || GET_OBJ_VAL( wielded, 0 ) != WEAPON_SHORT_BLADE )
 		{
-			ch->Send( "You need a short blade to do that.\r\n" );
+			ch->send( "You need a short blade to do that.\r\n" );
 			return ;
 		}
 
 		if ( !corpse->scalp->Food && subcmd == SCMD_BUTCHER )
 		{
-			ch->Send( "You can't butcher that!\r\n" );
+			ch->send( "You can't butcher that!\r\n" );
 			return ;
 		}
 
 		if ( !corpse->scalp->Skin && subcmd == SCMD_SKIN )
 		{
-			ch->Send( "You can't skin that!\r\n" );
+			ch->send( "You can't skin that!\r\n" );
 			return;
 		}
 
 		if ( GET_SKILL( ch, SKILL_SURVIVAL ) <= 0 && subcmd == SCMD_BUTCHER )
 		{
-			ch->Send( "You don't know how to go about doing that.\r\n" );
+			ch->send( "You don't know how to go about doing that.\r\n" );
 			return ;
 		}
 
@@ -478,14 +476,14 @@ ACMD( do_butcher )
 		{
 			if ( real_object( corpse->scalp->Food->vnum ) == -1 )
 			{
-				ch->Send( "Error with butchering..." );
+				ch->send( "Error with butchering..." );
 				MudLog( BRF, LVL_APPR, TRUE, "Butcher: Attempting to load invalid food, vnum: %d, quant: %d",
 						corpse->scalp->Food->vnum, corpse->scalp->Food->quantity );
 				return ;
 			}
 			if ( q > corpse->scalp->Food->quantity )
 			{
-				ch->Send( "You can't find enough to butcher from that.\r\n" );
+				ch->send( "You can't find enough to butcher from that.\r\n" );
 				return ;
 			}
 
@@ -496,24 +494,23 @@ ACMD( do_butcher )
 				MudLog( BRF, LVL_APPR, TRUE, "Failed Object Load: %s attempted to butcher %s. Attempted item load: %s(#%d).",
 						GET_NAME( ch ), corpse->GetSDesc(), obj_proto[ corpse->scalp->Food->vnum ]->short_description,
 						GET_OBJ_VNUM( obj_proto[ corpse->scalp->Food->vnum ] ) );
-				ch->Send( "You failed to butcher for unknown reasons...\r\n" );
+				ch->send( "You failed to butcher for unknown reasons...\r\n" );
 				return ;
 			}
 			if ( GET_OBJ_TYPE( obj ) != ITEM_FOOD )
 			{
-				ch->Send( "Error with butchering...\r\n" );
+				ch->send( "Error with butchering...\r\n" );
 				delete obj;
 				MudLog( BRF, LVL_APPR, TRUE, "%s attempted butchering %s, result was attempt to load item %d.",
 						GET_NAME( ch ), corpse->GetSDesc(), corpse->scalp->Food->vnum );
 			}
 
 			obj_to_char( obj, ch );
-#ifdef KINSLAYER_JAVASCRIPT
+
 			if( !obj->IsPurged() ) {
 				js_load_triggers(obj);
 			}
-#endif
-			ch->Send( "You lean over and butcher %s from the corpse of %s.\r\n",
+			ch->send( "You lean over and butcher %s from the corpse of %s.\r\n",
 					  obj->GetSDesc(), corpse->scalp->name.c_str() );
 			sprintf( buf, "%s leans over and butchers %s from the corpse of %s.", GET_NAME( ch ),
 					 obj->GetSDesc(), corpse->scalp->name.c_str() );
@@ -524,7 +521,7 @@ ACMD( do_butcher )
 		{
 			if ( real_object( corpse->scalp->Skin->vnum ) == -1 )
 			{
-				ch->Send( "Error with skinning..." );
+				ch->send( "Error with skinning..." );
 				MudLog( BRF, LVL_APPR, TRUE, "Skin: Attempting to load invalid skin, vnum: %d, req: %d",
 						corpse->scalp->Skin->vnum, corpse->scalp->Skin->required );
 				return ;
@@ -532,39 +529,39 @@ ACMD( do_butcher )
 			
 			if ( GET_SKILL( ch, SKILL_SKINNING ) < corpse->scalp->Skin->required )
 			{
-				ch->Send( "You aren't skilled enough to skin that.\r\n" );
+				ch->send( "You aren't skilled enough to skin that.\r\n" );
 				return ;
 			}
 			
 			if( corpse->scalp->Skin->skinned )
 			{
-				ch->Send( "This has already been skinned!\r\n" );
+				ch->send( "This has already been skinned!\r\n" );
 				return;
 			}
 
 			if ( !( obj = read_object( real_object( corpse->scalp->Skin->vnum ), REAL, true ) ) )
 			{
 				MudLog( BRF, LVL_APPR, TRUE, "Failed Object Load: %s attempted to skin %s. Attempted item load: #d.", GET_NAME( ch ), corpse->GetSDesc(), corpse->scalp->Skin->vnum );
-				ch->Send( "You failed to skin for unknown reasons...\r\n" );
+				ch->send( "You failed to skin for unknown reasons...\r\n" );
 				return ;
 			}
 			if ( GET_OBJ_TYPE( obj ) != ITEM_SKIN )
 			{
-				ch->Send( "Error with skinning...\r\n" );
+				ch->send( "Error with skinning...\r\n" );
 				delete obj;
 				MudLog( BRF, LVL_APPR, TRUE, "%s attempted skinning %s, result was attempt to load item %d.",
 						GET_NAME( ch ), corpse->GetSDesc(), corpse->scalp->Skin->vnum );
 			}
 
 			obj_to_char( obj, ch );
-#ifdef KINSLAYER_JAVASCRIPT
+
 			if( !obj->IsPurged() ) {
 				js_load_triggers(obj);
 			}
-#endif
+
 			corpse->scalp->Skin->skinned = true;
 
-			ch->Send( "You lean over and carve %s from the corpse of %s.\r\n",
+			ch->send( "You lean over and carve %s from the corpse of %s.\r\n",
 					  obj->GetSDesc(), corpse->scalp->name.c_str() );
 			sprintf( buf, "%s leans over and carves %s from the corpse of %s.", GET_NAME( ch ),
 					 obj->GetSDesc(), corpse->scalp->name.c_str() );
@@ -602,28 +599,28 @@ ACMD( do_scalp )
 	//No object matched their argument
 	if ( !corpse )
 	{
-		ch->Send( "You do not see that here.\r\n" );
+		ch->send( "You do not see that here.\r\n" );
 		return ;
 	}
 
 	//Object is not a corpse
 	if ( !IS_CORPSE( corpse ) || !corpse->scalp )
 	{
-		ch->Send( "That isn't a corpse!\r\n" );
+		ch->send( "That isn't a corpse!\r\n" );
 		return ;
 	}
 
 	/* Only daggers can do this */
 	if ( !wielded || GET_OBJ_VAL( wielded, 0 ) != WEAPON_SHORT_BLADE )
 	{
-		ch->Send( "You must use a short blade to scalp.\r\n" );
+		ch->send( "You must use a short blade to scalp.\r\n" );
 		return ;
 	}
 
 	/* Minimum level for scalping */
 	if ( corpse->scalp->level < 25 )
 	{
-		ch->Send( "Why even bother scalping that puny thing?!\r\n" );
+		ch->send( "Why even bother scalping that puny thing?!\r\n" );
 		return ;
 	}
 
@@ -661,14 +658,14 @@ ACMD( do_scalp )
 		SET_BITK( scalpo->obj_flags.wear_flags, ITEM_WEAR_TAKE );
 		GET_OBJ_WEIGHT( scalpo ) = 2;
 
-		ch->Send( "You sever a bloody %s from the corpse of %s.\r\n", type, corpse->scalp->name.c_str() );
+		ch->send( "You sever a bloody %s from the corpse of %s.\r\n", type, corpse->scalp->name.c_str() );
 		sprintf( buf, "%s leans over and severs the bloody %s from the corpse of %s.", GET_NAME( ch ), type,
 		         corpse->scalp->name.c_str() );
 		Act( buf, TRUE, ch, 0, 0, TO_ROOM );
 
 		if( ch->TooHeavyToPickUp( scalpo ) )
 		{
-			ch->Send("You can't carry that much weight!\r\n");
+			ch->send("You can't carry that much weight!\r\n");
 			scalpo->MoveToRoom(ch->in_room, true);
 		}
 		else
@@ -683,7 +680,7 @@ ACMD( do_scalp )
 	}
 
 	else
-		ch->Send( "It has already been scalped!\r\n" );
+		ch->send( "It has already been scalped!\r\n" );
 }
 
 /* Added by Galnor in September of 2003. Command mounts a character if successful. */
@@ -697,7 +694,7 @@ ACMD( do_ride )
 
 	if ( !*argument )
 	{
-		ch->Send( "Ride who?\r\n" );
+		ch->send( "Ride who?\r\n" );
 		return ;
 	}
 	REMOVE_BIT_AR( AFF_FLAGS( ch ), AFF_SNEAK );
@@ -705,44 +702,44 @@ ACMD( do_ride )
 
 	if( IS_DREADGUARD(ch) )
 	{
-		ch->Send( "Ride? That thing? That would be going against your ways.\r\n");
+		ch->send( "Ride? That thing? That would be going against your ways.\r\n");
 		return;
 	}
 	else if ( IS_TROLLOC( ch ) && !IS_FADE( ch ) && !IS_NPC( ch ) )
 	{
-		ch->Send( "But it looks so delicious... Those 4 legs....\r\n" );
+		ch->send( "But it looks so delicious... Those 4 legs....\r\n" );
 		return ;
 	}
 	else
 	{
 		if ( !( victim = get_char_room_vis( ch, ::arg ) ) )
-			ch->Send( "They aren't here!\r\n" );
+			ch->send( "They aren't here!\r\n" );
 		else if ( victim == ch )
-			ch->Send( "Yeah, that'd be fun...\r\n" );
+			ch->send( "Yeah, that'd be fun...\r\n" );
 		else if ( MOUNT( ch ) )
 			Act( "You're already riding $N", FALSE, ch, 0, MOUNT( ch ), TO_CHAR );
 		else if ( FIGHTING( victim ) )
-			ch->Send( "%s is fighting! You're mad to even think about mounting %s now!\r\n",
+			ch->send( "%s is fighting! You're mad to even think about mounting %s now!\r\n",
 			          HSSH( victim ), HMHR( victim ) );
 		else if ( RIDDEN_BY( ch ) )
 			Act( "You can't ride something else... $N is mounted on you!", FALSE, ch, 0, victim, TO_CHAR );
 		else if ( RIDDEN_BY( victim ) && RIDDEN_BY( victim ) ->in_room == victim->in_room )
-			ch->Send( "%s is already riding it", GET_NAME( RIDDEN_BY( victim ) ) );
+			ch->send( "%s is already riding it", GET_NAME( RIDDEN_BY( victim ) ) );
 		else if ( !IS_HORSE( victim ) )
 			Act( "You can't ride $M!", FALSE, ch, 0, victim, TO_CHAR );
 		else if ( ( MOB_FLAGGED( victim, MOB_MOUNT ) && IS_TROLLOC( ch ) ) || ( MOB_FLAGGED( victim, MOB_SHADOW_MOUNT ) && !IS_TROLLOC( ch ) ) || ( MOB_FLAGGED( victim, MOB_OGIER_MOUNT ) && !IS_OGIER(ch) ) )
 			Act( "$E would not like having your type on $M.", FALSE, ch, 0, victim, TO_CHAR );
 		else if ( ch->getUserClan( CLAN_WOLFBROTHER ) )
-			ch->Send( "You wouldn't even think about getting up on that thing!\r\n" );
+			ch->send( "You wouldn't even think about getting up on that thing!\r\n" );
 		else if ( SECT( ch->in_room ) == SECT_INSIDE )
-			ch->Send( "You can't ride inside!\r\n" );
+			ch->send( "You can't ride inside!\r\n" );
 		else if ( GET_SKILL( ch, SKILL_RIDE ) < percent )
 			Act( "You try to mount $M and fall right off of $S back!", FALSE, ch, 0, victim, TO_CHAR );
 		else
 		{
 			if ( AFF_FLAGGED( ch, AFF_SNEAK ) )
 			{
-				ch->Send( "You stop sneaking.\r\n" );
+				ch->send( "You stop sneaking.\r\n" );
 				affect_from_char( ch, 0, AFF_SNEAK );
 			}
 			riding = victim;
@@ -772,7 +769,7 @@ ACMD( do_dismount )
 
 	else
 	{
-		ch->Send( "You aren't riding anything\r\n" );
+		ch->send( "You aren't riding anything\r\n" );
 	}
 }
 
@@ -785,20 +782,20 @@ ACMD( do_quit )
 
 	if ( AFF_FLAGGED( ch, AFF_NOQUIT ) )
 	{
-		ch->Send( "Can't you feel the speed of your heartbeat?\r\n" );
+		ch->send( "Can't you feel the speed of your heartbeat?\r\n" );
 		return ;
 	}
 
 	if ( subcmd != SCMD_QUIT && GET_LEVEL( ch ) < LVL_IMMORT )
-		ch->Send( "You have to type quit--no less, to quit!\r\n" );
+		ch->send( "You have to type quit--no less, to quit!\r\n" );
 
 
 	else if ( GET_POS( ch ) == POS_FIGHTING )
-		ch->Send( "No way!  You're fighting for your life!\r\n" );
+		ch->send( "No way!  You're fighting for your life!\r\n" );
 
 	else if ( GET_POS( ch ) < POS_STUNNED )
 	{
-		ch->Send( "You die before your time...\r\n", ch );
+		ch->send( "You die before your time...\r\n", ch );
 		ch->Die();
 	}
 
@@ -807,7 +804,7 @@ ACMD( do_quit )
 		Act( "$n has left the game.", TRUE, ch, 0, 0, TO_ROOM );
 
 		MudLog( NRM, MAX( LVL_IMMORT, GET_INVIS_LEV( ch ) ), TRUE, "%s has quit the game.", GET_NAME( ch ) );
-		ch->Send( "Goodbye, friend.. Come back soon!\r\n" );
+		ch->send( "Goodbye, friend.. Come back soon!\r\n" );
 
 		/*
 		 * kill off all sockets connected to the same player as the one who is
@@ -827,12 +824,12 @@ ACMD( do_quit )
 
 		if ( GET_LEVEL( ch ) >= LVL_IMMORT )
 		{
-			ch->Send( "Your equipment has been saved.\r\n" );
+			ch->send( "Your equipment has been saved.\r\n" );
 			ch->rentSave();
 			ch->Extract(UserLogoutType::quitWithRent);
 		}
 		else {
-			ch->Send( "Your equipment has NOT BEEN SAVED.\r\n" );
+			ch->send( "Your equipment has NOT BEEN SAVED.\r\n" );
 			ch->Extract(UserLogoutType::quit); //User is saved in extract char
 			ch->itemSave();
 		}
@@ -854,9 +851,9 @@ ACMD( do_save )
 		 * (or one PC with a house) and system crashes. Note that houses are
 		 * still automatically saved without this enabled.
 		 */
-		ch->Send( "Saving %s.\r\n", GET_NAME( ch ) );
+		ch->send( "Saving %s.\r\n", GET_NAME( ch ) );
 	}
-	ch->Save();
+	ch->save();
 	ch->itemSave();
 }
 
@@ -865,7 +862,7 @@ ACMD( do_save )
    special procedures - i.e., shop commands, mail commands, etc. */
 ACMD( do_not_here )
 {
-	ch->Send( "Sorry, but you cannot do that here!\r\n" );
+	ch->send( "Sorry, but you cannot do that here!\r\n" );
 }
 
 ACMD( do_sneak )
@@ -873,11 +870,11 @@ ACMD( do_sneak )
 	struct affected_type af;
 
 	if ( !AFF_FLAGGED( ch, AFF_SNEAK ) )
-		ch->Send( "Okay, you'll try to move silently for a while.\r\n" );
+		ch->send( "Okay, you'll try to move silently for a while.\r\n" );
 
 	else if ( AFF_FLAGGED( ch, AFF_SNEAK ) )
 	{
-		ch->Send( "Okay, you will now stop sneaking.\n\r" );
+		ch->send( "Okay, you will now stop sneaking.\n\r" );
 		affect_from_char( ch, 0, AFF_SNEAK );
 		return ;
 	}
@@ -905,7 +902,7 @@ ACMD( do_hide )
 	{
 		if ( !( obj = get_obj_in_list_vis( ch, arg, ch->carrying ) ) )
 		{
-			ch->Send( "You are not carrying that item.\r\n" );
+			ch->send( "You are not carrying that item.\r\n" );
 			return ;
 		}
 
@@ -913,17 +910,17 @@ ACMD( do_hide )
 		obj->MoveToRoom( ch->in_room );
 		obj->hidden = true;
 
-		ch->Send( "You successfully hide %s.\r\n", obj->GetSDesc() );
+		ch->send( "You successfully hide %s.\r\n", obj->GetSDesc() );
 	}
 	else
 	{
 		if ( MOUNT( ch ) != NULL )
 		{
-			ch->Send( "You can't do that while riding!\r\n" );
+			ch->send( "You can't do that while riding!\r\n" );
 			return ;
 		}
 
-		ch->Send( "You attempt to hide yourself.\r\n" );
+		ch->send( "You attempt to hide yourself.\r\n" );
 
 		if ( AFF_FLAGGED( ch, AFF_HIDE ) )
 			REMOVE_BIT_AR( AFF_FLAGS( ch ), AFF_HIDE );
@@ -931,7 +928,7 @@ ACMD( do_hide )
 		if ( MiscUtil::random( 1, 101 ) < GET_SKILL( ch, SKILL_HIDE ) && !ROOM_FLAGGED(ch->in_room, ROOM_NOHIDE))
 			SET_BIT_AR( AFF_FLAGS( ch ), AFF_HIDE );
 		else
-			ch->Send("You can't find a good place to hide!\r\n");
+			ch->send("You can't find a good place to hide!\r\n");
 	}
 }
 
@@ -943,7 +940,7 @@ ACMD( do_steal )
 
 	if ( ROOM_FLAGGED( ch->in_room, ROOM_PEACEFUL ) )
 	{
-		ch->Send( "This room just has such a peaceful, easy feeling...\r\n" );
+		ch->send( "This room just has such a peaceful, easy feeling...\r\n" );
 		return ;
 	}
 
@@ -952,13 +949,13 @@ ACMD( do_steal )
 
 	if ( !( vict = get_char_room_vis( ch, vict_name ) ) )
 	{
-		ch->Send( "Steal what from who?\r\n" );
+		ch->send( "Steal what from who?\r\n" );
 		return ;
 	}
 
 	else if ( vict == ch )
 	{
-		ch->Send( "Come on now, that's rather stupid!\r\n" );
+		ch->send( "Come on now, that's rather stupid!\r\n" );
 		return ;
 	}
 
@@ -986,11 +983,11 @@ ACMD( do_visible )
 	if AFF_FLAGGED( ch, AFF_INVISIBLE )
 	{
 		ch->Appear();
-		ch->Send( "You break the spell of invisibility.\r\n" );
+		ch->send( "You break the spell of invisibility.\r\n" );
 	}
 
 	else
-		ch->Send( "You are already visible.\r\n" );
+		ch->send( "You are already visible.\r\n" );
 }
 
 int perform_group( Character *ch, Character *vict )
@@ -1015,11 +1012,11 @@ void print_group( Character *ch )
 	struct Follower *f;
 
 	if ( !AFF_FLAGGED( ch, AFF_GROUP ) )
-		ch->Send( "But you are not the member of a group!\r\n" );
+		ch->send( "But you are not the member of a group!\r\n" );
 
 	else
 	{
-		ch->Send( "Your group consists of:\r\n" );
+		ch->send( "Your group consists of:\r\n" );
 
 		k = ( ch->master ? ch->master : ch );
 
@@ -1073,12 +1070,12 @@ ACMD( do_group )
 		}
 
 		if ( !found )
-			ch->Send( "Everyone following you is already in your group.\r\n" );
+			ch->send( "Everyone following you is already in your group.\r\n" );
 		return ;
 	}
 
 	if ( !( vict = get_char_room_vis( ch, buf ) ) )
-		ch->Send( NOPERSON );
+		ch->send( NOPERSON );
 
 	else if ( ( vict->master != ch ) && ( vict != ch ) )
 		Act( "$N must follow you to enter your group.", FALSE, ch, 0, vict, TO_CHAR );
@@ -1115,7 +1112,7 @@ ACMD( do_ungroup )
 	{
 		if ( ch->master || !( AFF_FLAGGED( ch, AFF_GROUP ) ) )
 		{
-			ch->Send( "But you lead no group!\r\n" );
+			ch->send( "But you lead no group!\r\n" );
 			return ;
 		}
 
@@ -1128,32 +1125,32 @@ ACMD( do_ungroup )
 			if ( AFF_FLAGGED( f->follower, AFF_GROUP ) )
 			{
 				REMOVE_BIT_AR( AFF_FLAGS( f->follower ), AFF_GROUP );
-				f->follower->Send( buf2 );
+				f->follower->send( buf2 );
 
 				f->follower->stopFollowing();
 			}
 		}
 
 		REMOVE_BIT_AR( AFF_FLAGS( ch ), AFF_GROUP );
-		ch->Send( "You disband the group.\r\n" );
+		ch->send( "You disband the group.\r\n" );
 		return ;
 	}
 
 	if ( !( tch = get_char_room_vis( ch, buf ) ) )
 	{
-		ch->Send( "There is no such person!\r\n" );
+		ch->send( "There is no such person!\r\n" );
 		return ;
 	}
 
 	if ( tch->master != ch )
 	{
-		ch->Send( "That person is not following you!\r\n" );
+		ch->send( "That person is not following you!\r\n" );
 		return ;
 	}
 
 	if ( !AFF_FLAGGED( tch, AFF_GROUP ) )
 	{
-		ch->Send( "That person isn't in your group.\r\n" );
+		ch->send( "That person isn't in your group.\r\n" );
 		return ;
 	}
 
@@ -1170,7 +1167,7 @@ ACMD( do_use )
 
 	if ( !*::arg )
 	{
-		ch->Send( "What do you want to %s?\r\n",
+		ch->send( "What do you want to %s?\r\n",
 		complete_cmd_info[cmd].command.size() ? complete_cmd_info[cmd].command.c_str() : "ERROR!!! REPORT THIS!" );
 		return ;
 	}
@@ -1191,14 +1188,14 @@ ACMD( do_wimpy )
 	{
 		if ( ch->PlayerData->wimp_level )
 		{
-			ch->Send( "Your current wimp level is %d hit points.\r\n",
+			ch->send( "Your current wimp level is %d hit points.\r\n",
 				ch->PlayerData->wimp_level );
 			return ;
 		}
 
 		else
 		{
-			ch->Send( "At the moment, you're not a wimp.  (sure, sure...)\r\n" );
+			ch->send( "At the moment, you're not a wimp.  (sure, sure...)\r\n" );
 			return ;
 		}
 	}
@@ -1208,28 +1205,28 @@ ACMD( do_wimpy )
 		if ( ( wimp_lev = atoi( ::arg ) ) )
 		{
 			if ( wimp_lev < 0 )
-				ch->Send( "Heh, heh, heh.. we are jolly funny today, eh?\r\n" );
+				ch->send( "Heh, heh, heh.. we are jolly funny today, eh?\r\n" );
 
 			else if ( wimp_lev > GET_MAX_HIT( ch ) )
-				ch->Send( "That doesn't make much sense, now does it?\r\n" );
+				ch->send( "That doesn't make much sense, now does it?\r\n" );
 
 			else if ( wimp_lev > ( GET_MAX_HIT( ch ) / 2 ) )
-				ch->Send( "You can't set your wimp level above half your hit points.\r\n" );
+				ch->send( "You can't set your wimp level above half your hit points.\r\n" );
 
 			else
 			{
-				ch->Send( "Okay, you'll wimp out if you drop below %d hit points.\r\n", wimp_lev );
+				ch->send( "Okay, you'll wimp out if you drop below %d hit points.\r\n", wimp_lev );
 				ch->PlayerData->wimp_level = wimp_lev;
 			}
 		}
 		else
 		{
-			ch->Send( "Okay, you'll now tough out fights to the bitter end.\r\n" );
+			ch->send( "Okay, you'll now tough out fights to the bitter end.\r\n" );
 			ch->PlayerData->wimp_level = 0;
 		}
 	}
 	else
-		ch->Send( "Specify at how many hit points you want to wimp out at.  (0 to disable)\r\n" );
+		ch->send( "Specify at how many hit points you want to wimp out at.  (0 to disable)\r\n" );
 }
 
 ACMD( do_display )
@@ -1238,7 +1235,7 @@ ACMD( do_display )
 
 	if ( IS_NPC( ch ) )
 	{
-		ch->Send( "Mosters don't need displays.  Go away.\r\n" );
+		ch->send( "Mosters don't need displays.  Go away.\r\n" );
 		return ;
 	}
 
@@ -1246,7 +1243,7 @@ ACMD( do_display )
 
 	if ( !*argument )
 	{
-		ch->Send( "Usage: prompt { { H | M | V } | all | none }\r\n" );
+		ch->send( "Usage: prompt { { H | M | V } | all | none }\r\n" );
 		return ;
 	}
 
@@ -1282,14 +1279,14 @@ ACMD( do_display )
 					break;
 
 					default:
-					ch->Send( "Usage: prompt { { H | M | V } | all | none }\r\n" );
+					ch->send( "Usage: prompt { { H | M | V } | all | none }\r\n" );
 					return ;
 					break;
 			}
 		}
 	}
 
-	ch->Send( OK );
+	ch->send( OK );
 }
 
 const int TOG_OFF = 0;
@@ -1414,9 +1411,9 @@ ACMD( do_gen_tog )
 	}
 
 	if ( result )
-		ch->Send( tog_messages[ subcmd ][ TOG_ON ] );
+		ch->send( tog_messages[ subcmd ][ TOG_ON ] );
 	else
-		ch->Send( tog_messages[ subcmd ][ TOG_OFF ] );
+		ch->send( tog_messages[ subcmd ][ TOG_OFF ] );
 	return ;
 }
 
@@ -1431,7 +1428,7 @@ ACMD( do_change )
 
 	if ( !*argument )
 	{
-		ch->Send( "Usage: Description, Title, Mood, Password, Spam\r\n" );
+		ch->send( "Usage: Description, Title, Mood, Password, Spam\r\n" );
 		return ;
 	}
 
@@ -1440,17 +1437,17 @@ ACMD( do_change )
 		HalfChop( argument, arg1, arg2 );
 
 		if ( IS_NPC( ch ) )
-			ch->Send( "Your title is fine... go away.\r\n" );
+			ch->send( "Your title is fine... go away.\r\n" );
 		else if ( PLR_FLAGGED( ch, PLR_NOTITLE ) )
-			ch->Send( "You can't title yourself -- you shouldn't have abused it!\r\n" );
+			ch->send( "You can't title yourself -- you shouldn't have abused it!\r\n" );
 		else if ( strstr( arg2, "(" ) || strstr( arg2, ")") || strstr( arg2, "~") || strstr( arg2, "[" ) || strstr( arg2, "]" ) || strstr( arg2, "-" ) )
-			ch->Send( "Titles can't contain the '(', ')', '[', ']', '-' or '~' characters.\r\n" );
+			ch->send( "Titles can't contain the '(', ')', '[', ']', '-' or '~' characters.\r\n" );
 		else if ( strlen( arg2 ) > MAX_TITLE_LENGTH )
-			ch->Send( "Sorry, titles can't be longer than %d characters.\r\n", MAX_TITLE_LENGTH );
+			ch->send( "Sorry, titles can't be longer than %d characters.\r\n", MAX_TITLE_LENGTH );
 		else
 		{
 			ch->SetTitle( arg2 );
-			ch->Send( "Okay, you're now %s %s.\r\n", GET_NAME( ch ), ch->player.title.c_str() );
+			ch->send( "Okay, you're now %s %s.\r\n", GET_NAME( ch ), ch->player.title.c_str() );
 
 		}
 	}
@@ -1458,14 +1455,14 @@ ACMD( do_change )
 	{
 		if(IS_NPC(ch))
 		{
-			ch->Send("MOBs cannot change their mood, sorry...\r\n");
+			ch->send("MOBs cannot change their mood, sorry...\r\n");
 			return;
 		}
 		TwoArguments( argument, arg1, arg2 );
 
 		if ( ch->PlayerData->mood == MOOD_BERSERK && FIGHTING( ch ) )
 		{
-			ch->Send( "You are too berserk to do that now!\r\n" );
+			ch->send( "You are too berserk to do that now!\r\n" );
 			return;
 		}
 		if ( !str_cmp( arg2, "wimpy" ) )
@@ -1478,16 +1475,16 @@ ACMD( do_change )
 			ch->PlayerData->mood = MOOD_BERSERK;
 		else
 		{
-			ch->Send( "Current moods are: wimpy, mild, brave, berserk.\r\n" );
+			ch->send( "Current moods are: wimpy, mild, brave, berserk.\r\n" );
 			return ;
 		}
-		ch->Send( "Mood changed to: %s\r\n", MoodString( ch->PlayerData->mood ).c_str() );
+		ch->send( "Mood changed to: %s\r\n", MoodString( ch->PlayerData->mood ).c_str() );
 	}
 	else if ( IS_BLADEMASTER(ch) && !strn_cmp( arg1, "stance", strlen( arg1 ) ) )
 	{
 		if(IS_NPC(ch))
 		{
-			ch->Send("MOBs cannot change their stance, sorry...\r\n");
+			ch->send("MOBs cannot change their stance, sorry...\r\n");
 			return;
 		}
 		TwoArguments( argument, arg1, arg2 );
@@ -1509,10 +1506,10 @@ ACMD( do_change )
 		}
 		else
 		{
-			ch->Send( "Possible stances are: defensive, normal, offensive.\r\n" );
+			ch->send( "Possible stances are: defensive, normal, offensive.\r\n" );
 			return ;
 		}
-		ch->Send( "Stance changed to: %s\r\n", StanceString( ch->stance ).c_str() );
+		ch->send( "Stance changed to: %s\r\n", StanceString( ch->stance ).c_str() );
 	}
 	else if ( !strn_cmp( arg1, "password", strlen( arg1 ) ) )
 	{
@@ -1529,19 +1526,19 @@ ACMD( do_change )
 
 		if ( vArgs.size() < 2 )
 		{
-			ch->Send( "Password must contain something.\r\n" );
+			ch->send( "Password must contain something.\r\n" );
 			return ;
 		}
 		std::string sNewPassword = vArgs[ 1 ];
 		if( sNewPassword.size() > (MAX_PWD_LENGTH-1) )
 		{
-			ch->Send("Your password must be shorter than %d characters.\r\n");
+			ch->send("Your password must be shorter than %d characters.\r\n");
 			return;
 		}
 		ch->player.passwd = MD5::getHashFromString( sNewPassword.c_str() );
 		CharacterUtil::changeUserPassword(gameDatabase, ch->player.idnum, ch->player.passwd);
 		ForumUtil::changeUserPassword(gameDatabase, ch->player.idnum, ch->player.passwd);
-		ch->Send( "Your password has been changed to: %s.\r\n", sNewPassword.c_str() );
+		ch->send( "Your password has been changed to: %s.\r\n", sNewPassword.c_str() );
 	}
 	else if ( !strn_cmp( arg1, "spam", strlen( arg1 ) ) )
 	{
@@ -1549,17 +1546,17 @@ ACMD( do_change )
 
 		if ( !str_cmp( arg2, "complete" ) )
 		{
-			ch->Send( "Your spam has been turned to COMPLETE.\r\n" );
+			ch->send( "Your spam has been turned to COMPLETE.\r\n" );
 			SET_BIT_AR( PRF_FLAGS( ch ), PRF_SPAM );
 		}
 		else if ( !str_cmp( arg2, "none" ) )
 		{
-			ch->Send( "Your spam has been turned NONE.\r\n" );
+			ch->send( "Your spam has been turned NONE.\r\n" );
 			REMOVE_BIT_AR( PRF_FLAGS( ch ), PRF_SPAM );
 		}
 		else
 		{
-			ch->Send( "You can only change your spam to COMPLETE or NONE.\r\n" );
+			ch->send( "You can only change your spam to COMPLETE or NONE.\r\n" );
 			return ;
 		}
 	}
@@ -1568,14 +1565,14 @@ ACMD( do_change )
 		if ( ch->desc )
 		{
 			Act( "$n begins editing $s description.", FALSE, ch, NULL, NULL, TO_ROOM );
-			ch->Send( "Enter the new text you'd like others to see when they look at you.\r\n" );
-			ch->Send( "(/s saves /h for help)\r\n" );
+			ch->send( "Enter the new text you'd like others to see when they look at you.\r\n" );
+			ch->send( "(/s saves /h for help)\r\n" );
 			ch->desc->str = &ch->player.description;
 			ch->desc->max_str = EXDSCR_LENGTH;
 		}
 		else
 		{
-			ch->Send( "You don't have this ability!\r\n" );
+			ch->send( "You don't have this ability!\r\n" );
 		}
 	}
 }
@@ -1587,28 +1584,28 @@ ACMD( do_rage )
 
 	if ( !IS_FADE(ch) )
 	{
-		ch->Send("What?!?\r\n");
+		ch->send("What?!?\r\n");
 		return;
 	}
 	
 	if ( !GET_SKILL(ch, SKILL_SHADOW_RAGE) )
 	{
-		ch->Send("You have no idea how.\r\n");
+		ch->send("You have no idea how.\r\n");
 		return;
 	}
 
 	if ( GET_SHADOW(ch) <= 1 && !AFF_FLAGGED( ch, AFF_SHADOW_RAGE ) )
 	{
-		ch->Send("You feel too drained!\r\n");
+		ch->send("You feel too drained!\r\n");
 		return;
 	}
 
 	if ( !AFF_FLAGGED( ch, AFF_SHADOW_RAGE ) )
-		ch->Send( "You tap into a dark power, enhancing your attack speed.\r\n" );
+		ch->send( "You tap into a dark power, enhancing your attack speed.\r\n" );
 
 	else if ( AFF_FLAGGED( ch, AFF_SHADOW_RAGE ) )
 	{
-		ch->Send( "You release your hold on the darkness, slowing your speed.\n\r" );
+		ch->send( "You release your hold on the darkness, slowing your speed.\n\r" );
 		affect_from_char( ch, 0, AFF_SHADOW_RAGE );
 		return;
 	}

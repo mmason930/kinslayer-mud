@@ -10,9 +10,6 @@
 //
 //
 
-#ifdef KINSLAYER_JAVASCRIPT
-
-
 #ifndef KINSLAYER_JS_CONSTANTS_H
 #define KINSLAYER_JS_CONSTANTS_H
 
@@ -76,5 +73,3 @@ namespace JS
 	const int NUM_JS_TRIG_TYPES	= (26);
 }
 #endif
-#endif
-

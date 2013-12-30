@@ -463,7 +463,7 @@ bool WeaveManager::LoadWeaves()
 	return true;
 }
 
-bool WeaveManager::SaveWeaves()
+bool WeaveManager::saveWeaves()
 {
 
 	gameDatabase->sendRawQuery("DROP TABLE IF EXISTS tempWeaveAttribute");
@@ -651,7 +651,7 @@ void GateManager::UpdateGates()
 		if( GET_MOVE( (*g)->creator ) == 0 || GET_MANA( (*g)->creator ) <= 0 )
 		{
 			if ( (*g)->creator )
-				(*g)->creator->Send( "You can't hold open your gate any longer!\r\n" );
+				(*g)->creator->send( "You can't hold open your gate any longer!\r\n" );
 
 			try
 			{
@@ -872,8 +872,8 @@ std::list< Shield* >::iterator ShieldManager::RemoveShield( Shield* s )
 
 std::list< Shield* >::iterator ShieldManager::RemoveShield( std::list< Shield* >::iterator sIter )
 {
-	(*sIter)->GetCaster()->Send("Your shield against %s has dissipated.\r\n", (*sIter)->GetTarget()->player.name.c_str());
-	(*sIter)->GetTarget()->Send("The shield blocking you from the True Source has dissipated.\r\n");
+	(*sIter)->GetCaster()->send("Your shield against %s has dissipated.\r\n", (*sIter)->GetTarget()->player.name.c_str());
+	(*sIter)->GetTarget()->send("The shield blocking you from the True Source has dissipated.\r\n");
 
 	delete (*sIter);
 	return ShieldList.erase( sIter );

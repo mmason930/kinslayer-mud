@@ -69,7 +69,7 @@ void Character::RollMoves()
 	GET_MAX_MOVE(this) += offset;
 }
 
-void Character::RollShadow()
+void Character::rollShadow()
 {
 	if(IS_FADE(this))
 		GET_MAX_SHADOW(this) = 100 + this->GetWis() * 2;
@@ -206,7 +206,7 @@ sh_int Character::HitGain()
 				if( aff->bitvector == AFF_HEALING )
 				{
 					gain += aff->modifier;
-					this->Send("You feel a little stronger.\r\n");
+					this->send("You feel a little stronger.\r\n");
 				}
 			}
 		}
@@ -288,7 +288,7 @@ sh_int Character::MoveGain()
 				if( aff->bitvector == AFF_REGENERATION )
 				{
 					gain += aff->modifier;
-					this->Send("You feel a little more refreshed.\r\n");
+					this->send("You feel a little more refreshed.\r\n");
 				}
 			}
 		}
@@ -377,10 +377,10 @@ void gain_exp(Character * ch, int gain, bool enforceMax)
 		if (is_altered)
 		{
 			if (num_levels == 1)
-				ch->Send("%s%sYou rise a level!\r\n%s",
+				ch->send("%s%sYou rise a level!\r\n%s",
 				         COLOR_BOLD(ch, CL_SPARSE), COLOR_GREEN(ch, CL_SPARSE), COLOR_NORMAL(ch, CL_SPARSE));
 			else
-				ch->Send("%s%sYou rise %d levels!%s\r\n",
+				ch->send("%s%sYou rise %d levels!%s\r\n",
 				         COLOR_BOLD(ch, CL_SPARSE), COLOR_GREEN(ch, CL_SPARSE), num_levels, COLOR_NORMAL(ch, CL_SPARSE));
 		}
 		is_altered = FALSE;
@@ -413,10 +413,10 @@ void gain_exp_regardless(Character * ch, int gain)
 		if (is_altered)
 		{
 			if (num_levels == 1)
-				ch->Send("You rise a level!\r\n");
+				ch->send("You rise a level!\r\n");
 			else
 			{
-				ch->Send("You rise %d levels!\r\n", num_levels);
+				ch->send("You rise %d levels!\r\n", num_levels);
 			}
 			check_autowiz(ch);
 		}
@@ -443,14 +443,14 @@ void gain_condition(Character * ch, int condition, int value)
 	switch (condition)
 	{
 		case FULL:
-			ch->Send("You are hungry.\r\n");
+			ch->send("You are hungry.\r\n");
 			return;
 		case THIRST:
-			ch->Send("You are thirsty.\r\n");
+			ch->send("You are thirsty.\r\n");
 			return;
 		case DRUNK:
 			if (intoxicated)
-				ch->Send("You are now sober.\r\n");
+				ch->send("You are now sober.\r\n");
 			return;
 		default:
 			break;
@@ -498,7 +498,7 @@ int check_idling(Character * ch)
 		if(!GET_WAS_IN(ch))
 		{
 			Act("$n is idle and is pulled into the void.", TRUE, ch, 0, 0, TO_NOTVICT);
-			ch->Send("You are idle and are pulled into the void.\r\n");
+			ch->send("You are idle and are pulled into the void.\r\n");
 
 			if( !isInArena(ch) )
 				GET_WAS_IN(ch) = ch->in_room;
@@ -553,7 +553,7 @@ void Character::PointUpdate( bool login )
 		if(GET_SHADOW(this) <= 0 && AFF_FLAGGED(this, AFF_SHADOW_RAGE))
 		{
 			affect_from_char( this, 0, AFF_SHADOW_RAGE );
-			this->Send("Your rage leaves you as it saps the last of your energy.\r\n");
+			this->send("Your rage leaves you as it saps the last of your energy.\r\n");
 		}
 
 		FLEE_LAG(this) = MAX(0, FLEE_LAG(this) - FleeData.PulsesRemovedPerTic);

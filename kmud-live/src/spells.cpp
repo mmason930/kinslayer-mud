@@ -127,7 +127,7 @@ ASPELL(spell_regen)
 		Act(ToRoom.c_str(), TRUE, ch, NULL, victim, TO_NOTVICT);
 	}
 	else
-		ch->Send("You can't cast that on yourself!\r\n");
+		ch->send("You can't cast that on yourself!\r\n");
 }
 
 ASPELL(spell_create_water)
@@ -136,22 +136,22 @@ ASPELL(spell_create_water)
 
 	if( !*argument )
 	{
-		ch->Send("Where do you wish to put the water you create?\r\n");
+		ch->send("Where do you wish to put the water you create?\r\n");
 		return;
 	}
 	if( GET_OBJ_TYPE(obj) != ITEM_DRINKCON )
 	{
-		ch->Send("You cannot put water in that!\r\n");
+		ch->send("You cannot put water in that!\r\n");
 		return;
 	}
 	if( obj->GetTotalVal2() != LIQ_WATER )
 	{
-		ch->Send("That container already containers another liquid.\r\n");
+		ch->send("That container already containers another liquid.\r\n");
 		return;
 	}
 	if( obj->GetTotalVal1() == obj->GetTotalVal0() )
 	{
-		ch->Send("The container is already full.\r\n");
+		ch->send("The container is already full.\r\n");
 		return;
 	}
 
@@ -159,7 +159,7 @@ ASPELL(spell_create_water)
 	GET_OBJ_VAL(obj, 1) = MIN(GET_OBJ_VAL(obj, 0), GET_OBJ_VAL(obj, 1) + 18);
 	GET_OBJ_VAL(obj, 3) = 0;
 
-	ch->Send("You weave flows into %s to fill it with some water.\r\n", obj->GetSDesc());
+	ch->send("You weave flows into %s to fill it with some water.\r\n", obj->GetSDesc());
 	Act("$n waves $s hands around $p, which now seems slightly heftier.", TRUE, ch, obj, NULL, TO_NOTVICT);
 }
 
@@ -174,7 +174,7 @@ ASPELL(spell_locate_object)
 
 	if(!*arg)
 	{
-		ch->Send("What do you want to locate?\r\n");
+		ch->send("What do you want to locate?\r\n");
 		return;
 	}
 
@@ -223,7 +223,7 @@ ASPELL(spell_locate_object)
 	}
 	if(!found)
 	{
-		ch->Send("You do not sense that anywhere nearby.\r\n");
+		ch->send("You do not sense that anywhere nearby.\r\n");
 		return;
 	}
 	else
@@ -237,7 +237,7 @@ ASPELL(spell_tornado)
 
 	if( ch->in_room->sector_type == SECT_INSIDE )
 	{
-		ch->Send("Your attempt to form a tornado indoors didn't quite go according to plan.\r\n");
+		ch->send("Your attempt to form a tornado indoors didn't quite go according to plan.\r\n");
 		return;
 	}
 
@@ -252,7 +252,7 @@ ASPELL(spell_tornado)
 		if( vict == ch || IS_NPC(vict) ) continue; //Tornado will not throw the caster(or MOBs 03/09/2009).
 		if( RIDDEN_BY(vict) != NULL ) continue; //Skip over the horse. We'll move them when the rider gets moved.
 
-		vict->Send("The raging gusts of the tornado pick you up and throw you aside.\r\n");
+		vict->send("The raging gusts of the tornado pick you up and throw you aside.\r\n");
 		Act("$n is picked up by the raging gusts of the tornado.", TRUE, vict, NULL, NULL, TO_ROOM);
 
 		dist = PermDist;//Constant needs changing
@@ -306,7 +306,7 @@ ASPELL(spell_gate)
 
 	if( !*arg )
 	{
-		ch->Send("You must enter a gate code.\r\n");
+		ch->send("You must enter a gate code.\r\n");
 		return;
 	}
 
@@ -356,7 +356,7 @@ ASPELL(spell_gate)
 			}
 		}
 	}
-	ch->Send("Your weave collapses upon itself before it can be completed.\r\n");
+	ch->send("Your weave collapses upon itself before it can be completed.\r\n");
 }
 
 ASPELL(spell_locate_life)
@@ -369,7 +369,7 @@ ASPELL(spell_locate_life)
 
 	if(!*arg)
 	{
-		ch->Send("Who do you want to locate?\r\n");
+		ch->send("Who do you want to locate?\r\n");
 		return;
 	}
 
@@ -399,7 +399,7 @@ ASPELL(spell_locate_life)
 			std::string Dist = DistanceString(distance);
 			if( Dist.size() ) Dist = " " + Dist + " ";
 			else Dist = " ";
-			ch->Send("You sense %s%s%s.  --  [%s%s%s]\r\n",
+			ch->send("You sense %s%s%s.  --  [%s%s%s]\r\n",
 			         GET_NAME(vict), Dist.c_str(), loc[location], COLOR_GREEN(ch, CL_COMPLETE),
 			         vict->in_room->GateCode().c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
 		}
@@ -407,7 +407,7 @@ ASPELL(spell_locate_life)
 
 	if(!found)
 	{
-		ch->Send("You do not sense that anywhere nearby.\r\n");
+		ch->send("You do not sense that anywhere nearby.\r\n");
 		return;
 	}
 }
@@ -423,13 +423,13 @@ ASPELL(spell_ward_weapon)
 
 	if ((GET_OBJ_TYPE(obj) == ITEM_WEAPON))
 	{
-		ch->Send("You channel flows of Spirit into %s, forming a ward around the item.\r\n", obj->GetSDesc());
+		ch->send("You channel flows of Spirit into %s, forming a ward around the item.\r\n", obj->GetSDesc());
 		Act("$n grips $p, waving $s other hand around the item slowly.", TRUE, ch, obj, ch, TO_NOTVICT);
 		IS_OBJ_STAT(obj, ITEM_WARD);
 	}
 	else
 	{
-		ch->Send("You cannot ward this item.\r\n");
+		ch->send("You cannot ward this item.\r\n");
 	}
 }
 
@@ -441,7 +441,7 @@ ASPELL(spell_eavesdrop)
 {
 	if( GET_LEVEL(victim) >= LVL_IMMORT && GET_LEVEL(ch) < LVL_IMMORT)
 	{
-		ch->Send("You can't eavesdrop on a god!\r\n");
+		ch->send("You can't eavesdrop on a god!\r\n");
 		return;
 	}
 	if (ch != victim && ch->in_room != victim->in_room)
@@ -449,7 +449,7 @@ ASPELL(spell_eavesdrop)
 		if(victim->in_room->EavesWarder != NULL)
 		{
 			Act("You try to eavesdrop on $N, but the room is warded!", TRUE, ch, NULL, victim, TO_CHAR);
-			victim->in_room->EavesWarder->Send("Someone is attempting to listen in on your conversation!\r\n");
+			victim->in_room->EavesWarder->send("Someone is attempting to listen in on your conversation!\r\n");
 		}
 		else if(ch->in_room->DistanceToRoom(victim->in_room) <= atoi(weave->getAttribute("MaxDistance").c_str()))
 		{
@@ -464,19 +464,19 @@ ASPELL(spell_eavesdrop)
 	}
 	else
 	{
-		ch->Send("Why would you want to eavesdrop on someone in the same room as you?!\r\n");
+		ch->send("Why would you want to eavesdrop on someone in the same room as you?!\r\n");
 	}
 }
 ASPELL(spell_circle_of_silence)
 {
 	if (ch->in_room->EavesWarder)
 	{
-		ch->Send("The room has already been warded.\r\n");
+		ch->send("The room has already been warded.\r\n");
 	}
 	else
 	{
 		ch->in_room->EavesWarder = ch;
-		ch->Send("You weave a ward around the area to protect against unwanted listeners.\r\n");
+		ch->send("You weave a ward around the area to protect against unwanted listeners.\r\n");
 	}
 }
 
@@ -510,61 +510,61 @@ ASPELL(spell_flare)
 ASPELL( spell_delve )
 {
 	DisplayWeaveMessages(weave, ch, victim);
-	ch->Send("%s is affected by the following status effects:\r\n", GET_NAME(victim));
+	ch->send("%s is affected by the following status effects:\r\n", GET_NAME(victim));
 	
 	if(AFF_FLAGGED(victim, AFF_BLIND))
-		ch->Send("Blind\r\n");
+		ch->send("Blind\r\n");
 	if(AFF_FLAGGED(victim, AFF_POISON))
-		ch->Send("Poison\r\n");
+		ch->send("Poison\r\n");
 	if(AFF_FLAGGED(victim, AFF_SLEEP))
-		ch->Send("Sleep\r\n");
+		ch->send("Sleep\r\n");
 	if(AFF_FLAGGED(victim, AFF_NIGHT_VISION))
-		ch->Send("Night Vision\r\n");
+		ch->send("Night Vision\r\n");
 	if(AFF_FLAGGED(victim, AFF_HASTE))
-		ch->Send("Haste\r\n");
+		ch->send("Haste\r\n");
 	if(AFF_FLAGGED(victim, AFF_SHIELD))
-		ch->Send("Shield\r\n");
+		ch->send("Shield\r\n");
 	if(AFF_FLAGGED(victim, AFF_AGILITY))
-		ch->Send("Agility\r\n");
+		ch->send("Agility\r\n");
 	if(AFF_FLAGGED(victim, AFF_STRENGTH))
-		ch->Send("Strength\r\n");
+		ch->send("Strength\r\n");
 	if(AFF_FLAGGED(victim, AFF_INSANE))
-		ch->Send("Insanity\r\n");
+		ch->send("Insanity\r\n");
 	if(AFF_FLAGGED(victim, AFF_SILENCE))
-		ch->Send("Silence\r\n");
+		ch->send("Silence\r\n");
 	if(AFF_FLAGGED(victim, AFF_CHILL))
-		ch->Send("Chill\r\n");
+		ch->send("Chill\r\n");
 	if(AFF_FLAGGED(victim, AFF_SHIELD_BLOCK))
-		ch->Send("Shield Block\r\n");
+		ch->send("Shield Block\r\n");
 	if(AFF_FLAGGED(victim, AFF_SEVERE_WOUND))
-		ch->Send("Severe Wounds\r\n");
+		ch->send("Severe Wounds\r\n");
 	if(AFF_FLAGGED(victim, AFF_HAMSTRING))
-		ch->Send("Hamstring\r\n");
+		ch->send("Hamstring\r\n");
 	if(AFF_FLAGGED(victim, AFF_DEAF))
-		ch->Send("Deafness\r\n");
+		ch->send("Deafness\r\n");
 	if(AFF_FLAGGED(victim, AFF_WEAKEN))
-		ch->Send("Weakness\r\n");
+		ch->send("Weakness\r\n");
 	if(AFF_FLAGGED(victim, AFF_CRIPPLE))
-		ch->Send("Cripple\r\n");
+		ch->send("Cripple\r\n");
 	if(AFF_FLAGGED(victim, AFF_SLOW))
-		ch->Send("Slow\r\n");
+		ch->send("Slow\r\n");
 	if(AFF_FLAGGED(victim, AFF_DECAY))
-		ch->Send("Decay\r\n");
+		ch->send("Decay\r\n");
 	if(AFF_FLAGGED(victim, AFF_SLICE))
-		ch->Send("Slice\r\n");
+		ch->send("Slice\r\n");
 	if(AFF_FLAGGED(victim, AFF_BURN))
-		ch->Send("Burn\r\n");
+		ch->send("Burn\r\n");
 	if(AFF_FLAGGED(victim, AFF_DAZE))
-		ch->Send("Daze\r\n");
+		ch->send("Daze\r\n");
 	if(AFF_FLAGGED(victim, AFF_DARK_PLAGUE))
-		ch->Send("Dark Plague\r\n");
+		ch->send("Dark Plague\r\n");
 }
 
 ASPELL( spell_quicksand )
 {
 /*	if( IS_BASHED( victim ) )
 	{
-		ch->Send("They already seem to be stunned!\r\n");
+		ch->send("They already seem to be stunned!\r\n");
 		return;
 	}
 */
@@ -573,7 +573,7 @@ ASPELL( spell_quicksand )
 	{
 		int nrPulses = ( PULSE_VIOLENCE * atof(weave->getAttribute("Duration").c_str()) );
 		DisplayWeaveMessages(weave, ch, victim);
-		victim->SetBashState( nrPulses, true, false );
+		victim->setBashState( nrPulses, true, false );
 	}
 	else
 	{
