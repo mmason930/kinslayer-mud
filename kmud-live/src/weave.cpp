@@ -7,6 +7,7 @@
 
 #include "conf.h"
 #include "sysdep.h"
+#include <functional>
 
 #include "structs.h"
 #include "spells.h"
@@ -387,19 +388,9 @@ std::pair< std::string, std::string > Weave::GetNthAttribute(int starting)
 	return (*Iter);
 }
 
-//Galnor 12-19-2009 - Functor for weave sorting(by virtual number).
-struct WeaveFunctor
-{
-  bool operator()( Weave* a, Weave* b )
-  {
-	  return (a->getVnum() < b->getVnum());
-  }
-};
-
 void WeaveManager::SortWeaves()
 {
-	WeaveFunctor f;
-	std::sort(WeaveVector.begin(), WeaveVector.end(), f);
+	std::sort(WeaveVector.begin(), WeaveVector.end(), [](Weave *a, Weave *b) { return (a->getVnum() < b->getVnum()); });
 }
 
 void WeaveManager::AddWeave( Weave* w )

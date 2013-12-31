@@ -2509,8 +2509,9 @@ void perform_shadowstep(Character *ch, Character *vict)
 
 	}
 
-	FLEE_LAG(ch) += FleeData.PulsesPerEngagedFlee;
-	FLEE_LAG(ch) = MIN(FleeData.MaxFleeLag, FLEE_LAG(ch));
+	FLEE_LAG(ch) += (PULSE_VIOLENCE * 2);
+	//FLEE_LAG(ch) += FleeData.PulsesPerEngagedFlee;
+	//FLEE_LAG(ch) = MIN(FleeData.MaxFleeLag, FLEE_LAG(ch));
 }
 
 ACMD(do_pulverize)
