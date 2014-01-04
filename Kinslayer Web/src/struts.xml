@@ -103,6 +103,11 @@
 			<result name="Failure" type="redirect">player-portal-home</result>
 		</action>
 		
+		<action name="PlayerPortalHelpEditor" class="org.kinslayermud.web.playerportal.signedin.HelpEditorAction" method="execute">
+			<result name="Success" type="tiles">PlayerPortalHelpEditor</result>
+			<result name="Failure" type="redirect">player-portal-home</result>
+		</action>
+		
 
 		<!--  LEGENDS -->
 		<action name="LegendsIntroduction" class="org.kinslayermud.web.legends.LegendsIntroductionAction" method="execute">

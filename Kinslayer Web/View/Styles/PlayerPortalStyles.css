@@ -188,3 +188,70 @@ table.userLogTable td
 	text-align: left;
 	width: 33%;
 }
+
+
+
+/*** Start Help Editor ***/
+#helpFileForm
+{
+	margin-top: 20px;
+	width: 650px;
+}
+
+#helpFileEditor
+{
+	width: 500px;
+	height: 300px;
+	float: left;
+}
+
+#helpFileForm label
+{
+	display: inline-block;
+	width: 150px;
+}
+
+#helpFileForm input,
+#helpFileLoadForm input
+{
+	margin: 0;
+	width: 488px;
+	padding: 0px 5px 0px 5px;
+	line-height: 24px;
+	font-weight: bold;
+	color: #FFF;
+	background-color: #272822;
+	outline: none;
+	border: 1px solid #372822;
+	border-radius: 3px;
+}
+
+#helpFileForm .formEntry
+{
+	margin-bottom: 20px;
+}
+
+#helpFileSaveButton
+{
+	display: block;
+}
+
+#helpFileId
+{
+	width: 150px !important;
+}
+
+#helpFileLoadForm
+{
+	padding-bottom: 20px;
+	width: 100%;
+	border-bottom: 1px solid #AAA;
+}
+
+#helpFileLoadButton
+{
+	font-size: 16px;
+	padding-top: 3px;
+	padding-bottom: 3px;
+}
+/*** End Help Editor ***/

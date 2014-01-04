@@ -90,7 +90,7 @@
   </definition>
   
   <definition name="PlayerPortalViewTrophies" extends="PlayerPortalLayout">
-    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="title" value="KinslayerMUD - View Trophies"/>
     <put-attribute name="content" value="/View/PlayerPortal/SignedIn/ViewTrophies.jsp" cascade="true"/>
     <put-attribute name="topNavSelected" value="ViewTrophies" cascade="true"/>
     <put-attribute name="playerPortalH2" value="Trophies" cascade="true"/>
@@ -98,7 +98,7 @@
   </definition>
   
   <definition name="PlayerPortalSignInMenu" extends="PlayerPortalLayout">
-    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="title" value="KinslayerMUD - Sign In"/>
     <put-attribute name="MetaDescription" value="Sign in to your in-game player here. View information about your MUD player here."/>
     <put-attribute name="content" value="/View/PlayerPortal/SignInMenu.jsp" cascade="true"/>
     <put-attribute name="playerPortalH2" value="Sign In" cascade="true"/>
@@ -106,37 +106,44 @@
   </definition>
   
   <definition name="PlayerPortalHome" extends="PlayerPortalLayout">
-    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="title" value="KinslayerMUD - Player Portal Home"/>
     <put-attribute name="content" value="/View/PlayerPortal/SignedIn/PlayerPortalHome.jsp" cascade="true"/>
     <put-attribute name="topNavSelected" value="Home" cascade="true"/>
     <put-attribute name="playerPortalH2" value="Home" cascade="true"/>
   </definition>
   
   <definition name="PlayerPortalViewUserLog" extends="PlayerPortalLayout">
-    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="title" value="KinslayerMUD - User Log"/>
     <put-attribute name="content" value="/View/PlayerPortal/SignedIn/ViewUserLog.jsp" cascade="true"/>
     <put-attribute name="topNavSelected" value="UserLogs" cascade="true"/>
   </definition>
   
   <definition name="PlayerPortalViewUserLogs" extends="PlayerPortalLayout">
-    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="title" value="KinslayerMUD - User Logs"/>
     <put-attribute name="content" value="/View/PlayerPortal/SignedIn/ViewUserLogs.jsp" cascade="true"/>
     <put-attribute name="topNavSelected" value="UserLogs" cascade="true"/>
     <put-attribute name="playerPortalH2" value="User Logs" cascade="true"/>
   </definition>
   
   <definition name="PlayerPortalViewLoginHistory" extends="PlayerPortalLayout">
-    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="title" value="KinslayerMUD - Login History"/>
     <put-attribute name="content" value="/View/PlayerPortal/SignedIn/ViewLoginHistory.jsp" cascade="true"/>
     <put-attribute name="topNavSelected" value="ViewLoginHistory" cascade="true"/>
     <put-attribute name="playerPortalH2" value="Login History" cascade="true"/>
   </definition>
   
   <definition name="PlayerPortalViewTellHistory" extends="PlayerPortalLayout">
-    <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
+    <put-attribute name="title" value="KinslayerMUD - Tell History"/>
     <put-attribute name="content" value="/View/PlayerPortal/SignedIn/ViewTellHistory.jsp" cascade="true"/>
     <put-attribute name="topNavSelected" value="ViewTellHistory" cascade="true"/>
     <put-attribute name="playerPortalH2" value="Tell History" cascade="true"/>
+  </definition>
+  
+    <definition name="PlayerPortalHelpEditor" extends="PlayerPortalLayout">
+    <put-attribute name="title" value="KinslayerMUD - Help Editor"/>
+    <put-attribute name="content" value="/View/PlayerPortal/SignedIn/HelpEditor.jsp" cascade="true"/>
+    <put-attribute name="topNavSelected" value="HelpEditor" cascade="true"/>
+    <put-attribute name="playerPortalH2" value="Help Editor" cascade="true"/>
   </definition>
   
   <!--  TRADES -->

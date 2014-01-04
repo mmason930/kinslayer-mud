@@ -21,6 +21,7 @@ if(!hideTopNavBoolean) {
 					<li><a href="<%=WebSiteUrlUtil.getPlayerPortalViewLoginHistoryUrl() %>" <%=topNavSelected.equals("ViewLoginHistory") ? "class='selected'" : "" %>>Login History</a></li>
 					<li><a href="<%=WebSiteUrlUtil.getPlayerPortalViewTrophiesUrl() %>" <%=topNavSelected.equals("ViewTrophies") ? "class='selected'" : "" %>>Trophies</a></li>
 					<li><a href="<%=WebSiteUrlUtil.getPlayerPortalViewTellHistoryUrl(null) %>" <%=topNavSelected.equals("ViewTellHistory") ? "class='selected'" : "" %>>Tell History</a></li>
+					<li><a href="<%=WebSiteUrlUtil.getPlayerPortalHelpEditorUrl() %>" <%=topNavSelected.equals("HelpEditor") ? "class='selected'" : "" %>>Help Editor</a></li>
 				</ul>
 <%
 }

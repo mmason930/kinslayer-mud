@@ -69,6 +69,9 @@ public class WebSiteUrlUtil {
   public static String getPlayerPortalViewUserLogs() {
     return "./player-portal/view-user-logs";
   }
+  public static String getPlayerPortalHelpEditorUrl() {
+    return "./player-portal/help-editor";
+  }
   
   public static String getForumProfileUrl(int userId) {
     return "./forums/memberlist.php?mode=viewprofile&u=" + userId;
