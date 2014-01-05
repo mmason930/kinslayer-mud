@@ -26,37 +26,46 @@ String sessionId = (String)request.getAttribute("SessionId");
 
 <script type="text/javascript">
 
-var socket = new WebSocket("ws://kinslayermud.org:5002", "player-portal-protocol");
-var inputBuffer = "";
+var socket = null;
+$(document).ready(function() {
+	socket = new WebSocket("ws://kinslayermud.org:5002", "player-portal-protocol");
 
-socket.onopen = function()
-{
-	console.log("Connected.");
-	inputBuffer = "";
+	socket.onopen = function()
+	{
+		console.log("Connected.");
+		socket.inputBuffer = "";
+		
+		this.sendCommand({
+			method: "SessionID",
+			userId: <%= user.getUserId() %>,
+			sessionId: "<%= sessionId %>"
+		})
+	}
+	socket.onclose = function()
+	{
+		console.log("Disconnected.");
+	}
+	socket.onmessage = function(msg)
+	{
+		socket.inputBuffer += msg.data;
+		console.log("Message Received: " + msg);
+		
+		var command = JSON.parse(msg.data);
+		
+		console.log("Message Method: " + command.method);
+	}
+
+	socket.sendCommand = function(command)
+	{
+		this.send(JSON.stringify(command) + String.fromCharCode(0x06));
+	}
 	
-	this.sendCommand({
-		method: "SessionID",
-		userId: <%= user.getUserId() %>,
-		sessionId: "<%= sessionId %>"
+	$("#helpFileLoadForm").on("submit", function(e) {
+		
+		e.preventDefault();
+		console.log("Submitting Form...");
 	})
-}
-socket.onclose = function()
-{
-	console.log("Disconnected.");
-}
-socket.onmessage = function(msg)
-{
-	client.inputBuffer += msg.data;
-	console.log("Message Received: " + msg);
-	
-	var command = JSON.parse(msg.data);
-	
-	console.log("Message Method: " + command.method);
-}
+})
 
-socket.sendCommand = function(command)
-{
-	this.send(JSON.stringify(command) + String.fromCharCode(0x06));
-}
 
 </script>
