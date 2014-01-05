@@ -217,7 +217,7 @@ table.userLogTable td
 	margin: 0;
 	width: 488px;
 	padding: 0px 5px 0px 5px;
-	line-height: 24px;
+	height: 24px;
 	font-weight: bold;
 	color: #FFF;
 	background-color: #272822;
