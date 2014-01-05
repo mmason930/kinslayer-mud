@@ -936,4 +936,9 @@ public class WebSupport {
       QueryUtil.closeNoThrow(connection);
     }
   }
+  
+  public int getPlayerPortalServerPort() {
+    
+    return provider.getPlayerPortalServerPort();
+  }
 }

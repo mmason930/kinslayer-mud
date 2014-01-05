@@ -13,8 +13,14 @@ public class Provider {
   protected String mysqlUrl;
   protected String mysqlUsername;
   protected String mysqlPassword;
+  protected int playerPortalServerPort;
   
   protected Connection connection;
+  
+  public int getPlayerPortalServerPort() {
+    
+    return playerPortalServerPort;
+  }
   
   public String getInstanceDomain() {
     
@@ -43,5 +49,6 @@ public class Provider {
     mysqlUrl = properties.getProperty("Mysql.Main.Url");
     mysqlUsername = properties.getProperty("Mysql.Main.Username");
     mysqlPassword = properties.getProperty("Mysql.Main.Password");
+    playerPortalServerPort = Integer.valueOf(properties.getProperty("PlayerPortalServerPort"));
   }
 }
