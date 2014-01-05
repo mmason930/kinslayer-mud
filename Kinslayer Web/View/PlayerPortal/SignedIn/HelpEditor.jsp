@@ -27,6 +27,24 @@ String sessionId = (String)request.getAttribute("SessionId");
 <script type="text/javascript">
 
 var socket = null;
+var commandProcessors = {};
+
+commandProcessors["Load Help File"] = function(command)
+{
+	console.log("Processing Load Help File...");
+	if(command.error) {
+		alert(command.error);
+		return;
+	}
+	
+	$("#helpFileName").val(command.name);
+	$("#helpFileSyntax").val(command.syntax);
+	$("#helpFileKeywords").val(command.keywords);
+	editor.selectAll();
+	editor.removeLines();
+	editor.insert(command.description);
+};
+
 $(document).ready(function() {
 	socket = new WebSocket("ws://kinslayermud.org:5002", "player-portal-protocol");
 
@@ -48,11 +66,15 @@ $(document).ready(function() {
 	socket.onmessage = function(msg)
 	{
 		socket.inputBuffer += msg.data;
-		console.log("Message Received: " + msg.data);
 		
 		var command = JSON.parse(msg.data);
 		
-		console.log("Message Method: " + command.method);
+		var commandProcessor = commandProcessors[command];
+		
+		if(commandProcessor)
+		{
+			commandProcessor(command);
+		}
 	}
 
 	socket.sendCommand = function(command)
