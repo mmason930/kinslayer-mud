@@ -22,3 +22,29 @@ User user = (User)request.getAttribute("User");
 	editor.setTheme("ace/theme/monokai");
 	editor.getSession().setMode("ace/mode/javascript");
 </script>
+
+<script type="text/javascript">
+
+var socket = new WebSocket("ws://kinslayermud.org:5002", "player-portal-protocol");
+var inputBuffer = "";
+
+socket.onopen = function()
+{
+	console.log("Connected.");
+	inputBuffer = "";
+}
+socket.onclose = function()
+{
+	console.log("Disconnected.");
+}
+socket.onmessage = function(msg)
+{
+	client.inputBuffer += msg.data;
+	console.log("Message Received: " + msg);
+	
+	var command = JSON.parse(msg.data);
+	
+	console.log("Message Method: " + command.method);
+}
+
+</script>
