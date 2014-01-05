@@ -33,7 +33,7 @@ commandProcessors["Save Help File"] = function(command)
 {
 	if(command.errors)
 	{
-		console.log("Errors: " + command.errors);
+		socket.displaySaveFormWarnings(command.errors);
 		return;
 	}
 
@@ -45,7 +45,6 @@ $(document).ready(function() {
 
 	socket.onopen = function()
 	{
-		console.log("Connected.");
 		socket.inputBuffer = "";
 		
 		this.sendCommand({
@@ -56,12 +55,9 @@ $(document).ready(function() {
 	}
 	socket.onclose = function()
 	{
-		console.log("Disconnected.");
 	}
 	socket.onmessage = function(msg)
 	{
-		//socket.inputBuffer += msg.data;
-		
 		var command = JSON.parse(msg.data);
 		
 		var commandProcessor = commandProcessors[command.method];
