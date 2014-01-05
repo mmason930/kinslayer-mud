@@ -33,9 +33,6 @@ const char *OK = "Okay.\r\n";
 const char *NOPERSON = "No-one by that name here.\r\n";
 const char *NOEFFECT = "Nothing seems to happen.\r\n";
 
-int DFLT_PORT = 2230;
-const char *DFLT_IP = NULL;
-const char *DFLT_DIR = "lib";
 int MAX_PLAYERS = 300;
 int max_bad_pws = 3;
 int nameserver_is_slow = YES;

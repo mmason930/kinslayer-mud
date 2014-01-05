@@ -103,7 +103,6 @@ std::string	&sprintf(std::string &str, const char *format, ...);
 std::string	&strcat(std::string &str, const char *format, ...);
 int		Touch(const std::string &Path);
 int		get_line(FILE *fl, char *buf);
-int		get_filename(const std::string &orig_name, char *filename, int mode);
 void	BasicMudLog(const char *format, ...) __attribute__ ((format (printf, 1, 2)));
 void	MudLog(int type, int level, int file, const char *str, ...);
 void	sprintbit(std::bitset<64> &bitvector, const char *names[], char *result, const std::string delim,
@@ -209,7 +208,6 @@ const int CMP = 3;
 #define CONFIG_FROZEN_START		Conf->room_nums.frozen_start_room
 
 /** Game Operation **/
-#define CONFIG_DFLT_PORT        Conf->operation.DFLT_PORT
 #define CONFIG_MAX_PLAYING      Conf->operation.max_playing
 #define CONFIG_MAX_BAD_PWS      Conf->operation.max_bad_pws
 #define CONFIG_OLC_SAVE         Conf->operation.auto_save_olc
@@ -220,10 +218,6 @@ const int CMP = 3;
 #define CONFIG_START_MESSG      Conf->operation.START_MESSG
 
 extern std::vector<int> BodyPercents;
-
-/* get_filename() */
-const int PLOG_FILE = 0;
-
 
 /* breadth-first searching */
 #define BFS_ERROR			-1

@@ -149,7 +149,6 @@ void cedit_setup(Descriptor *d)
 	/****************************************************************************/
 	/** Game Operation                                                         **/
 	/****************************************************************************/
-	OLC_CONFIG(d)->operation.DFLT_PORT          =	CONFIG_DFLT_PORT;
 	OLC_CONFIG(d)->operation.max_playing        =	CONFIG_MAX_PLAYING;
 	OLC_CONFIG(d)->operation.max_bad_pws        =	CONFIG_MAX_BAD_PWS;
 	OLC_CONFIG(d)->operation.use_new_socials    =	CONFIG_NEW_SOCIALS;
@@ -226,7 +225,6 @@ void cedit_save_internally(Descriptor *d)
 	/****************************************************************************/
 	/** Game Operation                                                         **/
 	/****************************************************************************/
-	CONFIG_DFLT_PORT			= OLC_CONFIG(d)->operation.DFLT_PORT;
 	CONFIG_MAX_PLAYING			= OLC_CONFIG(d)->operation.max_playing;
 	CONFIG_MAX_BAD_PWS			= OLC_CONFIG(d)->operation.max_bad_pws;
 	CONFIG_NEW_SOCIALS			= OLC_CONFIG(d)->operation.use_new_socials;
@@ -353,9 +351,7 @@ void Config::Load()
 		int num = atoi(line);
 		double dec = atof(line);
 
-		if(!strcmp(tag, "Port"))
-			CONFIG_DFLT_PORT = num;
-		else if(!strcmp(tag, "Reboot"))
+		if(!strcmp(tag, "Reboot"))
 		{
 			if( sscanf(line, "%d:%d:%d", &Conf->operation.defaultRebootTime.hour, &Conf->operation.defaultRebootTime.minute, &Conf->operation.defaultRebootTime.second) == 3)
 			{
@@ -544,8 +540,7 @@ void Config::save()
 
 		sql << "INSERT INTO tempConfig(`name`,`value`) VALUES";
 
-		sql << "('Port','" << CONFIG_DFLT_PORT << "'),"
-			<< "('Reboot','" << std::setfill('0') << std::setw(2) << Conf->operation.defaultRebootTime.hour << ":" << std::setw(2) << Conf->operation.defaultRebootTime.minute << ":" << std::setw(2) << Conf->operation.defaultRebootTime.second << "'),"
+		sql << "('Reboot','" << std::setfill('0') << std::setw(2) << Conf->operation.defaultRebootTime.hour << ":" << std::setw(2) << Conf->operation.defaultRebootTime.minute << ":" << std::setw(2) << Conf->operation.defaultRebootTime.second << "'),"
 			<< "('World','" << (Conf->empty_world ? "empty" : "full") << "'),"
 			<< "('Max_Playing','" << CONFIG_MAX_PLAYING << "'),"
 			<< "('Max_Bad_Pwds','" << CONFIG_MAX_BAD_PWS << "'),"
@@ -1258,20 +1253,18 @@ void cedit_disp_operation_options(Descriptor *d)
 	////clear_screen(d);
 
 	d->send("\r\n\r\n"
-	        "%sA%s) Default Port : %s%d\r\n"
-	        "%sB%s) Logfile Name        : %s%s\r\n"
-	        "%sC%s) Max Players         : %s%d\r\n"
-	        "%sD%s) Max Bad Pws         : %s%d\r\n"
-	        "%sE%s) Name Server Is Slow : %s%s\r\n"
-	        "%sF%s) Use new socials file: %s%s\r\n"
-	        "%sG%s) OLC autosave to disk: %s%s\r\n"
-	        "%sH%s) Welcome Message     : \r\n%s%s\r\n"
-	        "%sI%s) Start Message       : \r\n%s%s\r\n"
+	        "%sA%s) Logfile Name        : %s%s\r\n"
+	        "%sB%s) Max Players         : %s%d\r\n"
+	        "%sC%s) Max Bad Pws         : %s%d\r\n"
+	        "%sD%s) Name Server Is Slow : %s%s\r\n"
+	        "%sE%s) Use new socials file: %s%s\r\n"
+	        "%sF%s) OLC autosave to disk: %s%s\r\n"
+	        "%sG%s) Welcome Message     : \r\n%s%s\r\n"
+	        "%sH%s) Start Message       : \r\n%s%s\r\n"
 			"%sN%s) Newbie Message      : \r\n%s%s\r\n"
 	        "%sT%s) Newbie Tips\r\n"
 	        "%sQ%s) Exit To The Main Menu\r\n"
 	        "Enter your choice : ",
-	        grn, nrm, cyn, OLC_CONFIG(d)->operation.DFLT_PORT,
 	        grn, nrm, cyn, OLC_CONFIG(d)->operation.LOGNAME ? OLC_CONFIG(d)->operation.LOGNAME : "<None>",
 	        grn, nrm, cyn, OLC_CONFIG(d)->operation.max_playing,
 	        grn, nrm, cyn, OLC_CONFIG(d)->operation.max_bad_pws,
@@ -1849,29 +1842,25 @@ void cedit_parse(Descriptor *d, char *arg)
 			switch (toupper(*arg))
 			{
 				case 'A':
-					d->send("Enter the default port number : ");
-					OLC_MODE(d) = CEDIT_DFLT_PORT;
-					return;
-				case 'B':
 					d->send("Enter the name of the logfile : ");
 					OLC_MODE(d) = CEDIT_LOGNAME;
 					return;
-				case 'C':
+				case 'B':
 					d->send("Enter the maximum number of players : ");
 					OLC_MODE(d) = CEDIT_MAX_PLAYING;
 					return;
-				case 'D':
+				case 'C':
 					d->send("Enter the maximum number of password attempts : ");
 					OLC_MODE(d) = CEDIT_MAX_BAD_PWS;
 					return;
-				case 'E':
+				case 'D':
 					TOGGLE_VAR(OLC_CONFIG(d)->operation.use_new_socials);
 					d->send( "Please note that using the stock social file will disable AEDIT.\r\n");
 					break;
-				case 'F':
+				case 'E':
 					TOGGLE_VAR(OLC_CONFIG(d)->operation.auto_save_olc);
 					break;
-				case 'G':
+				case 'F':
 					OLC_MODE(d) = CEDIT_WELC_MESSG;
 
 					d->send("Enter the new welcome message :\r\n\r\n");
@@ -1885,7 +1874,7 @@ void cedit_parse(Descriptor *d, char *arg)
 					d->str = &OLC_CONFIG(d)->operation.WELC_MESSG;
 					d->max_str = 500;
 					return;
-				case 'H':
+				case 'G':
 					//OLC_MODE(d) = CEDIT_START_MESSG;
 					d->send("Enter the new newbie start message :\r\n\r\n");
 
@@ -3216,13 +3205,6 @@ void cedit_parse(Descriptor *d, char *arg)
 				OLC_CONFIG(d)->room_nums.frozen_start.vnum = atoi(arg);
 				cedit_disp_room_numbers(d);
 			}
-			break;
-
-			/*-------------------------------------------------------------------*/
-
-		case CEDIT_DFLT_PORT:
-			OLC_CONFIG(d)->operation.DFLT_PORT = atoi(arg);
-			cedit_disp_operation_options(d);
 			break;
 
 			/*-------------------------------------------------------------------*/

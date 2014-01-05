@@ -1,4 +1,3 @@
-
 #ifndef KU_LISTENER_H
 #define KU_LISTENER_H
 
@@ -7,6 +6,7 @@
 #include <list>
 #include <map>
 #include <string>
+#include <functional>
 
 enum e_SocketType
 {

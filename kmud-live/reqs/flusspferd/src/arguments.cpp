@@ -27,7 +27,7 @@ THE SOFTWARE.
 #include "flusspferd/arguments.hpp"
 #include "flusspferd/exception.hpp"
 #include "flusspferd/value.hpp"
-#include <boost/foreach.hpp>
+#include <functional>
 #include <cassert>
 #include <js/jsapi.h>
 
@@ -36,13 +36,11 @@ using namespace flusspferd;
 Impl::arguments_impl::arguments_impl(std::vector<value> const &vals)
   : n(vals.size()), argv(0)
 {
-  values.reserve(n);
-  if (n > 0) {
-    BOOST_FOREACH(value const &v, vals) {
-      values.push_back(get_jsval(v));
-    }
-    argv = &values[0];
-  }
+	values.reserve(n);
+	if (n > 0) {
+		std::for_each(vals.begin(), vals.end(), [&](value v) {values.push_back(get_jsval(v)); });
+		argv = &values[0];
+	}
 }
 
 Impl::arguments_impl::arguments_impl(Impl::arguments_impl const &o)

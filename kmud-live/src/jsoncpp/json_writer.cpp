@@ -212,6 +212,13 @@ FastWriter::write( const Value &root )
    return document_;
 }
 
+std::string
+FastWriter::write(const Value &root, bool excludeNewline)
+{
+	document_ = "";
+	writeValue(root);
+	return document_;
+}
 
 void 
 FastWriter::writeValue( const Value &value )

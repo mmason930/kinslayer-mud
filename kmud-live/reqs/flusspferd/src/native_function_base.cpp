@@ -34,7 +34,6 @@ THE SOFTWARE.
 #include "flusspferd/spidermonkey/context.hpp"
 #include "flusspferd/spidermonkey/function.hpp"
 #include "flusspferd/current_context_scope.hpp"
-#include <boost/foreach.hpp>
 #include <js/jsapi.h>
 
 using namespace flusspferd;

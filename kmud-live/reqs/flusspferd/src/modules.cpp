@@ -34,7 +34,6 @@ THE SOFTWARE.
 #include "flusspferd/binary.hpp"
 #include "flusspferd/encodings.hpp"
 #include <boost/filesystem/fstream.hpp>
-#include <boost/foreach.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <sstream>
 

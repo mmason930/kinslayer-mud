@@ -101,7 +101,7 @@ object stream::read_whole_binary(boost::optional<byte_array&> output_) {
 
 string stream::read(boost::optional<unsigned> size_opt) {
   unsigned size = size_opt.get_value_or(4096);
-
+  
   boost::scoped_array<char> buf(new char[size + 1]);
 
   std::streamsize length = streambuf_->sgetn(buf.get(), size);

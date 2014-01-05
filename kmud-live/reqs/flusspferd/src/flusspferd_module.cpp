@@ -29,7 +29,6 @@ THE SOFTWARE.
 #include "flusspferd/create.hpp"
 #include "flusspferd/io/filesystem-base.hpp"
 #include <boost/algorithm/string.hpp>
-#include <boost/foreach.hpp>
 #include <boost/optional.hpp>
 #include <vector>
 #include <stdlib.h>
@@ -134,7 +133,7 @@ std::string get_exe_name_from_argv(std::string const &argv0) {
   std::vector<std::string>path_dirs;
   boost::split(path_dirs, path, boost::is_any_of(path_delim));
 
-  BOOST_FOREACH(std::string &d, path_dirs) {
+  for (auto &d : path_dirs) {
     fs::path candidate = fs::path(d) / name;
     fs::file_status s = fs::status(candidate);
     if (fs::exists(s) && !fs::is_directory(s)) {

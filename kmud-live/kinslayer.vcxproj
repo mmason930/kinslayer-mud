@@ -120,8 +120,8 @@
     <ClCompile Include="src\dg_event.cpp" />
     <ClCompile Include="src\fight.cpp" />
     <ClCompile Include="src\ForumUtil.cpp" />
+    <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\GatewayDescriptorType.cpp" />
-    <ClCompile Include="src\GatewayListener.cpp" />
     <ClCompile Include="src\graph.cpp" />
     <ClCompile Include="src\handler.cpp" />
     <ClCompile Include="src\HttpDescriptor.cpp" />
@@ -145,13 +145,16 @@
     <ClCompile Include="src\mobact.cpp" />
     <ClCompile Include="src\mobs.cpp" />
     <ClCompile Include="src\modify.cpp" />
-    <ClCompile Include="src\MudStatus.cpp" />
     <ClCompile Include="src\ObjectMoveLogger.cpp" />
     <ClCompile Include="src\objsave.cpp" />
     <ClCompile Include="src\oedit.cpp" />
     <ClCompile Include="src\olc.cpp" />
     <ClCompile Include="src\OlcEditType.cpp" />
     <ClCompile Include="src\OLCUtil.cpp" />
+    <ClCompile Include="src\PlayerPortalCommandProcessor.cpp" />
+    <ClCompile Include="src\PlayerPortalDescriptor.cpp" />
+    <ClCompile Include="src\PlayerPortalDescriptorStatus.cpp" />
+    <ClCompile Include="src\PlayerPortalServer.cpp" />
     <ClCompile Include="src\poker.cpp" />
     <ClCompile Include="src\redit.cpp" />
     <ClCompile Include="src\sedit.cpp" />
@@ -197,10 +200,6 @@
     <ClCompile Include="src\kuDescriptor.cpp" />
     <ClCompile Include="src\kuListener.cpp" />
     <ClCompile Include="src\kuSockets.cpp" />
-    <ClCompile Include="src\GatewayClient.cpp" />
-    <ClCompile Include="src\GatewayDescriptor.cpp" />
-    <ClCompile Include="src\GatewayDescriptorStatus.cpp" />
-    <ClCompile Include="src\GatewayServer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\accounts.h" />
@@ -223,8 +222,8 @@
     <ClInclude Include="src\Exception.h" />
     <ClInclude Include="src\fight.h" />
     <ClInclude Include="src\ForumUtil.h" />
+    <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\GatewayDescriptorType.h" />
-    <ClInclude Include="src\GatewayListener.h" />
     <ClInclude Include="src\handler.h" />
     <ClInclude Include="src\HttpDescriptor.h" />
     <ClInclude Include="src\HttpException.h" />
@@ -249,7 +248,6 @@
     <ClInclude Include="src\MailUtil.h" />
     <ClInclude Include="src\md5.h" />
     <ClInclude Include="src\mobs.h" />
-    <ClInclude Include="src\MudStatus.h" />
     <ClInclude Include="src\ObjectMoveLogger.h" />
     <ClInclude Include="src\olc.h" />
     <ClInclude Include="src\OlcEdit.h" />
@@ -259,6 +257,10 @@
     <ClInclude Include="src\OlcEditType.h" />
     <ClInclude Include="src\OlcEditZone.h" />
     <ClInclude Include="src\OLCUtil.h" />
+    <ClInclude Include="src\PlayerPortalCommandProcessor.h" />
+    <ClInclude Include="src\PlayerPortalDescriptor.h" />
+    <ClInclude Include="src\PlayerPortalDescriptorStatus.h" />
+    <ClInclude Include="src\PlayerPortalServer.h" />
     <ClInclude Include="src\poker.h" />
     <ClInclude Include="src\screen.h" />
     <ClInclude Include="src\sha1.h" />
@@ -306,13 +308,8 @@
     <ClInclude Include="src\kuDescriptor.h" />
     <ClInclude Include="src\kuListener.h" />
     <ClInclude Include="src\kuSockets.h" />
-    <ClInclude Include="src\GatewayClient.h" />
-    <ClInclude Include="src\GatewayDescriptor.h" />
-    <ClInclude Include="src\GatewayDescriptorStatus.h" />
-    <ClInclude Include="src\GatewayServer.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="GatewayServer.vcproj" />
     <None Include="dbChanges.sql" />
     <None Include="src\jsoncpp\json_internalarray.inl" />
     <None Include="src\jsoncpp\json_internalmap.inl" />

@@ -73,6 +73,7 @@
 #include "GatewayServer.h"
 #include "Descriptor.h"
 #include "GatewayDescriptorType.h"
+#include "Game.h"
 
 #include "HttpUtil.h"
 #include "HttpException.h"
@@ -93,15 +94,11 @@ extern HttpServer httpServer;
 #endif
 
 bool rebootNotified15=false, rebootNotified10=false, rebootNotified5=false, rebootNotified1=false;
-void setupFilesystem();
 
 /* externs */
 extern struct legend_data legend[ 8 ];
 extern char *startup;
 extern int circle_restrict;
-extern int DFLT_PORT;
-extern const char *DFLT_DIR;
-extern const char *DFLT_IP;
 extern int MAX_PLAYERS;
 extern Object *object_list;
 extern Character *character_list;
@@ -124,7 +121,6 @@ extern char *handbook;
 extern char *policies;
 extern char *startup;
 
-extern std::map<std::string, std::string> basicConfiguration;
 extern std::thread *objectMoveLoggerThread;
 extern ObjectMoveLogger objectMoveLogger;
 
@@ -139,7 +135,6 @@ public:
 
 extern std::list<PendingSession> pendingSessions;
 
-char mudname[ 256 ];  // Serai - 06/18/04 - for copyover
 int GLOBAL_RESET = 0;
 SwitchManager* SwitchManager::Self = NULL;
 FILE *logfile = NULL; /* Where to send the log messages. */
@@ -166,7 +161,6 @@ int circle_shutdown = 0; /* clean shutdown */
 int no_specials = 0; /* Suppress ass. of special routines */
 int max_players = 0; /* max descriptors available */
 int tics = 0; /* for extern checkpointing */
-int scheck = 0; /* for syntax checking mode */
 int Seconds = 0;
 DateTime rebootTime;
 unsigned int tip_on = 1;
@@ -274,29 +268,24 @@ int main( int argc, char **argv )
 #if (defined WIN32 && defined _DEBUG && defined _MEM_LEAKS )
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 #endif
+	game = new Game();
 	int port = 0;
 	int pos = 1;
-	char *dir;
+	std::string dir = game->getDefaultDirectory();
 
-	dir = ( char * ) DFLT_DIR;
-
-	/*
-	 * It would be nice to make this a command line option but the parser uses
-	 * the log() function, maybe later. -gg
-	 */
+	// It would be nice to make this a command line option but the parser uses
+	// the log() function, maybe later. -gg
 	logfile = fdopen( STDERR_FILENO, "w" );
 	if ( logfile == NULL )
 	{
-		printf( "error opening log file %s: %s\n",
-		        "stderr", strerror( errno ) );
-
-		exit( 1 );
+		std::cout << "error opening log file stderr: %s\n" << strerror(errno);
+		exit(1);
 	}
 
-	Log( "%s", circlemud_version.c_str() );
+	Log("%s", game->getVersion().c_str());
 
 	// Serai - 06/18/04 - copyover
-	strncpy( mudname, argv[ 0 ], sizeof( mudname ) );
+	game->setName(argv[ 0 ]);
 
 	while ( ( pos < argc ) && ( *( argv[ pos ] ) == '-' ) )
 	{
@@ -311,10 +300,10 @@ int main( int argc, char **argv )
 		}
 		case 'd':
 			if ( *( argv[ pos ] + 2 ) )
-				dir = argv[ pos ] + 2;
+				dir = std::string(argv[ pos ] + 2);
 
 			else if ( ++pos < argc )
-				dir = argv[ pos ];
+				dir = std::string(argv[ pos ]);
 
 			else
 			{
@@ -322,15 +311,6 @@ int main( int argc, char **argv )
 				exit( 1 );
 			}
 
-			break;
-
-		case 'c':
-			scheck = 1;
-			Log( "Syntax check mode enabled." );
-			break;
-
-		case 'q':
-			Log( "Quick boot mode -- rent check supressed." );
 			break;
 
 		case 'r':
@@ -349,7 +329,7 @@ int main( int argc, char **argv )
 	{
 		if ( !isdigit( *argv[ pos ] ) )
 		{
-			Log( "Usage: %s [-c] [-m] [-q] [-r] [-s] [-d pathname] [-v val] [port #]\n", argv[ 0 ] );
+			Log( "Usage: %s [-r] [-d pathname] [port #]\n", argv[ 0 ] );
 			exit( 1 );
 		}
 
@@ -359,30 +339,29 @@ int main( int argc, char **argv )
 			exit( 1 );
 		}
 	}
-	
-	if ( chdir( dir ) < 0 )
+
+	Log("Using %s as data directory.", dir.c_str());
+	if ( chdir( dir.c_str() ) < 0 )
 	{
 		int retval = chdir( "../" );
-		if( chdir( dir ) < 0 )
+		if( chdir( dir.c_str() ) < 0 )
 		{
 			perror( "SYSERR: Fatal error changing to data directory" );
 			exit( 1 );
 		}
 	}
-	
-	Log( "Using %s as data directory.", dir );
 
-	Log("Setting up filesystem...");
-	setupFilesystem();
+	game->setupFilesystem();
+	game->loadBasicConfig();
+	game->setupPlayerPortalServer(atoi(game->getBasicConfigValue("Player Portal Server Port").c_str()));
 
-	Log("Loading Basic Configuration...");
-	basicConfiguration = MiscUtil::loadResourcesFromFile(BASIC_CONFIG_FILE);
-
-	if(!port && basicConfiguration.find("MUD Port") != basicConfiguration.end())
-		port = atoi(basicConfiguration["MUD Port"].c_str());
-	else if(!port)
-		port = DFLT_PORT;
-
+	if(!port && game->hasBasicConfiguration("MUD Port"))
+		port = atoi(game->getBasicConfigValue("MUD Port").c_str());
+	else
+	{
+		Log("SYSERR: No port specified using either -q switch or in BasicConfig file.");
+		exit(1);
+	}
 
 	//Check to see if we need to perform a subroutine.
 	if(subroutine.empty() == false)
@@ -398,7 +377,7 @@ int main( int argc, char **argv )
 				DateTime currentDatetime;
 				std::stringstream sqlBuffer;
 				
-				boost::filesystem::path playerLogDirectoryPath(LIB_PLRLOGS);
+				boost::filesystem::path playerLogDirectoryPath(game->getPlayerLogsDirectory());
 				boost::filesystem::directory_iterator end;
 				for( boost::filesystem::directory_iterator iter(playerLogDirectoryPath) ; iter != end ; ++iter )
 				{
@@ -473,13 +452,6 @@ int main( int argc, char **argv )
 		}
 
 		return 0;
-	}
-
-
-	if ( scheck )
-	{
-		bootWorld();
-		Log( "Done." );
 	}
 
 	else
@@ -597,12 +569,8 @@ void waitForGatewayConnection() {
 
 	//Kick out all connections except for our gateway.
 
-	std::list<kuDescriptor*> descriptors = listener->l_GetDescriptors();
-
-	for(std::list<kuDescriptor*>::iterator iter = descriptors.begin();iter != descriptors.end();++iter) {
-
-		kuDescriptor *desc = (*iter);
-
+	for(kuDescriptor *desc : listener->l_GetDescriptors())
+	{
 		if(desc != gatewayConnection) {
 
 			desc->socketClose();
@@ -1776,6 +1744,10 @@ void heartbeat( int pulse )
 	rebootCountdown();
 	lagMonitor.stopClock( LAG_MONITOR_REBOOT_COUNTDOWN );
 
+	lagMonitor.startClock();
+	game->processPlayerPortalServer();
+	lagMonitor.stopClock(LAG_MONITOR_PLAYER_PORTAL_SERVER);
+
 	if ( !( pulse % ( SECS_PER_MUD_HOUR * PASSES_PER_SEC * 5 ) ) ) {
 		lagMonitor.startClock();
 		NewbieTips();
@@ -2196,14 +2168,14 @@ void Character::LogOutput( const std::string &buffer )
 	std::string filePath;
 
 	strftime(timestamp, sizeof(timestamp) - 1, "%Y%m%d", tmNow);
-	filePathBuffer << LIB_PLRLOGS << this->player.idnum << "_" << timestamp << ".plog";
+	filePathBuffer << game->getPlayerLogsDirectory() << this->player.idnum << "_" << timestamp << ".plog";
 	filePath = filePathBuffer.str();
 	
 	FILE *outfile;
 
 	if ( !( outfile = fopen( filePath.c_str(), "a+" ) ) )
 	{
-		Log( "Unable to open log file for %s.", GET_NAME( this ) );
+		Log( "Unable to open log file for %s: %s", GET_NAME( this ), filePathBuffer.str().c_str() );
 		return;
 	}
 

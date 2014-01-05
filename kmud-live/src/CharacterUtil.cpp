@@ -584,3 +584,17 @@ bool CharacterUtil::isValidUserName(const std::string username)
 {
 	return boost::regex_match(username, boost::regex("^[a-zA-Z]+$"));
 }
+
+bool CharacterUtil::authenticateUserWebSession(const int userId, const std::string &sessionId)
+{
+	std::stringstream sqlBuffer;
+
+	sqlBuffer	<< " SELECT 1"
+				<< " FROM websiteSession"
+				<< " WHERE id = " << sql::escapeQuoteString(sessionId)
+				<< " AND user_id = " << userId;
+
+	sql::Query query = gameDatabase->sendQuery(sqlBuffer.str());
+
+	return (query->numRows() > 0);
+}

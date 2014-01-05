@@ -18,7 +18,6 @@
 
 class WebSocketClientHeader
 {
-	friend class GatewayServer;
 protected:
 	std::map<std::string, std::string> fields;
 	std::string method;
@@ -27,10 +26,7 @@ protected:
 
 	static std::string getLine(const std::string &packet, std::string::size_type startPos, std::string::size_type &crlfPos);
 
-	virtual void read(std::string &packet) = 0;
 	void readFirstLine(const std::string &line);
-	void readFieldLine(const std::string &line);
-	static WebSocketClientHeader *allocateByInitialClientPacket(const std::string &packet);
 public:
 	WebSocketClientHeader(void);
 	~WebSocketClientHeader(void);
@@ -40,6 +36,9 @@ public:
 	void readLine(const std::string &line);
 	virtual std::string generateResponse(unsigned short port, const char *webSocketServerProtocolName) = 0;
 	std::string getFieldByName(const std::string &fieldName);
+	void readFieldLine(const std::string &line);
+	static WebSocketClientHeader *allocateByInitialClientPacket(const std::string &packet);
+	virtual void read(std::string &packet) = 0;
 };
 
 #endif

@@ -44,6 +44,8 @@ namespace Json {
    public: // overridden from Writer
       virtual std::string write( const Value &root );
 
+	  std::string write(const Value &root, bool excludeNewline);
+
    private:
       void writeValue( const Value &value );
 

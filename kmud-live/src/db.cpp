@@ -45,6 +45,7 @@
 #include "HttpServer.h"
 #include "GatewayDescriptorType.h"
 #include "ObjectMoveLogger.h"
+#include "Game.h"
 
 #include "js.h"
 #include "js_trigger.h"
@@ -76,7 +77,6 @@ extern int gamePort;
 Clock TheClock, TheClock2, TheClock3, TheClock4, TheClock5, TheClock6, TheClock7, TheClock8, TheClock9;
 
 class Wizard *wizlist =	NULL;
-std::map<std::string, std::string> basicConfiguration;
 std::list<Warrant *>		Warrants;
 std::list<Legend *>			Legends;
 std::list<std::string>	   *Tips;
@@ -433,10 +433,10 @@ void SetupMySQL( bool crash_on_failure )
 {
 	std::string username, password, dbname, hostname;
 
-	username = basicConfiguration["MySQL Username"];
-	password = basicConfiguration["MySQL Password"];
-	dbname = basicConfiguration["MySQL Database"];
-	hostname = basicConfiguration["MySQL Hostname"];
+	username = game->getBasicConfigValue("MySQL Username");
+	password = game->getBasicConfigValue("MySQL Password");
+	dbname = game->getBasicConfigValue("MySQL Database");
+	hostname = game->getBasicConfigValue("MySQL Hostname");
 
 	try
 	{
@@ -477,36 +477,6 @@ void loadScreenText()
 
 			credits = str_dup(text.c_str());
 		}
-	}
-}
-
-void setupFilesystem()
-{
-	bool sqlFileExists = false;
-
-	if(!boost::filesystem::exists("js_files")) {
-
-		Log("Creating lib/js_files...");
-		boost::filesystem::create_directory("js_files");
-	}
-
-	if(!boost::filesystem::exists("misc")) {
-
-		Log("Creating lib/misc...");
-
-		boost::filesystem::create_directory("misc");
-	}
-
-	if(!boost::filesystem::exists(LIB_PLRLOGS)) {
-
-		Log("Creating lib/plrlogs...");
-		boost::filesystem::create_directory("plrlogs");
-	}
-
-	if(!boost::filesystem::exists("misc/BasicConfig")) {
-
-		Log("lib/misc/BasicConfig not found. This file is required. Please create it and fill it with the required configuration.");
-		exit(1);
 	}
 }
 
@@ -604,7 +574,7 @@ void boot_db(void)
 
 	//TheClock.Reset(true);
 	Zone *zone;
-	if( Conf->empty_world == false && basicConfiguration["Dev Mode"] == "0" )
+	if (Conf->empty_world == false && game->getBasicConfigValue("Dev Mode") == "0")
 	{
 		for (i = 0; (zone = ZoneManager::GetManager().GetZoneByRnum(i)) != NULL; ++i)
 		{

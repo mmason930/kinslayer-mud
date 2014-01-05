@@ -1,3 +1,6 @@
+#ifndef KU_CLIENT_H
+#define KU_CLIENT_H
+
 #include "kuSockets.h"
 
 class kuClient
@@ -26,3 +29,5 @@ public:
 #define HOSTOK		0
 #define HOSTERR		1
 #define HOSTLOOKUP	2
+
+#endif

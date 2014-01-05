@@ -15,9 +15,6 @@
 #include "utils.h"
 #include "constants.h"
 
-const std::string circlemud_version = "CircleMUD, version 3.00 beta patchlevel 14";
-
-
 /* strings corresponding to ordinals/bitvectors in structs.h ***********/
 
 

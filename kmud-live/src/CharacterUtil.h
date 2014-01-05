@@ -40,6 +40,7 @@ public:
 	static void putUserMacro(sql::Connection connection, class UserMacro *);
 	static void freeUserMacros(std::list<class UserMacro *> &userMacros);
 	static bool isValidUserName(const std::string username);
+	static bool authenticateUserWebSession(const int userId, const std::string &sessionId);
 };
 
 #endif

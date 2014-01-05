@@ -821,35 +821,6 @@ int get_line(FILE * fl, char *buf)
 	}
 }
 
-int get_filename(const std::string &orig_name, char *filename, int mode)
-{
-	const char *prefix, *middle, *suffix;
-	char name[64], *ptr;
-
-	switch (mode)
-	{
-		case PLOG_FILE:
-			prefix = LIB_PLRLOGS;
-			suffix = SUF_PLOG;
-			break;
-		default:
-			return 0;
-	}
-
-	if (orig_name.empty())
-		return 0;
-
-	strcpy(name, orig_name.c_str());
-
-	for (ptr = name; *ptr;++ptr)
-		*ptr = tolower(*ptr);
-
-
-
-	sprintf(filename, "%s%s"SLASH"%s.%s", prefix, middle, name, suffix);
-	return 1;
-}
-
 void sprintbitarray(int bitvector[], const char *names[], int maxar, char *result)
 {
 	int nr, teller, found = FALSE;

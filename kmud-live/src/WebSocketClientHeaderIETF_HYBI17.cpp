@@ -9,12 +9,16 @@
 std::string WebSocketClientHeaderIETF_HYBI17::generateResponse(unsigned short port, const char *webSocketServerProtocolName)
 {
 	bool secureFlag = false;
-
 	std::string::size_type pos;
-
 	std::string message;
+	auto secWebSocketKeyIterator = fields.find("Sec-WebSocket-Key");
 
-	std::string secWebSocketAccept = fields["Sec-WebSocket-Key"] + std::string("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
+	if(secWebSocketKeyIterator == fields.end())
+	{
+		throw new WebSocketException("No `Sec-WebSocket-Key` header found");
+	}
+
+	std::string secWebSocketAccept = (*secWebSocketKeyIterator).second + std::string("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
 	secWebSocketAccept = StringUtil::SHA1(secWebSocketAccept);
 	secWebSocketAccept = StringUtil::base64Encode(secWebSocketAccept);
 
@@ -22,11 +26,8 @@ std::string WebSocketClientHeaderIETF_HYBI17::generateResponse(unsigned short po
 	message.append("Upgrade: WebSocket\r\n");
 	message.append("Connection: Upgrade\r\n");
 	message.append(std::string("Sec-WebSocket-Accept: ") + secWebSocketAccept + std::string("\r\n"));
-//	message.append(std::string("Sec-WebSocket-Version: ") + fields["Sec-WebSocket-Version"] + std::string("\r\n"));
-//	message.append(std::string("Sec-WebSocket-Extensions: ") + fields["Sec-WebSocket-Extensions"] + std::string("\r\n"));
 
-	message.append((webSocketServerProtocolName ? (std::string("Sec-WebSocket-Protocol: ") + std::string("lws-mirror-protocol") + std::string("\r\n")) : ""));
-	//message.append((webSocketServerProtocolName ? (std::string("Sec-WebSocket-Protocol: ") + std::string(webSocketServerProtocolName) + std::string("\r\n")) : ""));
+	message.append((webSocketServerProtocolName ? (std::string("Sec-WebSocket-Protocol: ") + std::string(webSocketServerProtocolName) + std::string("\r\n")) : ""));
 	message.append("\r\n");
 
 	return message;

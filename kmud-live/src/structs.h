@@ -2656,7 +2656,6 @@ class GameOperation
 	public:
 		GameOperation()
 		{
-			DFLT_PORT = 2222;
 			LOGNAME = 0;
 			max_playing = 0;
 			max_bad_pws = 0;
@@ -2680,7 +2679,6 @@ class GameOperation
 				delete[] START_MESSG;
 		}
 		DefaultRebootTime defaultRebootTime;	/* Default time of day for reboot.		*/
-		ush_int DFLT_PORT;			/* The default port to run the game.	*/
 		char *LOGNAME;				/* The file to log messages to.			*/
 		int max_playing;			/* Maximum number of players allowed.	*/
 		int max_bad_pws;			/* Maximum number of pword attempts.	*/

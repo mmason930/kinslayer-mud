@@ -27,7 +27,6 @@ THE SOFTWARE.
 #include "flusspferd/io/filesystem-base.hpp"
 #include "flusspferd/io/file.hpp"
 #include "flusspferd.hpp"
-#include <boost/foreach.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -139,7 +138,7 @@ fs::path fs_base::canonicalize(fs::path in) {
   }
 #endif
 
-  BOOST_FOREACH(fs::path seg, in) {
+  for (auto seg : in) {
     if (seg == ".")
       continue;
 
