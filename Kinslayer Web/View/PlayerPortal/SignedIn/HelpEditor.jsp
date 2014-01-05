@@ -64,6 +64,16 @@ $(document).ready(function() {
 		
 		e.preventDefault();
 		console.log("Submitting Form...");
+		
+		var helpFileId = parseInt($("#helpFileId").val());
+		
+		if(isNaN(helpFileId))
+			return;
+		
+		socket.sendCommand({
+			method: "Load Help File",
+			helpFileId: helpFileId
+		});
 	})
 })
 
