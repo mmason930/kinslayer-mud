@@ -4,26 +4,6 @@
 User user = (User)request.getAttribute("User");
 String sessionId = (String)request.getAttribute("SessionId");
 %>
-<form id="helpFileLoadForm">
-	ID: <input type="text" id="helpFileId"/> <button type="submit" class="flatGreyButton" id="helpFileLoadButton">Load</button>
-</form>
-<form id="helpFileForm">
-	<div class="formEntry clearFix"><label>ID:</label>123456</div>
-	<div class="formEntry clearFix"><label>Name:</label><input type="text" id="helpFileName"/></div>
-	<div class="formEntry clearFix"><label>Syntax:</label><input type="text" id="helpFileSyntax"/></div>
-	<div class="formEntry clearFix"><label>Keywords:</label><input type="text" id="helpFileKeywords"/></div>
-	<div class="formEntry clearFix"><label class="floatLeft">Description:</label><div id="helpFileEditor"></div></div>
-
-	<button type="submit" class="flatGreyButton floatRight" id="helpFileSaveButton">Save</button>
-</form>
-			
-<script src="./View/JavaScript/ace-min/ace.js" type="text/javascript" charset="utf-8"></script>
-<script>
-	var editor = ace.edit("helpFileEditor");
-	editor.setTheme("ace/theme/monokai");
-	editor.getSession().setMode("ace/mode/javascript");
-</script>
-
 <script type="text/javascript">
 
 var socket = null;
@@ -31,18 +11,33 @@ var commandProcessors = {};
 
 commandProcessors["Load Help File"] = function(command)
 {
-	console.log("Processing Load Help File...");
-	if(command.error) {
-		alert(command.error);
+	if(command.error && !socket.loadingParent) {
+		$("#loadHelpFileError").text(command.error).removeClass("hidden");
 		return;
 	}
-	
-	$("#helpFileName").val(command.name);
-	$("#helpFileSyntax").val(command.syntax);
-	$("#helpFileKeywords").val(command.keywords);
-	editor.selectAll();
-	editor.removeLines();
-	editor.insert(command.description);
+
+	if(!socket.loadingParent)
+	{
+		socket.setHelpFileForm(command);
+	}
+	else
+	{
+		socket.setParentHelpFile(command.helpFileId, command.name);
+		socket.hideSetNewParentHelpFile();
+	}
+
+	socket.loadingParent = false;
+};
+
+commandProcessors["Save Help File"] = function(command)
+{
+	if(command.errors)
+	{
+		console.log("Errors: " + command.errors);
+		return;
+	}
+
+	socket.setHelpFileForm(command);
 };
 
 $(document).ready(function() {
@@ -65,12 +60,11 @@ $(document).ready(function() {
 	}
 	socket.onmessage = function(msg)
 	{
-		socket.inputBuffer += msg.data;
+		//socket.inputBuffer += msg.data;
 		
 		var command = JSON.parse(msg.data);
 		
-		var commandProcessor = commandProcessors[command];
-		
+		var commandProcessor = commandProcessors[command.method];
 		if(commandProcessor)
 		{
 			commandProcessor(command);
@@ -81,12 +75,116 @@ $(document).ready(function() {
 	{
 		this.send(JSON.stringify(command) + String.fromCharCode(0x06));
 	}
+
+	socket.loadingParent = false;
+
+	socket.setParentHelpFile = function(id, name)
+	{
+		$("#helpFileParentAnchor").text(name).data("help-file-id", id);
+	}
+
+	socket.hideSetNewParentHelpFile = function()
+	{
+
+		$("#helpFileChangeParentWrapper").addClass("hidden");
+		$("#helpFileParentWrapper").removeClass("hidden");
+	}
+
+	socket.displaySaveFormWarnings = function(errors)
+	{
+		var $ul = $("#helpFileForm > ul");
+		$ul.html("");
+		errors.forEach(function(error) {
+			var $li = $("<li></li>");
+			$li.append(error);
+			$ul.append($li);
+		});
+
+		$ul.removeClass("hidden");
+	}
+
+	socket.hideSaveFormWarnings = function()
+	{
+		$("#helpFileForm > ul").addClass("hidden");
+	}
+
+	socket.setHelpFileForm = function(command)
+	{
+
+		$("#loadHelpFileError").text("").addClass("hidden");
 	
+		$("#helpFileName").val(command.name == null ? "" : command.name);
+		$("#helpFileSyntax").val(command.syntax == null ? "" : command.syntax);
+		$("#helpFileKeywords").val(command.keywords == null ? "" : command.keywords);
+		$("#helpFileIdValue").text(command.helpFileId);
+		$("#helpFileLastEdited").text(command.lastModified);
+		$("#helpFileCreated").text(command.created);
+		socket.setParentHelpFile(command.parent ? command.parent.helpFileId : "", command.parent ? command.parent.name : "<None>");
+
+		$("#helpFileChildren").html("");
+
+		command.children.forEach(function(child, index) {
+
+			var $a = $("<a></a>");
+			$a.append(child.name).attr("href", "#").data("help-file-id", child.helpFileId);
+
+			$("#helpFileChildren").append($a).append(index == command.children.length - 1 ? "" : ", ");
+		});
+
+		editor.selectAll();
+		editor.removeLines();
+		editor.insert(command.description);
+	};
+	
+	$("#helpFileForm").on("submit", function(e) {
+		e.preventDefault();
+
+		var helpFileId = $("#helpFileIdValue").text();
+		var helpFileName = $.trim($("#helpFileName").val());
+		var helpFileSyntax = $.trim( $("#helpFileSyntax").val() );
+		var helpFileKeywords = $.trim( $("#helpFileKeywords").val() );
+		var helpFileDescription = editor.getValue();
+		var helpFileParentId = $("#helpFileParentAnchor").data("help-file-id");
+		var errors = [];
+
+		if($.isNumeric(helpFileId))
+			helpFileId = parseInt(helpFileId);
+		else
+			helpFileId = null;
+
+		if(helpFileName == null || helpFileName == "")
+			errors.push("Name must not be blank.");
+		else if(helpFileName.length >= 60)
+			errors.push("Name must be no longer than 60 characters.");
+
+		if(helpFileSyntax.length >= 120)
+			errors.push("Syntax must be no longer than 120 characters.");
+
+		if(errors.length > 0)
+		{
+			socket.displaySaveFormWarnings(errors);
+			return;
+		}
+
+		socket.hideSaveFormWarnings();
+
+		var command = {
+			method: "Save Help File",
+			helpFileId: helpFileId,
+			name: helpFileName,
+			syntax: helpFileSyntax,
+			keywords: helpFileKeywords,
+			description: helpFileDescription,
+			parentId: helpFileParentId == "" ? null : parseInt(helpFileParentId)
+		};
+
+		socket.sendCommand(command);
+	})
+
 	$("#helpFileLoadForm").on("submit", function(e) {
 		
 		e.preventDefault();
-		console.log("Submitting Form...");
-		
+		socket.hideSetNewParentHelpFile();
 		var helpFileId = parseInt($("#helpFileId").val());
 		
 		if(isNaN(helpFileId))
@@ -96,8 +194,189 @@ $(document).ready(function() {
 			method: "Load Help File",
 			helpFileId: helpFileId
 		});
-	})
-})
+	});
 
+	$("#helpFileCreateNewButton").on("click", function(e) {
 
+		e.preventDefault();
+
+		socket.hideSetNewParentHelpFile();
+
+		$("#loadHelpFileError").text("").addClass("hidden");
+		$("#helpFileName").val("");
+		$("#helpFileSyntax").val("");
+		$("#helpFileKeywords").val("");
+		$("#helpFileIdValue").text("<NEW>");
+		$("#helpFileParentAnchor").text("<NONE>").data("help-file-id", "");
+
+		editor.selectAll();
+		editor.removeLines();
+	});
+
+	$("#helpFileChangeParentAnchor").on("click", function(e) {
+
+		e.preventDefault();
+
+		$("#helpFileChangeParentWrapper").removeClass("hidden");
+		$("#helpFileParentWrapper").addClass("hidden");
+		$("#helpFileNewParentIdInput").val("").focus();
+	});
+
+	$("#helpFileSaveNewParentIdButton").on("click", function(e) {
+
+		e.preventDefault();
+
+		var helpFileId = $("#helpFileNewParentIdInput").val();
+
+		if(helpFileId == "")
+		{
+			socket.setParentHelpFile("", "<None>");
+			socket.hideSetNewParentHelpFile();
+			return;
+		}
+
+		if(!$.isNumeric(helpFileId) || parseInt(helpFileId) != helpFileId) {
+			alert("Help File ID must either be blank(for no parent) or an integer");
+			return;
+		}
+
+		var command = {
+			method: "Load Help File",
+			helpFileId: parseInt(helpFileId)
+		};
+
+		socket.loadingParent = true;
+		socket.sendCommand(command);
+	});
+
+	$("#helpFileDiscardNewParentIdButton").on("click", function(e) {
+
+		e.preventDefault();
+		socket.hideSetNewParentHelpFile();
+	});
+
+	$("#helpFileChildren").on("click", "a", function(e) {
+
+		e.preventDefault();
+
+		var helpFileId = $(e.target).data("help-file-id");
+
+		if(helpFileId == "" || helpFileId == null)
+			return;
+
+		socket.sendCommand({
+			method: "Load Help File",
+			helpFileId: parseInt(helpFileId)
+		});
+	});
+
+	$("#helpFileParentAnchor").on("click", function(e) {
+
+		e.preventDefault();
+
+		var helpFileId = $(e.target).data("help-file-id");
+
+		if(helpFileId == "" || helpFileId == null)
+			return;
+
+		socket.sendCommand({
+			method: "Load Help File",
+			helpFileId: parseInt(helpFileId)
+		});
+	});
+});
+
+</script>
+
+<style type="text/css">
+
+#loadHelpFileError
+{
+	color: #880015;
+	font-size: 18px;
+	font-weight: bold;
+}
+
+#helpFileForm
+{
+	width: 100%;
+}
+
+#helpFileEditor
+{
+	width: 100%;
+}
+
+#helpFileParentWrapper
+{
+	display: inline-block;
+	width: 200px;
+}
+
+#helpFileNewParentIdInput
+{
+	width: 100px !important;
+}
+
+#helpFileChangeParentWrapper
+{
+	display: inline-block;
+}
+
+.hidden
+{
+	display: none !important;
+}
+
+.flatGreyButton.short
+{
+	padding-top: 1px;
+	padding-bottom: 1px;
+	margin: 0;
+}
+
+#helpFileForm > ul
+{
+	list-style: none;
+	padding: 0;
+	margin: 5px 0 10px 0;
+	color: #880015;
+	font-weight: bold;
+}
+
+</style>
+
+		<div class="userPortalContent">
+
+			<form id="helpFileLoadForm">
+				ID: <input type="text" id="helpFileId"/>
+				<button type="submit" class="flatGreyButton" id="helpFileLoadButton">Load</button>
+				<button type="button" class="flatGreyButton" id="helpFileCreateNewButton">Create New</button>
+				<span class="hidden" id="loadHelpFileError"></span>
+			</form>
+			<form id="helpFileForm">
+				<ul class="hidden">Errors.</ul>
+				<div class="formEntry clearFix"><label>ID:</label><span id="helpFileIdValue">&lt;NEW&gt;</span></div>
+				<div class="formEntry clearFix"><label>Name:</label><input type="text" id="helpFileName"/></div>
+				<div class="formEntry clearFix"><label>Syntax:</label><input type="text" id="helpFileSyntax"/></div>
+				<div class="formEntry clearFix"><label>Keywords:</label><input type="text" id="helpFileKeywords"/></div>
+				<div class="formEntry clearFix"><label>Parent:</label><div id="helpFileParentWrapper"><a href="#" id="helpFileParentAnchor" data-help-file-id="">&lt;NONE&gt;</a><a href="#" id="helpFileChangeParentAnchor">(change)</a></div><div id="helpFileChangeParentWrapper" class="hidden"><input type="text" id="helpFileNewParentIdInput"/> <button type="button" class="flatGreyButton short" id="helpFileSaveNewParentIdButton">Save</button> <button type="button" class="flatGreyButton short" id="helpFileDiscardNewParentIdButton">Discard</button></div></div>
+				<div class="formEntry clearFix"><label>Children:</label><span id="helpFileChildren"></span></div>
+				<div class="formEntry clearFix"><label>Created:</label><span id="helpFileCreated"></span></div>
+				<div class="formEntry clearFix"><label>Last Edited:</label><span id="helpFileLastEdited"></span></div>
+				<div class="formEntry clearFix"><label class="floatLeft">Description:</label><div id="helpFileEditor"></div></div>
+
+				<button type="submit" class="flatGreyButton floatRight" id="helpFileSaveButton">Save</button>
+			</form>
+
+		</div>
+		<div style="clear: both;"></div>
+	</div> <!-- End of Container Box -->
+
+<script src="./View/JavaScript/ace-min/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    var editor = ace.edit("helpFileEditor");
+    editor.setTheme("ace/theme/monokai");
+    editor.getSession().setMode("ace/mode/javascript");
+    editor.getSession().setUseWrapMode(true);
 </script>
