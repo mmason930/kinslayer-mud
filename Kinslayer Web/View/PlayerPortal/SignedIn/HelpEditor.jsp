@@ -288,64 +288,6 @@ $(document).ready(function() {
 
 </script>
 
-<style type="text/css">
-
-#loadHelpFileError
-{
-	color: #880015;
-	font-size: 18px;
-	font-weight: bold;
-}
-
-#helpFileForm
-{
-	width: 100%;
-}
-
-#helpFileEditor
-{
-	width: 100%;
-}
-
-#helpFileParentWrapper
-{
-	display: inline-block;
-	width: 200px;
-}
-
-#helpFileNewParentIdInput
-{
-	width: 100px !important;
-}
-
-#helpFileChangeParentWrapper
-{
-	display: inline-block;
-}
-
-.hidden
-{
-	display: none !important;
-}
-
-.flatGreyButton.short
-{
-	padding-top: 1px;
-	padding-bottom: 1px;
-	margin: 0;
-}
-
-#helpFileForm > ul
-{
-	list-style: none;
-	padding: 0;
-	margin: 5px 0 10px 0;
-	color: #880015;
-	font-weight: bold;
-}
-
-</style>
-
 		<div class="userPortalContent">
 
 			<form id="helpFileLoadForm">
@@ -366,7 +308,7 @@ $(document).ready(function() {
 				<div class="formEntry clearFix"><label>Last Edited:</label><span id="helpFileLastEdited"></span></div>
 				<div class="formEntry clearFix"><label class="floatLeft">Description:</label><div id="helpFileEditor"></div></div>
 
-				<button type="submit" class="flatGreyButton floatRight" id="helpFileSaveButton">Save</button>
+				<button type="submit" class="flatGreyButton marginAuto" id="helpFileSaveButton">Save</button>
 			</form>
 
 		</div>

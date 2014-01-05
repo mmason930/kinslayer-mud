@@ -248,10 +248,53 @@ table.userLogTable td
 	border-bottom: 1px solid #AAA;
 }
 
-#helpFileLoadButton
+#helpFileLoadButton,
+#helpFileCreateNewButton
 {
 	font-size: 16px;
 	padding-top: 3px;
 	padding-bottom: 3px;
+}
+
+#loadHelpFileError
+{
+	color: #880015;
+	font-size: 18px;
+	font-weight: bold;
+}
+
+#helpFileForm
+{
+	width: 100%;
+}
+
+#helpFileEditor
+{
+	width: 100%;
+}
+
+#helpFileParentWrapper
+{
+	display: inline-block;
+	width: 200px;
+}
+
+#helpFileNewParentIdInput
+{
+	width: 100px !important;
+}
+
+#helpFileChangeParentWrapper
+{
+	display: inline-block;
+}
+
+#helpFileForm > ul
+{
+	list-style: none;
+	padding: 0;
+	margin: 5px 0 10px 0;
+	color: #880015;
+	font-weight: bold;
 }
 /*** End Help Editor ***/

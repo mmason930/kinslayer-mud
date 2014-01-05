@@ -57,6 +57,11 @@ a:hover {
 	width: 67%;
 }
 
+.marginAuto
+{
+	margin: auto;
+}
+
 .clearLeft
 {
 	clear: left;
@@ -88,6 +93,11 @@ a:hover {
 	clear: both;
 	visibility: hidden;
 	height: 0;
+}
+
+.hidden
+{
+	display: none !important;
 }
 
 .leftNav
@@ -674,6 +684,12 @@ a.blueLink {
 	background-color: #555;
 }
 
+.flatGreyButton.short
+{
+	padding-top: 1px;
+	padding-bottom: 1px;
+	margin: 0;
+}
 
 @media (max-width: 1000px) {
 
