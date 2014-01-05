@@ -37,7 +37,7 @@ socket.onopen = function()
 	this.sendCommand({
 		method: "SessionID",
 		userId: <%= user.getUserId() %>,
-		sessionId: <%= sessionId %>
+		sessionId: "<%= sessionId %>"
 	})
 }
 socket.onclose = function()
