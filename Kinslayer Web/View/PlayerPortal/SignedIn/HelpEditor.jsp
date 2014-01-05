@@ -2,6 +2,7 @@
 <%@ include file="/View/Framework/Kinslayer.jsp" %>
 <%
 User user = (User)request.getAttribute("User");
+String sessionId = (String)request.getAttribute("SessionId");
 %>
 <form id="helpFileLoadForm">
 	ID: <input type="text" id="helpFileId"/> <button type="submit" class="flatGreyButton" id="helpFileLoadButton">Load</button>
@@ -32,6 +33,12 @@ socket.onopen = function()
 {
 	console.log("Connected.");
 	inputBuffer = "";
+	
+	this.sendCommand({
+		method: "SessionID",
+		userId: <%= user.getUserId() %>
+		sessionId: <%= sessionId %>
+	})
 }
 socket.onclose = function()
 {
@@ -45,6 +52,11 @@ socket.onmessage = function(msg)
 	var command = JSON.parse(msg.data);
 	
 	console.log("Message Method: " + command.method);
+}
+
+socket.sendCommand = function(command)
+{
+	this.send(JSON.stringify(command) + String.fromCharCode(0x06));
 }
 
 </script>
