@@ -48,7 +48,7 @@ $(document).ready(function() {
 	socket.onmessage = function(msg)
 	{
 		socket.inputBuffer += msg.data;
-		console.log("Message Received: " + msg);
+		console.log("Message Received: " + msg.data);
 		
 		var command = JSON.parse(msg.data);
 		
