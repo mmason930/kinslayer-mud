@@ -204,6 +204,9 @@ $(document).ready(function() {
 		$("#helpFileKeywords").val("");
 		$("#helpFileIdValue").text("<NEW>");
 		$("#helpFileParentAnchor").text("<NONE>").data("help-file-id", "");
+		$("#helpFileChildren").html("");
+		$("#helpFileCreated").text("");
+		$("#helpFileLastEdited").text("");
 
 		editor.selectAll();
 		editor.removeLines();
