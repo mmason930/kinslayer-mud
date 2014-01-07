@@ -29,6 +29,8 @@ public abstract class ValidateSignInAction extends StandardAction {
       return FAILURE_FORWARD;
     }
     
+    request.setAttribute("User", user);
+    
     return execute(webSupport, user);
   }
 }
