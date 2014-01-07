@@ -1159,7 +1159,7 @@ ACMD(do_kill)
 			if(!str_cmp(arg2, "backstab"))
 			{
 				weap = GET_EQ(ch, WEAR_WIELD);
-				if(!weap || !IS_SHORT_BLADE(weap))F
+				if(!weap || !IS_SHORT_BLADE(weap))
 				{
 					ch->send("You need to be wielding a dagger to do this.\r\n");
 					return;
