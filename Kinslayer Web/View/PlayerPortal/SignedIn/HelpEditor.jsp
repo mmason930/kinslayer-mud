@@ -183,9 +183,6 @@ $(document).ready(function() {
 		socket.hideSetNewParentHelpFile();
 		var helpFileId = parseInt($("#helpFileId").val());
 		
-		if(isNaN(helpFileId))
-			return;
-		
 		socket.sendCommand({
 			method: "Load Help File",
 			helpFileId: helpFileId
@@ -290,7 +287,7 @@ $(document).ready(function() {
 		<div class="userPortalContent">
 
 			<form id="helpFileLoadForm">
-				ID: <input type="text" id="helpFileId"/>
+				ID or Name: <input type="text" id="helpFileId"/>
 				<button type="submit" class="flatGreyButton" id="helpFileLoadButton">Load</button>
 				<button type="button" class="flatGreyButton" id="helpFileCreateNewButton">Create New</button>
 				<span class="hidden" id="loadHelpFileError"></span>
