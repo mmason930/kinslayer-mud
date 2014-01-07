@@ -181,7 +181,7 @@ $(document).ready(function() {
 		
 		e.preventDefault();
 		socket.hideSetNewParentHelpFile();
-		var helpFileId = parseInt($("#helpFileId").val());
+		var helpFileId = $("#helpFileId").val();
 		
 		socket.sendCommand({
 			method: "Load Help File",
