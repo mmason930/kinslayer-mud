@@ -5,10 +5,8 @@
 <tiles:useAttribute name="hideTopNav" classname="java.lang.String" ignore="true" />
 <%
 String sessionUserName = (String)request.getAttribute("SessionUserName");
-System.out.println("Session User Name: " + sessionUserName);
 boolean hideTopNavBoolean = StringUtil.removeNull(hideTopNav).equals("true");
 User user = (User)request.getAttribute("User");
-System.out.println("User: " + user);
 %>
 <div class="container_box">
 
@@ -17,7 +15,6 @@ System.out.println("User: " + user);
 			<div class="userPortalContainer">
 <%
 if(!hideTopNavBoolean) {
-	System.out.println("...1");
 %>
 				<ul class="userPortalTopNav">
 					<li><a href="<%=WebSiteUrlUtil.getPlayerPortalHomeUrl()%>" <%=topNavSelected.equals("Home") ? "class='selected'" : "" %>>Home</a></li>
@@ -27,12 +24,10 @@ if(!hideTopNavBoolean) {
 					<li><a href="<%=WebSiteUrlUtil.getPlayerPortalViewTellHistoryUrl(null) %>" <%=topNavSelected.equals("ViewTellHistory") ? "class='selected'" : "" %>>Tell History</a></li>
 <%
   if(user.getLevel() >= 100) {
-	System.out.println("...2");
 %>
 					<li><a href="<%=WebSiteUrlUtil.getPlayerPortalHelpEditorUrl() %>" <%=topNavSelected.equals("HelpEditor") ? "class='selected'" : "" %>>Help Editor</a></li>
 <%
   }
-System.out.println("...3");
 %>
 				</ul>
 <%
