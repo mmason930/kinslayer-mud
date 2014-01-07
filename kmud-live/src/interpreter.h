@@ -145,12 +145,11 @@ const int SCMD_HANDBOOK = 0;
 const int SCMD_CREDITS = 1;
 const int SCMD_NEWS = 2;
 const int SCMD_WIZLIST = 3;
-const int SCMD_POLICIES = 4;
-const int SCMD_VERSION = 5;
-const int SCMD_MOTD = 6;
-const int SCMD_IMOTD = 7;
-const int SCMD_CLEAR = 8;
-const int SCMD_WHOAMI = 9;
+const int SCMD_VERSION = 4;
+const int SCMD_MOTD = 5;
+const int SCMD_IMOTD = 6;
+const int SCMD_CLEAR = 7;
+const int SCMD_WHOAMI = 8;
 
 /* do_gen_tog */
 const int SCMD_NOHASSLE = 0;

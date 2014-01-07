@@ -574,7 +574,6 @@ class CommandInfo cmd_info[] =
 	    {	"page"		, "pag"	, POS_DEAD		, do_page			, LVL_APPR	, 0					, 0.0	,  0 	},
 	    {	"pardon"	, "par"	, POS_DEAD		, do_pardon			, 0			, 0					, 0.0	,  0 	},
 	    {	"pick"		, "pi"	, POS_STANDING	, do_gen_door		, 1			, SCMD_PICK			, 0.0	,  0 	},
-	    {	"policy"	, "pol"	, POS_DEAD		, do_gen_ps			, 0			, SCMD_POLICIES		, 0.0	,  0 	},
 	    {	"poofin"	, "poofi",POS_DEAD		, do_poofset		, LVL_IMMORT, SCMD_POOFIN		, 0.0	,  0 	},
 		{	"poofout"	, "poofo",POS_DEAD		, do_poofset		, LVL_IMMORT, SCMD_POOFOUT		, 0.0	,  0 	},
 	    {	"pour"		, "pour", POS_STANDING	, do_pour			, 0			, SCMD_POUR			, 0.0	,  0 	},

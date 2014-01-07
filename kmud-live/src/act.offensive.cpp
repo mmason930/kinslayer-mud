@@ -1128,7 +1128,7 @@ ACMD(do_kill)
 	Object *weap = 0;
 	char arg2[MAX_INPUT_LENGTH];
 
-	if ((GET_LEVEL(ch) < LVL_IMPL && !IS_GAY(ch) && !IS_AWESOME(ch) && !IS_QUEEN(ch)) || IS_NPC(ch))
+	if ((GET_LEVEL(ch) < LVL_IMPL && !IS_GAY(ch) && !IS_AWESOME(ch) && !IS_QUEEN(ch) && !IS_KING(ch)) || IS_NPC(ch))
 	{
 		do_hit(ch, argument, cmd, subcmd);
 		return;
@@ -1159,7 +1159,7 @@ ACMD(do_kill)
 			if(!str_cmp(arg2, "backstab"))
 			{
 				weap = GET_EQ(ch, WEAR_WIELD);
-				if(!weap || !IS_SHORT_BLADE(weap))
+				if(!weap || !IS_SHORT_BLADE(weap))F
 				{
 					ch->send("You need to be wielding a dagger to do this.\r\n");
 					return;

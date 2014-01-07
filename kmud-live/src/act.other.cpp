@@ -1188,8 +1188,7 @@ ACMD( do_wimpy )
 	{
 		if ( ch->PlayerData->wimp_level )
 		{
-			ch->send( "Your current wimp level is %d hit points.\r\n",
-				ch->PlayerData->wimp_level );
+			ch->send( "Your current wimp level is %d hit points.\r\n", ch->PlayerData->wimp_level );
 			return ;
 		}
 

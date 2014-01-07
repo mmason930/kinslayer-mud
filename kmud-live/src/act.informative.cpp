@@ -2434,9 +2434,6 @@ ACMD(do_gen_ps)
 		case SCMD_HANDBOOK:
 			page_string(ch->desc, handbook, 0);
 			break;
-		case SCMD_POLICIES:
-			page_string(ch->desc, policies, 0);
-			break;
 		case SCMD_MOTD:
 			page_string(ch->desc, motd, 0);
 			break;
@@ -2508,7 +2505,7 @@ void performMortalWhere(Character * ch, char *arg)
 		for (i = character_list; i; i = i->next)
 		{
 			if( i->IsPurged() ) continue;
-			if (i->in_room || i == ch)
+			if (!i->in_room || i == ch)
 				continue;
 
 			if (ch->in_room->zone != i->in_room->zone)

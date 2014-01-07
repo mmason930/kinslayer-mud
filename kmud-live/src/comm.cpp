@@ -2175,7 +2175,7 @@ void Character::LogOutput( const std::string &buffer )
 
 	if ( !( outfile = fopen( filePath.c_str(), "a+" ) ) )
 	{
-		Log( "Unable to open log file for %s: %s", GET_NAME( this ), filePathBuffer.str().c_str() );
+		Log("Unable to open log file for %s: %s: %s", GET_NAME(this), filePathBuffer.str().c_str(), strerror(errno));
 		return;
 	}
 

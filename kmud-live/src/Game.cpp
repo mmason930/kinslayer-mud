@@ -9,7 +9,7 @@ Game *game = NULL;
 Game::Game()
 {
 	this->version = "KinslayerMUD, version 0001";
-	this->playerLogsDirectory = "lib/plrlogs/";
+	this->playerLogsDirectory = "plrlogs/";
 	this->defaultDirectory = "lib";
 }
 

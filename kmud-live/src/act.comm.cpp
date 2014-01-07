@@ -579,7 +579,7 @@ ACMD(do_write)
 {
 	Object *paper = 0, *pen = 0;
 	char *papername, *penname, msg[MAX_STRING_LENGTH], cur[MAX_STRING_LENGTH], waste[MAX_STRING_LENGTH];
-	int i = 0, ammount = 0;
+	int i = 0, amount = 0;
 
 	if( ch->IsPurged() ) return;
 
@@ -591,7 +591,7 @@ ACMD(do_write)
 	HalfChop(msg, waste, msg);
 	//skip_spaces(&msg);
 
-	for(i = 0, ammount = atoi(waste);i < ammount && *waste;++i)
+	for(i = 0, amount = atoi(waste);i < amount && *waste;++i)
 	{
 		if(*waste)
 			HalfChop(msg, waste, msg);
@@ -640,8 +640,7 @@ ACMD(do_write)
 		/* One object was found.. now for the other one. */
 		if (!GET_EQ(ch, WEAR_HOLD))
 		{
-			ch->send("You can't write with %s %s alone.\r\n", AN(papername),
-			         papername);
+			ch->send("You can't write with %s %s alone.\r\n", AN(papername), papername);
 			return;
 		}
 
@@ -677,8 +676,6 @@ ACMD(do_write)
 		b) the abort buffer if the player aborts the message
 		*/
 
-
-
 		if (!ch->desc || IS_NPC(ch))
 		{
 			if(!*msg)
@@ -698,7 +695,7 @@ ACMD(do_write)
 			else
 				sprintf(cur, "%s\r\n", msg);
 
-			paper->action_description = new char[MAX_STRING_LENGTH];
+			//paper->action_description = new char[MAX_STRING_LENGTH];
 			paper->action_description = str_dup(cur);
 			return;
 		}
