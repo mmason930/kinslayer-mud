@@ -9,7 +9,7 @@ System.out.println("User Log Record Table: " + userLogRecordsTable);
 <table class="userLogTable">
 <%
 for(List<UserLogRecord> row : userLogRecordsTable) {
-	System.out.println("Row: " + row);"
+	System.out.println("Row: " + row);
 %>
 	<tr>
 <%
