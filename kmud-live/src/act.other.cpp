@@ -1331,8 +1331,6 @@ ACMD( do_gen_tog )
 	         "Buildwalk now ON.\r\n"},
 	        {"You will no longer see the tips.\r\n",
 	         "You will now see the tips.\r\n"},
-			{"You will no longer receive alert messages.\r\n",
-			 "You will now receive alert messages.\r\n"},
             {"Autoscan is now on.\r\n", // RHOLLOR 05.15.09
 			 "Autoscan is now off.\r\n"},  // RHOLLOR 05.15.09
 			{"You will now see immortal speaks.\r\n",
@@ -1394,9 +1392,6 @@ ACMD( do_gen_tog )
 			break;
 			case SCMD_NOTIPS:
 			result = NEWB_TOG_CHK( ch, NEW_TIPS );
-			break;
-			case SCMD_NOALERTS:
-			result = PRF_TOG_CHK( ch, PRF_ALERT );
 			break;
 			case SCMD_NOSPEAKS:
 			result = PRF_TOG_CHK( ch, PRF_NOSPEAKS );

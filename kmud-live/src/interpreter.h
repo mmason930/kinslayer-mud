@@ -143,13 +143,12 @@ const int SCMD_DOWN = 6;
 /* do_gen_ps */
 const int SCMD_HANDBOOK = 0;
 const int SCMD_CREDITS = 1;
-const int SCMD_NEWS = 2;
-const int SCMD_WIZLIST = 3;
-const int SCMD_VERSION = 4;
-const int SCMD_MOTD = 5;
-const int SCMD_IMOTD = 6;
-const int SCMD_CLEAR = 7;
-const int SCMD_WHOAMI = 8;
+const int SCMD_WIZLIST = 2;
+const int SCMD_VERSION = 3;
+const int SCMD_MOTD = 4;
+const int SCMD_IMOTD = 5;
+const int SCMD_CLEAR = 6;
+const int SCMD_WHOAMI = 7;
 
 /* do_gen_tog */
 const int SCMD_NOHASSLE = 0;
@@ -168,10 +167,9 @@ const int SCMD_SLOWNS = 12;
 const int SCMD_AUTOEXIT = 13;
 const int SCMD_BUILDWALK = 14;
 const int SCMD_NOTIPS = 15;
-const int SCMD_NOALERTS = 16;
-const int SCMD_AUTOSCAN = 17;   //RHOLLOR 05.15.09
-const int SCMD_NOSPEAKS = 18;
-const int SCMD_NOGLOBAL = 19;
+const int SCMD_AUTOSCAN = 16;   //RHOLLOR 05.15.09
+const int SCMD_NOSPEAKS = 17;
+const int SCMD_NOGLOBAL = 18;
 
 /* do_wizutil */
 const int SCMD_REROLL = 0;

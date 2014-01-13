@@ -89,11 +89,9 @@ extern bool rebootNotified15, rebootNotified10, rebootNotified5, rebootNotified1
 
 /* for chars */
 extern char *credits;
-extern char *news;
 extern char *motd;
 extern char *imotd;
 extern char *background;
-extern char *policies;
 extern char *startup;
 extern char *handbook;
 extern const char *class_types[];

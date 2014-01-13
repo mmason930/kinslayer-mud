@@ -52,10 +52,8 @@ extern DateTime rebootTime;
 extern int boot_high;
 extern int Seconds;
 extern char *credits;
-extern char *news;
 extern char *motd;
 extern char *imotd;
-extern char *policies;
 extern char *handbook;
 extern const char *class_abbrevs[];
 
@@ -2425,9 +2423,6 @@ ACMD(do_gen_ps)
 		case SCMD_CREDITS:
 			page_string(ch->desc, credits, 0);
 			break;
-		case SCMD_NEWS:
-			page_string(ch->desc, news, 0);
-			break;
 		case SCMD_WIZLIST:
 			print_wizlist(ch, !str_cmp(argument,"all"));
 			break;
@@ -2903,57 +2898,72 @@ ACMD(do_toggle)
 		return;
 
 	if ( !ch->PlayerData->wimp_level )
-		strcpy(buf2, "OFF");
+		strncpy(buf2, "OFF", sizeof(buf2));
 	else
-		sprintf(buf2, "%-3d", ch->PlayerData->wimp_level);
+		snprintf(buf2, sizeof(buf2), "%-3d", ch->PlayerData->wimp_level);
 
-	sprintf(buf,
-	        "Hit Pnt Display: %-3s    "
-	        "     Brief Mode: %-3s    "
-	        " Summon Protect: %-3s\r\n"
+	snprintf(buf, sizeof(buf),
+		"Hit Pnt Display: %-3s    "
+		"Brief Mode     : %-3s    "
+		"Incognito      : %-3s\r\n"
 
-	        "   Move Display: %-3s    "
-	        "   Compact Mode: %-3s    "
-	        "       On Quest: %-3s\r\n"
+		"Move Display   : %-3s    "
+		"Compact Mode   : %-3s    "
+		"Holy Light     : %-3s\r\n"
 
-	        "   Mana Display: %-3s    "
-	        "         NoTell: %-3s    "
-	        "   Repeat Comm.: %-3s\r\n"
+		"Mana Display   : %-3s    "
+		"No Tells       : %-3s    "
+		"Repeat Comm.   : %-3s\r\n"
 
-	        " Auto Show Exit: %-3s    "
-	        "     Wimp Level: %-3s\r\n"
+		"Auto Show Exit : %-3s    "
+		"Wimp Level     : %-3s    "
+		"Room Flags     : %-3s\r\n"
 
-	        "Narrate Channel: %-3s    "
-	        "   Chat Channel: %-3s    "
-	        "    Color Level: %-3s\r\n"
-			"Immortal Speaks: %-3s\r\n"
-			"Global Channel : %-3s\r\n"
+		"Narrate Channel: %-3s    "
+		"Chat Channel   : %-3s    "
+		"Global Channel : %-3s\r\n"
 
-	        "      Buildwalk: %-3s\r\n",
+		"Immortal Speaks: %-3s    "
+		"Shout Channel  : %-3s    "
+		"Buildwalk      : %-3s\r\n"
 
-	        ONOFF(PRF_FLAGGED(ch, PRF_DISPHP)),
-	        ONOFF(PRF_FLAGGED(ch, PRF_BRIEF)),
-	        ONOFF(!PRF_FLAGGED(ch, PRF_SUMMONABLE)),
+		"Tell Mute      : %-3s    "
+		"Say Mute       : %-3s    "
+		"Color Level    : %-3s\r\n"
 
-	        ONOFF(PRF_FLAGGED(ch, PRF_DISPMOVE)),
-	        ONOFF(PRF_FLAGGED(ch, PRF_COMPACT)),
-	        StringUtil::allUpper(StringUtil::yesNo(PRF_FLAGGED(ch, PRF_QUEST))).c_str(),
+		"Spam Mode      : %-3s    "
+		"Auto Scan      : %-3s\r\n",
 
-	        ONOFF(PRF_FLAGGED(ch, PRF_DISPMANA)),
-	        ONOFF(PRF_FLAGGED(ch, PRF_NOTELL)),
-			StringUtil::allUpper(StringUtil::yesNo((!PRF_FLAGGED(ch, PRF_NOREPEAT)))).c_str(),
+		ONOFF(PRF_FLAGGED(ch, PRF_DISPHP)),
+		ONOFF(PRF_FLAGGED(ch, PRF_BRIEF)),
+		ONOFF(PRF_FLAGGED(ch, PRF_INCOG)),
 
-	        ONOFF(PRF_FLAGGED(ch, PRF_AUTOEXIT)),
-	        buf2,
+		ONOFF(PRF_FLAGGED(ch, PRF_DISPMOVE)),
+		ONOFF(PRF_FLAGGED(ch, PRF_COMPACT)),
+		ONOFF(PRF_FLAGGED(ch, PRF_HOLYLIGHT)),
 
-	        ONOFF(!PRF_FLAGGED(ch, PRF_NONARR)),
-	        ONOFF(!PRF_FLAGGED(ch, PRF_NOCHAT)),
+		ONOFF(PRF_FLAGGED(ch, PRF_DISPMANA)),
+		ONOFF(PRF_FLAGGED(ch, PRF_NOTELL)),
+		StringUtil::allUpper(StringUtil::yesNo((!PRF_FLAGGED(ch, PRF_NOREPEAT)))).c_str(),
 
-	        ctypes[COLOR_LEV(ch)],
+		ONOFF(PRF_FLAGGED(ch, PRF_AUTOEXIT)),
+		StringUtil::allUpper(buf2),
+		ONOFF(PRF_FLAGGED(ch, PRF_ROOMFLAGS)),
 
-			ONOFF(!PRF_FLAGGED(ch, PRF_NOSPEAKS)),
-			ONOFF(!PRF_FLAGGED(ch, PRF_NOGLOBAL)),
-	        ONOFF(!PRF_FLAGGED(ch, PRF_BUILDWALK)));
+		ONOFF(!PRF_FLAGGED(ch, PRF_NONARR)),
+		ONOFF(!PRF_FLAGGED(ch, PRF_NOCHAT)),
+		ONOFF(!PRF_FLAGGED(ch, PRF_NOGLOBAL)),
+
+		ONOFF(!PRF_FLAGGED(ch, PRF_NOSPEAKS)),
+		ONOFF(!PRF_FLAGGED(ch, PRF_NOSHOUT)),
+		ONOFF(!PRF_FLAGGED(ch, PRF_BUILDWALK)),
+
+		ONOFF(PRF_FLAGGED(ch, PRF_TELL_MUTE)),
+		ONOFF(PRF_FLAGGED(ch, PRF_SAY_MUTE)),
+		StringUtil::allUpper(ctypes[COLOR_LEV(ch)]),
+
+		ONOFF(PRF_FLAGGED(ch, PRF_SPAM)),
+		ONOFF(PRF_FLAGGED(ch, PRF_AUTOSCAN)));
 
 	ch->send(buf);
 }

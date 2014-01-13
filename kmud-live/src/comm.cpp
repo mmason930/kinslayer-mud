@@ -113,12 +113,10 @@ kuDescriptor *gatewayConnection;
 std::string subroutine;
 
 extern char *credits;
-extern char *news;
 extern char *motd;
 extern char *imotd;
 extern char *background;
 extern char *handbook;
-extern char *policies;
 extern char *startup;
 
 extern std::thread *objectMoveLoggerThread;
@@ -930,12 +928,10 @@ void initiateGame( int port )
 
 	Log( "Freeing menus/guides..." );
 	delete[] ( credits );
-	delete[] ( news );
 	delete[] ( motd );
 	delete[] ( imotd );
 	delete[] ( background );
 	delete[] ( handbook );
-	delete[] ( policies );
 	delete[] ( startup );
 	delete[] ( complete_cmd_info );
 	delete[] ( soc_mess_list );

@@ -546,9 +546,7 @@ class CommandInfo cmd_info[] =
 	    {	"myzones"	, "myz"	, POS_DEAD		, do_myzones		, LVL_IMMORT, 0					, 0.0f	,  0	},
 
 	    {	"narrate"	, "nar"	, POS_RESTING	, do_gen_comm		, 0			, SCMD_NARRATE		, 0.0	,  0 	},
-	    {	"news"		, "new"	, POS_SLEEPING	, do_gen_ps			, 0			, SCMD_NEWS			, 0.0	,  0 	},
 	    {	"notice"	, "not"	, POS_RESTING	, do_notice			, 0			, 0					, 0.0	,  0 	},
-	    {	"noalerts"	, "nogr", POS_DEAD		, do_gen_tog		, 0			, SCMD_NOALERTS		, 0.0	,  0 	},
 	    {	"nochats"	, "nogr", POS_DEAD		, do_gen_tog		, 0			, SCMD_NOCHAT		, 0.0	,  0 	},
 	    {	"noglobals" , "nog"	, POS_DEAD		, do_gen_tog		, 0			, SCMD_NOGLOBAL		, 0.0	,  0 	},
 	    {	"nohassle"	, "noh"	, POS_DEAD		, do_gen_tog		, LVL_IMMORT, SCMD_NOHASSLE		, 0.0	,  0 	},

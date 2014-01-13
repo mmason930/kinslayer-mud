@@ -126,12 +126,10 @@ PreciseStrike PreciseStrikeData;
 time_t boot_time = 0;			/* time of mud boot					*/
 
 char *credits		= NULL;		/* game credits						*/
-char *news			= NULL;		/* mud news							*/
 char *motd			= NULL;		/* message of the day - mortals		*/
 char *imotd			= NULL;		/* message of the day - immorts		*/
 char *background	= NULL;		/* background story					*/
 char *handbook		= NULL;		/* handbook for new immortals		*/
-char *policies		= NULL;		/* policies page					*/
 char *startup		= NULL;		/* startup screen					*/
 
 std::vector<int> BodyPercents;

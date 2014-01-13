@@ -222,8 +222,7 @@ int Character::Draw()
 		{
 			if (!this->CanDraw( GET_EQ( this, i) ->contains))
 				return 1;
-			this->send( "You draw %s from %s.\r\n",
-			            GET_EQ( this, i ) ->contains->GetSDesc(), GET_EQ( this, i ) ->GetSDesc() );
+			this->send( "You draw %s from %s.\r\n", GET_EQ( this, i ) ->contains->GetSDesc(), GET_EQ( this, i ) ->GetSDesc() );
 			Act( "$n draws $p from $P.", TRUE, this, GET_EQ( this, i ) ->contains, GET_EQ( this, i ), TO_ROOM );
 			break;
 		}
