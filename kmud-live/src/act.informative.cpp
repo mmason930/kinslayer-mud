@@ -2908,7 +2908,7 @@ ACMD(do_toggle)
 		"Incognito      : %-3s\r\n"
 
 		"Move Display   : %-3s    "
-		"Compact Mode   : %-3s    "
+		"Auto Scan      : %-3s    "
 		"Holy Light     : %-3s\r\n"
 
 		"Mana Display   : %-3s    "
@@ -2931,15 +2931,14 @@ ACMD(do_toggle)
 		"Say Mute       : %-3s    "
 		"Color Level    : %-3s\r\n"
 
-		"Spam Mode      : %-3s    "
-		"Auto Scan      : %-3s\r\n",
+		"Spam Mode      : %-3s    ",
 
 		ONOFF(PRF_FLAGGED(ch, PRF_DISPHP)),
 		ONOFF(PRF_FLAGGED(ch, PRF_BRIEF)),
 		ONOFF(PRF_FLAGGED(ch, PRF_INCOG)),
 
 		ONOFF(PRF_FLAGGED(ch, PRF_DISPMOVE)),
-		ONOFF(PRF_FLAGGED(ch, PRF_COMPACT)),
+		ONOFF(PRF_FLAGGED(ch, PRF_AUTOSCAN)),
 		ONOFF(PRF_FLAGGED(ch, PRF_HOLYLIGHT)),
 
 		ONOFF(PRF_FLAGGED(ch, PRF_DISPMANA)),
@@ -2962,8 +2961,7 @@ ACMD(do_toggle)
 		ONOFF(PRF_FLAGGED(ch, PRF_SAY_MUTE)),
 		StringUtil::allUpper(ctypes[COLOR_LEV(ch)]),
 
-		ONOFF(PRF_FLAGGED(ch, PRF_SPAM)),
-		ONOFF(PRF_FLAGGED(ch, PRF_AUTOSCAN)));
+		ONOFF(PRF_FLAGGED(ch, PRF_SPAM)));
 
 	ch->send(buf);
 }

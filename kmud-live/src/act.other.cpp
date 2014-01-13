@@ -1242,7 +1242,7 @@ ACMD( do_display )
 
 	if ( !*argument )
 	{
-		ch->send( "Usage: prompt { { H | M | V } | all | none }\r\n" );
+		ch->send( "Usage: prompt { { H | M | S } | all | none }\r\n" );
 		return ;
 	}
 
@@ -1269,11 +1269,11 @@ ACMD( do_display )
 					SET_BIT_AR( PRF_FLAGS( ch ), PRF_DISPHP );
 					break;
 
-					case 'm':
+					case 's':
 					SET_BIT_AR( PRF_FLAGS( ch ), PRF_DISPMANA );
 					break;
 
-					case 'v':
+					case 'm':
 					SET_BIT_AR( PRF_FLAGS( ch ), PRF_DISPMOVE );
 					break;
 
