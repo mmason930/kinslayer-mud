@@ -2964,6 +2964,9 @@ ACMD(do_toggle)
 		ONOFF(PRF_FLAGGED(ch, PRF_SPAM)));
 
 	ch->send(buf);
+
+	get_char_cols(ch);
+	ch->send("\r\nFor more information, type %s%sHELP TOGGLE%s.\r\n", bld, cyn, nrm);
 }
 
 
