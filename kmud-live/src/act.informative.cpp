@@ -2931,7 +2931,7 @@ ACMD(do_toggle)
 		"Say Mute       : %-3s    "
 		"Color Level    : %-3s\r\n"
 
-		"Spam Mode      : %-3s    ",
+		"Spam Mode      : %-3s\r\n",
 
 		ONOFF(PRF_FLAGGED(ch, PRF_DISPHP)),
 		ONOFF(PRF_FLAGGED(ch, PRF_BRIEF)),
