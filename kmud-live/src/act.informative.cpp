@@ -2903,42 +2903,42 @@ ACMD(do_toggle)
 		snprintf(buf2, sizeof(buf2), "%-3d", ch->PlayerData->wimp_level);
 
 	snprintf(buf, sizeof(buf),
-		"Hit Pnt Display: %-3s    "
-		"Brief Mode     : %-3s    "
-		"Incognito      : %-3s\r\n"
+		"Hit Pnt Display  : %-3s    "
+		"Brief Mode       : %-3s    "
+		"Incognito        : %-3s\r\n"
 
-		"Move Display   : %-3s    "
-		"Auto Scan      : %-3s    "
-		"Holy Light     : %-3s\r\n"
+		"Move Display     : %-3s    "
+		"Auto Scan        : %-3s    "
+		"Holy Light       : %-3s\r\n"
 
-		"Mana Display   : %-3s    "
-		"No Tells       : %-3s    "
-		"Repeat Comm.   : %-3s\r\n"
+		"Spell Pnt Display: %-3s    "
+		"No Tells         : %-3s    "
+		"Repeat Comm.     : %-3s\r\n"
 
-		"Auto Show Exit : %-3s    "
-		"Wimp Level     : %-3s    "
-		"Room Flags     : %-3s\r\n"
+		"Auto Show Exit   : %-3s    "
+		"Wimp Level       : %-3s    "
+		"Room Flags       : %-3s\r\n"
 
-		"Narrate Channel: %-3s    "
-		"Chat Channel   : %-3s    "
-		"Global Channel : %-3s\r\n"
+		"Narrate Channel  : %-3s    "
+		"Chat Channel     : %-3s    "
+		"Global Channel   : %-3s\r\n"
 
-		"Immortal Speaks: %-3s    "
-		"Shout Channel  : %-3s    "
-		"Buildwalk      : %-3s\r\n"
+		"Immortal Speaks  : %-3s    "
+		"Shout Channel    : %-3s    "
+		"Buildwalk        : %-3s\r\n"
 
-		"Tell Mute      : %-3s    "
-		"Say Mute       : %-3s    "
-		"Color Level    : %-3s\r\n"
+		"Tell Mute        : %-3s    "
+		"Say Mute         : %-3s    "
+		"Color Level      : %-3s\r\n"
 
-		"Spam Mode      : %-3s\r\n",
+		"Spam Mode        : %-3s\r\n",
 
 		ONOFF(PRF_FLAGGED(ch, PRF_DISPHP)),
 		ONOFF(PRF_FLAGGED(ch, PRF_BRIEF)),
 		ONOFF(PRF_FLAGGED(ch, PRF_INCOG)),
 
 		ONOFF(PRF_FLAGGED(ch, PRF_DISPMOVE)),
-		ONOFF(PRF_FLAGGED(ch, PRF_AUTOSCAN)),
+		ONOFF(!PRF_FLAGGED(ch, PRF_AUTOSCAN)),
 		ONOFF(PRF_FLAGGED(ch, PRF_HOLYLIGHT)),
 
 		ONOFF(PRF_FLAGGED(ch, PRF_DISPMANA)),
