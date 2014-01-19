@@ -257,3 +257,7 @@ flusspferd::array JSRoom::pathToRoom( JSRoom *otherRoom )
 	}
 	return path;
 }
+bool JSRoom::roomFlagged(const int flag)
+{
+	return ROOM_FLAGGED(real, flag);
+}

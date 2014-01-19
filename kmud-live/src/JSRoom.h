@@ -68,6 +68,7 @@ FLUSSPFERD_CLASS_DESCRIPTION(
 		("enableExit", bind, enableExit)
 		("isFlagged", bind, isFlagged)
 		("pathToRoom", bind, pathToRoom)
+		("roomFlagged", bind, roomFlagged)
 		)
     (properties,
         ("name", getter, getName)
@@ -131,6 +132,8 @@ public:
 	flusspferd::array items();
 
 	flusspferd::array pathToRoom(JSRoom *otherRoom);
+
+	bool roomFlagged(const int flag);
 
     void echo(flusspferd::string message)
     {

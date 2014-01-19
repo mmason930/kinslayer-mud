@@ -1572,7 +1572,7 @@ ACMD( do_olist )
 			         COLOR_BOLD( ch, CL_COMPLETE ), COLOR_CYAN( ch, CL_COMPLETE ), COLOR_NORMAL( ch, CL_COMPLETE ) );
 			for ( iter = armor.begin();iter != armor.end();++iter )
 			{
-				strcat(buffer, "[%s%-7d%s]   %s%s%-40.40s%s  [%s%3d%s] [%s%3d%s] [%s%3d%s] [%s%3d%s] [%s%5.1f%s] [%s%3d%s]\r\n",
+				strcat(buffer, "[%s%-7d%s]   %s%s%-40.40s%s  [%s%3d%s] [%s%3d%s] [%s%3d%s] [%s%3d%s] [%s%5.1f%s] [%s%4d%s]\r\n",
 				         COLOR_CYAN( ch, CL_COMPLETE ), GET_OBJ_VNUM( *iter ), COLOR_NORMAL( ch, CL_COMPLETE ),
 				         COLOR_BOLD( ch, CL_COMPLETE ), COLOR_GREEN( ch, CL_COMPLETE ), ( *iter ) ->GetSDesc(),
 				         COLOR_NORMAL( ch, CL_COMPLETE ),
@@ -1597,7 +1597,7 @@ ACMD( do_olist )
 				sprintf(BashRating, "[%s%6.2f%s]",COLOR_CYAN(ch,CL_COMPLETE),
 					(*iter)->BashRating(), COLOR_NORMAL(ch,CL_COMPLETE));
 				strcat(buffer,
-				         "[%s%-7d%s]   %s%s%-40.40s%s  [%s%3d%s] [%s%3d%s] [%s%5.1f%s] [%s%3d%s] [%s%3d%s] %s [%s%3d%s] [%s%1d%s]\r\n",
+				         "[%s%-7d%s]   %s%s%-40.40s%s  [%s%3d%s] [%s%3d%s] [%s%5.1f%s] [%s%3d%s] [%s%3d%s] %s [%s%4d%s] [%s%1d%s]\r\n",
 				         COLOR_CYAN( ch, CL_COMPLETE ), GET_OBJ_VNUM( *iter ), COLOR_NORMAL( ch, CL_COMPLETE ),
 				         COLOR_BOLD( ch, CL_COMPLETE ), COLOR_GREEN( ch, CL_COMPLETE ), ( *iter ) ->GetSDesc(),
 				         COLOR_NORMAL( ch, CL_COMPLETE ),
@@ -1621,7 +1621,7 @@ ACMD( do_olist )
 			for ( iter = misc.begin();iter != misc.end();++iter )
 			{
 				strcat(buffer,
-				         "[%s%-7d%s]   %s%s%-40.40s%s  [%s%3d%s]  [%s%3d%s]  [%s%3d%s]  [%s%5.1f%s]  [%s%3d%s]\r\n",
+				         "[%s%-7d%s]   %s%s%-40.40s%s  [%s%3d%s]  [%s%3d%s]  [%s%3d%s]  [%s%5.1f%s]  [%s%4d%s]\r\n",
 				         COLOR_CYAN( ch, CL_COMPLETE ), GET_OBJ_VNUM( *iter ), COLOR_NORMAL( ch, CL_COMPLETE ),
 				         COLOR_BOLD( ch, CL_COMPLETE ), COLOR_GREEN( ch, CL_COMPLETE ), ( *iter ) ->GetSDesc(),
 				         COLOR_NORMAL( ch, CL_COMPLETE ),
