@@ -293,11 +293,6 @@ void mobileActivity(void)
 		}
 		ch->processForgets();
 		
-		if (ch->in_room->vnum == 13201)
-		{
-			Log("Can See In Dark: %s", CAN_SEE_IN_DARK(ch) ? "Yes" : "No");
-		}
-
 		//Code for mob checking their light source.
 		if (!CAN_SEE_IN_DARK(ch))
 		{
