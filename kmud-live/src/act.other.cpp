@@ -509,7 +509,7 @@ ACMD( do_butcher )
 				ch->send( "You failed to butcher for unknown reasons...\r\n" );
 				return ;
 			}
-			if ( GET_OBJ_TYPE( obj ) != ITEM_FOOD )
+			if (obj->getType() != ITEM_FOOD)
 			{
 				ch->send( "Error with butchering...\r\n" );
 				delete obj;
@@ -557,7 +557,7 @@ ACMD( do_butcher )
 				ch->send( "You failed to skin for unknown reasons...\r\n" );
 				return ;
 			}
-			if ( GET_OBJ_TYPE( obj ) != ITEM_SKIN )
+			if (obj->getType()  != ITEM_SKIN)
 			{
 				ch->send( "Error with skinning...\r\n" );
 				delete obj;

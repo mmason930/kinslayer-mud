@@ -136,12 +136,12 @@ Object *Object::bootLiveObject( const sql::Row &MyRow, bool recursive )
 		obj->obj_flags.bitvector[2] = atol(MyRow["bitv2"].c_str());
 		obj->obj_flags.bitvector[3] = atol(MyRow["bitv3"].c_str());
 
-		if( GET_OBJ_TYPE(obj) == ITEM_DRINKCON )
+		if (obj->getType() == ITEM_DRINKCON)
 		{
 			GET_OBJ_VAL(obj, 2) = atoi(MyRow["obj_extra0"].c_str());
 			GET_OBJ_VAL(obj, 1) = atoi(MyRow["obj_extra1"].c_str());
 		}
-		else if( GET_OBJ_TYPE(obj) == ITEM_KEY )
+		else if (obj->getType() == ITEM_KEY)
 		{
 			GET_OBJ_VAL(obj, 0) = atoi(MyRow["obj_extra0"].c_str());
 		}
@@ -736,12 +736,12 @@ void Object::saveItems( bool self, char holderType, const std::string &holderID,
 				specialType = SPECIAL_SCALP;
 		}
 
-		if( GET_OBJ_TYPE(this) == ITEM_DRINKCON )
+		if (this->getType() == ITEM_DRINKCON)
 		{
 			obj_extra0 = GET_OBJ_VAL(this, 2);
 			obj_extra1 = GET_OBJ_VAL(this, 1);
 		}
-		else if( GET_OBJ_TYPE(this) == ITEM_KEY )
+		else if (this->getType() == ITEM_KEY)
 		{
 			obj_extra0 = GET_OBJ_VAL(this, 0);
 		}
@@ -763,7 +763,7 @@ void Object::saveItems( bool self, char holderType, const std::string &holderID,
 		tempObjectsBatchInsertStatement.putChar(topLevelHolderType);
 		tempObjectsBatchInsertStatement.putString(topLevelHolderID);
 		tempObjectsBatchInsertStatement.putString(MiscUtil::encodeDateTime(createdDatetime));
-		tempObjectsBatchInsertStatement.putString(((action_description && (GET_OBJ_TYPE(this)==ITEM_NOTE)) ? this->action_description : ""));
+		tempObjectsBatchInsertStatement.putString(((action_description && (this->getType()==ITEM_NOTE)) ? this->action_description : ""));
 		tempObjectsBatchInsertStatement.putInt(specialType);
 		tempObjectsBatchInsertStatement.putString(MiscUtil::toString(this->Money));
 		tempObjectsBatchInsertStatement.endEntry();

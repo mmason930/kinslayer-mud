@@ -608,7 +608,7 @@ void kedit_parse(Descriptor *d, char *arg)
 
 				if (OLC_MODE(d) == KEDIT_WEAR_LIGHT)
 				{
-					if (GET_OBJ_TYPE(obj_proto[pos]) != ITEM_LIGHT)
+					if (obj_proto[pos]->getType() != ITEM_LIGHT)
 					{
 						d->send("That object can't be used as a light, try again : ");
 						return;
@@ -618,7 +618,7 @@ void kedit_parse(Descriptor *d, char *arg)
 				if (OLC_MODE(d) == KEDIT_WEAR_HOLD)
 				{
 					// From Act.item.cpp
-					if (!CAN_WEAR(obj_proto[pos], ITEM_WEAR_HOLD) && GET_OBJ_TYPE(obj_proto[pos]) != ITEM_POTION)
+					if (!CAN_WEAR(obj_proto[pos], ITEM_WEAR_HOLD) && obj_proto[pos]->getType() != ITEM_POTION)
 					{
 						d->send("That object can't be held, try again : ");
 						return;

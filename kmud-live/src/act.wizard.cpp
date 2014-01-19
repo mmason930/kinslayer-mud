@@ -55,8 +55,6 @@
 #include "ClanQuestPointTransaction.h"
 #include "dg_event.h"
 
-#include "TestResource.h"
-#include "HttpServer.h"
 #include "Exception.h"
 
 /*   external vars  */
@@ -112,8 +110,6 @@ extern int parse_race(char arg);
 extern Character *find_char(long n);
 extern unsigned long int bandwidth;
 extern std::tr1::unordered_map<void*, pair<std::string, flusspferd::value> > mapper;
-
-extern HttpServer httpServer;
 
 /* local functions */
 ACMD(do_advance);
@@ -1240,18 +1236,6 @@ ACMD(do_extra)
 
 	try {
 		if(false);
-		else if( !str_cmp(vArgs.at(0), "websocket") )
-		{
-			std::string username = vArgs.at(1);
-			
-			flusspferd::object commandObject = create_object(flusspferd::object());
-			commandObject.set_property("method", "Username");
-			commandObject.set_property("username", username);
-
-			std::string jsonStr = JS_stringifyJson(commandObject);
-
-			ch->desc->sendWebSocketCommand(jsonStr);
-		}
 		else if( !str_cmp(vArgs.at(0), "trackgen") )
 		{
 			Character *target = get_char_vis(ch, vArgs.at(2).c_str());
@@ -1303,11 +1287,6 @@ ACMD(do_extra)
 			std::string jsonStr = JS_stringifyJson(obj);
 
 			std::cout << "JSON String: " << jsonStr << std::endl;
-		}
-		else if( !str_cmp(vArgs.at(0), "httpserver") )
-		{
-			httpServer.deploy(5000);
-			httpServer.addResource(new TestResource());
 		}
 		else if( !str_cmp(vArgs.at(0), "invischar"))
 		{
@@ -3143,9 +3122,9 @@ void do_stat_room(Character * ch)
 
 	type = rm->sector_type;
 
-	sprintf(buf, "Zone: [%3d], VNum: [%s%5d%s], RNum: [%5d], Type: %s\r\n",
+	sprintf(buf, "Zone: [%3d], VNum: [%s%5d%s], RNum: [%5d], Light [%2d], Type: %s\r\n",
 	        rm->GetZone()->getVnum(), COLOR_GREEN(ch, CL_NORMAL), rm->vnum,
-	        COLOR_NORMAL(ch, CL_NORMAL), real_room(rm->vnum), sector_types[type]);
+	        COLOR_NORMAL(ch, CL_NORMAL), real_room(rm->vnum), (int)rm->light, sector_types[type]);
 
 	ch->send(buf);
 
@@ -3240,7 +3219,7 @@ void do_stat_room(Character * ch)
 			dir_opt = rm->dir_option[i]->exit_info;
 			char sBuf[1024];
 			sprintbit((long)dir_opt, (const char**)(exit_bits), sBuf, ", ", COLOR_YELLOW(ch, CL_NORMAL), "");
-			sprintf(buf, "Exit %s%-5s%s:  To: [%s], Key: [%5d], Keywrd: %s, Type: %s\r\n ",
+			sprintf(buf, "Exit %s%-5s%s:  To: [%s], Key: [%5d], Keywrd: %s, Type: %s\r\n",
 			        COLOR_CYAN(ch, CL_NORMAL), dirs[i], COLOR_NORMAL(ch, CL_NORMAL), buf1, rm->dir_option[i]->key,
 			        rm->dir_option[i]->keyword ? rm->dir_option[i]->keyword : "None", sBuf);
 			ch->send(buf);
@@ -3279,7 +3258,7 @@ void do_stat_object(Character * ch, Object * j)
 		strcpy(buf2, "None");
 
 	sprintf(buf, "VNum: [%s%5d%s], RNum: [%5d], Type: %s, SpecProc: %s, Num Existing[%7s]\r\n",
-	        COLOR_GREEN(ch, CL_NORMAL), vnum, COLOR_NORMAL(ch, CL_NORMAL), GET_OBJ_RNUM(j), item_types[(int)GET_OBJ_TYPE(j)],
+	        COLOR_GREEN(ch, CL_NORMAL), vnum, COLOR_NORMAL(ch, CL_NORMAL), GET_OBJ_RNUM(j), item_types[(int)j->getType()],
 	        buf2, (j->item_number < (int) ItemCount.size() && j->item_number > -1) ? itos(ItemCount[j->item_number]).c_str() : "Unknown");
 
 	ch->send(buf);
@@ -3350,7 +3329,7 @@ void do_stat_object(Character * ch, Object * j)
 	strcat(buf, "\r\n");
 	ch->send(buf);
 
-	switch (GET_OBJ_TYPE(j))
+	switch (j->getType())
 	{
 
 		case ITEM_LIGHT:
@@ -4163,7 +4142,7 @@ ACMD(do_oload)
 		return;
 	}
 
-	if( GET_OBJ_TYPE(obj_proto[r_num]) == ITEM_SPECIAL && GET_LEVEL(ch) < LVL_GRGOD )
+	if( obj_proto[r_num]->getType() == ITEM_SPECIAL && GET_LEVEL(ch) < LVL_GRGOD )
 	{
 		ch->send("That item is flagged as special. You may not load it.\r\n");
 		return;

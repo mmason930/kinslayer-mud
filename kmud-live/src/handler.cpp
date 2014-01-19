@@ -893,7 +893,7 @@ void Character::RemoveFromRoom()
 	}
 
 	if (GET_EQ(this, WEAR_LIGHT))
-		if (GET_OBJ_TYPE(GET_EQ(this, WEAR_LIGHT)) == ITEM_LIGHT)
+		if (GET_EQ(this, WEAR_LIGHT)->getType() == ITEM_LIGHT)
 			if (GET_OBJ_VAL(GET_EQ(this, WEAR_LIGHT), 2))	/* Light is ON */
 				--in_room->light;
 
@@ -923,7 +923,7 @@ void Character::MoveToRoom(Room *room)
 	this->in_room = room;
 
 	if (GET_EQ(this, WEAR_LIGHT))
-		if (GET_OBJ_TYPE(GET_EQ(this, WEAR_LIGHT)) == ITEM_LIGHT)
+		if (GET_EQ(this, WEAR_LIGHT)->getType() == ITEM_LIGHT)
 			if (GET_OBJ_VAL(GET_EQ(this, WEAR_LIGHT), 2))	/* Light ON */
 				++room->light;
 
@@ -1113,7 +1113,7 @@ void equip_char(Character * ch, Object * obj, int pos)
 
 	if (ch->in_room)
 	{
-		if (pos == WEAR_LIGHT && GET_OBJ_TYPE(obj) == ITEM_LIGHT)
+		if (pos == WEAR_LIGHT && obj->getType() == ITEM_LIGHT)
 			if (GET_OBJ_VAL(obj, 2))	/* if light is ON */
 				++ch->in_room->light;
 	}
@@ -1153,7 +1153,7 @@ Object *unequip_char(Character * ch, int pos)
 
 	if (ch->in_room)
 	{
-		if (pos == WEAR_LIGHT && GET_OBJ_TYPE(obj) == ITEM_LIGHT && GET_OBJ_VAL(obj, 2))
+		if (pos == WEAR_LIGHT && obj->getType() == ITEM_LIGHT && GET_OBJ_VAL(obj, 2))
 		{
 
 			--ch->in_room->light;
@@ -1486,17 +1486,21 @@ void update_char_objects(Character * ch)
 	int i;
 
 	if (GET_EQ(ch, WEAR_LIGHT) != NULL)
-		if (GET_OBJ_TYPE(GET_EQ(ch, WEAR_LIGHT)) == ITEM_LIGHT)
+		if (GET_EQ(ch, WEAR_LIGHT)->getType() == ITEM_LIGHT)
 			if (GET_OBJ_VAL(GET_EQ(ch, WEAR_LIGHT), 2) > 0)
 			{
 				i = --GET_OBJ_VAL(GET_EQ(ch, WEAR_LIGHT), 2);
 
-				if (i == 1)
+				if (i == 3)
 				{
 					Act("Your light begins to flicker and fade.", FALSE, ch, 0, 0, TO_CHAR);
 					Act("$n's light begins to flicker and fade.", FALSE, ch, 0, 0, TO_ROOM);
 				}
-
+				if (i == 1)
+				{
+					Act("Your light is about to go out.", FALSE, ch, 0, 0, TO_CHAR);
+					Act("$n's light is about to go out.", FALSE, ch, 0, 0, TO_ROOM);
+				}
 				else if (i == 0)
 				{
 					Act("Your light sputters out and dies.", FALSE, ch, 0, 0, TO_CHAR);

@@ -67,7 +67,7 @@ int mag_manacost( Character * ch, int spellnum )
 	/* If player is carrying an angreal, subtract the mana cost. */
 	if ( ( angreal = GET_EQ( ch, WEAR_HOLD ) ) )
 	{
-		if ( GET_OBJ_TYPE( angreal ) == ITEM_ANGREAL && angreal->GetTotalVal2() != 0 )
+		if ( angreal->getType() == ITEM_ANGREAL && angreal->GetTotalVal2() != 0 )
 		{
 			/* Turn this into a percent. */
 			mana *= ( ( float ) ( ( float ) angreal->GetTotalVal0() / 100 ) );

@@ -612,8 +612,8 @@ void oedit_disp_spells_menu(Descriptor *d)
 void oedit_disp_val1_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_VALUE_1;
-	printf("%d\n", GET_OBJ_TYPE(OLC_OBJ(d)));
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	printf("%d\n", OLC_OBJ(d)->getType());
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_LIGHT:
 			/*
@@ -666,7 +666,7 @@ void oedit_disp_val2_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_VALUE_2;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 
 		case ITEM_POTION:
@@ -712,7 +712,7 @@ void oedit_disp_val3_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_VALUE_3;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 
 		case ITEM_LIGHT:
@@ -746,7 +746,7 @@ void oedit_disp_val4_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_VALUE_4;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_POTION:
 			oedit_disp_spells_menu(d);
@@ -777,7 +777,7 @@ void oedit_disp_val5_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_VALUE_5;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_LIGHT:
 			d->send("Can this be refilled? (1 for yes, 0 for no) : ");
@@ -797,7 +797,7 @@ void oedit_disp_val6_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_VALUE_6;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_WEAPON:
 			d->send("Enter low end of backstab damage range : ");
@@ -814,7 +814,7 @@ void oedit_disp_val7_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_VALUE_7;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_WEAPON:
 			d->send("Enter high end of backstab damage range : ");
@@ -831,7 +831,7 @@ void oedit_disp_val8_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_VALUE_8;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_WEAPON:
 			d->send("Enter backstab rating(0 - 100) : ");
@@ -848,7 +848,7 @@ void oedit_disp_val9_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_VALUE_9;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_WEAPON:
 			d->send("Enter low end of charge damage range : ");
@@ -865,7 +865,7 @@ void oedit_disp_val10_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_VALUE_10;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_WEAPON:
 			d->send("Enter high end of charge damage range : ");
@@ -882,7 +882,7 @@ void oedit_disp_val11_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_VALUE_11;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_WEAPON:
 			d->send("Enter charge rating(0 - 100) : ");
@@ -899,7 +899,7 @@ void oedit_disp_val12_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_VALUE_12;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_WEAPON:
 			oedit_disp_weapon_menu(d);
@@ -917,7 +917,7 @@ void oedit_disp_clan1_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_CLAN_1;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_WEAPON:
 		case ITEM_ARMOR:
@@ -935,7 +935,7 @@ void oedit_disp_clan2_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_CLAN_2;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_WEAPON:
 		case ITEM_ARMOR:
@@ -952,7 +952,7 @@ void oedit_disp_clan3_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_CLAN_3;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_WEAPON:
 		case ITEM_ARMOR:
@@ -969,7 +969,7 @@ void oedit_disp_clan4_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_CLAN_4;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_WEAPON:
 		case ITEM_ARMOR:
@@ -986,7 +986,7 @@ void oedit_disp_clan5_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_CLAN_5;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_WEAPON:
 			break;
@@ -1004,7 +1004,7 @@ void oedit_disp_clan6_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_CLAN_6;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_WEAPON:
 		case ITEM_ARMOR:
@@ -1021,7 +1021,7 @@ void oedit_disp_clan7_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_CLAN_7;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_WEAPON:
 		case ITEM_ARMOR:
@@ -1038,7 +1038,7 @@ void oedit_disp_clan8_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_CLAN_8;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_WEAPON:
 		case ITEM_ARMOR:
@@ -1055,7 +1055,7 @@ void oedit_disp_clan9_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_CLAN_9;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_WEAPON:
 			d->send("Enter bonus to low damage range : ");
@@ -1072,7 +1072,7 @@ void oedit_disp_clan10_menu(Descriptor *d)
 {
 	OLC_MODE(d) = OEDIT_CLAN_10;
 
-	switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+	switch (OLC_OBJ(d)->getType())
 	{
 		case ITEM_WEAPON:
 			d->send("Enter bonus to high damage range : ");
@@ -1189,7 +1189,7 @@ void oedit_disp_menu(Descriptor *d)
 	 * Build buffers for first part of menu.
 	 */
 
-	sprinttype(GET_OBJ_TYPE(obj), (const char **) item_types, buf1);
+	sprinttype(obj->getType(), (const char **) item_types, buf1);
 	sprintbit(GET_OBJ_EXTRA(obj), extra_bits, buf2);
 
 	/*
@@ -1534,7 +1534,7 @@ void oedit_parse(Descriptor *d, char *arg)
 				return;
 			}
 			else
-				GET_OBJ_TYPE(OLC_OBJ(d)) = number;
+				OLC_OBJ(d)->setType(number);
 			break;
 
 		case OEDIT_EXTRAS:
@@ -1613,7 +1613,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			 * Here, I do need to check for out of range values.
 			 */
 			number = atoi(arg);
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_POTION:
 					if (number < 0 || number >= NUM_SPELLS)
@@ -1654,7 +1654,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			/*
 			 * Quick'n'easy error checking.
 			 */
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_LIGHT:
 					min_val = 0;
@@ -1683,7 +1683,7 @@ void oedit_parse(Descriptor *d, char *arg)
 
 		case OEDIT_VALUE_4:
 			number = atoi(arg);
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_LIGHT:
 					min_val = 0;
@@ -1714,7 +1714,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			return;
 		case OEDIT_VALUE_5:
 			number = atoi(arg);
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_LIGHT:
 					min_val = 0;
@@ -1735,7 +1735,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			return;
 		case OEDIT_VALUE_6:
 			number = atoi(arg);
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_WEAPON:
 					min_val = 0;
@@ -1751,7 +1751,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			return;
 		case OEDIT_VALUE_7:
 			number = atoi(arg);
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_WEAPON:
 					min_val = 0;
@@ -1767,7 +1767,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			return;
 		case OEDIT_VALUE_8:
 			number = atoi(arg);
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_WEAPON:
 					min_val = 0;
@@ -1783,7 +1783,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			return;
 		case OEDIT_VALUE_9:
 			number = atoi(arg);
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_WEAPON:
 					min_val = 0;
@@ -1799,7 +1799,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			return;
 		case OEDIT_VALUE_10:
 			number = atoi(arg);
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_WEAPON:
 					min_val = 0;
@@ -1815,7 +1815,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			return;
 		case OEDIT_VALUE_11:
 			number = atoi(arg);
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_WEAPON:
 					min_val = 0;
@@ -1831,7 +1831,7 @@ void oedit_parse(Descriptor *d, char *arg)
 
 		case OEDIT_CLAN_1:
 			number = atoi(arg);
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_WEAPON:
 				case ITEM_ARMOR:
@@ -1842,12 +1842,12 @@ void oedit_parse(Descriptor *d, char *arg)
 				default:
 					break;
 			}
-			if(GET_OBJ_TYPE(OLC_OBJ(d)) == ITEM_CONTAINER)
+			if(OLC_OBJ(d)->getType() == ITEM_CONTAINER)
 				break;
 			return;
 		case OEDIT_CLAN_2:
 			number = atoi(arg);
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_WEAPON:
 				case ITEM_ARMOR:
@@ -1860,7 +1860,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			return;
 		case OEDIT_CLAN_3:
 			number = atoi(arg);
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_WEAPON:
 				case ITEM_ARMOR:
@@ -1873,7 +1873,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			return;
 		case OEDIT_CLAN_4:
 			number = atoi(arg);
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_WEAPON:
 					GET_OBJ_CL_DB(OLC_OBJ(d)) = number;
@@ -1889,7 +1889,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			return;
 		case OEDIT_CLAN_5:
 			number = atoi(arg);
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_ARMOR:
 					GET_OBJ_CL_ABS(OLC_OBJ(d)) = number;
@@ -1899,7 +1899,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			}
 			return;
 		case OEDIT_CLAN_6:
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_WEAPON:
 				case ITEM_ARMOR:
@@ -1912,7 +1912,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			return;
 		case OEDIT_CLAN_7:
 			number = atoi(arg);
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_WEAPON:
 				case ITEM_ARMOR:
@@ -1925,7 +1925,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			return;
 		case OEDIT_CLAN_8:
 			number = atoi(arg);
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_WEAPON:
 					GET_OBJ_CL_HPS(OLC_OBJ(d)) = number;
@@ -1939,7 +1939,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			break;
 		case OEDIT_CLAN_9:
 			number = atoi(arg);
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_WEAPON:
 					GET_OBJ_CL_DMG1(OLC_OBJ(d)) = number;
@@ -1950,7 +1950,7 @@ void oedit_parse(Descriptor *d, char *arg)
 			return;
 		case OEDIT_CLAN_10:
 			number = atoi(arg);
-			switch (GET_OBJ_TYPE(OLC_OBJ(d)))
+			switch (OLC_OBJ(d)->getType())
 			{
 				case ITEM_WEAPON:
 					GET_OBJ_CL_DMG2(OLC_OBJ(d)) = number;

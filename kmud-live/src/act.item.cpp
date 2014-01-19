@@ -61,9 +61,7 @@ void name_from_drinkcon( Object *obj );
 void get_from_container( Character *ch, Object *cont, char *arg, int mode );
 void name_to_drinkcon( Object *obj, int type );
 void wear_message( Character *ch, Object *obj, int where );
-void perform_wear( Character *ch, Object *obj, int where );
 void perform_get_from_container( Character *ch, Object *obj, Object *cont, int mode );
-void perform_remove( Character *ch, int pos );
 void update_chest_log( Character *ch, Object *chest, Object *obj, int type );
 void lookInObject( Character * ch, char *arg, Object *obj=0);
 Character *give_find_vict( Character *h, char *arg );
@@ -447,7 +445,7 @@ ACMD( do_put )
 			ch->send( "You don't see %s %s here.\r\n", AN( arg2 ), arg2 );
 		}
 
-		else if ( GET_OBJ_TYPE( cont ) != ITEM_CONTAINER )
+		else if (  cont ->getType() != ITEM_CONTAINER )
 			Act( "$p is not a container.", FALSE, ch, cont, 0, TO_CHAR );
 
 		else if ( OBJVAL_FLAGGED( cont, CONT_CLOSED ) )
@@ -798,7 +796,7 @@ ACMD( do_get )
 			{
 				ch->send( "You don't have %s %s.\r\n", AN( arg2 ), arg2 );
 			}
-			else if ( GET_OBJ_TYPE( cont ) != ITEM_CONTAINER )
+			else if (  cont ->getType() != ITEM_CONTAINER )
 				Act( "$p is not a container.", FALSE, ch, cont, 0, TO_CHAR );
 			else
 				get_from_container( ch, cont, arg1, mode );
@@ -815,7 +813,7 @@ ACMD( do_get )
 			for ( cont = ch->carrying; cont; cont = cont->next_content )
 				if ( CAN_SEE_OBJ( ch, cont ) && ( cont_dotmode == FIND_ALL || isname( arg2, cont->getName() ) ) )
 				{
-					if ( GET_OBJ_TYPE( cont ) == ITEM_CONTAINER )
+					if (  cont ->getType() == ITEM_CONTAINER )
 					{
 						found = 1;
 						get_from_container( ch, cont, arg1, FIND_OBJ_INV );
@@ -830,7 +828,7 @@ ACMD( do_get )
 			{
 				if ( ( cont_dotmode == FIND_ALL || isname( arg2, cont->getName() ) ) )
 				{
-					if ( GET_OBJ_TYPE( cont ) == ITEM_CONTAINER )
+					if (  cont ->getType() == ITEM_CONTAINER )
 					{
 						get_from_container( ch, cont, arg1, FIND_OBJ_ROOM );
 						found = 1;
@@ -1208,7 +1206,7 @@ ACMD( do_drink )
 
 	if ( !*arg )
 	{
-		for ( temp = ch->in_room->contents;temp && GET_OBJ_TYPE( temp ) != ITEM_FOUNTAIN;temp = temp->next_content )
+		for ( temp = ch->in_room->contents;temp &&  temp ->getType() != ITEM_FOUNTAIN;temp = temp->next_content )
 			;
 		if ( !temp )
 		{
@@ -1229,14 +1227,14 @@ ACMD( do_drink )
 			on_ground = 1;
 	}
 
-	if ( ( GET_OBJ_TYPE( temp ) != ITEM_DRINKCON ) &&
-	        ( GET_OBJ_TYPE( temp ) != ITEM_FOUNTAIN ) )
+	if ( (  temp ->getType() != ITEM_DRINKCON ) &&
+	        (  temp ->getType() != ITEM_FOUNTAIN ) )
 	{
 		ch->send( "You can't drink from that!\r\n" );
 		return ;
 	}
 
-	if ( on_ground && ( GET_OBJ_TYPE( temp ) == ITEM_DRINKCON ) )
+	if ( on_ground && (  temp ->getType() == ITEM_DRINKCON ) )
 	{
 		ch->send( "You have to be holding that to drink from it.\r\n" );
 		return ;
@@ -1355,14 +1353,14 @@ ACMD( do_eat )
 		return ;
 	}
 
-	if ( subcmd == SCMD_TASTE && ( ( GET_OBJ_TYPE( food ) == ITEM_DRINKCON ) ||
-	                               ( GET_OBJ_TYPE( food ) == ITEM_FOUNTAIN ) ) )
+	if ( subcmd == SCMD_TASTE && ( (  food ->getType() == ITEM_DRINKCON ) ||
+	                               (  food ->getType() == ITEM_FOUNTAIN ) ) )
 	{
 		do_drink( ch, argument, 0, SCMD_SIP );
 		return ;
 	}
 
-	if ( ( GET_OBJ_TYPE( food ) != ITEM_FOOD ) && ( GET_LEVEL( ch ) < LVL_IMMORT ) )
+	if ( (  food ->getType() != ITEM_FOOD ) && ( GET_LEVEL( ch ) < LVL_IMMORT ) )
 	{
 		ch->send( "You can't eat THAT!\r\n" );
 		return ;
@@ -1442,7 +1440,7 @@ ACMD( do_pour )
 			return ;
 		}
 
-		if ( GET_OBJ_TYPE( from_obj ) != ITEM_DRINKCON )
+		if (  from_obj ->getType() != ITEM_DRINKCON )
 		{
 			Act( "You can't pour from that!", FALSE, ch, 0, 0, TO_CHAR );
 			return ;
@@ -1455,7 +1453,7 @@ ACMD( do_pour )
 		if ( ( to_obj = get_obj_in_list_vis( ch, arg2, ch->carrying ) ) )
 		{
 
-			if ( GET_OBJ_TYPE( to_obj ) == ITEM_LIGHT )
+			if (  to_obj ->getType() == ITEM_LIGHT )
 			{
 				if ( !( to_obj = get_obj_in_list_vis( ch, arg2, ch->carrying ) ) )
 				{
@@ -1548,14 +1546,13 @@ ACMD( do_pour )
 			return ;
 		}
 
-		if ( GET_OBJ_TYPE( to_obj ) == ITEM_LIGHT )
+		if (  to_obj ->getType() == ITEM_LIGHT )
 		{
 			ch->send( "It is not designed to be filled in that manner.\r\n" );
 			return ;
 		}
 
-
-		if ( GET_OBJ_TYPE( to_obj ) != ITEM_DRINKCON )
+		if (  to_obj ->getType() != ITEM_DRINKCON )
 		{
 			Act( "You can't fill $p!", FALSE, ch, to_obj, 0, TO_CHAR );
 			return ;
@@ -1573,7 +1570,7 @@ ACMD( do_pour )
 			return;
 		}
 
-		if ( GET_OBJ_TYPE(from_obj) != ITEM_FOUNTAIN && !IS_CORPSE(from_obj) )
+		if ( from_obj->getType() != ITEM_FOUNTAIN && !IS_CORPSE(from_obj) )
 		{
 			Act( "You can't fill something from $p.", FALSE, ch, from_obj, 0, TO_CHAR );
 			return;
@@ -1624,8 +1621,8 @@ ACMD( do_pour )
 			return ;
 		}
 
-		if ( ( GET_OBJ_TYPE( to_obj ) != ITEM_DRINKCON ) &&
-		        ( GET_OBJ_TYPE( to_obj ) != ITEM_FOUNTAIN ) )
+		if ( (  to_obj ->getType() != ITEM_DRINKCON ) &&
+		        (  to_obj ->getType() != ITEM_FOUNTAIN ) )
 		{
 			Act( "You can't pour anything into that.", FALSE, ch, 0, 0, TO_CHAR );
 			return ;
@@ -1886,14 +1883,14 @@ bool Character::CanWear(Object *obj, int &loc)
 	return true;
 }
 
-void perform_wear( Character * ch, Object * obj, int where )
+void Character::performWear( Object * obj, int where )
 {
-	if(ch->CanWear(obj, where))
+	if(this->CanWear(obj, where))
 	{
 		obj_from_char( obj );
-		equip_char( ch, obj, where );
-		if(!IS_OBJ_STAT((obj), ITEM_INVISIBLE) || GET_LEVEL(ch) > LVL_IMMORT) //RHOLLOR 05.03.09 remove msg when item is INVIS
-			wear_message( ch, obj, where );
+		equip_char( this, obj, where );
+		if(!IS_OBJ_STAT((obj), ITEM_INVISIBLE) || GET_LEVEL(this) > LVL_IMMORT) //RHOLLOR 05.03.09 remove msg when item is INVIS
+			wear_message( this, obj, where );
 	}
 }
 
@@ -2010,7 +2007,7 @@ ACMD( do_wear )
 			if ( ( where = find_eq_pos( ch, obj, 0, true ) ) >= 0 )
 			{
 				++items_worn;
-				perform_wear( ch, obj, where );
+				ch->performWear( obj, where );
 			}
 		}
 
@@ -2038,7 +2035,7 @@ ACMD( do_wear )
 				next_obj = get_obj_in_list_vis( ch, arg1, obj->next_content );
 
 				if ( ( where = find_eq_pos( ch, obj, 0, true ) ) >= 0 )
-					perform_wear( ch, obj, where );
+					ch->performWear( obj, where );
 				else
 					Act( "You can't wear $p.", FALSE, ch, obj, 0, TO_CHAR );
 
@@ -2057,7 +2054,7 @@ ACMD( do_wear )
 		else
 		{
 			if ( ( where = find_eq_pos( ch, obj, arg2, true) ) >= 0 )
-				perform_wear( ch, obj, where );
+				ch->performWear( obj, where );
 			else if ( !*arg2 )
 				Act( "You can't wear $p.", FALSE, ch, obj, 0, TO_CHAR );
 		}
@@ -2086,7 +2083,7 @@ ACMD( do_wield )
 		}
 		else
 		{
-			perform_wear( ch, obj, WEAR_WIELD );
+			ch->performWear( obj, WEAR_WIELD );
 		}
 	}
 }
@@ -2107,35 +2104,35 @@ ACMD( do_grab )
 
 	else
 	{
-		if ( GET_OBJ_TYPE( obj ) == ITEM_LIGHT )
-			perform_wear( ch, obj, WEAR_LIGHT );
+		if (  obj ->getType() == ITEM_LIGHT )
+			ch->performWear( obj, WEAR_LIGHT );
 		else if ( CAN_WEAR( obj, ITEM_WEAR_HOLD ) )
-			perform_wear( ch, obj, WEAR_HOLD );
+			ch->performWear( obj, WEAR_HOLD );
 		else
 			ch->send( "You can't hold that.\r\n" );
 	}
 }
 
-void perform_remove( Character * ch, int pos )
+void Character::performRemove( int wearLocation )
 {
 	Object * obj;
 
-	if ( !( obj = GET_EQ( ch, pos ) ) )
-		Log( "Error in perform_remove: bad pos %d passed.", pos );
+	if (!(obj = GET_EQ(this, wearLocation)))
+		MudLog(BRF, 100, TRUE, "Error in Character::performRemove: bad wearLocation %d passed.", wearLocation);
 	else if ( IS_OBJ_STAT( obj, ITEM_NODROP ) && !OBJ_FLAGGED(obj, ITEM_TEMP))
-		Act( "You can't remove $p, it must be CURSED!", FALSE, ch, obj, 0, TO_CHAR );
-	else if ( IS_CARRYING_N( ch ) >= CAN_CARRY_N( ch ) )
-		Act( "$p: you can't carry that many items!", FALSE, ch, obj, 0, TO_CHAR );
+		Act( "You can't remove $p, it must be CURSED!", FALSE, this, obj, 0, TO_CHAR );
+	else if ( IS_CARRYING_N( this ) >= CAN_CARRY_N( this ) )
+		Act( "$p: you can't carry that many items!", FALSE, this, obj, 0, TO_CHAR );
 	else
 	{
-		if( !js_object_removed(ch, obj, pos) || ch->IsPurged() || obj->IsPurged() )
+		if (!js_object_removed(this, obj, wearLocation) || this->IsPurged() || obj->IsPurged())
 			return;
-		if(!IS_OBJ_STAT((obj), ITEM_INVISIBLE) || GET_LEVEL(ch) >= LVL_IMMORT)
+		if(!IS_OBJ_STAT((obj), ITEM_INVISIBLE) || GET_LEVEL(this) >= LVL_IMMORT)
 		{ //RHOLLOR 05.03.09 remove message to morts when item is INVIS
-			Act( "You stop using $p.", FALSE, ch, obj, 0, TO_CHAR );
-			Act( "$n stops using $p.", TRUE, ch, obj, 0, TO_ROOM );
+			Act( "You stop using $p.", FALSE, this, obj, 0, TO_CHAR );
+			Act( "$n stops using $p.", TRUE, this, obj, 0, TO_ROOM );
 		}
-		obj_to_char( unequip_char( ch, pos ), ch );
+		obj_to_char(unequip_char(this, wearLocation), this);
 	}
 }
 
@@ -2162,7 +2159,7 @@ ACMD( do_remove )
 		{
 			if ( GET_EQ( ch, i ) )
 			{
-				perform_remove( ch, i );
+				ch->performRemove( i );
 				found = 1;
 			}
 		}
@@ -2184,7 +2181,7 @@ ACMD( do_remove )
 				if ( GET_EQ( ch, i ) && CAN_SEE_OBJ( ch, GET_EQ( ch, i ) ) &&
 				        isname( ::arg, GET_EQ( ch, i ) ->getName() ) )
 				{
-					perform_remove( ch, i );
+					ch->performRemove( i );
 					found = 1;
 				}
 
@@ -2202,7 +2199,7 @@ ACMD( do_remove )
 		}
 
 		else
-			perform_remove( ch, i );
+			ch->performRemove( i );
 	}
 }
 
@@ -2228,7 +2225,7 @@ ACMD( do_break )
 
 	else if ( ( o = get_obj_in_list_vis( ch, ::arg, ch->carrying ) ) )
 	{
-		if ( GET_OBJ_TYPE( o ) != ITEM_KEY )
+		if (  o ->getType() != ITEM_KEY )
 		{
 			keyfound = true;
 			ch->send( "Your puny fingers are too weak to break anything but a key!\r\n" );
@@ -2246,7 +2243,7 @@ ACMD( do_break )
 		if ( ( o = get_obj_in_list_vis( ch, ::arg, ( GET_EQ( ch, WEAR_HOLD ) ) ) ) )
 		{
 			keyfound = true;
-			if ( GET_OBJ_TYPE( o ) == ITEM_KEY )
+			if (  o ->getType() == ITEM_KEY )
 			{
 				keyfound = true;
 				o ->Extract();
@@ -2308,14 +2305,14 @@ ACMD( do_show )
 		target->send("%s\r\n\r\n", item->GetExDesc()->description);
 	}
 
-	if( GET_OBJ_TYPE(item) == ITEM_NOTE && item->action_description )
+	if( item->getType() == ITEM_NOTE && item->action_description )
 	{
 		target->send("There is something written on it:\r\n\r\n%s",
 			item->action_description);
 	}
-	else if( GET_OBJ_TYPE(item) == ITEM_WEAPON )
+	else if( item->getType() == ITEM_WEAPON )
 		target->send("It is a %s.\r\n", StringUtil::allLower(weapon_types[GET_OBJ_VAL(item,0)]));
-	else if( GET_OBJ_TYPE(item) == ITEM_CONTAINER )
+	else if( item->getType() == ITEM_CONTAINER )
 	{
 		target->send("When you look inside, you see: \r\n");
 		lookInObject(target, 0, item);

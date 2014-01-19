@@ -651,7 +651,7 @@ void Character::MakeCorpse()
 	corpse->scalp->level	= IS_NPC( this ) ? 30 : GET_LEVEL( this );
 	corpse->scalp->scalped	= (false);
 
-	GET_OBJ_TYPE( corpse ) = ITEM_CONTAINER;
+	corpse->setType(ITEM_CONTAINER);
 	GET_OBJ_EXTRA(corpse) = 0;
 
 	corpse->obj_flags.wear_flags = 0;
@@ -1722,7 +1722,7 @@ int hit( Character * ch, Character * victim, int type )
 		ch->Draw();
 
 	/* Find the weapon type (for display purposes only) */
-	if ( wielded && GET_OBJ_TYPE( wielded ) == ITEM_WEAPON )
+	if (wielded && wielded->getType() == ITEM_WEAPON)
 		w_type = GET_OBJ_VAL( wielded, 3 ) + TYPE_HIT;
 
 	else

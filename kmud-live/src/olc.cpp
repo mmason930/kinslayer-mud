@@ -1324,7 +1324,7 @@ int OlistCanDisp( Object *obj, char *arg1, char *arg2, char *arg3, bool RangeChe
 			return 1;
 		else if ( IS_CHAIN( obj ) && !strn_cmp( arg1, "chains", strlen( arg1 ) ) )
 			return 1;
-		else if ( GET_OBJ_TYPE( obj ) == ITEM_WEAPON && !strn_cmp( arg1, "weapons", strlen( arg1 ) ) )
+		else if ( obj->getType() == ITEM_WEAPON && !strn_cmp( arg1, "weapons", strlen( arg1 ) ) )
 			return 1;
 
 		//Armor Types
@@ -1356,7 +1356,7 @@ int OlistCanDisp( Object *obj, char *arg1, char *arg2, char *arg3, bool RangeChe
 			return 1;
 		else if ( IS_CLOAK( obj ) && !strn_cmp( arg1, "about", strlen( arg1 ) ) )
 			return 1;
-		else if ( GET_OBJ_TYPE( obj ) == ITEM_ARMOR && !strn_cmp( arg1, "armor", strlen( arg1 ) ) )
+		else if ( obj->getType() == ITEM_ARMOR && !strn_cmp( arg1, "armor", strlen( arg1 ) ) )
 			return 1;
 		else if (!strn_cmp(arg1, "misc", strlen(arg1)))
 			return 1;
@@ -1445,9 +1445,9 @@ ACMD( do_olist )
 	{
 		if ( ( ret = OlistCanDisp(obj_proto[ i ], arg1, arg2, arg3, RangeCheck) ) > 0 )
 		{
-			if ( GET_OBJ_TYPE(obj_proto[ i ]) == ITEM_WEAPON )
+			if ( obj_proto[ i ]->getType() == ITEM_WEAPON )
 				l = &weapons;
-			else if ( GET_OBJ_TYPE(obj_proto[ i ]) == ITEM_ARMOR )
+			else if ( obj_proto[ i ]->getType() == ITEM_ARMOR )
 				l = &armor;
 			else
 				l = &misc;

@@ -139,7 +139,7 @@ ASPELL(spell_create_water)
 		ch->send("Where do you wish to put the water you create?\r\n");
 		return;
 	}
-	if( GET_OBJ_TYPE(obj) != ITEM_DRINKCON )
+	if( obj->getType() != ITEM_DRINKCON )
 	{
 		ch->send("You cannot put water in that!\r\n");
 		return;
@@ -421,7 +421,7 @@ ASPELL(spell_ward_weapon)
 	if (ch == NULL || obj == NULL)
 		return;
 
-	if ((GET_OBJ_TYPE(obj) == ITEM_WEAPON))
+	if ((obj->getType() == ITEM_WEAPON))
 	{
 		ch->send("You channel flows of Spirit into %s, forming a ward around the item.\r\n", obj->GetSDesc());
 		Act("$n grips $p, waving $s other hand around the item slowly.", TRUE, ch, obj, ch, TO_NOTVICT);

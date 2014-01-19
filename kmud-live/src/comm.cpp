@@ -75,13 +75,8 @@
 #include "GatewayDescriptorType.h"
 #include "Game.h"
 
-#include "HttpUtil.h"
-#include "HttpException.h"
-#include "HttpServer.h"
 #include "ObjectMoveLogger.h"
 #include <boost/filesystem.hpp>
-
-extern HttpServer httpServer;
 
 #ifdef HAVE_ARPA_TELNET_H
 #include <arpa/telnet.h>
@@ -1568,32 +1563,8 @@ void invisiblePing()
 	}
 }
 
-void processHttpRequests()
-{
-	HttpRequest *httpRequest;
-	HttpQueue *httpQueue = httpServer.getQueue();
-	while( (httpRequest = httpQueue->getNextRequest()) != NULL )
-	{
-		std::cout << "REQUEST #" << httpRequest->getId() << " Found in Main Thread." << std::endl;
-
-		if(!httpServer.hasResource(httpRequest->getResource()))
-		{
-			std::cout << "NO RESOURCE FOUND: " << httpRequest->getResource() << std::endl;
-		}
-		else
-		{
-			HttpResource *httpResource = httpServer.getResource(httpRequest->getResource());
-			HttpResponse *httpResponse = httpResource->handleRequest(&httpServer, httpRequest);
-			httpQueue->putResponse(httpResponse);
-		}
-	}
-}
-
 void heartbeat( int pulse )
 {
-
-	processHttpRequests();
-
 	lagMonitor.startClock();
 	process_events();
 	lagMonitor.stopClock( LAG_MONITOR_PROCESS_EVENTS );

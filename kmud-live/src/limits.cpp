@@ -111,7 +111,7 @@ sh_int Character::ShadowGain()
 	if (AFF_FLAGGED(this, AFF_POISON))
 		gain /= 2;	
 
-	if (in_room && in_room->GetZone()->GetWeather()->get_sun() && !in_room->IsDark())
+	if (in_room && in_room->GetZone()->GetWeather()->getSun() && !in_room->IsDark())
 		gain /= 2;
 
 	//if (AFF_FLAGGED(this, AFF_SHADOW_RAGE))

@@ -46,8 +46,7 @@ OBJFILES = comm.o act.comm.o act.informative.o act.movement.o act.item.o \
 	MudStatus.o SystemUtil.o CharacterUtil.o ForumUtil.o DatabaseUtil.o UserType.o ClanUtil.o \
 	ClanQuestPointTransaction.o OLCUtil.o UserClan.o OlcEditType.o UserEmailEditor.o MailUtil.o \
 	GatewayListener.o WebSocketDataFrame.o WebSocketClientHeaderIETF_HYBI17.o WebSocketClientHeader.o \
-	HttpServer.o WebSocketClientHeaderHixie76.o sha1.o TestResource.o HttpResponse.o HttpQueue.o \
-	HttpProtocol.o HttpUtil.o HttpDescriptor.o HttpRequest.o GatewayDescriptorType.o \
+	WebSocketClientHeaderHixie76.o sha1.o GatewayDescriptorType.o \
 	jsoncpp/json_reader.o jsoncpp/json_writer.o jsoncpp/json_value.o sqlDatabase.o ObjectMoveLogger.o \
 	PlayerPortalDescriptor.o PlayerPortalDescriptorStatus.o PlayerPortalServer.o Game.o \
 	PlayerPortalCommandProcessor.o commands/immortals/Locate.o EntityType.o

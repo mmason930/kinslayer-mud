@@ -1445,7 +1445,7 @@ void medit_parse(Descriptor *d, char *arg)
 			}
 			else if(i == -1)
 				d->send("Invalid item number!\r\n");
-			else if( GET_OBJ_TYPE(obj_proto[ i ]) != ITEM_FOOD)
+			else if (obj_proto[i]->getType() != ITEM_FOOD)
 				d->send("Invalid food type: Must be a food item.\r\n");
 			else
 			{
@@ -1514,7 +1514,7 @@ void medit_parse(Descriptor *d, char *arg)
 			}
 			else if(i == -1)
 				d->send("Invalid item number!\r\n");
-			else if( GET_OBJ_TYPE(obj_proto[ i ]) != ITEM_SKIN)
+			else if (obj_proto[i]->getType() != ITEM_SKIN)
 				d->send("Invalid skin type: Must be a skin item.\r\n");
 			else
 			{

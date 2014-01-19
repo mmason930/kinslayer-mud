@@ -365,7 +365,7 @@ flusspferd::value JSCharacter::load_obj( const int vnum )
 		return lookupValue(0);
 	}
 
-	if( GET_OBJ_TYPE(obj_proto[r_num]) == ITEM_SPECIAL )
+	if (obj_proto[r_num]->getType() == ITEM_SPECIAL)
 	{
 		lookupValue(0);
 	}

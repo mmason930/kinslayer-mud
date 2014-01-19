@@ -1139,6 +1139,8 @@ class Object : public JSBindable, public Entity
 		int PickReq();
 		int KeyNum();
 		int getVnum();
+		byte getType() const { return obj_flags.type_flag; };
+		void setType(const bool type) { obj_flags.type_flag = type;  }
 
 		enum eObjectModifier {
 			OBJECT_MOD_DODGE=0,
@@ -2302,7 +2304,9 @@ public:
 	void setGateTimer();
 	void stopEavesdropping();
 	void stopWarding();
-	void setBashState( const int nrPulses, bool cancelTimer=true, bool makeSit=true );
+	void setBashState(const int nrPulses, bool cancelTimer = true, bool makeSit = true);
+	void performWear(Object *obj, int wearLocation);
+	void performRemove(int wearLocation);
 
 	int getUserId();
 	UserType *getUserType();

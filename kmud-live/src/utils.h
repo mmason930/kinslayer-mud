@@ -559,31 +559,31 @@ const int CLANS_MAX = 31;
 #define IS_BONDED(ch)			(0)
 #define IS_WARDER(ch)			((IS_BONDED(ch)) && (ch->getUserClan(CLAN_GAIDIN)))
 
-#define IS_LONG_BLADE(obj)		(GET_OBJ_TYPE(obj) == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) == WEAPON_LONG_BLADE)
-#define IS_SHORT_BLADE(obj)		(GET_OBJ_TYPE(obj) == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) == WEAPON_SHORT_BLADE)
-#define IS_CLUB(obj)			(GET_OBJ_TYPE(obj) == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) == WEAPON_CLUB)
-#define IS_STAFF(obj)			(GET_OBJ_TYPE(obj) == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) == WEAPON_STAFF)
-#define IS_SPEAR(obj)			(GET_OBJ_TYPE(obj) == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) == WEAPON_SPEAR)
-#define IS_AXE(obj)				(GET_OBJ_TYPE(obj) == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) == WEAPON_AXE)
-#define IS_CHAIN(obj)			(GET_OBJ_TYPE(obj) == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) == WEAPON_CHAIN)
-#define IS_BOW(obj)				(GET_OBJ_TYPE(obj) == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) == WEAPON_BOW)
-#define IS_LANCE(obj)			(GET_OBJ_TYPE(obj) == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) == WEAPON_LANCE)
+#define IS_LONG_BLADE(obj)		(obj->getType() == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) == WEAPON_LONG_BLADE)
+#define IS_SHORT_BLADE(obj)		(obj->getType() == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) == WEAPON_SHORT_BLADE)
+#define IS_CLUB(obj)			(obj->getType() == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) == WEAPON_CLUB)
+#define IS_STAFF(obj)			(obj->getType() == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) == WEAPON_STAFF)
+#define IS_SPEAR(obj)			(obj->getType() == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) == WEAPON_SPEAR)
+#define IS_AXE(obj)				(obj->getType() == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) == WEAPON_AXE)
+#define IS_CHAIN(obj)			(obj->getType() == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) == WEAPON_CHAIN)
+#define IS_BOW(obj)				(obj->getType() == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) == WEAPON_BOW)
+#define IS_LANCE(obj)			(obj->getType() == ITEM_WEAPON && GET_OBJ_VAL(obj, 0) == WEAPON_LANCE)
 
 
-#define IS_BODY_GEAR(obj)		(GET_OBJ_TYPE(obj) == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_BODY))
-#define IS_HEAD_GEAR(obj)		(GET_OBJ_TYPE(obj) == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_HEAD))
-#define IS_SHOULDER_GEAR(obj)	(GET_OBJ_TYPE(obj) == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_SHOULDERS))
-#define IS_ARM_GEAR(obj)		(GET_OBJ_TYPE(obj) == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_ARMS))
-#define IS_HAND_GEAR(obj)		(GET_OBJ_TYPE(obj) == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_HANDS))
-#define IS_LEG_GEAR(obj)		(GET_OBJ_TYPE(obj) == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_LEGS))
-#define IS_FEET_GEAR(obj)		(GET_OBJ_TYPE(obj) == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_FEET))
-#define IS_WRIST_GEAR(obj)		(GET_OBJ_TYPE(obj) == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_WRIST))
-#define IS_WAIST_GEAR(obj)		(GET_OBJ_TYPE(obj) == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_WAIST))
-#define IS_EARRING(obj)			(GET_OBJ_TYPE(obj) == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_EAR))
-#define IS_RING(obj)			(GET_OBJ_TYPE(obj) == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_FINGER))
-#define IS_NECKLACE(obj)		(GET_OBJ_TYPE(obj) == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_NECK))
-#define IS_SHIELD(obj)			(GET_OBJ_TYPE(obj) == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_SHIELD))
-#define IS_CLOAK(obj)			(GET_OBJ_TYPE(obj) == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_ABOUT))
+#define IS_BODY_GEAR(obj)		(obj->getType() == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_BODY))
+#define IS_HEAD_GEAR(obj)		(obj->getType() == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_HEAD))
+#define IS_SHOULDER_GEAR(obj)	(obj->getType() == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_SHOULDERS))
+#define IS_ARM_GEAR(obj)		(obj->getType() == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_ARMS))
+#define IS_HAND_GEAR(obj)		(obj->getType() == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_HANDS))
+#define IS_LEG_GEAR(obj)		(obj->getType() == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_LEGS))
+#define IS_FEET_GEAR(obj)		(obj->getType() == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_FEET))
+#define IS_WRIST_GEAR(obj)		(obj->getType() == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_WRIST))
+#define IS_WAIST_GEAR(obj)		(obj->getType() == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_WAIST))
+#define IS_EARRING(obj)			(obj->getType() == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_EAR))
+#define IS_RING(obj)			(obj->getType() == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_FINGER))
+#define IS_NECKLACE(obj)		(obj->getType() == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_NECK))
+#define IS_SHIELD(obj)			(obj->getType() == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_SHIELD))
+#define IS_CLOAK(obj)			(obj->getType() == ITEM_ARMOR && IS_SET(GET_OBJ_WEAR(obj), ITEM_WEAR_ABOUT))
 
 #define GET_SKILL(ch, i)		((ch)->getSkill(i))
 #define SET_SKILL(ch, i, pct)	((ch)->setSkill(i, pct))
@@ -601,7 +601,7 @@ const int CLANS_MAX = 31;
 #define CAN_CARRY_N(ch)			(5 + (ch->GetDex() >> 1) + (GET_LEVEL(ch) >> 1))
 #define AWAKE(ch)				(GET_POS(ch) > POS_SLEEPING)
 
-#define CAN_SEE_IN_DARK(ch)		(PRF_FLAGGED(ch, PRF_HOLYLIGHT) || IS_TROLLOC(ch) || IS_NPC(ch) || \
+#define CAN_SEE_IN_DARK(ch)		(PRF_FLAGGED(ch, PRF_HOLYLIGHT) || IS_TROLLOC(ch) || \
 								ch->getUserClan(CLAN_WOLFBROTHER) || AFF_FLAGGED(ch, AFF_NIGHT_VISION))
 
 /* descriptor-based utils ************************************************/
@@ -617,7 +617,6 @@ const int CLANS_MAX = 31;
 
 #define IS_SHEATH(obj)			(IS_OBJ_STAT(obj, ITEM_SWORD_SHEATH) || IS_OBJ_STAT(obj, ITEM_DAGGER_SHEATH))
 
-#define GET_OBJ_TYPE(obj)		((obj)->obj_flags.type_flag)
 #define GET_OBJ_COST(obj)		((obj)->obj_flags.cost)
 #define GET_OBJ_RENT(obj)		((obj)->obj_flags.cost_per_day)
 #define GET_OBJ_EXTRA(obj)		((obj)->obj_flags.extra_flags)
@@ -645,7 +644,7 @@ const int CLANS_MAX = 31;
 
 #define IS_OBJ_STAT(obj,stat)	(IS_SET((obj)->obj_flags.extra_flags,Q_BIT(stat)))
 
-#define IS_CORPSE(obj)			(GET_OBJ_TYPE(obj) == ITEM_CONTAINER && \
+#define IS_CORPSE(obj)			(obj->getType() == ITEM_CONTAINER && \
 								GET_OBJ_VAL((obj), 3) == 1)
 
 #define GET_OBJ_SPEC(obj) ((obj)->item_number >= 0 ? \

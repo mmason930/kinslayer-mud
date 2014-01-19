@@ -126,11 +126,11 @@ class Weather
 
 		void sun_message();
 		
-		const int get_sun() const
+		const int getSun() const
 		{
 			return sunlight;
 		}
-		void set_sun(Sun i)
+		void setSun(Sun i)
 		{
 			this->sunlight = i;
 		}

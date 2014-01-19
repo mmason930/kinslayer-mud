@@ -149,7 +149,7 @@ int mag_damage(Character *ch, Character *victim, int spellnum)
 
 	if ( (angreal = GET_EQ(ch, WEAR_HOLD)) != NULL)
 	{
-		if(GET_OBJ_TYPE(angreal) == ITEM_ANGREAL && angreal->GetTotalVal2() != 0)
+		if (angreal->getType() == ITEM_ANGREAL && angreal->GetTotalVal2() != 0)
 		{
 			/* Turn this into a percent. */
 			dam = (int) ((float) dam * ((float) ((float)angreal->GetTotalVal1() / 100)));
@@ -178,7 +178,7 @@ int mag_mana_damage(Character *ch, Character *victim, int spellnum)
 
 	if ( (angreal = GET_EQ(ch, WEAR_HOLD)) != NULL)
 	{
-		if(GET_OBJ_TYPE(angreal) == ITEM_ANGREAL && angreal->GetTotalVal2() != 0)
+		if (angreal->getType() == ITEM_ANGREAL && angreal->GetTotalVal2() != 0)
 		{
 			/* Turn this into a percent. */
 			dam = (int) ((float) dam * ((float) ((float)angreal->GetTotalVal1() / 100)));
@@ -589,9 +589,9 @@ void mag_alter_objs(Character * ch, Object * obj, int spellnum)
 	{
 		case SPELL_POISON:
 
-			if (((GET_OBJ_TYPE(obj) == ITEM_DRINKCON) ||
-			        (GET_OBJ_TYPE(obj) == ITEM_FOUNTAIN) ||
-			        (GET_OBJ_TYPE(obj) == ITEM_FOOD)) && !obj->GetTotalVal3())
+			if (((obj->getType() == ITEM_DRINKCON) ||
+				(obj->getType() == ITEM_FOUNTAIN) ||
+				(obj->getType() == ITEM_FOOD)) && !obj->GetTotalVal3())
 			{
 				GET_OBJ_VAL(obj, 3) = 1;
 				to_char = "$p steams briefly.";
@@ -601,9 +601,9 @@ void mag_alter_objs(Character * ch, Object * obj, int spellnum)
 
 		case SPELL_REMOVE_POISON:
 
-			if (((GET_OBJ_TYPE(obj) == ITEM_DRINKCON) ||
-			        (GET_OBJ_TYPE(obj) == ITEM_FOUNTAIN) ||
-			        (GET_OBJ_TYPE(obj) == ITEM_FOOD)) && obj->GetTotalVal3())
+			if (((obj->getType() == ITEM_DRINKCON) ||
+				(obj->getType() == ITEM_FOUNTAIN) ||
+				(obj->getType() == ITEM_FOOD)) && obj->GetTotalVal3())
 			{
 				GET_OBJ_VAL(obj, 3) = 0;
 				to_char = "$p steams briefly.";

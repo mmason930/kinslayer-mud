@@ -373,9 +373,9 @@ int trade_with(Object * item, int shop_nr)
 	if(IS_OBJ_STAT(item, ITEM_NOSELL))
 		return (OBJECT_NOTOK);
 
-	if(shop_index[shop_nr].Type.find(GET_OBJ_TYPE(item)) != shop_index[shop_nr].Type.end()) //Type exists
+	if(shop_index[shop_nr].Type.find(item->getType()) != shop_index[shop_nr].Type.end()) //Type exists
 	{
-		if(ShopTradeObjByName(item, (char*)shop_index[shop_nr].Type[GET_OBJ_TYPE(item)].keywords.c_str()))
+		if(ShopTradeObjByName(item, (char*)shop_index[shop_nr].Type[item->getType()].keywords.c_str()))
 			return (OBJECT_OK);
 	}
 	return (OBJECT_NOTOK);
@@ -917,7 +917,7 @@ char *list_object(Character *ch, Object * obj, int cnt, int index, int shop_nr)
 	/* Compile object name and information */
 	strcpy(buf3, obj->GetSDesc());
 
-	if ((GET_OBJ_TYPE(obj) == ITEM_DRINKCON) && (GET_OBJ_VAL(obj, 1)))
+	if ((obj->getType() == ITEM_DRINKCON) && (GET_OBJ_VAL(obj, 1)))
 		sprintf(END_OF(buf3), " of %s", drinks[obj->GetTotalVal0()]);
 
 	/* FUTURE: */

@@ -625,13 +625,13 @@ ACMD(do_write)
 			return;
 		}
 
-		if (GET_OBJ_TYPE(paper) == ITEM_PEN)
+		if (paper->getType() == ITEM_PEN)
 		{	/* oops, a pen.. */
 			pen = paper;
 			paper = 0;
 		}
 
-		else if (GET_OBJ_TYPE(paper) != ITEM_NOTE)
+		else if (paper->getType() != ITEM_NOTE)
 		{
 			ch->send("That thing has nothing to do with writing.\r\n");
 			return;
@@ -659,10 +659,10 @@ ACMD(do_write)
 
 
 	/* ok.. now let's see what kind of stuff we've found */
-	if (GET_OBJ_TYPE(pen) != ITEM_PEN)
+	if (pen->getType() != ITEM_PEN)
 		Act("$p is no good for writing with.", FALSE, ch, pen, 0, TO_CHAR);
 
-	else if (GET_OBJ_TYPE(paper) != ITEM_NOTE)
+	else if (paper->getType() != ITEM_NOTE)
 		Act("You can't write on $p.", FALSE, ch, paper, 0, TO_CHAR);
 
 	else if (paper->action_description && ch->desc && !IS_NPC(ch))

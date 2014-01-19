@@ -130,7 +130,7 @@ bool Character::HasBoat()
 	/* non-wearable boats in inventory will do it */
 	for (obj = this->carrying; obj; obj = obj->next_content)
 	{
-		if (GET_OBJ_TYPE(obj) == ITEM_BOAT && (find_eq_pos(this, obj, NULL, false) < 0))
+		if (obj->getType() == ITEM_BOAT && (find_eq_pos(this, obj, NULL, false) < 0))
 		{
 			return 1;
 		}
@@ -138,7 +138,7 @@ bool Character::HasBoat()
 	/* and any boat you're wearing will do it too */
 	for (int i = 0; i < NUM_WEARS;++i)
 	{
-		if (GET_EQ(this, i) && GET_OBJ_TYPE(GET_EQ(this, i)) == ITEM_BOAT)
+		if (GET_EQ(this, i) && GET_EQ(this, i)->getType() == ITEM_BOAT)
 		{
 			return 1;
 		}
@@ -1050,7 +1050,7 @@ int Direction::HiddenLevel()
 }
 
 #define DOOR_IS_OPENABLE(ch, obj, door)	((obj) ? \
-			((GET_OBJ_TYPE(obj) == ITEM_CONTAINER) && \
+			((obj->getType() == ITEM_CONTAINER) && \
 			OBJVAL_FLAGGED(obj, CONT_CLOSEABLE)) :\
 			(EXIT_FLAGGED(EXIT(ch, door), EX_ISDOOR)))
 
@@ -1088,11 +1088,11 @@ bool Object::IsOpen()
 }
 bool Object::CanOpen()
 {
-	return (GET_OBJ_TYPE(this) == ITEM_CONTAINER && OBJVAL_FLAGGED(this, CONT_CLOSEABLE));
+	return (this->getType() == ITEM_CONTAINER && OBJVAL_FLAGGED(this, CONT_CLOSEABLE));
 }
 bool Object::IsContainer()
 {
-	return (GET_OBJ_TYPE(this) == ITEM_CONTAINER);
+	return (this->getType() == ITEM_CONTAINER);
 }
 bool Object::IsLocked()
 {
@@ -1108,7 +1108,7 @@ bool Object::CanPick(Character *ch)
 }
 int Object::PickReq()
 {
-	if( GET_OBJ_TYPE(this) != ITEM_CONTAINER )
+	if (this->getType() != ITEM_CONTAINER)
 		return -1;//Can't pick a non-container!
 	return GET_OBJ_VAL(this, 3);
 }
@@ -1305,7 +1305,7 @@ ACMD(do_gen_door)
 
 
 	/************ ITEM CONTAINERS  *************/
-	else if(generic_find(type, FIND_OBJ_INV | FIND_OBJ_ROOM, ch, &victim, &obj) && GET_OBJ_TYPE( obj ) == ITEM_CONTAINER )
+	else if (generic_find(type, FIND_OBJ_INV | FIND_OBJ_ROOM, ch, &victim, &obj) && obj->getType() == ITEM_CONTAINER)
 	{
 		switch(subcmd)
 		{
@@ -1619,7 +1619,7 @@ ACMD(do_sit)
 					ch->send("You don't see that here.\r\n");
 					return;
 				}
-				if( GET_OBJ_TYPE(target) != ITEM_CHAIR )
+				if (target->getType() != ITEM_CHAIR)
 				{
 					ch->send("You can't sit on that!\r\n");
 					return;

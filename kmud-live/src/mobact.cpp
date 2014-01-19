@@ -21,6 +21,7 @@
 #include "clans.h"
 #include "shop.h"
 #include "mobs.h"
+#include "weather.h"
 
 #include "js.h"
 #include "js_interpreter.h"
@@ -160,12 +161,6 @@ void mobileActivity(void)
 
 	for (ch = character_list; ch; ch = ch->next)
 	{
-/**** Removed by Galnor 11/30/2009 - With extraction no longer removing from char list, we don't need this.
-		if( prev && ch != prev->next ) ch = prev->next;
-
-		prev = ch;
-		next_ch = ch->next;
-****/
 		if (ch->IsPurged() || !IS_MOB(ch) || !ch->in_room)
 			continue;
 
@@ -298,6 +293,38 @@ void mobileActivity(void)
 		}
 		ch->processForgets();
 		
+		if (ch->in_room->vnum == 13201)
+		{
+			Log("Can See In Dark: %s", CAN_SEE_IN_DARK(ch) ? "Yes" : "No");
+		}
+
+		//Code for mob checking their light source.
+		if (!CAN_SEE_IN_DARK(ch))
+		{
+			Zone *zone = ch->in_room->GetZone();
+			if (!ch->equipment[WEAR_LIGHT])
+			{
+				if (ch->in_room->IsDark() || zone->GetWeather()->getSun() == Sun::SUN_DARK || ROOM_FLAGGED(ch->in_room, ROOM_DARK))
+				{
+					for (Object *lightSource = ch->carrying; lightSource; lightSource = lightSource->next_content)
+					{
+						if (lightSource->getType() == ITEM_LIGHT)
+						{
+							ch->performWear(lightSource, WEAR_LIGHT);
+							break;
+						}
+					}
+				}
+			}
+			else
+			{
+				if (zone->GetWeather()->getSun() != Sun::SUN_DARK && !ROOM_FLAGGED(ch->in_room, ROOM_DARK))
+				{
+					ch->performRemove(WEAR_LIGHT);
+				}
+			}
+		}
+
 		/* Add new mobile actions here */
 	}				/* end for() */
 }

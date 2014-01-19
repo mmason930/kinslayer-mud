@@ -2657,7 +2657,7 @@ int Character::Dodge()
 			if( this->isInClan( GET_OBJ_CLAN( GET_EQ(this, i) ) ) )
 				dodge += GET_OBJ_CL_DB(GET_EQ(this, i));
 			//Galnor 11/16/2009 - Requested by Koridin. Prevent weapons from providing bonuses to non-wielded slots.
-			if( GET_OBJ_TYPE(GET_EQ(this, i)) == ITEM_WEAPON && i != WEAR_WIELD )
+			if (GET_EQ(this, i)->getType() == ITEM_WEAPON && i != WEAR_WIELD)
 				continue;
 			dodge += GET_EQ(this, i)->GetTotalDodge();
 		}
@@ -2734,7 +2734,7 @@ int Character::Offense()
 		if(GET_EQ(this, i))
 		{
 			//Galnor 11/16/2009 - Requested by Koradin. Prevent weapons from providing bonuses to non-wielded slots.
-			if( GET_OBJ_TYPE(GET_EQ(this, i)) == ITEM_WEAPON && i != WEAR_WIELD )
+			if (GET_EQ(this, i)->getType() == ITEM_WEAPON && i != WEAR_WIELD)
 				continue;
 			offense += GET_EQ(this, i)->GetTotalOffense();
 			if( this->isInClan( GET_OBJ_CLAN( GET_EQ(this, i) ) ) )
@@ -2920,7 +2920,7 @@ int Character::Parry()
 		if((item = GET_EQ(this, i)))
 		{
 			//Galnor 11/16/2009 - Requested by Koradin. Prevent weapons from providing bonuses to non-wielded slots.
-			if( GET_OBJ_TYPE(GET_EQ(this, i)) == ITEM_WEAPON && i != WEAR_WIELD )
+			if (GET_EQ(this, i)->getType() == ITEM_WEAPON && i != WEAR_WIELD)
 				continue;
 			if( this->isInClan( GET_OBJ_CLAN( GET_EQ(this, i) ) ) )
 				parry += GET_OBJ_CL_PB(GET_EQ(this, i));

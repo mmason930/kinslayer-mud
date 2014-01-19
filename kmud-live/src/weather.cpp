@@ -94,7 +94,7 @@ void another_hour(int mode)
 					else
 					{
 						Weather *MyWeather = ch->in_room->GetZone()->GetWeather();
-						MyWeather->set_sun(SUN_RISE);
+						MyWeather->setSun(SUN_RISE);
 						if(OUTSIDE(ch) && AWAKE(ch))
 						{
 							Zone *zone = ch->in_room->GetZone();
@@ -114,7 +114,7 @@ void another_hour(int mode)
 				}
 				break;
 
-			case 21:
+			case 19:
 				for(ch = character_list;ch;ch = ch->next)
 				{
 					if( ch->IsPurged() ) continue;
@@ -125,7 +125,7 @@ void another_hour(int mode)
 					}
 					else
 					{
-						zone->GetWeather()->set_sun(SUN_SET);
+						zone->GetWeather()->setSun(SUN_SET);
 						if(OUTSIDE(ch) && AWAKE(ch))
 						{
 							if(zone->GetSunset().empty())
@@ -137,12 +137,12 @@ void another_hour(int mode)
 				}
 				break;
 
-			case 22:
+			case 20:
 			{
 				Zone *zone;
 				for (int i = 0 ;(zone = ZoneManager::GetManager().GetZoneByRnum(i)) != NULL; ++i )
 				{
-					zone->GetWeather()->set_sun(SUN_DARK);
+					zone->GetWeather()->setSun(SUN_DARK);
 					sendToOutdoor(zone->getVnum(), "The night has begun.\r\n");
 				}
 				break;

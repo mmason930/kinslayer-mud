@@ -779,7 +779,7 @@ void showObjectToCharacter(Object *object, Character *ch, int mode, int ammount)
 		sprintf(text, " [%d]", ammount);
 		strcat(buf, text);
 	}
-	else if( (mode == 5 || mode == 6) && GET_OBJ_TYPE(object) == ITEM_WEAPON)
+	else if( (mode == 5 || mode == 6) && object->getType() == ITEM_WEAPON)
 	{
 		if( GET_OBJ_VAL(object, 0) < 0 || GET_OBJ_VAL(object, 0) >= NUM_WEAPON_TYPES )
 			strcat(buf, "You are unable to determine what kind of weapon it is.");
@@ -789,7 +789,7 @@ void showObjectToCharacter(Object *object, Character *ch, int mode, int ammount)
 	}
 	else if (mode == 5)
 	{
-		if (GET_OBJ_TYPE(object) == ITEM_NOTE)
+		if (object->getType() == ITEM_NOTE)
 		{
 			if (object->action_description)
 			{
@@ -803,7 +803,7 @@ void showObjectToCharacter(Object *object, Character *ch, int mode, int ammount)
 
 			return;
 		}
-		else if (GET_OBJ_TYPE(object) == ITEM_DRINKCON)
+		else if (object->getType() == ITEM_DRINKCON)
 			strcpy(buf, "It looks like a drink container.");
 		else
 			strcpy(buf, "You see nothing special..");			/* ITEM_TYPE == ITEM_DRINKCON||FOUNTAIN */
@@ -831,7 +831,7 @@ void showObjectToCharacter(Object *object, Character *ch, int mode, int ammount)
 			//...
 		}
 	}
-	if(GET_OBJ_TYPE(object) == ITEM_LIGHT && mode == 6)
+	if(object->getType() == ITEM_LIGHT && mode == 6)
 	{
 		sprintf(buf+strlen(buf), "\r\n%s%sWhen testing the light source, you find that ",
 		        COLOR_BOLD(ch, CL_NORMAL), COLOR_CYAN(ch, CL_NORMAL));
@@ -911,7 +911,7 @@ void listObjectToCharacter(Object *listy, Character *ch, int mode, int show)
 				cur.count = 1;
 				cur.obj = i;
 
-				if(GET_OBJ_TYPE(i) == ITEM_MONEY)
+				if(i->getType() == ITEM_MONEY)
 					cur.count = i->GetTotalVal1();
 
 				SpamList.push_back( cur );
@@ -1709,7 +1709,7 @@ void lookInObject(Character * ch, char *arg, Object *obj)
 		return;
 	}
 	//At this point, we know we have a valid object.
-	if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER || IS_SHEATH(obj))
+	if (obj->getType() == ITEM_CONTAINER || IS_SHEATH(obj))
 	{
 		if (obj->IsClosed() && !IS_SHEATH(obj))
 			ch->send("It is closed.\r\n");
@@ -1955,9 +1955,9 @@ ACMD(do_examine)
 
 	if (tmp_object)
 	{
-		if ((GET_OBJ_TYPE(tmp_object) == ITEM_DRINKCON) ||
-		        (GET_OBJ_TYPE(tmp_object) == ITEM_FOUNTAIN) ||
-		        (GET_OBJ_TYPE(tmp_object) == ITEM_CONTAINER) ||
+		if ((tmp_object->getType() == ITEM_DRINKCON) ||
+		        (tmp_object->getType() == ITEM_FOUNTAIN) ||
+		        (tmp_object->getType() == ITEM_CONTAINER) ||
 		        (IS_OBJ_STAT(tmp_object, ITEM_SWORD_SHEATH)) ||
 		        (IS_OBJ_STAT(tmp_object, ITEM_DAGGER_SHEATH))||
 				(IS_OBJ_STAT(tmp_object, ITEM_SPEAR_SHEATH)))
@@ -2248,7 +2248,7 @@ ACMD(do_weather)
 	{
 		ch->send("Imm info\r\nPrecipitation: %d\r\nTemperature: %d\r\nSky: %d\r\nSun: %d\r\nVisibility decrease: %d\r\n",
 		weather->get_precipitation(), weather->get_temp(), weather->get_sky(),
-		weather->get_sun(), weather->get_visibility());
+		weather->getSun(), weather->get_visibility());
 	}
 }
 

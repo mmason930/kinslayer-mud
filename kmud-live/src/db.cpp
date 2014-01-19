@@ -43,7 +43,6 @@
 #include "CharacterUtil.h"
 #include "ClanUtil.h"
 #include "EntityType.h"
-#include "HttpServer.h"
 #include "GatewayDescriptorType.h"
 #include "ObjectMoveLogger.h"
 #include "Game.h"
@@ -112,7 +111,6 @@ int Room::nr_dealloc = 0;
 
 sql::Context dbContext;
 sql::Connection gameDatabase;
-HttpServer httpServer;
 
 /***** Configuration Combat *****/
 Bash	BashData;
@@ -612,15 +610,15 @@ void reset_time(void)
 	time_info = *mud_time_passed(time(0), beginning_of_time);
 
 	if (time_info.hours <= 4)
-		weather_info->set_sun(SUN_DARK);
+		weather_info->setSun(SUN_DARK);
 	else if (time_info.hours == 5)
-		weather_info->set_sun(SUN_RISE);
-	else if (time_info.hours <= 20)
-		weather_info->set_sun(SUN_LIGHT);
-	else if (time_info.hours == 21)
-		weather_info->set_sun(SUN_SET);
+		weather_info->setSun(SUN_RISE);
+	else if (time_info.hours <= 19)
+		weather_info->setSun(SUN_LIGHT);
+	else if (time_info.hours == 20)
+		weather_info->setSun(SUN_SET);
 	else
-		weather_info->set_sun(SUN_DARK);
+		weather_info->setSun(SUN_DARK);
 
 	Log("   Current Gametime: %dH %dD %dM %dY.", time_info.hours,
 	    time_info.day, time_info.month, time_info.year);
@@ -2649,7 +2647,7 @@ bool Room::IsDark()
 
 	for(lamp=this->contents;lamp;lamp=lamp->next_content)
 	{
-		if(GET_OBJ_TYPE(lamp) == ITEM_LAMPPOST)
+		if(lamp->getType() == ITEM_LAMPPOST)
 			lampPresent = true;
 	}
 
@@ -2675,14 +2673,12 @@ bool Room::IsDark()
 		}
 		else
 		{
-			switch (this->GetZone()->GetWeather()->get_sun())
+			switch (this->GetZone()->GetWeather()->getSun())
 			{
-				case SUN_SET:
-					dark = true;
-					break;
 				case SUN_DARK:
 					dark = true;
 					break;
+				case SUN_SET:
 				case SUN_LIGHT:
 				case SUN_RISE:
 					dark = false;
