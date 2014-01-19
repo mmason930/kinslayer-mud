@@ -2339,7 +2339,7 @@ bool Object::IsRemortGear()
 
 bool Object::IsValidChest()
 {
-	return (IS_OBJ_STAT(this,ITEM_CHEST) && this->InRoom());
+	return (IS_OBJ_STAT(this,ITEM_CHEST) && this->getRoom());
 }
 
 bool remort_gear_message( Character *ch, Object *obj )
@@ -2376,7 +2376,7 @@ bool remort_gear_message( Character *ch, Object *obj )
 	return true;
 }
 
-char *Object::getName()
+const char *Object::getName()
 {
 	return (retool_name ? retool_name : name);
 }
@@ -2391,7 +2391,7 @@ char *Object::GetSDesc()
 	return (retool_sdesc ? retool_sdesc : short_description);
 }
 
-struct extra_descr_data *Object::GetExDesc()
+struct ExtraDescription *Object::GetExDesc()
 {
 	//Galnor 2011/02/12 - Extra descriptions have the keyword attached to it. With retools,
 	//We will almost certainly want the keywords to match the object's current aliases.
@@ -2431,4 +2431,26 @@ ACMD( do_auction )
 
 	AuctionManager::GetManager().SetupAuctionInterface( ch, a );
 	Act( "$n begins browsing the auctions.", TRUE, ch, 0, 0, TO_ROOM );
+}
+
+Object *Room::findFirstObject(const std::function<bool(class Object *obj)> &predicate)
+{
+	for (Object *obj = contents; obj; obj = obj->next_content)
+	{
+		if (predicate(obj))
+			return obj;
+	}
+
+	return NULL;
+}
+
+bool Character::anyEquipmentMeetsCritera(const std::function<bool(Object *obj)> &predicate)
+{
+	for (unsigned int pos = 0; pos < NUM_WEARS; ++pos)
+	{
+		if (predicate(GET_EQ(this, pos)))
+			return true;
+	}
+
+	return false;
 }

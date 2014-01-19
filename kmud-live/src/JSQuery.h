@@ -36,7 +36,7 @@ public:
 		MyQuery = q;
 	}
 	sql::Query MyQuery;
-	class Room *InRoom() { return 0; }
+	class Room *getRoom() { return 0; }
 	bool IsPurged() { return false; }
 };
 

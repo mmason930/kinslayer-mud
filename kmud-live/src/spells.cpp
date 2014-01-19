@@ -185,7 +185,7 @@ ASPELL(spell_locate_object)
 	for( obj = object_list;obj;obj = obj->next )
 	{
 		if( obj->IsPurged() ) continue;
-		room = obj->InRoom();
+		room = obj->getRoom();
 		if( !room ) continue;
 
 		if(ROOM_FLAGGED(room, ROOM_NOPORT) || ROOM_FLAGGED(room, ROOM_NOMAGIC) || room->GetZone()->IsClosed())

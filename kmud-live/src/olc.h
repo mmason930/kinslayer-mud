@@ -228,7 +228,7 @@ class OLC
 		class Shop *shop;
 		class StatGroup *statgroup;
 		class Config *config;    /* used for 'cedit'         */
-		struct extra_descr_data *desc;
+		struct ExtraDescription *desc;
 		class Weave *weave;
 		class Auction *auction;
 		struct AuctionData *auction_data;

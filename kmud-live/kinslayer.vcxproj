@@ -104,13 +104,13 @@
     <ClCompile Include="src\auction.cpp" />
     <ClCompile Include="src\ban.cpp" />
     <ClCompile Include="src\cedit.cpp" />
-    <ClCompile Include="src\CharacterUtil.cpp" />
     <ClCompile Include="src\ClanQuestPointTransaction.cpp" />
     <ClCompile Include="src\clans.cpp" />
     <ClCompile Include="src\ClanUtil.cpp" />
     <ClCompile Include="src\class.cpp" />
     <ClCompile Include="src\cledit.cpp" />
     <ClCompile Include="src\comm.cpp" />
+    <ClCompile Include="src\commands\immortals\Locate.cpp" />
     <ClCompile Include="src\config.cpp" />
     <ClCompile Include="src\constants.cpp" />
     <ClCompile Include="src\DatabaseUtil.cpp" />
@@ -118,6 +118,7 @@
     <ClCompile Include="src\db.cpp" />
     <ClCompile Include="src\Descriptor.cpp" />
     <ClCompile Include="src\dg_event.cpp" />
+    <ClCompile Include="src\EntityType.cpp" />
     <ClCompile Include="src\fight.cpp" />
     <ClCompile Include="src\ForumUtil.cpp" />
     <ClCompile Include="src\Game.cpp" />
@@ -204,7 +205,6 @@
   <ItemGroup>
     <ClInclude Include="src\accounts.h" />
     <ClInclude Include="src\auction.h" />
-    <ClInclude Include="src\CharacterUtil.h" />
     <ClInclude Include="src\ClanQuestPointTransaction.h" />
     <ClInclude Include="src\clans.h" />
     <ClInclude Include="src\ClanUtil.h" />
@@ -218,6 +218,7 @@
     <ClInclude Include="src\db.h" />
     <ClInclude Include="src\Descriptor.h" />
     <ClInclude Include="src\dg_event.h" />
+    <ClInclude Include="src\EntityType.h" />
     <ClInclude Include="src\Enum.h" />
     <ClInclude Include="src\Exception.h" />
     <ClInclude Include="src\fight.h" />

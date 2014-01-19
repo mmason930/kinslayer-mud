@@ -660,7 +660,7 @@ void GateManager::UpdateGates()
 	}
 }
 
-std::list< Gate* > GateManager::GetGatesInRoom( const int room_vnum )
+std::list< Gate* > GateManager::GetGatesgetRoom( const int room_vnum )
 {
 	int room_rnum = real_room(room_vnum);
 	if( room_rnum == -1 )
@@ -669,11 +669,11 @@ std::list< Gate* > GateManager::GetGatesInRoom( const int room_vnum )
 		Buffer << "Attempting to grab gates in room vnum " << room_vnum << ".";
 		throw RoomNotFoundException( Buffer.str() );
 	}
-	return GetGatesInRoom( World[room_rnum] );
+	return GetGatesgetRoom( World[room_rnum] );
 
 }
 
-std::list< Gate* > GateManager::GetGatesInRoom( class Room* room )
+std::list< Gate* > GateManager::GetGatesgetRoom( class Room* room )
 {
 	std::list<Gate*> TempGateList;
 
@@ -738,11 +738,11 @@ Gate::~Gate()
 
 std::list< Gate* > Room::GetGates()
 {
-	return GateManager::GetManager().GetGatesInRoom( this );
+	return GateManager::GetManager().GetGatesgetRoom( this );
 }
 int Room::NumGates()
 {
-	return GateManager::GetManager().GetGatesInRoom( this ).size();
+	return GateManager::GetManager().GetGatesgetRoom( this ).size();
 }
 void Room::RemoveGate( Gate* _Gate )
 {

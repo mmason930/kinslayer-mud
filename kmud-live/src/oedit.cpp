@@ -100,7 +100,7 @@ void oedit_setup_new(Descriptor *d)
 
 void oedit_setup_existing(Descriptor *d, int real_num)
 {
-	struct extra_descr_data *thist, *temp, *temp2;
+	struct ExtraDescription *thist, *temp, *temp2;
 	Object *obj;
 
 	obj = new Object();
@@ -126,7 +126,7 @@ void oedit_setup_existing(Descriptor *d, int real_num)
 	//Extra descriptions if necessary.
 	if (obj_proto[real_num]->ex_description)
 	{
-		temp = new extra_descr_data;
+		temp = new ExtraDescription;
 
 		obj->ex_description = temp;
 
@@ -138,7 +138,7 @@ void oedit_setup_existing(Descriptor *d, int real_num)
 
 			if (thist->next)
 			{
-				temp2 = new extra_descr_data;
+				temp2 = new ExtraDescription;
 				temp2->keyword = 0;
 				temp2->description = 0;
 
@@ -168,7 +168,7 @@ void oedit_save_internally(Descriptor *d)
 {
 	int shop, robj_num, found = FALSE;
 	unsigned int cmd_no, i;
-	struct extra_descr_data *thist, *next_one;
+	struct ExtraDescription *thist, *next_one;
 	struct Index *new_obj_index;
 	Object *obj, *swap;
 	Descriptor *dsc;
@@ -421,7 +421,7 @@ void oedit_disp_container_flags_menu(Descriptor *d)
  */
 void oedit_disp_extradesc_menu(Descriptor *d)
 {
-	extra_descr_data *extra_desc = OLC_DESC(d);
+	ExtraDescription *extra_desc = OLC_DESC(d);
 
 	strcpy(buf1, !extra_desc->next ? "<Not set>\r\n" : "Set.");
 
@@ -1476,8 +1476,8 @@ void oedit_parse(Descriptor *d, char *arg)
 					 */
 					if (!OLC_OBJ(d)->ex_description)
 					{
-						OLC_OBJ(d)->ex_description = new extra_descr_data;
-						memset(OLC_OBJ(d)->ex_description, 0, sizeof(extra_descr_data));
+						OLC_OBJ(d)->ex_description = new ExtraDescription;
+						memset(OLC_OBJ(d)->ex_description, 0, sizeof(ExtraDescription));
 					}
 					OLC_VAL(d) = 1;
 					OLC_DESC(d) = OLC_OBJ(d)->ex_description;
@@ -2006,7 +2006,7 @@ void oedit_parse(Descriptor *d, char *arg)
 				case 0:
 					if (!OLC_DESC(d)->keyword || !OLC_DESC(d)->description)
 					{
-						extra_descr_data **tmp_desc;
+						ExtraDescription **tmp_desc;
 
 						/*
 						 * Clean up pointers
@@ -2048,14 +2048,14 @@ void oedit_parse(Descriptor *d, char *arg)
 					 */
 					if (OLC_DESC(d)->keyword && OLC_DESC(d)->description)
 					{
-						struct extra_descr_data *new_extra;
+						struct ExtraDescription *new_extra;
 
 						if (OLC_DESC(d)->next)
 							OLC_DESC(d) = OLC_DESC(d)->next;
 						else
 						{	/* Make new extra description and attach at end. */
-							new_extra = new extra_descr_data;
-							memset(new_extra, 0, sizeof(extra_descr_data));
+							new_extra = new ExtraDescription;
+							memset(new_extra, 0, sizeof(ExtraDescription));
 							OLC_DESC(d)->next = new_extra;
 							OLC_DESC(d) = OLC_DESC(d)->next;
 						}

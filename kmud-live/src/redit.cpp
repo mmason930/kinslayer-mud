@@ -259,7 +259,7 @@ void redit_save_internally(Descriptor *d)
 		{
 			temp_obj->in_room = new_room;
 		}
-		std::list< Gate* > TempGateList = GateManager::GetManager().GetGatesInRoom( (*old_room) );
+		std::list< Gate* > TempGateList = GateManager::GetManager().GetGatesgetRoom( (*old_room) );
 		for(std::list<Gate *>::iterator gi = TempGateList.begin();gi != TempGateList.end();++gi)
 		{
 			if((*gi)->roomA == (*old_room))
@@ -315,7 +315,7 @@ void Room::AddToBatch( sql::BatchInsertStatement &roomInsert,
 	roomInsert.putInt( this->sector_type );
 	roomInsert.putInt( this->room_flags );
 	roomInsert.putInt( this->auction_vnum );
-	roomInsert.putString( extra_descr_data::Serialize(this->ex_description) );
+	roomInsert.putString( ExtraDescription::Serialize(this->ex_description) );
 
 	roomInsert.endEntry();
 
@@ -511,7 +511,7 @@ void redit_save_to_disk(int zone_num)
 void free_room(Room *room)
 {
 	int i;
-	struct extra_descr_data *thist, *next;
+	struct ExtraDescription *thist, *next;
 
 	if (room->name)
 		delete[] (room->name);
@@ -561,7 +561,7 @@ void free_room(Room *room)
  */
 void redit_disp_extradesc_menu(Descriptor *d)
 {
-	extra_descr_data *extra_desc = OLC_DESC(d);
+	ExtraDescription *extra_desc = OLC_DESC(d);
 
 	sprintf(buf,
 #if defined(CLEAR_SCREEN)
@@ -884,7 +884,7 @@ void redit_parse(Descriptor *d, char *arg)
 					 */
 					if (!OLC_ROOM(d)->ex_description)
 					{
-						OLC_ROOM(d)->ex_description = new struct extra_descr_data;
+						OLC_ROOM(d)->ex_description = new struct ExtraDescription;
 						OLC_ROOM(d)->ex_description->keyword = 0;
 						OLC_ROOM(d)->ex_description->description = 0;
 						OLC_ROOM(d)->ex_description->next = 0;
@@ -1120,7 +1120,7 @@ void redit_parse(Descriptor *d, char *arg)
 						 */
 						if (!OLC_DESC(d)->keyword || !OLC_DESC(d)->description)
 						{
-							extra_descr_data **tmp_desc;
+							ExtraDescription **tmp_desc;
 
 							/*
 							 * Clean up pointers.
@@ -1162,7 +1162,7 @@ void redit_parse(Descriptor *d, char *arg)
 					}
 					else
 					{
-						extra_descr_data *new_extra;
+						ExtraDescription *new_extra;
 
 						if (OLC_DESC(d)->next)
 							OLC_DESC(d) = OLC_DESC(d)->next;
@@ -1171,8 +1171,8 @@ void redit_parse(Descriptor *d, char *arg)
 							/*
 							 * Make new extra description and attach at end.
 							 */
-							new_extra = new extra_descr_data;
-							memset(new_extra, 0, sizeof(extra_descr_data));
+							new_extra = new ExtraDescription;
+							memset(new_extra, 0, sizeof(ExtraDescription));
 							OLC_DESC(d)->next = new_extra;
 							OLC_DESC(d) = new_extra;
 						}

@@ -409,13 +409,9 @@ ACMD( do_butcher )
 
 	if ( !*::arg )
 	{
-		for ( corpse = ch->in_room->contents;corpse;corpse = corpse->next_content )
-		{
-			if ( IS_CORPSE( corpse ) && CAN_SEE_OBJ( ch, corpse ) )
-			{
-				break;
-			}
-		}
+		corpse = ch->in_room->findFirstObject([&](Object *obj) {
+			return IS_CORPSE(obj) && CAN_SEE_OBJ(ch, obj);
+		});
 	}
 
 	else
@@ -426,12 +422,20 @@ ACMD( do_butcher )
 	if ( !corpse )
 	{
 		ch->send( "You don't see that here.\r\n" );
+		if (GET_LEVEL(ch) <= 5 && subcmd == SCMD_BUTCHER) {
+			get_char_cols(ch);
+			ch->send("\r\nType %s%sHELP BUTCHER%s for more information on this command.\n\n", bld, cyn, nrm);
+		}
 		return ;
 	}
 
 	if ( !IS_CORPSE( corpse ) || !corpse->scalp )
 	{
 		ch->send( "That isn't a corpse!\r\n" );
+		if (GET_LEVEL(ch) <= 5 && subcmd == SCMD_BUTCHER) {
+			get_char_cols(ch);
+			ch->send("\r\nType %s%sHELP BUTCHER%s for more information on this command.\n\n", bld, cyn, nrm);
+		}
 		return ;
 	}
 
@@ -440,6 +444,10 @@ ACMD( do_butcher )
 		if ( !wielded || GET_OBJ_VAL( wielded, 0 ) != WEAPON_SHORT_BLADE )
 		{
 			ch->send( "You need a short blade to do that.\r\n" );
+			if (GET_LEVEL(ch) <= 5 && subcmd == SCMD_BUTCHER) {
+				get_char_cols(ch);
+				ch->send("\r\nType %s%sHELP BUTCHER%s for more information on this command.\n\n", bld, cyn, nrm);
+			}
 			return ;
 		}
 
@@ -458,6 +466,10 @@ ACMD( do_butcher )
 		if ( GET_SKILL( ch, SKILL_SURVIVAL ) <= 0 && subcmd == SCMD_BUTCHER )
 		{
 			ch->send( "You don't know how to go about doing that.\r\n" );
+			if (GET_LEVEL(ch) <= 5 && subcmd == SCMD_BUTCHER) {
+				get_char_cols(ch);
+				ch->send("\r\nType %s%sHELP BUTCHER%s for more information on this command.\n\n", bld, cyn, nrm);
+			}
 			return ;
 		}
 

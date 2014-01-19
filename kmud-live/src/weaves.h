@@ -158,8 +158,8 @@ public:
 	void AddGate( Gate* gate );
 	std::list<Gate*>::iterator RemoveGate( Gate* gate );
 
-	std::list< Gate* > GetGatesInRoom( const int room_vnum );
-	std::list< Gate* > GetGatesInRoom( class Room* room );
+	std::list< Gate* > GetGatesgetRoom( const int room_vnum );
+	std::list< Gate* > GetGatesgetRoom( class Room* room );
 	std::list< Gate* > GetGatesByCreator( class Character* creator );
 
 	const size_t NumberOfGates() { return GateList.size(); }

@@ -154,7 +154,7 @@ Object *Object::bootLiveObject( const sql::Row &MyRow, bool recursive )
 		obj->retool_desc = str_dup( MyRow["retool_ldesc"].c_str() );
 	if( MyRow["retool_exdesc"].empty() == false )
 	{
-		obj->retool_ex_desc = new extra_descr_data();
+		obj->retool_ex_desc = new ExtraDescription();
 		obj->retool_ex_desc->keyword = str_dup(obj->getName());
 		obj->retool_ex_desc->description = str_dup(MyRow["retool_exdesc"].c_str());
 	}
@@ -181,7 +181,7 @@ std::list< Object* > Object::loadItemList( bool recursive )
 {
 	return Object::loadItemList( recursive,
 		(this->IsValidChest() ? 'C' : 'O'),
-		(this->IsValidChest() ? ToString(InRoom()->vnum) : ToString(this->objID))
+		(this->IsValidChest() ? ToString(getRoom()->vnum) : ToString(this->objID))
 	);
 }
 void Object::loadItems()
@@ -716,7 +716,7 @@ void Object::itemSave()
 		items.push_back(obj);
 	}
 
-	Object::saveTopLevelHolderItems( this->IsValidChest() ? 'C' : 'O', this->IsValidChest() ? ToString(this->InRoom()->vnum) : ToString(this->objID), items);
+	Object::saveTopLevelHolderItems( this->IsValidChest() ? 'C' : 'O', this->IsValidChest() ? ToString(this->getRoom()->vnum) : ToString(this->objID), items);
 }
 
 void Object::saveItems( bool self, char holderType, const std::string &holderID, char topLevelHolderType, const std::string &topLevelHolderID, sql::BatchInsertStatement &tempObjectsBatchInsertStatement, sql::BatchInsertStatement &tempObjectRetoolsBatchInsertStatement, sql::BatchInsertStatement &tempObjectSpecialsBatchInsertStatement, bool contents )
@@ -836,7 +836,7 @@ void Object::saveItems( bool self, char holderType, const std::string &holderID,
 			obj->saveItems(
 			true,
 				(isChest ? 'C' : 'O'),
-				(isChest ? ToString(this->InRoom()->vnum) : ToString(this->objID)),
+				(isChest ? ToString(this->getRoom()->vnum) : ToString(this->objID)),
 			topLevelHolderType,
 			topLevelHolderID,
 			tempObjectsBatchInsertStatement,

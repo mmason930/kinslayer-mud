@@ -3129,7 +3129,7 @@ ACMD(do_vnum)
 
 void do_stat_room(Character * ch)
 {
-	extra_descr_data *desc;
+	ExtraDescription *desc;
 	Room *rm = ch->in_room;
 	int i, found = 0;
 	Object *j = 0;
@@ -3261,7 +3261,7 @@ void do_stat_object(Character * ch, Object * j)
 {
 	int i, vnum, found;
 	Object *j2;
-	extra_descr_data *desc;
+	ExtraDescription *desc;
 
 	MudLog(NRM, MAX(LVL_GRGOD, GET_INVIS_LEV(ch)), TRUE,
 	       "%s did a statfind on object %s.", GET_NAME(ch), j->GetSDesc());
@@ -7016,7 +7016,7 @@ ACMD(do_retool)
 	{
 		isExDesc = true;
 		if( !obj->retool_ex_desc ) {
-			obj->retool_ex_desc = new extra_descr_data();
+			obj->retool_ex_desc = new ExtraDescription();
 		}
 		sBufPtr = &obj->retool_ex_desc->description;
 	}

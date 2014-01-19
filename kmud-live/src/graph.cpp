@@ -65,22 +65,6 @@ static struct bfs_queue_struct *queue_head = 0, *queue_tail = 0;
 #define VALID_EDGE(x, y)  ((x)->dir_option[(y)] && (TOROOM((x), y)) && (!ROOM_FLAGGED(TOROOM((x), y), ROOM_NOTRACK)) && (!IS_MARKED(TOROOM((x), y))))
 #define VALID_EDGE2(x, y) ((x)->dir_option[(y)] && (TOROOM((x), y)) && (!IS_MARKED(TOROOM((x), y))))
 
-Room *Object::InRoom()
-{
-	Character * ch;
-
-	if ( this->worn_by )
-		return this->worn_by->in_room;
-	else if ( this->carried_by )
-		return this->carried_by->in_room;
-	else if ( ( ch = this->FindHolder() ) )
-		return ch->in_room;
-	else if( this->in_obj )
-		return this->in_obj->InRoom();
-	else
-		return this->in_room;
-}
-
 std::string DistanceString( int dist )
 {
 	if ( dist == 0 || dist == 1 )

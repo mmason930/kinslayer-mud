@@ -102,6 +102,7 @@
 #include <set>
 #include <iomanip>
 #include <bitset>
+#include <functional>
 
 #include <ctype.h>
 #include <stdarg.h>

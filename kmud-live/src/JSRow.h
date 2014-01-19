@@ -51,7 +51,7 @@ public:
 		++sqlJSRow::numberDeallocated;
 	}
 	class sql::Row *MyRow;
-	class Room *InRoom() { return 0; }
+	class Room *getRoom() { return 0; }
 	bool IsPurged() { return false; }
 };
 

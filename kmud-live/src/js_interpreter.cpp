@@ -276,7 +276,7 @@ int JSEnvironment::execute(JSTrigger* trig, JSBindable *self, Character * actor,
 	instance->first_run = true;
 
 	if( !here && self )
-		here = self->InRoom();
+		here = self->getRoom();
 	if( !here && actor )
 		here = actor->in_room;
 

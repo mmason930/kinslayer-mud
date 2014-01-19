@@ -721,11 +721,22 @@ class JSBindable
 public:
 	std::shared_ptr<std::vector<JSTrigger*> > js_scripts;
 	std::shared_ptr<JSInstance> delayed_script;
-	virtual class Room *InRoom() = 0;
+	virtual class Room *getRoom() = 0;
 	virtual bool IsPurged() = 0;
 	void attachJS( const int vnum );
 	void detachJS( const int vnum, const int nr );
 	int countJS( const int vnum );
+};
+
+class EntityType;
+
+class Entity
+{
+public:
+	virtual const char *getDisplayName() = 0;
+	virtual std::string getDisplayableId() = 0;
+	virtual Room *getRoom() = 0;
+	virtual class EntityType *getEntityType() = 0;
 };
 
 /**********************************************************************
@@ -844,26 +855,26 @@ class Time
 
 /* Extra description: used in objects, mobiles, and rooms */
 
-struct extra_descr_data
+struct ExtraDescription
 {
-	extra_descr_data()
+	ExtraDescription()
 	{
 		keyword = 0;
 		description = 0;
 		next = 0;
 	}
-	~extra_descr_data()
+	~ExtraDescription()
 	{
 		if( keyword != NULL )
 			delete[] keyword;
 		if( description != NULL )
 			delete[] description;
 	}
-	static extra_descr_data *Parse( const std::string &eDescStr );
-	static std::string Serialize(extra_descr_data *eDescList);
+	static ExtraDescription *Parse( const std::string &eDescStr );
+	static std::string Serialize(ExtraDescription *eDescList);
 	char	*keyword;                 /* Keyword in look/examine          */
 	char	*description;             /* What to see                      */
-	struct extra_descr_data *next; /* Next in list                     */
+	struct ExtraDescription *next; /* Next in list                     */
 
 };
 
@@ -1002,9 +1013,8 @@ struct obj_affected_type
 
 /* ================== Memory Structure for Objects ================== */
 
-class Object
+class Object : public JSBindable, public Entity
 //11/06/2009 - implement JSBindable interface
-	: public JSBindable
 {
 	public:
 		static boost::uuids::random_generator uuidGenerator;
@@ -1024,8 +1034,8 @@ class Object
 		char	*short_description;							/* when worn/carry/in cont.         */
 		char    *retool_sdesc;                              /* retooled short description       */
 		char	*action_description;						/* What to write when used          */
-		struct extra_descr_data	*ex_description;			/* extra descriptions				*/
-		struct extra_descr_data *retool_ex_desc;			/* extra descriptions when retooled */
+		struct ExtraDescription	*ex_description;			/* extra descriptions				*/
+		struct ExtraDescription *retool_ex_desc;			/* extra descriptions when retooled */
 		class Character	*carried_by;						/* Carried by :NULL in room/conta   */
 		class Character	*worn_by;							/* Worn by?							*/
 		class Character *SatOnBy;							/* Who's sitting on this?			*/
@@ -1072,15 +1082,18 @@ class Object
 		void UnsetPrototypeSpecifics();
 		Character *FindHolder();
 
-		char *getName();
+		const char *getName();
+		const char *getDisplayName();
 		char *GetDesc();
 		char *GetSDesc();
-		struct extra_descr_data *GetExDesc();
+		struct ExtraDescription *GetExDesc();
 
 		unsigned long int Money;
 
 		float Weight();
-		Room *InRoom();
+		std::string getDisplayableId();
+		Room *getRoom();
+		class EntityType *getEntityType();
 
 		float BashRating();
 		void MoveToRoom( Room *room, bool vaultSave=true );
@@ -1212,7 +1225,7 @@ public:
 /* ================== Memory Structure for room ======================= */
 class Room //That's right! Classroom!
 //11/06/2009 - implement JSBindable interface
-	: public JSBindable
+	: public JSBindable, public Entity
 {
 	public:
 		static int nr_alloc;
@@ -1222,7 +1235,7 @@ class Room //That's right! Classroom!
 		sh_int sector_type;										// sector type (move/hide)
 		char	*name;											// Rooms name 'You are ...'
 		char	*description;									// Shown when entered
-		struct extra_descr_data *ex_description;				// for examine/look
+		struct ExtraDescription *ex_description;				// for examine/look
 		struct Direction *dir_option[ NUM_OF_DIRS ];			// Directions
 		int room_flags;											// DEATH,DARK ... etc
 		int auction_vnum;										// Vnum of the room's associated auction
@@ -1252,7 +1265,8 @@ class Room //That's right! Classroom!
 
 		bool IsDark();
 		bool IsPurged() { return false; }
-
+		const char *getName();
+		const char *getDisplayName();
 
 		std::list< class Gate* > GetGates();
 		void RemoveGate( class Gate* _Gate );
@@ -1270,6 +1284,7 @@ class Room //That's right! Classroom!
 		void Copy( const Room *source, bool deep = true );
 		void zero();
 		void zero(bool free);
+		Object *findFirstObject(const std::function<bool(class Object *obj)> &predicate);
 
 		void AddToBatch( sql::BatchInsertStatement &roomInsert,
 					     sql::BatchInsertStatement &exitInsert,
@@ -1317,7 +1332,9 @@ class Room //That's right! Classroom!
 		Room& operator<< ( const char * s );
 		Room& operator<< ( const char s );
 
-		Room *InRoom() { return this; }
+		std::string getDisplayableId();
+		Room *getRoom();
+		class EntityType *getEntityType();
 
 	private:
 };
@@ -1873,7 +1890,7 @@ public:
 
 class Character
 //11/06/2009 - implement JSBindable interface
-	: public JSBindable
+	: public JSBindable, public Entity
 {
 public:
 	static int nr_alloc;
@@ -2033,6 +2050,10 @@ public:
 	int GetAccount();
 	int CountZoneLoads();
 	int ExperienceToLevel();
+	bool anyEquipmentMeetsCritera(const std::function<bool(Object *obj)> &predicate);
+
+	const char *getName();
+	const char *getDisplayName();
 
 	void setSkill(short int skillId, int percent);
 	int getSkill(short int skillId);
@@ -2294,7 +2315,9 @@ public:
 	Character& operator<< ( const char * s );
 	Character& operator<< ( const char s );
 
-	Room *InRoom() { return this->in_room; }
+	std::string getDisplayableId();
+	Room *getRoom();
+	class EntityType *getEntityType();
 };
 
 /* other miscellaneous structures ***************************************/

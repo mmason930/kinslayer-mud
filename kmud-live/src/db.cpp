@@ -42,6 +42,7 @@
 #include "UserType.h"
 #include "CharacterUtil.h"
 #include "ClanUtil.h"
+#include "EntityType.h"
 #include "HttpServer.h"
 #include "GatewayDescriptorType.h"
 #include "ObjectMoveLogger.h"
@@ -918,7 +919,7 @@ Room *Room::Boot(const sql::Row &MyRow,
 	NewRoom->auction_vnum	= atoi(MyRow["auction_vnum"].c_str());
 	NewRoom->sector_type	= atoi(MyRow["sector"].c_str());
 	NewRoom->vnum			= atoi(MyRow["vnum"].c_str());
-	NewRoom->ex_description	= extra_descr_data::Parse(MyRow["edescription"]);
+	NewRoom->ex_description	= ExtraDescription::Parse(MyRow["edescription"]);
 
 	if( hasRoomExitIndexes == false && MyExits.empty() == false ) {
 		sql::Row row = MyExits.front();
@@ -2408,9 +2409,9 @@ void Room::Copy(const Room *source, bool deep)
 
 	if(source->ex_description)
 	{
-		struct extra_descr_data *thist, *temp, *temp2;
-		temp = new extra_descr_data;
-		memset(temp, 0, sizeof(extra_descr_data));
+		struct ExtraDescription *thist, *temp, *temp2;
+		temp = new ExtraDescription;
+		memset(temp, 0, sizeof(ExtraDescription));
 
 		this->ex_description = temp;
 
@@ -2421,8 +2422,8 @@ void Room::Copy(const Room *source, bool deep)
 
 			if(thist->next)
 			{
-				temp2 = new extra_descr_data;
-				memset(temp2, 0, sizeof(extra_descr_data));
+				temp2 = new ExtraDescription;
+				memset(temp2, 0, sizeof(ExtraDescription));
 				temp->next = temp2;
 				temp = temp2;
 			}
@@ -2462,7 +2463,7 @@ Room::~Room()
 {
 	Room::nr_dealloc++;
 	JSManager::get()->handleExtraction( this );
-	std::list< Gate* > GatesInRoom = GateManager::GetManager().GetGatesInRoom(this);
+	std::list< Gate* > GatesInRoom = GateManager::GetManager().GetGatesgetRoom(this);
 	for(std::list<Gate*>::iterator gIter = GatesInRoom.begin();gIter != GatesInRoom.end();++gIter)
 		GateManager::GetManager().RemoveGate( (*gIter) );
 	//Delete the room's directions...
@@ -2475,8 +2476,8 @@ Room::~Room()
 	delete[] this->name;
 	//Delete the room's descriptions...
 	delete[] this->description;
-	extra_descr_data *ExDNext;
-	for(extra_descr_data *ExD = this->ex_description;ExD;ExD = ExDNext)
+	ExtraDescription *ExDNext;
+	for(ExtraDescription *ExD = this->ex_description;ExD;ExD = ExDNext)
 	{
 		ExDNext = ExD->next;
 		delete ExD;
@@ -2594,8 +2595,8 @@ Object::~Object()
 			delete[] this->name;
 		if( this->description )
 			delete[] this->description;
-		extra_descr_data *exDesc, *exDescNext;
-		for( extra_descr_data *exDesc = this->ex_description;exDesc;exDesc = exDescNext )
+		ExtraDescription *exDesc, *exDescNext;
+		for( ExtraDescription *exDesc = this->ex_description;exDesc;exDesc = exDescNext )
 		{
 			exDescNext = exDesc->next;
 			delete (exDesc);
@@ -2797,7 +2798,7 @@ void Object::protoSave()
 	if( deleted ) return;
 
 	std::stringstream Buffer;
-	std::stringstream EDescBuffer(extra_descr_data::Serialize(this->ex_description));
+	std::stringstream EDescBuffer(ExtraDescription::Serialize(this->ex_description));
 	Buffer << "REPLACE DELAYED INTO obj_protos SET "
 		<< "aliases='" << (name ? sql::escapeString(this->name) : "") << "',"
 		<< "sdesc='" << (short_description ? sql::escapeString(this->short_description) : "") << "',"
@@ -2961,7 +2962,7 @@ void Object::ProtoBoot( sql::Row &MyRow, const int rnum, const std::list<int> &j
 	this->affected[4].modifier = atoi(MyRow[50].c_str());
 	this->affected[5].modifier = atoi(MyRow[51].c_str());
 	this->obj_flags.wear_flags = atoi(MyRow["wear"].c_str());
-	this->ex_description = extra_descr_data::Parse( MyRow["edescription"] );
+	this->ex_description = ExtraDescription::Parse( MyRow["edescription"] );
 
 	// Find any js scripts that are listed as attached to this mob in the db, and attach them to it
 	this->js_scripts = std::shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
@@ -2972,24 +2973,24 @@ void Object::ProtoBoot( sql::Row &MyRow, const int rnum, const std::list<int> &j
 	}
 }
 
-/* Return a list of extra_descr_data, parsed from the string that is passed */
-extra_descr_data *extra_descr_data::Parse( const std::string &eDescStr )
+/* Return a list of ExtraDescription, parsed from the string that is passed */
+ExtraDescription *ExtraDescription::Parse( const std::string &eDescStr )
 {
 	std::vector< std::string > vExDescParts = StringUtil::SplitToVector< std::string >(eDescStr,'~');
-	extra_descr_data *eDescList = (NULL);
+	ExtraDescription *eDescList = (NULL);
 
 	while( !vExDescParts.empty() )
 	{
 		if( vExDescParts.size() == 1 )
 			break;//Incomplete
-		extra_descr_data* ExDesc = new extra_descr_data;
+		ExtraDescription* ExDesc = new ExtraDescription;
 		ExDesc->keyword = str_dup( vExDescParts[0].c_str() );
 		ExDesc->description = str_dup( vExDescParts[1].c_str() );
 
 		if( !eDescList )
 			eDescList = ExDesc;
 		else {
-			extra_descr_data *temp;
+			ExtraDescription *temp;
 			for( temp = eDescList;temp->next;temp=temp->next );
 			temp->next = ExDesc;
 		}
@@ -2998,10 +2999,10 @@ extra_descr_data *extra_descr_data::Parse( const std::string &eDescStr )
 	return eDescList;
 }
 
-std::string extra_descr_data::Serialize(extra_descr_data *eDescList)
+std::string ExtraDescription::Serialize(ExtraDescription *eDescList)
 {
 	std::stringstream eDescBuffer;
-	for( extra_descr_data *e = eDescList;e;e = e->next )
+	for( ExtraDescription *e = eDescList;e;e = e->next )
 		eDescBuffer << e->keyword << "~" << std::endl << e->description << "~" << std::endl;
 	return eDescBuffer.str();
 }
@@ -4131,4 +4132,76 @@ bool Character::passwordMatches(const std::string &passwordInput)
 
 	return !((!passwordUpdated && strncmp( CRYPT(passwordInput.c_str(), this->player.passwd.c_str()), GET_PASSWD(this).c_str(), 10 )) ||
 	(passwordUpdated &&	GET_PASSWD(this).compare( MD5::getHashFromString(passwordInput.c_str())) ));
+}
+
+const char *Character::getDisplayName()
+{
+	return GET_NAME(this);
+}
+
+const char *Room::getDisplayName()
+{
+	return name;
+}
+
+const char *Object::getDisplayName()
+{
+	return this->GetSDesc();
+}
+
+std::string Object::getDisplayableId()
+{
+	return MiscUtil::toString(objID);
+}
+Room *Object::getRoom()
+{
+	Character * ch;
+
+	if (this->worn_by)
+		return this->worn_by->in_room;
+	else if (this->carried_by)
+		return this->carried_by->in_room;
+	else if ((ch = this->FindHolder()))
+		return ch->in_room;
+	else if (this->in_obj)
+		return this->in_obj->getRoom();
+	else
+		return this->in_room;
+}
+
+class EntityType *Object::getEntityType()
+{
+	return EntityType::object;
+}
+
+std::string Character::getDisplayableId()
+{
+	return MiscUtil::toString(this->player.idnum);
+}
+
+Room *Character::getRoom()
+{
+	return in_room;
+}
+
+class EntityType *Character::getEntityType()
+{
+	if (getUserType() == UserType::player)
+		return EntityType::player;
+	return EntityType::mob;
+}
+
+std::string Room::getDisplayableId()
+{
+	return MiscUtil::toString(this->vnum);
+}
+
+Room *Room::getRoom()
+{
+	return this;
+}
+
+class EntityType *Room::getEntityType()
+{
+	return EntityType::room;
 }

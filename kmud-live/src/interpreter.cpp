@@ -199,6 +199,7 @@ ACMD( do_leave );
 ACMD( do_levels );
 // ACMD(do_load);
 ACMD( do_look );
+ACMD(do_locate);
 ACMD( do_mark );
 ACMD( do_mbload );
 ACMD( do_memory );
@@ -534,6 +535,7 @@ class CommandInfo cmd_info[] =
 	    {	"levels"	, "lev"	, POS_DEAD		, do_levels			, 0			, 0					, 0.0	,  0 	},
 	    {	"list"		, "li"	, POS_STANDING	, do_not_here		, 0			, 0					, 0.0	,  0 	},
 	    {	"lock"		, "loc"	, POS_SITTING	, do_gen_door		, 0			, SCMD_LOCK			, 0.0	,  0 	},
+		{	"locate"	, "loca", POS_DEAD		, do_locate			, 0			, 0					, 0.0	,  0	},
 
 	    {	"medit"		, "med"	, POS_DEAD		, do_olc			, LVL_BLDER	, SCMD_OLC_MEDIT	, 0.0f	,  0	},
 	    {	"mark"		, "mar"	, POS_FIGHTING	, do_mark			, 0			, 0					, 0.0	,  0	},

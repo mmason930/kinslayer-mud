@@ -106,7 +106,7 @@ flusspferd::value JSObject::load_obj( const int vnum )
 	}
 
 	obj = read_object(r_num, REAL, true);
-	Room *inRoom = this->real->InRoom();
+	Room *inRoom = this->real->getRoom();
 	sprintf(obj->creator, "Loaded by Javascript. JSObject #%d. Room #%d.", this->real->getVnum(), (inRoom ? inRoom->vnum : -1));
 
 	obj_to_obj(obj,real);
@@ -236,7 +236,7 @@ void JSObject::setRetoolExDesc( flusspferd::string newExDesc )
 	if( newExDesc.empty() )
 		real->retool_ex_desc = NULL;
 	else {
-		real->retool_ex_desc = new extra_descr_data();
+		real->retool_ex_desc = new ExtraDescription();
 		real->retool_ex_desc->keyword = NULL;
 		real->retool_ex_desc->description = str_dup(newExDesc.c_str());
 	}
@@ -318,7 +318,7 @@ flusspferd::string JSObject::getExtraDescription()
 	if(!real || real->IsPurged())
 		return v.to_string();
 	
-	extra_descr_data *extraDescription = real->GetExDesc();
+	ExtraDescription *extraDescription = real->GetExDesc();
 	if(extraDescription)
 		return flusspferd::string(extraDescription->description);
 

@@ -50,7 +50,7 @@ OBJFILES = comm.o act.comm.o act.informative.o act.movement.o act.item.o \
 	HttpProtocol.o HttpUtil.o HttpDescriptor.o HttpRequest.o GatewayDescriptorType.o \
 	jsoncpp/json_reader.o jsoncpp/json_writer.o jsoncpp/json_value.o sqlDatabase.o ObjectMoveLogger.o \
 	PlayerPortalDescriptor.o PlayerPortalDescriptorStatus.o PlayerPortalServer.o Game.o \
-	PlayerPortalCommandProcessor.o
+	PlayerPortalCommandProcessor.o commands/immortals/Locate.o EntityType.o
 
 
 OBJFILES := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILES))

@@ -110,9 +110,9 @@ void listCharacterToCharacter( Character * listy, Character * ch);
 void lookInDirection( Character * ch, int dir);
 void lookInObject( Character * ch, char *arg, Object *obj=0);
 void lookAtTarget( Character * ch, char *arg);
-char *findExtraDescription(char *word, struct extra_descr_data * listy);
+char *findExtraDescription(char *word, struct ExtraDescription * listy);
 const char *findSuffix(int number);
-bool canSeeCharsInRoom(Character *ch, Room *room);
+bool canSeeCharsgetRoom(Character *ch, Room *room);
 std::vector<bool> getInvertedAffects(Character *ch);
 int getArenaTeam( Character *ch );
 
@@ -400,7 +400,7 @@ ACMD(do_scan)
 			do_auto_scan(ch,true);
 		}
 		else {
-			if(room->people && canSeeCharsInRoom(ch, room)) {
+			if(room->people && canSeeCharsgetRoom(ch, room)) {
 				listCharacterToCharacter(room->people, ch);
 				ch->send(COLOR_NORMAL(ch, CL_NORMAL));
 			}
@@ -1522,7 +1522,7 @@ void do_auto_scan(Character *ch, bool typed) {
          room = ch->in_room->dir_option[exit]->to_room;
 
 		 //Added to the If below to fix a small bug
-         if( ( room->people && canSeeCharsInRoom(ch, room) && (!room->IsDark() || CAN_SEE_IN_DARK(ch)))|| EXIT_FLAGGED(EXIT(ch, exit), EX_CLOSED)) {
+         if( ( room->people && canSeeCharsgetRoom(ch, room) && (!room->IsDark() || CAN_SEE_IN_DARK(ch)))|| EXIT_FLAGGED(EXIT(ch, exit), EX_CLOSED)) {
 
             ch->send(COLOR_CYAN(ch, CL_NORMAL));
             ch->send("%-5s: ",StringUtil::cap(StringUtil::allLower(dirs[exit])));
@@ -1750,9 +1750,9 @@ void lookInObject(Character * ch, char *arg, Object *obj)
 	}
 }
 
-char *findExtraDescription(char *word, struct extra_descr_data * listy)
+char *findExtraDescription(char *word, struct ExtraDescription * listy)
 {
-	struct extra_descr_data *i;
+	struct ExtraDescription *i;
 
 	for (i = listy; i; i = i->next)
 		if (isname(word, i->keyword))
@@ -1803,7 +1803,7 @@ void lookAtTarget(Character * ch, char *arg)
 
 	if( !str_cmp(temp_arg, "gate" ) )
 	{
-		std::list<Gate*> GatesInRoom = GateManager::GetManager().GetGatesInRoom(ch->in_room);
+		std::list<Gate*> GatesInRoom = GateManager::GetManager().GetGatesgetRoom(ch->in_room);
 		for(std::list<Gate*>::iterator gIter = GatesInRoom.begin();gIter != GatesInRoom.end() && nr >= 0;++gIter, --nr)
 		{
 			if( nr == 0 )//found by number
@@ -3091,7 +3091,7 @@ ACMD(do_commands)
 	ch->send(buf);
 }
 
-bool canSeeCharsInRoom(Character *ch, Room *room)
+bool canSeeCharsgetRoom(Character *ch, Room *room)
 {
 	if(room->people) 
 	{
