@@ -1140,7 +1140,7 @@ class Object : public JSBindable, public Entity
 		int KeyNum();
 		int getVnum();
 		byte getType() const { return obj_flags.type_flag; };
-		void setType(const bool type) { obj_flags.type_flag = type;  }
+		void setType(const byte type) { obj_flags.type_flag = type;  }
 
 		enum eObjectModifier {
 			OBJECT_MOD_DODGE=0,
