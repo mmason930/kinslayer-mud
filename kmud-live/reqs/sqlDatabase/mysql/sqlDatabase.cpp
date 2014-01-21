@@ -477,7 +477,7 @@ void BatchInsertStatement::putLong( const long long value )
 }
 void BatchInsertStatement::putChar( char value )
 {
-	static char buf[2];
+	char buf[2];
 	sprintf(buf, "%c", value);
 	putString(&value);
 }
@@ -513,7 +513,7 @@ std::string encodeQuoteDate(const time_t unix_timestamp)
 std::string encodeDate(const time_t unix_timestamp)
 {
 	struct tm *timeInfo;
-	static char buffer[32];
+	char buffer[32];
 
 	if(unix_timestamp == 0)
 		return "NULL";
