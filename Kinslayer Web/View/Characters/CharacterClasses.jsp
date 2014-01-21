@@ -167,19 +167,19 @@ $(document).ready(function() {
 					<div><a href="#">Thief</a></div>
 					<div><a href="#">Dreadguard</a></div>
 				</div>
-				<div id="trollocwarriordescription" class="classDescription">
+				<div id="trollocwarriordescription" class="classDescription hidden">
 					Trolloc Warriors have a slight edge in their strength capacity. As with the human warrior race, all warrior skills cost a single practice session to improve. Trolloc Warriors are able to roll as high as a 21 strength status point.
 				</div>
 
-				<div id="trollocrangerdescription" class="classDescription">
+				<div id="trollocrangerdescription" class="classDescription hidden">
 					Trolloc Rangers have a slight edge in their constitution capacity, able to roll as high as a 20 status point. As with human rangers, trolloc rangers are able to practice ranger skills at a cost of just one practice session. Rangers are also able to practice both warrior and thief skills at a cost of two, making them the most versatile class in the game.
 				</div>
 
-				<div id="trollocthiefdescription" class="classDescription">
+				<div id="trollocthiefdescription" class="classDescription hidden">
 					Trolloc Thieves are able to roll as high as a 20 dexterity status point, and are able to practice Thief skills at a cost of just one practice session. Warrior skills are expensive for Thieves, costing 3 sessions, while Ranger skills cost 2. For this reason, Thieves strive at surreptitious methods of attack, including sneaking, hiding, and backstabbing their opponents.
 				</div>
 
-				<div id="trollocdreadguarddescription" class="classDescription">
+				<div id="trollocdreadguarddescription" class="classDescription hidden">
 					Dreadguards are the channeling class of the Darkside. They are humans who have changed allegiance to the Shadow. They are able to ride horses and speak both the Trolloc and Common tongue. Their skill in the art of the One Power makes them an essential asset to the Shadow. Dreadguards who reach high rank are eventually able to advance to the status of Dreadlord.
 				</div>
 			</div>
