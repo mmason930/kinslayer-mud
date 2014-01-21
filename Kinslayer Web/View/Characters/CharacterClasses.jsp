@@ -97,10 +97,10 @@ $(document).ready(function() {
 
 	$("#selectTrollocAnchor").bind("click", function(event) {
 
-		$(".classPanel").hide();
-		$(".raceDescription").hide();
-		$("#trollocDescription").show();
-		$("#trollocClassPanel").show();
+		$(".classPanel").addClass("hidden");
+		$(".raceDescription").addClass("hidden");
+		$("#trollocDescription").removeClass("hidden");
+		$("#trollocClassPanel").removeClass("hidden");
 
 		$("#raceSelection div a").removeClass("selected");
 		$(this).addClass("selected");
@@ -109,10 +109,10 @@ $(document).ready(function() {
 
 	$("#selectHumanAnchor").bind("click", function(event) {
 
-		$(".classPanel").hide();
-		$(".raceDescription").hide();
-		$("#humanDescription").show();
-		$("#humanClassPanel").show();
+		$(".classPanel").addClass("hidden");
+		$(".raceDescription").addClass("hidden");
+		$("#humanDescription").removeClass("hidden");
+		$("#humanClassPanel").removeClass("hidden");
 
 		$("#raceSelection div a").removeClass("selected");
 		$(this).addClass("selected");
@@ -129,8 +129,8 @@ $(document).ready(function() {
 		var selectedClass = $(this).text().toLowerCase();
 		var descriptionElement = $("#" + selectedRace + selectedClass + "description");
 
-		$(".classDescription").hide();
-		descriptionElement.show();
+		$(".classDescription").addClass("hidden");
+		descriptionElement.removeClass("hidden");
 	});
 });
 
