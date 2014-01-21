@@ -86,8 +86,6 @@
 {
 	width: 74.5%;
 	margin: auto;
-	display: none;
-	
 }
 </style>
 
