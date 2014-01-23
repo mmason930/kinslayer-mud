@@ -124,7 +124,7 @@ flusspferd::array JSRoom::items()
 
 flusspferd::string JSRoom::doorName( const int dir )
 {
-	if( real && dir >= 0 && dir < NUM_OF_DIRS && real->dir_option[dir] )
+	if( real && dir >= 0 && dir < NUM_OF_DIRS && real->dir_option[dir] && real->dir_option[dir]->getKeywords() )
 		return real->dir_option[dir]->getKeywords();
 	return "";
 }
