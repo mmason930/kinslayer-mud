@@ -15,7 +15,8 @@ RewriteRule ^oldforum(.*)$ /forums? [R=301,L]
 RewriteRule ^old_web/telnet.php(.*)$ /mudclient/mudclient.php? [R=301,L]
 RewriteRule ^old_web(.*)$ /? [R=301,L]
 
-RewriteRule ^about-kinslayermud(.*)$		./AboutKinslayer.do$1 [QSA,L]
+RewriteRule ^about-kinslayermud(.*)$	./AboutKinslayer.do$1 [QSA,L]
+RewriteRule ^admin/olist(.*)$			./Admin.OList.do$1 [QSA,L]
 
 RewriteRule ^basic-commands(.*)$		./NewToMudsBasicCommands.do$1 [QSA,L]
 

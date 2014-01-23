@@ -72,8 +72,8 @@ public class WebSiteUrlUtil {
   public static String getPlayerPortalHelpEditorUrl() {
     return "./player-portal/help-editor";
   }
-  public static String getPlayerPortalOlistUrl() {
-    return "./player-portal/olist";
+  public static String getAdminOlistUrl() {
+    return "./admin/olist";
   }
   
   public static String getForumProfileUrl(int userId) {

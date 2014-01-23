@@ -1,7 +1,5 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ include file="/View/Framework/Kinslayer.jsp" %>
-<tiles:useAttribute name="leftNavSelected" classname="java.lang.String" />
-<tiles:useAttribute name="MetaDescription" classname="java.lang.String" ignore="true" />
 <tiles:useAttribute name="title" classname="java.lang.String" ignore="true" />
 <%
 String sessionUserName = (String)request.getAttribute("SessionUserName");
