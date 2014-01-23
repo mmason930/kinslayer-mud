@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.struts2.interceptor.ServletRequestAware;
 import org.apache.struts2.interceptor.ServletResponseAware;
 import org.apache.struts2.util.ServletContextAware;
-import org.kinslayermud.misc.Provider;
 import org.kinslayermud.util.MiscUtil;
 import org.kinslayermud.util.WebSupport;
 import org.kinslayermud.web.util.HttpUtil;
@@ -21,6 +20,9 @@ public abstract class StandardAction extends ActionSupport implements ServletReq
   protected HttpServletResponse response;
   protected ServletContext servletContext;
   protected WebSupport webSupport;
+  
+  protected final String SUCCESS_FORWARD = "Success";
+  protected final String FAILURE_FORWARD = "Failure";
   
   public StandardAction() {
 

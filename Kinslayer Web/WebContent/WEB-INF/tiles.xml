@@ -244,6 +244,16 @@
   </definition>
   
   
+	<definition name="AdminLayout" template="/View/AdminPortal/Framework/AdminPortalLayout.jsp">
+		<put-attribute name="title" value=""/>
+		<put-attribute name="body" value=""/>
+	</definition>
+	
+	<definition name="Admin.OList" extends="AdminLayout">
+		<put-attribute name="title" value="OList | Admin | KinslayerMUD"/>
+		<put-attribute name="body" value="/View/AdminPortal/SignedIn/OList.jsp"/>
+	</definition>
+  
   <!-- ADMIN -->
   <definition name="Admin.ViewUserLog" extends="StandardLayout">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>

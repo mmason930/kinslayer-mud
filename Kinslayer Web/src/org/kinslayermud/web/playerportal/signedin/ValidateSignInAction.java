@@ -9,8 +9,6 @@ import org.kinslayermud.web.util.HttpUtil;
 
 public abstract class ValidateSignInAction extends StandardAction {
 
-  protected final String FAILURE_FORWARD = "Failure";
-  
   public abstract String execute(WebSupport webSupport, User user) throws Exception;
   
   public String execute(WebSupport webSupport) throws Exception {

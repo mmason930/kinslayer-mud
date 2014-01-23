@@ -190,6 +190,10 @@
 			<result name="Success" type="tiles">Admin.ViewUserLog</result>
 		</action>
 		
+		<action name="Admin.OList" class="org.kinslayermud.web.admin.signedin.OListAction" method="execute">
+			<result name="Success" type="tiles">Admin.OList</result>
+		</action>
+		
 		<!--  MISC -->
 		<action name="JSONResponse" class="org.kinslayermud.web.generic.JSONResponseAction" />
 		

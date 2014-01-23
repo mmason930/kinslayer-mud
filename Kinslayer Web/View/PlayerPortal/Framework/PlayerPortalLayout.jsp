@@ -26,6 +26,7 @@ if(!hideTopNavBoolean) {
   if(user.getLevel() >= 100) {
 %>
 					<li><a href="<%=WebSiteUrlUtil.getPlayerPortalHelpEditorUrl() %>" <%=topNavSelected.equals("HelpEditor") ? "class='selected'" : "" %>>Help Editor</a></li>
+					<li><a href="<%=WebSiteUrlUtil.getPlayerPortalOlistUrl() %>">OList</a></li>
 <%
   }
 %>
