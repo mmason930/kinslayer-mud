@@ -28,6 +28,7 @@
 #include "StringUtil.h"
 #include "Descriptor.h"
 #include "UserEmailAddress.h"
+#include "rooms/Room.h"
 
 #include <boost/regex.hpp>
 
@@ -56,7 +57,6 @@ void oedit_setup_existing( Descriptor *d, int robj_num );
 void sedit_setup_new( Descriptor *d );
 void sedit_setup_existing( Descriptor *d, int robj_num );
 void sedit_save_to_disk();
-void free_room( Room *room );
 void aedit_save_to_disk();
 extern int find_action( int cmd );
 extern int real_shop( int vnum );
@@ -342,7 +342,7 @@ ACMD( do_olc )
 		{
 		case SCMD_OLC_ZEDIT:
 		case SCMD_OLC_REDIT:
-			num = ch->in_room->vnum;
+			num = ch->in_room->getVnum();
 			break;
 		case SCMD_OLC_OEDIT:
 		case SCMD_OLC_MEDIT:
@@ -786,10 +786,10 @@ void cleanup_olc( Descriptor *d, byte cleanup_type )
 			switch ( cleanup_type )
 			{
 			case CLEANUP_ALL:
-				d->olc->room->FreeLiveRoom();
+				d->olc->room->freeLiveRoom();
 				break;
 			case CLEANUP_STRUCTS:
-				d->olc->room->FreeLiveRoom();
+				d->olc->room->freeLiveRoom();
 				break;
 			default:
 				/* The caller has screwed up. */
@@ -908,114 +908,6 @@ void cleanup_olc( Descriptor *d, byte cleanup_type )
 	}
 }
 
-/* Everything below this line is part of the OLC+ package specifically. */
-
-/* This little function has real potential.  Give it  *
- * a source room's rnum and a target room's rnum, and *
- * it will do a copy.  Use it in your own commands.   *
- *                                 TR 5-20-98         */
-void copy_room( int rnum_src, int rnum_targ )
-{
-	if ( World[ rnum_src ] ->name )
-		World[ rnum_targ ] ->name = str_dup( World[ rnum_src ] ->name );
-
-	if ( World[ rnum_src ] ->description )
-		World[ rnum_targ ] ->description = str_dup( World[ rnum_src ] ->description );
-
-	World[ rnum_targ ] ->sector_type = World[ rnum_src ] ->sector_type;
-	World[ rnum_targ ] ->room_flags  = World[ rnum_src ] ->room_flags;
-//	World[ rnum_targ ] ->room_flags[ 0 ] = World[ rnum_src ] ->room_flags[ 0 ];
-//	World[ rnum_targ ] ->room_flags[ 1 ] = World[ rnum_src ] ->room_flags[ 1 ];
-//	World[ rnum_targ ] ->room_flags[ 2 ] = World[ rnum_src ] ->room_flags[ 2 ];
-//	World[ rnum_targ ] ->room_flags[ 3 ] = World[ rnum_src ] ->room_flags[ 3 ];
-
-	/* Note:  ex_descriptions are not being      *
-	 * copied.  I think it will stay that way.   *
-	 *                       TR 5-20-98          */
-
-	return ;
-}
-
-
-/* Same as copy_room, but with objects.  No error checking.  *
- * Should this be made an integer so a check can be made for *
- * success?                             TR 2-20-98           */
-void copy_object( int rnum_src, int rnum_targ )
-{
-	if ( obj_proto[ rnum_src ]->name )
-		obj_proto[ rnum_targ ]->name = str_dup( obj_proto[ rnum_src ]->name );
-
-	if ( obj_proto[ rnum_src ]->description )
-		obj_proto[ rnum_targ ]->description = str_dup( obj_proto[ rnum_src ]->description );
-
-	if ( obj_proto[ rnum_src ]->short_description )
-		obj_proto[ rnum_targ ]->short_description = str_dup( obj_proto[ rnum_src ]->short_description );
-
-	if ( obj_proto[ rnum_src ]->action_description )
-		obj_proto[ rnum_targ ]->action_description = str_dup( obj_proto[ rnum_src ]->action_description );
-
-	if ( obj_proto[ rnum_src ]->ex_description )
-		obj_proto[ rnum_targ ]->ex_description = obj_proto[ rnum_src ]->ex_description;
-
-	obj_proto[ rnum_targ ]->obj_flags = obj_proto[ rnum_src ]->obj_flags;
-	obj_proto[ rnum_targ ]->worn_on = obj_proto[ rnum_src ]->worn_on;
-	// add more if you want...
-
-	return ;
-}
-
-
-// Create an exit in a room (rnum) in this direction.  (No target)
-int create_dir( int room, int dir )
-{
-	if ( ( room < 0 ) || ( (unsigned int) room > World.size() ) )
-	{
-		Log( "create_dir(): tried to create invalid door" );
-		return FALSE;
-	}
-
-	if ( World[ room ] ->dir_option[ dir ] )
-		return FALSE;
-
-	World[ room ] ->dir_option[ dir ] = new Direction();
-	World[ room ] ->dir_option[ dir ] ->general_description = str_dup( "You see nothing special.\r\n" );
-	World[ room ] ->dir_option[ dir ] ->key = -1;
-
-	return TRUE;
-
-}
-
-
-// Remove an exit from a room (rnum).
-int free_dir( Room *room, int dir )
-{
-	if ( ( dir < 0 ) || ( dir >= NUM_OF_DIRS ) )
-	{
-		Log( "free_dir(): tried to free invalid door" );
-		return FALSE;
-	}
-
-	if ( !room->dir_option[ dir ] )
-		return FALSE;
-
-	room->dir_option[ dir ] ->to_room = 0;
-	room->dir_option[ dir ] ->exit_info = 0;
-
-	if ( room->dir_option[ dir ] ->general_description )
-		delete ( room->dir_option[ dir ] ->general_description );
-
-	if ( room->dir_option[ dir ] ->keyword )
-		delete ( room->dir_option[ dir ] ->keyword );
-
-	room->dir_option[ dir ] ->key = -1;
-	delete ( room->dir_option[ dir ] );
-	room->dir_option[ dir ] = NULL;
-
-	return TRUE;
-
-}
-
-
 // These defines were harvested from....  zedit.c ?
 #define ZCMD (zone_table[zone].cmd[cmd_no])
 #define W_EXIT(room, num) (World[(room)]->dir_option[(num)])
@@ -1050,14 +942,14 @@ ACMD( do_rlist )
 
 	for ( unsigned int i = 0;i < World.size();++i )
 	{
-		if ( World[ i ] ->vnum > r2 )
+		if (World[i]->getVnum() > r2)
 			break;
 
-		if ( World[ i ] ->vnum >= r1 )
+		if (World[i]->getVnum() >= r1)
 		{
 			found = true;
 			ch->send( "[%s%s%d%s]%s\r\n", COLOR_BOLD( ch, CL_COMPLETE ), COLOR_GREEN( ch, CL_COMPLETE ),
-			          World[ i ] ->vnum, COLOR_NORMAL( ch, CL_COMPLETE ), World[ i ] ->name );
+				World[i]->getVnum(), COLOR_NORMAL(ch, CL_COMPLETE), World[i]->getName());
 		}
 	}
 

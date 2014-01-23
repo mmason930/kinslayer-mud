@@ -1,8 +1,10 @@
-#include "JSObject.h"
+#include "conf.h"
+#include "sysdep.h"
 
+#include "structs.h"
+#include "JSObject.h"
 #include "JSCharacter.h"
 #include "JSRoom.h"
-#include "structs.h"
 #include "mobs.h"
 #include "db.h"
 #include "handler.h"
@@ -10,6 +12,7 @@
 
 #include "js_functions.h"
 #include "js_interpreter.h"
+#include "rooms/Room.h"
 
 void JSEnvironment::LoadJSObject()
 {
@@ -107,7 +110,7 @@ flusspferd::value JSObject::load_obj( const int vnum )
 
 	obj = read_object(r_num, REAL, true);
 	Room *inRoom = this->real->getRoom();
-	sprintf(obj->creator, "Loaded by Javascript. JSObject #%d. Room #%d.", this->real->getVnum(), (inRoom ? inRoom->vnum : -1));
+	sprintf(obj->creator, "Loaded by Javascript. JSObject #%d. Room #%d.", this->real->getVnum(), (inRoom ? inRoom->getVnum() : -1));
 
 	obj_to_obj(obj,real);
 

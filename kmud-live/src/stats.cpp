@@ -290,7 +290,7 @@ void StatManager::Boot()
 
 		sql::Row statGroupRow = statGroupQuery->getRow();
 
-		StatGroup *statGroup = new StatGroup(statGroupRow.getInt("chclass"), statGroupRow.getInt("race"), statGroupRow.getInt("sex"));
+		StatGroup statGroup(statGroupRow.getInt("chclass"), statGroupRow.getInt("race"), statGroupRow.getInt("sex"));
 
 		while(statGroupStatQuery->hasNextRow()) {
 
@@ -303,7 +303,7 @@ void StatManager::Boot()
 			if(statGroupId == statGroupStat_statGroupId) {
 
 				statGroupStatQuery->skipRow();
-				statGroup->StatRolls[statGroupStatRow.getInt("stat_type")].push_back(statGroupStatRow.getInt("probability"));
+				statGroup.StatRolls[statGroupStatRow.getInt("stat_type")].push_back(statGroupStatRow.getInt("probability"));
 			}
 			else if(statGroupStat_statGroupId < statGroupId) {
 

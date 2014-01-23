@@ -31,6 +31,8 @@
 #include "ClanUtil.h"
 #include "DatabaseUtil.h"
 #include "MiscUtil.h"
+#include "rooms/Room.h"
+#include "rooms/Exit.h"
 
 Clock individualHitClockDamage;
 #define PERFORM_VIOLENCE_LOGGING 0
@@ -79,7 +81,7 @@ bool JS_isArenaZone(int zoneVnum);
 
 bool isInArena(Character *ch)
 {
-	if(ch && ch->in_room && JS_isArenaZone(ch->in_room->GetZone()->getVnum()))
+	if(ch && ch->in_room && JS_isArenaZone(ch->in_room->getZone()->getVnum()))
 		return true;
 
 	return false;
@@ -358,7 +360,7 @@ void Character::weaveGroupDistribution( Character* victim )
 
 	//wp now has all the weave points which will be distributed to the group.
 	bool bNextPlayerKillIDObtained=false;
-	if(leader->in_room->zone == this->in_room->zone)
+	if(leader->in_room->getZoneNumber() == this->in_room->getZoneNumber())
 	{
 		leader->gainWeave( wp / num_followers );
 		leader->UpdateLegendEntry();
@@ -370,7 +372,7 @@ void Character::weaveGroupDistribution( Character* victim )
 	}
 	for(f = leader->followers;f;f = f->next)
 	{
-		if(f->follower->in_room->zone == this->in_room->zone && AFF_FLAGGED(f->follower, AFF_GROUP)
+		if (f->follower->in_room->getZoneNumber() == this->in_room->getZoneNumber() && AFF_FLAGGED(f->follower, AFF_GROUP)
 			&& f->follower->canGainWeave( victim ))
 		{
 			f->follower->gainWeave( wp / num_followers );
@@ -719,7 +721,7 @@ void Character::DeathCry()
 		{
 			if ( CAN_GO( this, door ) )
 			{
-				in_room = was_in->dir_option[ door ] ->to_room;
+				in_room = was_in->dir_option[ door ] ->getToRoom();
 				Act( "Your blood freezes as you hear someone's death cry.", FALSE, this, 0, 0, TO_ROOM );
 				this->in_room = was_in;
 			}
@@ -753,8 +755,7 @@ void Character::Die( Character *killer )
 		dieClock2.turnOn();
 		if ( !IS_NPC( this ) )
 		{
-			MudLog( BRF, (MAX(LVL_IMMORT,GET_LEVEL(this))), TRUE,
-					"%s killed by %s at %s", GET_NAME( this ), GET_NAME( killer ), this->in_room->name );
+			MudLog( BRF, (MAX(LVL_IMMORT,GET_LEVEL(this))), TRUE, "%s killed by %s at %s", GET_NAME( this ), GET_NAME( killer ), this->in_room->getName() );
 			if ( MOB_FLAGGED( killer, MOB_MEMORY ) )
 				killer->Forget(this);
 		}
@@ -1305,7 +1306,7 @@ int damage( Character * ch, Character * victim, int dam, int attacktype, int Bod
 {//TODO: Needs rewrite
 	if ( GET_POS( victim ) <= POS_DEAD )
 	{
-		Log( "SYSERR: Attempt to damage corpse '%s' in room #%d by '%s'.", GET_NAME( victim ), victim->in_room->vnum, GET_NAME( ch ) );
+		Log("SYSERR: Attempt to damage corpse '%s' in room #%d by '%s'.", GET_NAME(victim), victim->in_room->getVnum(), GET_NAME(ch));
 		victim->Die( ch );
 		return 0;			// -je, 7/7/92
 	}

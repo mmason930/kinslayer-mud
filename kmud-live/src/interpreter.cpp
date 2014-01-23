@@ -39,6 +39,7 @@
 #include "CharacterUtil.h"
 #include "Descriptor.h"
 #include "GatewayDescriptorType.h"
+#include "rooms/Room.h"
 
 extern const char *human_class_menu;
 extern const char *other_class_menu;
@@ -821,7 +822,7 @@ void CommandInterpreter( Character *ch, char *argument )
 
 	/* otherwise, find the command */
 	if ( ( !ch->ignoreCommandTrigger ) && (
-		str_cmp(arg,"override")
+		str_cmp(vArgs[ 0 ].c_str(), "override")
 		&& js_command_triggers(ch, vArgs[ 0 ].c_str(), argument, true) 
 		))
 	{//command trigger took over

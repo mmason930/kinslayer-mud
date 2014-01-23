@@ -1,17 +1,23 @@
-#include "JSRoom.h"
+#include <flusspferd.hpp>
 
-#include "JSCharacter.h"
-#include "JSObject.h"
+#include "conf.h"
+#include "sysdep.h"
+
 #include "structs.h"
 #include "mobs.h"
 #include "db.h"
 #include "olc.h"
 #include "constants.h"
 
+#include "JSRoom.h"
+#include "JSCharacter.h"
+#include "JSObject.h"
 #include "js_functions.h"
 #include "StringUtil.h"
+#include "rooms/Room.h"
+#include "rooms/RoomSector.h"
+#include "rooms/Exit.h"
 
-extern std::list< Direction* > TemporaryDirections;
 extern std::vector<Object*> obj_proto;
 
 #include "js_interpreter.h"
@@ -39,14 +45,14 @@ void JSRoom::digTo( int dir, JSRoom *d, bool bothSides, bool temporary )
 
 	if( real->dir_option[ dir ] != NULL )
 		delete real->dir_option[ dir ];
-	real->dir_option[ dir ] = new Direction();
-	real->dir_option[ dir ]->to_room = d->toReal();
+	real->dir_option[ dir ] = new Exit();
+	real->dir_option[ dir ]->setToRoom(d->toReal());
 
 	if( bothSides && d->toReal()->dir_option[ rev_dir[ dir ] ] )
 	{
 		delete d->toReal()->dir_option[ rev_dir[ dir ] ];
-		d->toReal()->dir_option[ rev_dir[ dir ] ] = new Direction();
-		d->toReal()->dir_option[ rev_dir[ dir ] ]->to_room = real;
+		d->toReal()->dir_option[ rev_dir[ dir ] ] = new Exit();
+		d->toReal()->dir_option[ rev_dir[ dir ] ]->setToRoom(real);
 	}
 
 }
@@ -54,12 +60,12 @@ void JSRoom::killExit( int dir, bool bothSides )
 {
 	if( dir < 0 || dir >= NUM_OF_DIRS ) return;
 
-	if( bothSides && real->GetNeighbor( dir ) )
+	if (bothSides && real->getNeighbor(dir))
 	{
-		if( real->GetNeighbor( dir )->GetNeighbor( rev_dir[ dir ] ) == real )
+		if (real->getNeighbor(dir)->getNeighbor(rev_dir[dir]) == real)
 		{
-			delete real->GetNeighbor( dir )->dir_option[ rev_dir[ dir ] ];
-			real->GetNeighbor( dir )->dir_option[ rev_dir[ dir ] ] = NULL;
+			delete real->getNeighbor(dir)->dir_option[rev_dir[dir]];
+			real->getNeighbor(dir)->dir_option[rev_dir[dir]] = NULL;
 		}
 	}
 	if( real->dir_option[ dir ] != NULL )
@@ -70,19 +76,19 @@ void JSRoom::killExit( int dir, bool bothSides )
 }
 void JSRoom::disableExit( int dir, bool bothSides )
 {
-	if( !real || !real->GetNeighbor( dir ) )
+	if (!real || !real->getNeighbor(dir))
 		return;
-	real->dir_option[ dir ]->Disable();
-	if( bothSides && real->GetNeighbor( dir )->GetNeighbor( rev_dir[ dir ] ) == real )
-		real->GetNeighbor( dir )->dir_option[ rev_dir[ dir ] ]->Disable();
+	real->dir_option[ dir ]->disable();
+	if (bothSides && real->getNeighbor(dir)->getNeighbor(rev_dir[dir]) == real)
+		real->getNeighbor(dir)->dir_option[rev_dir[dir]]->disable();
 }
 void JSRoom::enableExit( int dir, bool bothSides )
 {
-	if( !real || !real->GetNeighbor( dir ) )
+	if (!real || !real->getNeighbor(dir))
 		return;
-	real->dir_option[ dir ]->Enable();
-	if( bothSides && real->GetNeighbor( dir )->GetNeighbor( rev_dir[ dir ] ) == real )
-		real->GetNeighbor( dir )->dir_option[ rev_dir[ dir ] ]->Enable();
+	real->dir_option[ dir ]->enable();
+	if (bothSides && real->getNeighbor(dir)->getNeighbor(rev_dir[dir]) == real)
+		real->getNeighbor(dir)->dir_option[rev_dir[dir]]->enable();
 }
 
 int JSRoom::countJS( flusspferd::value tVnum )
@@ -119,59 +125,59 @@ flusspferd::array JSRoom::items()
 flusspferd::string JSRoom::doorName( const int dir )
 {
 	if( real && dir >= 0 && dir < NUM_OF_DIRS && real->dir_option[dir] )
-		return real->dir_option[dir]->keyword;
+		return real->dir_option[dir]->getKeywords();
 	return "";
 }
 int JSRoom::doorHidden( const int dir )
 {
 	if( real && dir >= 0 && dir < NUM_OF_DIRS && real->dir_option[dir] )
-		return real->dir_option[dir]->hidden;
+		return real->dir_option[dir]->getHiddenLevel();
 	return 0;
 }
 int JSRoom::getDoorFlags( const int dir )
 {
 	if( real && dir >= 0 && dir < NUM_OF_DIRS && real->dir_option[dir] )
-		return real->dir_option[dir]->exit_info;
+		return real->dir_option[dir]->getExitInfo();
 	return 0;
 }
 void JSRoom::setDoorFlags( const int dir, const int v )
 {
 	if( real && dir >= 0 && dir < NUM_OF_DIRS && real->dir_option[dir] )
-		real->dir_option[dir]->exit_info = v;
+		real->dir_option[dir]->setExitInfo(v);
 }
 int JSRoom::doorPick( const int dir )
 {
 	if( real && dir >= 0 && dir <= NUM_OF_DIRS && real->dir_option[dir] )
-		return real->dir_option[dir]->PickReq;
+		return real->dir_option[dir]->getPickRequirement();
 	return 0;
 }
 int JSRoom::doorKey( const int dir )
 {
 	if( real && dir >= 0 && dir < NUM_OF_DIRS && real->dir_option[dir] )
-		return real->dir_option[dir]->key;
+		return real->dir_option[dir]->getKey();
 	return 0;
 }
 flusspferd::string JSRoom::doorDesc( const int dir )
 {
 	if( real && dir >= 0 && dir < NUM_OF_DIRS && real->dir_option[dir] )
-		return real->dir_option[dir]->general_description;
+		return real->dir_option[dir]->getGeneralDescription();
 	return "";
 }
 bool JSRoom::doorExists( const int dir )
 {
-	return (real && dir >= 0 && dir < NUM_OF_DIRS && real->dir_option[dir] && real->dir_option[dir]->IsDoor());
+	return (real && dir >= 0 && dir < NUM_OF_DIRS && real->dir_option[dir] && real->dir_option[dir]->isDoor());
 }
 bool JSRoom::doorIsLocked( const int dir )
 {
-	return (real && dir >= 0 && dir < NUM_OF_DIRS && real->dir_option[dir] && real->dir_option[dir]->IsLocked());
+	return (real && dir >= 0 && dir < NUM_OF_DIRS && real->dir_option[dir] && real->dir_option[dir]->isLocked());
 }
 bool JSRoom::doorIsClosed( const int dir )
 {	
-	return (real && dir >= 0 && dir < NUM_OF_DIRS && real->dir_option[dir] && real->dir_option[dir]->IsClosed());
+	return (real && dir >= 0 && dir < NUM_OF_DIRS && real->dir_option[dir] && real->dir_option[dir]->isClosed());
 }
 bool JSRoom::doorIsRammable( const int dir )
 {
-	return (real && dir >= 0 && dir < NUM_OF_DIRS && real->dir_option[dir] && real->dir_option[dir]->IsRammable());
+	return (real && dir >= 0 && dir < NUM_OF_DIRS && real->dir_option[dir] && real->dir_option[dir]->isRammable());
 }
 bool JSRoom::isFlagged( const int flag )
 {
@@ -180,13 +186,13 @@ bool JSRoom::isFlagged( const int flag )
 int JSRoom::distanceTo( JSRoom *d )
 {
 	if( real && d->toReal() )
-		return real->DistanceToRoom( d->toReal() );
+		return real->getDistanceToRoom( d->toReal() );
 	return -1;
 }
 int JSRoom::firstStep( JSRoom *d )
 {
 	if( real && d->toReal() )
-		return real->FindFirstStep( d->toReal() );
+		return real->findFirstStep( d->toReal() );
 	return -1;
 }
 void JSRoom::echoaround(JSCharacter& ch, std::string message)
@@ -200,7 +206,7 @@ void JSRoom::echoaround(JSCharacter& ch, std::string message)
 	}
 }
 
-flusspferd::value JSRoom::load_obj( const int vnum )
+flusspferd::value JSRoom::loadObj( const int vnum )
 {
 	if( !real ) return lookupValue(0);
 
@@ -217,7 +223,7 @@ flusspferd::value JSRoom::load_obj( const int vnum )
 	}
 
 	obj = read_object(r_num, REAL, true);
-	sprintf(obj->creator, "Loaded by Javascript. JSRoom #%d.", this->real->vnum);
+	sprintf(obj->creator, "Loaded by Javascript. JSRoom #%d.", this->real->getVnum());
 
 	obj->MoveToRoom(real);
 	if( !obj->IsPurged() ) {
@@ -226,7 +232,8 @@ flusspferd::value JSRoom::load_obj( const int vnum )
 
 	return lookupValue(obj);
 }
-flusspferd::value JSRoom::load_mob( const int vnum )
+
+flusspferd::value JSRoom::loadMob( const int vnum )
 {
 	if( !real ) return lookupValue(0);
 	int r_num;
@@ -243,6 +250,7 @@ flusspferd::value JSRoom::load_mob( const int vnum )
 	}
 	return lookupValue(mob);
 }
+
 flusspferd::array JSRoom::pathToRoom( JSRoom *otherRoom )
 {
 	std::list<int> thePath;
@@ -250,14 +258,115 @@ flusspferd::array JSRoom::pathToRoom( JSRoom *otherRoom )
 
 	if( real && otherRoom->toReal() )
 	{
-		thePath = real->PathToRoom( otherRoom->toReal() );
+		thePath = real->pathToRoom( otherRoom->toReal() );
 		for( std::list<int>::iterator i = thePath.begin(); i != thePath.end(); i++ )
 			if( *i >= 0 )
 				path.call("push", *i );
 	}
 	return path;
 }
+
 bool JSRoom::roomFlagged(const int flag)
 {
 	return ROOM_FLAGGED(real, flag);
+}
+
+Room* JSRoom::toReal()
+{
+	return real;
+}
+
+void JSRoom::setReal(Room *r)
+{
+	real = r;
+}
+
+int JSRoom::vnum()
+{
+	return (real ? real->getVnum() : (-1));
+}
+
+int JSRoom::sector()
+{
+	return (real ? real->getSector()->getValue() : 0);
+}
+
+int JSRoom::zoneVnum()
+{
+	return (real ? real->getZone()->getVnum() : -1);
+}
+
+bool JSRoom::dark()
+{
+	return (real ? real->isDark() : false);
+}
+
+flusspferd::string JSRoom::zoneName()
+{
+	return (real ? real->getZone()->getName() : "undefined");
+}
+
+flusspferd::value JSRoom::direction(int dir)
+{
+	return lookupValue((real ? real->getNeighbor(dir) : real));
+}
+
+flusspferd::array JSRoom::neighbors()
+{
+	flusspferd::array a = flusspferd::create_array(NUM_OF_DIRS);
+	for (unsigned int i = 0; i < NUM_OF_DIRS; ++i)
+	{
+		if (real != 0 && real->dir_option[i] != 0 && real->dir_option[i]->getToRoom() != 0)
+			a.set_element(i, lookupValue(real->dir_option[i]->getToRoom()));
+		else
+			a.set_element(i, lookupValue((Room*)0));
+	}
+	return a;
+}
+
+void JSRoom::echo(flusspferd::string message)
+{
+	if (real) {
+		sendToRoom(flusspferd::string::concat(message, "\r\n").c_str(), real);
+	}
+}
+
+void JSRoom::zecho(flusspferd::string message)
+{
+	if (real) {
+		sendToZone(flusspferd::string::concat(message, "\r\n").c_str(), real->getZoneNumber());
+	}
+}
+
+void JSRoom::zreset()
+{
+	if (real) {
+		real->getZone()->Reset();
+	}
+}
+
+flusspferd::string JSRoom::getName()
+{
+	if (real) {
+		return flusspferd::string(real->getName());
+	}
+	else {
+		return flusspferd::string("Invalid");
+	}
+}
+
+flusspferd::string JSRoom::getDescription()
+{
+	return flusspferd::string(real ? real->description : "Invalid");
+}
+
+JSRoom::JSRoom(flusspferd::object const &self, flusspferd::call_context& cc) : base_type(self)
+{
+}
+
+JSRoom::~JSRoom() {}
+
+JSRoom::JSRoom(flusspferd::object const &self, Room *real) : base_type(self)
+{
+	this->real = real;
 }

@@ -33,6 +33,9 @@
 #include "js_functions.h"
 #include "accounts.h"
 #include "Descriptor.h"
+#include "rooms/Room.h"
+#include "rooms/RoomSector.h"
+#include "rooms/Exit.h"
 #include "zones.h"
 
 #include <boost/filesystem.hpp>
@@ -56,6 +59,7 @@
 #include "dg_event.h"
 
 #include "Exception.h"
+#include "Game.h"
 
 /*   external vars  */
 extern GameTime time_info;
@@ -292,8 +296,8 @@ ACMD(do_saveall)
 		ReditSaveClock.reset(true);
 
 		if( World.empty() == false ) {
-			int lowVnum = World.front()->vnum;
-			int highVnum = World.back()->vnum;
+			int lowVnum = World.front()->getVnum();
+			int highVnum = World.back()->getVnum();
 			redit_save_to_disk( lowVnum, highVnum );
 		}
 		ReditSaveClock.turnOff();
@@ -305,8 +309,8 @@ ACMD(do_saveall)
 	else if(!strn_cmp(arg1, "OLC", strlen(arg1)))
 	{
 		if( World.empty() == false ) {
-			int lowVnum = World.front()->vnum;
-			int highVnum = World.back()->vnum;
+			int lowVnum = World.front()->getVnum();
+			int highVnum = World.back()->getVnum();
 			redit_save_to_disk( lowVnum, highVnum );
 		}
 		for(i = 0;i < ZoneManager::GetManager().NumZones();++i)
@@ -676,12 +680,12 @@ ACMD(do_copy)
 			Destination = new Room();
 		else
 			Destination = World[real];
-		Destination->Copy(Source,false);
-		Destination->vnum = vnum2;
-		Destination->zone = zone->GetRnum();
+		Destination->copy(Source,false);
+		Destination->setVnum(vnum2);
+		Destination->setZoneNumber(zone->GetRnum());
 		if( real == NOWHERE )//New room. Add to world.
 			AddRoomToWorld( Destination );
-		olc_add_to_save_list( Destination->GetZone()->getVnum(), OLC_SAVE_ROOM );
+		olc_add_to_save_list( Destination->getZone()->getVnum(), OLC_SAVE_ROOM );
 	}
 	else if( !strn_cmp(type, "object", strlen(type)) )
 	{
@@ -1019,11 +1023,11 @@ ACMD(do_memory)
 	}
 
 	ch->send("Directions:       Single: [%s%5i%s] bytes, Number: [%s%5d%s], Total: [%s%10f%s] MB.\r\n",
-	         COLOR_GREEN(ch, CL_NORMAL), sizeof(Direction), COLOR_NORMAL(ch, CL_NORMAL),
+	         COLOR_GREEN(ch, CL_NORMAL), sizeof(Exit), COLOR_NORMAL(ch, CL_NORMAL),
 	         COLOR_GREEN(ch, CL_NORMAL), number, COLOR_NORMAL(ch, CL_NORMAL),
-	         COLOR_GREEN(ch, CL_NORMAL), MB(number * sizeof(Direction)), COLOR_NORMAL(ch, CL_NORMAL));
+			 COLOR_GREEN(ch, CL_NORMAL), MB(number * sizeof(Exit)), COLOR_NORMAL(ch, CL_NORMAL));
 
-	total += sizeof(Direction) * number;
+	total += sizeof(Exit) * number;
 
 	std::tr1::unordered_map<void*, pair<std::string, flusspferd::value> >::iterator iter;
 	int jsValues = mapper.size();
@@ -2552,7 +2556,7 @@ ACMD(do_dig)
 			break;
 	}
 
-	mzone = ch->in_room->GetZone();
+	mzone = ch->in_room->getZone();
 	tzone = ZoneManager::GetManager().GetZoneByRoomVnum(tvnum);
 
 	if (tzone == NULL)
@@ -2565,7 +2569,7 @@ ACMD(do_dig)
 	{
 		if( !mzone->CanEdit(ch) )
 		{
-			ch->send("You do not have permission to edit room #%d.\r\n", ch->in_room->vnum);
+			ch->send("You do not have permission to edit room #%d.\r\n", ch->in_room->getVnum());
 		}
 		if( !tzone->CanEdit(ch) )
 		{
@@ -2591,19 +2595,19 @@ ACMD(do_dig)
 		OLC_NUM(d) = tvnum;
 		OLC_ROOM(d) = new Room();
 
-		OLC_ROOM(d)->name = str_dup("An unfinished room");
+		OLC_ROOM(d)->setName("An unfinished room");
 
 		/* Copy the room's description.*/
 		OLC_ROOM(d)->description = str_dup("You are in an unfinished room.\r\n");
-		OLC_ROOM(d)->zone = tzone->GetRnum();
-		OLC_ROOM(d)->vnum = NOWHERE;
+		OLC_ROOM(d)->setZoneNumber(tzone->GetRnum());
+		OLC_ROOM(d)->setVnum(NOWHERE);
 
 		/*
 		 * Save the new room to memory.
 		 * redit_save_internally handles adding the room in the right place, etc.
 		 */
 		redit_save_internally(d);
-		AddOlcLog( d->character, "room", d->olc->room->vnum );
+		AddOlcLog(d->character, "room", d->olc->room->getVnum());
 		OLC_VAL(d) = 0;
 
 		ch->send("New room (%d) created.\r\n", tvnum);
@@ -2618,14 +2622,16 @@ ACMD(do_dig)
 		return;
 	}
 
-	room->dir_option[rev_dir[dir]] = new Direction();
-	room->dir_option[rev_dir[dir]]->to_room = ch->in_room;
+	room->dir_option[rev_dir[dir]] = new Exit();
+	room->dir_option[rev_dir[dir]]->setToRoom(ch->in_room);
 
-	ch->in_room->dir_option[dir] = new Direction();
-	ch->in_room->dir_option[dir]->to_room = room;
+	ch->in_room->dir_option[dir] = new Exit();
+	ch->in_room->dir_option[dir]->setToRoom(room);
 
 	/* Only works if you have Oasis OLC */
 	olc_add_to_save_list(tzone->getVnum(), OLC_SAVE_ROOM);
+	if (room->getZone()->getVnum() != tzone->getVnum())
+		olc_add_to_save_list(room->getZone()->getVnum(), OLC_SAVE_ROOM);
 
 	ch->send("You make an exit %s to room %d.\r\n", buf2, tvnum);
 }
@@ -2646,7 +2652,7 @@ ACMD(do_echo)
 			if(!count)
 			{
 				MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE,
-					"%s made echo %s in room %d.", StringUtil::cap(GET_NAME(ch)), argument, ch->in_room->vnum);
+					"%s made echo %s in room %d.", StringUtil::cap(GET_NAME(ch)), argument, ch->in_room->getVnum());
 			}
 		}
 	}
@@ -2875,7 +2881,7 @@ ACMD(do_at)
 
 	if(GET_LEVEL(ch) >= LVL_IMMORT && GET_LEVEL(ch) <= LVL_BLDER || PLR_FLAGGED(ch, PLR_ZONE_BAN))
 	{
-		if(!loc->GetZone()->CanEdit(ch))
+		if(!loc->getZone()->CanEdit(ch))
 		{
 			ch->send("You must be higher level to leave your zone!\r\n");
 			return;
@@ -2891,8 +2897,7 @@ ACMD(do_at)
 
 	CommandInterpreter(ch, command);
 
-	MudLog(NRM, MAX(GET_INVIS_LEV(ch), LVL_GRGOD),TRUE, "%s used the at command : \"%s\" in room %d.",
-	       GET_NAME(ch), command, r->vnum);
+	MudLog(NRM, MAX(GET_INVIS_LEV(ch), LVL_GRGOD),TRUE, "%s used the at command : \"%s\" in room %d.", GET_NAME(ch), command, r->getVnum());
 
 	if( ch->IsPurged() )
 		return;
@@ -2914,7 +2919,7 @@ ACMD(do_goto)
 
 	/* Must have permission to leave your zone at lower levels... */
 	if(GET_LEVEL(ch) >= LVL_IMMORT && GET_LEVEL(ch) <= LVL_BLDER || PLR_FLAGGED(ch, PLR_ZONE_BAN))
-		if(!loc->GetZone()->CanEdit(ch))
+		if(!loc->getZone()->CanEdit(ch))
 		{
 			ch->send("You must be higher level to leave your zone!\r\n");
 			return;
@@ -2974,8 +2979,7 @@ ACMD(do_trans)
 			Act("$n has transferred you!", FALSE, ch, 0, victim, TO_VICT);
 			look_at_room(victim, 0);
 
-			MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "%s transfers %s to room vnum %d.",
-			       GET_NAME(ch), GET_NAME(victim), victim->in_room->vnum);
+			MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "%s transfers %s to room vnum %d.", GET_NAME(ch), GET_NAME(victim), victim->in_room->getVnum());
 		}
 	}
 
@@ -3057,8 +3061,7 @@ ACMD(do_teleport)
 		look_at_room(victim, 0);
 
 
-		MudLog(NRM, MAX(LVL_IMMORT, GET_INVIS_LEV(ch)), TRUE,
-		       "%s has teleported %s to %s.", GET_NAME(ch), GET_NAME(victim), victim->in_room->name);
+		MudLog(NRM, MAX(LVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s has teleported %s to %s.", GET_NAME(ch), GET_NAME(victim), victim->in_room->getName());
 
 		victim->CancelTimer(false);
 	}
@@ -3113,18 +3116,15 @@ void do_stat_room(Character * ch)
 	int i, found = 0;
 	Object *j = 0;
 	Character *k = 0;
-	int type, dir_opt;
+	int dir_opt;
 
-	sprintf(buf, "Room name: %s%s%s\r\n", COLOR_CYAN(ch, CL_NORMAL), rm->name,
-	        COLOR_NORMAL(ch, CL_NORMAL));
+	sprintf(buf, "Room name: %s%s%s\r\n", COLOR_CYAN(ch, CL_NORMAL), rm->getName(), COLOR_NORMAL(ch, CL_NORMAL));
 
 	ch->send(buf);
 
-	type = rm->sector_type;
-
 	sprintf(buf, "Zone: [%3d], VNum: [%s%5d%s], RNum: [%5d], Light [%2d], Type: %s\r\n",
-	        rm->GetZone()->getVnum(), COLOR_GREEN(ch, CL_NORMAL), rm->vnum,
-	        COLOR_NORMAL(ch, CL_NORMAL), real_room(rm->vnum), (int)rm->light, sector_types[type]);
+		rm->getZone()->getVnum(), COLOR_GREEN(ch, CL_NORMAL), rm->getVnum(),
+		COLOR_NORMAL(ch, CL_NORMAL), real_room(rm->getVnum()), (int)rm->getLight(), rm->getSector()->getStandardName().c_str());
 
 	ch->send(buf);
 
@@ -3210,23 +3210,21 @@ void do_stat_room(Character * ch)
 	{
 		if (rm->dir_option[i])
 		{
-			if (!rm->dir_option[i]->to_room)
+			if (!rm->dir_option[i]->getToRoom())
 				sprintf(buf1, " %sNONE%s", COLOR_CYAN(ch, CL_NORMAL), COLOR_NORMAL(ch, CL_NORMAL));
 			else
-				sprintf(buf1, "%s%5d%s", COLOR_CYAN(ch, CL_NORMAL),
-
-				        rm->dir_option[i]->to_room->vnum, COLOR_NORMAL(ch, CL_NORMAL));
-			dir_opt = rm->dir_option[i]->exit_info;
+				sprintf(buf1, "%s%5d%s", COLOR_CYAN(ch, CL_NORMAL), rm->dir_option[i]->getToRoom()->getVnum(), COLOR_NORMAL(ch, CL_NORMAL));
+			dir_opt = rm->dir_option[i]->getExitInfo();
 			char sBuf[1024];
 			sprintbit((long)dir_opt, (const char**)(exit_bits), sBuf, ", ", COLOR_YELLOW(ch, CL_NORMAL), "");
 			sprintf(buf, "Exit %s%-5s%s:  To: [%s], Key: [%5d], Keywrd: %s, Type: %s\r\n",
-			        COLOR_CYAN(ch, CL_NORMAL), dirs[i], COLOR_NORMAL(ch, CL_NORMAL), buf1, rm->dir_option[i]->key,
-			        rm->dir_option[i]->keyword ? rm->dir_option[i]->keyword : "None", sBuf);
+			        COLOR_CYAN(ch, CL_NORMAL), dirs[i], COLOR_NORMAL(ch, CL_NORMAL), buf1, rm->dir_option[i]->getKey(),
+			        rm->dir_option[i]->getKeywords() ? rm->dir_option[i]->getKeywords() : "None", sBuf);
 			ch->send(buf);
 
 
-			if (rm->dir_option[i]->general_description)
-				strcpy(buf, rm->dir_option[i]->general_description);
+			if (rm->dir_option[i]->getGeneralDescription())
+				strcpy(buf, rm->dir_option[i]->getGeneralDescription());
 			else
 				strcpy(buf, "  No exit description.\r\n");
 
@@ -3312,7 +3310,7 @@ void do_stat_object(Character * ch, Object * j)
 
 	else
 	{
-		sprintf(buf2, "%d", j->in_room->vnum);
+		sprintf(buf2, "%d", j->in_room->getVnum());
 		strcat(buf, buf2);
 	}
 
@@ -3500,8 +3498,8 @@ void do_stat_character(Character * ch, Character * k)
 			(!IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB")),
 			grn, GET_NAME(k), nrm,
 			yel, (k->player.idnum), nrm,
-			yel, (k->in_room ? k->in_room->vnum : -1), nrm,
-			yel, (k->StartRoom() ? k->StartRoom()->vnum : -1), nrm,
+			yel, (k->in_room ? k->in_room->getVnum() : -1), nrm,
+			yel, (k->StartRoom() ? k->StartRoom()->getVnum() : -1), nrm,
 			yel, k->wait, nrm);
 	ch->send(strcat(buf, buf2));
 
@@ -4814,10 +4812,10 @@ ACMD(do_force)
 		ch->send(OK);
 
 		MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE,
-		       "(GC) %s forced room %d to %s", GET_NAME(ch), ch->in_room->vnum, to_force);
+			"(GC) %s forced room %d to %s", GET_NAME(ch), ch->in_room->getVnum(), to_force);
 
 
-		std::list<Character*> lPeople = ch->in_room->GetPeople();
+		std::list<Character*> lPeople = ch->in_room->getPeople();
 		for(std::list<Character*>::iterator pIter = lPeople.begin();pIter != lPeople.end();++pIter)
 		{
 			vict = (*pIter);
@@ -5028,7 +5026,7 @@ ACMD(do_wiznet)
 		        argument);
 		sprintf(buf2, "Someone: %s%s\r\n", emote ? "<--- " : "", argument);
 	}
-	CommManager::GetManager().SaveComm("wiznet", argument, ch, ch->in_room->vnum, level, ch->points.invis);
+	CommManager::GetManager().SaveComm("wiznet", argument, ch, ch->in_room->getVnum(), level, ch->points.invis);
 
 	for (d = descriptor_list; d; d = d->next)
 	{
@@ -5078,7 +5076,7 @@ ACMD(do_zreset)
 		return;
 	}
 	else if (*::arg == '.')
-		zone = ZoneManager::GetManager().GetZoneByRnum(ch->in_room->zone);
+		zone = ZoneManager::GetManager().GetZoneByRnum(ch->in_room->getZoneNumber());
 	else
 		zone = ZoneManager::GetManager().GetZoneByVnum(atoi(::arg));
 
@@ -5568,7 +5566,7 @@ ACMD(do_wshow)
 			char *cBuffer;
 			if (self)
 			{
-				Zone *zone = ZoneManager::GetManager().GetZoneByRnum(ch->in_room->zone);
+				Zone *zone = ZoneManager::GetManager().GetZoneByRnum(ch->in_room->getZoneNumber());
 				zone->PrintToBuffer(Buffer);
 			}
 			else if (*value && IsNumber(value))
@@ -5700,7 +5698,8 @@ ACMD(do_wshow)
 
 			sConnected = (JSManager::get()->SciteIsConnected() ? "Connected" : "Not Connected");
 
-			sprintf(buf + strlen(buf), " Kinpad: %s\r\n", sConnected.c_str());
+			sprintf(buf + strlen(buf), " Kinpad Server: %s, Port: %d, Descriptors: %u\r\n", sConnected.c_str(), JSManager::get()->ScitePort(), JSManager::get()->numberOfConnectedDescriptors());
+			sprintf(buf + strlen(buf), " Web Socket Server: %s, Port: %d, Descriptors: %u\r\n", (game->playerPortalServerIsConnected() ? "Connected" : "Not Connected"), game->getPlayerPortalPort(), game->getNumberOfPlayerPortalDescriptors());
 			sprintf(buf + strlen(buf), " Switch: %s\r\n", Conf->play.switch_restriction ? "Restricted" : "Not Restricted");
 			sprintf(buf + strlen(buf), " Flusspferd Garbage Collections: %lld\r\n", JSManager::get()->getGC_Count());
 
@@ -5722,9 +5721,8 @@ ACMD(do_wshow)
 			{
 				for (j = 0; j < NUM_OF_DIRS; j++)
 				{
-					if (World[i]->dir_option[j] && World[i]->dir_option[j]->to_room == 0)
-						sprintf(buf + strlen(buf), "%2d: [%5d] %s\r\n", ++k, World[i]->vnum,
-						        World[i]->name);
+					if (World[i]->dir_option[j] && World[i]->dir_option[j]->getToRoom() == 0)
+						sprintf(buf + strlen(buf), "%2d: [%5d] %s\r\n", ++k, World[i]->getVnum(), World[i]->getName());
 				}
 			}
 			page_string(ch->desc, buf, TRUE);
@@ -5737,8 +5735,7 @@ ACMD(do_wshow)
 			{
 				if (ROOM_FLAGGED( (World[i]), ROOM_DEATH))
 				{
-					sprintf(buf + strlen(buf), "%2d: [%5d] %s\r\n", ++j,
-					        World[i]->vnum, World[i]->name);
+					sprintf(buf + strlen(buf), "%2d: [%5d] %s\r\n", ++j, World[i]->getVnum(), World[i]->getName());
 				}
 			}
 			page_string(ch->desc, buf, TRUE);
@@ -5751,8 +5748,7 @@ ACMD(do_wshow)
 			{
 				if (ROOM_FLAGGED( (World[i]), ROOM_GODROOM))
 				{
-					sprintf(buf + strlen(buf), "%2d: [%5d] %s\r\n",
-					        ++j, World[i]->vnum, World[i]->name);
+					sprintf(buf + strlen(buf), "%2d: [%5d] %s\r\n", ++j, World[i]->getVnum(), World[i]->getName());
 				}
 			}
 			page_string(ch->desc, buf, TRUE);
@@ -5804,18 +5800,18 @@ ACMD(do_wshow)
 			ch->send("Rooms with %d lines: \r\n", atoi(arg3));
 			for(j = 0, i = 0;i < (int)World.size();++i)
 			{
-				Zone *zone = World[i]->GetZone();
+				Zone *zone = World[i]->getZone();
 				if( (!strn_cmp(value, "all", strlen(value)) || (unsigned int)atoi(value) == zone->getVnum())
-				        && World[i]->LinesInDesc() == atoi(arg3))
+				&& World[i]->getLinesInDescription() == atoi(arg3))
 				{
 					if(j)
 						ch->send(", ");
 					if(!(j % 10))
 						ch->send("\r\n");
-					if( !World[i]->GetZone()->IsClosed() )
+					if( !World[i]->getZone()->IsClosed() )
 						ch->send("%s%s", COLOR_BOLD(ch, CL_COMPLETE), COLOR_GREEN(ch, CL_COMPLETE));
-					ch->send("%d", World[i]->vnum);
-					if( !World[i]->GetZone()->IsClosed() )
+					ch->send("%d", World[i]->getVnum());
+					if( !World[i]->getZone()->IsClosed() )
 						ch->send("%s", COLOR_NORMAL(ch, CL_COMPLETE));
 					++j;
 				}

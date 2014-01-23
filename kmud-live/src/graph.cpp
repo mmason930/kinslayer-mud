@@ -29,6 +29,9 @@
 #include "handler.h"
 #include "db.h"
 #include "shop.h"
+#include "rooms/Room.h"
+#include "rooms/RoomSector.h"
+#include "rooms/Exit.h"
 
 #include <stack>
 
@@ -59,8 +62,7 @@ static struct bfs_queue_struct *queue_head = 0, *queue_tail = 0;
 #define MARK(room) (SET_BITK(ROOM_FLAGS(room), (1<<ROOM_BFS_MARK)))
 #define UNMARK(room) (REMOVE_BIT(ROOM_FLAGS(room), (1<<ROOM_BFS_MARK)))
 #define IS_MARKED(room) (ROOM_FLAGGED(room, ROOM_BFS_MARK))
-#define TOROOM(x, y) ((x)->dir_option[(y)]->to_room)
-#define IS_CLOSED(x, y) (EXIT_FLAGGED((x)->dir_option[(y)], EX_CLOSED))
+#define TOROOM(x, y) ((x)->dir_option[(y)]->getToRoom())
 
 #define VALID_EDGE(x, y)  ((x)->dir_option[(y)] && (TOROOM((x), y)) && (!ROOM_FLAGGED(TOROOM((x), y), ROOM_NOTRACK)) && (!IS_MARKED(TOROOM((x), y))))
 #define VALID_EDGE2(x, y) ((x)->dir_option[(y)] && (TOROOM((x), y)) && (!IS_MARKED(TOROOM((x), y))))
@@ -117,7 +119,7 @@ void ClearPathQueue()
 	}
 }
 
-std::list<int> Room::PathToRoom( Room *OtherRoom )
+std::list<int> Room::pathToRoom( Room *OtherRoom )
 {
 	std::list<int> ThePath;
 	std::stack< PathNode > *CurrentPath;
@@ -134,10 +136,10 @@ std::list<int> Room::PathToRoom( Room *OtherRoom )
 		if( VALID_EDGE2(this, i) )
 		{
 			CurrentPath = new std::stack< PathNode >;
-			CurrentPath->push( PathNode(this->dir_option[i]->to_room, i) );
+			CurrentPath->push( PathNode(this->dir_option[i]->getToRoom(), i) );
 			PathQueue.push( CurrentPath );
 
-			MARK(this->dir_option[i]->to_room);
+			MARK(this->dir_option[i]->getToRoom());
 		}
 	}
 
@@ -164,9 +166,9 @@ std::list<int> Room::PathToRoom( Room *OtherRoom )
 			{
 				if( VALID_EDGE2(CurrentPath->top().TheRoom, i) )
 				{
-					MARK(CurrentPath->top().TheRoom->dir_option[i]->to_room);
+					MARK(CurrentPath->top().TheRoom->dir_option[i]->getToRoom());
 					std::stack< PathNode > *NewStack = new std::stack< PathNode >( *CurrentPath );
-					NewStack->push(PathNode(CurrentPath->top().TheRoom->dir_option[i]->to_room, i));
+					NewStack->push(PathNode(CurrentPath->top().TheRoom->dir_option[i]->getToRoom(), i));
 					PathQueue.push( NewStack );
 				}
 			}
@@ -176,7 +178,7 @@ std::list<int> Room::PathToRoom( Room *OtherRoom )
 	return ThePath;
 }
 
-int Room::FindFirstStep( Room *OtherRoom )
+int Room::findFirstStep( Room *OtherRoom )
 {
 	int curr_dir, curr_room;
 
@@ -229,7 +231,7 @@ int Room::FindFirstStep( Room *OtherRoom )
 	}
 	return BFS_NO_PATH;
 }
-int Room::DistanceToRoom( Room* OtherRoom )
+int Room::getDistanceToRoom( Room* OtherRoom )
 {
 	int curr_dir, curr_room, curr_depth;
 
@@ -247,8 +249,8 @@ int Room::DistanceToRoom( Room* OtherRoom )
 	{
 		if ( VALID_EDGE2( this, curr_dir ) )
 		{
-			MARK( (this)->dir_option[(curr_dir)]->to_room );
-			bfs_enqueue( (this)->dir_option[(curr_dir)]->to_room, curr_dir, 1 );
+			MARK( (this)->dir_option[(curr_dir)]->getToRoom() );
+			bfs_enqueue( (this)->dir_option[(curr_dir)]->getToRoom(), curr_dir, 1 );
 		}
 	}
 	/* now, do the classic BFS. */
@@ -267,8 +269,8 @@ int Room::DistanceToRoom( Room* OtherRoom )
 			{
 				if ( VALID_EDGE2( queue_head->room, curr_dir ) )
 				{
-					MARK( (queue_head->room)->dir_option[(curr_dir)]->to_room );
-					bfs_enqueue( (queue_head->room)->dir_option[(curr_dir)]->to_room, queue_head->dir, queue_head->depth+1 );
+					MARK( (queue_head->room)->dir_option[(curr_dir)]->getToRoom() );
+					bfs_enqueue( (queue_head->room)->dir_option[(curr_dir)]->getToRoom(), queue_head->dir, queue_head->depth+1 );
 				}
 			}
 			bfs_dequeue();
@@ -276,61 +278,6 @@ int Room::DistanceToRoom( Room* OtherRoom )
 	}
 	return -1;
 }
-
-/************************
-int Room::DistanceToRoom( Room* OtherRoom )
-{
-	std::stack< Room* > *CurrentPath;
-	int i;
-
-	//No distance between here and the destination.
-	if( OtherRoom == this ) return 0;
-
-	for(i = 0;i < World.size();++i)
-		UNMARK(World[i]);
-
-	for(i = 0;i < NUM_OF_DIRS;++i)
-	{
-		if( VALID_EDGE(this, i) )
-		{
-			CurrentPath = new std::stack< Room* >;
-			CurrentPath->push( this->dir_option[i]->to_room );
-			PathQueue.push( CurrentPath );
-
-			MARK(this->dir_option[i]->to_room);
-		}
-	}
-
-	MARK(this);
-
-	while( !PathQueue.empty() )
-	{
-		CurrentPath = PathQueue.top();
-		//We have found our destination.
-		if( CurrentPath->top() == OtherRoom )
-		{
-			int nr = CurrentPath->size();
-			ClearPathQueue();//This will invalidate CurrentPath!
-			return nr;
-		}
-		else
-		{
-			PathQueue.pop();
-			for( i = 0;i < NUM_OF_DIRS;++i )
-			{
-				if( VALID_EDGE(CurrentPath->top(), i) )
-				{
-					MARK(CurrentPath->top()->dir_option[i]->to_room);
-					PathQueue.push( new std::stack< Room* >( *CurrentPath ) );
-					PathQueue.top()->push(CurrentPath->top()->dir_option[i]->to_room);
-				}
-			}
-			delete CurrentPath;
-		}
-	}
-	return -1;
-}
-*****************************/
 
 void bfs_enqueue( Room *room, int dir, int depth )
 {
@@ -486,12 +433,13 @@ void Character::HuntVictim()
 		this->player.hunting = 0;
 	else
 	{
-		if ( !this->master && !MOB_FLAGGED(this, MOB_SENTINEL) &&
-		        ( !ROOM_FLAGGED(EXIT(this, dir)->to_room, ROOM_NOMOB) &&
-		          !ROOM_FLAGGED(EXIT(this, dir)->to_room, ROOM_DEATH) &&
-		          !IS_SET(this->MobData->nsects, (1<<SECT(EXIT( this, dir )->to_room )) ) &&
-		          (!MOB_FLAGGED(this, MOB_STAY_ZONE) ||
-				  (EXIT(this, dir)->to_room->zone == this->in_room->zone))))
+		if (!this->master && !MOB_FLAGGED(this, MOB_SENTINEL) &&
+			(!ROOM_FLAGGED(EXIT(this, dir)->getToRoom(), ROOM_NOMOB) &&
+			!ROOM_FLAGGED(EXIT(this, dir)->getToRoom(), ROOM_DEATH) &&
+			!IS_SET(this->MobData->nsects, (1 << EXIT(this, dir)->getToRoom()->getSector()->getValue())) &&
+			(!MOB_FLAGGED(this, MOB_STAY_ZONE) ||
+			(EXIT(this, dir)->getToRoom()->getZoneNumber() == this->in_room->getZoneNumber()))))
+
 		{
 			perform_move( this, dir, 1 );
 		}

@@ -15,6 +15,7 @@ public:
 	boost::uuids::uuid objectId;
 	char *message;
 	time_t timestamp;
+
 };
 
 class ObjectMoveLogger
@@ -30,6 +31,7 @@ public:
 	void threadHandler();
 
 	void kill();
+	void freeEntries(std::list<ObjectMoveLogEntry> &entries);
 };
 
 #endif

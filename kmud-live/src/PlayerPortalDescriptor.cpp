@@ -81,7 +81,7 @@ void PlayerPortalDescriptor::processInput()
 		}
 		catch (WebSocketException webSocketException)
 		{
-			Log("Exception while processing websocket input for player portal descriptor: %s", webSocketException.what().c_str());
+			MudLog(NRM, LVL_APPR, TRUE, "Exception while processing websocket input for player portal descriptor: %s", webSocketException.what().c_str());
 			this->close();
 		}
 	}
@@ -91,7 +91,7 @@ void PlayerPortalDescriptor::processInput()
 		{
 			unsigned int bytesRead = 0;
 			WebSocketDataFrame *webSocketDataFrame = WebSocketDataFrame::parse(this->descriptor->getInputBuffer(), bytesRead);
-
+			
 			if (webSocketDataFrame != NULL)
 			{
 				if (webSocketDataFrame->getOpCode() == 0x8)
@@ -128,10 +128,8 @@ void PlayerPortalDescriptor::processInput()
 				{
 					processCommand(command);
 				}
-
 				commandStart = commandEnd + 1;
 			}
-
 			if (commandStart != inputBufferData)
 				inputBuffer.erase(0, commandStart - inputBufferData);
 		}
@@ -231,5 +229,5 @@ void PlayerPortalDescriptor::send(const std::string &output)
 
 	delete[] cleansedPacket;
 
-	descriptor->socketWriteInstant(dataFrame.prepareNetworkPacket());
+	descriptor->send(dataFrame.prepareNetworkPacket());
 }

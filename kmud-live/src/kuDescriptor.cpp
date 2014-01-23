@@ -127,26 +127,23 @@ void kuDescriptor::send(const std::string &str)
 
 int kuDescriptor::socketWrite()
 {
-	int i = 0;
-	while( !this->output.empty() )
+	const char *outputBuffer = output.c_str();
+	int bytesWritten = 0;
+
+	if (!*outputBuffer)
+		return 0;
+
+	server->handleBeforeSocketWriteCallback(this);
+
+	if((bytesWritten = ::send(this->sock, outputBuffer, output.size(), 0)) < 0)
 	{
-		std::string substr = this->output.substr( 0, 1024*5 );
-
-		server->handleBeforeSocketWriteCallback(this, substr);
-
-		if((i = ::send(this->sock, substr.c_str(), substr.size(), 0)) < 0)
-		{
-			this->socketClose();
-			return -1;
-		}
-
-//		std::cout << "[WRITE]: " << std::endl << std::endl << "`" << substr << "`" << std::endl << std::endl;
-
-		server->handleAfterSocketWriteCallback(this, substr);
-
-		this->output.erase(0, substr.size());
+		this->socketClose();
+		return -1;
 	}
-	return i;
+	
+	server->handleAfterSocketWriteCallback(this, std::string(outputBuffer, bytesWritten));
+
+	this->output.erase(0, bytesWritten);
 }
 
 void kuDescriptor::clearInput()
@@ -214,11 +211,24 @@ void kuDescriptor::disconnect() {
 	}
 }
 
+//Write a message to the socket immediately.
 void kuDescriptor::socketWriteInstant(const std::string &message)
 {
-	if( ::send(sock, message.c_str(), message.size(), 0) < 0 ) {
+	//send() is not guaranteed to write the full message to the connected socket.
+	//Keep attempting to send until the full message has been written, or until an error has occurred.
+	int bytesSent = 0, bytesRemaining = message.size();
+	const char *buffer = message.c_str(), *bufferReadPosition;
+	while (bytesRemaining)
+	{
+		bufferReadPosition = (buffer + bytesSent);
 
-		socketClose();
+		if ((bytesSent = ::send(sock, bufferReadPosition, bytesRemaining, 0)) < 0) {
+			//Under zero return value indicates error.
+			socketClose();
+			return;
+		}
+
+		bytesRemaining -= bytesSent;
 	}
 }
 

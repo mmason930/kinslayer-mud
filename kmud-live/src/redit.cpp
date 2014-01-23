@@ -20,6 +20,9 @@
 
 #include "StringUtil.h"
 #include "Descriptor.h"
+#include "rooms/Room.h"
+#include "rooms/RoomSector.h"
+#include "rooms/Exit.h"
 
 /* List each room saved, was used for debugging. */
 #if 0
@@ -55,7 +58,6 @@ void redit_parse(Descriptor *d, char *arg);
 void redit_setup_new(Descriptor *d);
 void redit_setup_existing(Descriptor *d, int real_num);
 void redit_save_internally(Descriptor *d);
-void free_room(Room *room);
 int can_edit_zone(Character *ch, int number);
 
 /*------------------------------------------------------------------------*/
@@ -86,7 +88,7 @@ void AddRoomToWorld( Room *TheRoom )
 	std::vector<Room*>::iterator rIter;
 	for(rIter = World.begin();rIter != World.end();++rIter, ++room_num)
 	{
-		if( (*rIter)->vnum > TheRoom->vnum )
+		if ((*rIter)->getVnum() > TheRoom->getVnum())
 		{
 			World.insert(rIter, TheRoom);
 			break;
@@ -133,11 +135,11 @@ int buildwalk(Character *ch, int dir)
 	if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_BUILDWALK) && GET_LEVEL(ch) >= LVL_BUILDER)
 	{
 		//get_char_colors(ch);
-		if ( !ch->in_room->GetZone()->CanEdit(ch) )
+		if ( !ch->in_room->getZone()->CanEdit(ch) )
 		{
 			ch->send("You do not have build permissions in this zone.\r\n");
 		}
-		else if ((vnum = ch->in_room->GetZone()->FindUnusedRoomVnum()) == NOWHERE)
+		else if ((vnum = ch->in_room->getZone()->FindUnusedRoomVnum()) == NOWHERE)
 			ch->send("No free vnums are available in this zone!\r\n");
 		else
 		{
@@ -155,16 +157,16 @@ int buildwalk(Character *ch, int dir)
 			}
 
 			d->olc = new OLC();
-			OLC_ZNUM(d) = ch->in_room->zone;
+			OLC_ZNUM(d) = ch->in_room->getZoneNumber();
 			OLC_NUM(d) = vnum;
 			OLC_ROOM(d) = new Room();
 
-			OLC_ROOM(d)->name = str_dup("New BuildWalk Room");
+			OLC_ROOM(d)->setName(str_dup("New BuildWalk Room"));
 
 			sprintf(buf, "This unfinished room was created by %s.\r\n", GET_NAME(ch));
 			OLC_ROOM(d)->description = str_dup(buf);
-			OLC_ROOM(d)->zone = OLC_ZNUM(d);
-			OLC_ROOM(d)->vnum = NOWHERE;
+			OLC_ROOM(d)->setZoneNumber(OLC_ZNUM(d));
+			OLC_ROOM(d)->setVnum(NOWHERE);
 
 			/*
 			 * Save the new room to memory.
@@ -175,10 +177,10 @@ int buildwalk(Character *ch, int dir)
 
 			/* Link rooms */
 			room = FindRoomByVnum(vnum);
-			EXIT(ch, dir) = new Direction();
-			EXIT(ch, dir)->to_room = room;
-			room->dir_option[rev_dir[dir]] = new Direction();
-			room->dir_option[rev_dir[dir]]->to_room = ch->in_room;
+			EXIT(ch, dir) = new Exit();
+			EXIT(ch, dir)->setToRoom(room);
+			room->dir_option[rev_dir[dir]] = new Exit();
+			room->dir_option[rev_dir[dir]]->setToRoom(ch->in_room);
 
 			/* Report room creation to user */
 			ch->send("%s%sRoom #%d created by BuildWalk.%s\r\n", COLOR_BOLD(ch, CL_COMPLETE),
@@ -197,7 +199,7 @@ void redit_setup_new(Descriptor *d)
 {
 	OLC_ROOM(d) = new Room();
 
-	OLC_ROOM(d)->name = str_dup("An unfinished room");
+	OLC_ROOM(d)->setName("An unfinished room");
 	OLC_ROOM(d)->description = str_dup("You are in an unfinished room.\r\n");
 	redit_disp_menu(d);
 	OLC_VAL(d) = 0;
@@ -228,11 +230,11 @@ void redit_save_internally(Descriptor *d)
 	room_num = real_room(OLC_NUM(d));
 
 	//Allocate & copy
-	new_room					= new Room(OLC_ROOM(d));
+	new_room = new Room(OLC_ROOM(d));
 
 	//Change a few variables from their standard copy values.
-	new_room->vnum				= OLC_NUM(d);
-	new_room->func				= NULL;
+	new_room->setVnum(OLC_NUM(d));
+	new_room->func = NULL;
 
 	//EXISTING ROOM
 	if (room_num > 0)
@@ -269,7 +271,7 @@ void redit_save_internally(Descriptor *d)
 		}
 
 		Room *oldRoomPtr = (*old_room);
-		(*old_room)->FreeLiveRoom();//No longer considered a prototype
+		(*old_room)->freeLiveRoom();//No longer considered a prototype
 		delete ( (*old_room) );
 		World.erase(old_room);
 
@@ -280,9 +282,9 @@ void redit_save_internally(Descriptor *d)
 		{
 			for(j = 0;j < NUM_OF_DIRS;++j)
 			{
-				if(World[i]->dir_option[j] && World[i]->dir_option[j]->to_room == oldRoomPtr)
+				if(World[i]->dir_option[j] && World[i]->dir_option[j]->getToRoom() == oldRoomPtr)
 				{
-					World[i]->dir_option[j]->to_room = new_room;
+					World[i]->dir_option[j]->setToRoom(new_room);
 				}
 			}
 		}
@@ -292,63 +294,14 @@ void redit_save_internally(Descriptor *d)
 	else
 	{
 		AddRoomToWorld( new_room );
-		room_num = real_room(new_room->vnum);
-		new_room->zone = OLC_ZNUM(d);
+		room_num = real_room(new_room->getVnum());
+		new_room->setZoneNumber(OLC_ZNUM(d));
 	}
 
-	olc_add_to_save_list(World[room_num]->GetZone()->getVnum(), OLC_SAVE_ROOM);
+	olc_add_to_save_list(World[room_num]->getZone()->getVnum(), OLC_SAVE_ROOM);
 }
 
 /*------------------------------------------------------------------------*/
-class JSTrigger;
-void Room::AddToBatch( sql::BatchInsertStatement &roomInsert,
-					   sql::BatchInsertStatement &exitInsert,
-					   sql::BatchInsertStatement &jsInsert )
-{
-	roomInsert.beginEntry();
-	Zone *myZone = this->GetZone();
-
-	roomInsert.putLong(this->vnum);
-	roomInsert.putLong(myZone ? myZone->getVnum() : -1);
-	roomInsert.putString( this->name ? this->name : "" );
-	roomInsert.putString( this->description ? this->description : "" );
-	roomInsert.putInt( this->sector_type );
-	roomInsert.putInt( this->room_flags );
-	roomInsert.putInt( this->auction_vnum );
-	roomInsert.putString( ExtraDescription::Serialize(this->ex_description) );
-
-	roomInsert.endEntry();
-
-	for(unsigned int dir = 0;dir < NUM_OF_DIRS;++dir)
-	{
-		if( this->dir_option[ dir ] == NULL || this->dir_option[ dir ]->to_room == NULL )
-			continue;
-		Direction *exit = this->dir_option[ dir ];
-		exitInsert.beginEntry();
-
-		exitInsert.putInt(this->vnum);
-		exitInsert.putInt(exit->to_room->vnum);
-		exitInsert.putString( exit->general_description ? exit->general_description : "" );
-		exitInsert.putString( exit->keyword ? exit->keyword : "" );
-		exitInsert.putInt( exit->exit_info );
-		exitInsert.putInt( exit->hidden );
-		exitInsert.putInt( exit->PickReq );
-		exitInsert.putInt( exit->key );
-		exitInsert.putInt( dir );
-
-		exitInsert.endEntry();
-	}
-
-	for(unsigned int i = 0;i < this->js_scripts->size();++i) {
-		jsInsert.beginEntry();
-
-		jsInsert.putString("R");
-		jsInsert.putLong(this->vnum);
-		jsInsert.putLong(this->js_scripts->at(i)->vnum);
-
-		jsInsert.endEntry();
-	}
-}
 
 void reditSaveFinalizationQueryProcessor( sql::Connection connection, std::string query1, std::string query2 )
 {
@@ -414,12 +367,12 @@ void redit_save_to_disk( int lowVnum, int highVnum )
 		jsInsert.start();
 
 		int bottomRnum = 0;
-		while( World[ bottomRnum ]->vnum < lowVnum )
+		while (World[bottomRnum]->getVnum() < lowVnum)
 			bottomRnum++;
 
-		while( bottomRnum < World.size() && World[ bottomRnum ]->vnum <= highVnum )
+		while (bottomRnum < World.size() && World[bottomRnum]->getVnum() <= highVnum)
 		{
-			World[ bottomRnum++ ]->AddToBatch( roomInsert, exitInsert, jsInsert );
+			World[bottomRnum++]->addToBatch(roomInsert, exitInsert, jsInsert);
 		}
 
 		roomInsert.finish();
@@ -506,51 +459,6 @@ void redit_save_to_disk(int zone_num)
 	olc_remove_from_save_list(zone->getVnum(), OLC_SAVE_ROOM);
 }
 
-/*------------------------------------------------------------------------*/
-
-void free_room(Room *room)
-{
-	int i;
-	struct ExtraDescription *thist, *next;
-
-	if (room->name)
-		delete[] (room->name);
-	if (room->description)
-		delete[] (room->description);
-
-	/*
-	 * Free exits.
-	 */
-	for (i = 0; i < NUM_OF_DIRS; i++)
-	{
-		if (room->dir_option[i])
-		{
-			if (room->dir_option[i]->general_description)
-				delete[] (room->dir_option[i]->general_description);
-
-			if (room->dir_option[i]->keyword)
-				delete[] (room->dir_option[i]->keyword);
-		}
-
-		delete (room->dir_option[i]);
-	}
-
-	/*
-	 * Free extra descriptions.
-	 */
-	for (thist = room->ex_description; thist; thist = next)
-	{
-		next = thist->next;
-
-		if (thist->keyword)
-			delete[] (thist->keyword);
-
-		if (thist->description)
-			delete[] (thist->description);
-
-		delete[] (thist);
-	}
-}
 
 /**************************************************************************
  Menu functions
@@ -591,12 +499,12 @@ void redit_disp_exit_menu(Descriptor *d)
 	 * if exit doesn't exist, alloc/create it
 	 */
 	if (!OLC_EXIT(d))
-		OLC_EXIT(d) = new Direction();
+		OLC_EXIT(d) = new Exit();
 
 	/*
 	 * Weird door handling!
 	 */
-	if (IS_SET(OLC_EXIT(d)->exit_info, EX_ISDOOR))
+	if (OLC_EXIT(d)->isFlagged(EX_ISDOOR))
 	{
 		strcpy(buf2, "Is a door");
 	}
@@ -618,13 +526,13 @@ void redit_disp_exit_menu(Descriptor *d)
 	    "%s8%s) Purge exit.\r\n"
 	    "Enter choice, 0 to quit : ",
 
-	    grn, nrm, cyn, OLC_EXIT(d)->to_room ? OLC_EXIT(d)->to_room->vnum : -1,
-	    grn, nrm, yel, OLC_EXIT(d)->general_description ? OLC_EXIT(d)->general_description : "<NONE>",
-	    grn, nrm, yel, OLC_EXIT(d)->keyword ? OLC_EXIT(d)->keyword : "<NONE>",
-	    grn, nrm, cyn, OLC_EXIT(d)->key,
+		grn, nrm, cyn, OLC_EXIT(d)->getToRoom() ? OLC_EXIT(d)->getToRoom()->getVnum() : -1,
+	    grn, nrm, yel, OLC_EXIT(d)->getGeneralDescription() ? OLC_EXIT(d)->getGeneralDescription() : "<NONE>",
+	    grn, nrm, yel, OLC_EXIT(d)->getKeywords() ? OLC_EXIT(d)->getKeywords() : "<NONE>",
+	    grn, nrm, cyn, OLC_EXIT(d)->getKey(),
 	    grn, nrm, cyn, buf2,
-	    grn, nrm, cyn, OLC_EXIT(d)->HiddenLevel(),
-	    grn, nrm, cyn, OLC_EXIT(d)->PickReq,
+	    grn, nrm, cyn, OLC_EXIT(d)->getHiddenLevel(),
+	    grn, nrm, cyn, (int)OLC_EXIT(d)->getPickRequirement(),
 	    grn, nrm
 	);
 
@@ -640,8 +548,8 @@ void redit_disp_exit_flag_menu(Descriptor *d)
 	d->send("%s1%s) Door Exists: %s\r\n"
 			"%s2%s) Rammable: %s\r\n"
 			"%s3%s) Exit\r\n"
-			"	Enter choice : ", grn, nrm, StringUtil::yesNo(IS_SET(OLC_EXIT(d)->exit_info, EX_ISDOOR)).c_str(), grn, nrm,
-			(OLC_EXIT(d)->IsRammable() ? "Yes" : "No"), grn, nrm);
+			"	Enter choice : ", grn, nrm, StringUtil::yesNo(OLC_EXIT(d)->isFlagged(EX_ISDOOR)).c_str(), grn, nrm,
+			(OLC_EXIT(d)->isRammable() ? "Yes" : "No"), grn, nrm);
 }
 
 /*
@@ -679,11 +587,9 @@ void redit_disp_sector_menu(Descriptor *d)
 
 	d->send("[H[J");
 #endif
-
-	for (counter = 0; counter < NUM_ROOM_SECTORS; ++counter)
+	for (auto sectorIter = RoomSector::getStartIterator(); sectorIter != RoomSector::getEndIterator(); ++sectorIter)
 	{
-		d->send("%s%2d%s) %-20.20s %s", grn, counter, nrm,
-		        sector_types[counter], !(++columns % 2) ? "\r\n" : "");
+		d->send("%s%2d%s) %-20.20s %s", grn, (*sectorIter)->getValue(), nrm, (*sectorIter)->getStandardName().c_str(), ((*sectorIter)->getValue() % 2) ? "\r\n" : "");
 	}
 	d->send("\r\nEnter sector type : ");
 	OLC_MODE(d) = REDIT_SECTOR;
@@ -703,10 +609,9 @@ void redit_disp_menu(Descriptor *d)
 	Zone *zone = ZoneManager::GetManager().GetZoneByRnum(OLC_ZNUM(d));
 
 	sprintbit(room->room_flags, (const char**)room_bits, buf1);
-	sprinttype(room->sector_type, (const char **) sector_types, buf2);
 
-	if( d->olc->room->auction_vnum != -1
-	&& (a = AuctionManager::GetManager().GetAuction(d->olc->room->auction_vnum)) != NULL )
+	if( d->olc->room->getAuctionVnum() != -1
+	&& (a = AuctionManager::GetManager().GetAuction(d->olc->room->getAuctionVnum())) != NULL )
 		sprintf(aBuffer, "%s%s%s [ %s%d%s ]", cyn, a->getName().c_str(), nrm, cyn, a->getVnum(), nrm);
 	else
 		sprintf(aBuffer, "%s< NONE >%s", cyn, nrm);
@@ -736,31 +641,31 @@ void redit_disp_menu(Descriptor *d)
 
 	    cyn, OLC_NUM(d), nrm,
 	    cyn, zone->getVnum(), nrm,
-	    grn, nrm, yel, room->name,
+	    grn, nrm, yel, room->getName(),
 	    grn, nrm, yel, room->description,
 	    grn, nrm, cyn, buf1,
-	    grn, nrm, cyn, buf2,
+	    grn, nrm, cyn, OLC_ROOM(d)->getSector()->getStandardName().c_str(),
 	    grn, nrm, cyn,
-	    room->dir_option[NORTH] && room->dir_option[NORTH]->to_room ?
-	    room->dir_option[NORTH]->to_room->vnum : -1,
+		room->dir_option[NORTH] && room->dir_option[NORTH]->getToRoom() ?
+		room->dir_option[NORTH]->getToRoom()->getVnum() : -1,
 	    grn, nrm, cyn,
-	    room->dir_option[EAST] && room->dir_option[EAST]->to_room ?
-	    room->dir_option[EAST]->to_room->vnum : -1,
+		room->dir_option[EAST] && room->dir_option[EAST]->getToRoom() ?
+		room->dir_option[EAST]->getToRoom()->getVnum() : -1,
 	    grn, nrm, cyn,
-	    room->dir_option[SOUTH] && room->dir_option[SOUTH]->to_room ?
-	    room->dir_option[SOUTH]->to_room->vnum : -1,
+		room->dir_option[SOUTH] && room->dir_option[SOUTH]->getToRoom() ?
+		room->dir_option[SOUTH]->getToRoom()->getVnum() : -1,
 	    grn, nrm, cyn,
-	    room->dir_option[WEST] && room->dir_option[WEST]->to_room ?
-	    room->dir_option[WEST]->to_room->vnum : -1,
+		room->dir_option[WEST] && room->dir_option[WEST]->getToRoom() ?
+		room->dir_option[WEST]->getToRoom()->getVnum() : -1,
 	    grn, nrm, cyn,
-	    room->dir_option[UP] && room->dir_option[UP]->to_room ?
-	    room->dir_option[UP]->to_room->vnum : -1,
+		room->dir_option[UP] && room->dir_option[UP]->getToRoom() ?
+		room->dir_option[UP]->getToRoom()->getVnum() : -1,
 	    grn, nrm, cyn,
-	    room->dir_option[DOWN] && room->dir_option[DOWN]->to_room ?
-	    room->dir_option[DOWN]->to_room->vnum : -1,
+		room->dir_option[DOWN] && room->dir_option[DOWN]->getToRoom() ?
+		room->dir_option[DOWN]->getToRoom()->getVnum() : -1,
 		grn, nrm, aBuffer.c_str(),
 	    grn, nrm,
-	    grn, nrm, cyn, room->deleted ? "Yes" : "No",
+	    grn, nrm, cyn, room->isDeleted() ? "Yes" : "No",
 		grn, nrm, cyn, (room->js_scripts->size() ? "Set." : "Not Set."),
 	    grn, nrm
 	);
@@ -894,15 +799,15 @@ void redit_parse(Descriptor *d, char *arg)
 					break;
 				case 'd':
 				case 'D':
-					if(OLC_ROOM(d)->deleted)
+					if(OLC_ROOM(d)->isDeleted())
 					{
 						d->send("This room will no longer be deleted.\r\n");
-						OLC_ROOM(d)->deleted = false;
+						OLC_ROOM(d)->setDeleted(false);
 					}
 					else
 					{
 						d->send("This room will be deleted after the next reboot.\r\n");
-						OLC_ROOM(d)->deleted = true;
+						OLC_ROOM(d)->setDeleted(true);
 					}
 					OLC_VAL(d) = 1;
 					redit_disp_menu(d);
@@ -925,11 +830,9 @@ void redit_parse(Descriptor *d, char *arg)
 				return;
 			break;
 		case REDIT_NAME:
-			if (OLC_ROOM(d)->name)
-				delete[] (OLC_ROOM(d)->name);
 			if (strlen(arg) > MAX_ROOM_NAME)
 				arg[MAX_ROOM_NAME - 1] = '\0';
-			OLC_ROOM(d)->name = str_dup((arg && *arg) ? arg : "undefined");
+			OLC_ROOM(d)->setName(arg && *arg ? arg : "undefined");
 			break;
 
 		case REDIT_DESC:
@@ -960,14 +863,14 @@ void redit_parse(Descriptor *d, char *arg)
 
 		case REDIT_SECTOR:
 			number = atoi(arg);
-			if (number < 0 || number >= NUM_ROOM_SECTORS)
+			if (RoomSector::getEnumByValue(number) == NULL)
 			{
 				d->send("Invalid choice!");
 				redit_disp_sector_menu(d);
 				return;
 			}
 			else
-				OLC_ROOM(d)->sector_type = number;
+				OLC_ROOM(d)->setSector((RoomSector*)RoomSector::getEnumByValue(number));
 			break;
 		case REDIT_EXIT_MENU:
 			switch (*arg)
@@ -979,17 +882,19 @@ void redit_parse(Descriptor *d, char *arg)
 					d->send("Exit to room number : ");
 					return;
 				case '2':
+				{
 					OLC_MODE(d) = REDIT_EXIT_DESCRIPTION;
 					d->sendRaw("Enter exit description: (/s saves /h for help)\r\n\r\n");
 					d->backstr = NULL;
-					if (OLC_EXIT(d)->general_description)
+					if (OLC_EXIT(d)->getGeneralDescription())
 					{
-						d->sendRaw(OLC_EXIT(d)->general_description);
-						d->backstr = str_dup(OLC_EXIT(d)->general_description);
+						d->sendRaw(OLC_EXIT(d)->getGeneralDescription());
+						d->backstr = str_dup(OLC_EXIT(d)->getGeneralDescription());
 					}
-					d->str = &OLC_EXIT(d)->general_description;
+					d->str = OLC_EXIT(d)->getPointerToGeneralDescription();//Todo: Do not modify const variable directly.
 					d->max_str = MAX_EXIT_DESC;
 					return;
+				}
 				case '3':
 					OLC_MODE(d) = REDIT_EXIT_KEYWORD;
 					d->send("Enter keywords : ");
@@ -1027,7 +932,7 @@ void redit_parse(Descriptor *d, char *arg)
 					d->send("That room does not exist, try again : ");
 					return;
 				}
-			OLC_EXIT(d)->to_room = FindRoomByVnum(atoi(arg));
+			OLC_EXIT(d)->setToRoom(FindRoomByVnum(atoi(arg)));
 			redit_disp_exit_menu(d);
 			return;
 		case REDIT_EXIT_DESCRIPTION:
@@ -1037,13 +942,11 @@ void redit_parse(Descriptor *d, char *arg)
 			MudLog(BRF, LVL_BUILDER, TRUE, "SYSERR: Reached REDIT_EXIT_DESC case in parse_redit");
 			break;
 		case REDIT_EXIT_KEYWORD:
-			if (OLC_EXIT(d)->keyword)
-				delete[] (OLC_EXIT(d)->keyword);
-			OLC_EXIT(d)->keyword = ((arg && *arg) ? str_dup(arg) : NULL);
+			OLC_EXIT(d)->setKeywords(arg && *arg ? arg : NULL);
 			redit_disp_exit_menu(d);
 			return;
 		case REDIT_EXIT_KEY:
-			OLC_EXIT(d)->key = atoi(arg);
+			OLC_EXIT(d)->setKey(atoi(arg));
 			redit_disp_exit_menu(d);
 			return;
 		case REDIT_HIDDEN:
@@ -1057,7 +960,7 @@ void redit_parse(Descriptor *d, char *arg)
 			}
 			else
 			{
-				OLC_EXIT(d)->hidden = (char)number;
+				OLC_EXIT(d)->setHiddenLevel((byte)number);
 				redit_disp_exit_menu(d);
 			}
 			return;
@@ -1072,7 +975,7 @@ void redit_parse(Descriptor *d, char *arg)
 			}
 			else
 			{
-				OLC_EXIT(d)->PickReq = number;
+				OLC_EXIT(d)->setPickRequirement(number);
 				redit_disp_exit_menu(d);
 			}
 			return;
@@ -1080,12 +983,12 @@ void redit_parse(Descriptor *d, char *arg)
 			number = atoi(arg);
 			if( number == 1 )
 			{
-				TOGGLE_BIT(OLC_EXIT(d)->exit_info, EX_ISDOOR);
+				OLC_EXIT(d)->toggleFlag(EX_ISDOOR);
 				redit_disp_exit_flag_menu(d);
 			}
 			else if( number == 2 )
 			{
-				OLC_EXIT(d)->ToggleRammable();
+				OLC_EXIT(d)->toggleRammable();
 				redit_disp_exit_flag_menu(d);
 			}
 			else if( number == 3 )
@@ -1099,10 +1002,10 @@ void redit_parse(Descriptor *d, char *arg)
 			}
 			return;
 		case REDIT_AUCTION_VNUM:
-			if( (AuctionManager::GetManager().GetAuction( atoi(arg) )) != NULL )
-				d->olc->room->auction_vnum = atoi(arg);
+			if ((AuctionManager::GetManager().GetAuction(atoi(arg))) != NULL)
+				d->olc->room->setAuctionVnum(atoi(arg));
 			else
-				d->olc->room->auction_vnum = (-1);
+				d->olc->room->setAuctionVnum(-1);
 			redit_disp_menu(d);
 			break;
 		case REDIT_EXTRADESC_KEY:

@@ -24,6 +24,7 @@
 #include <flusspferd/spidermonkey/context.hpp>
 #include "js_trigger.h"
 #include "screen.h"
+#include "rooms/RoomSector.h"
 
 flusspferd::object makeConstants()
 {
@@ -212,17 +213,8 @@ flusspferd::object makeConstants()
 	o.set_property("ROOM_SMITHING", flusspferd::value(ROOM_SMITHING));
 	o.set_property("ROOM_TAILORING", flusspferd::value(ROOM_TAILORING));
 
-	o.set_property("SECT_INSIDE", flusspferd::value(SECT_INSIDE));	// Indoors
-	o.set_property("SECT_CITY", flusspferd::value(SECT_CITY));	// In a city
-	o.set_property("SECT_FIELD", flusspferd::value(SECT_FIELD));	// In a field
-	o.set_property("SECT_FOREST", flusspferd::value(SECT_FOREST));	// In a forest
-	o.set_property("SECT_HILLS", flusspferd::value(SECT_HILLS));	// In the hills
-	o.set_property("SECT_MOUNTAIN", flusspferd::value(SECT_MOUNTAIN));	// On a mountain
-	o.set_property("SECT_WATER_SWIM", flusspferd::value(SECT_WATER_SWIM));	// Swimmable water
-	o.set_property("SECT_WATER_NOSWIM", flusspferd::value(SECT_WATER_NOSWIM));	// Water - need a boat
-	o.set_property("SECT_UNDERWATER", flusspferd::value(SECT_UNDERWATER));	// Underwater
-	o.set_property("SECT_FLYING", flusspferd::value(SECT_FLYING));	// Wheee!
-	o.set_property("SECT_ROAD", flusspferd::value(SECT_ROAD));	// Roads
+	for (auto sectorIter = RoomSector::getStartIterator(); sectorIter != RoomSector::getEndIterator(); ++sectorIter)
+		o.set_property((*sectorIter)->getStandardName(), (*sectorIter)->getValue());
 
 	o.set_property("NORTH", flusspferd::value(NORTH));
 	o.set_property("EAST", flusspferd::value(EAST));

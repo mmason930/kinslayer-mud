@@ -27,7 +27,8 @@
 #include "MiscUtil.h"
 #include "UserLogoutType.h"
 #include "Descriptor.h"
-
+#include "rooms/Room.h"
+#include "rooms/RoomSector.h"
 #include "js.h"
 #include "js_trigger.h"
 
@@ -743,7 +744,7 @@ ACMD( do_ride )
 			Act( "$E would not like having your type on $M.", FALSE, ch, 0, victim, TO_CHAR );
 		else if ( ch->getUserClan( CLAN_WOLFBROTHER ) )
 			ch->send( "You wouldn't even think about getting up on that thing!\r\n" );
-		else if ( SECT( ch->in_room ) == SECT_INSIDE )
+		else if ( ch->in_room->getSector() == RoomSector::inside )
 			ch->send( "You can't ride inside!\r\n" );
 		else if ( GET_SKILL( ch, SKILL_RIDE ) < percent )
 			Act( "You try to mount $M and fall right off of $S back!", FALSE, ch, 0, victim, TO_CHAR );

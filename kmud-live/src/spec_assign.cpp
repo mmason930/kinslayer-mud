@@ -16,6 +16,7 @@
 #include "interpreter.h"
 #include "utils.h"
 #include "mobs.h"
+#include "rooms/Room.h"
 
 extern struct Index *obj_index;
 

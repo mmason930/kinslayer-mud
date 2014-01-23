@@ -34,6 +34,7 @@
 #include "ClanUtil.h"
 #include "Descriptor.h"
 #include "CharacterUtil.h"
+#include "rooms/Room.h"
 
 
 extern const int rev_dir[];

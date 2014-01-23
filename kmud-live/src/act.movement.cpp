@@ -27,6 +27,9 @@
 #include "zones.h"
 #include "StringUtil.h"
 #include "Descriptor.h"
+#include "rooms/Room.h"
+#include "rooms/RoomSector.h"
+#include "rooms/Exit.h"
 
 extern Character *character_list;
 extern Descriptor *descriptor_list;
@@ -89,22 +92,6 @@ void Character::SitOnChair( Object *Chair, bool show)
 	}
 	Chair->SatOnBy = this;
 	this->player.sitting_on = Chair;
-}
-
-std::string Room::FadeCode()
-{
-	static std::stringstream Code;
-	Code.str("");
-	Code << MD5::getHashFromString( itos(this->vnum).c_str() );
-	return Code.str();
-}
-
-std::string Room::GateCode()
-{
-	static std::stringstream Code;
-	Code.str("");
-	Code << MD5::getHashFromString( itos(this->vnum*2).c_str() );
-	return Code.str();
 }
 
 const char *door_state(int state)
@@ -187,7 +174,7 @@ Track::Track(Character *ch, int dir, Room *room)
 	this->npc			= (IS_NPC(ch));
 	this->laytime		= time(0);
 
-	room->Tracks.push_front(this);
+	room->tracks.push_front(this);
 	TrackList.push_back(this);
 }
 
@@ -206,7 +193,7 @@ Room *FindFadingRoom(char *name)
 	for(unsigned int i = 0;i < World.size();++i)
 	{
 		room = World[i];
-		if(!strcmp(name, room->FadeCode()))
+		if(!strcmp(name, room->fadeCode()))
 		{
 			if(ROOM_FLAGGED(room, ROOM_PRIVATE) || ROOM_FLAGGED(room, ROOM_DEATH))
 				return 0;
@@ -254,11 +241,8 @@ bool Character::CanTrack(Room *room)
 {
 	if(ROOM_FLAGGED(room, ROOM_NOTRACK))
 		return false;
-	//Only thieves/greymen can track inside/cities
-//	if( (SECT(room) == SECT_INSIDE || SECT(room) == SECT_CITY) && !IS_THIEF(this) && !IS_GREYMAN(this))
-//		return false;
-	if(SECT(room) == SECT_WATER_NOSWIM || SECT(room) == SECT_UNDERWATER
-		|| SECT(room) == SECT_WATER_SWIM || SECT(room) == SECT_FLYING)
+	if(	room->getSector() == RoomSector::waterNoSwim || room->getSector() == RoomSector::underwater ||
+		room->getSector() == RoomSector::waterSwim || room->getSector() == RoomSector::flying)
 		return false;
 	return true;
 }
@@ -296,14 +280,14 @@ ACMD(do_sense)
 
 		else
 		{
-			if(!IS_DARK(ch->in_room))
+			if(!ch->in_room->isDark())
 			{
 				ch->send("There is no darkness to sense here.\r\n");
 				return;
 			}
 
 			ch->send("This room: [%s%s%s]\r\n", COLOR_GREEN(ch, CL_COMPLETE),
-			         ch->in_room->FadeCode().c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
+			         ch->in_room->fadeCode().c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
 		}
 	}
 }
@@ -325,7 +309,7 @@ ACMD(do_fade)
 		return;
 	}
 
-	if(!IS_DARK(ch->in_room) || ROOM_FLAGGED(ch->in_room, ROOM_NOPORT))
+	if(!ch->in_room->isDark() || ROOM_FLAGGED(ch->in_room, ROOM_NOPORT))
 	{
 		ch->send("There are no shadows to reach out to.\r\n");
 		return;
@@ -373,7 +357,7 @@ ACMD(do_fade)
 			return;
 		}
 
-		distance = room->GetZone()->Distance(ch->in_room->GetZone());
+		distance = room->getZone()->Distance(ch->in_room->getZone());
 
 		cost = 15;
 		cost += distance * 3;
@@ -507,8 +491,7 @@ int can_move(Character *ch, int dir, int need_specials_check, bool flee)
 	}
 
 	/* if this room or the one we're going to needs a boat, check for one */
-	if ((SECT(ch->in_room) == SECT_WATER_NOSWIM) ||
-	        (SECT(EXIT(ch, dir)->to_room) == SECT_WATER_NOSWIM))
+	if ((ch->in_room->getSector() == RoomSector::waterNoSwim) || (EXIT(ch, dir)->getToRoom()->getSector() == RoomSector::waterNoSwim))
 	{
 		if (!ch->HasBoat())
 		{
@@ -517,7 +500,7 @@ int can_move(Character *ch, int dir, int need_specials_check, bool flee)
 		}
 	}
 
-	if(MOUNT(ch) && SECT(ch->in_room->dir_option[dir]->to_room) == SECT_INSIDE )
+	if(MOUNT(ch) && ch->in_room->dir_option[dir]->getToRoom()->getSector() == RoomSector::inside )
 	{
 		if(!flee)
 			ch->send("You cannot ride in there!\r\n");
@@ -525,16 +508,15 @@ int can_move(Character *ch, int dir, int need_specials_check, bool flee)
 	}
 
 	if(GET_LEVEL(ch) >= LVL_IMMORT && GET_LEVEL(ch) <= LVL_BLDER || PLR_FLAGGED(ch, PLR_ZONE_BAN))
-		if(!ch->in_room->dir_option[dir]->to_room->GetZone()->CanEdit(ch)
-		&& ch->in_room->dir_option[dir]->to_room->zone != 0)
+		if(!ch->in_room->dir_option[dir]->getToRoom()->getZone()->CanEdit(ch)
+		&& ch->in_room->dir_option[dir]->getToRoom()->getZoneNumber() != 0)
 		{
 			ch->send("You must be higher level to leave your zone!\r\n");
 			return 0;
 		}
 
 	/* move points needed is avg. move loss for src and destination sect type */
-	need_movement = (movement_loss[SECT(ch->in_room)] +
-	                 movement_loss[SECT(EXIT(ch, dir)->to_room)]) / 2;
+	need_movement = ch->in_room->getSector()->getMovementLoss() + EXIT(ch, dir)->getToRoom()->getSector()->getMovementLoss();
 
 	if(IS_TROLLOC(ch) || ch->getUserClan(CLAN_WOLFBROTHER))
 		need_movement = 2;
@@ -582,7 +564,7 @@ int can_move(Character *ch, int dir, int need_specials_check, bool flee)
 	}
 
 	/* Mortals and low level gods cannot enter greater god rooms. */
-	if (ROOM_FLAGGED(EXIT(ch, dir)->to_room, ROOM_GODROOM) &&
+	if (ROOM_FLAGGED(EXIT(ch, dir)->getToRoom(), ROOM_GODROOM) &&
 	        GET_LEVEL(ch) < LVL_IMMORT)
 	{
 		ch->send("You aren't godly enough to use that room!\r\n");
@@ -596,7 +578,7 @@ int can_move(Character *ch, int dir, int need_specials_check, bool flee)
 int Character::NeededToMove(int dir)
 {
 	if( dir < 0 || dir >= NUM_OF_DIRS || !EXIT(this, dir) ) return 0;
-	return NeededToMove(this->in_room->dir_option[dir]->to_room);
+	return NeededToMove(this->in_room->dir_option[dir]->getToRoom());
 }
 int Character::NeededToMove(Room* OtherRoom)
 {
@@ -604,8 +586,7 @@ int Character::NeededToMove(Room* OtherRoom)
 
 	if( !OtherRoom ) return 0;
 
-	need_movement = (	movement_loss[SECT(this->in_room)] +
-						movement_loss[SECT(OtherRoom)]) / 2;
+	need_movement = (this->in_room->getSector()->getMovementLoss() + OtherRoom->getSector()->getMovementLoss());
 
 	//if(IS_HORSE(this) && RIDDEN_BY(this) && AFF_FLAGGED(RIDDEN_BY(this), AFF_NOTICE))
 		//need_movement += 1;
@@ -653,10 +634,6 @@ bool Character::ShouldLayTrack()
 {
 	return (!PLR_FLAGGED(this, PLR_NOTRACK) && !MOB_FLAGGED(this, MOB_NOTRACK) && !MOB_FLAGGED(this, MOB_INVIS));
 }
-bool Room::IsTrackable()
-{
-	return (!ROOM_FLAGGED(this, ROOM_INDOORS) && !ROOM_FLAGGED(this, ROOM_NOTRACK));
-}
 
 int Character::SimpleMove(int dir, int need_specials_check, bool flee)
 {
@@ -670,7 +647,7 @@ int Character::SimpleMove(int dir, int need_specials_check, bool flee)
 	//Script moved us! Could cause problems.
 	if(this->in_room != was_in)
 		return 0;
-	if (EXIT(this, dir) && (!js_enter_triggers(EXIT(this, dir)->to_room, this, dir) || this->IsPurged()) )
+	if (EXIT(this, dir) && (!js_enter_triggers(EXIT(this, dir)->getToRoom(), this, dir) || this->IsPurged()) )
 		return 0;
 	//Script moved us! Could cause problems.
 	if(this->in_room != was_in)
@@ -690,7 +667,7 @@ int Character::SimpleMove(int dir, int need_specials_check, bool flee)
 		Act(buf2, TRUE, this, 0, 0, TO_ROOM);
 	}
 
-	if( this->ShouldLayTrack() && this->in_room->IsTrackable() )
+	if (this->ShouldLayTrack() && this->in_room->isTrackable())
 	{
 		if( MOUNT(this) )
 			MOUNT(this)->LayTrack(this->in_room,dir);
@@ -699,7 +676,7 @@ int Character::SimpleMove(int dir, int need_specials_check, bool flee)
 	}
 
 	this->RemoveFromRoom();
-	this->MoveToRoom(was_in->dir_option[dir]->to_room);
+	this->MoveToRoom(was_in->dir_option[dir]->getToRoom());
 
 	if(MOUNT(this))
 	{
@@ -728,7 +705,7 @@ int Character::SimpleMove(int dir, int need_specials_check, bool flee)
 		look_at_room(this, 0);
 
 	//Fade Shadow Sensing
-	if(IS_FADE(this) && IS_DARK(this->in_room))
+	if(IS_FADE(this) && this->in_room->isDark())
 		this->send("%s\r\nYou feel the presence of shadows all around you.%s\r\n", COLOR_RED(this, CL_COMPLETE),
 		           COLOR_NORMAL(this, CL_COMPLETE));
 
@@ -742,7 +719,7 @@ int Character::SimpleMove(int dir, int need_specials_check, bool flee)
 	if (ROOM_FLAGGED(this->in_room, ROOM_DEATH) && GET_LEVEL(this) < LVL_IMMORT)
 	{
 		MudLog(BRF, LVL_IMMORT, TRUE, "%s hit death trap #%d (%s)",
-			GET_NAME(this), this->in_room->vnum, this->in_room->name);
+			GET_NAME(this), this->in_room->getVnum(), this->in_room->getName());
 
 		if(IS_NPC(this))
 			this->Extract();
@@ -763,16 +740,16 @@ int perform_move(Character *ch, int dir, int need_specials_check)
 		return 0;
 	else if(ch->PokerData || ch->PokerTable)
 		ch->send("You must leave the table before you can leave the room.\r\n");
-	else if ((!EXIT(ch, dir) && !buildwalk(ch, dir)) || !EXIT(ch, dir)->to_room)
+	else if ((!EXIT(ch, dir) && !buildwalk(ch, dir)) || !EXIT(ch, dir)->getToRoom())
 		ch->send("Alas, you cannot go that way...\r\n");
-	else if( (EXIT(ch, dir)->HiddenLevel() > 0 && EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED))
-	|| EXIT(ch,dir)->IsDisabled())
+	else if( (EXIT(ch, dir)->getHiddenLevel() > 0 && EXIT(ch, dir)->isFlagged(EX_CLOSED))
+	|| EXIT(ch,dir)->isDisabled())
 		ch->send("Alas, you cannot go that way...\r\n");
-	else if (EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED))
+	else if (EXIT(ch, dir)->isFlagged(EX_CLOSED))
 	{
-		if (EXIT(ch, dir)->keyword)
+		if (EXIT(ch, dir)->getKeywords())
 		{
-			ch->send("The %s seems to be closed.\r\n", fname(EXIT(ch, dir)->keyword));
+			ch->send("The %s seems to be closed.\r\n", fname(EXIT(ch, dir)->getKeywords()));
 		}
 		else
 			ch->send("It seems to be closed.\r\n");
@@ -886,7 +863,7 @@ void Character::stopEavesdropping()
 
 void Character::stopWarding()
 {
-	this->in_room->EavesWarder = NULL;
+	this->in_room->setEavesdroppingWarder(NULL);
 	this->send("You release your ward.\r\n");
 }
 	
@@ -900,7 +877,7 @@ int Character::FindDoor(const char *type, char *dir, const char *cmdname)
 	}
 	for(door = 0;door < NUM_OF_DIRS;++door)
 	{
-		if(EXIT(this, door) && EXIT(this, door)->keyword && !str_cmp(EXIT(this, door)->keyword, type))
+		if(EXIT(this, door) && EXIT(this, door)->getKeywords() && !str_cmp(EXIT(this, door)->getKeywords(), type))
 			return door;
 	}
 	return -1;
@@ -955,124 +932,13 @@ int PickReq(Object *obj, Room *r, int dir)
 	if(!obj)
 	{
 		if(r->dir_option[dir])
-			return r->dir_option[dir]->PickReq;
+			return r->dir_option[dir]->getPickRequirement();
 		else
 			return 0;
 	}
 	else
 		return 0;
 }
-
-
-bool Direction::IsPickProof()
-{
-	return (this->PickReq == -1);
-}
-bool Direction::IsClosed()
-{
-	return EXIT_FLAGGED(this, EX_CLOSED);
-}
-bool Direction::IsOpen()
-{
-	return !EXIT_FLAGGED(this, EX_CLOSED);
-}
-bool Direction::CanOpen()
-{
-	return EXIT_FLAGGED(this, EX_ISDOOR);
-}
-bool Direction::IsDoor()
-{
-	return EXIT_FLAGGED(this, EX_ISDOOR);
-}
-bool Direction::IsLocked()
-{
-	return EXIT_FLAGGED(this, EX_LOCKED);
-}
-bool Direction::CanPick(Character *ch)
-{
-	return (GET_SKILL(ch, SKILL_PICK_LOCK) >= this->PickReq);
-}
-bool Direction::CanLock()
-{
-	return (key != -1);
-}
-bool Direction::CanBeSeen(Character *ch)
-{
-	return (GET_SKILL(ch, SKILL_SEARCH) >= this->hidden);
-}
-bool Direction::IsRammable()
-{
-	return (IS_SET(this->exit_info, EX_RAMMABLE));
-}
-void Direction::SetRammable()
-{
-	SET_BITK(exit_info, EX_RAMMABLE);
-}
-void Direction::UnsetRammable()
-{
-	REMOVE_BIT(exit_info, EX_RAMMABLE);
-}
-void Direction::ToggleRammable()
-{
-	TOGGLE_BIT(exit_info, EX_RAMMABLE);
-}
-bool Direction::IsDisabled()
-{
-	return IS_SET(this->exit_info, EX_DISABLED);
-}
-bool Direction::IsTemporary()
-{
-	return IS_SET(this->exit_info, EX_TEMPORARY);
-}
-void Direction::MakePermanent()
-{
-	REMOVE_BIT(exit_info, EX_TEMPORARY);
-}
-void Direction::MakeTemporary()
-{
-	SET_BITK(exit_info, EX_TEMPORARY);
-}
-void Direction::Enable()
-{
-	REMOVE_BIT(exit_info, EX_DISABLED);
-}
-void Direction::Disable()
-{
-	SET_BITK(exit_info, EX_DISABLED);
-}
-int  Direction::PickLevel()
-{
-	return (int)this->PickReq;
-}
-int Direction::HiddenLevel()
-{
-	return (int)this->hidden;
-}
-
-#define DOOR_IS_OPENABLE(ch, obj, door)	((obj) ? \
-			((obj->getType() == ITEM_CONTAINER) && \
-			OBJVAL_FLAGGED(obj, CONT_CLOSEABLE)) :\
-			(EXIT_FLAGGED(EXIT(ch, door), EX_ISDOOR)))
-
-#define DOOR_IS_OPEN(ch, obj, door)	((obj) ? \
-			(!OBJVAL_FLAGGED(obj, CONT_CLOSED)) :\
-			(!EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED)))
-
-#define DOOR_IS_UNLOCKED(ch, obj, door)	((obj) ? \
-			(!OBJVAL_FLAGGED(obj, CONT_LOCKED)) :\
-			(!EXIT_FLAGGED(EXIT(ch, door), EX_LOCKED)))
-
-#define DOOR_IS_PICKPROOF(ch, obj, door) ((obj) ? \
-			(OBJVAL_FLAGGED(obj, CONT_PICKPROOF)) : \
-			(EXIT_FLAGGED(EXIT(ch, door), EX_PICKPROOF)))
-
-
-#define DOOR_IS_CLOSED(ch, obj, door)	(!(DOOR_IS_OPEN(ch, obj, door)))
-#define DOOR_IS_LOCKED(ch, obj, door)	(!(DOOR_IS_UNLOCKED(ch, obj, door)))
-#define DOOR_KEY(ch, obj, door)		((obj) ? (GET_OBJ_VAL(obj, 2)) : \
-					(EXIT(ch, door)->key))
-#define DOOR_LOCK(ch, obj, door)	((obj) ? (GET_OBJ_VAL(obj, 1)) : \
-					(EXIT(ch, door)->exit_info))
 
 bool Object::IsPickProof()
 {
@@ -1123,7 +989,7 @@ ACMD(do_gen_door)
 	char type[MAX_INPUT_LENGTH], dir[MAX_INPUT_LENGTH];
 	Object *obj = 0;
 	Character *victim;
-	Direction *exit = 0;
+	Exit *exit = 0;
 
 	skip_spaces(&argument);
 
@@ -1140,12 +1006,12 @@ ACMD(do_gen_door)
 	{
 		exit = ch->in_room->dir_option[door];
 
-		if(!exit->IsOpen() && !exit->CanBeSeen(ch))
+		if(!exit->isOpen() && !exit->canBeSeen(ch))
 		{
 			ch->send("%s what?\r\n", StringUtil::cap(cmd_door[subcmd]));
 			return;
 		}
-		if(!(exit->CanOpen()))
+		if(!(exit->canOpen()))
 		{
 			ch->send("You can't %s that.\r\n", cmd_door[subcmd]);
 			return;
@@ -1153,81 +1019,81 @@ ACMD(do_gen_door)
 		switch(subcmd)
 		{
 			case SCMD_OPEN:
-				if(exit->IsLocked())
+				if(exit->isLocked())
 				{
 					ch->send("But it's locked!\r\n");
 					return;
 				}
-				if(exit->IsOpen())
+				if(exit->isOpen())
 				{
 					ch->send("It's already open!\r\n");
 					return;
 				}
-				ch->in_room->RemoveDoorBit(door, EX_CLOSED);
-				if( ch->in_room->vnum == 2501 || ch->in_room->vnum == 2502 ) {
+				ch->in_room->removeDoorBit(door, EX_CLOSED);
+				if (ch->in_room->getVnum() == 2501 || ch->in_room->getVnum() == 2502) {
 					/*** NARGDOOR - DEFY ALL LOGIC!!!!! ***/
-					if(ch->in_room->dir_option[door] && ch->in_room->dir_option[door]->to_room)
-						ch->in_room->dir_option[door]->to_room->SetDoorBitOneSide(rev_dir[door],EX_CLOSED);
+					if(ch->in_room->dir_option[door] && ch->in_room->dir_option[door]->getToRoom())
+						ch->in_room->dir_option[door]->getToRoom()->setDoorBitOneSide(rev_dir[door],EX_CLOSED);
 				}
 				break;
 			case SCMD_CLOSE:
-				if(exit->IsClosed())
+				if(exit->isClosed())
 				{
 					ch->send("It's already closed!\r\n");
 					return;
 				}
-				ch->in_room->SetDoorBit(door, EX_CLOSED);
-				if( ch->in_room->vnum == 2501 || ch->in_room->vnum == 2502 ) {
+				ch->in_room->setDoorBit(door, EX_CLOSED);
+				if (ch->in_room->getVnum() == 2501 || ch->in_room->getVnum() == 2502) {
 					/*** NARGDOOR - DEFY ALL LOGIC!!!!! ***/
-					if(ch->in_room->dir_option[door] && ch->in_room->dir_option[door]->to_room)
-						ch->in_room->dir_option[door]->to_room->RemoveDoorBitOneSide(rev_dir[door],EX_CLOSED);
+					if(ch->in_room->dir_option[door] && ch->in_room->dir_option[door]->getToRoom())
+						ch->in_room->dir_option[door]->getToRoom()->removeDoorBitOneSide(rev_dir[door],EX_CLOSED);
 				}
 				break;
 			case SCMD_LOCK:
-				if(!exit->CanLock())
+				if(!exit->canLock())
 				{
 					ch->send("You can't seem to find the keyhole.\r\n");
 					return;
 				}
-				if(exit->IsLocked())
+				if(exit->isLocked())
 				{
 					ch->send("It's already locked.\r\n");
 					return;
 				}
-				if(exit->IsOpen())
+				if(exit->isOpen())
 				{
 					ch->send("It needs to be closed first!\r\n");
 					return;
 				}
-				if(!ch->HasKey(exit->key))
+				if(!ch->HasKey(exit->getKey()))
 				{
 					ch->send("You don't have the proper key.\r\n");
 					return;
 				}
-				ch->in_room->SetDoorBit(door, EX_LOCKED);
-				if( ch->in_room->vnum == 2501 || ch->in_room->vnum == 2502 ) {
+				ch->in_room->setDoorBit(door, EX_LOCKED);
+				if (ch->in_room->getVnum() == 2501 || ch->in_room->getVnum() == 2502) {
 					/*** NARGDOOR - DEFY ALL LOGIC!!!!! ***/
-					if(ch->in_room->dir_option[door] && ch->in_room->dir_option[door]->to_room)
-						ch->in_room->dir_option[door]->to_room->RemoveDoorBitOneSide(rev_dir[door],EX_LOCKED);
+					if(ch->in_room->dir_option[door] && ch->in_room->dir_option[door]->getToRoom())
+						ch->in_room->dir_option[door]->getToRoom()->removeDoorBitOneSide(rev_dir[door],EX_LOCKED);
 				}
 				break;
 			case SCMD_UNLOCK:
-				if(!exit->CanLock())
+				if(!exit->canLock())
 				{
 					ch->send("You can't seem to find the keyhole.\r\n");
 					return;
 				}
-				if(!exit->IsLocked())
+				if(!exit->isLocked())
 				{
 					ch->send("It's not even locked!\r\n");
 					return;
 				}
-				if(!exit->IsClosed())
+				if(!exit->isClosed())
 				{
 					ch->send("It needs to be closed first!\r\n");
 					return;
 				}
-				if(!ch->HasKey(exit->key))
+				if(!ch->HasKey(exit->getKey()))
 				{
 					ch->send("You don't have the proper key.\r\n");
 					return;
@@ -1237,9 +1103,9 @@ ACMD(do_gen_door)
 				/* The key finding code is shamelessly stolen from HasKey() :) */
 				if (!IS_NPC(ch))
 				{
-					if (ch->HasObjectInInventory(exit->key))
+					if (ch->HasObjectInInventory(exit->getKey()))
 					{
-						Object * key = ch->GetObjectFromInventory(exit->key);
+						Object * key = ch->GetObjectFromInventory(exit->getKey());
 						--GET_OBJ_VAL(key, 0);
 						/* If it starts as 0, disabled, it cannot */
 						/* equal after a -- operation. */
@@ -1252,7 +1118,7 @@ ACMD(do_gen_door)
 					}
 					else
 					{
-						if (GET_OBJ_VNUM(GET_EQ(ch, WEAR_HOLD)) == exit->key )
+						if (GET_OBJ_VNUM(GET_EQ(ch, WEAR_HOLD)) == exit->getKey() )
 						{
 							Object * key = GET_EQ(ch, WEAR_HOLD);
 							--GET_OBJ_VAL(key, 0);
@@ -1265,35 +1131,35 @@ ACMD(do_gen_door)
 						}
 					}
 				}
-				ch->in_room->RemoveDoorBit(door, EX_LOCKED);
-				if( ch->in_room->vnum == 2501 || ch->in_room->vnum == 2502 ) {
+				ch->in_room->removeDoorBit(door, EX_LOCKED);
+				if (ch->in_room->getVnum() == 2501 || ch->in_room->getVnum() == 2502) {
 					/*** NARGDOOR - DEFY ALL LOGIC!!!!! ***/
-					if(ch->in_room->dir_option[door] && ch->in_room->dir_option[door]->to_room)
-						ch->in_room->dir_option[door]->to_room->SetDoorBitOneSide(rev_dir[door],EX_LOCKED);
+					if(ch->in_room->dir_option[door] && ch->in_room->dir_option[door]->getToRoom())
+						ch->in_room->dir_option[door]->getToRoom()->setDoorBitOneSide(rev_dir[door],EX_LOCKED);
 				}
 				break;
 			case SCMD_PICK:
-				if(exit->IsOpen())
+				if(exit->isOpen())
 				{
 					ch->send("But it's open!\r\n");
 					return;
 				}
-				if(!exit->IsLocked())
+				if(!exit->isLocked())
 				{
 					ch->send("It's not even locked!\r\n");
 					return;
 				}
-				if(exit->IsPickProof())
+				if(exit->isPickProof())
 				{
 					ch->send("It resists your attempt to pick it.\r\n");
 					return;
 				}
-				if(!exit->CanPick(ch))
+				if(!exit->canPick(ch))
 				{
 					ch->send("You fail to pick the lock.\r\n");
 					return;
 				}
-				ch->in_room->RemoveDoorBit(door, EX_LOCKED);
+				ch->in_room->removeDoorBit(door, EX_LOCKED);
 				ch->send("The lock quickly gives way to your skills.\r\n");
 				return;
 			default:
@@ -1431,20 +1297,20 @@ ACMD(do_gen_door)
 	if( subcmd == SCMD_PICK )
 		ch->send("The lock quickly gives way to your skills.\r\n");
 	else
-		ch->send("You %s %s%s.\r\n", cmd_door[subcmd], exit ? "the " : "", obj ? obj->GetSDesc() : exit->keyword);
+		ch->send("You %s %s%s.\r\n", cmd_door[subcmd], exit ? "the " : "", obj ? obj->GetSDesc() : exit->getKeywords());
 
 	//Notify the room.
-	sprintf(buf, "%s %ss %s%s.", GET_NAME(ch), cmd_door[subcmd], exit ? "the " : "", obj ? obj->GetSDesc() : exit->keyword);
+	sprintf(buf, "%s %ss %s%s.", GET_NAME(ch), cmd_door[subcmd], exit ? "the " : "", obj ? obj->GetSDesc() : exit->getKeywords());
 	Act(buf, TRUE, ch, 0, 0, TO_ROOM);
 
-	Direction *reverse_exit = 0;
+	Exit *reverse_exit = 0;
 	//Notify the other end of the door if it was an open/close.
-	if(exit && EXIT(ch, door) && EXIT(ch, door)->to_room > 0 && EXIT(ch, door)->to_room &&
+	if(exit && EXIT(ch, door) && EXIT(ch, door)->getToRoom() > 0 && EXIT(ch, door)->getToRoom() &&
 	        (subcmd == SCMD_OPEN || subcmd == SCMD_CLOSE) &&
-	        (reverse_exit = EXIT(ch, door)->to_room->dir_option[rev_dir[door]]))
+	        (reverse_exit = EXIT(ch, door)->getToRoom()->dir_option[rev_dir[door]]))
 	{
-		sprintf(buf, "The %s is %s from the other side.\r\n", reverse_exit->keyword, subcmd == SCMD_OPEN ? "opened" : "closed");
-		sendToRoom(buf, EXIT(ch, door)->to_room);
+		sprintf(buf, "The %s is %s from the other side.\r\n", reverse_exit->getKeywords(), subcmd == SCMD_OPEN ? "opened" : "closed");
+		sendToRoom(buf, EXIT(ch, door)->getToRoom());
 	}
 }
 
@@ -1474,11 +1340,11 @@ ACMD(do_enter)
 	}
 
 	//Found a dot argument
-	if (!str_cmp(buf + i, "Gate") && ch->in_room->NumGates())
+	if (!str_cmp(buf + i, "Gate") && ch->in_room->getNumberOfGates())
 	{
 		n = atoi(num.c_str()) - 1;
 
-		std::list<Gate*> TempGateList = ch->in_room->GetGates();
+		std::list<Gate*> TempGateList = ch->in_room->getGates();
 		for(g = TempGateList.begin();g != TempGateList.end() && n;++g, --n);
 
 		if(!n && g != TempGateList.end())
@@ -1497,9 +1363,9 @@ ACMD(do_enter)
 
 			if (EXIT(ch, door))
 
-				if (EXIT(ch, door)->keyword)
+				if (EXIT(ch, door)->getKeywords())
 
-					if (!str_cmp(EXIT(ch, door)->keyword, buf))
+					if (!str_cmp(EXIT(ch, door)->getKeywords(), buf))
 					{
 						perform_move(ch, door, 1);
 						return;
@@ -1519,10 +1385,9 @@ ACMD(do_enter)
 		{
 			if (EXIT(ch, door))
 			{
-				if (EXIT(ch, door)->to_room)
+				if (EXIT(ch, door)->getToRoom())
 				{
-					if (!EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED) &&
-					        ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_INDOORS))
+					if (!EXIT(ch, door)->isFlagged( EX_CLOSED ) && ROOM_FLAGGED(EXIT(ch, door)->getToRoom(), ROOM_INDOORS))
 					{
 						perform_move(ch, door, 1);
 						return;
@@ -1549,10 +1414,9 @@ ACMD(do_leave)
 		{
 			if (EXIT(ch, door))
 			{
-				if (EXIT(ch, door)->to_room)
+				if (EXIT(ch, door)->getToRoom())
 				{
-					if (!EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED) &&
-					        !ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_INDOORS))
+					if (!EXIT(ch, door)->isFlagged(EX_CLOSED) && !ROOM_FLAGGED(EXIT(ch, door)->getToRoom(), ROOM_INDOORS))
 					{
 						perform_move(ch, door, 1);
 						return;
@@ -1783,7 +1647,7 @@ ACMD(do_wake)
 ACMD(do_knock)
 {
 	char doorName[MAX_INPUT_LENGTH];
-	Direction *dir = 0;
+	Exit *dir = 0;
 	int iDir = NUM_OF_DIRS;
 
 	OneArgument(argument, doorName);
@@ -1797,8 +1661,8 @@ ACMD(do_knock)
 	//Now, look to see if the door entered by the user actually exists.
 	for(unsigned int i = 0;i < NUM_OF_DIRS;++i)
 	{
-		if( ch->in_room->dir_option[i] && ch->in_room->dir_option[i]->CanBeSeen(ch)
-			&& ch->in_room->dir_option[i]->IsDoor() && !str_cmp(doorName, ch->in_room->dir_option[i]->keyword) )
+		if( ch->in_room->dir_option[i] && ch->in_room->dir_option[i]->canBeSeen(ch)
+			&& ch->in_room->dir_option[i]->isDoor() && !str_cmp(doorName, ch->in_room->dir_option[i]->getKeywords()) )
 		{
 			dir = ch->in_room->dir_option[i];
 			iDir = i;
@@ -1806,18 +1670,18 @@ ACMD(do_knock)
 		}
 	}
 
-	if( !dir || (IS_DARK(ch->in_room) && !CAN_SEE_IN_DARK(ch)) )
+	if( !dir || (ch->in_room->isDark() && !CAN_SEE_IN_DARK(ch)) )
 	{//Door was not found / can't be seen.
 		ch->send("You don't see a '%s' here.\r\n", doorName);
 		return;
 	}
-	if( dir->IsOpen() )
+	if( dir->isOpen() )
 	{
-		ch->send("The %s appears to be open.\r\n", dir->keyword);
+		ch->send("The %s appears to be open.\r\n", dir->getKeywords());
 		return;
 	}
 
-	ch->send("You knock on the %s.\r\n", dir->keyword);
+	ch->send("You knock on the %s.\r\n", dir->getKeywords());
 
 	for(Character *onLooker = ch->in_room->people;onLooker;onLooker = onLooker->next_in_room)
 	{//Show each person in the room that a door has been knocked on.
@@ -1830,25 +1694,25 @@ ACMD(do_knock)
 		else					dirText = (std::string("to the ") + dirs[iDir]);
 
 		//If they can't see the door, show them that 'something' was knocked on.
-		if( !dir->CanBeSeen( onLooker ) || (IS_DARK(ch->in_room) && !CAN_SEE_IN_DARK(onLooker)) )
+		if( !dir->canBeSeen( onLooker ) || (ch->in_room->isDark() && !CAN_SEE_IN_DARK(onLooker)) )
 			onLooker->send("%s knocks on something %s.\r\n", PERS(ch, onLooker), dirText.c_str());
 		else
-			onLooker->send("%s knocks on the %s.\r\n", PERS(ch, onLooker), dir->keyword);
+			onLooker->send("%s knocks on the %s.\r\n", PERS(ch, onLooker), dir->getKeywords());
 	}
 
 	Room *OtherRoom;
-	if( (OtherRoom = dir->to_room) != NULL )
+	if( (OtherRoom = dir->getToRoom()) != NULL )
 	{//Notify everyone on the other end of the door that it was knocked on.
 		int iRevDir = rev_dir[iDir];
-		Direction *revDir = OtherRoom->dir_option[iRevDir];
+		Exit *revDir = OtherRoom->dir_option[iRevDir];
 
-		if( revDir && revDir->IsDoor() )
+		if( revDir && revDir->isDoor() )
 		{
 			for( Character *onLooker = OtherRoom->people;onLooker;onLooker = onLooker->next_in_room )
 			{
-				if( revDir->CanBeSeen( onLooker ) && (!IS_DARK(OtherRoom) || CAN_SEE_IN_DARK(onLooker)) )
+				if( revDir->canBeSeen( onLooker ) && (!OtherRoom->isDark() || CAN_SEE_IN_DARK(onLooker)) )
 				{
-					onLooker->send("Someone knocks on the %s from the other side.\r\n", dir->keyword);
+					onLooker->send("Someone knocks on the %s from the other side.\r\n", dir->getKeywords());
 				}
 				else
 				{
@@ -1961,7 +1825,7 @@ int Character::group_members_in_zone()
 	
 	for (Follower *f = this->followers; f; f = f->next)
 	{
-		if(f->follower->in_room->GetZone() == this->in_room->GetZone())
+		if(f->follower->in_room->getZone() == this->in_room->getZone())
 			count++;
 	}
 	return count;

@@ -24,6 +24,7 @@
 
 #include "js_functions.h"
 #include "MiscUtil.h"
+#include "rooms/Room.h"
 
 extern Object *object_list;
 extern Character *character_list;
@@ -867,7 +868,7 @@ int PerformPeriodicEffects(Character *ch, affected_type *af)
 		int iMaxDist = atoi(WeaveManager::GetManager().GetWeave("Slow")->getAttribute("MaxDist").c_str());
 
 		if( ch->SlowedBy )
-			dist = MIN(ch->in_room->DistanceToRoom(ch->SlowedBy->in_room), iMaxDist);
+			dist = MIN(ch->in_room->getDistanceToRoom(ch->SlowedBy->in_room), iMaxDist);
 		else
 			dist = iMaxDist + 1;
 		dmg = dist / atoi(WeaveManager::GetManager().GetWeave("Slow")->getAttribute("DistFactor").c_str());
@@ -884,7 +885,7 @@ int PerformPeriodicEffects(Character *ch, affected_type *af)
 		int iMaxDist = atoi(WeaveManager::GetManager().GetWeave("Decay")->getAttribute("MaxDist").c_str());
 
 		if( ch->DecayedBy )
-			dist = MIN(ch->in_room->DistanceToRoom(ch->DecayedBy->in_room), iMaxDist);
+			dist = MIN(ch->in_room->getDistanceToRoom(ch->DecayedBy->in_room), iMaxDist);
 		else
 			dist = iMaxDist + 1;
 		dmg = MiscUtil::random(atoi(WeaveManager::GetManager().GetWeave("Decay")->getAttribute("DmgLow").c_str()), atoi(WeaveManager::GetManager().GetWeave("Decay")->getAttribute("DmgHigh").c_str()));

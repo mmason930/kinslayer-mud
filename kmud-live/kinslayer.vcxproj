@@ -51,7 +51,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;XP_WIN;BOOST_PARAMETER_MAX_ARITY=10;KINSLAYER_JAVASCRIPT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX ;_SCL_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;XP_WIN;BOOST_PARAMETER_MAX_ARITY=10;KINSLAYER_JAVASCRIPT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -104,6 +104,7 @@
     <ClCompile Include="src\auction.cpp" />
     <ClCompile Include="src\ban.cpp" />
     <ClCompile Include="src\cedit.cpp" />
+    <ClCompile Include="src\CharacterUtil.cpp" />
     <ClCompile Include="src\ClanQuestPointTransaction.cpp" />
     <ClCompile Include="src\clans.cpp" />
     <ClCompile Include="src\ClanUtil.cpp" />
@@ -151,6 +152,9 @@
     <ClCompile Include="src\PlayerPortalServer.cpp" />
     <ClCompile Include="src\poker.cpp" />
     <ClCompile Include="src\redit.cpp" />
+    <ClCompile Include="src\rooms\Exit.cpp" />
+    <ClCompile Include="src\rooms\Room.cpp" />
+    <ClCompile Include="src\rooms\RoomSector.cpp" />
     <ClCompile Include="src\sedit.cpp" />
     <ClCompile Include="src\sha1.cpp" />
     <ClCompile Include="src\shop.cpp" />
@@ -161,7 +165,6 @@
     <ClCompile Include="src\statedit.cpp" />
     <ClCompile Include="src\stats.cpp" />
     <ClCompile Include="src\SystemUtil.cpp" />
-    <ClCompile Include="src\TestResource.cpp" />
     <ClCompile Include="src\threaded_jobs.cpp" />
     <ClCompile Include="src\UserClan.cpp" />
     <ClCompile Include="src\UserEmailEditor.cpp" />
@@ -198,6 +201,7 @@
   <ItemGroup>
     <ClInclude Include="src\accounts.h" />
     <ClInclude Include="src\auction.h" />
+    <ClInclude Include="src\CharacterUtil.h" />
     <ClInclude Include="src\ClanQuestPointTransaction.h" />
     <ClInclude Include="src\clans.h" />
     <ClInclude Include="src\ClanUtil.h" />
@@ -247,6 +251,9 @@
     <ClInclude Include="src\PlayerPortalDescriptorStatus.h" />
     <ClInclude Include="src\PlayerPortalServer.h" />
     <ClInclude Include="src\poker.h" />
+    <ClInclude Include="src\rooms\Exit.h" />
+    <ClInclude Include="src\rooms\Room.h" />
+    <ClInclude Include="src\rooms\RoomSector.h" />
     <ClInclude Include="src\screen.h" />
     <ClInclude Include="src\sha1.h" />
     <ClInclude Include="src\shop.h" />
@@ -256,7 +263,6 @@
     <ClInclude Include="src\sysdep.h" />
     <ClInclude Include="src\SystemUtil.h" />
     <ClInclude Include="src\telnet.h" />
-    <ClInclude Include="src\TestResource.h" />
     <ClInclude Include="src\threaded_jobs.h" />
     <ClInclude Include="src\UserClan.h" />
     <ClInclude Include="src\UserDisabledCommand.h" />

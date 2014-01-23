@@ -19,6 +19,7 @@
 #include "Descriptor.h"
 
 #include "ClanUtil.h"
+#include "rooms/RoomSector.h"
 
 /*
  * Set this to 1 for debugging logs in medit_save_internally.
@@ -49,7 +50,6 @@ extern const char *position_types[];
 extern const char *genders[];
 extern const char *aggros[];
 extern const char *class_types[];
-extern const char *sector_types[];
 extern const char *pc_race_types[];
 extern Index *obj_index;
 extern int top_shop;
@@ -226,22 +226,21 @@ void MeditDispNsects(Descriptor *d)
 	Character *mob = OLC_MOB(d);
 	int i = 0, c = 0;
 
+
 	d->send("Setup for room sectors in which this MOB cannot wander to.\r\n");
-	for(i = 0;i < NUM_ROOM_SECTORS;++i)
+	for (auto sectorIter = RoomSector::getStartIterator(); sectorIter != RoomSector::getEndIterator();++sectorIter)
 	{
-		d->send("%s%2d%s) %-20.20s %s", grn, i, nrm,
-		        sector_types[i], !(++c % 2) ? "\r\n" : "");
+		d->send("%s%2d%s) %-20.20s %s", grn, (*sectorIter)->getValue(), nrm, (*sectorIter)->getStandardName().c_str(), !(++c % 2) ? "\r\n" : "");
 	}
+
 	d->send("\r\nCurrently Set: ");
-	for(c  = 0, i = 0;i < NUM_ROOM_SECTORS;++i)
+	for (auto sectorIter = RoomSector::getStartIterator(); sectorIter != RoomSector::getEndIterator();++sectorIter)
 	{
-		if(IS_SET(mob->MobData->nsects, Q_BIT(i)))
+		RoomSector *sector = (*sectorIter);
+		if(IS_SET(mob->MobData->nsects, Q_BIT(sector->getValue())))
 		{
-			if(c++)
-				d->send(", ");
-			else
-				d->send(" ");
-			d->send("%s%s%s", cyn, sector_types[i], nrm);
+			d->send(sector->getValue() ? ", " : " ");
+			d->send("%s%s%s", cyn, sector->getStandardName().c_str(), nrm);
 		}
 	}
 	d->send("\r\n\n%sQ%s) Quit", grn, nrm);
@@ -680,10 +679,10 @@ void medit_disp_menu(Descriptor *d)
 		}
 	}
 	*nsects = '\0';
-	for(i = 0;i < NUM_ROOM_SECTORS;++i)
+	for (auto sectorIter = RoomSector::getStartIterator(); sectorIter != RoomSector::getEndIterator();++sectorIter)
 	{
 		if(IS_SET(mob->MobData->nsects, Q_BIT(i)))
-			sprintf(nsects + strlen(nsects), "%s ", sector_types[i]);
+			sprintf(nsects + strlen(nsects), "%s ", (*sectorIter)->getStandardName().c_str());
 	}
 
 	if(mob->MobData->primary_kit)
@@ -1117,7 +1116,7 @@ void medit_parse(Descriptor *d, char *arg)
 			{
 				break;
 			}
-			else if(atoi(arg) < 0 && atoi(arg) >= NUM_ROOM_SECTORS)
+			else if(!RoomSector::getEnumByValue(atoi(arg)))
 			{
 				d->send("That number is out of range. Try again(Q to quit) : ");
 				return;

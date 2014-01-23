@@ -23,6 +23,7 @@
 #include "StringUtil.h"
 #include "ClanUtil.h"
 #include "Descriptor.h"
+#include "rooms/Room.h"
 
 extern int circle_restrict;
 extern DateTime rebootTime;

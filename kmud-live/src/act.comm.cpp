@@ -28,6 +28,7 @@
 #include "MiscUtil.h"
 #include "ClanUtil.h"
 #include "Descriptor.h"
+#include "rooms/Room.h"
 
 class Descriptor;
 
@@ -222,7 +223,7 @@ ACMD(do_say)
 	else if(!AFF_FLAGGED(ch, AFF_SILENCE) || GET_LEVEL(ch) >= LVL_IMMORT)
 	{
 		if( !IS_NPC(ch) )
-			CommManager::GetManager().SaveComm("say", argument, ch, ch->in_room->vnum);
+			CommManager::GetManager().SaveComm("say", argument, ch, ch->in_room->getVnum());
 		for(vict = ch->in_room->people;vict;vict = vict->next_in_room)
 		{
 			if(vict != ch && GET_POS(vict) > POS_SLEEPING && (!AFF_FLAGGED(vict, AFF_DEAF) || GET_LEVEL(ch) >= LVL_IMMORT || GET_LEVEL(vict) >= LVL_IMMORT))
@@ -316,7 +317,7 @@ ACMD(do_speak)
 		ch->send("You begin to speak, but have nothing to say...\r\n");
 	else
 	{
-		CommManager::GetManager().SaveComm(std::string("speak_") + spokenTo.at(0), speech, ch, ch->in_room->vnum);
+		CommManager::GetManager().SaveComm(std::string("speak_") + spokenTo.at(0), speech, ch, ch->in_room->getVnum());
 		for (pt = descriptor_list; pt; pt = pt->next)
 		{
 			if(!pt->character || STATE(pt) != CON_PLAYING)
@@ -406,13 +407,13 @@ void Character::SendTell(Character *target, char *arg)
 		this->send(OK);
 	else
 	{
-		CommManager::GetManager().SaveComm(std::string("tell"), arg, this, this->in_room->vnum, target);
+		CommManager::GetManager().SaveComm(std::string("tell"), arg, this, this->in_room->getVnum(), target);
 		sprintf(buf, "You tell $N, '%s'", arg);
 		Act(buf, FALSE, this, 0, target, TO_CHAR);
 
 		if(IS_NPC(target) && !IS_NPC(this))
 			MudLog(CMP, MAX(GET_LEVEL(this), LVL_GOD), TRUE, "%s tells %s '%s' in room %d.",
-			       GET_NAME(this), GET_NAME(target), arg, this->in_room->vnum);
+			GET_NAME(this), GET_NAME(target), arg, this->in_room->getVnum());
 
 		if(this->IsIgnoring(target->player.name))
 			this->RemoveIgnore(target->player.name);
@@ -566,7 +567,7 @@ ACMD(do_spec_comm)
 
 			if(IS_NPC(vict) && !IS_NPC(ch))
 				MudLog(CMP, MAX(GET_LEVEL(ch), LVL_GOD), TRUE, "%s %s %s '%s' in room %d.",
-				       GET_NAME(ch), action_plur, GET_NAME(vict), buf2, ch->in_room->vnum);
+				GET_NAME(ch), action_plur, GET_NAME(vict), buf2, ch->in_room->getVnum());
 
 		}
 		Act(action_others, FALSE, ch, 0, vict, TO_NOTVICT);
@@ -926,7 +927,7 @@ ACMD(do_gen_comm)
 		else
 			sprintf(buf1, "You %s, '%s'", com_msgs[subcmd][1], argument);
 		Act(buf1, FALSE, ch, 0, 0, TO_CHAR | TO_SLEEP);
-		CommManager::GetManager().SaveComm(com_msgs[subcmd][1], argument, ch, ch->in_room->vnum);
+		CommManager::GetManager().SaveComm(com_msgs[subcmd][1], argument, ch, ch->in_room->getVnum());
 	}
 
 	/* now send all the strings out */
@@ -963,7 +964,7 @@ ACMD(do_gen_comm)
 			{
 				strcpy(name, DARKNESS_CHECK(i->character, ch));
 
-				if((IS_DARK(i->character->in_room) || IS_DARK(ch->in_room)) && !CAN_SEE_IN_DARK(i->character))
+				if((i->character->in_room->isDark() || ch->in_room->isDark()) && !CAN_SEE_IN_DARK(i->character))
 					strcpy(name, "Someone");
 			}
 
@@ -990,7 +991,7 @@ ACMD(do_gen_comm)
 			}
 
 			if (subcmd == SCMD_YELL &&
-			        ((ch->in_room->zone != i->character->in_room->zone) ||
+			        ((ch->in_room->getZoneNumber() != i->character->in_room->getZoneNumber()) ||
 			         GET_POS(i->character) < POS_RESTING))
 				continue;
 

@@ -12,6 +12,8 @@ PlayerPortalServer::PlayerPortalServer(kuListener *listener)
 
 	commandProcessors["Load Help File"] = new PlayerPortalLoadHelpFileCommandProcessor();
 	commandProcessors["Save Help File"] = new PlayerPortalSaveHelpFileCommandProcessor();
+	commandProcessors["Load Item Flags"] = new PlayerPortalLoadItemFlagsCommandProcess();
+	commandProcessors["Load Object List"] = new PlayerPortalLoadObjectListCommandProcess();
 }
 
 PlayerPortalServer::~PlayerPortalServer()
@@ -21,18 +23,23 @@ PlayerPortalServer::~PlayerPortalServer()
 		delete descriptor;
 	}
 
-	listener->l_Close();
+	for (auto commandProcessorPair : commandProcessors)
+	{
+		delete commandProcessorPair.second;
+	}
+
+	listener->close();
 	delete listener;
 }
 
 int PlayerPortalServer::getPort()
 {
-	return this->listener->l_GetPort();
+	return this->listener->getPort();
 }
 
 void PlayerPortalServer::process()
 {
-	std::list<kuDescriptor *> newDescriptors = this->listener->l_AcceptNewHosts();
+	std::list<kuDescriptor *> newDescriptors = this->listener->acceptNewHosts();
 
 	for(kuDescriptor *descriptor : newDescriptors)
 	{
@@ -41,7 +48,7 @@ void PlayerPortalServer::process()
 		this->kuDescriptorUidToPlayerPortalDescriptorMap[descriptor->getUid()] = playerPortalDescriptor;
 	}
 
-	this->listener->l_Pulse();
+	this->listener->pulse();
 
 	for(PlayerPortalDescriptor *playerPortalDescriptor : descriptors)
 	{
@@ -71,7 +78,14 @@ void PlayerPortalServer::processCommand(PlayerPortalDescriptor *playerPortalDesc
 		return;
 	}
 
-	(*commandProcessorIter).second->process(playerPortalDescriptor, command);
+	try
+	{
+		(*commandProcessorIter).second->process(playerPortalDescriptor, command);
+	}
+	catch (std::exception e)
+	{
+		MudLog(NRM, LVL_APPR, TRUE, "Could not process web socket command. Command: '%s', Error: %s", command["method"].asString().c_str(), e.what());
+	}
 }
 
 void PlayerPortalServer::closeDescriptor(PlayerPortalDescriptor *playerPortalDescriptor)
@@ -94,4 +108,14 @@ void onPlayerPortalServerSocketClose(void *data, kuListener *listener, kuDescrip
 	PlayerPortalServer *playerPortalServer = (PlayerPortalServer*)data;
 
 	playerPortalServer->onDescriptorClose(descriptor);
+}
+
+bool PlayerPortalServer::isConnected()
+{
+	return this->listener->isListening();
+}
+
+unsigned int PlayerPortalServer::numberOfDescriptors()
+{
+	return descriptors.size();
 }

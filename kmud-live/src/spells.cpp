@@ -25,6 +25,9 @@
 #include "shop.h"
 #include "weaves.h"
 #include "zones.h"
+#include "rooms/Room.h"
+#include "rooms/RoomSector.h"
+#include "rooms/Exit.h"
 
 extern Object *object_list;
 extern Character *character_list;
@@ -188,7 +191,7 @@ ASPELL(spell_locate_object)
 		room = obj->getRoom();
 		if( !room ) continue;
 
-		if(ROOM_FLAGGED(room, ROOM_NOPORT) || ROOM_FLAGGED(room, ROOM_NOMAGIC) || room->GetZone()->IsClosed())
+		if(ROOM_FLAGGED(room, ROOM_NOPORT) || ROOM_FLAGGED(room, ROOM_NOMAGIC) || room->getZone()->IsClosed())
 			continue;
 
 		if( !is_name(arg, obj->getName()) )
@@ -201,8 +204,8 @@ ASPELL(spell_locate_object)
 			continue;
 		}
 
-		distance = room->GetZone()->Distance(ch->in_room->GetZone());
-		location = find_zone_slope(room->zone, ch->in_room->zone);
+		distance = room->getZone()->Distance(ch->in_room->getZone());
+		location = find_zone_slope(room->getZoneNumber(), ch->in_room->getZoneNumber());
 
 		if(distance <= GET_SKILL(ch, SPELL_LOCATE_OBJECT) / 20)
 		{
@@ -213,7 +216,7 @@ ASPELL(spell_locate_object)
 
 			sprintf(buf2, "You sense %s%s%s.  --  [%s%s%s]\r\n",
 				obj->GetSDesc(), Dist.c_str(), loc[location], COLOR_GREEN(ch, CL_COMPLETE),
-				room->GateCode().c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
+				room->gateCode().c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
 
 			//Make sure the buffer can hold this new line...
 			if( strlen(buf) + strlen(buf2) < MAX_STRING_LENGTH )//We have enough space.
@@ -235,7 +238,7 @@ ASPELL(spell_tornado)
 	Character* vict, *vict_next;
 	int PermDist, dist;
 
-	if( ch->in_room->sector_type == SECT_INSIDE )
+	if( ch->in_room->getSector() == RoomSector::inside )
 	{
 		ch->send("Your attempt to form a tornado indoors didn't quite go according to plan.\r\n");
 		return;
@@ -261,7 +264,7 @@ ASPELL(spell_tornado)
 		for(;dist > 0;--dist)
 		{
 			//Before looking for another room, check to see if this room is inside. If so, we're done.
-			if( cur_room->sector_type == SECT_INSIDE )
+			if( cur_room->getSector() == RoomSector::inside )
 				break;
 
 			int start_exit = MiscUtil::random(0, NUM_OF_DIRS - 1);
@@ -271,14 +274,14 @@ ASPELL(spell_tornado)
 					i = 0;
 
 				//Does this exit even exist?
-				if( cur_room->dir_option[i] != NULL && cur_room->dir_option[i]->to_room != NULL )
+				if( cur_room->dir_option[i] != NULL && cur_room->dir_option[i]->getToRoom() != NULL )
 				{
 					//Is the exit closed off?
-					if( cur_room->dir_option[i]->IsClosed() )
+					if( cur_room->dir_option[i]->isClosed() )
 						continue;
 
 					//Move to this room.
-					cur_room = cur_room->dir_option[i]->to_room;
+					cur_room = cur_room->dir_option[i]->getToRoom();
 					break;
 				}
 			}
@@ -317,15 +320,15 @@ ASPELL(spell_gate)
 			if(	ROOM_FLAGGED(World[i], ROOM_NOPORT)  ||
 				ROOM_FLAGGED(World[i], ROOM_NOMAGIC) ||
 				ROOM_FLAGGED(World[i], ROOM_DEATH) ||
-				World[i]->GetZone()->IsClosed()
+				World[i]->getZone()->IsClosed()
 			)
 			{
 				continue;
 			}
 
-			if( World[i]->GateCode() == arg )
+			if( World[i]->gateCode() == arg )
 			{
-				int diff = ch->in_room->GetZone()->Distance(World[i]->GetZone()) - (GET_SKILL(ch, weave->getVnum()) / 20);
+				int diff = ch->in_room->getZone()->Distance(World[i]->getZone()) - (GET_SKILL(ch, weave->getVnum()) / 20);
 				int failure = MiscUtil::random(0, 100) - ((100 - GET_SKILL(ch,weave->getVnum())) + 50 + (10*(diff+1)) );
 
 				if( diff >= 0 && failure < 0 )//Gate too far, and distance factor kicked in. Need to find random room.
@@ -338,7 +341,7 @@ ASPELL(spell_gate)
 						if(	ROOM_FLAGGED(World[i], ROOM_NOPORT)  ||
 							ROOM_FLAGGED(World[i], ROOM_NOMAGIC) ||
 							ROOM_FLAGGED(World[i], ROOM_DEATH) ||
-							World[i]->GetZone()->IsClosed()
+							World[i]->getZone()->IsClosed()
 						)
 							continue;
 						else
@@ -386,11 +389,11 @@ ASPELL(spell_locate_life)
 		if(GET_CLASS(ch) == CLASS_GREYMAN)
 			continue;
 
-		zone = vict->in_room->zone;
-		distance = vict->in_room->GetZone()->Distance(ch->in_room->GetZone());
-		location = find_zone_slope(zone, ch->in_room->zone);
+		zone = vict->in_room->getZoneNumber();
+		distance = vict->in_room->getZone()->Distance(ch->in_room->getZone());
+		location = find_zone_slope(zone, ch->in_room->getZoneNumber());
 
-		if(ROOM_FLAGGED(vict->in_room, ROOM_NOPORT) || ROOM_FLAGGED(vict->in_room, ROOM_NOMAGIC) || vict->in_room->GetZone()->IsClosed())
+		if(ROOM_FLAGGED(vict->in_room, ROOM_NOPORT) || ROOM_FLAGGED(vict->in_room, ROOM_NOMAGIC) || vict->in_room->getZone()->IsClosed())
 			continue;
 
 		if(distance <= GET_SKILL(ch, SPELL_LOCATE_LIFE) / 20)
@@ -401,7 +404,7 @@ ASPELL(spell_locate_life)
 			else Dist = " ";
 			ch->send("You sense %s%s%s.  --  [%s%s%s]\r\n",
 			         GET_NAME(vict), Dist.c_str(), loc[location], COLOR_GREEN(ch, CL_COMPLETE),
-			         vict->in_room->GateCode().c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
+			         vict->in_room->gateCode().c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
 		}
 	}
 
@@ -446,12 +449,12 @@ ASPELL(spell_eavesdrop)
 	}
 	if (ch != victim && ch->in_room != victim->in_room)
 	{
-		if(victim->in_room->EavesWarder != NULL)
+		if (victim->in_room->getEavesdroppingWarder() != NULL)
 		{
 			Act("You try to eavesdrop on $N, but the room is warded!", TRUE, ch, NULL, victim, TO_CHAR);
-			victim->in_room->EavesWarder->send("Someone is attempting to listen in on your conversation!\r\n");
+			victim->in_room->getEavesdroppingWarder()->send("Someone is attempting to listen in on your conversation!\r\n");
 		}
-		else if(ch->in_room->DistanceToRoom(victim->in_room) <= atoi(weave->getAttribute("MaxDistance").c_str()))
+		else if (ch->in_room->getDistanceToRoom(victim->in_room) <= atoi(weave->getAttribute("MaxDistance").c_str()))
 		{
 			ch->Eavesdropping = victim->in_room;
 			victim->in_room->eavesdropping.push_back(ch);
@@ -469,13 +472,13 @@ ASPELL(spell_eavesdrop)
 }
 ASPELL(spell_circle_of_silence)
 {
-	if (ch->in_room->EavesWarder)
+	if (ch->in_room->getEavesdroppingWarder())
 	{
 		ch->send("The room has already been warded.\r\n");
 	}
 	else
 	{
-		ch->in_room->EavesWarder = ch;
+		ch->in_room->setEavesdroppingWarder(ch);
 		ch->send("You weave a ward around the area to protect against unwanted listeners.\r\n");
 	}
 }
@@ -487,23 +490,23 @@ ASPELL(spell_flare)
 
 	if( IS_HUMAN( ch ) )
 	{
-		sendToZone( weave->getAttribute( "FromHuman" ).c_str(), ch->in_room->GetZone()->GetRnum() );
-		sendToZone( "\r\n", ch->in_room->GetZone()->GetRnum() );
+		sendToZone( weave->getAttribute( "FromHuman" ).c_str(), ch->in_room->getZone()->GetRnum() );
+		sendToZone( "\r\n", ch->in_room->getZone()->GetRnum() );
 	}
 	else if( IS_TROLLOC( ch ) )
 	{
-		sendToZone( weave->getAttribute( "FromTrolloc" ).c_str(), ch->in_room->GetZone()->GetRnum() );
-		sendToZone( "\r\n", ch->in_room->GetZone()->GetRnum() );
+		sendToZone( weave->getAttribute( "FromTrolloc" ).c_str(), ch->in_room->getZone()->GetRnum() );
+		sendToZone( "\r\n", ch->in_room->getZone()->GetRnum() );
 	}
 	else if( IS_SEANCHAN( ch ) )
 	{
-		sendToZone( weave->getAttribute( "FromSeanchan" ).c_str(), ch->in_room->GetZone()->GetRnum() );
-		sendToZone( "\r\n", ch->in_room->GetZone()->GetRnum() );
+		sendToZone( weave->getAttribute( "FromSeanchan" ).c_str(), ch->in_room->getZone()->GetRnum() );
+		sendToZone( "\r\n", ch->in_room->getZone()->GetRnum() );
 	}
 	else if( IS_AIEL( ch ) )
 	{
-		sendToZone( weave->getAttribute( "FromAiel" ).c_str(), ch->in_room->GetZone()->GetRnum() );
-		sendToZone( "\r\n", ch->in_room->GetZone()->GetRnum() );
+		sendToZone( weave->getAttribute( "FromAiel" ).c_str(), ch->in_room->getZone()->GetRnum() );
+		sendToZone( "\r\n", ch->in_room->getZone()->GetRnum() );
 	}
 }
 

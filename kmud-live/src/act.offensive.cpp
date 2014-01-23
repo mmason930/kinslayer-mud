@@ -25,6 +25,9 @@
 #include "weaves.h"
 #include "MiscUtil.h"
 #include "Descriptor.h"
+#include "rooms/Room.h"
+#include "rooms/RoomSector.h"
+#include "rooms/Exit.h"
 
 /* extern variables */
 
@@ -659,21 +662,14 @@ int Character::ChargeOffenseRoll(int skill)
 						((int) (offense * ChargeData.O_PositiveSway) )
 					 );
 
-	switch (SECT(this->in_room))
-	{
-		case SECT_CITY:
-			offense -= 10;
-			break;
-		case SECT_FOREST:
-			offense -= 20;
-			break;
-		case SECT_HILLS:
-			offense -= 30;
-			break;
-		case SECT_MOUNTAIN:
-			offense -= 40;
-			break;
-	}
+	if (in_room->getSector() == RoomSector::city)
+		offense -= 10;
+	else if (in_room->getSector() == RoomSector::forest)
+		offense -= 20;
+	else if (in_room->getSector() == RoomSector::hills)
+		offense -= 30;
+	else if (in_room->getSector() == RoomSector::mountain)
+		offense -= 40;
 	
 	offense *= ((float)GET_SKILL(this, skill) / 100);
 
@@ -788,7 +784,7 @@ ACMD(do_charge)
 	}
 
 	/* Fogel 5/7/09 - Added to disallow trollocs from skewering indoors and humans from charging indoors should they get ported indoors while mounted*/
-	if(SECT( ch->in_room ) == SECT_INSIDE)
+	if(ch->in_room->getSector() == RoomSector::inside)
 	{
 		ch->send("There isn't enough room for you to do that.\r\n");
 		return;
@@ -1042,7 +1038,7 @@ ACMD(do_release)
 
 	if(ch->Eavesdropping)
 		ch->stopEavesdropping();
-	if(ch->in_room->EavesWarder == ch)
+	if(ch->in_room->getEavesdroppingWarder() == ch)
 		ch->stopWarding();
 	if(ch->InvertNextWeave)
 		ch->InvertNextWeave = false;
@@ -1374,15 +1370,6 @@ ACMD(do_order)
 	}
 }
 
-int Room::NumExits()
-{
-	int num = 0;
-	for( int i = 0; i < NUM_OF_DIRS; i++ )
-		if( this->GetNeighbor(i) )
-			num++;
-	return num;
-}
-
 void performFlee(Character *ch)
 {
 	int attempt, loss;
@@ -1400,7 +1387,7 @@ void performFlee(Character *ch)
 	}
 	attempt = GET_DIRECTION(ch);	/* Select a random direction */
 
-	if (CAN_GO(ch, attempt) && !ROOM_FLAGGED(EXIT(ch, attempt)->to_room, ROOM_DEATH))
+	if (CAN_GO(ch, attempt) && !ROOM_FLAGGED(EXIT(ch, attempt)->getToRoom(), ROOM_DEATH))
 	{
 		vict = FIGHTING(ch);
 		was_fighting = FIGHTING(ch);
@@ -1432,7 +1419,7 @@ void performFlee(Character *ch)
 
 ACMD(do_flee)
 {
-	int num_exits = ch->in_room->NumExits(), i = 0;
+	int num_exits = ch->in_room->getNumberOfExits(), i = 0;
 	bool room_found = FALSE;
 	char arg1[MAX_INPUT_LENGTH];
 
@@ -1502,7 +1489,7 @@ ACMD(do_flee)
 			if( CAN_GO(ch, GET_DIRECTION(ch)) )
 			{
 				// Prevent player from fleeing into a deathtrap.
-				if( ROOM_FLAGGED(EXIT(ch, GET_DIRECTION(ch))->to_room, ROOM_DEATH) )
+				if( ROOM_FLAGGED(EXIT(ch, GET_DIRECTION(ch))->getToRoom(), ROOM_DEATH) )
 					break;
 				// We'll check specially to see if they cannot move due to movement points being too low.
 				if( GET_MOVE(ch) < ch->NeededToMove(fleeDir) )
@@ -1521,8 +1508,8 @@ ACMD(do_flee)
 					room_found = TRUE;
 			}
 			// Bail out if the exit is valid but blocked by a door.
-			if( EXIT(ch, GET_DIRECTION(ch)) && EXIT(ch, GET_DIRECTION(ch))->to_room && 
-				!EXIT(ch, GET_DIRECTION(ch))->IsDisabled() && IS_SET(EXIT(ch, GET_DIRECTION(ch))->exit_info, EX_CLOSED) )
+			if( EXIT(ch, GET_DIRECTION(ch)) && EXIT(ch, GET_DIRECTION(ch))->getToRoom() && 
+			!EXIT(ch, GET_DIRECTION(ch))->isDisabled() && EXIT(ch, GET_DIRECTION(ch))->isClosed())
 				break;
 
 			// Insurance policy in case something goes wrong.
@@ -2766,7 +2753,7 @@ int Character::Offense()
 	offense = MAX(offense, 0);
 	offense += MoodOffense();
 
-	if((IS_FADE(this) && this->followers && this->check_if_pc_in_group() && this->group_members_in_zone()) || (!IS_NPC(this) && this->master && IS_FADE(this->master) && (this->in_room->GetZone() == this->master->in_room->GetZone())))
+	if((IS_FADE(this) && this->followers && this->check_if_pc_in_group() && this->group_members_in_zone()) || (!IS_NPC(this) && this->master && IS_FADE(this->master) && (this->in_room->getZone() == this->master->in_room->getZone())))
 		offense += 5;
 
 	offense *= lPercent;

@@ -108,3 +108,18 @@ void Game::setupFilesystem()
 		exit(1);
 	}
 }
+
+bool Game::playerPortalServerIsConnected()
+{
+	return playerPortalServer->isConnected();
+}
+
+int Game::getPlayerPortalPort()
+{
+	return this->playerPortalServer->getPort();
+}
+
+unsigned int Game::getNumberOfPlayerPortalDescriptors()
+{
+	return playerPortalServer->numberOfDescriptors();
+}

@@ -11,6 +11,7 @@
 #include "handler.h"
 #include "weather.h"
 #include "js.h"
+#include "rooms/Room.h"
 
 std::recursive_mutex ZoneManager::SingletonMutex;
 extern Index *obj_index;
@@ -239,7 +240,7 @@ void Zone::Reset()
 					if (cmd[cmd_no]->arg3 >= 0)
 					{
 						obj = read_object(cmd[cmd_no]->arg1, REAL, true);
-						sprintf(obj->creator, "zone load -ground- to room %d", World[cmd[cmd_no]->arg3]->vnum);
+						sprintf(obj->creator, "zone load -ground- to room %d", World[cmd[cmd_no]->arg3]->getVnum());
 						obj->MoveToRoom(cmd[cmd_no]->arg3);
 
 						if(IS_OBJ_STAT(obj, ITEM_CHEST))
@@ -389,16 +390,16 @@ void Zone::Reset()
 					switch (cmd[cmd_no]->arg3)
 					{
 						case 0:
-							World[cmd[cmd_no]->arg1]->RemoveDoorBit(cmd[cmd_no]->arg2, EX_LOCKED);
-							World[cmd[cmd_no]->arg1]->RemoveDoorBit(cmd[cmd_no]->arg2, EX_CLOSED);
+							World[cmd[cmd_no]->arg1]->removeDoorBit(cmd[cmd_no]->arg2, EX_LOCKED);
+							World[cmd[cmd_no]->arg1]->removeDoorBit(cmd[cmd_no]->arg2, EX_CLOSED);
 							break;
 						case 1:
-							World[cmd[cmd_no]->arg1]->SetDoorBit(cmd[cmd_no]->arg2, EX_CLOSED);
-							World[cmd[cmd_no]->arg1]->RemoveDoorBit(cmd[cmd_no]->arg2, EX_LOCKED);
+							World[cmd[cmd_no]->arg1]->setDoorBit(cmd[cmd_no]->arg2, EX_CLOSED);
+							World[cmd[cmd_no]->arg1]->removeDoorBit(cmd[cmd_no]->arg2, EX_LOCKED);
 							break;
 						case 2:
-							World[cmd[cmd_no]->arg1]->SetDoorBit(cmd[cmd_no]->arg2, EX_LOCKED);
-							World[cmd[cmd_no]->arg1]->SetDoorBit(cmd[cmd_no]->arg2, EX_CLOSED);
+							World[cmd[cmd_no]->arg1]->setDoorBit(cmd[cmd_no]->arg2, EX_LOCKED);
+							World[cmd[cmd_no]->arg1]->setDoorBit(cmd[cmd_no]->arg2, EX_CLOSED);
 							break;
 					}
 				}
@@ -800,7 +801,7 @@ void Zone::LogError( int cmd_no, const char *message )
     std::stringstream RoomStream;
 
     if(room_var && (*room_var) != -1)
-        RoomStream << ", room " << World[*room_var]->vnum;
+		RoomStream << ", room " << World[*room_var]->getVnum();
 
 	MudLog(NRM, LVL_GOD, TRUE, "SYSERR: zone file: %s", message);
 	MudLog(NRM, LVL_GOD, TRUE,
@@ -821,7 +822,7 @@ room_vnum Zone::FindUnusedRoomVnum()
 	{
 		if (vnum > (room_rnum)GetTop())
 			return(NOWHERE);
-		if (rnum >= (room_rnum)World.size() || World[rnum]->vnum > vnum)
+		if (rnum >= (room_rnum)World.size() || World[rnum]->getVnum() > vnum)
 			break;
 		++rnum;
 		++vnum;
@@ -887,8 +888,8 @@ int ResetCommand::GetRealArg1()
 	if( command == 'G' ) return obj_index[arg1].vnum;
 	if( command == 'E' ) return obj_index[arg1].vnum;
 	if( command == 'P' ) return obj_index[arg1].vnum;
-	if( command == 'D' ) return World[arg1]->vnum;
-	if( command == 'R' ) return World[arg1]->vnum;
+	if (command == 'D') return World[arg1]->getVnum();
+	if (command == 'R') return World[arg1]->getVnum();
 	return arg1;
 }
 int ResetCommand::GetRealArg2()
@@ -899,13 +900,13 @@ int ResetCommand::GetRealArg2()
 int ResetCommand::GetRealArg3()
 {
 	if( command == 'P' ) return obj_index[arg3].vnum;
-	if( command == 'O' ) return World[arg3]->vnum;
-	if( command == 'M' ) return World[arg3]->vnum;
+	if (command == 'O') return World[arg3]->getVnum();
+	if (command == 'M') return World[arg3]->getVnum();
 	return arg3;
 }
 int ResetCommand::GetRealArg4()
 {
-	if( command == 'P' ) return World[arg4]->vnum;
+	if (command == 'P') return World[arg4]->getVnum();
 	return arg4;
 }
 int ResetCommand::GetRealArg5()

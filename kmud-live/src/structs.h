@@ -19,6 +19,9 @@
 class UserType;
 class Quest;
 class Zone;
+class Character;
+class Room;
+class Object;
 char	*str_dup(const char *source);
 
 /* preamble *************************************************************/
@@ -87,20 +90,6 @@ const int ROOM_TAILORING	= 25;	// The room can be used for tailoring
 #define EX_RAMMABLE		(1 << 3)	/* The door is rammable			*/
 #define EX_DISABLED		(1 << 4)	/* The exit is disabled			*/
 #define EX_TEMPORARY	(1 << 5)	/* The exit does not save		*/
-
-/* Sector types: used in Room.sector_type					*/
-
-const int SECT_INSIDE		= 0;	// Indoors
-const int SECT_CITY			= 1;	// In a city
-const int SECT_FIELD		= 2;	// In a field
-const int SECT_FOREST		= 3;	// In a forest
-const int SECT_HILLS		= 4;	// In the hills
-const int SECT_MOUNTAIN		= 5;	// On a mountain
-const int SECT_WATER_SWIM	= 6;	// Swimmable water
-const int SECT_WATER_NOSWIM	= 7;	// Water - need a boat
-const int SECT_UNDERWATER	= 8;	// Underwater
-const int SECT_FLYING		= 9;	// Wheee!
-const int SECT_ROAD			= 10;	// Roads
 
 /* char and mob-related defines *****************************************/
 /* PC classes */
@@ -1073,7 +1062,6 @@ class Object : public JSBindable, public Entity
 
 		bool IsProto();
 
-		void FreePrototype();
 		void FreeLiveObject();
 		void Extract( bool lowerItemCount = false );
 
@@ -1185,161 +1173,6 @@ class Object : public JSBindable, public Entity
 		float GetModifierFloat( eObjectModifier modType );
 };
 
-/* room-related structures ************************************************/
-struct Direction
-{
-public:
-	char	*general_description;		/* When look DIR.						*/
-	char	*keyword;					/* for open/close						*/
-
-	sh_int exit_info;					/* Exit info							*/
-	obj_vnum key;						/* Key's number (-1 for no key */
-	class Room *to_room;				/* Where direction leads (NOWHERE)		*/
-	byte hidden;
-	byte PickReq;
-
-	Direction();
-	~Direction();
-	bool IsPickProof();
-	bool IsClosed();
-	bool IsOpen();
-	bool CanOpen();
-	bool IsDoor();
-	bool IsLocked();
-	bool CanLock();
-	bool CanPick( Character *ch );
-	bool CanBeSeen( Character *ch );
-	bool IsRammable();
-	void SetRammable();
-	bool IsDisabled();
-	bool IsTemporary();
-	void Enable();
-	void Disable();
-	void MakeTemporary();
-	void MakePermanent();
-	void UnsetRammable();
-	void ToggleRammable();
-	int HiddenLevel();
-	int PickLevel();
-	void Clear();
-};
-
-/* ================== Memory Structure for room ======================= */
-class Room //That's right! Classroom!
-//11/06/2009 - implement JSBindable interface
-	: public JSBindable, public Entity
-{
-	public:
-		static int nr_alloc;
-		static int nr_dealloc;
-		room_vnum vnum;											// Rooms number	(vnum)
-		sh_int zone;											// Room zone (for resetting)
-		sh_int sector_type;										// sector type (move/hide)
-		char	*name;											// Rooms name 'You are ...'
-		char	*description;									// Shown when entered
-		struct ExtraDescription *ex_description;				// for examine/look
-		struct Direction *dir_option[ NUM_OF_DIRS ];			// Directions
-		int room_flags;											// DEATH,DARK ... etc
-		int auction_vnum;										// Vnum of the room's associated auction
-		Character *EavesWarder;									// Warding room against listeners
-		bool isCorpseRoom;
-		void setIsCorpseRoom();
-		bool getIsCorpseRoom();
-
-		byte light;												// Number of lightsources in room
-		SPECIAL( *func );
-
-		std::list<class Track *> Tracks;
-		std::vector<class Character*> eavesdropping;			// Characters eavesdropping on this room
-
-		class Object *contents;									// List of items in room
-		class Character *people;								// List of NPC / PC in room
-		class PokerTable *PTable;
-		bool deleted;											// Whether or not the room should be deleted on next zone save.
-		
-		static std::set< int > corpseRooms;
-
-
-		//Methods
-		int LinesInDesc();
-
-		std::list< Character* > GetPeople();
-
-		bool IsDark();
-		bool IsPurged() { return false; }
-		const char *getName();
-		const char *getDisplayName();
-
-		std::list< class Gate* > GetGates();
-		void RemoveGate( class Gate* _Gate );
-		int NumGates();
-		int NumExits();
-		int DistanceToRoom( Room* OtherRoom );
-		int FindFirstStep( Room* OtherRoom );
-		std::list<int> PathToRoom( Room *OtherRoom );
-
-		void ScrambleTracks( bool erase );
-		void SetDoorBit( int dir, int bit );
-		void SetDoorBitOneSide( int dir, int bit );
-		void RemoveDoorBit( int dir, int bit );
-		void RemoveDoorBitOneSide( int dir, int bit );
-		void Copy( const Room *source, bool deep = true );
-		void zero();
-		void zero(bool free);
-		Object *findFirstObject(const std::function<bool(class Object *obj)> &predicate);
-
-		void AddToBatch( sql::BatchInsertStatement &roomInsert,
-					     sql::BatchInsertStatement &exitInsert,
-					     sql::BatchInsertStatement &jsInsert
-					   );
-
-		bool IsTrackable();
-
-		std::string FadeCode();
-		std::string GateCode();
-
-		class Zone * GetZone();
-
-		Room *operator =( Room &source );
-
-		Room( const Room *source );
-		Room( const Room &source );
-		Room();
-		~Room();
-
-		Room *GetNeighbor( const int dir );
-
-		void FreePrototype();
-		void FreeLiveRoom();
-
-		void save();
-		void DeleteFromDatabase();
-
-		static void BootWorld();
-		static Room *Boot( const sql::Row &MyRow, const std::list< sql::Row > &MyExits,
-			const std::list< sql::Row > &MyJS, const std::list< Object* > &MyObjects);
-
-		std::list< Object* > loadItemList( bool recursive );
-		void loadItems();
-		void loadItems( const std::list< Object* > &lItems );
-		void itemSave();
-		void corpseSave();
-		static void saveCorpseRooms();
-
-		Room& operator<< ( const std::string &s );
-		Room& operator<< ( const int );
-		Room& operator<< ( const float );
-		Room& operator<< ( const double );
-		Room& operator<< ( const bool );
-		Room& operator<< ( const char * s );
-		Room& operator<< ( const char s );
-
-		std::string getDisplayableId();
-		Room *getRoom();
-		class EntityType *getEntityType();
-
-	private:
-};
 /* ====================================================================== */
 
 struct RoomNotFoundException

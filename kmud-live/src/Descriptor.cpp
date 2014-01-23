@@ -11,12 +11,14 @@
 #include "olc.h"
 #include "comm.h"
 #include "kuDescriptor.h"
-#include "UserEmailAddress.h"
 
 #include "stats.h"
 #include "telnet.h"
 #include "Descriptor.h"
+#include "rooms/Room.h"
+#include "rooms/RoomSector.h"
 #include "UserMacro.h"
+#include "UserEmailAddress.h"
 #include "StringUtil.h"
 #include "CharacterUtil.h"
 
@@ -839,7 +841,7 @@ void Descriptor::completeEnterGame()
 		else
 		{
 			mount->MoveToRoom( loadRoom );
-			if ( this->character->in_room->sector_type == SECT_INSIDE )
+			if ( this->character->in_room->getSector() == RoomSector::inside )
 				do_follow( mount, ( char* ) GET_NAME( this->character ), 0, 0 );
 			else
 			{

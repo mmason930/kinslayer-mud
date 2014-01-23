@@ -26,6 +26,7 @@
 
 #include "StringUtil.h"
 #include "Descriptor.h"
+#include "rooms/Room.h"
 
 WeaveManager * WeaveManager::Self  = NULL;
 GateManager  * GateManager::Self   = NULL;
@@ -736,19 +737,6 @@ Gate::~Gate()
 {
 }
 
-std::list< Gate* > Room::GetGates()
-{
-	return GateManager::GetManager().GetGatesgetRoom( this );
-}
-int Room::NumGates()
-{
-	return GateManager::GetManager().GetGatesgetRoom( this ).size();
-}
-void Room::RemoveGate( Gate* _Gate )
-{
-	GateManager::GetManager().RemoveGate( _Gate );
-}
-
 std::list<Gate*>::iterator Gate::Close()
 {
 	sendToRoom("A gate slowly fades out of existance.\r\n", roomA);
@@ -770,7 +758,7 @@ Room* Gate::OtherEnd( Room* ThisEnd )
 	if( ThisEnd == this->roomB )
 		return roomA;
 	std::stringstream Buffer;
-	Buffer << "Gate::OtherEnd passed room with vnum " << ThisEnd->vnum << ".";
+	Buffer << "Gate::OtherEnd passed room with vnum " << ThisEnd->getVnum() << ".";
 	throw RoomNotFoundException(Buffer.str());
 }
 
@@ -886,7 +874,7 @@ bool Character::ShieldOutOfRange( Character* Target )
 
 	double distance_required = atof(weave->getAttribute("SkillFactor").c_str()) * (GET_SKILL(this, weave->getVnum()));
 
-	if( this->in_room->DistanceToRoom( Target->in_room ) >= (int)distance_required )
+	if (this->in_room->getDistanceToRoom(Target->in_room) >= (int)distance_required)
 		return true;
 	return false;
 }

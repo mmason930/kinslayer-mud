@@ -14,6 +14,7 @@
 #include "mobs.h"
 #include "zones.h"
 #include "Descriptor.h"
+#include "rooms/Room.h"
 
 /*-------------------------------------------------------------------*/
 
@@ -655,8 +656,7 @@ void sedit_rooms_menu(Descriptor *d)
 
 	for (i = 0; i < shop->in_room.size(); ++i)
 	{
-		d->send("%2d - [%s%5d%s] - %s%s%s\r\n", (i+1), cyn, shop->in_room[i], nrm,
-		        yel, FindRoomByVnum(shop->in_room[i])->name, nrm);
+		d->send("%2d - [%s%5d%s] - %s%s%s\r\n", (i+1), cyn, shop->in_room[i], nrm, yel, FindRoomByVnum(shop->in_room[i])->getName(), nrm);
 	}
 
 	d->send("\r\n"

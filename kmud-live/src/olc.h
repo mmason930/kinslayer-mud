@@ -38,7 +38,6 @@ const int YES = 1;
  */
 
 const int NUM_ROOM_FLAGS = 26;
-const int NUM_ROOM_SECTORS = 11;
 
 const int NUM_MOB_FLAGS = 28;
 const int NUM_AFF_FLAGS = 36;

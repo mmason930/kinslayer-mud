@@ -33,6 +33,8 @@
 #include "UserClan.h"
 #include "UserType.h"
 #include "ObjectMoveLogger.h"
+#include "rooms/Room.h"
+#include "rooms/RoomSector.h"
 
 #include "js.h"
 
@@ -358,7 +360,7 @@ const char *DARKNESS_CHECK(Character *ch, Character *vict)
 		return "Someone";
 }
 
-char *fname(char *namelist)
+char *fname(const char *namelist)
 {
 	const int space = 30;
 	static char holder[space];
@@ -836,7 +838,7 @@ void Character::StepThroughGate( class Gate *g )
 		return;
 	}
 
-	if( MOUNT(this) && SECT(OtherEnd) == SECT_INSIDE )
+	if( MOUNT(this) && OtherEnd->getSector() == RoomSector::inside )
 	{
 		this->send("You cannot ride there.\r\n");
 		return;
@@ -895,7 +897,7 @@ void Character::RemoveFromRoom()
 	if (GET_EQ(this, WEAR_LIGHT))
 		if (GET_EQ(this, WEAR_LIGHT)->getType() == ITEM_LIGHT)
 			if (GET_OBJ_VAL(GET_EQ(this, WEAR_LIGHT), 2))	/* Light is ON */
-				--in_room->light;
+				in_room->setLight(in_room->getLight() - 1);
 
 	REMOVE_FROM_LIST(this, this->in_room->people, next_in_room);
 	in_room = 0;
@@ -925,7 +927,7 @@ void Character::MoveToRoom(Room *room)
 	if (GET_EQ(this, WEAR_LIGHT))
 		if (GET_EQ(this, WEAR_LIGHT)->getType() == ITEM_LIGHT)
 			if (GET_OBJ_VAL(GET_EQ(this, WEAR_LIGHT), 2))	/* Light ON */
-				++room->light;
+				room->setLight(room->getLight() + 1);
 
 	/* Stop fighting now, if we left. */
 	if (FIGHTING(this) && this->in_room != FIGHTING(this)->in_room)
@@ -947,7 +949,7 @@ void Character::MoveToRoom(Room *room)
 	{
 		this->stopEavesdropping();		
 	}
-	if(this->in_room->EavesWarder && this->in_room->EavesWarder == this)
+	if (this->in_room->getEavesdroppingWarder() == this)
 	{
 		this->stopWarding();
 	}
@@ -1115,13 +1117,11 @@ void equip_char(Character * ch, Object * obj, int pos)
 	{
 		if (pos == WEAR_LIGHT && obj->getType() == ITEM_LIGHT)
 			if (GET_OBJ_VAL(obj, 2))	/* if light is ON */
-				++ch->in_room->light;
+				ch->in_room->setLight(ch->in_room->getLight() + 1);
 	}
 
 	for (j = 0; j < MAX_OBJ_AFFECT; ++j)
-		affect_modify_ar(ch, obj->affected[j].location,
-		                 obj->affected[j].modifier,
-		                 (int *) obj->obj_flags.bitvector, TRUE);
+		affect_modify_ar(ch, obj->affected[j].location, obj->affected[j].modifier, (int *) obj->obj_flags.bitvector, TRUE);
 
 	if ( ch->isInClan( GET_OBJ_CLAN( obj ) ) )
 	{
@@ -1156,7 +1156,7 @@ Object *unequip_char(Character * ch, int pos)
 		if (pos == WEAR_LIGHT && obj->getType() == ITEM_LIGHT && GET_OBJ_VAL(obj, 2))
 		{
 
-			--ch->in_room->light;
+			ch->in_room->setLight(ch->in_room->getLight() - 1);
 		}
 	}
 
@@ -1330,7 +1330,7 @@ void Object::MoveToRoom(Room *room, bool vaultSave)
 	else if(this->in_room){}
 	else
 	{
-		objectMoveLogger.logObjectMove(this->objID, std::string("Moved to room #") + ToString(room->vnum));
+		objectMoveLogger.logObjectMove(this->objID, std::string("Moved to room #") + ToString(room->getVnum()));
 
 		this->next_content = room->contents;
 		room->contents = this;
@@ -1343,7 +1343,7 @@ void Object::MoveToRoom(Room *room, bool vaultSave)
 				room->itemSave();
 		}
 		else if(IS_CORPSE(this)) {
-			Room::corpseRooms.insert(room->vnum);
+			Room::corpseRooms.insert(room->getVnum());
 		}
 	}
 }
@@ -1505,7 +1505,7 @@ void update_char_objects(Character * ch)
 				{
 					Act("Your light sputters out and dies.", FALSE, ch, 0, 0, TO_CHAR);
 					Act("$n's light sputters out and dies.", FALSE, ch, 0, 0, TO_ROOM);
-					--ch->in_room->light;
+					ch->in_room->setLight(ch->in_room->getLight() - 1);
 				}
 			}
 
@@ -1537,7 +1537,7 @@ void Character::Extract( UserLogoutType *userLogoutType, bool full_delete )
 	Descriptor *t_desc;
 	Object *obj;
 	int i = 0, freed = 0;
-	int playerRoomVnum = this->in_room ? this->in_room->vnum : -1;
+	int playerRoomVnum = this->in_room ? this->in_room->getVnum() : -1;
 
 	if( purged == true )
 		return;
@@ -1634,7 +1634,7 @@ void Character::Extract( UserLogoutType *userLogoutType, bool full_delete )
 	
 		std::stringstream sqlBuffer;
 
-		std::string roomString = in_room ? MiscUtil::Convert<std::string>(in_room->vnum) : "NULL";
+		std::string roomString = in_room ? MiscUtil::Convert<std::string>(in_room->getVnum()) : "NULL";
 
 		sqlBuffer	<< "INSERT INTO userLogout("
 					<< " `user_id`,"

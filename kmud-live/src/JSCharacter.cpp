@@ -1,3 +1,6 @@
+#include "conf.h"
+#include "sysdep.h"
+
 #include "JSCharacter.h"
 #include "JSRoom.h"
 #include "JSObject.h"
@@ -16,6 +19,7 @@
 #include "ClanUtil.h"
 #include "UserLogoutType.h"
 #include "Descriptor.h"
+#include "rooms/Room.h"
 
 int level_exp( int level );
 
@@ -317,7 +321,7 @@ void JSCharacter::setHps(int x)
 			GET_HIT(real) = 1;
 		else {
 			MudLog(BRF, 0, TRUE, "%s killed by a JS trap at %s", GET_NAME(real),
-				(real->in_room ? real->in_room->name : "<Unknown>"));
+				(real->in_room ? real->in_room->getName() : "<Unknown>"));
 			real->Die();
 		}
 	}
@@ -372,7 +376,7 @@ flusspferd::value JSCharacter::load_obj( const int vnum )
 
 	obj = read_object(r_num, REAL, true);
 	Room *inRoom = this->real->getRoom();
-	sprintf(obj->creator, "Loaded by Javascript. Type: JSCharacter, ID: %ld, Vnum: %d, Room: %d.", this->real->player.idnum, this->real->getVnum(), (inRoom ? inRoom->vnum : -1));
+	sprintf(obj->creator, "Loaded by Javascript. Type: JSCharacter, ID: %ld, Vnum: %d, Room: %d.", this->real->player.idnum, this->real->getVnum(), (inRoom ? inRoom->getVnum() : -1));
 
 	obj_to_char(obj,real);
 

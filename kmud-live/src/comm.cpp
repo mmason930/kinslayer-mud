@@ -72,6 +72,7 @@
 #include "UserLogoutType.h"
 #include "GatewayServer.h"
 #include "Descriptor.h"
+#include "rooms/Room.h"
 #include "GatewayDescriptorType.h"
 #include "Game.h"
 
@@ -511,11 +512,11 @@ void waitForGatewayConnection() {
 
 	while(gatewayConnection == NULL) {
 
-		listener->l_AcceptNewHosts();
+		listener->acceptNewHosts();
 
-		listener->l_Pulse();
+		listener->pulse();
 
-		std::list<kuDescriptor*> descriptors = listener->l_GetDescriptors();
+		std::list<kuDescriptor*> descriptors = listener->getDescriptors();
 
 		for(std::list<kuDescriptor*>::iterator iter = descriptors.begin();iter != descriptors.end();++iter) {
 
@@ -562,7 +563,7 @@ void waitForGatewayConnection() {
 
 	//Kick out all connections except for our gateway.
 
-	for(kuDescriptor *desc : listener->l_GetDescriptors())
+	for (kuDescriptor *desc : listener->getDescriptors())
 	{
 		if(desc != gatewayConnection) {
 
@@ -610,7 +611,7 @@ void processGatewayCommand(const std::string &input)
 	}
 }
 
-void onBeforeSocketWrite(void *data, kuListener *listener, kuDescriptor *descriptor, const std::string &output)
+void onBeforeSocketWrite(void *data, kuListener *listener, kuDescriptor *descriptor)
 {
 }
 
@@ -676,7 +677,7 @@ void initiateGame( int port )
 
 	listener = new kuListener(port, TCP);
 
-	if( listener->l_IsListening() == false ) {
+	if( listener->isListening() == false ) {
 
 		Log("Could not bind to port %d.", port);
 
@@ -691,7 +692,7 @@ void initiateGame( int port )
 	
 	listener->setAfterSocketWriteCallback(&onAfterSocketWrite);
 
-	if(!(listener->l_EnableKeepAlive()))
+	if(!(listener->enableKeepAlive()))
 	{
 		Log("Could not enable keepalive on socket.");
 	}
@@ -734,7 +735,7 @@ void initiateGame( int port )
 	Log( "Entering game loop." );
 	gameLoop();
 
-	listener->l_Pulse();
+	listener->pulse();
 
 	//Tell the gateway server that we're rebooting.
 	if(gatewayConnection != NULL) {
@@ -823,7 +824,7 @@ void initiateGame( int port )
 		descriptor_list->persistentDisconnect();
 	}
 
-	listener->l_Close();
+	listener->close();
 
 	Log( "Freeing PCs and NPCs..." );
 
@@ -919,6 +920,7 @@ void initiateGame( int port )
 	Log("Freeing Comm Manager...");
 	CommManager::GetManager().Free();
 
+	Log("Freeing JSManager...");
 	delete JSManager::get();
 
 	Log( "Freeing menus/guides..." );
@@ -938,14 +940,18 @@ void initiateGame( int port )
 	Log("Ending Game Session...");
 	endGameSession();
 
+	Log("Closing main socket...");
 	delete listener;
 
 	dbContext.reset();
 
-	Log("Closing object movement log thread.");
+	Log("Closing object movement log thread...");
 	objectMoveLogger.kill();
 	objectMoveLoggerThread->join();
 	delete objectMoveLoggerThread;
+
+	Log("Deleting game object...");
+	delete game;
 
 	Log("~~~Summary~~~");
 	Log("Rooms       : Total Alloc: %d, Dealloc: %d, Rem: %d",
@@ -1202,9 +1208,9 @@ void gameLoop()
 			missed_pulses = 2 * PASSES_PER_SEC;
 		}
 
-		listener->l_Pulse();
+		listener->pulse();
 
-		listener->l_AcceptNewHosts();
+		listener->acceptNewHosts();
 
 		for(d = descriptor_list;d;d = d->next) {
 
@@ -1385,7 +1391,7 @@ void autoSave( void )
 			if(IS_CORPSE(object))
 				roomContents.push_back(object);
 		}
-		holderIdAndTypeToContentsMap[ std::pair<char, std::string>('R', MiscUtil::Convert<std::string>(corpseRoom->vnum)) ] = roomContents;
+		holderIdAndTypeToContentsMap[std::pair<char, std::string>('R', MiscUtil::Convert<std::string>(corpseRoom->getVnum()))] = roomContents;
 	}
 
 	Object::saveMultipleHolderItems(holderIdAndTypeToContentsMap, true);
@@ -1458,7 +1464,7 @@ void DeleteOldTracks()
 		{
 			//delete track;
 			if(track->room)
-				track->room->Tracks.remove(track);
+				track->room->tracks.remove(track);
 			TrackList.pop_back();
 
 			tracksToDelete->push_back(track);
@@ -2215,53 +2221,6 @@ Character& Character::operator<< ( const bool s )
 	return *this;
 }
 
-// Room operator<< overloading
-Room& Room::operator<< ( const std::string &s )
-{
-	sendToRoom( s.c_str(), this );
-	return *this;
-
-}
-
-Room& Room::operator<< ( const char * s )
-{
-	sendToRoom( s, this );
-	return *this;
-
-}
-
-Room& Room::operator<< ( const char s )
-{
-	sendToRoom( ToString(s).c_str(), this );
-	return *this;
-
-}
-
-Room& Room::operator<< ( const int s )
-{
-	sendToRoom( ToString(s).c_str(), this );
-	return *this;
-
-}
-Room& Room::operator<< ( const float s )
-{
-	sendToRoom( ToString(s).c_str(), this );
-	return *this;
-
-}
-
-Room& Room::operator<< ( const double s )
-{
-	sendToRoom( ToString(s).c_str(), this );
-	return *this;
-
-}
-
-Room& Room::operator<< ( const bool s )
-{
-	sendToRoom( ToString(s).c_str(), this );
-	return *this;
-}
 void sendToZone(const char *messg, int zone_rnum)
 {
 	Descriptor *i;
@@ -2272,7 +2231,7 @@ void sendToZone(const char *messg, int zone_rnum)
 	for (i = descriptor_list; i; i = i->next)
 	{
 		if (!i->connected && i->character && AWAKE(i->character) &&
-		        (i->character->in_room->zone == zone_rnum))
+		        (i->character->in_room->getZoneNumber() == zone_rnum))
 		{
 			i->sendRaw(messg);
 		}

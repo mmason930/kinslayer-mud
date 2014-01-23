@@ -1,8 +1,6 @@
 #include "../../conf.h"
 #include "../../sysdep.h"
 
-#include <boost/regex.hpp>
-
 #include "../../structs.h"
 #include "../../spells.h"
 #include "../../utils.h"
@@ -27,6 +25,7 @@
 #include "../../StringUtil.h"
 #include "../../UserType.h"
 #include "../../EntityType.h"
+#include "../../rooms/Room.h"
 
 extern Object *object_list;
 extern Character *character_list;
@@ -283,9 +282,9 @@ ACMD(do_locate)
 				continue;
 
 			Room *room = target->in_room;
-			if (zone.exists() && (!room || !zone.matches(room->GetZone()->getVnum())))
+			if (zone.exists() && (!room || !zone.matches(room->getZone()->getVnum())))
 				continue;
-			if (!roomNumber.exists() && (!room || !roomNumber.matches(room->vnum)))
+			if (!roomNumber.exists() && (!room || !roomNumber.matches(room->getVnum())))
 				continue;
 
 			//Save these chese for last as they are more costly
@@ -339,9 +338,9 @@ ACMD(do_locate)
 				continue;
 
 			Room *room = obj->getRoom();
-			if (zone.exists() && (!room || !zone.matches(room->GetZone()->getVnum())))
+			if (zone.exists() && (!room || !zone.matches(room->getZone()->getVnum())))
 				continue;
-			if (roomNumber.exists() && (!room || !roomNumber.matches(room->vnum)))
+			if (roomNumber.exists() && (!room || !roomNumber.matches(room->getVnum())))
 				continue;
 
 			entityList.push_back((Entity*)obj);
@@ -354,12 +353,12 @@ ACMD(do_locate)
 		{
 			if (room->IsPurged())
 				continue;
-			if (vnum.exists() && !vnum.matches(room->vnum))
+			if (vnum.exists() && !vnum.matches(room->getVnum()))
 				continue;
 
-			if (zone.exists() && !zone.matches(room->GetZone()->getVnum()))
+			if (zone.exists() && !zone.matches(room->getZone()->getVnum()))
 				continue;
-			if (roomNumber.exists() && !roomNumber.matches(room->vnum))
+			if (roomNumber.exists() && !roomNumber.matches(room->getVnum()))
 				continue;
 
 			entityList.push_back((Entity*)room);
@@ -388,14 +387,14 @@ ACMD(do_locate)
 		else if (obj = dynamic_cast<Object*>(entity))
 			entityVnum = obj->getVnum();
 		else if (room = dynamic_cast<Room*>(entity))
-			entityVnum = room->vnum;
+			entityVnum = room->getVnum();
 
 		Room *entityRoom = entity->getRoom();
 
 		outputBuffer << std::setw(6) << std::right << (entityVnum == -1 ? "" : MiscUtil::toString(entityVnum)) << "  "
 			<< std::setw(6) << std::left << entity->getEntityType()->getStandardName() << " "
 			<< std::setw(37) << std::right << entity->getDisplayableId() << "   "
-			<< std::setw(6) << std::right << (entityRoom ? MiscUtil::toString(entityRoom->vnum) : "") << "       "
+			<< std::setw(6) << std::right << (entityRoom ? MiscUtil::toString(entityRoom->getVnum()) : "") << "       "
 			<< entity->getDisplayName() << std::endl;
 	}
 

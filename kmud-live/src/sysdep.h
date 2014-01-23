@@ -143,7 +143,7 @@ using std::tr1::unordered_map;
 #include <dirent.h>
 typedef int SOCKET;
 typedef int socket_t;
-#define closesocket(sock) close(sock)
+#define closesocket(sock) ::close(sock)
 #define SOCKET_ERROR (-1)
 
 #define INVALID_SOCKET (-1)

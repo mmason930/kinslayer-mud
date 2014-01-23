@@ -27,6 +27,9 @@
 #include "js_interpreter.h"
 #include "Descriptor.h"
 #include "UserClan.h"
+#include "rooms/Room.h"
+#include "rooms/RoomSector.h"
+#include "rooms/Exit.h"
 
 extern Character *character_list;
 
@@ -276,11 +279,11 @@ void mobileActivity(void)
 		/* Mob Movement */
 		if (!ch->master && !MOB_FLAGGED(ch, MOB_SENTINEL) && (GET_POS(ch) == POS_STANDING) &&
 		        ((door = MiscUtil::random(0, 42)) < NUM_OF_DIRS) && CAN_GO(ch, door) &&
-		        !ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_NOMOB) &&
-		        !ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_DEATH) &&
-		        !IS_SET(ch->MobData->nsects, Q_BIT(SECT(EXIT(ch, door)->to_room))) &&
+		        !ROOM_FLAGGED(EXIT(ch, door)->getToRoom(), ROOM_NOMOB) &&
+		        !ROOM_FLAGGED(EXIT(ch, door)->getToRoom(), ROOM_DEATH) &&
+		        !IS_SET(ch->MobData->nsects, Q_BIT(EXIT(ch, door)->getToRoom()->getSector()->getValue())) &&
 		        (!MOB_FLAGGED(ch, MOB_STAY_ZONE) ||
-		         (EXIT(ch, door)->to_room->zone == ch->in_room->zone)))
+				(EXIT(ch, door)->getToRoom()->getZoneNumber() == ch->in_room->getZoneNumber())))
 		{
 			perform_move(ch, door, 1);
 		}
@@ -296,10 +299,10 @@ void mobileActivity(void)
 		//Code for mob checking their light source.
 		if (!CAN_SEE_IN_DARK(ch))
 		{
-			Zone *zone = ch->in_room->GetZone();
+			Zone *zone = ch->in_room->getZone();
 			if (!ch->equipment[WEAR_LIGHT])
 			{
-				if (ch->in_room->IsDark() || zone->GetWeather()->getSun() == Sun::SUN_DARK || ROOM_FLAGGED(ch->in_room, ROOM_DARK))
+				if (ch->in_room->isDark() || zone->GetWeather()->getSun() == Sun::SUN_DARK || ROOM_FLAGGED(ch->in_room, ROOM_DARK))
 				{
 					for (Object *lightSource = ch->carrying; lightSource; lightSource = lightSource->next_content)
 					{

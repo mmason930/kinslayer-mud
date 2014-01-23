@@ -29,4 +29,37 @@ public:
 class PlayerPortalLoadHelpFileCommandProcessor : public PlayerPortalJavaScriptCommandProcessor {};
 class PlayerPortalSaveHelpFileCommandProcessor : public PlayerPortalJavaScriptCommandProcessor {};
 
+class PlayerPortalLoadItemTypesAndWearsCommandProcess : public PlayerPortalCommandProcessor
+{
+private:
+public:
+
+	PlayerPortalLoadItemTypesAndWearsCommandProcess();
+	~PlayerPortalLoadItemTypesAndWearsCommandProcess();
+
+	void process(PlayerPortalDescriptor *descriptor, Json::Value command);
+};
+
+class PlayerPortalLoadItemFlagsCommandProcess : public PlayerPortalCommandProcessor
+{
+private:
+public:
+
+	PlayerPortalLoadItemFlagsCommandProcess();
+	~PlayerPortalLoadItemFlagsCommandProcess();
+
+	void process(PlayerPortalDescriptor *descriptor, Json::Value command);
+};
+
+class PlayerPortalLoadObjectListCommandProcess : public PlayerPortalCommandProcessor
+{
+private:
+public:
+
+	PlayerPortalLoadObjectListCommandProcess();
+	~PlayerPortalLoadObjectListCommandProcess();
+
+	void process(PlayerPortalDescriptor *descriptor, Json::Value command);
+};
+
 #endif

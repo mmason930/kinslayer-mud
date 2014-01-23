@@ -33,6 +33,8 @@ public:
 	void processCommand(PlayerPortalDescriptor *playerPortalDescriptor, const Json::Value &command);
 	void onDescriptorClose(kuDescriptor *descriptor);
 	int getPort();
+	bool isConnected();
+	unsigned int numberOfDescriptors();
 };
 
 #endif

@@ -1,3 +1,6 @@
+#include "conf.h"
+#include "sysdep.h"
+
 #include "structs.h"
 #include "js_utils.h"
 #include "flusspferd.hpp"
@@ -13,6 +16,7 @@
 #include <string>
 #include <map>
 #include "MiscUtil.h"
+#include "rooms/Room.h"
 
 using namespace std;
 

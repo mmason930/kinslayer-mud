@@ -46,6 +46,8 @@
 #include "GatewayDescriptorType.h"
 #include "ObjectMoveLogger.h"
 #include "Game.h"
+#include "rooms/Room.h"
+#include "rooms/Exit.h"
 
 #include "js.h"
 #include "js_trigger.h"
@@ -86,7 +88,7 @@ std::vector<Index *>		MobIndex;
 Character *character_list = NULL;				// global linked list of chars
 Object *object_list = NULL;						// global linked list of objs
 Index *obj_index;								// index table for object file
-std::vector<Object*> obj_proto;;				//Object prototypes
+std::vector<Object*> obj_proto;				//Object prototypes
 MeleeMessageList fight_messages[MAX_MESSAGES];	// fighting messages
 std::list<PlayerIndex *> PlayerTable;
 GameTime time_info;								// the infomation about the time
@@ -390,7 +392,7 @@ void bootWorld(void)
 	BootObjects();
 
 	Log("Loading rooms.");
-	Room::BootWorld();
+	Room::bootWorld();
 
 	Log("Loading global scripts.");
 	BootGlobalScripts();
@@ -741,231 +743,6 @@ char fread_letter(FILE *fp)
 	return c;
 }
 
-class PassiveRoomQueryReleaseJob : public Job
-{
-	sql::Query RoomQuery, ExitQuery, jsQuery, ObjectQuery;
-public:
-	PassiveRoomQueryReleaseJob( sql::Query RoomQuery, sql::Query ExitQuery, sql::Query jsQuery, sql::Query ObjectQuery )
-	{
-		this->RoomQuery = RoomQuery;
-		this->ExitQuery = ExitQuery;
-		this->jsQuery = jsQuery;
-		this->ObjectQuery = ObjectQuery;
-	}
-	virtual void performRoutine()
-	{
-		this->RoomQuery.reset();
-		this->ExitQuery.reset();
-		this->jsQuery.reset();
-		this->ObjectQuery.reset();
-	}
-	virtual void performPostJobRoutine()
-	{
-		//...
-	}
-};
-
-void Room::BootWorld()
-{
-	sql::Query RoomQuery, ExitQuery, jsQuery, ObjectQuery;
-	std::list< sql::Row > MyExits, MyJS;
-	std::list< Object* > MyObjects;
-
-	Clock clock1;
-	clock1.turnOn();
-	try {
-		std::stringstream roomQueryBuffer, exitQueryBuffer, objectQueryBuffer;
-
-		roomQueryBuffer << " SELECT *"
-						<< " FROM rooms"
-						<< " ORDER BY vnum ASC";
-
-		exitQueryBuffer << " SELECT *"
-						<< " FROM roomExit"
-						<< " ORDER BY room_vnum ASC";
-
-		objectQueryBuffer << " SELECT id, holder_id"
-						  << " FROM objects"
-						  << " WHERE holder_type='R'"
-						  << " AND holder_id IN(SELECT vnum FROM rooms)"
-						  << " ORDER BY (holder_id+0) ASC";
-
-		RoomQuery = gameDatabase->sendQuery( roomQueryBuffer.str() );
-		ExitQuery = gameDatabase->sendQuery( exitQueryBuffer.str() );
-		ObjectQuery=gameDatabase->sendQuery( objectQueryBuffer.str() );
-		jsQuery    =gameDatabase->sendQuery( "SELECT * FROM js_attachments WHERE type='R' ORDER BY target_vnum ASC,id ASC;" );
-	} catch( sql::QueryException e ) {
-		MudLog(BRF, LVL_APPR, TRUE, "Could not send query in Room::BootWorld() : %s", e.getMessage().c_str());
-		exit(1);
-	}
-
-	while( RoomQuery->hasNextRow() )
-	{
-		sql::Row MyRow = RoomQuery->getRow();
-		MyExits.clear();
-		MyJS.clear();
-		MyObjects.clear();
-
-		while( ExitQuery->hasNextRow() && ExitQuery->peekRow()["room_vnum"] == MyRow["vnum"] )
-			MyExits.push_back( ExitQuery->getRow() );
-
-		while( ObjectQuery->hasNextRow() && ObjectQuery->peekRow()["holder_id"] == MyRow["vnum"] )
-		{
-			boost::uuids::string_generator uuidGenerator;
-			boost::uuids::uuid objID = uuidGenerator(ObjectQuery->getRow()["id"].c_str());
-			Object *obj = Object::loadSingleItem(objID,false);
-			if( obj != NULL ) {
-				MyObjects.push_back( obj );
-			}
-		}
-		while( jsQuery->hasNextRow() && jsQuery->peekRow()["target_vnum"] == MyRow["vnum"] )
-			MyJS.push_back( jsQuery->getRow() );
-
-		Room *r = Room::Boot( MyRow, MyExits, MyJS, MyObjects );
-
-		if( r != NULL )
-			World.push_back( r );
-	}
-
-	/***
-	  * Cleanup of these resources is a monumental task. As such, it would be better to run it behind the
-	  * scenes with a separate thread. First, we copy the four boost::shared_ptr's into this class.
-	  * We then reset them so they bring their reference count down to 1. Once this happens, we can run
-	  * the thread and exit this function.
-	  *
-	  ***/
-
-	MyExits.clear();
-	MyJS.clear();
-
-	//We want a guarantee that the resources will be released.
-	assert( RoomQuery.use_count() == 1 );
-	assert( ExitQuery.use_count() == 1 );
-	assert( jsQuery.use_count() == 1 );
-	assert( ObjectQuery.use_count() == 1 );
-
-	Job *cleanupJob = new PassiveRoomQueryReleaseJob( RoomQuery, ExitQuery, jsQuery, ObjectQuery );
-
-	//Drop use count down to 1.
-	RoomQuery.reset();
-	ExitQuery.reset();
-	jsQuery.reset();
-	ObjectQuery.reset();
-
-	//And deploy the thread...
-	ThreadedJobManager::get().addJob( cleanupJob );
-}
-
-void Room::save()
-{
-	//TODO: Remove.
-}
-void Room::DeleteFromDatabase()
-{
-	std::stringstream QueryBuffer;
-
-	try {
-		QueryBuffer << "DELETE FROM rooms WHERE vnum='" << this->vnum << "';";
-		gameDatabase->sendRawQuery(QueryBuffer.str());
-
-		QueryBuffer.str("");
-
-		QueryBuffer << "DELETE FROM roomExit WHERE room_vnum='" << this->vnum << "';";
-		gameDatabase->sendRawQuery(QueryBuffer.str());
-
-		QueryBuffer.str("");
-
-		QueryBuffer << "DELETE FROM js_attachments WHERE target_vnum='" << this->vnum << "' AND type='R';";
-		gameDatabase->sendRawQuery(QueryBuffer.str());
-
-	} catch( sql::QueryException e ) {
-		MudLog(BRF, LVL_APPR, TRUE, "Failed to delete room #%d from database: %s",
-			this->vnum, e.getMessage().c_str());
-		return;
-	}
-}
-Room *Room::Boot(const sql::Row &MyRow,
-				 const std::list< sql::Row > &MyExits,
-				 const std::list< sql::Row > &MyJS,
-				 const std::list< Object* > &MyObjects )
-{
-	static bool hasRoomExitIndexes = false;
-	static int EXIT_ROOM_VNUM_INDEX;
-	static int EXIT_TO_ROOM_INDEX;
-	static int EXIT_GENERAL_DESCRIPTION_INDEX;
-	static int EXIT_KEYWORD_INDEX;
-	static int EXIT_EXIT_INFO_INDEX;
-	static int EXIT_HIDDEN_LEVEL_INDEX;
-	static int EXIT_PICK_REQ_INDEX;
-	static int EXIT_KEY_VNUM_INDEX;
-	static int EXIT_DIR_INDEX;
-
-	Room *NewRoom = new Room();
-	Zone *zone;
-	if( (zone = ZoneManager::GetManager().GetZoneByVnum( MiscUtil::Convert<unsigned int>(MyRow["znum"]) )) == NULL )
-	{
-		MudLog(BRF, LVL_APPR, TRUE,
-			"Attempting to load room with invalid zone vnum. Room: %d. Zone: %d.", atoi(MyRow["vnum"].c_str()),
-			MiscUtil::Convert<unsigned int>(MyRow["znum"]));
-		return (NULL);
-	}
-
-	NewRoom->name			= str_dup(MyRow["name"].c_str());
-	NewRoom->description	= str_dup(MyRow["description"].c_str());
-	NewRoom->zone			= zone->GetRnum();
-	NewRoom->room_flags		= atoi(MyRow["room_flags"].c_str());
-	NewRoom->auction_vnum	= atoi(MyRow["auction_vnum"].c_str());
-	NewRoom->sector_type	= atoi(MyRow["sector"].c_str());
-	NewRoom->vnum			= atoi(MyRow["vnum"].c_str());
-	NewRoom->ex_description	= ExtraDescription::Parse(MyRow["edescription"]);
-
-	if( hasRoomExitIndexes == false && MyExits.empty() == false ) {
-		sql::Row row = MyExits.front();
-		EXIT_ROOM_VNUM_INDEX			= row.getIndexByField("room_vnum");
-		EXIT_TO_ROOM_INDEX				= row.getIndexByField("to_room");
-		EXIT_GENERAL_DESCRIPTION_INDEX	= row.getIndexByField("general_description");
-		EXIT_KEYWORD_INDEX				= row.getIndexByField("keyword");
-		EXIT_EXIT_INFO_INDEX			= row.getIndexByField("exit_info");
-		EXIT_HIDDEN_LEVEL_INDEX			= row.getIndexByField("hidden_level");
-		EXIT_PICK_REQ_INDEX				= row.getIndexByField("pick_req");
-		EXIT_KEY_VNUM_INDEX				= row.getIndexByField("key_vnum");
-		EXIT_DIR_INDEX					= row.getIndexByField("dir");
-		hasRoomExitIndexes=true;
-	}
-
-	for( std::list< sql::Row >::const_iterator eRow = MyExits.begin();eRow != MyExits.end();++eRow )
-	{
-		int dir = atoi( (*eRow)[EXIT_DIR_INDEX].c_str() );
-
-		if( dir >= 0 && dir < NUM_OF_DIRS )
-		{
-			NewRoom->dir_option[dir] = new Direction();
-			NewRoom->dir_option[dir]->general_description	= str_dup((*eRow)[EXIT_GENERAL_DESCRIPTION_INDEX].c_str());
-			NewRoom->dir_option[dir]->keyword				= str_dup((*eRow)[EXIT_KEYWORD_INDEX].c_str());
-			NewRoom->dir_option[dir]->exit_info				= atoi((*eRow)[EXIT_EXIT_INFO_INDEX].c_str());
-			NewRoom->dir_option[dir]->PickReq				= (byte)(atoi((*eRow)[EXIT_PICK_REQ_INDEX].c_str()));
-			NewRoom->dir_option[dir]->hidden				= (byte)(atoi((*eRow)[EXIT_HIDDEN_LEVEL_INDEX].c_str()));
-			NewRoom->dir_option[dir]->key					= atoi((*eRow)[EXIT_KEY_VNUM_INDEX].c_str());
-			NewRoom->dir_option[dir]->to_room				= (Room*)(atoi((*eRow)[EXIT_TO_ROOM_INDEX].c_str()));
-			//This last line is a HACK!
-			//Instead of wasting memory on a seperate int to hold the vnum,
-			//we'll just store it in the pointer until later.
-		}
-	}
-    NewRoom->js_scripts = std::shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
-	for(std::list< sql::Row >::const_iterator jsIter = MyJS.begin();jsIter != MyJS.end();++jsIter )
-	{
-		int vnum = atoi((*jsIter)["script_vnum"].c_str());
-		JSTrigger* t = JSManager::get()->getTrigger(vnum);
-		NewRoom->js_scripts->push_back(t);
-	}
-
-	if( !MyObjects.empty() )
-		NewRoom->loadItems( MyObjects );
-
-	return (NewRoom);
-}
-
 /* resolve all vnums into rnums in the world */
 void renum_world(void)
 {
@@ -977,9 +754,9 @@ void renum_world(void)
 		{
 			if (World[room]->dir_option[door])
 			{
-				if (World[room]->dir_option[door]->to_room)
+				if (World[room]->dir_option[door]->getToRoom())
 				{
-					World[room]->dir_option[door]->to_room = FindRoomByVnum( (__int64)World[room]->dir_option[door]->to_room);
+					World[room]->dir_option[door]->setToRoom(FindRoomByVnum( (__int64)World[room]->dir_option[door]->getToRoom()) );
 				}
 			}
 		}
@@ -1255,8 +1032,7 @@ int Character::VnumRoom(std::string SearchName)
 			bool exitFound = false;
 			for(int i = 0;i < NUM_OF_DIRS;++i)
 			{
-				if( World[nr]->dir_option[i] && World[nr]->dir_option[i]->to_room
-				&& World[nr]->dir_option[i]->to_room->vnum == exitVnum )
+				if( World[nr]->dir_option[i] && World[nr]->dir_option[i]->getToRoom() && World[nr]->dir_option[i]->getToRoom()->getVnum() == exitVnum)
 				{
 					exitFound=true;
 					break;
@@ -1265,10 +1041,10 @@ int Character::VnumRoom(std::string SearchName)
 			if( !exitFound ) continue;
 			/************************/
 		}
-		else if( !isname(SearchName, World[nr]->name) )
+		else if( !isname(SearchName, World[nr]->getName()) )
 			continue;
 
-		this->send("%3d. [%5d] %s\r\n", ++found, World[nr]->vnum, World[nr]->name);
+		this->send("%3d. [%5d] %s\r\n", ++found, World[nr]->getVnum(), World[nr]->getName());
 	}
 	return (found);
 }
@@ -1414,39 +1190,6 @@ void zone_update(void)
 	}
 }
 
-void Room::SetDoorBit(int dir, int bit)
-{
-	if(this->dir_option[dir])
-	{
-		SET_BITK(this->dir_option[dir]->exit_info, bit);
-
-		if(this->dir_option[dir]->to_room && this->dir_option[dir]->to_room->dir_option[rev_dir[dir]]) {
-            SET_BITK(this->dir_option[dir]->to_room->dir_option[rev_dir[dir]]->exit_info, bit);
-		}
-	}
-}
-void Room::SetDoorBitOneSide(int dir, int bit)
-{
-	if(this->dir_option[dir])
-        SET_BITK(this->dir_option[dir]->exit_info, bit);
-}
-void Room::RemoveDoorBit(int dir, int bit)
-{
-	if(this->dir_option[dir])
-	{
-		REMOVE_BIT(this->dir_option[dir]->exit_info, bit);
-
-		if(this->dir_option[dir]->to_room && this->dir_option[dir]->to_room->dir_option[rev_dir[dir]]) {
-			REMOVE_BIT(this->dir_option[dir]->to_room->dir_option[rev_dir[dir]]->exit_info, bit);
-		}
-	}
-}
-void Room::RemoveDoorBitOneSide(int dir, int bit)
-{
-	if(this->dir_option[dir])
-		REMOVE_BIT(this->dir_option[dir]->exit_info, bit);
-}
-
 /* for use in reset_zone; return TRUE if zone 'nr' is free of PC's  */
 int is_zone_empty(int zone_nr)
 {
@@ -1456,7 +1199,7 @@ int is_zone_empty(int zone_nr)
 	{
 		if (STATE(i) == CON_PLAYING)
 		{
-			if (i->character->in_room->zone == zone_nr)
+			if (i->character->in_room->getZoneNumber() == zone_nr)
 			{
 				return 0;
 			}
@@ -1763,12 +1506,12 @@ bool Character::basicSave()
 
 	int save_room;
 
-	if(in_room && in_room->vnum == 20)
-		save_room = this->StartRoom()->vnum;
+	if (in_room && in_room->getVnum() == 20)
+		save_room = this->StartRoom()->getVnum();
 	else if(this->in_room)
-		save_room = this->in_room->vnum;
+		save_room = this->in_room->getVnum();
 	else if( this->StartRoom() )
-		save_room = this->StartRoom()->vnum;
+		save_room = this->StartRoom()->getVnum();
 	else
 		save_room = -1;
 
@@ -2325,211 +2068,6 @@ bool Character::CreateDatabaseEntry()
 	return true;
 }
 
-void Room::zero(bool free)
-{
-	if(!free)
-	{
-		this->zero();
-		return;
-	}
-}
-void Room::zero()
-{
-	this->vnum				= NOWHERE;
-	this->zone				= 0;
-	this->sector_type		= 0;
-	this->name				= NULL;
-	this->description		= NULL;
-	this->ex_description	= NULL;
-	this->light				= 0;
-	this->contents			= NULL;
-	this->people			= NULL;
-	this->PTable			= NULL;
-	this->deleted			= false;
-	this->EavesWarder		= NULL;
-	this->auction_vnum		= -1;
-	this->room_flags		= 0;
-	this->func				= (NULL);
-	this->js_scripts		= std::shared_ptr<std::vector<JSTrigger*> >( new std::vector< JSTrigger* > );
-
-	memset(&this->dir_option,	0, sizeof(dir_option));
-}
-
-Zone * Room::GetZone()
-{
-	return ZoneManager::GetManager().GetZoneByRnum(zone);
-}
-
-void Room::Copy(const Room *source, bool deep)
-{
-	if( deep == true )
-	{
-		this->contents		= source->contents;
-		this->people		= source->people;
-		this->PTable		= source->PTable;
-		for( std::list<Track*>::const_iterator tIter = source->Tracks.begin();tIter != source->Tracks.end();++tIter )
-		{
-			this->Tracks.push_back( (*tIter)->Clone() );
-			this->Tracks.back()->room = this;
-		}
-//		this->Tracks		= source->Tracks;
-		this->deleted		= source->deleted;
-	}
-	this->func			= source->func;
-	this->light			= source->light;
-	this->room_flags	= source->room_flags;
-//	memcpy(&this->room_flags, &source->room_flags, sizeof(int) * 4);
-	this->sector_type	= source->sector_type;
-	this->zone			= source->zone;
-	this->auction_vnum	= source->auction_vnum;
-	this->js_scripts	= source->js_scripts;
-
-	this->name			= str_dup(source->name ? source->name : "undefined");
-	this->description	= str_dup(source->description ? source->description : "undefined\r\n");
-
-	int i;
-	for(i = 0;i < NUM_OF_DIRS;++i)
-	{
-		if(source->dir_option[i])
-		{
-			this->dir_option[i] = new Direction();
-			*this->dir_option[i]= *source->dir_option[i];
-			this->dir_option[i]->general_description = source->dir_option[i]->general_description ?
-			        str_dup(source->dir_option[i]->general_description) : 0;
-			this->dir_option[i]->keyword = source->dir_option[i]->keyword ? str_dup(source->dir_option[i]->keyword) : 0;
-		}
-		else if( this->dir_option[i] != NULL )
-		{
-			delete this->dir_option[i];
-			this->dir_option[i] = NULL;
-		}
-	}
-
-	if(source->ex_description)
-	{
-		struct ExtraDescription *thist, *temp, *temp2;
-		temp = new ExtraDescription;
-		memset(temp, 0, sizeof(ExtraDescription));
-
-		this->ex_description = temp;
-
-		for(thist = source->ex_description;thist;thist = thist->next)
-		{
-			temp->keyword = thist->keyword ? str_dup(thist->keyword) : 0;
-			temp->description = thist->description ? str_dup(thist->description) : 0;
-
-			if(thist->next)
-			{
-				temp2 = new ExtraDescription;
-				memset(temp2, 0, sizeof(ExtraDescription));
-				temp->next = temp2;
-				temp = temp2;
-			}
-			else
-				temp->next = 0;
-		}
-	}
-}
-Room *Room::operator =(Room &source)
-{
-	this->Copy(&source);
-	return (&source);
-}
-Room::Room(const Room &source)
-{
-	++Room::nr_alloc;
-	this->zero();
-	this->Copy(&source);
-}
-
-Room::Room(const Room *source)
-{
-	Room::nr_alloc++;
-	this->zero();
-	this->Copy(source);
-}
-
-// Galnor - 3-24-2005 - Constructor for Rooms.
-Room::Room()
-{
-	Room::nr_alloc++;
-	this->zero();
-}
-
-//Room Destructor
-Room::~Room()
-{
-	Room::nr_dealloc++;
-	JSManager::get()->handleExtraction( this );
-	std::list< Gate* > GatesInRoom = GateManager::GetManager().GetGatesgetRoom(this);
-	for(std::list<Gate*>::iterator gIter = GatesInRoom.begin();gIter != GatesInRoom.end();++gIter)
-		GateManager::GetManager().RemoveGate( (*gIter) );
-	//Delete the room's directions...
-	for(unsigned int i = 0;i < NUM_OF_DIRS;++i)
-	{
-		if( this->dir_option[i] != NULL )
-			delete this->dir_option[i];
-	}
-	//Delete the room's name...
-	delete[] this->name;
-	//Delete the room's descriptions...
-	delete[] this->description;
-	ExtraDescription *ExDNext;
-	for(ExtraDescription *ExD = this->ex_description;ExD;ExD = ExDNext)
-	{
-		ExDNext = ExD->next;
-		delete ExD;
-	}
-	while( !this->Tracks.empty() )
-	{
-		delete ( this->Tracks.front() );
-		this->Tracks.pop_front();
-	}
-
-	if( this->PTable )
-		delete this->PTable;
-}
-void Room::FreePrototype()
-{
-	delete (this);
-}
-
-Room *Room::GetNeighbor( const int dir )
-{
-	if( dir >= 0 && dir < NUM_OF_DIRS && this->dir_option[ dir ] != 0 )
-		return this->dir_option[ dir ]->to_room;
-	return static_cast< Room* >( 0 );
-}
-
-//Reserve prototype-sensitive information.
-void Room::FreeLiveRoom()
-{
-	this->PTable = NULL;
-	this->Tracks.clear();
-}
-void Direction::Clear()
-{
-	this->general_description =0;
-	this->keyword = 0;
-	this->exit_info = 0;
-	this->key = -1;
-	this->to_room = 0;
-	this->hidden = 0;
-	this->PickReq = 0;
-	this->SetRammable();
-}
-Direction::Direction()
-{
-	this->Clear();
-}
-Direction::~Direction()
-{
-	if( this->keyword)
-		delete[] this->keyword;
-	if (this->general_description)
-		delete[] (this->general_description);
-}
-
 void Object::UnsetPrototypeSpecifics()
 {
 	this->name = NULL;
@@ -2614,81 +2152,6 @@ Object::~Object()
 		delete retool_ex_desc;
 	if( obj_flags.mModifiers )
 		delete obj_flags.mModifiers;
-}
-//Count # of lines in a room description
-int Room::LinesInDesc()
-{
-	unsigned int i = 0, lines = 0;
-
-	for(i = 0; i < strlen(this->description); ++i)
-	{
-		if(this->description[i] == '\n')
-		{
-			++lines;
-		}
-	}
-
-	return lines;
-}
-std::list< Character* > Room::GetPeople()
-{
-	std::list<Character*> lPeople;
-	for(Character *p = this->people;p;p = p->next_in_room)
-		lPeople.push_back( p );
-	return lPeople;
-}
-bool Room::IsDark()
-{
-	bool dark = false;
-
-	//Rhollor 7.22.09 - Added check for a Lamp Post
-	bool lampPresent = false;
-	Object *lamp;
-
-	for(lamp=this->contents;lamp;lamp=lamp->next_content)
-	{
-		if(lamp->getType() == ITEM_LAMPPOST)
-			lampPresent = true;
-	}
-
-	if (this->light)
-		return false;
-
-	else if (lampPresent == true)
-		dark = false;
-
-	else if (ROOM_FLAGGED(this, ROOM_DARK))
-		dark = true;
-
-	else if (ROOM_FLAGGED(this, ROOM_LIT))
-		dark = false;
-
-	else if ( SECT(this) != SECT_INSIDE)// && SECT(this) != SECT_CITY )
-	{
-		Zone *MyZone = this->GetZone();
-		if( MyZone == NULL )
-		{
-			MudLog(CMP, LVL_GOD, TRUE, "Room %d has an invalid zone.", this->vnum);
-			dark = false;
-		}
-		else
-		{
-			switch (this->GetZone()->GetWeather()->getSun())
-			{
-				case SUN_DARK:
-					dark = true;
-					break;
-				case SUN_SET:
-				case SUN_LIGHT:
-				case SUN_RISE:
-					dark = false;
-					break;
-				break;
-			}
-		}
-	}
-
-	return dark;
 }
 
 //Galnor - Object constructor
@@ -3694,11 +3157,6 @@ void Object::FreeLiveObject()
 {
 	delete (this);
 }
-//Everything gets deleted.
-void Object::FreePrototype()
-{
-	delete (this);
-}
 
 /* read contents of a text file, and place in buf */
 int file_to_string(const char *name, char *buf)
@@ -3838,11 +3296,11 @@ Room *FindRoomByVnum(unsigned int vnum)
 	for(;;)
 	{
 		mid = (bot + top) / 2;
-		if((unsigned int)World[mid]->vnum == vnum)
+		if ((unsigned int)World[mid]->getVnum() == vnum)
 			return World[mid];
 		if(bot >= top)
 			return 0;
-		if((unsigned int)World[mid]->vnum > vnum)
+		if ((unsigned int)World[mid]->getVnum() > vnum)
 			top = mid - 1;
 		else
 			bot = mid + 1;
@@ -3863,11 +3321,11 @@ int real_room(unsigned int vnum)
 	for (;;)
 	{
 		mid = (bot + top) / 2;
-		if ((unsigned int)World[mid]->vnum == vnum)
+		if ((unsigned int)World[mid]->getVnum() == vnum)
 			return (int)(mid);
 		if (bot >= top)
 			return NOWHERE;
-		if ((unsigned int)World[mid]->vnum > vnum)
+		if ((unsigned int)World[mid]->getVnum() > vnum)
 			top = mid - 1;
 		else
 			bot = mid + 1;
@@ -4185,19 +3643,4 @@ class EntityType *Character::getEntityType()
 	if (getUserType() == UserType::player)
 		return EntityType::player;
 	return EntityType::mob;
-}
-
-std::string Room::getDisplayableId()
-{
-	return MiscUtil::toString(this->vnum);
-}
-
-Room *Room::getRoom()
-{
-	return this;
-}
-
-class EntityType *Room::getEntityType()
-{
-	return EntityType::room;
 }

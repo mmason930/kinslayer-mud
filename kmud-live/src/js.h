@@ -87,6 +87,7 @@ class JSManager
 		void SciteDisconnect();
 		bool SciteIsConnected();
 		int ScitePort();
+		unsigned int numberOfConnectedDescriptors();
 
 		void incDepth();
 		void decDepth();

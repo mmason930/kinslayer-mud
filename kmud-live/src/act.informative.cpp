@@ -31,10 +31,13 @@
 #include "CharacterUtil.h"
 #include "ClanUtil.h"
 #include "Descriptor.h"
+#include "rooms/Room.h"
 #include "zones.h"
 
 #include "js.h"
 #include "js_utils.h"
+#include "rooms/RoomSector.h"
+#include "rooms/Exit.h"
 
 /* extern variables */
 extern Wizard *wizlist;
@@ -365,21 +368,21 @@ ACMD(do_scan)
 	}
 	if( exit != -1 )//If they chose a specific direction...
 	{
-		if (( !EXIT(ch,exit) || !EXIT(ch,exit)->to_room ))
+		if (( !EXIT(ch,exit) || !EXIT(ch,exit)->getToRoom() ))
 		{//If the exit is invalid...
 			ch->send("There doesn't appear to be anything in that direction.\r\n");
 			return;
 		}
-		else if( EXIT_FLAGGED( EXIT(ch,exit), EX_CLOSED ) )
+		else if( EXIT(ch,exit)->isFlagged( EX_CLOSED ) )
 		{//If the exit is closed...
-			if((GET_SKILL(ch,SKILL_SEARCH) < EXIT(ch, exit)->HiddenLevel()) || !EXIT(ch,exit)->keyword )
+			if((GET_SKILL(ch,SKILL_SEARCH) < EXIT(ch, exit)->getHiddenLevel()) || !EXIT(ch,exit)->getKeywords() )
 				ch->send("There doesn't appear to be anything in that direction.\r\n");
 			else
-				ch->send("You cannot see through the %s.\r\n",fname(EXIT(ch, exit)->keyword));
+				ch->send("You cannot see through the %s.\r\n", fname(EXIT(ch, exit)->getKeywords()));
 			return;
 		}
-		room = ch->in_room->dir_option[exit]->to_room;
-		if(room->IsDark() && !CAN_SEE_IN_DARK(ch))
+		room = ch->in_room->dir_option[exit]->getToRoom();
+		if(room->isDark() && !CAN_SEE_IN_DARK(ch))
 		{//If the room to be scanned is not visible...
 			ch->send("It looks too dark in there to make anything out.\r\n");
 			return;
@@ -410,17 +413,6 @@ ACMD(do_scan)
 		}
 	}
 /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^   RHOLLOR 05/02/09   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
-/*
-   if (ch->in_room->dir_option[exit] && (room = ch->in_room->dir_option[exit]->to_room) &&
-           !EXIT_FLAGGED(EXIT(ch, exit), EX_CLOSED) && !ch->in_room->sector_type != SECT_INSIDE &&
-           !ch->in_room->sector_type != SECT_CITY)
-   {
-      listCharacterToCharacter(room->people, ch);
-      ch->send(COLOR_NORMAL(ch, CL_NORMAL));
-   }
-
-*/
-
 }
 
 /* Imped by Galnor on 10-08-2003. Command is used to view different lists, for example, clans.*/
@@ -632,9 +624,9 @@ void perform_search(Character *ch, int direction)
 {
 	if(EXIT(ch, direction))
 	{
-		if(GET_SKILL(ch, SKILL_SEARCH) >= EXIT(ch, direction)->hidden && EXIT(ch, direction)->keyword)
+		if(GET_SKILL(ch, SKILL_SEARCH) >= EXIT(ch, direction)->getHiddenLevel() && EXIT(ch, direction)->getKeywords())
 		{
-			ch->send("You discovered the %s!\r\n", fname(EXIT(ch, direction)->keyword));
+			ch->send("You discovered the %s!\r\n", fname(EXIT(ch, direction)->getKeywords()));
 			return;
 		}
 	}
@@ -696,9 +688,9 @@ ACMD(do_search)
 		return;
 	}
 
-	if(EXIT(ch, direction) && EXIT(ch, direction)->to_room )
+	if(EXIT(ch, direction) && EXIT(ch, direction)->getToRoom() )
 	{
-		if(!EXIT_FLAGGED(EXIT(ch, direction), EX_CLOSED))
+		if(!EXIT(ch, direction)->isFlagged(EX_CLOSED))
 		{
 			ch->send("The way is already open!\r\n");
 			return;
@@ -706,8 +698,8 @@ ACMD(do_search)
 	}
 	if(!ch->command_ready)
 	{
-		if(EXIT(ch, direction) && EXIT(ch, direction)->to_room)
-			ch->timer	 = (float)(EXIT(ch, direction)->hidden / 5) - ch->GetSkillLevel(SKILL_SEARCH);
+		if(EXIT(ch, direction) && EXIT(ch, direction)->getToRoom())
+			ch->timer	 = (float)(EXIT(ch, direction)->getHiddenLevel() / 5) - ch->GetSkillLevel(SKILL_SEARCH);
 		else
 			ch->timer	 = (float)(15 - ch->GetSkillLevel(SKILL_SEARCH));
 		ch->command_ready = true;
@@ -1218,14 +1210,14 @@ void performAutoExits(Character * ch)
 
 	for (door = 0; door < NUM_OF_DIRS; ++door)
 	{
-		if( !EXIT(ch,door) || EXIT(ch, door)->IsDisabled() )
+		if( !EXIT(ch,door) || EXIT(ch, door)->isDisabled() )
 			continue;
-		if((EXIT(ch, door)->to_room) &&
-		(!EXIT(ch, door)->HiddenLevel() || !EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED)))
+		if((EXIT(ch, door)->getToRoom()) &&
+		(!EXIT(ch, door)->getHiddenLevel() || !EXIT(ch, door)->isFlagged(EX_CLOSED)))
 		{
 			slen += sprintf(buf + slen, "%c ", LOWER(*dirs[door]));
 		}
-		else if(EXIT(ch, door) && EXIT(ch, door)->HiddenLevel() && GET_LEVEL(ch) >= LVL_GRGOD)
+		else if(EXIT(ch, door) && EXIT(ch, door)->getHiddenLevel() && GET_LEVEL(ch) >= LVL_GRGOD)
 			slen += sprintf(buf + slen, "%s%s*%c%s%s ", COLOR_BOLD(ch, CL_COMPLETE),COLOR_GREEN(ch, CL_COMPLETE),
 			                UPPER(*dirs[door]), COLOR_NORMAL(ch, CL_COMPLETE), COLOR_CYAN(ch, CL_COMPLETE));
 	}
@@ -1247,25 +1239,23 @@ ACMD(do_exits)
 	}
 */
 	for (door = 0; door < NUM_OF_DIRS; ++door)
-		if (EXIT(ch, door) && EXIT(ch, door)->to_room)
-			if (!EXIT(ch, door)->HiddenLevel() || !EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED))
+		if (EXIT(ch, door) && EXIT(ch, door)->getToRoom())
+			if (!EXIT(ch, door)->getHiddenLevel() || !EXIT(ch, door)->isFlagged(EX_CLOSED))
 			{
-				if( EXIT(ch,door)->IsDisabled() )
+				if( EXIT(ch,door)->isDisabled() )
 					continue;
 				if (GET_LEVEL(ch) >= LVL_IMMORT)
-					sprintf(buf2, "%-5s - [%5d] %s\r\n", dirs[door],
-					        EXIT(ch, door)->to_room->vnum,
-					        EXIT(ch, door)->to_room->name);
+					sprintf(buf2, "%-5s - [%5d] %s\r\n", dirs[door], EXIT(ch, door)->getToRoom()->getVnum(), EXIT(ch, door)->getToRoom()->getName());
 				else
 				{
 					sprintf(buf2, "%-5s - ", dirs[door]);
 
-					if (IS_DARK(EXIT(ch, door)->to_room) && !CAN_SEE_IN_DARK(ch))
+					if (EXIT(ch, door)->getToRoom()->isDark() && !CAN_SEE_IN_DARK(ch))
 						strcat(buf2, "Too dark to tell\r\n");
 
 					else
 					{
-						strcat(buf2, EXIT(ch, door)->to_room->name);
+						strcat(buf2, EXIT(ch, door)->getToRoom()->getName());
 						strcat(buf2, "\r\n");
 					}
 				}
@@ -1289,7 +1279,7 @@ int Character::TrackLines(Room *room, bool auto_track, bool &full_view)
 {
 	full_view = false;
 	// Thieves receive less indoor/city tracks & nothing outdoors, always same.
-	if( (SECT(room) == SECT_INSIDE || SECT(room) == SECT_CITY) )
+	if( (room->getSector() == RoomSector::inside || room->getSector() == RoomSector::city) )
 	{
 		//Must not be mounted.
 		if( /*!MOUNT(this) && */( IS_THIEF(this) || IS_GREYMAN(this) ) && !auto_track )
@@ -1306,19 +1296,19 @@ int Character::TrackLines(Room *room, bool auto_track, bool &full_view)
 			return MAX(1, this->GetSkillLevel(SKILL_TRACK) - 1);
 	}
 	//Primary autotrack sectors for race(non thieves).
-	else if((IS_WARRIOR(this)&&(SECT(room) == SECT_FIELD||SECT(room) == SECT_ROAD||SECT(room) == SECT_HILLS))
-	|| ((IS_RANGER(this) || IS_FADE(this) || IS_BLADEMASTER(this) || IS_OGIER(this)) && (SECT(room) == SECT_FOREST || SECT(room) == SECT_MOUNTAIN))  )
+	else if((IS_WARRIOR(this) && (room->getSector() == RoomSector::field || room->getSector() == RoomSector::road || room->getSector() == RoomSector::hills))
+	|| ((IS_RANGER(this) || IS_FADE(this) || IS_BLADEMASTER(this) || IS_OGIER(this)) && (room->getSector() == RoomSector::forest || room->getSector() == RoomSector::mountain))  )
 	{
 		full_view = (this->GetSkillLevel(SKILL_TRACK) >= 7);
 		return (this->GetSkillLevel(SKILL_TRACK) - 2) /*/ (MOUNT(this) ? 2 : 1)*/;
 	}
 	//Secondary warrior autotrack sectors.
-	else if(IS_WARRIOR(this) && (SECT(room) == SECT_FOREST || SECT(room) == SECT_MOUNTAIN))
+	else if(IS_WARRIOR(this) && (room->getSector() == RoomSector::forest || room->getSector() == RoomSector::mountain))
 	{
 		return MIN(2, (this->GetSkillLevel(SKILL_TRACK) - 2) / (MOUNT(this) ? 2 : 1));
 	}
-	else if((IS_RANGER(this) || IS_FADE(this) || IS_BLADEMASTER(this) || IS_OGIER(this)) && (SECT(room) == SECT_FIELD
-	|| SECT(room) == SECT_ROAD || SECT(room) == SECT_HILLS))
+	else if((IS_RANGER(this) || IS_FADE(this) || IS_BLADEMASTER(this) || IS_OGIER(this)) && (room->getSector() == RoomSector::field
+	|| room->getSector() == RoomSector::road || room->getSector() == RoomSector::hills))
 	{
 		return MIN(3, (this->GetSkillLevel(SKILL_TRACK) - 2) / (MOUNT(this) ? 2 : 1));
 	}
@@ -1338,7 +1328,7 @@ void Character::PrintTracks(Room *room, bool auto_track)
 	std::list<Track *>::iterator track;
 	int num_can_see = this->TrackLines(room, auto_track, full_view);
 
-	for(track = room->Tracks.begin();track != room->Tracks.end() && num_can_see > 0;++track, --num_can_see)
+	for(track = room->tracks.begin();track != room->tracks.end() && num_can_see > 0;++track, --num_can_see)
 	{
 		C++;
 		this->send( (*track)->ToString( full_view ).c_str());
@@ -1367,8 +1357,8 @@ void Character::PrintTracks(Room *room, std::string name)
 
 	int num_can_see = this->TrackLines(room, false, full_view);
 
-	for(iter = room->Tracks.begin();
-	        iter != room->Tracks.end() && num_can_see > 0;
+	for(iter = room->tracks.begin();
+	        iter != room->tracks.end() && num_can_see > 0;
 	        iter++)
 	{
 		Track *track = (*iter);
@@ -1500,40 +1490,39 @@ void Character::lookAtGate( class Gate* gate )
 	if( OtherRoom == NULL )//This really should never happen, but...
 		this->send("You can't make out what is on the other end of the gate.\r\n");
 	else
-		this->send("On the other side of the gate, you see: %s\r\n", OtherRoom->name);
+		this->send("On the other side of the gate, you see: %s\r\n", OtherRoom->getName());
 }
 
 /* vvvvvvvvvvvvvvvvvvvvv RHOLLOR 05.15.09 vvvvvvvvvvvvvvvvvv */
 /*  do_auto_scan to be used in look_at_room, displays one line of mobs in all visible directions  */
 void do_auto_scan(Character *ch, bool typed) {
 
-   Room *room;
-   int exit;
-   int none_seen = 0;
+	Room *room;
+	int exit;
+	int none_seen = 0;
 
-   if (GET_POS(ch) != POS_STANDING) {
-      return;
-   }
+	if (GET_POS(ch) != POS_STANDING) {
+		return;
+	}
 
-   for(exit = 0; exit < NUM_OF_DIRS; exit++) {
-      if (EXIT(ch, exit) && EXIT(ch, exit)->to_room && ( !EXIT(ch, exit)->HiddenLevel()
-      || (!EXIT_FLAGGED(EXIT(ch, exit), EX_CLOSED) ) ) && EXIT(ch,exit)->to_room != ch->in_room)
-	  { //There is an exit in this direction && there is a room
-         room = ch->in_room->dir_option[exit]->to_room;
+	for(exit = 0; exit < NUM_OF_DIRS; exit++) {
+		if (EXIT(ch, exit) && EXIT(ch, exit)->getToRoom() && (!EXIT(ch, exit)->getHiddenLevel()
+		|| (!EXIT(ch, exit)->isFlagged(EX_CLOSED))) && EXIT(ch, exit)->getToRoom() != ch->in_room)
+		{ //There is an exit in this direction && there is a room
+		   room = ch->in_room->dir_option[exit]->getToRoom();
 
 		 //Added to the If below to fix a small bug
-         if( ( room->people && canSeeCharsgetRoom(ch, room) && (!room->IsDark() || CAN_SEE_IN_DARK(ch)))|| EXIT_FLAGGED(EXIT(ch, exit), EX_CLOSED)) {
+         if( ( room->people && canSeeCharsgetRoom(ch, room) && (!room->isDark() || CAN_SEE_IN_DARK(ch)))|| EXIT(ch, exit)->isFlagged(EX_CLOSED)) {
 
             ch->send(COLOR_CYAN(ch, CL_NORMAL));
             ch->send("%-5s: ",StringUtil::cap(StringUtil::allLower(dirs[exit])));
             ch->send(COLOR_NORMAL(ch, CL_NORMAL));
 
-            if (EXIT_FLAGGED(EXIT(ch, exit), EX_CLOSED) && !EXIT(ch, exit)->HiddenLevel()
-            && EXIT(ch, exit)->keyword)  {
-               ch->send("The %s obstructs your view.\r\n",fname(EXIT(ch, exit)->keyword));
+            if (EXIT(ch, exit)->isFlagged(EX_CLOSED) && !EXIT(ch, exit)->getHiddenLevel() && EXIT(ch, exit)->getKeywords())  {
+               ch->send("The %s obstructs your view.\r\n",fname(EXIT(ch, exit)->getKeywords()));
             }
 
-            else if(room->IsDark() && !CAN_SEE_IN_DARK(ch))
+            else if(room->isDark() && !CAN_SEE_IN_DARK(ch))
             {
                ch->send("It looks too dark in there to make out anything.\r\n");
             }
@@ -1591,7 +1580,7 @@ void look_at_room(Character * ch, int ignore_brief)
 		ch->MoveToRoom(FindTargetRoom(ch, sRoom));
 	}
 
-	if (ch->in_room->IsDark() && !CAN_SEE_IN_DARK(ch))
+	if (ch->in_room->isDark() && !CAN_SEE_IN_DARK(ch))
 	{
 		ch->send("It is pitch black...\r\n");
 		return;
@@ -1615,11 +1604,10 @@ void look_at_room(Character * ch, int ignore_brief)
 	else if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS))
 	{
 		sprintbit((long)ch->in_room->room_flags, (const char**)room_bits, buf, " ", "", "");
-		ch->send("[%5d] %s [ %s]", ch->in_room->vnum,
-				ch->in_room->name, buf);
+		ch->send("[%5d] %s [ %s]", ch->in_room->getVnum(), ch->in_room->getName(), buf);
 	}
 	else
-		ch->send(ch->in_room->name);
+		ch->send(ch->in_room->getName());
 
 	ch->send(COLOR_NORMAL(ch, CL_NORMAL));
 	ch->send("\r\n");
@@ -1648,7 +1636,7 @@ void look_at_room(Character * ch, int ignore_brief)
 	ch->send(COLOR_GREEN(ch, CL_NORMAL));
 	listObjectToCharacter(ch->in_room->contents, ch, 0, FALSE);
 
-	std::list<Gate*> TempGateList = ch->in_room->GetGates();
+	std::list<Gate*> TempGateList = ch->in_room->getGates();
 	for(std::list<Gate *>::iterator i = TempGateList.begin();i != TempGateList.end();++i)
 	{
 		ch->send("A strange gateway is here, leading to an unknown destination.\r\n");
@@ -1667,21 +1655,20 @@ void lookInDirection(Character * ch, int dir)
 	if (EXIT(ch, dir))
 
 	{
-		hid = EXIT(ch, dir)->HiddenLevel();
+		hid = EXIT(ch, dir)->getHiddenLevel();
 
 
-		if (EXIT(ch, dir)->general_description)
-			ch->send(EXIT(ch, dir)->general_description);
+		if (EXIT(ch, dir)->getGeneralDescription())
+			ch->send(EXIT(ch, dir)->getGeneralDescription());
 
-		if (EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED) && EXIT(ch, dir)->keyword && !hid)
+		if (EXIT(ch, dir)->isFlagged(EX_CLOSED) && EXIT(ch, dir)->getKeywords() && !hid)
 		{
-			ch->send("The %s is closed.\r\n", fname(EXIT(ch, dir)->keyword));
+			ch->send("The %s is closed.\r\n", fname(EXIT(ch, dir)->getKeywords()));
 		}
 
-		else if (EXIT_FLAGGED(EXIT(ch, dir), EX_ISDOOR) && EXIT(ch, dir)->keyword &&
-		         !EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED))
+		else if (EXIT(ch, dir)->isFlagged(EX_ISDOOR) && EXIT(ch, dir)->getKeywords() && !EXIT(ch, dir)->isFlagged(EX_CLOSED))
 		{
-			ch->send("The %s is open.\r\n", fname(EXIT(ch, dir)->keyword));
+			ch->send("The %s is open.\r\n", fname(EXIT(ch, dir)->getKeywords()));
 		}
 
 	}
@@ -1901,7 +1888,7 @@ ACMD(do_look)
 /*	else if (AFF_FLAGGED(ch, AFF_BLIND))
 		ch->send("You can't see a damned thing, you're blind!\r\n");*/
 
-	else if (IS_DARK(ch->in_room) && !CAN_SEE_IN_DARK(ch))
+	else if (ch->in_room->isDark() && !CAN_SEE_IN_DARK(ch))
 	{
 		ch->send("It is pitch black...\r\n");
 		listCharacterToCharacter(ch->in_room->people, ch);	/* glowing red eyes */
@@ -2185,7 +2172,7 @@ std::string MakeTemperatureAdj(int i)
 
 ACMD(do_weather)
 {
-	Weather * weather = ch->in_room->GetZone()->GetWeather();
+	Weather * weather = ch->in_room->getZone()->GetWeather();
 	if (OUTSIDE(ch))
 	{
 		// This shows sky info.
@@ -2469,7 +2456,7 @@ void performMortalWhere(Character * ch, char *arg)
 			if (!i->in_room || !CAN_SEE(ch, i))
 				continue;
 
-			if (ch->in_room->zone != i->in_room->zone)
+			if (ch->in_room->getZoneNumber() != i->in_room->getZoneNumber())
 				continue;
 
 			if (MOUNT(i) && IS_TROLLOC(ch) && !IS_FADE(i) && !IS_DREADLORD(i) && !IS_DREADGUARD(i) &&
@@ -2491,7 +2478,7 @@ void performMortalWhere(Character * ch, char *arg)
 			if(AFF_FLAGGED(i, AFF_HIDE) && GET_LEVEL(ch) < LVL_IMMORT)
 				continue;
 
-			ch->send("%-20s - %s\r\n", GET_NAME(i), i->in_room->name);
+			ch->send("%-20s - %s\r\n", GET_NAME(i), i->in_room->getName());
 		}
 	}
 
@@ -2503,10 +2490,10 @@ void performMortalWhere(Character * ch, char *arg)
 			if (!i->in_room || i == ch)
 				continue;
 
-			if (ch->in_room->zone != i->in_room->zone)
+			if (ch->in_room->getZoneNumber() != i->in_room->getZoneNumber())
 				continue;
 
-			if ((GET_INVIS_LEV(i) > GET_LEVEL(ch) || i->in_room->zone != ch->in_room->zone)
+			if ((GET_INVIS_LEV(i) > GET_LEVEL(ch) || i->in_room->getZoneNumber() != ch->in_room->getZoneNumber())
 			        && GET_LEVEL(ch) < LVL_IMMORT)
 				continue;
 
@@ -2516,7 +2503,7 @@ void performMortalWhere(Character * ch, char *arg)
 			if(GET_RACE(ch) != GET_RACE(i) && GET_LEVEL(i) <= LVL_IMMORT)
 				continue;
 
-			ch->send("%-25s - %s\r\n", GET_NAME(i), i->in_room->name);
+			ch->send("%-25s - %s\r\n", GET_NAME(i), i->in_room->getName());
 			return;
 		}
 
@@ -2552,8 +2539,8 @@ void performMortalWhere(Character * ch, char *arg)
 	{
 		if(GET_MARKED(ch))
 		{
-			int distance = GET_MARKED(ch)->in_room->GetZone()->Distance(ch->in_room->GetZone());
-			int slope = find_zone_slope(GET_MARKED(ch)->in_room->zone, ch->in_room->zone);
+			int distance = GET_MARKED(ch)->in_room->getZone()->Distance(ch->in_room->getZone());
+			int slope = find_zone_slope(GET_MARKED(ch)->in_room->getZoneNumber(), ch->in_room->getZoneNumber());
 
 			if(distance <= MAX(4, ( (userClan = ch->getUserClan(CLAN_SOULLESS)) ? userClan->getRank() / 2 : 1)))
 			{
@@ -2592,7 +2579,7 @@ void printObjectLocation(std::stringstream &outputBuffer, int num, Object *obj, 
 
 	if (obj->in_room)
 	{
-		sprintf(buf + strlen(buf), "[%5d] %s\r\n", obj->in_room->vnum, obj->in_room->name);
+		sprintf(buf + strlen(buf), "[%5d] %s\r\n", obj->in_room->getVnum(), obj->in_room->getName());
 		outputBuffer << buf;
 	}
 
@@ -2647,7 +2634,7 @@ void performImmortalWhere(Character * ch, char *arg)
 				if (i && CAN_SEE(ch, i) && i->in_room)
 				{
 					if (d->original)
-						sprintf(buf, "%-20s - [%5d] %s (in %s)", GET_NAME(i), d->character->in_room->vnum, d->character->in_room->name, GET_NAME(d->character));
+						sprintf(buf, "%-20s - [%5d] %s (in %s)", GET_NAME(i), d->character->in_room->getVnum(), d->character->in_room->getName(), GET_NAME(d->character));
 					else
 					{
 						if(IS_TROLLOC(i) && GET_LEVEL(i) < LVL_IMMORT)
@@ -2657,7 +2644,7 @@ void performImmortalWhere(Character * ch, char *arg)
 						else
 							strcpy(color, NORMAL);
 
-						sprintf(buf, "%s%-20s - [%5d] %s %s", color, GET_NAME(i), i->in_room->vnum, i->in_room->name, NORMAL);
+						sprintf(buf, "%s%-20s - [%5d] %s %s", color, GET_NAME(i), i->in_room->getVnum(), i->in_room->getName(), NORMAL);
 					}
 					outputBuffer << buf << std::endl;
 				}
@@ -2672,7 +2659,7 @@ void performImmortalWhere(Character * ch, char *arg)
 			if (!i->IsPurged() && isname(arg, i->player.name) && i->in_room && CAN_SEE(ch, i))
 			{
 				found = 1;
-				sprintf(buf, "M%3d. %-25s - [%5d] %s\r\n", ++num, GET_NAME(i), i->in_room->vnum, i->in_room->name);
+				sprintf(buf, "M%3d. %-25s - [%5d] %s\r\n", ++num, GET_NAME(i), i->in_room->getVnum(), i->in_room->getName());
 				outputBuffer << buf;
 			}
 		}

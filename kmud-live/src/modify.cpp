@@ -715,26 +715,6 @@ void string_add(Descriptor *d, char *str)
 
 	delete_doubledollar(str);
 
-#if 0
-	/* Removed old handling of '@' character, put #if 1 to re-enable it. */
-	if ((terminator = (*str == '@')))
-		*str = '\0';
-#endif
-
-#if 0
-	/*
-	 * Erase any ~'s inserted by people in the editor.  This prevents anyone
-	 * using online creation from causing parse errors in the world files.
-	 * Derived from an idea by Sammy <samedi@dhc.net> (who happens to like
-	 * his tildes thank you very much.), -gg 2/20/98
-	 */
-	{
-		char *tilde = str;
-		while ((tilde = strchr(tilde, '~')))
-			*tilde = ' ';
-	}
-#endif
-
 	if ((action = ((*str == '/') && (str[1] != '/') && (str[1] != '*'))))
 	{
 		while (str[i] != '\0')
@@ -823,7 +803,7 @@ void string_add(Descriptor *d, char *str)
 	}
 	else
 	{
-		if( !d->addToString( str ) )
+		if (!d->addToString(str))
 			d->send("String too long, limit reached on message. Last line ignored.\r\n");
 	}
 

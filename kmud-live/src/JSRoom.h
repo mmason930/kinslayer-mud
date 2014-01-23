@@ -41,8 +41,8 @@ FLUSSPFERD_CLASS_DESCRIPTION(
     (methods,
         ("echo", bind, echo)
 		("echoaround", bind, echoaround)
-		("loadObj", bind, load_obj)
-		("loadMob", bind, load_mob)
+		("loadObj", bind, loadObj)
+		("loadMob", bind, loadMob)
 		("zecho", bind, zecho)
 		("zreset", bind, zreset)
 		("direction", bind, direction)
@@ -84,82 +84,38 @@ FLUSSPFERD_CLASS_DESCRIPTION(
 	))
 {
 public:
-    JSRoom(flusspferd::object const &self, flusspferd::call_context& cc)
-        : base_type(self)
-    {
-//        std::cout << "Creating JSRoom: Real: -" << std::endl;
-    }
+	JSRoom(flusspferd::object const &self, flusspferd::call_context& cc);
+	JSRoom(flusspferd::object const &self, Room* real);
+	~JSRoom();
 
-    ~JSRoom() {
-//       std::cout << "Destroying JSRoom" << std::endl;
-    }
+	Room* toReal();
+	void setReal(Room *r);
 
-    JSRoom(flusspferd::object const &self, Room* _real)
-        : base_type(self)
-    {
-        real = _real;
- //       std::cout << "Creating JSRoom: Real: " << real << std::endl;
-    }
+	int vnum();
+	int sector();
+	int zoneVnum();
+	bool dark();
+	flusspferd::string zoneName();
+	flusspferd::string doorName(const int dir);
+	flusspferd::string getName();
+	flusspferd::string getDescription();
 
-	Room* toReal() { return real; }
-	void setReal( Room *r ) { real = r; }
-
-	int vnum() { return (real ? real->vnum : (-1)); }
-	int sector() { return (real ? real->sector_type : 0); }
-	int zoneVnum() { return (real ? real->GetZone()->getVnum() : -1); }
-	bool dark() { return (real ? real->IsDark() : false); }
-	flusspferd::string zoneName() { return (real ? real->GetZone()->getName() : "undefined"); }
-
-	flusspferd::value direction(int dir)
-	{
-		return lookupValue((real ? real->GetNeighbor(dir) : real));
-	}
-	flusspferd::array neighbors()
-	{
-		flusspferd::array a = flusspferd::create_array(NUM_OF_DIRS);
-		for(unsigned int i = 0;i < NUM_OF_DIRS;++i)
-		{
-			if( real != 0 && real->dir_option[i] != 0 && real->dir_option[i]->to_room != 0 )
-				a.set_element(i, lookupValue(real->dir_option[i]->to_room));
-			else
-				a.set_element(i, lookupValue( (Room*)0 ));
-		}
-		return a;
-	}
-
+	flusspferd::value direction(int dir);
+	flusspferd::array neighbors();
 	flusspferd::array people();
-
 	flusspferd::array items();
-
 	flusspferd::array pathToRoom(JSRoom *otherRoom);
 
 	bool roomFlagged(const int flag);
-
-    void echo(flusspferd::string message)
-    {
-		if( real ) {
-	        sendToRoom(flusspferd::string::concat(message, "\r\n").c_str(), real);
-		}
-    }
-
+	void echo(flusspferd::string message);
 	void echoaround(JSCharacter& ch, std::string message);
+	void zecho(flusspferd::string message);
+	void zreset();
 
-	void zecho(flusspferd::string message)
-	{
-		if( real ) {
-			sendToZone(flusspferd::string::concat(message, "\r\n").c_str(), real->zone);
-		}
-	}
+	flusspferd::value loadObj( const int vnum );
+	flusspferd::value loadMob( const int vnum );
 
-	void zreset()
-	{
-		if( real ) {
-			real->GetZone()->Reset();
-		}
-	}
-	flusspferd::value load_obj( const int vnum );
-	flusspferd::value load_mob( const int vnum );
-	flusspferd::string doorName( const int dir );
+
 	int doorHidden( const int dir );
 	int getDoorFlags( const int dir );
 	void setDoorFlags( const int dir, const int v );
@@ -181,18 +137,6 @@ public:
 	void disableExit( int dir, bool bothSides );
 	bool isFlagged( const int flag );
 
-    flusspferd::string getName()
-    {
-		if( real ) {
-	        return flusspferd::string(real->name);
-		} else {
-			return flusspferd::string("Invalid");
-		}
-    }
-	flusspferd::string getDescription()
-	{
-		return flusspferd::string(real ? real->description : "Invalid");
-	}
 private:
     Room * real;
 };

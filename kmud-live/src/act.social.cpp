@@ -19,6 +19,7 @@
 #include "db.h"
 #include "shop.h"
 #include "MiscUtil.h"
+#include "rooms/Room.h"
 
 /* extern variables */
 

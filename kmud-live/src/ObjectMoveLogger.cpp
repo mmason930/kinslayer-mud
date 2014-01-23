@@ -13,6 +13,7 @@ ObjectMoveLogger::ObjectMoveLogger()
 
 ObjectMoveLogger::~ObjectMoveLogger()
 {
+	freeEntries(*objectMoveLogEntries);
 	delete this->objectMoveLogEntries;
 }
 
@@ -33,6 +34,12 @@ void ObjectMoveLogger::logObjectMove(const boost::uuids::uuid &objectId, const s
 void ObjectMoveLogger::kill()
 {
 	this->running = false;
+}
+
+void ObjectMoveLogger::freeEntries(std::list<ObjectMoveLogEntry> &entries)
+{
+	for (ObjectMoveLogEntry objectMoveLogEntry : entries)
+		delete[] objectMoveLogEntry.message;
 }
 
 void ObjectMoveLogger::threadHandler()
@@ -71,6 +78,7 @@ void ObjectMoveLogger::threadHandler()
 			
 				logFile.close();
 			}
+			freeEntries(*threadObjectMoveLogEntries);
 			delete threadObjectMoveLogEntries;
 		}
 

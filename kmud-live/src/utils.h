@@ -414,7 +414,6 @@ const int TYPE_OUT = 2;
 #define AFF_FLAGGED(ch, flag)			(IS_SET_AR(AFF_FLAGS(ch), (flag)))
 #define PRF_FLAGGED(ch, flag)			(IS_SET_AR(PRF_FLAGS(ch), (flag)))
 #define ROOM_FLAGGED(loc, flag)			(IS_SET(ROOM_FLAGS(loc), (1<<flag)))
-#define EXIT_FLAGGED(exit, flag)		(IS_SET((exit)->exit_info, (flag)))
 #define OBJVAL_FLAGGED(obj, flag)		(IS_SET(GET_OBJ_VAL((obj), 1), (flag)))
 #define OBJWEAR_FLAGGED(obj, flag)		(IS_SET((obj)->obj_flags.wear_flags, (flag)))
 #define OBJ_FLAGGED(obj, flag)			(IS_SET(GET_OBJ_EXTRA(obj), Q_BIT(flag)))
@@ -434,12 +433,7 @@ const int TYPE_OUT = 2;
 
 /* room utils ************************************************************/
 
-
-#define SECT(room)	(room->sector_type)
-
-#define IS_DARK(room)  ( room->IsDark() )
-
-#define IS_LIGHT(room)  (!IS_DARK(room))
+#define IS_LIGHT(room)  (!room->isDark())
 
 #define GET_ROOM_SPEC(room) ((room) >= 0 ? (room)->func : NULL)
 
@@ -711,9 +705,9 @@ const int CLANS_MAX = 31;
 #define EXIT(ch, door)  (ch->in_room->dir_option[door])
 
 #define CAN_GO(ch, door) (EXIT(ch,door) && \
-			 (EXIT(ch,door)->to_room) && \
-			 !IS_SET(EXIT(ch, door)->exit_info, EX_CLOSED) && \
-			 !EXIT(ch,door)->IsDisabled())
+			 (EXIT(ch,door)->getToRoom()) && \
+			 !EXIT(ch, door)->isClosed() && \
+			 !EXIT(ch,door)->isDisabled())
 
 //Allow classes set to 1 to be selectable upon creation
 #define	CHANNELER_SELECT

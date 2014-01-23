@@ -32,6 +32,7 @@
 
 #include "CharacterUtil.h"
 #include "StringUtil.h"
+#include "rooms/Room.h"
 
 using namespace std;
 using namespace tr1;
@@ -439,7 +440,7 @@ void JSManager::SciteConnect( const int port )
 		delete server;
 	server = new kuListener(port, TCP);
 
-	if( !server->l_IsBound() || !server->l_IsListening() )
+	if( !server->isBound() || !server->isListening() )
 	{
 		delete server;
 		server = 0;
@@ -448,11 +449,17 @@ void JSManager::SciteConnect( const int port )
 }
 bool JSManager::SciteIsConnected()
 {
-	return (server && server->l_IsBound() && server->l_IsListening());
+	return (server && server->isBound() && server->isListening());
 }
+
 int JSManager::ScitePort()
 {
-	return (SciteIsConnected() ? server->l_GetPort() : 0);
+	return (SciteIsConnected() ? server->getPort() : 0);
+}
+
+unsigned int JSManager::numberOfConnectedDescriptors()
+{
+	return server ? server->getDescriptors().size() : 0;
 }
 
 /* Galnor 11/23/2009 - For the external editor, handle incoming requests */
@@ -460,11 +467,11 @@ void JSManager::SocketEvents()
 {
 	if( server == 0 )
 		return;
-	std::list< kuDescriptor * > lNewDesc = server->l_AcceptNewHosts();
-	server->l_Pulse();
+	std::list< kuDescriptor * > lNewDesc = server->acceptNewHosts();
+	server->pulse();
 	Descriptor *descriptor = NULL;
 
-	std::list< kuDescriptor * > lDescList = server->l_GetDescriptors();
+	std::list< kuDescriptor * > lDescList = server->getDescriptors();
 
 	for( std::list< kuDescriptor * >::iterator dIter = lNewDesc.begin();dIter != lNewDesc.end();++dIter )
 	{
@@ -694,6 +701,9 @@ JSManager::~JSManager()
 	{
 		delete iter->second;
 	}
+
+	if (this->server)
+		delete server;
 
 	delete env;
 }

@@ -27,6 +27,7 @@
 #include "CharacterUtil.h"
 #include "UserLogoutType.h"
 #include "Descriptor.h"
+#include "rooms/Room.h"
 
 extern Index *obj_index;
 extern Descriptor *descriptor_list;
@@ -181,7 +182,7 @@ std::list< Object* > Object::loadItemList( bool recursive )
 {
 	return Object::loadItemList( recursive,
 		(this->IsValidChest() ? 'C' : 'O'),
-		(this->IsValidChest() ? ToString(getRoom()->vnum) : ToString(this->objID))
+		(this->IsValidChest() ? ToString(getRoom()->getVnum()) : ToString(this->objID))
 	);
 }
 void Object::loadItems()
@@ -682,7 +683,7 @@ void Room::itemSave()
 {
 	std::list<Object*> items;
 
-	for( Object *obj = this->contents;obj;obj = obj->next_content )
+	for (Object *obj = this->contents; obj; obj = obj->next_content)
 	{
 		items.push_back(obj);
 	}
@@ -693,10 +694,10 @@ void Room::itemSave()
 void Room::corpseSave()
 {
 	std::list<Object*> corpses;
-	
-	for( Object *obj = this->contents;obj;obj = obj->next_content )
+
+	for (Object *obj = this->contents; obj; obj = obj->next_content)
 	{
-		if(IS_CORPSE(obj))
+		if (IS_CORPSE(obj))
 			corpses.push_back(obj);
 	}
 
@@ -716,7 +717,7 @@ void Object::itemSave()
 		items.push_back(obj);
 	}
 
-	Object::saveTopLevelHolderItems( this->IsValidChest() ? 'C' : 'O', this->IsValidChest() ? ToString(this->getRoom()->vnum) : ToString(this->objID), items);
+	Object::saveTopLevelHolderItems(this->IsValidChest() ? 'C' : 'O', this->IsValidChest() ? ToString(this->getRoom()->getVnum()) : ToString(this->objID), items);
 }
 
 void Object::saveItems( bool self, char holderType, const std::string &holderID, char topLevelHolderType, const std::string &topLevelHolderID, sql::BatchInsertStatement &tempObjectsBatchInsertStatement, sql::BatchInsertStatement &tempObjectRetoolsBatchInsertStatement, sql::BatchInsertStatement &tempObjectSpecialsBatchInsertStatement, bool contents )
@@ -836,7 +837,7 @@ void Object::saveItems( bool self, char holderType, const std::string &holderID,
 			obj->saveItems(
 			true,
 				(isChest ? 'C' : 'O'),
-				(isChest ? ToString(this->getRoom()->vnum) : ToString(this->objID)),
+				(isChest ? ToString(this->getRoom()->getVnum()) : ToString(this->objID)),
 			topLevelHolderType,
 			topLevelHolderID,
 			tempObjectsBatchInsertStatement,

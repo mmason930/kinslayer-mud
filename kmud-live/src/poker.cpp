@@ -12,6 +12,7 @@
 #include "dg_event.h"
 
 #include "MiscUtil.h"
+#include "rooms/Room.h"
 
 PokerTable *PokerTableList = NULL;
 
@@ -849,9 +850,7 @@ void PokerTable::EndGame()
 		{
 			if( Group == Winners.end() )
 			{
-				MudLog(BRF, LVL_APPR, TRUE,
-					"Poker table in room %d still has pot remainder of %d after pot distribution.",
-					this->InRoom->name, Pot);
+				MudLog(BRF, LVL_APPR, TRUE, "Poker table in room %d still has pot remainder of %d after pot distribution.", this->InRoom->getName(), Pot);
 				break;
 			}
 			if(!nr)

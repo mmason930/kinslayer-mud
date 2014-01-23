@@ -30,6 +30,7 @@
 #include "js_functions.h"
 #include "StringUtil.h"
 #include "Descriptor.h"
+#include "rooms/Room.h"
 
 
 // External variables
@@ -1027,7 +1028,7 @@ SPECIAL(shop_keeper)
 		return (FALSE);
 	}
 
-	if (!ok_shop_room(shop_nr, ch->in_room->vnum))
+	if (!ok_shop_room(shop_nr, ch->in_room->getVnum()))
 		return (0);
 
 	if (!AWAKE(keeper))
@@ -1359,7 +1360,7 @@ void list_detailed_shop(Character * ch, int shop_nr)
 		if (index)
 			strcat(buf, ", ");
 		if ((temp = FindRoomByVnum(SHOP_ROOM(shop_nr, index))))
-			sprintf(buf1, "%s (#%d)", temp->name, temp->vnum);
+			sprintf(buf1, "%s (#%d)", temp->getName(), temp->getVnum());
 		else
 			sprintf(buf1, "<UNKNOWN> (#%d)", SHOP_ROOM(shop_nr, index));
 		handle_detailed_list(buf, buf1, ch);
@@ -1466,7 +1467,7 @@ void show_shops(Character * ch, char *arg)
 		{
 
 			for (shop_nr = 0; shop_nr < top_shop; ++shop_nr)
-				if (ok_shop_room(shop_nr, ch->in_room->vnum))
+			if (ok_shop_room(shop_nr, ch->in_room->getVnum()))
 					break;
 
 

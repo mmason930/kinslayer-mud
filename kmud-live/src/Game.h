@@ -38,6 +38,9 @@ public:
 
 	bool hasBasicConfiguration(const std::string &basicConfigurationName);
 	void setupFilesystem();
+	bool playerPortalServerIsConnected();
+	int getPlayerPortalPort();
+	unsigned int getNumberOfPlayerPortalDescriptors();
 };
 
 extern class Game *game;

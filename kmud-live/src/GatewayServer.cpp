@@ -294,7 +294,7 @@ void GatewayServer::bindListener()
 
 		listener->setOpenDescriptorCallback(openDescriptorCallback);
 
-		if(!listener->l_EnableKeepAlive())
+		if (!listener->enableKeepAlive())
 		{
 			std::cout << makeTimestamp() << " Failed to set keepalive on socket." << std::endl;
 		}
@@ -320,7 +320,7 @@ void GatewayServer::bindListener()
 
 		listener->setOpenDescriptorCallback(openDescriptorCallback);
 
-		if(!listener->l_EnableKeepAlive())
+		if (!listener->enableKeepAlive())
 		{
 			std::cout << makeTimestamp() << " Failed to set keepalive on socket." << std::endl;
 		}
@@ -532,8 +532,8 @@ void GatewayServer::run()
 
 		for(auto gatewayListenerIter = listeners.begin();gatewayListenerIter != listeners.end();++gatewayListenerIter)
 		{
-			(*gatewayListenerIter)->getListener()->l_AcceptNewHosts();
-			(*gatewayListenerIter)->getListener()->l_Pulse();
+			(*gatewayListenerIter)->getListener()->acceptNewHosts();
+			(*gatewayListenerIter)->getListener()->pulse();
 		}
 
 		if(!isConnectedToGameServer())
@@ -706,7 +706,7 @@ void GatewayServer::run()
 
 						std::auto_ptr<WebSocketClientHeader> webSocketClientHeader(WebSocketClientHeader::allocateByInitialClientPacket(dataFromWebSocketClient));
 						webSocketClientHeader->read(dataFromWebSocketClient);
-						std::string response = webSocketClientHeader->generateResponse(descriptor->getGatewayListener()->getListener()->l_GetPort(), "mud-protocol");
+						std::string response = webSocketClientHeader->generateResponse(descriptor->getGatewayListener()->getListener()->getPort(), "mud-protocol");
 
 						descriptor->sendToClient(response);
 						descriptor->setStatus(GatewayDescriptorStatus::awaitingConnection);

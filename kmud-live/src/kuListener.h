@@ -20,9 +20,9 @@ class kuListener
 {
 	//Variables
 public:
-	e_SocketType l_type;
+	e_SocketType socketType;
 private:
-	u_short	l_Port;
+	u_short	port;
 	fd_set inset, outset, excset;
 	timeval nulltime;
 	void *dataForCloseDescriptorCallback;
@@ -32,12 +32,12 @@ private:
 	void *dataForSocketReadCallback;
 	void (*openDescriptorCallback)(void*, kuListener *, kuDescriptor*);
 	void (*closeDescriptorCallback)(void*, kuListener *, kuDescriptor*);
-	void (*beforeSocketWriteCallback)(void *, kuListener *, kuDescriptor*, const std::string &output);
+	void (*beforeSocketWriteCallback)(void *, kuListener *, kuDescriptor*);
 	void (*afterSocketWriteCallback)(void *, kuListener *, kuDescriptor*, const std::string &output);
 	void (*socketReadCallback)(void *, kuListener *, kuDescriptor*, const std::string &input);
 
 public:
-	kuListener(const int port, e_SocketType t);
+	kuListener(const int port, e_SocketType socketType);
 	~kuListener(void);
 
 	void setCloseDescriptorCallback( void (*closeDescriptorCallback)(void*, kuListener*, kuDescriptor*) );
@@ -46,7 +46,7 @@ public:
 	void setOpenDescriptorCallback( void (*openDescriptorCallback)(void*, kuListener*, kuDescriptor*) );
 	void setDataForOpenDescriptorCallback( void *data );
 	
-	void setBeforeSocketWriteCallback( void (*socketWriteCallback)(void*, kuListener*, kuDescriptor*, const std::string &output) );
+	void setBeforeSocketWriteCallback( void (*socketWriteCallback)(void*, kuListener*, kuDescriptor*) );
 	void setDataForBeforeSocketWriteCallback( void *data );
 
 	void setAfterSocketWriteCallback( void (*socketWriteCallback)(void*, kuListener*, kuDescriptor*, const std::string &output) );
@@ -56,38 +56,38 @@ public:
 	void setDataForSocketReadCallback( void *data );
 
 	void handleCloseDescriptor(kuDescriptor *descriptor);
-	void handleBeforeSocketWriteCallback(kuDescriptor *descriptor, const std::string &output);
+	void handleBeforeSocketWriteCallback(kuDescriptor *descriptor);
 	void handleAfterSocketWriteCallback(kuDescriptor *descriptor, const std::string &output);
 	void handleSocketReadCallback(kuDescriptor *descriptor, const std::string &input);
 
-	std::list< kuDescriptor * > l_GetDescriptors();
+	std::list< kuDescriptor * > getDescriptors();
 
-	u_short l_GetPort();
-	bool l_IsBound();
-	bool l_IsListening();
-	SOCKET l_GetSocket();
-	bool l_CanAccept();
-	std::pair< kuDescriptor *, bool > l_Accept();
-	int l_Select(const int MaxDescs, fd_set *inset, fd_set *outset, fd_set *excset);
+	u_short getPort();
+	bool isBound();
+	bool isListening();
+	SOCKET getSocket();
+	bool canAccept();
+	std::pair< kuDescriptor *, bool > accept();
+	int select(const int MaxDescs, fd_set *inset, fd_set *outset, fd_set *excset);
 
-	kuDescriptor *l_GetDesc( const int uid );
+	kuDescriptor *getDescriptorById(const int uid);
 
-	std::list< kuDescriptor * > l_AcceptNewHosts();
-	void l_Pulse();
-	void l_Close();
-	bool l_EnableKeepAlive();
+	std::list< kuDescriptor * > acceptNewHosts();
+	void pulse();
+	void close();
+	bool enableKeepAlive();
 private:
 
-	std::map< int, kuDescriptor * > mDescriptors;
-	SOCKET l_TCPSocket();
-	SOCKET l_UDPSocket();
+	std::map< int, kuDescriptor * > descriptorMap;
+	SOCKET createTCPSocket();
+	SOCKET createUDPSocket();
 
-	int l_Bind(const int port);
-	int l_Listen();
+	int bind(const int port);
+	int listen();
 
-	bool l_isBound;
-	bool l_isListening;
-	SOCKET	l_Sock;
+	bool bound;
+	bool listening;
+	SOCKET socket;
 
 };
 

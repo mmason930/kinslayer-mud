@@ -24,6 +24,7 @@
 #include "clans.h"
 #include "MiscUtil.h"
 #include "Descriptor.h"
+#include "rooms/Room.h"
 
 #include "ClanUtil.h"
 
@@ -362,7 +363,7 @@ ACMD( do_cast )
 		return;
 	}
 
-	if(weave->getName() == "Eavesdrop" && (ch->in_room->DistanceToRoom(cvict->in_room) > atoi(WeaveManager::GetManager().GetWeave("Eavesdrop")->getAttribute("MaxDistance").c_str())))
+	if (weave->getName() == "Eavesdrop" && (ch->in_room->getDistanceToRoom(cvict->in_room) > atoi(WeaveManager::GetManager().GetWeave("Eavesdrop")->getAttribute("MaxDistance").c_str())))
 	{
 		ch->send("Your target could not be found.\r\n");
 		return;

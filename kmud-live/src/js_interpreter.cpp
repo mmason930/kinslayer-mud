@@ -31,6 +31,7 @@
 #include "js_trigger.h"
 
 #include "StringUtil.h"
+#include "rooms/Room.h"
 
 #if(0)
 #define KJS_USE_TIMEOUT_SIGNALS

@@ -108,18 +108,15 @@ public:
     JSObject(flusspferd::object const &self, flusspferd::call_context& cc)
         : base_type(self)
     {
-//        std::cout << "Creating JSObject: Real: -" << std::endl;
     }
 
     ~JSObject() {
-//        std::cout << "Destroying JSObject" << std::endl;
     }
 
     JSObject(flusspferd::object const &self, Object* _real)
         : base_type(self)
     {
         real = _real;
-//        std::cout << "Creating JSObject: Real: " << real << std::endl;
     }
 
 	Object* toReal() { return real; }

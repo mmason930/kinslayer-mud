@@ -28,6 +28,7 @@
 #include "MiscUtil.h"
 #include "StringUtil.h"
 #include "ClanUtil.h"
+#include "rooms/Room.h"
 
 /*   external vars  */
 

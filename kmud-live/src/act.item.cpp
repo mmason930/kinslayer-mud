@@ -29,6 +29,7 @@
 #include "StringUtil.h"
 #include "MiscUtil.h"
 #include "Descriptor.h"
+#include "rooms/Room.h"
 #include "ClanUtil.h"
 
 #include "js.h"
@@ -586,13 +587,13 @@ void update_chest_log( Character *ch, Object *chest, Object *obj, int type )
 	if ( type == TYPE_OUT )
 	{
 		sprintf( msg, "%s: %s took \"%s\" out of chest vnum %d in room %d.",
-		         tm, GET_NAME( ch ), obj->GetSDesc(), GET_OBJ_VNUM( chest ), ch->in_room->vnum );
+			tm, GET_NAME(ch), obj->GetSDesc(), GET_OBJ_VNUM(chest), ch->in_room->getVnum());
 	}
 
 	else if ( type == TYPE_IN )
 	{
 		sprintf( msg, "%s: %s put \"%s\" in to chest vnum %d in room %d.",
-		         tm, GET_NAME( ch ), obj->GetSDesc(), GET_OBJ_VNUM( chest ), ch->in_room->vnum );
+			tm, GET_NAME(ch), obj->GetSDesc(), GET_OBJ_VNUM(chest), ch->in_room->getVnum());
 	}
 
 	else
@@ -2307,8 +2308,7 @@ ACMD( do_show )
 
 	if( item->getType() == ITEM_NOTE && item->action_description )
 	{
-		target->send("There is something written on it:\r\n\r\n%s",
-			item->action_description);
+		target->send("There is something written on it:\r\n\r\n%s", item->action_description);
 	}
 	else if( item->getType() == ITEM_WEAPON )
 		target->send("It is a %s.\r\n", StringUtil::allLower(weapon_types[GET_OBJ_VAL(item,0)]));
@@ -2413,7 +2413,7 @@ ACMD( do_auction )
 		return;
 
 	/* Check to ensure that the current room has a valid auction */
-	if( (a = AuctionManager::GetManager().GetAuction( ch->in_room->auction_vnum )) == NULL )
+	if( (a = AuctionManager::GetManager().GetAuction( ch->in_room->getAuctionVnum() )) == NULL )
 	{
 		ch->send(YouCantDoThatHere);
 		return;
@@ -2428,17 +2428,6 @@ ACMD( do_auction )
 
 	AuctionManager::GetManager().SetupAuctionInterface( ch, a );
 	Act( "$n begins browsing the auctions.", TRUE, ch, 0, 0, TO_ROOM );
-}
-
-Object *Room::findFirstObject(const std::function<bool(class Object *obj)> &predicate)
-{
-	for (Object *obj = contents; obj; obj = obj->next_content)
-	{
-		if (predicate(obj))
-			return obj;
-	}
-
-	return NULL;
 }
 
 bool Character::anyEquipmentMeetsCritera(const std::function<bool(Object *obj)> &predicate)

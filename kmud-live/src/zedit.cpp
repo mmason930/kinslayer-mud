@@ -18,6 +18,7 @@
 #include "mobs.h"
 #include "zones.h"
 #include "Descriptor.h"
+#include "rooms/Room.h"
 
 /*
  * Turn on zedit debugging.  Please mail log results to greerga@van.ml.org
@@ -313,7 +314,7 @@ ACMD(do_zlist)
 	//Zone commands...
 	for( int znr = 0;(z=ZoneManager::GetManager().GetZoneByRnum(znr)) != NULL;++znr)
 	{
-		if(!global && znr != ch->in_room->zone)
+		if (!global && znr != ch->in_room->getZoneNumber())
 			continue;
 		ch->send(COLOR_YELLOW(ch, CL_COMPLETE));
 		for(s = 0;s < z->cmd.size();++s)
@@ -423,7 +424,7 @@ ACMD(do_zlist)
 			sprintf(buf + strlen(buf), " (ID: %d)", z->cmd[s]->dbID);
 
 			if(zone || global)
-				sprintf(buf + strlen(buf), ", Room [%s%s%d%s%s]", COLOR_BOLD(ch, CL_COMPLETE), grn, cmd_room->vnum, nrm, yel);
+				sprintf(buf + strlen(buf), ", Room [%s%s%d%s%s]", COLOR_BOLD(ch, CL_COMPLETE), grn, cmd_room->getVnum(), nrm, yel);
 			sprintf(buf2, "%d. %s\r\n", ++count, buf);//This is the entire line.
 
 			if( strlen(buf2) + strlen(buf3) > (sizeof(buf3)-1) )

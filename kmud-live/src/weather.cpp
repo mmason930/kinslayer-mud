@@ -46,6 +46,9 @@
 #include "db.h"
 #include "weather.h"
 #include "zones.h"
+#include "rooms/Room.h"
+
+#include <algorithm>
 
 extern struct GameTime time_info;
 
@@ -61,7 +64,7 @@ void sendToOutdoor(int zone, const char * messg)
 	{
 		if( ch->IsPurged() ) continue;
 		if (OUTSIDE(ch))
-			if (ch->in_room->zone == zone)
+			if (ch->in_room->getZoneNumber() == zone)
 				ch->send(messg);
 	}	
 }
@@ -89,15 +92,15 @@ void another_hour(int mode)
 				for(ch = character_list;ch;ch = ch->next)
 				{
 					if( ch->IsPurged() ) continue;
-					if( !ch->in_room->GetZone() )
+					if( !ch->in_room->getZone() )
 						MudLog(CMP, LVL_GOD, TRUE, "%s has an invalid zone!", GET_NAME(ch));
 					else
 					{
-						Weather *MyWeather = ch->in_room->GetZone()->GetWeather();
+						Weather *MyWeather = ch->in_room->getZone()->GetWeather();
 						MyWeather->setSun(SUN_RISE);
 						if(OUTSIDE(ch) && AWAKE(ch))
 						{
-							Zone *zone = ch->in_room->GetZone();
+							Zone *zone = ch->in_room->getZone();
 							if(zone->GetSunrise().empty())
 								ch->send("The sun rises from the east.\r\n");
 							else
@@ -118,7 +121,7 @@ void another_hour(int mode)
 				for(ch = character_list;ch;ch = ch->next)
 				{
 					if( ch->IsPurged() ) continue;
-					Zone *zone = ch->in_room->GetZone();
+					Zone *zone = ch->in_room->getZone();
 					if( (zone) == NULL )
 					{
 						MudLog(CMP, TRUE, LVL_GOD, "%s has an invalid zone!", GET_NAME(ch));
@@ -627,8 +630,8 @@ void Weather::force_change_intensity(bool worse, int percent_known)
 	}
 	
 	// To make sure we didn't go out of range.
-	p = MIN(int(p), 100);
-	p = MAX(int(p), 0);
+	p = std::min(int(p), 100);
+	p = std::max(int(p), 0);
 
 	storm->intensity = int(p);
 	i_modified = true;

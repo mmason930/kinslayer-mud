@@ -12,7 +12,7 @@
 
 #include <iostream>
 
-kuListener::kuListener(const int port, e_SocketType t)
+kuListener::kuListener(const int port, e_SocketType socketType)
 {
 	closeDescriptorCallback = NULL;
 	dataForCloseDescriptorCallback = NULL;
@@ -24,14 +24,14 @@ kuListener::kuListener(const int port, e_SocketType t)
 	dataForAfterSocketWriteCallback = NULL;
 	dataForSocketReadCallback = NULL;
 	socketReadCallback = NULL;
-	l_type = t;
+	this->socketType = socketType;
 	nulltime.tv_sec = 0;
 	nulltime.tv_usec = 0;
-	l_isListening = false;
-	l_isBound = false;
-	l_Sock = SOCKET_ERROR;
-	l_Port = static_cast<u_short>(port);
-	int opt;
+	this->listening = false;
+	this->bound = false;
+	this->socket = SOCKET_ERROR;
+	this->port = static_cast<u_short>(port);
+	int opt = 1;//True
 #ifdef WIN32
 	int i = 0;
 	WSADATA wsaData;
@@ -42,30 +42,30 @@ kuListener::kuListener(const int port, e_SocketType t)
 	}
 #endif
 
-	if(t == TCP)
-		this->l_Sock = this->l_TCPSocket();
-	else if(t == UDP)
-		this->l_Sock = this->l_UDPSocket();
+	if (socketType == TCP)
+		this->socket = this->createTCPSocket();
+	else if (socketType == UDP)
+		this->socket = this->createUDPSocket();
 	else
-		this->l_Sock = this->l_TCPSocket();
+		this->socket = this->createTCPSocket();
 
-	if ( setsockopt( this->l_Sock, SOL_SOCKET, SO_REUSEADDR, ( char * ) & opt, sizeof( opt ) ) < 0 )
+	if (setsockopt(this->socket, SOL_SOCKET, SO_REUSEADDR, (const char *)&opt, sizeof(opt)) < 0)
 	{
 		return;
 	}
 
-	if ((this->l_Sock) == INVALID_SOCKET)
+	if ((this->socket) == INVALID_SOCKET)
 	{
 		return;
 	}
 	
 	//Bind the socket
-	if(this->l_Bind(port) == INVALID_SOCKET)
+	if(this->bind(port) == INVALID_SOCKET)
 	{
 		return;
 	}
 	//Listen, only required for TCP sockets.
-	if(t == TCP && this->l_Listen() == INVALID_SOCKET)
+	if (socketType == TCP && this->listen() == INVALID_SOCKET)
 	{
 		return;
 	}
@@ -73,28 +73,34 @@ kuListener::kuListener(const int port, e_SocketType t)
 
 kuListener::~kuListener()
 {
-	l_Close();
+	for (auto descriptorIdToDescriptorPaid : descriptorMap)
+	{
+		descriptorIdToDescriptorPaid.second->socketClose();
+		delete descriptorIdToDescriptorPaid.second;
+	}
+
+	this->close();
 }
 
 /********* Calling the listen() function ************/
-int kuListener::l_Listen()
+int kuListener::listen()
 {
 	int i = 0;
 
-	if( (i = listen(this->l_Sock, 5) ) < 0)
+	if ((i = ::listen(this->socket, 5)) < 0)
 	{
-		l_isListening = false;
+		this->listening = false;
 		return -1;
 	}
 
-	l_isListening = true;
+	this->listening = true;
 	return i;
 }
 /**************************************************/
 
 
 /********* Calling the bind() function ************/
-int kuListener::l_Bind(const int port)
+int kuListener::bind(const int port)
 {
 	int i = 0;
 	struct sockaddr_in sin;
@@ -103,12 +109,12 @@ int kuListener::l_Bind(const int port)
 	sin.sin_addr.s_addr = htonl(INADDR_ANY);
 	sin.sin_port	= htons(port);
 
-	if( (i = bind(this->l_Sock, (struct sockaddr *)(&sin), sizeof(sin)) )  == INVALID_SOCKET)
+	if ((i = ::bind(this->socket, (struct sockaddr *)(&sin), sizeof(sin))) == INVALID_SOCKET)
 	{
-		l_isBound = false;
+		this->bound = false;
 		return INVALID_SOCKET;
 	}
-	l_isBound = true;
+	this->bound = true;
 	return i;
 }
 /****************************************************/
@@ -116,7 +122,7 @@ int kuListener::l_Bind(const int port)
 
 /********* Calling the accept() function ************/
 
-std::pair< kuDescriptor *, bool > kuListener::l_Accept()
+std::pair< kuDescriptor *, bool > kuListener::accept()
 {
 	SOCKET sock = 0;
 	kuDescriptor *d = 0;
@@ -125,7 +131,7 @@ std::pair< kuDescriptor *, bool > kuListener::l_Accept()
 	socklen_t size = sizeof(struct sockaddr_in);
 
 	d = new kuDescriptor( this );
-	if( (sock = accept(this->l_Sock, (sockaddr *)&d->sin, &size) ) == INVALID_SOCKET)
+	if ((sock = ::accept(this->socket, (sockaddr *)&d->sin, &size)) == INVALID_SOCKET)
 	{
 		delete (d);
 		lND.first = (0);
@@ -137,7 +143,7 @@ std::pair< kuDescriptor *, bool > kuListener::l_Accept()
 		d->nonBlock();
 		d->ipAddress = inet_ntoa(d->sin.sin_addr);
 
-		mDescriptors[ d->getUid() ] = d;
+		descriptorMap[d->getUid()] = d;
 
 		lND.first = (d);
 		lND.second = (true);
@@ -146,67 +152,70 @@ std::pair< kuDescriptor *, bool > kuListener::l_Accept()
 }
 
 //Is there a new connection to be grabbed?
-bool kuListener::l_CanAccept()
+bool kuListener::canAccept()
 {
 	fd_set pending;
 	timeval nt = {0,0};
 
 	FD_ZERO(&pending);
-	FD_SET(this->l_Sock, &pending);
+	FD_SET(this->socket, &pending);
 
-	if( (select(this->l_Sock + 1, &pending, 0, 0, &nt) ) == INVALID_SOCKET )
+	if ((::select(this->socket + 1, &pending, 0, 0, &nt)) == INVALID_SOCKET)
 	{
 		return false;
 	}
-	if(FD_ISSET(this->l_Sock, &pending))
+	if (FD_ISSET(this->socket, &pending))
 	{
 		return true;
 	}
 	return false;
 }
 
-void kuListener::l_Close()
+void kuListener::close()
 {
-	if( this->l_GetSocket() != INVALID_SOCKET ) {
-		closesocket( this->l_Sock );
+	if( this->getSocket() != INVALID_SOCKET ) {
+		closesocket(this->socket);
 	}
-	this->l_isBound = false;
-	this->l_isListening = false;
+	this->bound = false;
+	this->listening = false;
 }
 /****************************************************/
 
-u_short kuListener::l_GetPort()
+u_short kuListener::getPort()
 {
-	return (l_Port);
+	return (this->port);
 }
-bool kuListener::l_IsBound()
+
+bool kuListener::isBound()
 {
-	return (l_isBound);
+	return (this->bound);
 }
-bool kuListener::l_IsListening()
+
+bool kuListener::isListening()
 {
-	return (l_isListening);
+	return (this->listening);
 }
-SOCKET kuListener::l_GetSocket()
+
+SOCKET kuListener::getSocket()
 {
-	return (l_Sock);
+	return (socket);
 }
 
 /**** Check to see if there are any new hosts waiting to be accepted. If so, we will grab them
       and append them to our descriptor list. Return a list of any newly accepted descriptors. ****/
-std::list< kuDescriptor * > kuListener::l_AcceptNewHosts()
+std::list< kuDescriptor * > kuListener::acceptNewHosts()
 {
 	std::list< kuDescriptor * > lNewDescriptors;
 	FD_ZERO(&inset );
 	FD_ZERO(&outset);
 	FD_ZERO(&excset);
-	FD_SET(this->l_Sock, &inset);
-	FD_SET(this->l_Sock, &outset);
-	FD_SET(this->l_Sock, &excset);
+	FD_SET(this->socket, &inset);
+	FD_SET(this->socket, &outset);
+	FD_SET(this->socket, &excset);
 
-	if(this->l_CanAccept())
+	if (this->canAccept())
 	{
-		std::pair< kuDescriptor *, bool > lND = this->l_Accept();
+		std::pair< kuDescriptor *, bool > lND = this->accept();
 
 		if( lND.second == true ) {
 			lNewDescriptors.push_back( lND.first );
@@ -219,76 +228,77 @@ std::list< kuDescriptor * > kuListener::l_AcceptNewHosts()
 	}
 	return lNewDescriptors;
 }
-void kuListener::l_Pulse()
+
+void kuListener::pulse()
 {
 	SOCKET max = 0;
-	for(dMapType::iterator dIter = mDescriptors.begin();dIter != mDescriptors.end();++dIter)
+	for (auto descriptorPair : descriptorMap)
 	{
-		if( (*dIter).second->socketIsClosed() )
+		if (descriptorPair.second->socketIsClosed())
 			continue;
-		max = (*dIter).second->sock > max ? (*dIter).second->sock : max;
-		FD_SET( (*dIter).second->sock, &inset );
-		FD_SET( (*dIter).second->sock, &outset);
-		FD_SET( (*dIter).second->sock, &excset);
+		max = descriptorPair.second->sock > max ? descriptorPair.second->sock : max;
+		FD_SET(descriptorPair.second->sock, &inset);
+		FD_SET(descriptorPair.second->sock, &outset);
+		FD_SET(descriptorPair.second->sock, &excset);
 	}
-	select(max + 1, &inset, &outset, &excset, &nulltime);
+	::select(max + 1, &inset, &outset, &excset, &nulltime);
 
-	for(dMapType::iterator dIter = mDescriptors.begin();dIter != mDescriptors.end();++dIter)
+	for (auto descriptorPair : descriptorMap)
 	{
-		if( !(*dIter).second->socketIsClosed() && FD_ISSET( (*dIter).second->sock, &inset ) )
+		if (!descriptorPair.second->socketIsClosed() && FD_ISSET(descriptorPair.second->sock, &inset))
 		{
-			if( (*dIter).second->socketRead() == -1 )
-				(*dIter).second->socketClose();
+			if (descriptorPair.second->socketRead() == -1)
+				descriptorPair.second->socketClose();
 		}
-		if( !(*dIter).second->socketIsClosed() && FD_ISSET( (*dIter).second->sock, &outset ) )
+		if (!descriptorPair.second->socketIsClosed() && FD_ISSET(descriptorPair.second->sock, &outset))
 		{
-			(*dIter).second->socketWrite();
+			descriptorPair.second->socketWrite();
 		}
-		if( !(*dIter).second->socketIsClosed() && FD_ISSET( (*dIter).second->sock, &excset ) )
+		if (!descriptorPair.second->socketIsClosed() && FD_ISSET(descriptorPair.second->sock, &excset))
 		{
-			(*dIter).second->socketClose();
+			descriptorPair.second->socketClose();
 		}
 	}
-	for(dMapType::iterator dIter = mDescriptors.begin();dIter != mDescriptors.end();)
+	for(auto iter = descriptorMap.begin();iter != descriptorMap.end();)
 	{
-		if( (*dIter).second->socketIsClosed() )
+		if( (*iter).second->socketIsClosed() )
 		{
 			if( this->closeDescriptorCallback != NULL ) {
-				this->closeDescriptorCallback(this->dataForCloseDescriptorCallback, this, (*dIter).second);
+				this->closeDescriptorCallback(this->dataForCloseDescriptorCallback, this, (*iter).second);
 			}
-			delete (*dIter).second;
-			mDescriptors.erase( dIter++ );
+			delete (*iter).second;
+			descriptorMap.erase( iter++ );
 		}
 		else
-			++dIter;
+			++iter;
 	}
 }
 
-std::list< kuDescriptor * > kuListener::l_GetDescriptors()
+std::list< kuDescriptor * > kuListener::getDescriptors()
 {
 	std::list< kuDescriptor * > lDesc;
-	for( dMapType::iterator dIter = mDescriptors.begin();dIter != mDescriptors.end();++dIter )
+	for (dMapType::iterator dIter = descriptorMap.begin(); dIter != descriptorMap.end(); ++dIter)
 		lDesc.push_back( (*dIter).second );
 	return lDesc;
 }
 
 /********* Calling the socket() function ************/
-int kuListener::l_Select(const int MaxDescs, fd_set *inset, fd_set *outset, fd_set *excset)
+int kuListener::select(const int MaxDescs, fd_set *inset, fd_set *outset, fd_set *excset)
 {
 	timeval nulltime = {0,0};
 	
-	if((select(MaxDescs + 1, inset, outset, excset, &nulltime)) < 0)
+	if((::select(MaxDescs + 1, inset, outset, excset, &nulltime)) < 0)
 	{
 		return -1;
 	}
 	return 1;
 }
 /********* Calling the socket() function for TCP ************/
-SOCKET kuListener::l_TCPSocket()
+SOCKET kuListener::createTCPSocket()
 {
 	SOCKET sock = 0;
 
-	if ( (sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+	if ( (sock = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
 	{
 		return -1;
 	}
@@ -297,11 +307,11 @@ SOCKET kuListener::l_TCPSocket()
 /****************************************************/
 
 /********* Calling the socket() function for UDP ************/
-SOCKET kuListener::l_UDPSocket()
+SOCKET kuListener::createUDPSocket()
 {
 	SOCKET sock = 0;
 
-	if ( (sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+	if ( (sock = ::socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 	{
 		return -1;
 	}
@@ -309,11 +319,11 @@ SOCKET kuListener::l_UDPSocket()
 }
 /****************************************************/
 
-bool kuListener::l_EnableKeepAlive()
+bool kuListener::enableKeepAlive()
 {
 	char optval;
 	socklen_t optlen = sizeof(optval);
-	if(getsockopt(this->l_Sock, SOL_SOCKET, SO_KEEPALIVE, &optval, &optlen) < 0) {
+	if (getsockopt(this->socket, SOL_SOCKET, SO_KEEPALIVE, &optval, &optlen) < 0) {
 		return false;
 	}
 
@@ -322,11 +332,11 @@ bool kuListener::l_EnableKeepAlive()
 
 	optval = 1;
 	optlen = sizeof(optval);
-	if(setsockopt(this->l_Sock, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0) {
+	if (setsockopt(this->socket, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0) {
 		return false;
 	}
 
-	if(getsockopt(this->l_Sock, SOL_SOCKET, SO_KEEPALIVE, &optval, &optlen) < 0) {
+	if (getsockopt(this->socket, SOL_SOCKET, SO_KEEPALIVE, &optval, &optlen) < 0) {
 		return false;
 	}
 
@@ -335,9 +345,9 @@ bool kuListener::l_EnableKeepAlive()
 	return false;//The option failed.
 }
 
-kuDescriptor *kuListener::l_GetDesc( const int uid )
+kuDescriptor *kuListener::getDescriptorById( const int uid )
 {
-	return( mDescriptors.count( uid ) == 0 ? (0) : mDescriptors[ uid ] );
+	return(descriptorMap.count(uid) == 0 ? (0) : descriptorMap[uid]);
 }
 
 void kuListener::setCloseDescriptorCallback( void (*closeDescriptorCallback)(void*, kuListener*, kuDescriptor*) )
@@ -366,7 +376,7 @@ void kuListener::setDataForOpenDescriptorCallback( void *data )
 	this->dataForOpenDescriptorCallback = data;
 }
 
-void kuListener::setBeforeSocketWriteCallback( void (*socketWriteCallback)(void*, kuListener*, kuDescriptor*, const std::string &output) )
+void kuListener::setBeforeSocketWriteCallback( void (*socketWriteCallback)(void*, kuListener*, kuDescriptor*) )
 {
 	this->beforeSocketWriteCallback = socketWriteCallback;
 }
@@ -400,11 +410,11 @@ void kuListener::handleCloseDescriptor(kuDescriptor *descriptor)
 	}
 }
 
-void kuListener::handleBeforeSocketWriteCallback(kuDescriptor *descriptor, const std::string &output)
+void kuListener::handleBeforeSocketWriteCallback(kuDescriptor *descriptor)
 {
 	if(beforeSocketWriteCallback != NULL) {
 
-		beforeSocketWriteCallback(dataForBeforeSocketWriteCallback, this, descriptor, output);
+		beforeSocketWriteCallback(dataForBeforeSocketWriteCallback, this, descriptor);
 	}
 }
 

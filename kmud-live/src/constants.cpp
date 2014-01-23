@@ -110,42 +110,24 @@ const char *room_bits[] = {
 
 
 /* EX_x */
-const char *exit_bits[] = {
-                        "DOOR",
-                        "CLOSED",
-                        "LOCKED",
-                        "\n"
-                    };
-
-
-/* SECT_ */
-const char *sector_types[] =
+const char *exit_bits[] =
 {
-	"Inside",
-	"City",
-	"Field",
-	"Forest",
-	"Hills",
-	"Mountains",
-	"Water (Swim)",
-	"Water (No Swim)",
-	"Underwater",
-	"In Flight",
-	"Road",
+	"DOOR",
+	"CLOSED",
+	"LOCKED",
 	"\n"
 };
-const int NUM_SECTORS = 11;
 
 /*
  * SEX_x
  * Not used in sprinttype() so no \n.
  */
 const char *genders[] =
-    {
-        "Neutral",
-        "Male",
-        "Female"
-    };
+{
+	"Neutral",
+	"Male",
+	"Female"
+};
 
 
 /* POS_x */
@@ -995,22 +977,6 @@ const int rev_dir[] =
 
         5,
         4
-    };
-
-const int movement_loss[] =
-    {
-        2,	/* Inside     */
-        2,	/* City       */
-        2,	/* Field      */
-        2,	/* Forest     */
-        2,	/* Hills      */
-        3,	/* Mountains  */
-        3,	/* Swimming   */
-        2,	/* Unswimable */
-        1,	/* Flying     */
-        5,	/* Underwater */
-        2,
-        2,
     };
 
 /* Not used in sprinttype(). */
