@@ -17,6 +17,7 @@ if(request.getAttribute("Title") != null) {
 		<base href="http://<%=webSupport.getInstanceDomain() %>/" />
 		<link rel="stylesheet" href="./View/Styles/style.css" type="text/css"/>
 		<link rel="stylesheet" href="./View/Styles/PlayerPortalStyles.css" type="text/css"/>
+		<link rel="stylesheet" href="./View/Styles/Admin/OList.css" type="text/css"/>
 		<link rel="stylesheet" href="./View/Styles/HelpStyles.css" type="text/css"/>
 		<script type="text/javascript" src="./View/JavaScript/jquery-1.8.0.js"></script>
 		<script type="text/javascript" src="./View/JavaScript/scripts.js"></script>
