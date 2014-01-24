@@ -1,29 +1,30 @@
 <project name="build kinslayermud" default="build" basedir=".">
 
-	<property name="tomcat-home" value=""/>
-	<property name="tomcat-bin" value="${tomcat-home}/bin"/>
-	<property name="web-root" value=""/>
-	<property name="web-webinf" value="${web-root}/WEB-INF"/>
-	<property name="web-classes" value="${web-webinf}/classes"/>
-	<property name="web-lib" value="${web-webinf}/lib"/>
-	<property name="web-view" value="${web-root}/View"/>
-	<property name="checkout-root" value="Kinslayer Web"/>
-	<property name="checkout-src-web" value="${checkout-root}/src-web"/>
-	<property name="checkout-src-core" value="${checkout-root}/src-core"/>
-	<property name="checkout-webinf" value="${checkout-root}/WebContent/WEB-INF"/>
-	<property name="checkout-lib" value="${checkout-webinf}/lib/"/>
-	<property name="checkout-classes" value="${checkout-webinf}/classes"/>
-	<property name="checkout-view" value="${checkout-root}/View"/>
-
 	<property name="branch" value="trunk" />
 	<property name="revision" value="" />
+
+	<property name="checkout-root" value="${branch}/KinslayerWeb"/>
+
+        <property name="tomcat-home" value=""/>
+        <property name="tomcat-bin" value="${tomcat-home}/bin"/>
+        <property name="web-root" value=""/>
+        <property name="web-webinf" value="${web-root}/WEB-INF"/>
+        <property name="web-classes" value="${web-webinf}/classes"/>
+        <property name="web-lib" value="${web-webinf}/lib"/>
+        <property name="web-view" value="${web-root}/View"/>
+        <property name="checkout-src-web" value="${checkout-root}/src-web"/>
+        <property name="checkout-src-core" value="${checkout-root}/src-core"/>
+        <property name="checkout-webinf" value="${checkout-root}/WebContent/WEB-INF"/>
+        <property name="checkout-lib" value="${checkout-webinf}/lib/"/>
+        <property name="checkout-classes" value="${checkout-webinf}/classes"/>
+        <property name="checkout-view" value="${checkout-root}/View"/>
 	
 	<path id="classpath">
 		<fileset dir="${checkout-lib}">
 			<include name="**/*.jar"/>
 		</fileset>
 	</path>
-	
+
 	<target name="build" depends="compile, inject-updates" />
 
 	<target name="svn-checkout">
@@ -33,13 +34,14 @@
 	</target>
 	
 	<target name="compile">
+
 		<mkdir dir="${checkout-classes}"/>
 		<javac debug="true" destdir="${checkout-classes}" classpathref="classpath">
-			<src dir="${checkout-src-web}" />
-			<src dir="${checkout-src-core}" />
+			<src path="${checkout-src-web}" />
+			<src path="${checkout-src-core}" />
 		</javac>
 		
-		<copy file="${checkout-src}/struts.xml" todir="${checkout-classes}" />
+		<copy file="${checkout-src-web}/struts.xml" todir="${checkout-classes}" />
 	</target>
 
 	<target name="stop-tomcat">
