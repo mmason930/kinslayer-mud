@@ -172,7 +172,7 @@ void Exit::toggleFlag(const int flag)
 
 void Exit::setFlag(const int flag)
 {
-	TOGGLE_BIT(exitInfo, flag);
+	SET_BITK(exitInfo, flag);
 }
 
 void Exit::removeFlag(const int flag)

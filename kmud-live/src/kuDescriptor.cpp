@@ -76,7 +76,6 @@ int kuDescriptor::socketRead()
 
 	if(recvReturnValue > 0)
 	{
-//		std::cout << "[READ]: " << std::endl << std::endl << "`" << dataReadFromSocket << "`" << std::endl << std::endl;
 		total += recvReturnValue;
 		this->input.append(dataReadFromSocket, recvReturnValue);
 	}

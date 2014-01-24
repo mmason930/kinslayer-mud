@@ -8,6 +8,7 @@
 
 extern int top_of_objt;
 extern std::vector<Object*> obj_proto;
+extern std::vector<int> ItemCount;
 
 PlayerPortalCommandProcessor::PlayerPortalCommandProcessor() {}
 PlayerPortalCommandProcessor::~PlayerPortalCommandProcessor() {}
@@ -127,7 +128,7 @@ void PlayerPortalLoadObjectListCommandProcess::process(PlayerPortalDescriptor *d
 				continue;
 			if (itemType != -1 && itemType != objectPrototype->getType())
 				continue;
-			if (wearType != -1 && !OBJWEAR_FLAGGED(objectPrototype, wearType))
+			if (wearType != -1 && !OBJWEAR_FLAGGED(objectPrototype, (1 << wearType)))
 				continue;
 
 			Json::Value objectValue;
@@ -144,6 +145,7 @@ void PlayerPortalLoadObjectListCommandProcess::process(PlayerPortalDescriptor *d
 			objectValue["pb"] = objectPrototype->obj_flags.parry;
 			objectValue["abs"] = objectPrototype->obj_flags.absorb;
 			objectValue["bash"] = objectPrototype->BashRating();
+			objectValue["num"] = ItemCount[objectPrototype->item_number];
 
 			response["objects"].append(objectValue);
 		}
