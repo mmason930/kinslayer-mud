@@ -1,0 +1,108 @@
+input[type='text']
+{
+	margin: 0;
+	padding: 0px 5px 0px 5px;
+	height: 24px;
+	font-weight: bold;
+	color: #FFF;
+	background-color: #272822;
+	outline: none;
+	border: 1px solid #372822;
+	border-radius: 3px;
+}
+
+#searchForm input
+{
+	width: 50px;
+}
+
+#searchForm
+{
+	width: 750px;
+	margin: auto;
+}
+
+#divider
+{
+	border-top: 1px solid #999;
+	content: " ";
+	width: 70%;
+	margin: 20px auto 20px auto;
+}
+
+#resultsTable
+{
+	width: 100%;
+	border: 1px solid #999;
+	font-size: 14px;
+}
+
+#resultsTable tr td
+{
+    border-spacing: 00px;
+    padding: 5px 15px 5px 15px;
+    font-weight: bold;
+}
+
+.objectIdRow
+{
+	width: 65px;
+}
+
+.shortDescriptorRow
+{
+	width: 300px;
+	color: #00FF3C;
+}
+
+.itemTypeRow
+{
+	width: 105px;
+	color: #008080;
+}
+
+.wearFlagsRow
+{
+	color: #00b300;
+}
+
+.extraFlagsRow
+{
+	color: #800080;
+}
+
+.weightRow
+{
+	color: #808000;
+	width: 60px;
+}
+
+.costRow
+{
+	color:#808000;
+}
+
+.obRow
+{
+	color: #008080;
+}
+
+.dbRow
+{
+	color: #008080;
+}
+
+.pbRow
+{
+	color: #008080;
+}
+
+.absRow
+{
+	color: #008080;
+}
+
+.bashRow
+{
+
+}

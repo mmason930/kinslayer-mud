@@ -1,0 +1,727 @@
+body
+{
+	background: #000;
+	font-family: courier;
+	color: #FFF;
+}
+
+.inlineHeader
+{
+	display: inline;
+	margin: 0;
+	padding: 0;
+	font-size: inherit !important;
+	font-weight: bold;
+}
+
+a {
+	color: #FFF;
+	text-decoration: none;
+
+	transition: all 0.2s ease 0s;
+	-webkit-transition: all 0.2s ease 0s;
+	-moz-transition: all 0.2s ease 0s;
+	-o-transition: all 0.2s ease 0s;
+}
+
+a:hover {
+	color: #880015;
+}
+
+.textCenter
+{
+	text-align: center;
+}
+
+.noBottomMargin
+{
+	margin-bottom: 0 !important;
+}
+
+.rightSideContainer
+{
+	float: left;
+	overflow: hidden;
+	width: 77%;
+}
+
+.topRight
+{
+	float: right;
+}
+
+.bannerImage
+{
+	margin-left: 3%;
+	margin-top: 2%;
+	width: 67%;
+}
+
+.marginAuto
+{
+	margin: auto;
+}
+
+.clearLeft
+{
+	clear: left;
+}
+
+.clearRight
+{
+	clear: right;
+}
+
+.clearBoth
+{
+	clear: both;
+}
+
+.floatLeft
+{
+	float: left;
+}
+
+.floatRight
+{
+	float: right;
+}
+
+.clearFix:after {
+	content: " ";
+	display: block;
+	clear: both;
+	visibility: hidden;
+	height: 0;
+}
+
+.hidden
+{
+	display: none !important;
+}
+
+.leftNav
+{
+	float: left;
+	width: 21%;
+	margin-left: 1.5%;
+}
+
+.leftNav .logoText
+{
+	color: #880015;
+	font-size: 27px;
+	font-weight: bold;
+	border-bottom: 1px solid #FFF;
+	padding-bottom: 10px;
+	line-height: 200%;
+	text-decoration: none;
+}
+
+.leftNav a:hover
+{
+	color: #FFF;
+}
+
+.leftNavMenu
+{
+	margin-top: 4%;
+	color: #FFF;
+}
+
+.leftNavMenu ul
+{
+	margin: 0 0 0 0;
+	padding: 0 0 0 0;
+}
+
+.leftNavMenu ul li
+{
+	list-style: none;
+}
+
+.leftNavMenu ul li a
+{
+	text-decoration: none;
+	float: left;
+	color: #FFF;
+	line-height: 200%;
+	font-size: 20px;
+	width:100%;
+}
+
+.leftNavMenu ul li a:hover
+{
+	color: #880015;
+}
+
+.leftNavMenu ul li a.selected
+{
+	color: #880015 !important;
+}
+
+.battleLogContainer
+{
+	width: 60%;
+	margin: auto;
+	margin-top: 10px;
+	height: 25%;
+}
+
+.battleLogDescription
+{
+	text-align: center;
+	height:15%;
+	padding: 0;
+	margin: 0;
+}
+
+.battleLogPrompt
+{
+	border: 1px solid #FFF;
+	height: 84%;
+	overflow: hidden;
+}
+
+.battleLogPrompt div
+{
+	margin: 1%;
+}
+
+.battleLogPrompt div span
+{
+	line-height: 160%;
+	font-size: 110%;
+}
+
+.playNowButton
+{
+	color: #FFFFFF;
+	text-decoration: none;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 10px;
+	text-align: center;
+	border: 1px solid #FFF;
+	width: 150px;
+	height: 25px;
+}
+
+.playNowButton:hover
+{
+	background: #880015;
+	color: #000000;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.italics
+{
+	font-style: italic;
+}
+
+.bold
+{
+	font-weight: bold;
+}
+
+.auctionsContainer {
+	float: left;
+	width: 17%;
+	height: 100%;
+	margin-left: 1.5%;
+}
+
+.centerText {
+	text-align: center;
+}
+
+.auctionsContainer a {
+	color: #0000FF;
+}
+
+.auctionsContainer .auction {
+	margin-bottom: 10px;
+}
+
+.auctionsContainer .auction:last-child {
+	margin-bottom: 0px;
+}
+
+.copper {
+	color: #BA6D00;
+}
+
+.silver {
+	color: #969696;
+}
+
+.gold {
+	color: #FFD000;
+}
+
+a.blueLink:hover {
+	color: #880015;
+}
+
+a.blueLink {
+	color: #3953FA;
+}
+
+#pageContent
+{
+	width: 55%;
+	margin-left: auto;
+	margin-right: auto;
+	color: #880015;
+	margin-bottom: 5%;
+}
+
+#pageTitle
+{
+	text-align: center;
+	margin-bottom: 1%;
+	font-size: 22px;
+	font-weight: bold;
+}
+
+.noTopMargin
+{
+	margin-top: 0px !important;
+}
+
+.autoWidth
+{
+	width: auto !important;
+}
+
+/*** SuperMOBs ***/
+#superMobLeftNav
+{
+	float:left;
+	border-right: 1px solid #FFF;
+	padding-right: 1%;
+	width: 19%;
+	font-size: 75%;
+}
+
+
+#superMobLeftNav ul
+{
+	padding: 0 0 0 0;
+	margin: 0 0 0 8%;
+}
+
+#superMobLeftNav ul li
+{
+	list-style: none;
+}
+
+#superMobLeftNav ul li a
+{
+	float: left;
+	color: #880015;
+	width: 100%;
+	line-height: 25px;
+	text-decoration: none;
+}
+
+#superMobLeftNav ul li a.selected
+{
+	color: #FFF !important;
+}
+
+#superMobLeftNav ul li a:hover
+{
+	color: #FFF;
+}
+
+#superMobDetailPanel
+{
+	float: left;
+	width: 100%;
+}
+
+#superMobImage
+{
+	float: left;
+	width: 17%;
+}
+
+#superMobDescription
+{
+	float: left;
+	margin-left: 1%;
+	width: 55%;
+}
+
+#superMobMap
+{
+	float: left;
+	width: 27%;
+}
+
+#superMobEquipmentPanel
+{
+}
+
+#superMobRightNav
+{
+	float:right;
+	width: 79.5%;
+}
+
+#superMobEquipmentTable
+{
+	margin-top: 2%;
+	width: 100%;
+	clear: left;
+	float: left;
+}
+
+#superMobEquipmentTable th
+{
+	font-weight: bold;
+	text-align: left;
+	font-size: 20px;
+}
+
+#superMobEquipmentTable td
+{
+	font-size: 14px;
+	color: #FFF;
+}
+
+#superMobEquipmentTable .itemNameColumn
+{
+	width: 70%;
+}
+
+#superMobEquipmentTable .bodyLocationColumn
+{
+	width: 15%;
+}
+
+#superMobEquipmentTable .loadProbabilityColumn
+{
+	width: 15%;
+}
+
+#superMobLocation
+{
+	text-align: center;
+	margin-bottom: 2%;
+}
+
+
+
+.userPortalContainer
+{
+	width: 80%;
+	margin: auto;
+}
+
+.userSessionLink
+{
+	display: inline-block;
+	width: 23%;
+	text-align: center;
+}
+
+.userSessionLink + span:last-child
+{
+	display: none;
+}
+
+.homeContent
+{
+	width: 60%;
+	margin: auto;
+	margin-top: 1%;
+}
+
+.homeContent h1
+{
+	font-size: 20px;
+	margin: 0;
+	padding: 0;
+	display: block;
+	text-align: center;
+}
+
+/*** Equipment Pages ***/
+#equipmentOrWeaponPanel
+{
+	width: 60%;
+	text-align: center;
+	margin:auto;
+}
+
+#equipmentOrWeaponPanel div
+{
+	float: left;
+	width: 50%;
+}
+
+#equipmentOrWeaponPanel div a
+{
+	text-decoration: none;
+	color: #FFF;
+	font-size: 24px;
+}
+
+#equipmentOrWeaponPanel div a:hover,
+#equipmentOrWeaponPanel div a.selected
+{
+	text-decoration: underline;
+	color: #880015;
+}
+
+.equipmentLeftNav
+{
+	float: left;
+	padding-right: 1%;
+	width: 17%;
+	font-size: 75%;
+	margin-left: 4%;
+}
+
+.equipmentLeftNav ul
+{
+	padding: 0 0 0 0;
+	margin: 0 0 0 8%;
+}
+
+.equipmentLeftNav ul li
+{
+	list-style: none;
+}
+
+
+.equipmentLeftNav ul li a
+{
+	float: left;
+	color: #FFF;
+	width: 100%;
+	line-height: 32px;
+	text-decoration: none;
+	font-size: 17px;
+}
+
+.equipmentLeftNav ul li a.selected,
+.equipmentLeftNav ul li a:hover
+{
+	color: #880015 !important;
+}
+
+.equipmentRightPanel
+{
+	float: left;
+	width: 77.5%;
+}
+
+.equipmentArmorTableContainer
+{
+	width: 87%;
+	float: left;
+}
+
+.equipmentArmorTableContainerInner
+{
+	border: 1px solid #FFF;
+}
+
+.equipmentArmorTableContainerInner table
+{
+	width: 100%;
+	font-weight: normal;
+}
+
+
+.equipmentArmorTableContainerInner table tr th,
+.equipmentArmorTableContainerInner table tr td
+{
+	font-size: 16px;
+}
+
+.equipmentArmorTableContainerInner table tr th.itemNameColumn,
+.equipmentArmorTableContainerInner table tr td.itemNameColumn,
+.equipmentArmorTableContainer .itemNameColumn
+{
+	width: 60%;
+	text-align: left;
+}
+
+.equipmentArmorTableContainerInner table tr th.dodgeColumn,
+.equipmentArmorTableContainerInner table tr td.dodgeColumn,
+.equipmentArmorTableContainer .dodgeColumn
+{
+	width: 10%;
+	text-align: center;
+}
+.equipmentArmorTableContainerInner table tr th.parryColumn,
+.equipmentArmorTableContainerInner table tr td.parryColumn,
+.equipmentArmorTableContainer .parryColumn
+{
+	width: 10%;
+	text-align: center;
+}
+.equipmentArmorTableContainerInner table tr th.absColumn,
+.equipmentArmorTableContainerInner table tr td.absColumn,
+.equipmentArmorTableContainer .absColumn
+{
+	width: 10%;
+	text-align: center;
+}
+
+.equipmentArmorTableContainerInner table tr th.weightColumn,
+.equipmentArmorTableContainerInner table tr td.weightColumn,
+.equipmentArmorTableContainer .weightColumn
+{
+	width: 10%;
+	text-align: center;
+}
+
+.equipmentWeaponTableContainer
+{
+	width: 87%;
+	float: left;
+}
+
+.equipmentWeaponTableContainerInner
+{
+	border: 1px solid #FFF;
+}
+
+.equipmentWeaponTableContainerInner table
+{
+	width: 100%;
+	font-weight: normal;
+}
+
+
+.equipmentWeaponTableContainerInner table tr th,
+.equipmentWeaponTableContainerInner table tr td
+{
+	font-size: 16px;
+}
+
+.equipmentWeaponTableContainerInner table tr th.itemNameColumn,
+.equipmentWeaponTableContainerInner table tr td.itemNameColumn,
+.equipmentWeaponTableContainer .itemNameColumn
+{
+	width: 60%;
+	text-align: left;
+}
+
+.equipmentWeaponTableContainerInner table tr th.offensiveColumn,
+.equipmentWeaponTableContainerInner table tr td.offensiveColumn,
+.equipmentWeaponTableContainer .offensiveColumn
+{
+	width: 8%;
+	text-align: center;
+}
+.equipmentWeaponTableContainerInner table tr th.parryColumn,
+.equipmentWeaponTableContainerInner table tr td.parryColumn,
+.equipmentWeaponTableContainer .parryColumn
+{
+	width: 8%;
+	text-align: center;
+}
+.equipmentWeaponTableContainerInner table tr th.weightColumn,
+.equipmentWeaponTableContainerInner table tr td.weightColumn,
+.equipmentWeaponTableContainer .weightColumn
+{
+	width: 8%;
+	text-align: center;
+}
+
+.equipmentWeaponTableContainerInner table tr th.damageLow,
+.equipmentWeaponTableContainerInner table tr td.damageLow,
+.equipmentWeaponTableContainer .damageLow
+{
+	width: 8%;
+	text-align: center;
+}
+
+.equipmentWeaponTableContainerInner table tr th.damageHigh,
+.equipmentWeaponTableContainerInner table tr td.damageHigh,
+.equipmentWeaponTableContainer .damageHigh
+{
+	width: 8%;
+	text-align: center;
+}
+
+.equipmentDescriptionBox
+{
+	width: 73%;
+	margin: 2% 0 2% 0;
+}
+
+.equipmentDescriptionBox .header
+{
+	text-align: center;
+	display: block;
+	padding: 0;
+	margin: 0;
+}
+/*** End of Equipment Pages ***/
+
+.flatGreyButton {
+	font-size: 20px;
+	background-color: #272822;
+	border: 1px solid #000;
+	text-align: center;
+	font-weight: bold;
+	cursor: pointer;
+	padding: 5px 30px 5px 30px;
+	transition: 0.2s linear;
+	color: #FFF;
+}
+
+.flatGreyButton:hover {
+	background-color: #555;
+}
+
+.flatGreyButton.short
+{
+	padding-top: 1px;
+	padding-bottom: 1px;
+	margin: 0;
+}
+
+@media (max-width: 1000px) {
+
+	.leftNavMenu ul li a {
+
+		font-size: 18px;
+		line-height: 150%;
+	}
+
+	.leftNav .logoText {
+
+		font-size: 20px;
+	}
+
+	.rightSideContainer {
+		width: 70%;
+	}
+
+	.leftNav {
+		width: 28%;
+	}
+
+	.auctionsContainer {
+		width: 30%;
+	}
+
+	.bannerImage {
+
+		height: 33%;
+	}
+
+	.topRight {
+		font-size: 12px;
+	}
+}
