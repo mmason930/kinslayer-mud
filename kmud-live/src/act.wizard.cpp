@@ -2402,14 +2402,19 @@ ACMD(do_declan)
 	StringUtil::formatPlayername(playername);
 	if(!(victim = get_char_vis(ch, playername)))
 	{
-		if(!playerExists(playername) && !(victim = CharacterUtil::loadCharacter(playername)))
+		if (playerExists(playername))
 		{
-			ch->send(NOPERSON);
-			return;
-		}
-		else
+			victim = CharacterUtil::loadCharacter(playername);
 			loaded = true;
+		}
 	}
+
+	if (!victim)
+	{
+		ch->send(NOPERSON);
+		return;
+	}
+
 	UserClan *userClan = victim->getUserClan(clanId);
 	if(clanId && (victim && !userClan))
 	{
