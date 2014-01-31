@@ -586,7 +586,7 @@ int Character::NeededToMove(Room* OtherRoom)
 
 	if( !OtherRoom ) return 0;
 
-	need_movement = (this->in_room->getSector()->getMovementLoss() + OtherRoom->getSector()->getMovementLoss());
+	need_movement = (this->in_room->getSector()->getMovementLoss() + OtherRoom->getSector()->getMovementLoss()) / 2;
 
 	//if(IS_HORSE(this) && RIDDEN_BY(this) && AFF_FLAGGED(RIDDEN_BY(this), AFF_NOTICE))
 		//need_movement += 1;
