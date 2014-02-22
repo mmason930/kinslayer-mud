@@ -21,6 +21,7 @@
 #include "UserEmailAddress.h"
 #include "StringUtil.h"
 #include "CharacterUtil.h"
+#include "MobLoadLogger.h"
 
 extern kuDescriptor *gatewayConnection;
 extern Descriptor *descriptor_list;
@@ -840,6 +841,9 @@ void Descriptor::completeEnterGame()
 		}
 		else
 		{
+			char logBuffer[256];
+			snprintf(logBuffer, sizeof(logBuffer), "Login mount load for %s(UID %d)", GET_NAME(this->character), this->character->player.idnum);
+			mobLoadLogger.logMobLoad(mount->getVnum(), logBuffer);
 			mount->MoveToRoom( loadRoom );
 			if ( this->character->in_room->getSector() == RoomSector::inside )
 				do_follow( mount, ( char* ) GET_NAME( this->character ), 0, 0 );

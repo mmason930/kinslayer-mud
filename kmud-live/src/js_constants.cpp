@@ -335,6 +335,7 @@ flusspferd::object makeConstants()
 	o.set_property("CLAN_ANDORAN", flusspferd::value(2));
 	o.set_property("CLAN_SHIENARAN", flusspferd::value(3));
 	o.set_property("CLAN_MURANDIAN", flusspferd::value(4));
+	o.set_property("CLAN_MERCHANT_GUILD", flusspferd::value(5));
 	o.set_property("CLAN_KOBAL", flusspferd::value(7));
 	o.set_property("CLAN_DHAVOL", flusspferd::value(8));
 	o.set_property("CLAN_ALGHOL", flusspferd::value(9));

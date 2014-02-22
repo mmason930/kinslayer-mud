@@ -12,6 +12,7 @@
 #include "weather.h"
 #include "js.h"
 #include "rooms/Room.h"
+#include "MobLoadLogger.h"
 
 std::recursive_mutex ZoneManager::SingletonMutex;
 extern Index *obj_index;
@@ -205,6 +206,10 @@ void Zone::Reset()
 
 				//MobClock.On();
 					mob = new Character(this->cmd[cmd_no]->arg1, REAL, false);
+					char logBuffer[256];
+					snprintf(logBuffer, sizeof(logBuffer), "Zone %d cmd %d", this->getVnum(), this->cmd[cmd_no]->dbID);
+					mobLoadLogger.logMobLoad(mob->getVnum(), logBuffer);
+					//TODO: Log mob load here.
 				//MobClock.Off();
 					mob->MoveToRoom(World[this->cmd[cmd_no]->arg3]);
 					this->cmd[cmd_no]->mob = mob;

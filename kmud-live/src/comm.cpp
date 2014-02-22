@@ -77,6 +77,7 @@
 #include "Game.h"
 
 #include "ObjectMoveLogger.h"
+#include "MobLoadLogger.h"
 #include <boost/filesystem.hpp>
 
 #ifdef HAVE_ARPA_TELNET_H
@@ -949,6 +950,11 @@ void initiateGame( int port )
 	objectMoveLogger.kill();
 	objectMoveLoggerThread->join();
 	delete objectMoveLoggerThread;
+
+	Log("Closing mob load log thread...");
+	mobLoadLogger.kill();
+	mobLoadLoggerThread->join();
+	delete mobLoadLoggerThread;
 
 	Log("Deleting game object...");
 	delete game;

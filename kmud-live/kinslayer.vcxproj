@@ -138,6 +138,7 @@
     <ClCompile Include="src\md5.cpp" />
     <ClCompile Include="src\medit.cpp" />
     <ClCompile Include="src\mobact.cpp" />
+    <ClCompile Include="src\MobLoadLogger.cpp" />
     <ClCompile Include="src\mobs.cpp" />
     <ClCompile Include="src\modify.cpp" />
     <ClCompile Include="src\ObjectMoveLogger.cpp" />
@@ -236,6 +237,7 @@
     <ClInclude Include="src\jsoncpp\writer.h" />
     <ClInclude Include="src\MailUtil.h" />
     <ClInclude Include="src\md5.h" />
+    <ClInclude Include="src\MobLoadLogger.h" />
     <ClInclude Include="src\mobs.h" />
     <ClInclude Include="src\ObjectMoveLogger.h" />
     <ClInclude Include="src\olc.h" />

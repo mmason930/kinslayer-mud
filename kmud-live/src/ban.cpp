@@ -306,11 +306,10 @@ ACMD(do_ban)
 	//Does the ban already exist?
 	if( BanManager::GetManager().GetBanBySite( site ) != NULL ) 
 	{
-			ch->send("That site has already been banned -- unban it to change the ban type.\r\n");
-			return;
+		ch->send("That site has already been banned -- unban it to change the ban type.\r\n");
+		return;
 	}
-	BanElement *NewElement
-		= new BanElement(BanManager::GetManager().GetTypeByString(flag), time(0), GET_NAME(ch), site );
+	BanElement *NewElement = new BanElement(BanManager::GetManager().GetTypeByString(flag), time(0), GET_NAME(ch), site );
 	BanManager::GetManager().AddBan( NewElement );
 
 	if( NewElement->GetType() == BAN_NAME )

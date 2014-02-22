@@ -57,6 +57,7 @@
 #include "UserDisabledCommand.h"
 #include "ClanQuestPointTransaction.h"
 #include "dg_event.h"
+#include "MobLoadLogger.h"
 
 #include "Exception.h"
 #include "Game.h"
@@ -4086,6 +4087,7 @@ ACMD(do_mbload)
 {
 	Character *mob;
 	int number, r_num;
+	char logBuffer[256];
 
 	OneArgument(argument, buf);
 
@@ -4108,13 +4110,14 @@ ACMD(do_mbload)
 	}
 
 	mob = new Character(r_num, REAL);
+	snprintf(logBuffer, sizeof(logBuffer), "mbload by %s(UID %d)", GET_NAME(ch), ch->player.idnum);
+	mobLoadLogger.logMobLoad(mob->getVnum(), logBuffer);
 	mob->MoveToRoom(ch->in_room);
 
 	Act("$n has created $N!", FALSE, ch, 0, mob, TO_ROOM);
 	Act("You create $N.", FALSE, ch, 0, mob, TO_CHAR);
 
-	MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "%s has created %s.",
-	       GET_NAME(ch), GET_NAME(mob));
+	MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "%s has created %s.", GET_NAME(ch), GET_NAME(mob));
 
 	if( mob->IsPurged() ) return;
 

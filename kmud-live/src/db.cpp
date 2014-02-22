@@ -45,6 +45,7 @@
 #include "EntityType.h"
 #include "GatewayDescriptorType.h"
 #include "ObjectMoveLogger.h"
+#include "MobLoadLogger.h"
 #include "Game.h"
 #include "rooms/Room.h"
 #include "rooms/Exit.h"
@@ -398,6 +399,7 @@ void bootWorld(void)
 	BootGlobalScripts();
 
 	objectMoveLoggerThread = new std::thread(&ObjectMoveLogger::threadHandler, &objectMoveLogger);
+	mobLoadLoggerThread = new std::thread(&MobLoadLogger::threadHandler, &mobLoadLogger);
 
 	Log("Renumbering rooms.");
 	renum_world();

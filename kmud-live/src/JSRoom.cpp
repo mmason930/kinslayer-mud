@@ -17,6 +17,7 @@
 #include "rooms/Room.h"
 #include "rooms/RoomSector.h"
 #include "rooms/Exit.h"
+#include "MobLoadLogger.h"
 
 extern std::vector<Object*> obj_proto;
 
@@ -243,6 +244,11 @@ flusspferd::value JSRoom::loadMob( const int vnum )
 		return lookupValue(0);
 	}
 	mob = new Character(r_num, REAL);
+	
+	char logBuffer[256];
+	snprintf(logBuffer, sizeof(logBuffer), "Script, room %d", this->real->getVnum());
+	mobLoadLogger.logMobLoad(mob->getVnum(), logBuffer);
+	
 	mob->MoveToRoom(real);
 
 	if( !mob->IsPurged() ) {

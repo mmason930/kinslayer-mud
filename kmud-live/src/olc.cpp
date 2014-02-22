@@ -964,28 +964,28 @@ ACMD( do_rlist )
  *               improved olist command, where we will be able to sort mobs      *
  *               by different attributes and get more information from the list  *
  *                                                                               *
+ * Updated 02/21/2014 - Galnor - Allow keyword search, optimize sorting.         *
+ *                                                                               *
  *********************************************************************************/
 ACMD( do_mlist )
 {
 	if( !ch->desc )
 		return;
-	char arg1[ MAX_INPUT_LENGTH ], arg2[ MAX_INPUT_LENGTH ], arg3[ MAX_INPUT_LENGTH ], sortType[MAX_INPUT_LENGTH];
+	char arg1[ MAX_INPUT_LENGTH ], arg2[ MAX_INPUT_LENGTH ], arg3[ MAX_INPUT_LENGTH ], sortType[MAX_INPUT_LENGTH], *keyword = NULL;
 	int m1 = -1, m2 = -1, r1 = -1, r2 = -1;
-	bool found = false;
 	std::stringstream OutBuf;
 	Character *Prototype = NULL;
-	std::list<Character*> OrderedList;
 	std::list<std::string> SortTypes;
-	std::map<int,int> zCounts; /* Mob Rnum to Mob Zone Load Counts */
+	std::map<int,int> zoneLoads, openZoneLoads; // Mob Rnum to Mob Zone Load
 
-	std::string strSortTypes = "exp lvl hp ob pb db vnum kit gold zloads";
+	std::string strSortTypes = "exp lvl level hp ob pb db vnum kit gold zloads open";
 	SortTypes = StringUtil::SplitToContainer< std::list< std::string >, std::string >(strSortTypes, ' ');
 
 	*arg1 = *arg2 = *arg3 = *sortType = '\0';
 
 	if ( !argument )
 	{
-		ch->send( "Syntax: mlist <Bottom Room Number> <Top Room Number> <Sort Type>\r\n" );
+		ch->send( "Syntax: mlist [<Keyword> | <Bottom Room Number> <Top Room Number>] <Sort Type>\r\n" );
 		return ;
 	}
 
@@ -1001,13 +1001,32 @@ ACMD( do_mlist )
 	{
 		m1 = atoi( arg1 );
 		m2 = atoi( arg2 );
+
+		if(m1 < 0)
+		{
+			ch->send("Bottom number must be zero or above.");
+			return;
+		}
+
+		if(m2 < 0)
+		{
+			ch->send("Top number must be zero or above.");
+			return;
+		}
+
+		if ( m2 < m1 )
+		{
+			ch->send( "The second mob number must be greater than or equal to the first. %d %d, not %d %d\r\n", m2, m1, m1, m2 );
+			return;
+		}
+
 		strcpy(sortType, arg3);
 	}
 	else
-	{//No boundary specified. List all mobs.
-		m1 = 0;
-		m2 = MobManager::GetManager().GetPrototype( MobManager::GetManager().NumberOfPrototypes() - 1 )->getVnum();
-		strcpy(sortType, arg1);
+	{//No boundary specified. Use keyword.
+		m1 = m2 = -1;
+		keyword = &arg1[0];
+		strcpy(sortType, arg2);
 	}
 
 	if( (*sortType) )
@@ -1028,32 +1047,29 @@ ACMD( do_mlist )
 		}
 	}
 
-	if ( m1 < 0 || m2 < 0 )
-	{
-		ch->send( "Both numbers must be above zero.\r\n" );
-		return ;
-	}
+	std::vector<Character *> mobList;
 
-	if ( m2 < m1 )
-	{
-		ch->send( "The second room number must be greater than or equal to the first. %d %d, not %d %d\r\n", m2, m1, m1, m2 );
-		return ;
-	}
-
-	//We need to find bounding real numbers for the mobiles.
 	for(unsigned int i = 0;i < MobManager::GetManager().NumberOfPrototypes();++i)
 	{
-		Character *m = MobManager::GetManager().GetPrototype( i );
-		int mVnum;//Set this only when needed so this runs more efficiently.
-		if( r1 == -1 && (mVnum = m->getVnum()) >= m1 )
-			r1 = m->nr;
-		if( r1 != -1 )//Lower bound already has been found.
+		Character *mob = MobManager::GetManager().GetPrototype( i );
+
+		if(keyword)
 		{
-			if( mVnum <= m2 )//Still in bounds.
-				r2 = m->nr;
-			else //Out of bounds. We are done!
-				break;
+			if(isname(keyword, mob->player.name))
+				mobList.push_back(mob);
 		}
+		else
+		{
+			int vnum = mob->getVnum();
+			if(vnum >= m1 && vnum <= m2)
+				mobList.push_back(mob);
+		}
+	}
+
+	if( mobList.empty() )
+	{
+		ch->send("No mobs were found.\r\n");
+		return;
 	}
 
 	/* First, we need to go through and figure out how many zone commands exist that have a chance of loading this mob */
@@ -1063,107 +1079,97 @@ ACMD( do_mlist )
 		for(unsigned int c = 0;c < zone->cmd.size();++c)
 		{
 			int zMobRnum = zone->cmd[c]->arg1;
-			if( zone->cmd[c]->command == 'M' && zMobRnum >= r1 && zMobRnum <= r2 )
-				++zCounts[zMobRnum];
-		}
-	}
-
-//	Clock MyTimer;
-
-	for ( unsigned int i = 0;i < MobManager::GetManager().NumberOfPrototypes();++i )
-	{
-		Index *MIndex = MobManager::GetManager().GetIndex(i);
-		Character *MProto = MobManager::GetManager().GetPrototype(i);
-		if ( MIndex->vnum > m2 )
-			break;
-
-		if ( MIndex->vnum >= m1 )
-		{
-			//Good. We found a mob. Now we need to figure out where it belongs in our list.
-
-			//First, make sure we're actually sorting this.
-			if( *sortType )
+			if( zone->cmd[c]->command == 'M' )
 			{
-				unsigned int size_before = OrderedList.size();
-				for( std::list<Character*>::iterator cIter = OrderedList.begin();cIter != OrderedList.end();++cIter )
-				{
-//					MyTimer.On();
-					Kit *cKit = (*cIter)->MobData->primary_kit, *mKit = MProto->MobData->primary_kit;
-					     if( !str_cmp(sortType, "exp") && GET_EXP(MProto) > GET_EXP((*cIter)) )
-						OrderedList.insert(cIter, MProto);
-					else if( !str_cmp(sortType, "lvl") && GET_LEVEL(MProto) > GET_LEVEL((*cIter)) )
-						OrderedList.insert(cIter, MProto);
-					else if( !str_cmp(sortType, "ob") && GET_OB(MProto) > GET_OB((*cIter)) )
-						OrderedList.insert(cIter, MProto);
-					else if( !str_cmp(sortType, "pb") && GET_PB(MProto) > GET_PB((*cIter)) )
-						OrderedList.insert(cIter, MProto);
-					else if( !str_cmp(sortType, "db") && GET_DB(MProto) > GET_DB((*cIter)) )
-						OrderedList.insert(cIter, MProto);
-					else if( !str_cmp(sortType, "vnum") && MProto->getVnum() > (*cIter)->getVnum() )
-						OrderedList.insert(cIter, MProto);
-					else if( !str_cmp(sortType, "hp") && MProto->points.move > (*cIter)->points.move )
-						OrderedList.insert(cIter, MProto);
-					else if( !str_cmp(sortType, "kit") && (!cKit || (mKit && mKit->vnum > cKit->vnum)) )
-						OrderedList.insert(cIter, MProto);
-					else if( !str_cmp(sortType, "gold") && MProto->points.gold > (*cIter)->points.gold )
-						OrderedList.insert(cIter, MProto);
-					else if( !str_cmp(sortType, "zloads") &&
-						((MProto->nr >= r1   && MProto->nr <= r2)   ? zCounts[MProto->nr]   : (0)) >
-						(((*cIter)->nr >= r1 && (*cIter)->nr <= r2) ? zCounts[(*cIter)->nr] : (0))
-						)//Sorry this is so ugly, but it _is_ an efficient way of doing this...
-					{
-						OrderedList.insert(cIter, MProto);
-					}
-					else
-						continue;
-//					MyTimer.Off();
-					break;
-				}
-				if( size_before == OrderedList.size() )//Not added
-					OrderedList.push_back(MProto);
+				++zoneLoads[zMobRnum];
+
+				if(!zone->IsClosed())
+					++openZoneLoads[zMobRnum];
 			}
-			else
-				OrderedList.push_back(MProto);
 		}
 	}
 
-//	MyTimer.Off();
-//	MyTimer.Print();
+	//Sort the mobs.
+	std::function<bool(Character *mob1, Character *mob2)> sortPredicate =
+		[](Character *mob1, Character *mob2) -> bool {
+			return mob1->getVnum() < mob2->getVnum();
+		};
 
-	if( OrderedList.empty() )
-	{
-		ch->send("No mobs were found.\r\n");
-		return;
-	}
-	OutBuf << " Vnum               Name                                    Exp      Lvl      HP       OB        PB        DB       Kit       Gold     Zloads" << std::endl;
-	OutBuf << "---------------------------------------------------------------------------------------------------------------------------------------------" << std::endl;
+	if(!str_cmp(sortType, "lvl") || !str_cmp(sortType, "level"))
+		sortPredicate = [](Character *mob1, Character *mob2) -> bool {
+			return GET_LEVEL(mob1) > GET_LEVEL(mob2);
+		};
+	else if(!str_cmp(sortType, "exp"))
+		sortPredicate = [](Character *mob1, Character *mob2) -> bool {
+			return GET_EXP(mob1) > GET_EXP(mob2);
+		};
+	else if(!str_cmp(sortType, "ob"))
+		sortPredicate = [](Character *mob1, Character *mob2) -> bool {
+			return GET_OB(mob1) > GET_OB(mob2);
+		};
+	else if(!str_cmp(sortType, "pb"))
+		sortPredicate = [](Character *mob1, Character *mob2) -> bool {
+			return GET_PB(mob1) > GET_PB(mob2);
+		};
+	else if(!str_cmp(sortType, "db"))
+		sortPredicate = [](Character *mob1, Character *mob2) -> bool {
+			return GET_DB(mob1) > GET_DB(mob2);
+		};
+	else if(!str_cmp(sortType, "hp"))
+		sortPredicate = [](Character *mob1, Character *mob2) -> bool {
+			return mob1->points.max_hit > mob2->points.max_hit;
+		};
+	else if(!str_cmp(sortType, "kit"))
+		sortPredicate = [](Character *mob1, Character *mob2) -> bool {
+			return mob1->MobData->primary_kit && mob2->MobData->primary_kit && mob1->MobData->primary_kit->vnum > mob2->MobData->primary_kit->vnum;
+		};
+	else if(!str_cmp(sortType, "gold"))
+		sortPredicate = [](Character *mob1, Character *mob2) -> bool {
+			return mob1->points.gold > mob2->points.gold;
+		};
+	else if(!str_cmp(sortType, "zloads"))
+		sortPredicate = [&](Character *mob1, Character *mob2) -> bool {
+			return zoneLoads[mob1->nr] > zoneLoads[mob2->nr];
+		};
+	else if(!str_cmp(sortType, "open"))
+		sortPredicate = [&](Character *mob1, Character *mob2) -> bool {
+			return openZoneLoads[mob1->nr] > openZoneLoads[mob2->nr];
+		};
+
+
+	std::sort(mobList.begin(), mobList.end(), sortPredicate);
+
+	OutBuf << " Vnum               Name                                    Exp      Lvl      HP       OB        PB        DB       Kit       Copper   Zloads   Open" << std::endl;
+	OutBuf << "------------------------------------------------------------------------------------------------------------------------------------------------------" << std::endl;
 
 	get_char_cols(ch);
 	std::string nameStr;
 	unsigned int nSizeLim = 45;
 
 	//Loop through the list and get the display.
-	for( std::list<Character*>::iterator cIter = OrderedList.begin();cIter != OrderedList.end();++cIter )
+	for( Character *mob : mobList )
 	{
-		nameStr = GET_NAME((*cIter));
+		nameStr = GET_NAME(mob);
 		if( nameStr.size() > nSizeLim )
 		{
 			nameStr.resize(nSizeLim - 3);
 			nameStr += std::string("...");
 		}
-		int czCounts = zCounts.count((*cIter)->nr) ? zCounts[(*cIter)->nr] : (0);
-		OutBuf << "[" << cyn << std::right << std::setw(5) << (*cIter)->getVnum() << nrm << "]";
+		int zoneCount = zoneLoads.count(mob->nr) ? zoneLoads[mob->nr] : (0);
+		int openZoneCount = openZoneLoads.count(mob->nr) ? openZoneLoads[mob->nr] : (0);
+		OutBuf << "[" << cyn << std::right << std::setw(5) << mob->getVnum() << nrm << "]";
 		OutBuf << "  " << grn << std::left << std::setw(nSizeLim) << nameStr << nrm;
-		OutBuf << " [" << cyn << std::right << std::setw(10) << GET_EXP((*cIter)) << nrm << "]";
-		OutBuf << " [" << cyn << std::right << std::setw(3) << ((int)GET_LEVEL((*cIter))) << nrm << "]";
-		OutBuf << " [" << cyn << std::right << std::setw(6) << ((*cIter))->points.move << nrm << "]";
-		OutBuf << " [ " << cyn << std::right << std::setw(6) << GET_OB((*cIter)) << nrm << "]";
-		OutBuf << " [ " << cyn << std::right << std::setw(6) << GET_PB((*cIter)) << nrm << "]";
-		OutBuf << " [ " << cyn << std::right << std::setw(6) << GET_DB((*cIter)) << nrm << "]";
+		OutBuf << " [" << cyn << std::right << std::setw(10) << GET_EXP(mob) << nrm << "]";
+		OutBuf << " [" << cyn << std::right << std::setw(3) << ((int)GET_LEVEL(mob)) << nrm << "]";
+		OutBuf << " [" << cyn << std::right << std::setw(6) << (mob)->points.move << nrm << "]";
+		OutBuf << " [ " << cyn << std::right << std::setw(6) << GET_OB(mob) << nrm << "]";
+		OutBuf << " [ " << cyn << std::right << std::setw(6) << GET_PB(mob) << nrm << "]";
+		OutBuf << " [ " << cyn << std::right << std::setw(6) << GET_DB(mob) << nrm << "]";
 		OutBuf << " [ " << cyn << std::right << std::setw(6)
-			<< (((*cIter))->MobData->primary_kit ? MiscUtil::Convert<std::string>((*cIter)->MobData->primary_kit->vnum) : "<None>") << nrm << "]";
-		OutBuf << " [ " << cyn << std::right << std::setw(7) << (*cIter)->points.gold << nrm << "]";
-		OutBuf << " [ " << cyn << std::right << std::setw(4) << czCounts << nrm << "]";
+				<< ((mob)->MobData->primary_kit ? MiscUtil::Convert<std::string>(mob->MobData->primary_kit->vnum) : "<None>") << nrm << "]";
+		OutBuf << " [ " << cyn << std::right << std::setw(7) << mob->points.gold << nrm << "]";
+		OutBuf << " [ " << cyn << std::right << std::setw(4) << zoneCount << nrm << "]";
+		OutBuf << " [ " << cyn << std::right << std::setw(4) << openZoneCount << nrm << "]";
 		OutBuf << std::endl;
 	}
 	char *cBuf = new char[OutBuf.str().size()+1];
