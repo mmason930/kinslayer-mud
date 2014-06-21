@@ -15,7 +15,7 @@ std::string WebSocketClientHeaderIETF_HYBI17::generateResponse(unsigned short po
 
 	if(secWebSocketKeyIterator == fields.end())
 	{
-		throw new WebSocketException("No `Sec-WebSocket-Key` header found");
+		throw WebSocketException("No `Sec-WebSocket-Key` header found");
 	}
 
 	std::string secWebSocketAccept = (*secWebSocketKeyIterator).second + std::string("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");

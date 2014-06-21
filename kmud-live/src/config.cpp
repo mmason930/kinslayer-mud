@@ -35,4 +35,3 @@ const char *NOEFFECT = "Nothing seems to happen.\r\n";
 
 int MAX_PLAYERS = 300;
 int max_bad_pws = 3;
-int nameserver_is_slow = YES;

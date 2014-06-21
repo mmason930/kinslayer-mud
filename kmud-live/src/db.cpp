@@ -131,7 +131,6 @@ char *credits		= NULL;		/* game credits						*/
 char *motd			= NULL;		/* message of the day - mortals		*/
 char *imotd			= NULL;		/* message of the day - immorts		*/
 char *background	= NULL;		/* background story					*/
-char *handbook		= NULL;		/* handbook for new immortals		*/
 char *startup		= NULL;		/* startup screen					*/
 
 std::vector<int> BodyPercents;

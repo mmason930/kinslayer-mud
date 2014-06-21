@@ -96,7 +96,6 @@ extern char *motd;
 extern char *imotd;
 extern char *background;
 extern char *startup;
-extern char *handbook;
 extern const char *class_types[];
 extern const char *pc_class_types[];
 extern const char *pc_race_types[];
@@ -140,7 +139,6 @@ ACMD(do_gcomm);
 ACMD(do_gecho);
 ACMD(do_goto);
 ACMD(do_invis);
-ACMD(do_install);
 ACMD(do_ipfind);
 ACMD(do_lag);
 ACMD(do_last);
@@ -165,7 +163,6 @@ ACMD(do_wshow);
 ACMD(do_shutdown);
 ACMD(do_snoop);
 ACMD(do_statfind);
-ACMD(do_swap);
 ACMD(do_switch);
 ACMD(do_syslog);
 ACMD(do_teleport);
@@ -590,7 +587,7 @@ ACMD(do_copy)
 
 	if( !*type || !*sVnum1 || !*sVnum2 )
 	{
-		ch->send("USAGE: copy [room|shop|mob|kit|trigger] [source vnum] [target vnum]\r\n");
+		ch->send("USAGE: copy [room|mob|kit] [source vnum] [target vnum]\r\n");
 		return;
 	}
 	vnum1 = atoi(sVnum1);
@@ -687,16 +684,6 @@ ACMD(do_copy)
 		if( real == NOWHERE )//New room. Add to world.
 			AddRoomToWorld( Destination );
 		olc_add_to_save_list( Destination->getZone()->getVnum(), OLC_SAVE_ROOM );
-	}
-	else if( !strn_cmp(type, "object", strlen(type)) )
-	{
-		ch->send("Disabled.");
-		return;
-	}
-	else if( !strn_cmp(type, "script", strlen(type)) )
-	{
-		ch->send("Disabled.");
-		return;
 	}
 	ch->send("Copy was successful.\r\n");
 }
@@ -1856,12 +1843,6 @@ ACMD(do_zap)
 	victim->save();
 
 	CLEANUP(victim, load);
-}
-
-/* Swap an item from an offline character with the third argument. Galnor, October 2003 */
-ACMD(do_swap)
-{
-	ch->send("Disabled...\r\n");
 }
 
 ACMD(do_warn)
@@ -6201,11 +6182,6 @@ ACMD(do_wshow)
 			break;
 	}
 }
-
-ACMD( do_install )
-{
-}
-
 
 /***************** The do_set function ***********************************/
 

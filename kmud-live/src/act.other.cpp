@@ -40,7 +40,6 @@
 
 extern Descriptor *descriptor_list;
 extern char *class_abbrevs[];
-extern int nameserver_is_slow;
 extern int max_filesize;
 extern class Ideas *idea_list;
 extern struct Index *obj_index;
@@ -1393,9 +1392,6 @@ ACMD( do_gen_tog )
 			break;
 			case SCMD_HOLYLIGHT:
 			result = PRF_TOG_CHK( ch, PRF_HOLYLIGHT );
-			break;
-			case SCMD_SLOWNS:
-			result = ( nameserver_is_slow = !nameserver_is_slow );
 			break;
 			case SCMD_AUTOEXIT:
 			result = PRF_TOG_CHK( ch, PRF_AUTOEXIT );

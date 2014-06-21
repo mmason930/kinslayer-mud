@@ -57,7 +57,6 @@ extern int Seconds;
 extern char *credits;
 extern char *motd;
 extern char *imotd;
-extern char *handbook;
 extern const char *class_abbrevs[];
 
 int is_viewable_clan(Character *ch, int number);
@@ -2412,9 +2411,6 @@ ACMD(do_gen_ps)
 			break;
 		case SCMD_WIZLIST:
 			print_wizlist(ch, !str_cmp(argument,"all"));
-			break;
-		case SCMD_HANDBOOK:
-			page_string(ch->desc, handbook, 0);
 			break;
 		case SCMD_MOTD:
 			page_string(ch->desc, motd, 0);

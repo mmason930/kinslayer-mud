@@ -113,7 +113,6 @@ extern char *credits;
 extern char *motd;
 extern char *imotd;
 extern char *background;
-extern char *handbook;
 extern char *startup;
 
 extern std::thread *objectMoveLoggerThread;
@@ -164,7 +163,6 @@ long int LongestPulse = 0, AveragePulese = 0, NumPulses = 0;
 clock_t GlobalClock = 0;
 void check_fighting( void );
 void CheckWaitState( void );
-extern int nameserver_is_slow; /* see config.c */
 struct timeval null_time; /* zero-valued time structure */
 void *Pointer = 0;
 int gamePort;
@@ -929,7 +927,6 @@ void initiateGame( int port )
 	delete[] ( motd );
 	delete[] ( imotd );
 	delete[] ( background );
-	delete[] ( handbook );
 	delete[] ( startup );
 	delete[] ( complete_cmd_info );
 	delete[] ( soc_mess_list );

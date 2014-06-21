@@ -184,7 +184,6 @@ ACMD( do_inventory );
 ACMD( do_invert );
 ACMD( do_invis );
 ACMD( do_ipfind );
-ACMD( do_install );
 ACMD( do_jedit );
 ACMD( do_jstat );
 ACMD( do_jattach );
@@ -272,7 +271,6 @@ ACMD( do_stand );
 ACMD( do_statfind );
 ACMD( do_statedit );
 ACMD( do_steal );
-ACMD( do_swap );
 ACMD( do_switch );
 ACMD( do_syslog );
 ACMD( do_teleport );
@@ -502,7 +500,6 @@ class CommandInfo cmd_info[] =
 	    {	"grab"		, "gra"	, POS_RESTING	, do_grab			, 0			, 0					, 0.0	,  0 	},
 
 		{	"hamstring"	, "ham"	, POS_FIGHTING	, do_hamstring		, 1			, 0					, 4.2f	,  0	},
-	    {	"handbook"	, "hand", POS_DEAD		, do_gen_ps			, LVL_IMMORT, SCMD_HANDBOOK		, 0.0	,  0 	},
 	    {	"hide"		, "hid"	, POS_STANDING	, do_hide			, 0			, 0					, 0.0	,  0 	},
 	    {	"hit"		, "h"	, POS_FIGHTING	, do_hit			, 0			, SCMD_HIT			, 0.0	,  0 	},
 	    {	"hold"		, "ho"	, POS_RESTING	, do_grab			, 1			, 0					, 0.0	,  0 	},
@@ -517,7 +514,6 @@ class CommandInfo cmd_info[] =
 	    {	"invis"		, "inv"	, POS_DEAD		, do_invis			, LVL_IMMORT, 0					, 0.0	,  0 	},
 	    {	"ipfind"	, "ip"	, POS_DEAD		, do_ipfind			, LVL_GRGOD	, 0					, 0.0	,  0 	},
 	    {	"insert"	, "ip"	, POS_DEAD		, do_insert			, LVL_GOD	, 0					, 0.0	,  0 	},
-		{	"install"	, "ins"	, POS_DEAD		, do_install		, LVL_GOD	, 0					, 0.0	,  0	},
 		{	"jattach"	, "ja"	, POS_DEAD		, do_jattach		, LVL_GOD	, 0					, 0.0	,  0 	},
 		{	"jedit"		, "jed"	, POS_DEAD		, do_jedit			, LVL_APPR	, 0					, 0.0	,  0 	},
 		{	"jstat"		, "js"	, POS_DEAD		, do_jstat			, LVL_APPR	, 0					, 0.0	,  0 	},
@@ -644,7 +640,6 @@ class CommandInfo cmd_info[] =
 	    {	"skin"	    , "ski"	, POS_STANDING	, do_butcher    	, 0			, SCMD_SKIN			, 0.0	,  0	},
 		{	"sleep"		, "sl"	, POS_SLEEPING	, do_sleep			, 0			, 0					, 0.0f	,  0 	},
 	    {	"slist"		, "sli"	, POS_DEAD		, do_slist			, LVL_BLDER	, 0					, 0.0f	,  0		},
-	    {	"slowns"	, "slown",POS_DEAD		, do_gen_tog		, LVL_IMPL	, SCMD_SLOWNS		, 0.0f	,  0 	},
 	    {	"sneak"		, "snea", POS_STANDING	, do_sneak			, 1			, 0					, 0.0f	,  0 	},
 	    {	"snoop"		, "sno"	, POS_DEAD		, do_snoop			, LVL_IMMORT, 0					, 0.0	,  0 	},
 	    {	"socials"	, "soc"	, POS_DEAD		, do_commands		, 0			, SCMD_SOCIALS		, 0.0f	,  0 	},
@@ -654,7 +649,6 @@ class CommandInfo cmd_info[] =
 		{	"statedit"	, "state",POS_DEAD		, do_statedit		, LVL_APPR	, 0					, 0.0	,  0	},
 	    {	"steal"		, "stea", POS_STANDING	, do_steal			, 1			, 0					, 3.0f	,0 	},
 		{	"strike"	, "str", POS_FIGHTING	, do_precisestrike	, 1			, 0					, 3.0f	,0 	},
-	    {	"swap"		, "swa"	, POS_DEAD		, do_swap			, LVL_GOD	, 0					, 0.0f	,0 	},
 	    {	"switch"	, "sw"	, POS_DEAD		, do_switch			, LVL_APPR	, 0					, 0.0f	,0 	},
 	    {	"syslog"	, "sys"	, POS_DEAD		, do_syslog			, LVL_APPR	, 0					, 0.0f	,0 	},
 
