@@ -2,6 +2,8 @@ package org.kinslayermud.web.users;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -150,6 +152,13 @@ public class ViewProfileAction extends StandardAction {
     }
     
     Map<Integer, User> victimUserMap = webSupport.getUserMap(userIdCollection);
+    
+    Collections.sort(playerKills, new Comparator<PlayerKill>() {
+      
+      public int compare(PlayerKill playerKill1, PlayerKill playerKill2) {
+        return playerKill2.getTimeOfDeath().compareTo(playerKill1.getTimeOfDeath());
+      }
+    });
     
     for(PlayerKill playerKill : playerKills) {
       

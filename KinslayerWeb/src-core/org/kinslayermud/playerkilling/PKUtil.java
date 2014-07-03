@@ -33,7 +33,7 @@ public class PKUtil {
     String sql = " SELECT *"
                + " FROM userPlayerKill"
                + " WHERE " + criteria
-               + " ORDER BY " + orderBy;
+               + (orderBy != null ? (" ORDER BY " + orderBy) : "");
     
     List<UserPlayerKill> userPlayerKills = new LinkedList<UserPlayerKill>();
     ResultSet resultSet = statement.executeQuery(sql);
