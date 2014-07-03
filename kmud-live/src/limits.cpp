@@ -245,13 +245,13 @@ sh_int Character::MoveGain()
 			gain = 40;   //Troll regen//
 		else if(IS_GREYMAN(this))
 			gain = 45;
-		else if(this->getUserClan(CLAN_WOLFBROTHER))
+		else if(this->hasWolfbrotherBonuses())
 			gain = 60;
 		else
 			gain = 26;   //Other regen//
 		
 		/* Position calculations    */
-		if(IS_TROLLOC(this) || this->getUserClan(CLAN_WOLFBROTHER))
+		if(IS_TROLLOC(this) || this->hasWolfbrotherBonuses())
 		{
 			switch(GET_POS(this))
 			{

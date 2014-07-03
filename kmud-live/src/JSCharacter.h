@@ -154,7 +154,6 @@ FLUSSPFERD_CLASS_DESCRIPTION(
         ("wisdom", getter_setter, (getWisdom, setWisdom))
         ("dexterity", getter_setter, (getDexterity, setDexterity))
         ("constitution", getter_setter, (getConstitution, setConstitution))
-        ("luck", getter_setter, (getLuck, setLuck))
 		("fighting", getter_setter, (getFighting, setFightingVar))
 		("mount", getter_setter, (getMount, setMount))
 		("riddenBy", getter_setter, (getRiddenBy, setRiddenBy))
@@ -274,7 +273,6 @@ public:
     int getWisdom()				{ if( !real || real->IsPurged() ) return 0; return real->aff_abils.wis; }
     int getDexterity()			{ if( !real || real->IsPurged() ) return 0; return real->aff_abils.dex; }
     int getConstitution()		{ if( !real || real->IsPurged() ) return 0; return real->aff_abils.con; }
-    int getLuck()				{ if( !real || real->IsPurged() ) return 0; return real->aff_abils.luck; }
 	int getID()					{ if( !real || real->IsPurged() ) return -1; return real->player.idnum; }
 	bool getIsValid()			{ if( !real || real->IsPurged() ) return false; return true; }
 
@@ -300,7 +298,6 @@ public:
     void setWisdom(int x)			{ if( !real || real->IsPurged() ) return; real->real_abils.wis = real->aff_abils.wis = MAX(0,x); }
     void setDexterity(int x)		{ if( !real || real->IsPurged() ) return; real->real_abils.dex = real->aff_abils.dex = MAX(0,x); }
     void setConstitution(int x)		{ if( !real || real->IsPurged() ) return; real->real_abils.con = real->aff_abils.con = MAX(0,x); }
-    void setLuck(int x)				{ if( !real || real->IsPurged() ) return; real->real_abils.luck = real->aff_abils.luck = MAX(0,x); }
 	flusspferd::value getFighting()		{ if( !real || real->IsPurged() ) return lookupValue(0); return lookupValue(FIGHTING(real)); }
 	void setFightingVar( JSCharacter *t );
 	void setFighting( JSCharacter *t );

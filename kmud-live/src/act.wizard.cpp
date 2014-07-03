@@ -3525,13 +3525,12 @@ void do_stat_character(Character * ch, Character * k)
 	}
 
 	ch->send("Str: [%s%d%s]  Int: [%s%d%s]  Wis: [%s%d%s]  "
-	         "Dex: [%s%d%s]  Con: [%s%d%s]  Luck: [%s%d%s]\r\n",
+	         "Dex: [%s%d%s]  Con: [%s%d%s]\r\n",
 	         cyn, k->GetStr(), nrm,
 	         cyn, k->GetInt(), nrm,
 	         cyn, k->GetWis(), nrm,
 	         cyn, k->GetDex(), nrm,
-	         cyn, k->GetCon(), nrm,
-	         cyn, k->GetLuck(),nrm);
+	         cyn, k->GetCon(), nrm);
 
 	ch->send("Total Quest Points [%s%d%s], Weave Points [%s%d%s], Legend [%s%d%s].\r\n",
 	         grn, k->TotalQP(), nrm,
@@ -5199,9 +5198,9 @@ ACMD(do_reroll)
 		MudLog(NRM, MAX(LVL_BLDER, GET_INVIS_LEV(ch)), TRUE,
 		       "(GC) %s has rerolled %s's stats.", GET_NAME(ch), GET_NAME(vict));
 
-		ch->send("New stats: Str %d, Int %d, Wis %d, Dex %d, Con %d, Luck %d.\r\n",
+		ch->send("New stats: Str %d, Int %d, Wis %d, Dex %d, Con %d.\r\n",
 		         vict->GetStr(), vict->GetInt(), vict->GetWis(),
-				 vict->GetDex(), vict->GetCon(), vict->GetLuck());
+				 vict->GetDex(), vict->GetCon());
 	}
 
 	else if(!strn_cmp(type, "moves", strlen(type)))
@@ -6270,19 +6269,17 @@ set_struct set_fields[] =
         { "deathwait"	,LVL_GRGOD,		BOTH,	NUMBER,		true},
         { "idle"		,LVL_GRGOD,		PC,		NUMBER,		true},
         { "bodystruct"	,LVL_GOD,		BOTH,	MISC,		true},
-        { "luck"		,LVL_GRGOD,		BOTH,	NUMBER,		true},
-        { "wasin"		,LVL_GRGOD,		PC,		NUMBER,		true},	// 65 //
-        { "noweave"		,LVL_GRGOD,		PC,		BINARY,		true},
+        { "wasin"		,LVL_GRGOD,		PC,		NUMBER,		true},
+        { "noweave"		,LVL_GRGOD,		PC,		BINARY,		true},	// 65 //
 		{ "spractices"  ,LVL_GRGOD,     PC,     NUMBER,		true},
         { "notrace"		,LVL_IMPL,		PC,		BINARY,		false},
-        { "wizinact"	,LVL_GRGOD,		PC,		BINARY,		false},
-        { "weaveeditor"	,LVL_IMPL,		PC,		BINARY,		false},	// 70 //
+        { "weaveeditor"	,LVL_IMPL,		PC,		BINARY,		false},
 		{ "stateditor"	,LVL_IMPL,		PC,		BINARY,		false},
-		{ "chargeeditor",LVL_IMPL,		PC,		BINARY,		false},
+		{ "chargeeditor",LVL_IMPL,		PC,		BINARY,		false},	// 70 //
 		{ "position"	,LVL_APPR,		BOTH,	NUMBER,		true},
 		{ "tpractices"	,LVL_GRGOD,		BOTH,	NUMBER,		true},
-		{ "account"		,LVL_GRGOD,		PC,		MISC,		false}, // 75 //
-		{ "globaljs"	,LVL_GRGOD,		PC,		BINARY,		false},	
+		{ "account"		,LVL_GRGOD,		PC,		MISC,		false},
+		{ "globaljs"	,LVL_GRGOD,		PC,		BINARY,		false}, // 74 //	
         { "\n", 0, BOTH, MISC, false }
     };
 
@@ -6764,9 +6761,6 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			}
 			break;
 		case 64:
-			vict->SetLuck(RANGE(0, 20));
-			break;
-		case 65:
 			if(real_room(value) == -1)
 			{
 				if(ch)
@@ -6774,10 +6768,10 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 				return 0;
 			}
 			vict->was_in_room = FindRoomByVnum(value);
-		case 66:
+		case 65:
 			SET_OR_REMOVE2(PLR_FLAGS(vict), PLR_NO_WEAVE);
 			break;
-		case 67:
+		case 66:
 			if (value < 0 )
 			{
 				if(ch)
@@ -6786,22 +6780,22 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			}
 
 			vict->PlayerData->spellpracs = value;
-		case 68:
+		case 67:
 			SET_OR_REMOVE2(PLR_FLAGS(vict), PLR_NO_TRACE);
 			break;
-		case 70:
+		case 68:
 			SET_OR_REMOVE2(PLR_FLAGS(vict), PLR_WEAVE_EDITOR);
 			break;
-		case 71:
+		case 69:
 			SET_OR_REMOVE2(PLR_FLAGS(vict), PLR_STAT_EDITOR);
 			break;
-		case 72:
+		case 70:
 			SET_OR_REMOVE2(PLR_FLAGS(vict), PLR_CHARGE_EDITOR);
 			break;
-		case 73:
+		case 71:
 			GET_POS(vict) = RANGE(POS_DEAD, POS_STANDING);
 			break;
-		case 74:
+		case 72:
 			if (value < 0 )
 			{
 				if(ch)
@@ -6810,7 +6804,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			}
 			vict->PlayerData->tradepracs = value;
 			break;
-		case 75:
+		case 73:
 		{
 			Account a = SwitchManager::GetManager().GetAccountByName( val_arg );
 			if( !a.IsValid() )
@@ -6824,7 +6818,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 				ch->send("%s's account has been set to %s.\r\n", vict->player.name.c_str(), a.getName().c_str());
 			break;
 		}
-		case 76:
+		case 74:
 			SET_OR_REMOVE2(PLR_FLAGS(vict), PLR_GLOBAL_SCRIPTS);
 			break;
 		default:

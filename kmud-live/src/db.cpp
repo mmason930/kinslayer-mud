@@ -1571,7 +1571,6 @@ bool Character::basicSave()
 	Query << "intel = " << ((int)this->real_abils.intel)						<< ",";
 	Query << "wis = " << ((int)this->real_abils.wis)							<< ",";
 	Query << "con = " << ((int)this->real_abils.con)							<< ",";
-	Query << "luck = " << ((int)this->real_abils.luck)							<< ",";
 	Query << "exp = " << this->points.exp										<< ",";
 	Query << "played = " << played												<< ",";
 	Query << "restat = " << this->restat_time.getTime()							<< ",";
@@ -2762,7 +2761,6 @@ void Character::zero()
 		this->equipment[i]			=	NULL;
 
 	this->last_tell					=	0;
-	SetLuck(0);
 }
 
 void CharPointData::operator =(CharPointData &source)
@@ -3252,7 +3250,6 @@ void Character::Init()
 	this->real_abils.dex = this->StatMinimum(STAT_DEX);
 	this->real_abils.str = this->StatMinimum(STAT_STR);
 	this->real_abils.con = this->StatMinimum(STAT_CON);
-	this->real_abils.luck = MiscUtil::random(0, 20);
 
 	for (i = 0; i < 3; ++i)
 		this->PlayerData->conditions[ i ] = (GET_LEVEL(this) == LVL_IMPL ? -1 : 24);

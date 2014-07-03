@@ -73,7 +73,6 @@ StatManager::StatManager()
     this->StatList.push_back( Stat("Wisdom"         , "Wis", STAT_WIS ) );
     this->StatList.push_back( Stat("Dexterity"      , "Dex", STAT_DEX ) );
     this->StatList.push_back( Stat("Constitution"   , "Con", STAT_CON ) );
-    this->StatList.push_back( Stat("Luck"           , "Luc", STAT_LUCK) );
 }
 
 StatManager::~StatManager()
@@ -140,9 +139,6 @@ bool StatManager::RollStats(Character *ch) //Roll ch's stats.
             case STAT_CON:
                 statToAlter = &ch->aff_abils.con;
                 break;
-            case STAT_LUCK:
-                statToAlter = &ch->aff_abils.luck;
-                break;
             default:
                 statToAlter = 0;
                 break;
@@ -156,7 +152,6 @@ bool StatManager::RollStats(Character *ch) //Roll ch's stats.
 		ch->real_abils.wis		= ch->GetWis();
 		ch->real_abils.dex		= ch->GetDex();
 		ch->real_abils.con		= ch->GetCon();
-		ch->real_abils.luck		= ch->GetLuck();
 		return true;
 	}
 }

@@ -7,7 +7,6 @@ const int STAT_INT  = 1;
 const int STAT_WIS  = 2;
 const int STAT_DEX  = 4;
 const int STAT_CON  = 5;
-const int STAT_LUCK = 6;
 
 class Stat
 {

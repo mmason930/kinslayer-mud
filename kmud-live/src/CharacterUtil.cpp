@@ -159,8 +159,6 @@ Character *CharacterUtil::loadCharacter(const int userId)
 	character->SetWis(character->real_abils.wis);
 	character->real_abils.con = atoi(row["con"].c_str());
 	character->SetCon(character->real_abils.con);
-	character->real_abils.luck = atoi(row["luck"].c_str());
-	character->SetLuck(character->real_abils.luck);
 
 	character->points.exp = atoi(row["exp"].c_str());
 	character->player.time.played = atol(row["played"].c_str());

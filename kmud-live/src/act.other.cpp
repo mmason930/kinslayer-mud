@@ -741,7 +741,7 @@ ACMD( do_ride )
 			Act( "You can't ride $M!", FALSE, ch, 0, victim, TO_CHAR );
 		else if ( ( MOB_FLAGGED( victim, MOB_MOUNT ) && IS_TROLLOC( ch ) ) || ( MOB_FLAGGED( victim, MOB_SHADOW_MOUNT ) && !IS_TROLLOC( ch ) ) || ( MOB_FLAGGED( victim, MOB_OGIER_MOUNT ) && !IS_OGIER(ch) ) )
 			Act( "$E would not like having your type on $M.", FALSE, ch, 0, victim, TO_CHAR );
-		else if ( ch->getUserClan( CLAN_WOLFBROTHER ) )
+		else if ( ch->hasWolfbrotherBonuses() )
 			ch->send( "You wouldn't even think about getting up on that thing!\r\n" );
 		else if ( ch->in_room->getSector() == RoomSector::inside )
 			ch->send( "You can't ride inside!\r\n" );

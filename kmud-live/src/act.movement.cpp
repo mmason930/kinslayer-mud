@@ -518,12 +518,12 @@ int can_move(Character *ch, int dir, int need_specials_check, bool flee)
 	/* move points needed is avg. move loss for src and destination sect type */
 	need_movement = ch->in_room->getSector()->getMovementLoss() + EXIT(ch, dir)->getToRoom()->getSector()->getMovementLoss();
 
-	if(IS_TROLLOC(ch) || ch->getUserClan(CLAN_WOLFBROTHER))
+	if(IS_TROLLOC(ch) || ch->hasWolfbrotherBonuses())
 		need_movement = 2;
 	else
 		need_movement = MIN(need_movement,5);
 
-	//if(AFF_FLAGGED(ch, AFF_NOTICE) && !IS_TROLLOC(ch) && !ch->getUserClan(CLAN_WOLFBROTHER) && !IS_BLADEMASTER(ch) && !IS_THIEF(ch))
+	//if(AFF_FLAGGED(ch, AFF_NOTICE) && !IS_TROLLOC(ch) && !ch->hasWolfbrotherBonuses() && !IS_BLADEMASTER(ch) && !IS_THIEF(ch))
 		//need_movement += 1;
 
 	if(MOUNT(ch))
@@ -595,7 +595,7 @@ int Character::NeededToMove(Room* OtherRoom)
 	{
 		if(IS_WARDER(this) || IS_BLADEMASTER(this) || IS_FADE(this) || IS_GREYMAN(this) || IS_DREADLORD(this) || IS_OGIER(this))
 			need_movement = 2;
-		else if(this->getUserClan(CLAN_WOLFBROTHER))
+		else if(this->hasWolfbrotherBonuses())
 			need_movement = 2;
 		else
 		{
@@ -628,7 +628,7 @@ bool Character::SnuckIn()
 {
 	if( MOUNT(this) ) return false;
 	return	(	(AFF_FLAGGED(this, AFF_SNEAK) && MiscUtil::random(1, 125) <= GET_SKILL(this, SKILL_SNEAK)) || 
-				(IS_GREYMAN(this)) /*|| (this->getUserClan(CLAN_WOLFBROTHER))*/		);
+				(IS_GREYMAN(this)) /*|| (this->hasWolfbrotherBonuses())*/		);
 }
 bool Character::ShouldLayTrack()
 {

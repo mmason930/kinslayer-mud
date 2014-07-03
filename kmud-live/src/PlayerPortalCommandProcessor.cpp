@@ -3,8 +3,10 @@
 #include "js.h"
 #include "jsoncpp/json.h"
 #include "constants.h"
+#include "StringUtil.h"
 
 #include <vector>
+#include <boost/regex.hpp>
 
 extern int top_of_objt;
 extern std::vector<Object*> obj_proto;
@@ -100,25 +102,79 @@ void PlayerPortalLoadObjectListCommandProcess::process(PlayerPortalDescriptor *d
 		Json::Value response;
 		response["method"] = command["method"];
 		response["objects"] = Json::Value(Json::arrayValue);
-		int lowVnum = -1, highVnum = -1, wearType = -1, itemType = -1;
+		Json::Value itemTypeValue = command["itemType"];
+		Json::Value itemWearValue = command["itemWear"];
+		Json::Value itemExtraValue = command["itemExtra"];
+		Json::Value triggerVnumsValue = command["triggers"];
+		std::string namelistPatternString, sdescPatternString, ldescPatternString;
+		boost::regex namelistRegex, sdescRegex, ldescRegex;
+		int lowVnum = -1, highVnum = -1;
+		std::vector<int> itemTypes, itemWears, itemExtras, triggerVnums;
 
 		if (!command["lowVnum"].isNull() && command["lowVnum"].isInt())
 			lowVnum = command["lowVnum"].asInt();
 		if (!command["highVnum"].isNull() && command["highVnum"].isInt())
 			highVnum = command["highVnum"].asInt();
 
+		if(!command["namelist"].isNull())
+		{
+			namelistPatternString = command["namelist"].asString();
+			if(!namelistPatternString.empty())
+				namelistRegex = boost::regex(namelistPatternString);
+		}
+		if(!command["shortDescription"].isNull())
+		{
+			sdescPatternString = command["shortDescription"].asString();
+			if(!sdescPatternString.empty())
+				sdescRegex = boost::regex(sdescPatternString);
+		}
+		if(!command["longDescription"].isNull())
+		{
+			ldescPatternString = command["longDescription"].asString();
 
-		if (!command["itemType"].isNull() && command["itemType"].isInt())
-			itemType = command["itemType"].asInt();
+			if(!ldescPatternString.empty())
+				ldescRegex = boost::regex(ldescPatternString);
+		}
 
-		itemType = itemType >= 0 && itemType < NUM_ITEM_TYPES ? itemType : -1;
+		if(!triggerVnumsValue.isNull() && triggerVnumsValue.isArray())
+		{
+			for(auto iter = triggerVnumsValue.begin();iter != triggerVnumsValue.end();++iter)
+			{
+				std::string triggerVnumString = (*iter).asString();
+				if(MiscUtil::isInt(triggerVnumString))
+					triggerVnums.push_back(atoi(triggerVnumString.c_str()));
+			}
+		}
+		if(!itemExtraValue.isNull() && itemExtraValue.isArray())
+		{
+			for(auto iter = itemExtraValue.begin();iter != itemExtraValue.end();++iter)
+			{
+				std::string itemExtraValue = (*iter).asString();
+				if(MiscUtil::isInt(itemExtraValue))
+					itemExtras.push_back(atoi(itemExtraValue.c_str()));
+			}
+		}
+		if(!itemWearValue.isNull() && itemWearValue.isArray())
+		{
+			for(auto iter = itemWearValue.begin();iter != itemWearValue.end();++iter)
+			{
+				std::string itemWearValue = (*iter).asString();
+				if(MiscUtil::isInt(itemWearValue))
+					itemWears.push_back(atoi(itemWearValue.c_str()));
+			}
+		}
+		if(!itemTypeValue.isNull() && itemTypeValue.isArray())
+		{
+			for(auto iter = itemTypeValue.begin();iter != itemTypeValue.end();++iter)
+			{
+				std::string itemTypeValue = (*iter).asString();
+				if(MiscUtil::isInt(itemTypeValue))
+					itemTypes.push_back(atoi(itemTypeValue.c_str()));
+			}
+		}
 
-		if (!command["wearType"].isNull() && command["wearType"].isInt())
-			wearType = command["wearType"].asInt();
-
-		wearType = wearType >= 0 && wearType < NUM_ITEM_WEARS ? wearType : -1;
-
-		Log("Low Vnum: %d, High Vnum: %d, Wear Type: %d, Item Type: %d", lowVnum, highVnum, wearType, itemType);
+		Log("Low Vnum: %d, High Vnum: %d, Wear Types: %d, Item Types: %d, Item Extras: %d", lowVnum, highVnum, itemWears.size(), itemTypes.size(), itemExtras.size());
+		Log("LDesc Valid: %s, SDesc Valid: %s, Namelist Valid: %s", StringUtil::yesNo(!sdescRegex.empty()).c_str(), StringUtil::yesNo(!ldescRegex.empty()).c_str(), StringUtil::yesNo(!namelistRegex.empty()).c_str());
 
 		for (Object *objectPrototype : obj_proto)
 		{
@@ -126,9 +182,69 @@ void PlayerPortalLoadObjectListCommandProcess::process(PlayerPortalDescriptor *d
 				continue;
 			if (highVnum != -1 && highVnum < objectPrototype->getVnum())
 				continue;
-			if (itemType != -1 && itemType != objectPrototype->getType())
+			if (!itemTypes.empty() && std::find(itemTypes.begin(), itemTypes.end(), objectPrototype->getType()) == itemTypes.end())
 				continue;
-			if (wearType != -1 && !OBJWEAR_FLAGGED(objectPrototype, (1 << wearType)))
+			if(!itemWears.empty() && std::none_of(itemWears.begin(), itemWears.end(), [&](int itemWear) {
+				return OBJWEAR_FLAGGED(objectPrototype, (1 << itemWear));
+			})) {
+				continue;
+			}
+			if(!itemExtras.empty() && std::none_of(itemExtras.begin(), itemExtras.end(), [&](int itemExtra) {
+				return OBJ_FLAGGED(objectPrototype, itemExtra);
+			})) {
+				continue;
+			}
+
+			if(!triggerVnums.empty() && std::none_of(objectPrototype->js_scripts->begin(), objectPrototype->js_scripts->end(), [&](JSTrigger *trigger) {
+				return std::find(triggerVnums.begin(), triggerVnums.end(), trigger->vnum) != triggerVnums.end();
+			}))
+			{
+				continue;
+			}
+
+			try
+			{
+				if(!ldescRegex.empty() && !boost::regex_search(objectPrototype->description, ldescRegex))
+			 		continue;
+			}
+			catch(std::exception e)
+			{
+				MudLog(BRF, LVL_APPR, TRUE, "Invalid regular expression: %s", ldescPatternString.c_str());
+			}
+
+			try
+			{
+				if(!sdescRegex.empty() && !boost::regex_search(objectPrototype->short_description, sdescRegex))
+			 		continue;
+			}
+			catch(std::exception e)
+			{
+				MudLog(BRF, LVL_APPR, TRUE, "Invalid regular expression: %s", sdescPatternString.c_str());
+			}
+
+			try
+			{
+				if(!namelistRegex.empty() && !boost::regex_search(objectPrototype->name, namelistRegex))
+			 		continue;
+			}
+			catch(std::exception e)
+			{
+				MudLog(BRF, LVL_APPR, TRUE, "Invalid regular expression: %s", namelistPatternString.c_str());
+			}
+			
+			bool skip = false;
+			for(int valueNumber = 0;valueNumber < sizeof(objectPrototype->obj_flags.value);++valueNumber)
+			{
+				char variableName[10];
+				snprintf(variableName, sizeof(variableName), "val%d", valueNumber);
+				if(!command[variableName].isNull() && command[variableName].isInt() && command[variableName].asInt() != objectPrototype->obj_flags.value[valueNumber])
+				{
+					skip = true;
+					break;
+				}
+			}
+
+			if(skip)
 				continue;
 
 			Json::Value objectValue;

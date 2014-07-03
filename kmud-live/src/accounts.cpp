@@ -457,7 +457,7 @@ Switch *SwitchManager::GetGreatestSwitch( const std::string &Host, const std::st
 	Switch *Greatest = NULL;
 	time_t greatestTime = 0;
 
-	for(std::list<Switch*>::iterator iter = MySwitches.begin();iter != MySwitches.end();++iter)
+	for(auto iter = MySwitches.begin();iter != MySwitches.end();++iter)
 	{
 		Time RemainingTime = TimeRemaining(UserName,Host,(*iter));
 

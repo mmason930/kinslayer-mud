@@ -518,7 +518,6 @@ bool Character::BackstabLanded(Character *victim)
 
 	//Status contributors
 	off_range += GetDex();
-	off_range -= GetLuck();
 
 	//Notice factor
 	if(AFF_FLAGGED(victim, SKILL_NOTICE))
@@ -734,7 +733,7 @@ ACMD(do_charge)
 		return;
 	}
 
-	if(((!IS_TROLLOC(ch) && !ch->getUserClan(CLAN_WOLFBROTHER)) || IS_FADE(ch)) && (subcmd == SCMD_SKEWER))
+	if(((!IS_TROLLOC(ch) && !ch->hasWolfbrotherBonuses()) || IS_FADE(ch)) && (subcmd == SCMD_SKEWER))
 	{
 		ch->send("You can't run fast enough to do that.\r\n");
 		return;
@@ -2875,7 +2874,7 @@ int Character::MoodOffense()
 		}
 	}
 
-	if(this->player.mount || this->getUserClan( CLAN_WOLFBROTHER ))
+	if(this->player.mount || this->hasWolfbrotherBonuses())
 		a += OB_RIDING_BONUS;
 
 	if(IS_TROLLOC(this) && !IS_FADE(this))

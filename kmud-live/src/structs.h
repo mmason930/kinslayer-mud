@@ -1347,7 +1347,6 @@ struct CharAbilityData
 		intel = 0;
 		con = 0;
 		dex = 0;
-		luck = 0;
 	}
 	void operator =(CharAbilityData &source)
 	{
@@ -1356,14 +1355,12 @@ struct CharAbilityData
 		wis = source.wis;
 		dex = source.dex;
 		con = source.con;
-		luck = source.luck;
 	}
 	byte str;
     byte intel;
     byte wis;
     byte dex;
     byte con;
-    byte luck;
 };
 
 
@@ -1813,14 +1810,12 @@ public:
 	sh_int GetWis()  {  return aff_abils.wis;   }
 	sh_int GetDex()  {  return aff_abils.dex;   }
 	sh_int GetCon()  {  return aff_abils.con;   }
-	sh_int GetLuck() {  return aff_abils.luck;  }
 
 	void SetStr( byte _val ) { aff_abils.str   = _val; }
 	void SetInt( byte _val ) { aff_abils.intel = _val; }
 	void SetWis( byte _val ) { aff_abils.wis   = _val; }
 	void SetDex( byte _val ) { aff_abils.dex   = _val; }
 	void SetCon( byte _val ) { aff_abils.con   = _val; }
-	void SetLuck(byte _val ) { aff_abils.luck  = _val; }
 
 	bool TooHeavyToPickUp( Object *obj );
 
@@ -1967,6 +1962,7 @@ public:
 	bool circleFollow(Character *target);
 	void stopFollowing();
 	bool passwordMatches(const std::string &passwordInput);
+	bool hasWolfbrotherBonuses();
 
 
 	bool ShieldOutOfRange( Character* Target );

@@ -556,3 +556,11 @@ UserClan *Character::getUserClan(short clanId)
 {
 	return ClanUtil::getUserClanFromList(userClans, clanId);
 }
+
+//Galnor: June 02, 2014 - Requested by Bollesedun - Treat all Wolfbrothers as normal humans until rank 5.
+bool Character::hasWolfbrotherBonuses()
+{
+	UserClan *userClan = this->getUserClan(CLAN_WOLFBROTHER);
+
+	return userClan != NULL && userClan->getRank() >= 5;
+}

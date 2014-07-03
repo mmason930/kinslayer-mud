@@ -157,3 +157,5 @@ CREATE TABLE `shopRoom` (
   PRIMARY KEY(`id`),
   KEY `shop_id`(`shop_id`)
 ) ENGINE=MyISAM;
+
+ALTER TABLE achievement_data ADD `image_file_name` varchar(255) not null;

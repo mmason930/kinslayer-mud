@@ -596,7 +596,7 @@ const int CLANS_MAX = 31;
 #define AWAKE(ch)				(GET_POS(ch) > POS_SLEEPING)
 
 #define CAN_SEE_IN_DARK(ch)		(PRF_FLAGGED(ch, PRF_HOLYLIGHT) || IS_TROLLOC(ch) || \
-								ch->getUserClan(CLAN_WOLFBROTHER) || AFF_FLAGGED(ch, AFF_NIGHT_VISION))
+								ch->hasWolfbrotherBonuses() || AFF_FLAGGED(ch, AFF_NIGHT_VISION))
 
 /* descriptor-based utils ************************************************/
 
@@ -660,7 +660,7 @@ const int CLANS_MAX = 31;
 /* Various macros building up to CAN_SEE */
 
 #define LIGHT_OK(sub)	(/*!AFF_FLAGGED(sub, AFF_BLIND) &&*/ \
-   (IS_LIGHT((sub)->in_room) || IS_TROLLOC(sub) || sub->getUserClan(CLAN_WOLFBROTHER) || IS_NPC(sub) || \
+   (IS_LIGHT((sub)->in_room) || IS_TROLLOC(sub) || sub->hasWolfbrotherBonuses() || IS_NPC(sub) || \
 	AFF_FLAGGED(sub, AFF_NIGHT_VISION)))
 
 #define INVIS_OK(sub, obj) \
@@ -735,7 +735,7 @@ const int CLANS_MAX = 31;
 #define IS_AIEL(ch)			((GET_RACE(ch) == RACE_AIEL))
 #define IS_ANIMAL(ch)		((GET_RACE(ch) == RACE_ANIMAL))
 
-#define CAN_RIDE(ch)		(!( (IS_TROLLOC(ch) || ch->getUserClan(CLAN_WOLFBROTHER)) && !IS_FADE(ch) && !IS_DREADLORD(ch)))
+#define CAN_RIDE(ch)		(!( (IS_TROLLOC(ch) || ch->hasWolfbrotherBonuses()) && !IS_FADE(ch) && !IS_DREADLORD(ch)))
 
 #define INTERVAL(a, b, c)   (((b) < (a)) ? (a) : (((b) > (c)) ? (c) : (b)))
 
