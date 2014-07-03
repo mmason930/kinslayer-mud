@@ -63,7 +63,7 @@ for(Comm comm : tellHistory) {
     else if(comm.getRecipientType() == 'C') {
       if(userMap.containsKey(comm.getRecipientUserId())) {
         User tellUser = userMap.get(comm.getRecipientUserId());
-        url = WebSiteUrlUtil.getForumProfileUrl(tellUser.getUserId());
+        url = WebSiteUrlUtil.getUserProfileUrl(webSupport.getInstanceDomain(), tellUser.getUserName());
         username = "<a href='" + url + "'>" + tellUser.getUserName() + "</a>";
       }
       else {
@@ -88,7 +88,7 @@ for(Comm comm : tellHistory) {
     else if(comm.getSenderType() == 'C') {
       if(userMap.containsKey(comm.getSenderUserId())) {
         User tellUser = userMap.get(comm.getSenderUserId());
-        url = WebSiteUrlUtil.getForumProfileUrl(tellUser.getUserId());
+        url = WebSiteUrlUtil.getUserProfileUrl(webSupport.getInstanceDomain(), tellUser.getUserName());
         username = "<a href='" + url + "'>" + tellUser.getUserName() + "</a>";
       }
       else {

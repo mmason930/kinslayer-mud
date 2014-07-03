@@ -28,7 +28,7 @@ for(AuctionItem auctionItem : auctionItems) {
     
     if(user != null) {
       userName = user.getUserName();
-      userUrl = WebSiteUrlUtil.getForumProfileUrl(user.getUserId());
+      userUrl = WebSiteUrlUtil.getUserProfileUrl(webSupport.getInstanceDomain(), user.getUserName());
     }
     
 %>

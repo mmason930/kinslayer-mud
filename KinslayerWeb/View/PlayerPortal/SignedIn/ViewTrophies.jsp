@@ -18,7 +18,7 @@ for(PlayerKill playerKill : playerKills) {
   User victimUser = userMap.get(playerKill.getVictimUserId());
   String victimForumProfileUrl = null;
   if(victimUser != null) {
-    victimForumProfileUrl = WebSiteUrlUtil.getForumProfileUrl(playerKill.getVictimUserId());
+    victimForumProfileUrl = WebSiteUrlUtil.getUserProfileUrl(webSupport.getInstanceDomain(), victimUser.getUserName());
   }
   String timeOfDeath = MiscUtil.formatDateMMMsDDcsYYYYsHHsMMsSS(playerKill.getTimeOfDeath());
   UserPlayerKill userPlayerKill = playerKill.getUserPlayerKillByKillerUserId(user.getUserId());
@@ -30,7 +30,7 @@ for(PlayerKill playerKill : playerKills) {
     if(partyMemberUser != null) {
       int partyMemberUserId = partyMemberUser.getUserId();
       String partyMemberUserName = partyMemberUser.getUserName();
-      partyMembers.add("<a href='" + WebSiteUrlUtil.getForumProfileUrl(partyMemberUserId) + "'>" + partyMemberUserName + "</a>");
+      partyMembers.add("<a href='" + WebSiteUrlUtil.getUserProfileUrl(webSupport.getInstanceDomain(), partyMemberUserName) + "'>" + partyMemberUserName + "</a>");
     }
   }
 %>
