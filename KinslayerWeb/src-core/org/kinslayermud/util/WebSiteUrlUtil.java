@@ -141,4 +141,19 @@ public class WebSiteUrlUtil {
 
     return newStr.toString().toLowerCase();
   }
+  
+  public static String getUserProfileUrl(String instanceDomain, String username) {
+    
+    return "http://" + instanceDomain + "/users/" + username.toLowerCase();
+  }
+  
+  public static String getDefaultUserProfileAvatarUrl(String instanceDomain) {
+    
+    return "http://" + instanceDomain + "/user-profile/default-avatar.jpg";
+  }
+  
+  public static String getForumAvatarUrl(String instanceDomain, String avatarFileName) {
+    
+    return "http://" + instanceDomain + "/forums/download/file.php?avatar=" + avatarFileName;
+  }
 }

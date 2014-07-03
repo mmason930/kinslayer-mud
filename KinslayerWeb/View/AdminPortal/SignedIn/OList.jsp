@@ -12,29 +12,69 @@ var commandProcessors = {};
 
 commandProcessors["Load Item Flags"] = function(command)
 {
-	var $itemTypeSelect = $("#itemTypeSelect");
-	command.itemTypes.forEach(function(itemType) {
 
-		var $option = $("<option></option>");
-		$option.attr("value", itemType.id);
-		$option.text(itemType.name);
-		$itemTypeSelect.append($option);
+	var $itemWearInputs = $("#itemWearPanel .inputs");
+	var $itemTypeInputs = $("#itemTypePanel .inputs");
+	var $itemExtraInputs = $("#itemExtrasPanel .inputs");
+
+	$itemWearInputs.html("");
+
+	command.itemTypes.forEach(function(itemType, index) {
+
+		var $input = $("<input type='checkbox' name='ItemType'></input>");
+		$input.val(itemType.id);
+		$input.attr("id", "ItemType" + itemType.id);
+
+		var $label = $("<label></label>");
+		$label.text(itemType.name);
+		$label.attr("for", "ItemType" + itemType.id);
+
+		$itemTypeInputs.append($input).append($label);
+
+		if((index + 1) % 3 == 0) {
+
+			$itemTypeInputs.append("<br>");
+		}
 
 		socket.itemTypesMap[ parseInt(itemType.id) ] = itemType.name;
 	});
 
-	var $itemWearTypeSelect = $("#itemWearTypeSelect");
-	command.itemWears.forEach(function(itemWear) {
+	command.itemWears.forEach(function(itemWear, index) {
 
-		var $option = $("<option></option>");
-		$option.attr("value", itemWear.id);
-		$option.text(itemWear.name);
-		$itemWearTypeSelect.append($option);
+		var $input = $("<input type='checkbox' name='ItemWear'></input>");
+		$input.val(itemWear.id);
+		$input.attr("id", "ItemWear" + itemWear.id);
+
+		var $label = $("<label></label>");
+		$label.text(itemWear.name);
+		$label.attr("for", "ItemWear" + itemWear.id);
+
+		$itemWearInputs.append($input).append($label);
+
+		if((index + 1) % 3 == 0) {
+
+			$itemWearInputs.append("<br>");
+		}
 
 		socket.wearTypesMap[ parseInt(itemWear.id) ] = itemWear.name;
 	});
 
-	command.extraFlags.forEach(function(extraFlag) {
+	command.extraFlags.forEach(function(extraFlag, index) {
+
+		var $input = $("<input type='checkbox' name='ItemExtra'></input>");
+		$input.val(extraFlag.id);
+		$input.attr("id", "ItemExtra" + extraFlag.id);
+
+		var $label = $("<label></label>");
+		$label.text(extraFlag.name);
+		$label.attr("for", "ItemExtra" + extraFlag.id);
+
+		$itemExtraInputs.append($input).append($label);
+
+		if((index + 1) % 3 == 0) {
+
+			$itemExtraInputs.append("<br>");
+		}
 
 		socket.extraFlagsMap[ parseInt(extraFlag.id) ] = extraFlag.name;
 	});
@@ -62,6 +102,7 @@ commandProcessors["Load Object List"] = function(command)
 					+	"<td class='pbRow'></td>"
 					+	"<td class='absRow'></td>"
 					+	"<td class='bashRow'></td>"
+					+	"<td class='numRow'></td>"
 					+	"</tr>"
 					);
 
@@ -92,6 +133,7 @@ commandProcessors["Load Object List"] = function(command)
 		$tdArray.eq( 9).text(object.pb);
 		$tdArray.eq(10).text(object.abs);
 		$tdArray.eq(11).text(object.bash.toFixed(4));
+		$tdArray.eq(12).text(object.num);
 
 		$tbody.append($row);
 	});
@@ -108,6 +150,13 @@ $(document).ready(function() {
 	socket.itemTypesMap = {};
 	socket.wearTypesMap = {};
 	socket.extraFlagsMap = {};
+
+	var reduceInputs = function(elements) {
+
+		return elements.map(function(element) {
+			return element.value;
+		});
+	};
 
 	socket.onopen = function()
 	{
@@ -145,17 +194,58 @@ $(document).ready(function() {
 
 		var command = {
 			method: "Load Object List",
-			itemType: parseInt($("#itemTypeSelect").val()),
-			wearType: parseInt($("#itemWearTypeSelect").val())
+			itemType: reduceInputs($("#itemTypePanel input:checked").toArray()),
+			wearType: reduceInputs($("#itemWearPanel input:checked").toArray()),
+			itemExtra: reduceInputs($("#itemExtrasPanel input:checked").toArray()),
+			triggers: $("#TriggersInput").val().split(/[ ,]/),
+			namelist: $("#NamelistInput").val(),
+			shortDescription: $("#ShortDescriptionInput").val(),
+			longDescription: $("#LongDescriptionInput").val()
 		};
 
 		var lowVnum = parseInt($("#lowVnumInput").val());
 		var highVnum = parseInt($("#highVnumInput").val());
+		var val1 = parseInt($("#Val1").val());
+		var val2 = parseInt($("#Val2").val());
+		var val3 = parseInt($("#Val3").val());
+		var val4 = parseInt($("#Val4").val());
+		var val5 = parseInt($("#Val5").val());
+		var val6 = parseInt($("#Val6").val());
+		var val7 = parseInt($("#Val7").val());
+		var val8 = parseInt($("#Val8").val());
+		var val9 = parseInt($("#Val9").val());
+		var val10 = parseInt($("#Val10").val());
+		var val11 = parseInt($("#Val11").val());
+		var val12 = parseInt($("#Val12").val());
 
 		if(!isNaN(lowVnum))
 			command["lowVnum"] = lowVnum;
 		if(!isNaN(highVnum))
 			command["highVnum"] = highVnum;
+		if(!isNaN(val1))
+			command["val1"] = val1;
+		if(!isNaN(val2))
+			command["val2"] = val2;
+		if(!isNaN(val3))
+			command["val3"] = val3;
+		if(!isNaN(val4))
+			command["val4"] = val4;
+		if(!isNaN(val5))
+			command["val5"] = val5;
+		if(!isNaN(val6))
+			command["val6"] = val6;
+		if(!isNaN(val7))
+			command["val7"] = val7;
+		if(!isNaN(val8))
+			command["val8"] = val8;
+		if(!isNaN(val9))
+			command["val9"] = val9;
+		if(!isNaN(val10))
+			command["val10"] = val10;
+		if(!isNaN(val11))
+			command["val11"] = val11;
+		if(!isNaN(val12))
+			command["val12"] = val12;
 
 		socket.sendCommand(command);
 	});
@@ -219,14 +309,46 @@ $(document).ready(function() {
 
 		Low Vnum: <input type="text" id="lowVnumInput" />
 		High Vnum: <input type="text" id="highVnumInput" />
-		<select id="itemTypeSelect">
-			<option>All Item Types</option>
-		</select>
 
-		<select id="itemWearTypeSelect">
-			<option>All Item Wears</option>
-		</select>
+		Triggers: <input type="text" placeholder="space or comma separated" id="TriggersInput" class="input200" />
+		
+		<br/>
+		<br/>
+		
+		Namelist: <input type="text" placeholder="regular expression" id="NamelistInput" class="input200" />
+		Short Description: <input type="text" placeholder="regular expression" id="ShortDescriptionInput" class="input200" />
+		Long Description: <input type="text" placeholder="regular expression" id="LongDescriptionInput" class="input200" />
+		
+		<br/>
+		<br/>
+		
+		Val 1: <input type="text" id="Val1" /> Val 2: <input type="text" id="Val2" /> Val 3: <input type="text" id="Val3" />
+		Val 4: <input type="text" id="Val4" /> Val 5: <input type="text" id="Val5" /> Val 6: <input type="text" id="Val6" />
+		<br/>
+		<br/>
+		Val 7: <input type="text" id="Val7" /> Val 8: <input type="text" id="Val8" /> Val 9: <input type="text" id="Val9" />
+		Val 10: <input type="text" id="Val10" /> Val 11: <input type="text" id="Val11" /> Val 12: <input type="text" id="Val12" />
+		<br/>
+		<br/>
+		
+		<div id="itemExtrasPanel">
+			<div class="textCenter itemExtrasHeader">Item Extras</div>
+			<div class="inputs"></div>
+		</div>
+		
+		
+		<div id="itemTypePanel">
+			<div class="textCenter itemTypeHeader">Item Types</div>
+            <div class="inputs"></div>
+		</div>
+		
+		<div id="itemWearPanel">
+			<div class="textCenter itemWearHeader">Item Wears</div>
+            <div class="inputs"></div>
+		</div>
 
+		<br/>
+		<br/>
 		<button type="submit" class="flatGreyButton short" id="searchButton">Search</button>
 	</form>
 </div>
@@ -249,6 +371,7 @@ $(document).ready(function() {
 			<th><a href="#">PB</a></th>
 			<th><a href="#">ABS</a></th>
 			<th><a href="#">Bash</a></th>
+			<th><a href="#">Num</a></th>
 		</tr>
 	</table>
 

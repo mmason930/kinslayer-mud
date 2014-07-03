@@ -1,0 +1,194 @@
+@mixin text-stroke($stroke-width)
+{
+	text-shadow: -$stroke-width 0 black, 0 $stroke-width black, $stroke-width 0 black, 0 (-$stroke-width) black;
+}
+
+#userAchievements
+{
+	font-weight: bold;
+	font-size: 12px;
+
+	.achievementContainer
+	{
+		text-align: center;
+	}
+
+	.header
+	{
+		display: block;
+		text-align: center;
+	}
+	.achievement
+	{
+		float: left;
+		width: 190px;
+		margin-top: 10px;
+
+		img
+		{
+			display: block;
+			width: 100px;
+			border: 1px solid #000;
+			margin: auto;
+		}
+
+		span
+		{
+			font-weight: bold;
+		}
+	}
+}
+
+#userDetails
+{
+	font-size: 14px;
+
+	.userStatistics
+	{
+		float: left;
+		width: 30%;
+
+		.label
+		{
+			text-align: right;
+			display: inline-block;
+			width: 150px;
+			margin-right: 8px;
+		}
+	}
+
+	.knownClans
+	{
+		float: left;
+		width: 33%;
+
+		ul
+		{
+			padding: 0 0 0 0;
+			margin: 0 0 0 0;
+		}
+	}
+
+	.recentPlayerKills
+	{
+		float: left;
+		width: 37%;
+	}
+}
+
+.bigBold
+{
+	font-weight: bold;
+	font-size: 20px;
+	@include text-stroke(2px);
+}
+
+.userProfileContainer
+{
+	padding: 20px;
+	background-color: #111;
+	border-radius: 7px;
+	border: 1px solid #555;
+	width: 85%;
+	margin-top: 5%;
+	a
+	{
+		font-weight: bold;
+		font-size: 1.10em;
+	}
+
+	.subCategory
+	{
+
+		width: 95%;
+		background-color: #7b7b7b;
+
+		padding: 15px;
+		margin-top: 15px;
+		border-radius: 7px;
+		border: 2px solid #000000;
+
+		.noTopMargin
+		{
+			margin-top: none !important;
+		}
+	}
+
+	.userSummaryContainer
+	{
+		display: table;
+	}
+
+	.usernameAndAvatarContainer
+	{
+		width: 45%;
+		height: 100px;
+		display: table-cell;
+
+		.avatar
+		{
+			width: 100px;
+			float: left;
+			margin-right: 10px;
+
+			img
+			{
+				width: 100%;
+				display: block;
+				border: 1px solid #000;
+			}
+		}
+		
+		.usernameContainer
+		{
+			overflow: hidden;
+
+			.username
+			{
+				font-weight: bold;
+				font-size: 24px;
+				@include text-stroke(2px);
+			}
+
+			.title
+			{
+				font-size: 16px;
+			}
+
+			.star
+			{
+				position: relative;
+				width: 39px;
+				img
+				{
+					width: 39px;
+				}
+
+				.level
+				{
+					position: absolute;
+					width: 100%;
+					text-align: center;
+					bottom: 12px;
+					left: -1px;
+					font-weight: bold;
+
+					@include text-stroke(2px);
+				}
+			}
+		}
+	}
+
+	.descriptionContainer
+	{
+		padding-left: 20px;
+		display: table-cell;
+
+		.playerDescription
+		{
+			margin-top: 10px;
+			white-space: pre-wrap;
+			font-style: italic;
+		}
+	}
+}

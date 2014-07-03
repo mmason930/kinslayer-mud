@@ -1,5 +1,6 @@
 <%@ taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 <%@ include file="/View/Framework/Kinslayer.jsp" %>
+<tiles:useAttribute name="replaceBannerImage" classname="java.lang.String" />
 <%
 String sessionUserName = (String)request.getAttribute("SessionUserName");
 Integer sessionUserId = (Integer)request.getAttribute("SessionUserId");
@@ -25,6 +26,20 @@ if(sessionUserId != null) {
 }
 %>
 Host: kinslayermud.org | Port: 2222</div>
+
+<%
+if(StringUtil.removeNull(replaceBannerImage).equals("true")) {
+%>
+			<div class="bodyContainer">
+				<tiles:insertAttribute name="body" />
+			</div>
+<%
+}
+else {
+%>
 			<img class="bannerImage" src="./images/sword_on_black_surface_and_background-wide-no-margins.jpg"></img>
+<%
+}
+%>
 		</div>
 		<div class="clearLeft"></div>

@@ -53,7 +53,14 @@ public abstract class StandardAction extends ActionSupport implements ServletReq
       request.setAttribute("SessionId", sessionIdCookie.getValue());
     }
     
-    return execute(webSupport);
+    try {
+      return execute(webSupport);
+    }
+    catch(Exception exception) {
+      
+      exception.printStackTrace();
+      return null;//TODO: Forward to error page.
+    }
   }
   
   public void setServletRequest(HttpServletRequest request) {

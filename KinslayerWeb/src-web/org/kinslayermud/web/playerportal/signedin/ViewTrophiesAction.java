@@ -18,7 +18,7 @@ public class ViewTrophiesAction extends ValidateSignInAction {
   
   public String execute(WebSupport webSupport, User user) throws Exception {
     
-    List<PlayerKill> playerKills = webSupport.getPlayerKillsByKillerId(user.getUserId());
+    List<PlayerKill> playerKills = webSupport.getPlayerKillsByKillerId(user.getUserId(), null, null, true);
     Collection<Integer> userIdCollection = new HashSet<Integer>();
     Map<Integer, User> userMap;
     

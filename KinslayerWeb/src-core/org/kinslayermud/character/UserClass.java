@@ -21,23 +21,25 @@ abstract class UserClassStatic {
 
 public enum UserClass implements VEnum {
 
-  warrior(0, "Warrior"),
-  thief(1, "Thief"),
-  ranger(2, "Ranger"),
-  channeler(3, "Channeler"),
-  fade(4, "Fade"),
-  dreadlord(5, "Dreadlord"),
-  blademaster(6, "Blademaster"),
-  greyman(7, "Greyman"),
-  draghkar(8, "Draghkar"),
-  dreadguard(9, "Dreadguard"),
-  ogier(10, "Ogier"),
-  undefined(21, "Undefined");
+  warrior(    0, "Warrior"    , false),
+  thief(      1, "Thief"      , false),
+  ranger(     2, "Ranger"     , false),
+  channeler(  3, "Channeler"  , false),
+  fade(       4, "Fade"       , true),
+  dreadlord(  5, "Dreadlord"  , true),
+  blademaster(6, "Blademaster", true),
+  greyman(    7, "Greyman"    , true),
+  draghkar(   8, "Draghkar"   , true),
+  dreadguard( 9, "Dreadguard" , false),
+  ogier(     10, "Ogier"      , true),
+  undefined( 21, "Undefined"  , false);
   
   private String standardName;
+  private boolean isRemort;
 
-  private UserClass (int id, String standardName) {
+  private UserClass (int id, String standardName, boolean isRemort) {
     this.standardName = standardName;
+    this.isRemort = isRemort;
     UserClassStatic.addEnum(this, id, standardName);
   }
 
@@ -45,6 +47,7 @@ public enum UserClass implements VEnum {
   public String toString () { return UserClassStatic.enumSet.toString(this); }
 
   public String getStandardName () { return standardName; }
+  public boolean isRemort () { return isRemort; }
 
   public static UserClass getEnum(int value) throws IndexOutOfBoundsException { return UserClassStatic.enumSet.getEnum(value); }
   public static Iterator<UserClass> getSetIterator () { return UserClassStatic.enumSet.iterator(); }

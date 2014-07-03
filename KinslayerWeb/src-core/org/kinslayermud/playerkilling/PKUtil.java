@@ -34,6 +34,7 @@ public class PKUtil {
                + " FROM userPlayerKill"
                + " WHERE " + criteria
                + " ORDER BY " + orderBy;
+    
     List<UserPlayerKill> userPlayerKills = new LinkedList<UserPlayerKill>();
     ResultSet resultSet = statement.executeQuery(sql);
     
@@ -107,11 +108,13 @@ public class PKUtil {
     return playerKills;
   }
   
-  public static Collection<Integer> getPlayerKillIdsByKillerId(Statement statement, int killerUserId) throws SQLException {
+  public static Collection<Integer> getPlayerKillIdsByKillerId(Statement statement, int killerUserId, Integer offset, Integer fetchSize, boolean sort) throws SQLException {
     
     String sql = " SELECT kill_id"
                + " FROM userPlayerKill"
-               + " WHERE killer_id = " + killerUserId;
+               + " WHERE killer_id = " + killerUserId
+               + (sort ? " ORDER BY time_of_death DESC" : "")
+               + SQLUtil.buildLimit(offset, fetchSize);
     
     Collection<Integer> playerKillIds = new HashSet<Integer>();
     ResultSet resultSet = statement.executeQuery(sql);
@@ -124,11 +127,12 @@ public class PKUtil {
     return playerKillIds;
   }
   
-  public static List<PlayerKill> getPlayerKillsByKillerId(Statement statement, int killerUserId) throws SQLException {
+  public static List<PlayerKill> getPlayerKillsByKillerId(Statement statement, int killerUserId, Integer offset, Integer fetchSize, boolean sort) throws SQLException {
     
-    Collection<Integer> playerKillIdCollection = getPlayerKillIdsByKillerId(statement, killerUserId);
+    Collection<Integer> playerKillIdCollection = getPlayerKillIdsByKillerId(statement, killerUserId, offset, fetchSize, sort);
     
     String criteria = "kill_id IN" + SQLUtil.buildListSQL(playerKillIdCollection, false, true);
+    
     List<UserPlayerKill> userPlayerKills = getUserPlayerKillsMeetingCriteria(statement, criteria, null);
     
     return convertToPlayerKills(userPlayerKills);

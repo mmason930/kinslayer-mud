@@ -1,0 +1,196 @@
+input[type='text']
+{
+	margin: 0;
+	padding: 0px 5px 0px 5px;
+	height: 24px;
+	font-weight: bold;
+	color: #FFF;
+	background-color: #272822;
+	outline: none;
+	border: 1px solid #372822;
+	border-radius: 3px;
+	width: 50px;
+}
+
+#searchForm
+{
+	margin: auto;
+	width: 1325px;
+}
+
+#searchButton
+{
+	margin: auto;
+	display: block;
+}
+
+#filterPanel
+{
+	font-weight: 12px;
+}
+
+#divider
+{
+	border-top: 1px solid #999;
+	content: " ";
+	width: 70%;
+	margin: 20px auto 20px auto;
+}
+
+#resultsTable
+{
+	width: 100%;
+	border: 1px solid #999;
+	font-size: 14px;
+
+	tr td
+	{
+	    border-spacing: 00px;
+    	padding: 5px 15px 5px 15px;
+    	font-weight: bold;
+	}
+}
+
+.objectIdRow
+{
+	width: 65px;
+	text-align: right;
+}
+
+.shortDescriptorRow
+{
+	width: 300px;
+	color: #00FF3C;
+}
+
+.itemTypeRow
+{
+	width: 105px;
+	color: #008080;
+}
+
+.wearFlagsRow
+{
+	color: #00b300;
+}
+
+.extraFlagsRow
+{
+	color: #800080;
+}
+
+.weightRow
+{
+	color: #808000;
+	width: 60px;
+	text-align: right;
+}
+
+.costRow
+{
+	color:#808000;
+	text-align: right;
+}
+
+.obRow
+{
+	color: #008080;
+	text-align: right;
+}
+
+.dbRow
+{
+	color: #008080;
+	text-align: right;
+}
+
+.pbRow
+{
+	color: #008080;
+	text-align: right;
+}
+
+.absRow
+{
+	color: #008080;
+	text-align: right;
+}
+
+.bashRow
+{
+	text-align: right;
+}
+
+.numRow
+{
+	text-align: right;
+}
+
+input[type='checkbox']
+{
+	margin-top: 4px 0 0 0;
+	top: 3px;
+	position: relative;
+}
+
+#itemExtrasPanel
+{
+	font-size: 14px;
+	font-weight: bold;
+	display: inline-block;
+}
+
+.itemExtrasHeader
+{
+	color: #800080;
+}
+
+.input200
+{
+	width: 200px !important;
+}
+
+#itemTypePanel
+{
+	font-size: 14px;
+	font-weight: bold;
+	display: inline-block;
+	border-left: 1px solid #BBB;
+	padding-left: 20px;
+}
+
+.itemTypeHeader
+{
+	color: #008080;
+}
+
+#itemWearPanel
+{
+	font-size: 14px;
+	font-weight: bold;
+	display: inline-block;
+	border-left: 1px solid #BBB;
+	padding-left: 20px;
+}
+
+.itemWearHeader
+{
+	color: #008080;
+}
+
+.inputs
+{
+	label, input
+	{
+		&:hover
+		{
+			cursor: pointer;
+		}
+	}
+
+	label
+	{
+		display: inline-block;
+		width: 120px;
+	}
+}

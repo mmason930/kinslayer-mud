@@ -103,14 +103,14 @@ for(PlayerKill playerKill : playerKills) {
         killerNamesDisp += ", ";
       }
     
-      killerNamesDisp += killerUser.getUserName();
+      killerNamesDisp += "<a href='" + WebSiteUrlUtil.getUserProfileUrl(webSupport.getInstanceDomain(), killerUser.getUserName()) + "'>" + killerUser.getUserName() + "</a>";
     
       ++playersDisplayedSoFar;
     }
   }
   
 %>
-					<span>(<%=timeOfDeathDisp%>) <%= killerNamesDisp %> slew <%=victimUser.getUserName()%> for a gain of <%= totalWeavePointsTransfered %> weave point<%=totalWeavePointsTransfered == 1 ? "" : "s" %>.</span><br/>
+					<span>(<%=timeOfDeathDisp%>) <%= killerNamesDisp %> slew <%="<a href='" + WebSiteUrlUtil.getUserProfileUrl(webSupport.getInstanceDomain(), victimUser.getUserName()) + "'>" + victimUser.getUserName() + "</a>"%> for a gain of <%= totalWeavePointsTransfered %> weave point<%=totalWeavePointsTransfered == 1 ? "" : "s" %>.</span><br/>
 <%
 }
 %>

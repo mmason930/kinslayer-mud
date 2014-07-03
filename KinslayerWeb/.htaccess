@@ -118,6 +118,8 @@ RewriteRule ^topkills.php(.*)$			/? [L,R=301]
 RewriteRule ^trades.php(.*)			/? [L,R=301]
 RewriteRule ^types-of-equipment(.*)$		./EquipmentTypes.do$1 [QSA,L]
 
+RewriteRule ^users/(.*)$				./Users.ViewProfile.do?Username=$1 [QSA,L]
+
 RewriteRule ^var/www-prod/supermob-listing(.*)$		/supermob-listing$1 [L,R=301]
 
 RewriteRule ^warrior-skills/(.*)$		./classes-and-races$1 [QSA,L]

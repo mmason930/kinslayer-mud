@@ -7,13 +7,15 @@
 <tiles-definitions>
 
   <definition name="StandardLayout" template="/View/Framework/StandardLayout.jsp">
-    <put-attribute name="title" value=""/>
-    <put-attribute name="body" value="/View/Home/Home.jsp"/>
+    <put-attribute name="title" value="title"/>
+    <put-attribute name="body" value="/View/Home/Home.jsp" cascade="true"/>
     <put-attribute name="leftNavSelected" value="Home"/>
+    <put-attribute name="stylesheets" value=""/>
+    <put-attribute name="replaceBannerImage" value="false" cascade="true"/>
   </definition>
   
   <definition name="Home" extends="StandardLayout">
-    <put-attribute name="body" value="/View/Home/Home.jsp"/>
+    <put-attribute name="body" value="/View/Home/Home.jsp" cascade="true"/>
     <put-attribute name="title" value="Kinslayer MUD - A Free Online Wheel of Time Game"/>
     <put-attribute name="MetaDescription" value="Kinslayer MUD is a free online multiplayer game based on the Wheel of Time by Robert Jordan. To play the Wheel of Time game for free, click here." />
   </definition>
@@ -25,14 +27,14 @@
   <definition name="CharacterClasses" extends="StandardLayout">
     <put-attribute name="title" value="Classes &amp; Races | Trolloc &amp; Human Classes Available In-Game | Kinslayer MUD"/>
     <put-attribute name="MetaDescription" value="View races and classes available in the free online game. See details of Trolloc &amp; Human classes."/>
-    <put-attribute name="body" value="/View/Characters/CharacterClasses.jsp"/>
+    <put-attribute name="body" value="/View/Characters/CharacterClasses.jsp" cascade="true"/>
     <put-attribute name="leftNavSelected" value="Characters"/>
   </definition>
   
   <definition name="CharacterSkills" extends="StandardLayout">
     <put-attribute name="MetaDescription" value="Read about character skills for human &amp; trolloc races. This free game features many character skills."/>
     <put-attribute name="title" value="Character Skills | Warrior, Ranger, Channeler &amp; Thief Skills | Kinslayer MUD"/>
-    <put-attribute name="body" value="/View/Characters/CharacterSkills.jsp"/>
+    <put-attribute name="body" value="/View/Characters/CharacterSkills.jsp" cascade="true"/>
     <put-attribute name="leftNavSelected" value="Characters"/>
   </definition>
   
@@ -41,14 +43,14 @@
   <definition name="SuperMobWhatIs" extends="StandardLayout">
     <put-attribute name="title" value="Super MOB Intro | Info About Super MOBS | Kinslayer MUD"/>
     <put-attribute name="MetaDescription" value=""/>
-    <put-attribute name="body" value="/View/SuperMobs/SuperMobWhatIs.jsp"/>
+    <put-attribute name="body" value="/View/SuperMobs/SuperMobWhatIs.jsp" cascade="true"/>
     <put-attribute name="leftNavSelected" value="SuperMobs"/>
   </definition>
   
   <definition name="SuperMobListing" extends="StandardLayout">
     <put-attribute name="title" value="Super MOB Listing | Find In-Game Spawning Points | Kinslayer MUD"/>
     <put-attribute name="MetaDescription" value="Super MOB spawning points and equipment loads. To find the most powerful mobs in the game, click here."/>
-    <put-attribute name="body" value="/View/SuperMobs/SuperMobListing.jsp"/>
+    <put-attribute name="body" value="/View/SuperMobs/SuperMobListing.jsp" cascade="true"/>
     <put-attribute name="leftNavSelected" value="SuperMobs"/>
   </definition>
   
@@ -56,34 +58,34 @@
   <!-- LEGENDS -->
   <definition name="LegendsIntroduction" extends="StandardLayout">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
-    <put-attribute name="body" value="/View/Legends/LegendsIntroduction.jsp"/>
+    <put-attribute name="body" value="/View/Legends/LegendsIntroduction.jsp" cascade="true"/>
   </definition>
   
   <definition name="LegendsOverall" extends="StandardLayout">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
-    <put-attribute name="body" value="/View/Legends/LegendsOverall.jsp"/>
+    <put-attribute name="body" value="/View/Legends/LegendsOverall.jsp" cascade="true"/>
   </definition>
   
   <definition name="LegendsWeekly" extends="StandardLayout">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
-    <put-attribute name="body" value="/View/Legends/LegendsWeekly.jsp"/>
+    <put-attribute name="body" value="/View/Legends/LegendsWeekly.jsp" cascade="true"/>
   </definition>
   
   <definition name="LegendsMonthly" extends="StandardLayout">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
-    <put-attribute name="body" value="/View/Legends/LegendsMonthly.jsp"/>
+    <put-attribute name="body" value="/View/Legends/LegendsMonthly.jsp" cascade="true"/>
   </definition>
   
   <definition name="LegendsYearly" extends="StandardLayout">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
-    <put-attribute name="body" value="/View/Legends/LegendsYearly.jsp"/>
+    <put-attribute name="body" value="/View/Legends/LegendsYearly.jsp" cascade="true"/>
   </definition>
   
   
   <!-- PLAYER PORTAL -->
   <definition name="PlayerPortalLayout" extends="StandardLayout">
     <put-attribute name="title" value="Player Portal Sign In | Sign In To Your Character | Kinslayer MUD"/>
-    <put-attribute name="body" value="/View/PlayerPortal/Framework/PlayerPortalLayout.jsp"/>
+    <put-attribute name="body" value="/View/PlayerPortal/Framework/PlayerPortalLayout.jsp" cascade="true"/>
     <put-attribute name="content" value="" cascade="true"/>
     <put-attribute name="topNavSelected" value="" cascade="true"/>
     <put-attribute name="playerPortalH2" value="" cascade="true"/>
@@ -150,21 +152,21 @@
   <definition name="TradesIntroduction" extends="StandardLayout">
     <put-attribute name="title" value="Trades Introduction | Trades Available In Game | Kinslayer MUD"/>
     <put-attribute name="MetaDescription" value="Kinslayer MUD trades introduction. The game features trades including mining &amp; smithing. Find out more here."/>
-    <put-attribute name="body" value="/View/Trades/TradesIntroduction.jsp"/>
+    <put-attribute name="body" value="/View/Trades/TradesIntroduction.jsp" cascade="true"/>
     <put-attribute name="leftNavSelected" value="Trades"/>
   </definition>
   
   <definition name="TradesMining" extends="StandardLayout">
     <put-attribute name="title" value="Mining Trade | Read About Mining | Kinslayer MUD"/>
     <put-attribute name="MetaDescription" value="Kinslayer MUD Mining Trade. Read more about the free game's mining skill trade here."/>
-    <put-attribute name="body" value="/View/Trades/TradesMining.jsp"/>
+    <put-attribute name="body" value="/View/Trades/TradesMining.jsp" cascade="true"/>
     <put-attribute name="leftNavSelected" value="Trades"/>
   </definition>
   
   <definition name="TradesSmithing" extends="StandardLayout">
     <put-attribute name="title" value="Smithing Trade | Read About Smithing | Kinslayer MUD"/>
     <put-attribute name="MetaDescription" value="Read about Kinslayer's smithing trade. Our free game offers two main trades. To learn more, click here."/>
-    <put-attribute name="body" value="/View/Trades/TradesSmithing.jsp"/>
+    <put-attribute name="body" value="/View/Trades/TradesSmithing.jsp" cascade="true"/>
     <put-attribute name="leftNavSelected" value="Trades"/>
   </definition>
   
@@ -173,19 +175,19 @@
   <definition name="EquipmentIntroduction" extends="StandardLayout">
     <put-attribute name="title" value="Equipment Introduction | Kinslayer MUD"/>
     <put-attribute name="MetaDescription" value="Learn about game equipment here. Equipment, weapons &amp; armor available in the game explained."/>
-    <put-attribute name="body" value="/View/Equipment/EquipmentIntroduction.jsp"/>
+    <put-attribute name="body" value="/View/Equipment/EquipmentIntroduction.jsp" cascade="true"/>
     <put-attribute name="leftNavSelected" value="Equipment"/>
   </definition>
   
   <definition name="EquipmentTypes" extends="StandardLayout">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
-    <put-attribute name="body" value="/View/Equipment/EquipmentTypes.jsp"/>
+    <put-attribute name="body" value="/View/Equipment/EquipmentTypes.jsp" cascade="true"/>
     <put-attribute name="leftNavSelected" value="Equipment"/>
   </definition>
   
   <definition name="EquipmentCatalog" extends="StandardLayout">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
-    <put-attribute name="body" value="/View/Equipment/EquipmentCatalog.jsp"/>
+    <put-attribute name="body" value="/View/Equipment/EquipmentCatalog.jsp" cascade="true"/>
     <put-attribute name="leftNavSelected" value="Equipment"/>
   </definition>
   
@@ -193,42 +195,51 @@
   <definition name="AboutKinslayer" extends="StandardLayout">
     <put-attribute name="title" value="About Kinslayer MUD | Free Online Game"/>
     <put-attribute name="MetaDescription" value="Kinslayer MUD is a free online game based on Robert Jordan's The Wheel of Time series. To play, click here." />
-    <put-attribute name="body" value="/View/NewToMudsHome/AboutKinslayer.jsp"/>
+    <put-attribute name="body" value="/View/NewToMudsHome/AboutKinslayer.jsp" cascade="true"/>
     <put-attribute name="leftNavSelected" value="About"/>
+  </definition>
+  
+  
+  <definition name="Users.ViewProfile" extends="StandardLayout">
+    <put-attribute name="title" value=""/>
+    <put-attribute name="MetaDescription" value="Kinslayer MUD is a free online game based on Robert Jordan's The Wheel of Time series. To play, click here." />
+    <put-attribute name="body" value="/View/Users/ViewProfile.jsp" cascade="true"/>
+    <put-attribute name="stylesheets" value="Users/UserStyles.css" />
+    <put-attribute name="replaceBannerImage" value="true" cascade="true" />
   </definition>
   
   <!-- NEW TO MUDS -->
   
   <definition name="NewToMuds" extends="StandardLayout">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
-    <put-attribute name="body" value="/View/NewToMudsHome/NewToMudsHome.jsp"/>
+    <put-attribute name="body" value="/View/NewToMudsHome/NewToMudsHome.jsp" cascade="true"/>
     <put-attribute name="leftNavSelected" value="GettingStarted"/>
   </definition>
   
   <definition name="NewToMudsCharacterCreation" extends="StandardLayout">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
-    <put-attribute name="body" value="/View/NewToMudsHome/NewToMudsCharacterCreation.jsp"/>
+    <put-attribute name="body" value="/View/NewToMudsHome/NewToMudsCharacterCreation.jsp" cascade="true"/>
     <put-attribute name="leftNavSelected" value="GettingStarted"/>
   </definition>
   
 
   <definition name="NewToMudsConnecting" extends="StandardLayout">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
-    <put-attribute name="body" value="/View/NewToMudsHome/NewToMudsConnecting.jsp"/>
+    <put-attribute name="body" value="/View/NewToMudsHome/NewToMudsConnecting.jsp" cascade="true"/>
     <put-attribute name="leftNavSelected" value="GettingStarted"/>
   </definition>
   
 
   <definition name="NewToMudsBasicCommands" extends="StandardLayout">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
-    <put-attribute name="body" value="/View/NewToMudsHome/NewToMudsBasicCommands.jsp"/>
+    <put-attribute name="body" value="/View/NewToMudsHome/NewToMudsBasicCommands.jsp" cascade="true"/>
     <put-attribute name="leftNavSelected" value="GettingStarted"/>
   </definition>
   
   <!-- HELP -->
   <definition name="HelpLayout" extends="StandardLayout">
     <put-attribute name="title" value=""/>
-    <put-attribute name="body" value="/View/Help/Framework/HelpLayout.jsp"/>
+    <put-attribute name="body" value="/View/Help/Framework/HelpLayout.jsp" cascade="true"/>
     <put-attribute name="content" value="" cascade="true"/>
     <put-attribute name="leftNavSelected" value="Help" cascade="true"/>
   </definition>
@@ -243,21 +254,20 @@
     <put-attribute name="content" value="/View/Help/ViewHelpFile.jsp" cascade="true"/>
   </definition>
   
-  
 	<definition name="AdminLayout" template="/View/AdminPortal/Framework/AdminPortalLayout.jsp">
 		<put-attribute name="title" value=""/>
-		<put-attribute name="body" value=""/>
+		<put-attribute name="body" value="" cascade="true"/>
 	</definition>
 	
 	<definition name="Admin.OList" extends="AdminLayout">
 		<put-attribute name="title" value="OList | Admin | KinslayerMUD"/>
-		<put-attribute name="body" value="/View/AdminPortal/SignedIn/OList.jsp"/>
+		<put-attribute name="body" value="/View/AdminPortal/SignedIn/OList.jsp" cascade="true"/>
 	</definition>
   
   <!-- ADMIN -->
   <definition name="Admin.ViewUserLog" extends="StandardLayout">
     <put-attribute name="title" value="KinslayerMUD - A Free Wheel of Time Roleplaying Game"/>
-    <put-attribute name="body" value="/View/Admin/ViewUserLog.jsp"/>
+    <put-attribute name="body" value="/View/Admin/ViewUserLog.jsp" cascade="true"/>
     <put-attribute name="leftNavSelected" value="GettingStarted"/>
   </definition>
     

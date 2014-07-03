@@ -56,6 +56,18 @@ public class PlayerKill {
     
     return userIdSet;
   }
+  
+  public Collection<Integer> getKillerUserIdSet() {
+    
+    Set<Integer> userIdSet = new HashSet<Integer>();
+    
+    for(UserPlayerKill userPlayerKill : userPlayerKills) {
+      
+      userIdSet.add(userPlayerKill.getKillerId());
+    }
+    
+    return userIdSet;
+  }
 
   public int getTotalWeavePointTransfer() {
     

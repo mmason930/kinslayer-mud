@@ -35,14 +35,36 @@
 	
 	<target name="compile">
 
+		<antcall target="build-sass" />
+
 		<mkdir dir="${checkout-classes}"/>
 		<javac debug="true" destdir="${checkout-classes}" classpathref="classpath">
 			<src path="${checkout-src-web}" />
 			<src path="${checkout-src-core}" />
 		</javac>
-		
+
 		<copy file="${checkout-src-web}/struts.xml" todir="${checkout-classes}" />
 	</target>
+
+        <target name="check-sass-uptodate">
+                <uptodate property="sass-up-to-date">
+                        <srcfiles dir= "${checkout-view}/Styles/" includes="**/*.scss"/>
+                        <mapper type="glob" from="*.scss" to="${checkout-view}/Styles/*.css"/>
+                </uptodate>
+        </target>
+
+        <target name="build-sass" unless="sass-up-to-date" depends="check-sass-uptodate">
+
+                <echo>Building Sass</echo>
+                <apply executable="sass" dir="${checkout-view}/Styles" relative="true" verbose="true" force="true" failonerror="true">
+                        <arg value="--unix-newlines" />
+                        <srcfile />
+                        <targetfile />
+                        <fileset dir="${checkout-view}/Styles" includes="**/*.scss" excludes="**/_*" />
+                        <mapper type="glob" from="*.scss" to="*.css"/>
+                </apply>
+        </target>
+
 
 	<target name="stop-tomcat">
 		<echo>

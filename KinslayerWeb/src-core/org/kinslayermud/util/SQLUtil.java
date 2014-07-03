@@ -245,4 +245,28 @@ public abstract class SQLUtil {
   public static String buildStringFromList (List<String> values) {
     return StringUtil.buildStringFromList(values, StringUtil.MYSQL_STORAGE_SEPERATOR_SEQUENCE);
   }
+  
+  public static String buildLimit(Integer offset, Integer fetchSize) {
+    
+    if(offset == null && fetchSize == null) {
+      return "";
+    }
+    
+    StringBuilder stringBuilder = new StringBuilder(" LIMIT ");
+    
+    if(offset != null && fetchSize != null) {
+      
+      stringBuilder.append(offset + "," + fetchSize);
+    }
+    else if(offset != null) {
+      
+      stringBuilder.append(offset);
+    }
+    else {
+      
+      stringBuilder.append(fetchSize);
+    }
+    
+    return stringBuilder.toString();
+  }
 }

@@ -9,15 +9,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.kinslayermud.achievement.Achievement;
 import org.kinslayermud.advertising.FeaturedMUDListing;
 import org.kinslayermud.advertising.FeaturedMUDListingUtil;
 import org.kinslayermud.auction.AuctionBid;
 import org.kinslayermud.auction.AuctionItem;
 import org.kinslayermud.auction.AuctionUtil;
 import org.kinslayermud.character.User;
+import org.kinslayermud.character.UserClan;
+import org.kinslayermud.clan.ClanWithRanks;
 import org.kinslayermud.comm.Comm;
 import org.kinslayermud.comm.CommUtil;
 import org.kinslayermud.exception.DataInterfaceException;
+import org.kinslayermud.forum.ForumUser;
 import org.kinslayermud.help.HelpFile;
 import org.kinslayermud.help.HelpUtil;
 import org.kinslayermud.kit.KitUtil;
@@ -80,7 +84,7 @@ public class WebSupport {
     
     try {
       
-      System.out.println("Loading Home Resources...");
+      //System.out.println("Loading Home Resources...");
       
       List<PlayerKill> playerKills = getLastSoManyPlayerKills(10);
       List<AuctionItem> auctionItems = getActiveAuctionItems();
@@ -609,7 +613,7 @@ public class WebSupport {
     }
   }
   
-  public List<PlayerKill> getPlayerKillsByKillerId(int killerUserId) throws DataInterfaceException {
+  public List<PlayerKill> getPlayerKillsByKillerId(int killerUserId, Integer offset, Integer fetchSize, boolean sort) throws DataInterfaceException {
 
     Connection connection = null;
     Statement statement = null;
@@ -617,7 +621,7 @@ public class WebSupport {
       connection = provider.getConnection();
       statement = connection.createStatement();
       
-      List<PlayerKill> playerKills = PKUtil.getPlayerKillsByKillerId(statement, killerUserId);
+      List<PlayerKill> playerKills = PKUtil.getPlayerKillsByKillerId(statement, killerUserId, offset, fetchSize, sort);
 
       statement.close();
       statement = null;
@@ -925,6 +929,186 @@ public class WebSupport {
       connection = null;
       
       return objectMap;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public User getUserByUsername(String username) throws DataInterfaceException {
+    
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      User user = UserUtil.getUserByUsername(statement, username, false);
+
+      statement.close();
+      statement = null;
+      
+      connection.commit();
+      connection.close();
+      connection = null;
+      
+      return user;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public List<UserClan> getUserClansByUserId(int userId) throws DataInterfaceException {
+    
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      List<UserClan> userClans = UserUtil.getUserClansByUserId(statement, userId);
+
+      statement.close();
+      statement = null;
+      
+      connection.commit();
+      connection.close();
+      connection = null;
+      
+      return userClans;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public Map<Integer, ClanWithRanks> getClansWithRanksMap(Collection<Integer> clanIdCollection) throws DataInterfaceException {
+    
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      Map<Integer, ClanWithRanks> clanWithRanksMap = ClanUtil.getClanIdToClanWithRanksMap(statement, clanIdCollection);
+
+      statement.close();
+      statement = null;
+      
+      connection.commit();
+      connection.close();
+      connection = null;
+      
+      return clanWithRanksMap;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public List<Integer> getAchievementIdsByUser(int userId) throws DataInterfaceException {
+    
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      List<Integer> achievementIds = UserUtil.getAchievementIdSetByUserId(statement, userId);
+
+      statement.close();
+      statement = null;
+      
+      connection.commit();
+      connection.close();
+      connection = null;
+      
+      return achievementIds;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public Map<Integer, Achievement> getAchievementMap(Collection<Integer> achievementIdCollection) throws DataInterfaceException {
+    
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      Map<Integer, Achievement> achievementMap = AchievementUtil.getAchievementMap(statement, achievementIdCollection);
+
+      statement.close();
+      statement = null;
+      
+      connection.commit();
+      connection.close();
+      connection = null;
+      
+      return achievementMap;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public ForumUser getForumUser(int userId) throws DataInterfaceException {
+    
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      ForumUser forumUser = ForumUtil.getForumUser(statement, userId, false);
+
+      statement.close();
+      statement = null;
+      
+      connection.commit();
+      connection.close();
+      connection = null;
+      
+      return forumUser;
     }
     catch(Throwable throwable) {
       

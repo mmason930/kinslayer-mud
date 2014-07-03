@@ -178,6 +178,11 @@
 			<result name="Success" type="tiles">Help.Home</result>
 		</action>
 		
+		<!--  USERS -->
+		<action name="Users.ViewProfile" class="org.kinslayermud.web.users.ViewProfileAction" method="execute">
+			<result name="Success" type="tiles">Users.ViewProfile</result>
+		</action>
+		
 		
 		<!-- ADMIN -->
 		<action name="Admin.Home" class="org.kinslayermud.web.admin.HomeAction" method="execute">

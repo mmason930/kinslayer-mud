@@ -676,4 +676,9 @@ public abstract class StringUtil {
     
     return values;
   }
+  
+  public static String plural(long number) {
+    
+    return number == 1 ? "" : "s";
+  }
 }
