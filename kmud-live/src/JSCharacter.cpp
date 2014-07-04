@@ -545,13 +545,13 @@ bool JSCharacter::canSee( flusspferd::value t )
 
 flusspferd::string JSCharacter::getArriveMessage()
 {
-	if( real && !real->IsPurged() )
+	if( real && !real->IsPurged() && real->player.ArriveMessage )
 		return real->player.ArriveMessage;
 	return flusspferd::string( "" );
 }
 flusspferd::string JSCharacter::getLeaveMessage()
 {
-	if( real && !real->IsPurged() )
+	if( real && !real->IsPurged() && real->player.LeaveMessage )
 		return real->player.LeaveMessage;
 	return flusspferd::string( "" );
 

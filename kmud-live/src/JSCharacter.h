@@ -223,6 +223,7 @@ public:
 	flusspferd::string getLongDesc()
 	{
 		if( !real || real->IsPurged() ) return "Invalid";
+		if(!real->player.long_descr) return "";
 		return real->player.long_descr;
 	}
 	flusspferd::string getDescription()
