@@ -1660,17 +1660,17 @@ ACMD(do_enable)
 
 ACMD(do_pardon)
 {
-	char arg[MAX_INPUT_LENGTH];
-	char arg2[MAX_INPUT_LENGTH];
+	char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
 	Character *victim;
+	Clan *clan;
+	UserClan *chUserClan, *victimUserClan;
+	Warrant *warrant;
 	bool load = false;
-	int clan = 0;
 
-	TwoArguments(argument, arg, arg2);
-
-	if(GET_LEVEL(ch) < LVL_GOD && !IS_NPC(ch))
+	TwoArguments(OneArgument(argument, arg), arg2, arg3);
+	if(!argument || !*arg || !*arg2)
 	{
-		ch->send("What!?!\r\n");
+		ch->send("Syntax: Pardon <Player Name> <Clan Name Or Number>\r\n");
 		return;
 	}
 
@@ -1685,47 +1685,95 @@ ACMD(do_pardon)
 			load = true;
 	}
 
-	if(!(clan = GetClanByString(arg2)))
+	std::unique_ptr<Character> victimUniquePointer;
+
+	if(load)
+		victimUniquePointer = std::unique_ptr<Character>(victim);
+
+	int clanId = GetClanByString(arg2);
+
+	if(!clanId)
 	{
-		ch->send("Invalid clan.\r\n");
-		CLEANUP(victim, load);
+		ch->send("Invalid clan. Enter a valid clan name or clan number. You can see all clans by using the VIEW CLANS command.\r\n");
 		return;
 	}
-	victim->RemoveWarrant(ch, clan);
-	MudLog(BRF, MAX(LVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s has pardoned %s.", GET_NAME(ch), GET_NAME(victim));
 
-	if(!load)
+	clan = ClanUtil::getClan(clanId);
+	chUserClan = ch->getUserClan(clanId);
+	
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && !chUserClan)
+	{
+		ch->send("You are not a member of the %s clan.\r\n", clan->Name.c_str());
+		return;
+	}
+
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && !chUserClan->getIsCouncil())
+	{
+		ch->send("You are not a member of the %s council.\r\n", clan->Name.c_str());
+		return;
+	}
+
+	warrant = clan->GetWarrant();
+
+	if(!warrant)
+	{
+		ch->send("Oddly, the %s clan cannot issue any pardons!\r\n", clan->Name.c_str());
+		return;
+	}
+
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && GET_RACE(ch) != GET_RACE(victim))
+	{
+		ch->send("%s is not of the same race as you!\r\n", GET_NAME(victim));
+		return;
+	}
+
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && GET_LEVEL(victim) >= LVL_IMMORT)
+	{
+		ch->send("Only the gods themselves are mighty enough to pardon %s of %s crimes!\r\n", GET_NAME(victim), HSHR(victim));
+		return;
+	}
+
+	if(!IS_SET_AR(GET_WARRANTS(victim), warrant->vnum))
+	{
+		ch->send("%s is not wanted by the %s clan.\r\n", GET_NAME(victim), clan->Name.c_str());
+		return;
+	}
+	
+	victim->RemoveWarrant(ch, clanId);
+
+	MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE,
+		"%s pardoned %s for clan %s(%s).",
+		GET_NAME(ch), GET_NAME(victim), clan->Name.c_str(), clan->GetWarrant()->Name.c_str());
+
+	if(load)
+	{
+		victim->save();
+	}
+	else
 	{//We want all MOBs in the clan to forget the player if they previously were set to aggro them.
 		for(Character *mob = character_list;mob;mob = mob->next)
 		{
-			if(IS_NPC(mob) && mob->isInClan(clan))
+			if(IS_NPC(mob) && mob->isInClan(clan->vnum))
 			{
 				mob->Forget(victim);
 			}
 		}
 	}
-
-	CLEANUP(victim, load);
 }
 
 ACMD(do_warrant)
 {
 	char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
 	Character *victim;
-	Clan *c;
+	Clan *clan;
+	UserClan *chUserClan, *victimUserClan;
+	Warrant *warrant;
 	bool load = false;
-	int count = 0;
-
-	if(GET_LEVEL(ch) < LVL_GOD && !IS_NPC(ch))
-	{
-		ch->send("What!?!\r\n");
-		return;
-	}
 
 	TwoArguments(OneArgument(argument, arg), arg2, arg3);
 	if(!argument || !*arg || !*arg2)
 	{
-		ch->send("Syntax: Warrant <PlayerName> <ClanName OR Vnum> HIDE\r\n");
+		ch->send("Syntax: Warrant <Player Name> <Clan Name Or Number>\r\n");
 		return;
 	}
 
@@ -1740,32 +1788,76 @@ ACMD(do_warrant)
 			load = true;
 	}
 
-	if((count = GetClanByString(arg2)))
+	std::unique_ptr<Character> victimUniquePointer;
+
+	if(load)
+		victimUniquePointer = std::unique_ptr<Character>(victim);
+
+	int clanId = GetClanByString(arg2);
+
+	if(!clanId)
 	{
-		if(!strn_cmp(arg3, "hide", 1) && GET_LEVEL(ch) >= LVL_GRGOD)
-			victim->SetWarrant(ch, count, true);
-		else
-			victim->SetWarrant(ch, count, false);
-
-		if(!(c = ClanUtil::getClan(count)) || !c->GetWarrant())
-		{
-			ch->send("There is no warrant set for this clan.\r\n");
-			return;
-		}
-
-		MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "%s warranted %s for clan %s(%s).",
-		       GET_NAME(ch), GET_NAME(victim), c->Name.c_str(), c->GetWarrant()->Name.c_str());
+		ch->send("Invalid clan. Enter a valid clan name or clan number. You can see all clans by using the VIEW CLANS command.\r\n");
+		return;
 	}
-	else
-		ch->send("That is an invalid clan.\r\n");
 
-	CLEANUP(victim, load);
+	clan = ClanUtil::getClan(clanId);
+	chUserClan = ch->getUserClan(clanId);
+	
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && !chUserClan)
+	{
+		ch->send("You are not a member of the %s clan.\r\n", clan->Name.c_str());
+		return;
+	}
+
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && !chUserClan->getIsCouncil())
+	{
+		ch->send("You are not a council member of the %s clan.\r\n", clan->Name.c_str());
+		return;
+	}
+
+	warrant = clan->GetWarrant();
+
+	if(!warrant)
+	{
+		ch->send("Oddly, the %s clan cannot issue any warrants!\r\n", clan->Name.c_str());
+		return;
+	}
+
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && GET_RACE(ch) != GET_RACE(victim))
+	{
+		ch->send("%s is not of the same race as you!\r\n", GET_NAME(victim));
+		return;
+	}
+
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && GET_LEVEL(victim) >= LVL_IMMORT)
+	{
+		ch->send("You think you're godly enough to warrant %s? Hah!\r\n", GET_NAME(victim));
+		return;
+	}
+
+	if(IS_SET_AR(GET_WARRANTS(victim), warrant->vnum))
+	{
+		ch->send("%s is already wanted by the %s clan.\r\n", GET_NAME(victim), clan->Name.c_str());
+		return;
+	}
+	
+	victim->SetWarrant(ch, clanId, false);
+
+	MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE,
+		"%s warranted %s for clan %s(%s).",
+		GET_NAME(ch), GET_NAME(victim), clan->Name.c_str(), clan->GetWarrant()->Name.c_str());
+
+	if(load)
+	{
+		victim->save();
+	}
 }
 
 ACMD(do_zap)
 {
 	Character *victim;
-	int ammount = 0, i;
+	int amount = 0, i;
 	bool load = false;
 	char arg[MAX_INPUT_LENGTH], level[MAX_INPUT_LENGTH];
 
@@ -1798,16 +1890,16 @@ ACMD(do_zap)
 		}
 	}
 
-	ammount = atoi(level);
+	amount = atoi(level);
 
-	if(ammount >= GET_LEVEL(victim))
+	if(amount >= GET_LEVEL(victim))
 	{
 		Act("Your argument MUST be lower than $S level.", FALSE, ch, NULL, victim, TO_CHAR);
 		CLEANUP(victim, load);
 		return;
 	}
 
-	if(ammount <= 0)
+	if(amount <= 0)
 	{
 		ch->send("Level drop cannot be below 1.\r\n");
 		CLEANUP(victim, load);
@@ -1829,9 +1921,9 @@ ACMD(do_zap)
 	}
 
 	MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "%s lowered %s's level from %d to %d.%s",
-	       GET_NAME(ch), GET_NAME(victim), GET_LEVEL(victim), ammount, load ? " (Offline)" : "");
+	       GET_NAME(ch), GET_NAME(victim), GET_LEVEL(victim), amount, load ? " (Offline)" : "");
 
-	for(i = GET_LEVEL(victim);i > ammount;--i)
+	for(i = GET_LEVEL(victim);i > amount;--i)
 		victim->DropLevel();
 
 	GET_EXP(victim) = level_exp(GET_LEVEL(victim));
@@ -2045,28 +2137,23 @@ ACMD(do_countdown)
 ACMD(do_rank)
 {
 	Character *victim;
-	UserClan *userClan;
+	UserClan *victimUserClan, *chUserClan;
+	Clan *clan;
 	int i = 0;
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 	bool load = false;
-
+	std::string syntax = "Syntax: Rank <Player Name> <Clan Name or Number>";
 	TwoArguments(argument, arg1, arg2);
-
-	if(GET_LEVEL(ch) < LVL_APPR && !IS_NPC(ch))
-	{
-		ch->send("You cannot use this command!\r\n");
-		return;
-	}
 
 	if(!*arg1)
 	{
-		ch->send("Rank who?\r\n");
+		ch->send("%s\r\n", syntax.c_str());
 		return;
 	}
 
 	if(!*arg2)
 	{
-		ch->send("Rank for which clan?\r\n");
+		ch->send("%s\r\n", syntax.c_str());
 		return;
 	}
 
@@ -2084,70 +2171,106 @@ ACMD(do_rank)
 		}
 	}
 
+	std::unique_ptr<Character> victimUniquePointer;
+
+	if(load)
+		victimUniquePointer = std::unique_ptr<Character>(victim);
+
 	if(!(i = GetClanByString(arg2)) || !ch->CanViewClan(i))
 	{
-		ch->send("There is no such clan.\r\n");
-
-		if(load)
-			delete victim;
+		ch->send("Invalid clan. Enter a valid clan name or clan number. You can see all clans by using the VIEW CLANS command.\r\n");
 		return;
 	}
 
-	if(!(userClan = victim->getUserClan(i)))
-	{
-		ch->send("%s is not a member of that clan.\r\n", GET_NAME(victim));
+	clan = ClanUtil::getClan(i);
+	chUserClan = ch->getUserClan(i);
 
-		if(load)
-			delete victim;
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && !chUserClan)
+	{
+		ch->send("You are not a member of the %s clan.\r\n", clan->Name.c_str());
 		return;
 	}
 
-	if(userClan->getQuestPoints() < rank_req[userClan->getRank()])
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && !chUserClan->getIsCouncil())
 	{
-		ch->send("They do not have enough quest points to rank.\r\n");
-
-		if(load)
-			delete victim;
+		ch->send("You are not a council member of the %s clan.\r\n", clan->Name.c_str());
 		return;
 	}
 
-	userClan->setRank(userClan->getRank() + 1);
-	MudLog(NRM, MAX(LVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "%s raised %s's rank to %d.%s", GET_NAME(ch), GET_NAME(victim), (int)userClan->getRank(), load ? " (Offline)" : "");
-
-	ch->send("Ok.\r\n");
-	ClanUtil::putUserClan(gameDatabase, userClan);
-	if(load)
+	if(!(victimUserClan = victim->getUserClan(i)))
 	{
-		delete victim;
+		ch->send("%s is not a member of the %s clan.\r\n", GET_NAME(victim), clan->Name.c_str());
+		return;
+	}
+
+	if(victim->getUserId() == ch->getUserId())
+	{
+		ch->send("You cannot rank yourself!\r\n");
+		return;
+	}
+
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && GET_LEVEL(victim) >= LVL_IMMORT)
+	{
+		ch->send("%s might appreciate what you're doing, but you'd better let %s take care of this %sself.\r\n", StringUtil::cap(std::string(HSSH(victim))).c_str(), HMHR(victim), HMHR(victim));
+		return;
+	}
+
+	if(victimUserClan->getQuestPoints() < rank_req[victimUserClan->getRank()])
+	{
+		ch->send("%s does not have enough quest points to rank.\r\n", GET_NAME(victim));
+		return;
+	}
+
+	victimUserClan->setRank(victimUserClan->getRank() + 1);
+	MudLog(NRM, MAX(LVL_GRGOD, GET_INVIS_LEV(ch)), TRUE, "%s raised %s's rank to %d in the %s clan.%s", GET_NAME(ch), GET_NAME(victim), (int)victimUserClan->getRank(), clan->Name.c_str(), load ? " (Offline)" : "");
+
+	ch->send("You raise %s's rank to %d in the %s clan.\r\n", GET_NAME(victim), (int)victimUserClan->getRank(), clan->Name.c_str());
+	ClanUtil::putUserClan(gameDatabase, victimUserClan);
+
+	std::string rankName = clan->GetRankName(victimUserClan->getRank());
+
+	if(!rankName.empty() && !clan->secret)
+	{
+		game->sendToAll([&](Character *target) {
+
+			std::stringstream messageStringStream;
+
+			messageStringStream
+				<< COLOR_BOLD(target, CL_NORMAL) << COLOR_GREEN(target, CL_NORMAL)
+				<< "**" << GET_NAME(victim) << " has been promoted to " << rankName << "!**" << COLOR_NORMAL(victim, CL_NORMAL) << "\r\n";
+
+			return messageStringStream.str();
+		});
+	}
+
+	if(victimUserClan->getRank() == 6)
+	{
+		victim->send("You are now able to select a special skill at your clan leader.\r\n"
+					 "Type %s%sSHOW SKILLS%s at your clan leader to view the skills available.\r\n",
+					 COLOR_BOLD(victim, CL_NORMAL), COLOR_CYAN(victim, CL_NORMAL), COLOR_NORMAL(victim, CL_NORMAL));
 	}
 }
 
 ACMD(do_demote)
-// demote function, imped by Stark, rewritten by Galnor: 11-25-2004
+// demote function, imped by Stark, rewritten by Galnor: 11-25-2004, rewritten again July 3rd 2014.
 {
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 	int i = 0;
 	Character *victim;
-	UserClan *userClan;
 	bool load = false;
+	std::string syntax = "Syntax: Demote <Player Name> <Clan Name or Number>";
 
 	TwoArguments(argument, arg1, arg2);
 
-	if(GET_LEVEL(ch) < LVL_GOD && !IS_NPC(ch))
-	{
-		ch->send("You cannot use this command!\r\n");
-		return;
-	}
-
 	if(!*arg1)
 	{
-		ch->send("Demote who?\r\n");
+		ch->send("%s\r\n", syntax.c_str());
 		return;
 	}
 
 	if(!*arg2)
 	{
-		ch->send("Demote from which clan?\r\n");
+		ch->send("%s\r\n", syntax.c_str());
 		return;
 	}
 
@@ -2165,73 +2288,81 @@ ACMD(do_demote)
 		}
 	}
 
+	std::unique_ptr<Character> victimUniquePointer;
+
+	if(load)
+		victimUniquePointer = std::unique_ptr<Character>(victim);
+
 	if(!(i = GetClanByString(arg2)) || !ch->CanViewClan(i))
 	{
 		ch->send("There is no such clan.\r\n");
-
-		if(load)
-			delete victim;
 		return;
 	}
 
-	if(!(userClan = victim->getUserClan(i)))
+	Clan *clan = ClanUtil::getClan(i);
+	UserClan *chUserClan = ch->getUserClan(i);
+
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && !chUserClan)
 	{
-		ch->send("%s is no in that clan.\r\n", GET_NAME(victim));
-
-		if(load)
-			delete victim;
+		ch->send("You are not a member of the %s clan.\r\n", clan->Name.c_str());
 		return;
 	}
 
-	if(userClan->getRank() <= 0)
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && !chUserClan->getIsCouncil())
 	{
-		ch->send("You cannot lower someone's rank any lower than zero.\r\n");
-
-		if(load)
-			delete victim;
+		ch->send("You are not a member of the %s council.\r\n", clan->Name.c_str());
 		return;
 	}
 
-	userClan->setRank(userClan->getRank() - 1);
-	if(load)
-		victim->saveClans();
+	if(victim->getUserId() == ch->getUserId())
+	{
+		ch->send("You cannot demote yourself!\r\n");
+		return;
+	}
+
+	UserClan *victimUserClan = victim->getUserClan(i);
+
+	if(!victimUserClan)
+	{
+		ch->send("%s is not a member of the %s clan.\r\n", GET_NAME(victim), clan->Name.c_str());
+		return;
+	}
+
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && GET_LEVEL(victim) >= LVL_IMMORT)
+	{
+		ch->send("%s would probably smite you into a thousand bits if %s caught you doing that to %s!\r\n", StringUtil::cap(std::string(HSSH(victim))).c_str(), HSSH(victim), HMHR(victim));
+		return;
+	}
+
+	if(victimUserClan->getRank() <= 0)
+	{
+		ch->send("%s is already at rank 0. You cannot lower %s rank any further.\r\n", GET_NAME(victim), HSHR(victim));
+		return;
+	}
+
+	victimUserClan->setRank(victimUserClan->getRank() - 1);
+	ClanUtil::putUserClan(gameDatabase, victimUserClan);
 
 	MudLog(NRM, MAX(LVL_GRGOD, GET_INVIS_LEV(ch)), TRUE,
-	       "%s lowered %s's rank to %d.%s",
-	       GET_NAME(ch), GET_NAME(victim), (int)userClan->getRank(), load ? " (Offline)" : "");
-	ch->send(OK);
-
-	if(load)
-		delete victim;
-
+	       "%s lowered %s's rank to %d in the %s clan.%s",
+	       GET_NAME(ch), GET_NAME(victim), (int)victimUserClan->getRank(), clan->Name.c_str(), load ? " (Offline)" : "");
+	ch->send("You lowered %s's rank to %d in the %s clan.\r\n", GET_NAME(victim), (int)victimUserClan->getRank(), clan->Name.c_str());
 }
 
 ACMD(do_council)
 {
 	Character *victim;
 	UserClan *userClan;
-	std::string type;
+	Clan *clan;
 	char player_name[MAX_INPUT_LENGTH], clan_name[MAX_INPUT_LENGTH];
 	int clan_num;
 	bool load = false;
 
-	if(GET_LEVEL(ch) < LVL_APPR && !IS_NPC(ch))
-	{
-		ch->send("You can't do that!\r\n");
-		return;
-	}
-
 	TwoArguments(argument, player_name, clan_name);
 
-	if(!*player_name)
+	if(!*player_name || !*clan_name)
 	{
-		ch->send("Make who Council?\r\n");
-		return;
-	}
-
-	if(!*clan_name)
-	{
-		ch->send("What clan?\r\n");
+		ch->send("Syntax: Council <Player Name> <Clan Name or Number>\r\n");
 		return;
 	}
 
@@ -2244,38 +2375,71 @@ ACMD(do_council)
 		}
 		else
 		{
-//			victim->loadClans();
 			load = true;
 		}
 	}
+
+	std::unique_ptr<Character> victimUniquePointer;
+
+	if(load)
+		victimUniquePointer = std::unique_ptr<Character>();
 
 	//Get the clan
 	if(!(clan_num = GetClanByString(clan_name)))
 	{
 		ch->send("Invalid clan name or number.\r\n");
-
-		if(load)
-			delete victim;
-
 		return;
 	}
 
 	if(!(userClan = victim->getUserClan(clan_num)))
 	{
 		ch->send("%s is not a member of that clan.\r\n", GET_NAME(victim));
-
-		if(load)
-			delete victim;
 		return;
 	}
 
+	clan = ClanUtil::getClan(clan_num);
 	userClan->setIsCouncil(!userClan->getIsCouncil());
 
-	ch->send("%s has been %s from the Council.\r\n", GET_NAME(victim),
-		userClan->getIsCouncil() ? "added" : "removed");
+	ch->send("%s has been %s from the Council.\r\n", GET_NAME(victim), userClan->getIsCouncil() ? "added" : "removed");
 	MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE,
-		"%s %s %s's council flag for clan %s.%s", GET_NAME(ch), (userClan->getIsCouncil() ? "added" : "removed"),
-	       GET_NAME(victim), ClanUtil::getClan(clan_num)->Name.c_str(), load ? " (Offline)" : "");
+		"%s %s %s's council flag for clan %s.%s",
+		GET_NAME(ch), (userClan->getIsCouncil() ? "added" : "removed"),
+		GET_NAME(victim), ClanUtil::getClan(clan_num)->Name.c_str(), load ? " (Offline)" : "");
+
+	try
+	{
+		flusspferd::object victimJavaScriptObject;
+		if(load)
+		{
+			Room *loadRoom = FindRoomByVnum( victim->PlayerData->load_room );
+			if(!loadRoom)
+				loadRoom = victim->StartRoom();
+
+			victim->MoveToRoom( loadRoom );
+
+			victimJavaScriptObject = flusspferd::create_native_object<JSCharacter>(flusspferd::object(), victim).get_object();
+		}
+		else
+			victimJavaScriptObject = lookupValue(victim).to_object();
+
+		
+		flusspferd::object clanUtil = flusspferd::global().get_property("ClanUtil").get_object();
+
+		if(userClan->getIsCouncil())
+			flusspferd::value result = clanUtil.call("onUserAddedToCouncil", victimJavaScriptObject, clan->vnum);
+		else
+			flusspferd::value result = clanUtil.call("onUserRemovedFromCouncil", victimJavaScriptObject, clan->vnum);
+
+		if(load)
+		{
+			flusspferd::get_native<JSCharacter>(victimJavaScriptObject).setReal(NULL);
+			victim->RemoveFromRoom();
+		}
+	}
+	catch(flusspferd::exception e)
+	{
+		MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "Error while changing %s's council flag by %s in clan %s: %s", GET_NAME(victim), GET_NAME(ch), clan->Name.c_str(), e.what());
+	}
 
 	if(load)
 		victim->saveClans();
@@ -2287,23 +2451,18 @@ ACMD(do_clan)
 	Character *victim = NULL;
 	UserClan *userClan;
 	bool loaded = false;
-
-	if(GET_LEVEL(ch) < LVL_APPR && !IS_NPC(ch))
-	{
-		ch->send("What!?!\r\n");
-		return;
-	}
+	std::string syntax = "Clan <Player Name> <Clan Name or Number>";
 
 	TwoArguments(argument, playername, clanstr);
 
 	if(!*playername)
 	{
-		ch->send("Clan who?");
+		ch->send("%s\r\n", syntax.c_str());
 		return;
 	}
 	if(!*clanstr)
 	{
-		ch->send("Which clan?\r\n");
+		ch->send("%s\r\n", syntax.c_str());
 		return;
 	}
 
@@ -2311,7 +2470,21 @@ ACMD(do_clan)
 	Clan *clan = NULL;
 	if(!(clanId = GetClanByString(clanstr)) || !(clan = ClanUtil::getClan(clanId)))
 	{
-		ch->send("Invalid clan.\r\n");
+		ch->send("Invalid clan. Enter a valid clan name or clan number. You can see all clans by using the VIEW CLANS command.\r\n");
+		return;
+	}
+
+	userClan = ch->getUserClan(clan->vnum);
+
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && !userClan)
+	{
+		ch->send("You are not a member of the %s clan.\r\n", clan->Name.c_str());
+		return;
+	}
+
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && !userClan->getIsCouncil())
+	{
+		ch->send("You are not a council member of the %s clan\r\n", clan->Name.c_str());
 		return;
 	}
 
@@ -2327,9 +2500,20 @@ ACMD(do_clan)
 			loaded = true;
 	}
 
-	if( (victim && victim->getUserClan(clanId)))
+	std::unique_ptr<Character> victimAutoPointer;
+
+	if(loaded)
+		victimAutoPointer = std::unique_ptr<Character>(victim);
+
+	if(victim->getUserClan(clanId))
 	{
-		ch->send("%s is already in that clan.\r\n", playername);
+		ch->send("%s is already a member of the %s clan.\r\n", GET_NAME(victim), clan->Name.c_str());
+		return;
+	}
+
+	if(GET_LEVEL(ch) <= COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && GET_RACE(victim) != GET_RACE(ch))
+	{
+		ch->send("%s is not of the same race as you.\r\n", GET_NAME(victim));
 		return;
 	}
 
@@ -2341,11 +2525,39 @@ ACMD(do_clan)
 	ch->send("%s has been added to clan %s.\r\n", StringUtil::cap(StringUtil::allLower(playername)), clan->Name.c_str());
 	MudLog(NRM, MAX(GET_INVIS_LEV(ch), LVL_GOD), TRUE, "%s clanned %s into clan %s.", ch->player.name.c_str(), StringUtil::cap(StringUtil::allLower(playername)), clan->Name.c_str());
 
-	if(victim)
-		victim->addToClan(userClan);
+	try
+	{
+		flusspferd::object victimJavaScriptObject;
+		if(loaded)
+		{
+			Room *loadRoom = FindRoomByVnum( victim->PlayerData->load_room );
+			if(!loadRoom)
+				loadRoom = victim->StartRoom();
 
-	if(loaded)
-		delete victim;
+			victim->MoveToRoom( loadRoom );
+
+			victimJavaScriptObject = flusspferd::create_native_object<JSCharacter>(flusspferd::object(), victim).get_object();
+		}
+		else
+			victimJavaScriptObject = lookupValue(victim).to_object();
+
+		
+		flusspferd::object clanUtil = flusspferd::global().get_property("ClanUtil").get_object();
+
+		flusspferd::value result = clanUtil.call("onUserAddedToClan", victimJavaScriptObject, clan->vnum);
+
+		if(loaded)
+		{
+			flusspferd::get_native<JSCharacter>(victimJavaScriptObject).setReal(NULL);
+			victim->RemoveFromRoom();
+		}
+	}
+	catch(flusspferd::exception e)
+	{
+		MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "Error while clanning %s by %s to clan %s: %s", GET_NAME(victim), GET_NAME(ch), clan->Name.c_str(), e.what());
+	}
+
+	victim->addToClan(userClan);
 }
 
 ACMD(do_declan)
@@ -2355,29 +2567,25 @@ ACMD(do_declan)
 	bool loaded = false;
 	Character *victim = NULL;
 	Clan *clan = NULL;
-
-	if(GET_LEVEL(ch) < LVL_APPR && !IS_NPC(ch))
-	{
-		ch->send("What!?!\r\n");
-		return;
-	}
+	std::string syntax = "Syntax: Declan <Player Name> <Clan Name or Number>";
+	std::list<int> clanIdsUserWasRemovedFrom;
 
 	TwoArguments(argument, playername, clanstr);
 
 	if(!*playername)
 	{
-		ch->send("Declan who?");
+		ch->send("%s\r\n", syntax.c_str());
 		return;
 	}
 	if(!*clanstr)
 	{
-		ch->send("Which clan?\r\n");
+		ch->send("%s\r\n", syntax.c_str());
 		return;
 	}
 
-	if((!(clanId = GetClanByString(clanstr)) || !(clan = ClanUtil::getClan(clanId))) && str_cmp(clanstr, "all"))
+	if((!(clanId = GetClanByString(clanstr)) || !(clan = ClanUtil::getClan(clanId))) && (str_cmp(clanstr, "all") || GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL))
 	{
-		ch->send("Invalid clan.\r\n");
+		ch->send("Invalid clan. Enter a valid clan name or clan number. You can see all clans by using the VIEW CLANS command.\r\n");
 		return;
 	}
 
@@ -2397,42 +2605,119 @@ ACMD(do_declan)
 		return;
 	}
 
-	UserClan *userClan = victim->getUserClan(clanId);
-	if(clanId && (victim && !userClan))
-	{
-		ch->send("That player is not in that clan.\r\n");
-		return;
-	}
+	std::unique_ptr<Character> victimUniquePointer;
+	
+	if(loaded)
+		victimUniquePointer = std::unique_ptr<Character>(victim);
 
-	//Only way clanId can be 0 is if GetClanByString() returned 0 and clanstr was set to "all"
-	//Therefore we are removing all of the player's clans.
 	if(clanId)
 	{
+		UserClan *chUserClan = ch->getUserClan(clanId);
+
+		if(GET_LEVEL(ch) <= COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && !chUserClan)
+		{
+			ch->send("You are not a member of the %s clan.\r\n", clan->Name.c_str());
+			return;
+		}
+
+		if(GET_LEVEL(ch) <= COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && !chUserClan->getIsCouncil())
+		{
+			ch->send("You are not a council member of the %s clan.\r\n", clan->Name.c_str());
+			return;
+		}
+
+		UserClan *victimUserClan = victim->getUserClan(clanId);
+		if(!victimUserClan)
+		{
+			ch->send("%s is not a member of the %s clan.\r\n", GET_NAME(victim), clan->Name.c_str());
+			return;
+		}
+
+		if(GET_LEVEL(ch) <= COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && ch->getUserId() == victim->getUserId())
+		{
+			ch->send("You cannot declan yourself.\r\n");
+			return;
+		}
+		
+		if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && GET_LEVEL(victim) >= LVL_IMMORT)
+		{
+			ch->send("You wouldn't dare declan %s for fear of retribution!\r\n", GET_NAME(victim));
+			return;
+		}
+
+		//Only way clanId can be 0 is if GetClanByString() returned 0 and clanstr was set to "all"
+		//Therefore we are removing all of the player's clans.
+		
 		ch->send("You have removed %s from clan %s.\r\n", playername, clan->Name.c_str());
 		MudLog(NRM, MAX(GET_INVIS_LEV(ch), LVL_GOD), TRUE, "%s removed %s from clan %s.", ch->player.name.c_str(), playername, clan->Name.c_str());
 		
 		//Remove from the database.
-		if(!userClan->isNew())
+		if(!victimUserClan->isNew())
 		{
 			std::list<int> userClanIds;
-			userClanIds.push_back(userClan->getId());
+			userClanIds.push_back(victimUserClan->getId());
 			ClanUtil::removeUserClansFromDatabase(gameDatabase, userClanIds);
 		}
 
 		if(victim)
+		{
 			victim->removeFromClan(clanId);
+			clanIdsUserWasRemovedFrom.push_back(clanId);
+		}
 	}
 	else
 	{
+		if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL)
+		{//This check should be covered above when we check for clan name, but just in case.
+			ch->send("Only immortals level %d or greater can remove a player from all clans.\r\n", COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL);
+			return;
+		}
+
 		ClanUtil::removeUserClansFromDatabase(gameDatabase, victim->userClans);
 		ch->send("You have removed %s from all clans.\r\n", playername);
 		MudLog(NRM, MAX(GET_INVIS_LEV(ch), LVL_GOD), TRUE, "%s removed %s from all clans.", ch->player.name.c_str(), playername);
+
+		for(UserClan *userClan : victim->userClans)
+		{
+			clanIdsUserWasRemovedFrom.push_back(userClan->getClanId());
+		}
+
 		if(victim)
 			victim->removeFromClan();
 	}
 
-	if(loaded)
-		delete victim;
+	try
+	{
+		flusspferd::object victimJavaScriptObject;
+		if(loaded)
+		{
+			Room *loadRoom = FindRoomByVnum( victim->PlayerData->load_room );
+			if(!loadRoom)
+				loadRoom = victim->StartRoom();
+
+			victim->MoveToRoom( loadRoom );
+			victimJavaScriptObject = flusspferd::create_native_object<JSCharacter>(flusspferd::object(), victim).get_object();
+		}
+		else
+			victimJavaScriptObject = lookupValue(victim).to_object();
+
+		flusspferd::object clanUtil = flusspferd::global().get_property("ClanUtil").get_object();
+
+		for(int clanId : clanIdsUserWasRemovedFrom)
+		{
+			flusspferd::value result = clanUtil.call("onUserRemovedFromClan", victimJavaScriptObject, clanId);
+		}
+		
+		if(loaded)
+		{
+			flusspferd::get_native<JSCharacter>(victimJavaScriptObject).setReal(NULL);
+			victim->RemoveFromRoom();
+		}
+	}
+	catch(flusspferd::exception e)
+	{
+		MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "Error while clanning %s by %s to clan %s: %s", GET_NAME(victim), GET_NAME(ch), clan->Name.c_str(), e.what());
+	}
 }
 
 ACMD(do_reset)
@@ -2731,7 +3016,7 @@ ACMD(do_award)
 
 	if(clanQuestPointTransaction != NULL)
 	{//The operation succeeded.
-		ch->send("You award %s %d quest points. Transaction ID: %d\r\n", targetUserPlayerIndex->name.c_str(), clanQuestPointTransaction->getAmount(), clanQuestPointTransaction->getId());
+		ch->send("You award %s %d quest points.\r\n", targetUserPlayerIndex->name.c_str(), clanQuestPointTransaction->getAmount(), clanQuestPointTransaction->getId());
 		MudLog(BRF, MAX(GET_LEVEL(ch), LVL_APPR), TRUE, "%s has awarded %s %d quest points. Transaction ID: %d Reason given: `%s`", GET_NAME(ch), targetUserPlayerIndex->name.c_str(), clanQuestPointTransaction->getAmount(), clanQuestPointTransaction->getId(), clanQuestPointTransaction->getReason().c_str());
 
 		Character *targetUser = CharacterUtil::getOnlineCharacterById(targetUserId);
@@ -4090,7 +4375,7 @@ ACMD(do_mbload)
 	}
 
 	mob = new Character(r_num, REAL);
-	snprintf(logBuffer, sizeof(logBuffer), "mbload by %s(UID %d)", GET_NAME(ch), ch->player.idnum);
+	snprintf(logBuffer, sizeof(logBuffer), "mbload by %s(UID %ld)", GET_NAME(ch), ch->player.idnum);
 	mobLoadLogger.logMobLoad(mob->getVnum(), logBuffer);
 	mob->MoveToRoom(ch->in_room);
 

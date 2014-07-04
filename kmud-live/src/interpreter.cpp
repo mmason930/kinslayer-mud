@@ -28,6 +28,7 @@
 #include "mobs.h"
 #include "md5.h"
 #include "accounts.h"
+#include "constants.h"
 
 #include "js_functions.h"
 #include "js.h"
@@ -449,7 +450,7 @@ class CommandInfo cmd_info[] =
 		{	"copy"		, "copy", POS_DEAD		, do_copy			, LVL_IMMORT, 0					, 0.0	,  0			},
 //		{	"copyover"	, "copyo",POS_DEAD		, do_copyover		, LVL_IMPL	, 0					, 0.0	, 0		},
 		{	"credits"	, "cre"	, POS_DEAD		, do_gen_ps			, 0			, SCMD_CREDITS		, 0.0	,  0		},
-		{	"council"	, "cou"	, POS_DEAD		, do_council		, 0			, 0					, 0.0	,  LVL_APPR		},
+		{	"council"	, "cou"	, POS_DEAD		, do_council		, (byte)COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL, 0					, 0.0	,  LVL_APPR		},
 
 	    {	"date"		, "date", POS_DEAD		, do_date			, LVL_IMMORT, SCMD_DATE			, 0.0	,  0	},
 	    {	"dc"		, "dc"	, POS_DEAD		, do_dc				, LVL_GOD	, 0					, 0.0	,  LVL_APPR		},

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <functional>
 
 #include "PlayerPortalServer.h"
 
@@ -41,6 +42,7 @@ public:
 	bool playerPortalServerIsConnected();
 	int getPlayerPortalPort();
 	unsigned int getNumberOfPlayerPortalDescriptors();
+	void sendToAll(std::function<std::string(class Character *target)>);
 };
 
 extern class Game *game;

@@ -257,7 +257,7 @@ void Character::SetWarrant(Character *warranter, int clan, bool hide)
 	Act("$N has been warranted.", FALSE, warranter, 0, this, TO_CHAR);
 
 	if(!hide)
-		this->send("You have been warranted by the %s!\r\n", c->GetWarrant()->Name.c_str());
+		this->send("You have been warranted by %s!\r\n", c->GetWarrant()->Name.c_str());
 }
 void Character::RemoveWarrant(Character *pardoner, int num)
 {
@@ -267,7 +267,7 @@ void Character::RemoveWarrant(Character *pardoner, int num)
 
 	REMOVE_BIT_AR(GET_WARRANTS(this), c->GetWarrant()->vnum);
 	Act("$N has been pardoned.", FALSE, pardoner, 0, this, TO_CHAR);
-	this->send("You have been pardoned by the %s!\r\n", c->GetWarrant()->Name.c_str());
+	this->send("You have been pardoned by %s!\r\n", c->GetWarrant()->Name.c_str());
 }
 
 void MySQLSaveQuest(const std::string &playername, const Quest *quest, bool update)

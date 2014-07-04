@@ -3,6 +3,9 @@
 #include "Game.h"
 #include "MiscUtil.h"
 #include "utils.h"
+#include "structs.h"
+
+extern Character *character_list;
 
 Game *game = NULL;
 
@@ -122,4 +125,15 @@ int Game::getPlayerPortalPort()
 unsigned int Game::getNumberOfPlayerPortalDescriptors()
 {
 	return playerPortalServer->numberOfDescriptors();
+}
+
+void Game::sendToAll(std::function<std::string(Character *target)> messageFunction)
+{
+	for(Character *target = character_list;target;target = target->next)
+	{
+		if(target->desc)
+		{
+			target->send(messageFunction(target).c_str());
+		}
+	}
 }

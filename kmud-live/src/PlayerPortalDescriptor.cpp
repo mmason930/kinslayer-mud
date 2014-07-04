@@ -119,7 +119,7 @@ void PlayerPortalDescriptor::processInput()
 				Json::Value command;
 				Json::Reader reader;
 
-				MudLog(BRF, LVL_APPR, TRUE, "Command: %s", std::string(commandStart, commandEnd - commandStart).c_str());
+				//MudLog(BRF, LVL_APPR, TRUE, "Command: %s", std::string(commandStart, commandEnd - commandStart).c_str());
 				if (!reader.parse(jsonCommand, command, false))
 				{
 					MudLog(BRF, LVL_APPR, TRUE, "Could not process player portal websocket command. Input: %s", StringUtil::vaEscape(jsonCommand).c_str());

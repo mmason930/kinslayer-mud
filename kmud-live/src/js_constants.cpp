@@ -13,6 +13,7 @@
 #include "conf.h"
 #include "sysdep.h"
 
+#include "constants.h"
 #include "structs.h"
 #include "sysdep.h"
 #include "js.h"
@@ -429,6 +430,8 @@ flusspferd::object makeConstants()
 	o.set_property("APPLY_HITROLL", flusspferd::value(APPLY_HITROLL));
 	o.set_property("APPLY_DAMROLL", flusspferd::value(APPLY_DAMROLL));
 	o.set_property("APPLY_RACE", flusspferd::value(APPLY_RACE));
+
+	o.set_property("COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL", COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL);
 
 	return o;
 }

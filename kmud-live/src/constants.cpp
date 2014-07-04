@@ -195,7 +195,6 @@ const char * sun_types[] =
 
 const int NUM_SUN_TYPES = 4;
 
-
 const char * weather_patterns[] =
 {
 	"The sky is cloudless.",
@@ -1122,3 +1121,5 @@ const int WSP_BOND = 12;
 const int WSP_ENHANCE_WEAPON = 13;
 
 const int NUM_SPECIAL_FUNCTIONS = 14;
+
+const int COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL = LVL_APPR;
