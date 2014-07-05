@@ -21,7 +21,7 @@ int Room::getLinesInDescription()
 {
 	int lines = 0;
 
-	for (const char *ptr = description; ptr; ++ptr)
+	for (const char *ptr = description; *ptr; ++ptr)
 	{
 		if ((*ptr) == '\n')
 			++lines;
