@@ -2203,7 +2203,7 @@ ACMD(do_rank)
 		return;
 	}
 
-	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && ch->getUserId() == ch->getUserId())
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && ch->getUserId() == victim->getUserId())
 	{
 		ch->send("You cannot rank yourself!\r\n");
 		return;
@@ -2314,7 +2314,7 @@ ACMD(do_demote)
 		return;
 	}
 
-	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && ch->getUserId() == ch->getUserId())
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && ch->getUserId() == victim->getUserId())
 	{
 		ch->send("You cannot demote yourself!\r\n");
 		return;
