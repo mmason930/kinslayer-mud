@@ -36,6 +36,7 @@ FLUSSPFERD_CLASS_DESCRIPTION(
     (constructor_name, "JSCharacter")
     (methods,
 		("send", bind, send)
+		("sendRaw", bind, sendRaw)
 		("say", bind, say)
 		("damage", bind, damage)
 		("eq", bind, eq)
@@ -202,6 +203,7 @@ public:
 	void setReal( Character *c ) { real = c; }
 
     void send(std::string message);
+	void sendRaw(std::string message);
 	void damage(int dmg, flusspferd::value attacker);
     void say(flusspferd::string msg);
     void tell(JSCharacter *vict, flusspferd::string msg);

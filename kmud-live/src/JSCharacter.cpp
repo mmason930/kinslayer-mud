@@ -67,6 +67,13 @@ void JSCharacter::send( std::string message )
 	real->send(StringUtil::vaEscape(message + "\r\n"));
 }
 
+void JSCharacter::sendRaw( std::string message )
+{
+	if( !real || real->IsPurged() )
+		return;
+	real->send(StringUtil::vaEscape(message));
+}
+
 ACMD(do_say);
 
 struct GameTime *real_time_passed(time_t t2, time_t t1);
