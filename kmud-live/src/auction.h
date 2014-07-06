@@ -1,7 +1,7 @@
 /********************************************************************
- *	auction.h - Defines the AuctionManager classes				*
+ *	auction.h - Defines the AuctionManager classes					*
  *																	*
- *	Coded by Galnor in September of 2009 (Sortak@gmail.com)			*
+ *	Coded by Galnor in September of 2009 (mikemason930@gmail.com)	*
  *																	*
  ********************************************************************/
 

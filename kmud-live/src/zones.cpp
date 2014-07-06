@@ -192,6 +192,7 @@ void Zone::Reset()
 		switch (this->cmd[cmd_no]->command)
 		{
 			case 'M':			// read a mobile
+
 				if (this->cmd[cmd_no]->arg2 >= MiscUtil::random(1, 100) &&
 					(this->cmd[cmd_no]->arg4 == -1 || this->cmd[cmd_no]->arg4 > (int)CountMobsRoom(this->cmd[cmd_no]->arg1, World[this->cmd[cmd_no]->arg3])) &&
 					(this->cmd[cmd_no]->arg5 == -1 || this->cmd[cmd_no]->arg5 > (int)CountMobs(this->cmd[cmd_no]->arg1)) &&

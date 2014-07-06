@@ -746,10 +746,15 @@ ACMD(do_incognito)
 /*
  * This function screams bitvector... -gg 6/45/98
  */
-void showObjectToCharacter(Object *object, Character *ch, int mode, int ammount)
+void showObjectToCharacter(Object *object, Character *ch, int mode, int amount)
 {
 	bool found;
 	char text[MAX_INPUT_LENGTH];
+
+	bool disorientRoll = false;
+	
+	if(mode == 0)
+		disorientRoll = ch->disorientRoll();
 
 	*buf = '\0';
 
@@ -765,9 +770,11 @@ void showObjectToCharacter(Object *object, Character *ch, int mode, int ammount)
 	                                       (mode == 2) || (mode == 3) || (mode == 4)))
 		strcpy(buf, object->GetSDesc());
 
-	if(ammount > 1)
+	if(amount > 1)
 	{
-		sprintf(text, " [%d]", ammount);
+		if(disorientRoll)
+			amount = MiscUtil::random(amount, amount * 2);
+		sprintf(text, " [%d]", amount);
 		strcat(buf, text);
 	}
 	else if( (mode == 5 || mode == 6) && object->getType() == ITEM_WEAPON)
@@ -839,7 +846,18 @@ void showObjectToCharacter(Object *object, Character *ch, int mode, int ammount)
 		strcat(buf, COLOR_NORMAL(ch, CL_NORMAL));
 	}
 	strcat(buf, "\r\n");
-	page_string(ch->desc, buf, TRUE);
+	
+	if(disorientRoll)
+	{//page_string will wipe out our buffer, so we need to copy it if we are calling it twice.
+
+		char objectDisplayBuffer[MAX_STRING_LENGTH];
+		snprintf(objectDisplayBuffer, sizeof(objectDisplayBuffer), "%s", buf);
+
+		page_string(ch->desc, buf, TRUE);
+		page_string(ch->desc, objectDisplayBuffer, TRUE);
+	}
+	else
+		page_string(ch->desc, buf, TRUE);
 }
 
 int count_object(Object *obj)
@@ -880,18 +898,18 @@ void listObjectToCharacter(Object *listy, Character *ch, int mode, int show)
 				continue;
 
 			hasSeen = false;
-			for(std::list<SpamItem>::iterator sIter = SpamList.begin();sIter != SpamList.end();++sIter)
+			for(SpamItem spamItem : SpamList)
 			{
-				if(mode != 0 && !strcmp(i->GetSDesc(),(*sIter).obj->GetSDesc()))
+				if(mode != 0 && !strcmp(i->GetSDesc(),spamItem.obj->GetSDesc()))
 				{
 					hasSeen = true;
-					++(*sIter).count;
+					++spamItem.count;
 					break;
 				}
-				else if( mode == 0 && !strcmp(i->GetDesc(),(*sIter).obj->GetDesc()) )
+				else if( mode == 0 && !strcmp(i->GetDesc(),spamItem.obj->GetDesc()))
 				{
 					hasSeen = true;
-					++(*sIter).count;
+					++spamItem.count;
 					break;
 				}
 			}
@@ -909,9 +927,9 @@ void listObjectToCharacter(Object *listy, Character *ch, int mode, int show)
 			}
 		}
 
-		for(std::list<SpamItem>::iterator sIter = SpamList.begin();sIter != SpamList.end();++sIter)
+		for(SpamItem spamItem : SpamList)
 		{
-			showObjectToCharacter((*sIter).obj, ch, mode, (*sIter).count);
+			showObjectToCharacter(spamItem.obj, ch, mode, spamItem.count);
 			found = true;
 		}
 	}
@@ -1187,16 +1205,18 @@ void listOneCharacter(Character *i, Character *ch)
 		Act("...$n glows with a bright light!", FALSE, i, 0, ch, TO_VICT);
 }
 
-void listCharacterToCharacter( Character * listy,  Character * ch)
+void listCharacterToCharacter(Character *characterList, Character *ch)
 {
-	Character *i;
+	Character *characterToDisplay;
 
-	for (i = listy; i; i = i->next_in_room)
+	for(characterToDisplay = characterList;characterToDisplay;characterToDisplay = characterToDisplay->next_in_room)
 	{
-		if (ch != i)
+		if(characterToDisplay != ch && CAN_SEE(ch, characterToDisplay))
 		{
-			if (CAN_SEE(ch, i))
-				listOneCharacter(i, ch);
+			listOneCharacter(characterToDisplay, ch);
+
+			if(ch->disorientRoll())
+				listOneCharacter(characterToDisplay, ch);
 		}
 	}
 }
@@ -1606,7 +1626,9 @@ void look_at_room(Character * ch, int ignore_brief)
 		ch->send("[%5d] %s [ %s]", ch->in_room->getVnum(), ch->in_room->getName(), buf);
 	}
 	else
+	{
 		ch->send(ch->in_room->getName());
+	}
 
 	ch->send(COLOR_NORMAL(ch, CL_NORMAL));
 	ch->send("\r\n");
@@ -1623,22 +1645,30 @@ void look_at_room(Character * ch, int ignore_brief)
 	/* autoexits */
 	if (PRF_FLAGGED(ch, PRF_AUTOEXIT))
 		performAutoExits(ch);
+
 	/* vvvvvvvvv RHOLLOR 05.15.09 vvvvvvvvv */
 	/*  Adds autoscan to thieves when they perform look_at_room  */
 	if ( ( GET_CLASS(ch) == CLASS_THIEF || IS_GREYMAN(ch) ) && !PRF_FLAGGED(ch, PRF_AUTOSCAN) )
 		do_auto_scan(ch,false);
 	/* ^^^^^^^^^ RHOLLOR 05.15.09 ^^^^^^^^^ */
 	if(!AFF_FLAGGED(ch, AFF_BLIND))
+	{
 		ch->PrintTracks(ch->in_room, true);
+
+		if(ch->disorientRoll())
+			ch->PrintTracks(ch->in_room, true);
+	}
 
 	/* now list characters & objects */
 	ch->send(COLOR_GREEN(ch, CL_NORMAL));
 	listObjectToCharacter(ch->in_room->contents, ch, 0, FALSE);
 
-	std::list<Gate*> TempGateList = ch->in_room->getGates();
-	for(std::list<Gate *>::iterator i = TempGateList.begin();i != TempGateList.end();++i)
+	for(Gate *gate : ch->in_room->getGates())
 	{
-		ch->send("A strange gateway is here, leading to an unknown destination.\r\n");
+		ch->send(GATEWAY_ROOM_MESSAGE);
+
+		if(ch->disorientRoll())
+			ch->send(GATEWAY_ROOM_MESSAGE);
 	}
 
 	ch->send(COLOR_YELLOW(ch, CL_NORMAL));

@@ -2171,11 +2171,31 @@ void Character::send( const char *messg, ... )
 	}
 }
 
-void Character::send( std::string s)
+void Character::send( const std::string &s)
 {
     send(s.c_str());
 }
 
+void Character::sendDisorientableMessage( const char *message, ... )
+{
+	if(!message)
+		return;
+
+	va_list args;
+	va_start(args, message);
+
+	send(message, args);
+
+	if(AFF_FLAGGED(this, AFF_DISORIENT) && MiscUtil::random(1, 2) == 1)
+		send(message, args);
+
+	va_end(args);
+}
+
+void Character::sendDisorientableMessage( const std::string &s )
+{
+	sendDisorientableMessage(s.c_str());
+}
 
 // Character operator<< overloading
 Character& Character::operator<< ( const std::string &s)
@@ -2308,13 +2328,9 @@ const char *ACTNULL = "<NULL>";
 #define CHECK_NULL(pointer, expression) \
  if ((pointer) == NULL) i = ACTNULL; else i = (expression);
 
-
 /* higher-level communication: the Act() function */
-void PerformAct( const char *orig, Character *ch, Object *obj,
-				const void *vict_obj, Character *to, const int type, const char *bgColor )
-
+void PerformAct( const char *orig, Character *ch, Object *obj, const void *vict_obj, Character *to, const int type, const char *bgColor, bool disorientable )
 {
-
 	const char * i = NULL;
 	char lbuf[ MAX_STRING_LENGTH ], *buf;
 
@@ -2420,7 +2436,10 @@ void PerformAct( const char *orig, Character *ch, Object *obj,
 	*( ++buf ) = '\0';
 
 	if ( to->desc )
-		to->desc->sendRaw(StringUtil::cap( lbuf ));
+		to->desc->sendRaw(StringUtil::cap(lbuf));
+
+	if(disorientable && to->disorientRoll())
+		to->desc->sendRaw(StringUtil::cap(lbuf));
 }
 
 
@@ -2430,8 +2449,7 @@ void PerformAct( const char *orig, Character *ch, Object *obj,
 		!PLR_FLAGGED((ch), PLR_WRITING))
 	#endif
 
-void Act( const char *str, int hide_invisible, Character *ch,
-          Object *obj, const void *vict_obj, int type, const char *bgColor )
+void Act( const char *str, int hide_invisible, Character *ch, Object *obj, const void *vict_obj, int type, const char *bgColor, bool disorientable )
 {
 
 	Character * to = NULL;
@@ -2458,14 +2476,14 @@ void Act( const char *str, int hide_invisible, Character *ch,
 	if ( type == TO_CHAR )
 	{
 		if ( ch && ( SENDOK( ch ) || IS_NPC( ch ) ) )
-			PerformAct( str, ch, obj, vict_obj, ch, type, bgColor );
+			PerformAct( str, ch, obj, vict_obj, ch, type, bgColor, disorientable );
 		return ;
 	}
 
 	if ( type == TO_VICT )
 	{
 		if ( ( to = ( Character * ) vict_obj ) && SENDOK( to ) )
-			PerformAct( str, ch, obj, vict_obj, to, type, bgColor );
+			PerformAct( str, ch, obj, vict_obj, to, type, bgColor, disorientable );
 		return ;
 	}
 
@@ -2491,7 +2509,7 @@ void Act( const char *str, int hide_invisible, Character *ch,
 			continue;
 		if ( type != TO_ROOM && to == vict_obj )
 			continue;
-		PerformAct( str, ch, obj, vict_obj, to, type, bgColor );
+		PerformAct( str, ch, obj, vict_obj, to, type, bgColor, disorientable );
 	}
 }
 

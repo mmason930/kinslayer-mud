@@ -90,14 +90,21 @@ void affect_update(void)
 				af->duration = -1;	/* GODs only! unlimited */
 			else
 			{
-				if ((!af->next || (af->next->type != af->type) || (af->next->duration > 0)) &&
-				((weave = WeaveManager::GetManager().GetWeave( af->type )) != NULL) )
+				if ((!af->next || (af->next->type != af->type) || (af->next->duration > 0)))
 				{
-					std::string WearOffMsg = weave->getAttribute("WearOffMsg");
-					if( WearOffMsg != "<None>" )
-						i->send("%s\r\n", WearOffMsg.c_str());
-					if( af->bitvector == AFF_INSANE )
-						i->points.temp_taint = 0;
+					if((weave = WeaveManager::GetManager().GetWeave( af->type )) != NULL)
+					{
+						std::string WearOffMsg = weave->getAttribute("WearOffMsg");
+						if( WearOffMsg != "<None>" )
+							i->send("%s\r\n", WearOffMsg.c_str());
+						if( af->bitvector == AFF_INSANE )
+							i->points.temp_taint = 0;
+					}
+					else if(af->bitvector == AFF_DISORIENT)
+					{//TODO: we should have a map or something cleaner for this.
+						i->send("The world stops spinning around you as you regain your bearings.\r\n");
+						Act("$n appears to regain $s bearings.", true, i, NULL, NULL, TO_ROOM);
+					}
 				}
 				if(i->SlowedBy)
 				{

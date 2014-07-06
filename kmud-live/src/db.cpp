@@ -2105,6 +2105,24 @@ Object::~Object()
 		}
 	}
 
+	//We may have an immortal in the zone editor with a reference to this object. Get rid of those as well!
+	//Galnor 2014-07-05
+	for(Descriptor *descriptor = descriptor_list;descriptor;descriptor = descriptor->next)
+	{
+		if(STATE(descriptor) == CON_ZEDIT)
+		{
+			Zone *olcZone = descriptor->olc->zone;
+			for(auto resetCommandIterator = olcZone->cmd.begin();resetCommandIterator != olcZone->cmd.end();++resetCommandIterator)
+			{
+				ResetCommand *resetCommand = (*resetCommandIterator);
+				if(resetCommand->obj == this)
+				{
+					resetCommand->obj = NULL;
+				}
+			}
+		}
+	}
+
 	if( this->SatOnBy != NULL )
 	{
 		this->SatOnBy->player.sitting_on = NULL;
@@ -3075,6 +3093,7 @@ Character::~Character()
 
 	JSManager::get()->handleExtraction( this );
 
+	//Delete all zone command references to this mob.
 	Zone *zone;
 	for(i = 0;(zone = ZoneManager::GetManager().GetZoneByRnum(i)) != NULL;++i)
 	{
@@ -3082,6 +3101,24 @@ Character::~Character()
 		{
 			if(zone->cmd[s]->mob == this)
 				zone->cmd[s]->mob = NULL;
+		}
+	}
+
+	//We may have an immortal in the zone editor with a reference to this mob. Get rid of those as well!
+	//Galnor 2014-07-05
+	for(Descriptor *descriptor = descriptor_list;descriptor;descriptor = descriptor->next)
+	{
+		if(STATE(descriptor) == CON_ZEDIT)
+		{
+			Zone *olcZone = descriptor->olc->zone;
+			for(auto resetCommandIterator = olcZone->cmd.begin();resetCommandIterator != olcZone->cmd.end();++resetCommandIterator)
+			{
+				ResetCommand *resetCommand = (*resetCommandIterator);
+				if(resetCommand->mob == this)
+				{
+					resetCommand->mob = NULL;
+				}
+			}
 		}
 	}
 

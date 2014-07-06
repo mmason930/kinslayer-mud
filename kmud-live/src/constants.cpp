@@ -329,7 +329,7 @@ const char *affected_bits[] =
         "EFFUSION",
         "AGILITY",
         "STRENGTH",
-        "COVER TRACKS",
+        "DISORIENT",
         "DIZZINESS",
 		"WET",
 		"CONFUSED",
@@ -1123,3 +1123,4 @@ const int WSP_ENHANCE_WEAPON = 13;
 const int NUM_SPECIAL_FUNCTIONS = 14;
 
 const int COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL = LVL_APPR;
+const char *GATEWAY_ROOM_MESSAGE = "A strange gateway is here, leading to an unknown destination.\r\n";

@@ -526,7 +526,7 @@ ACMD( do_butcher )
 					  obj->GetSDesc(), corpse->scalp->name.c_str() );
 			sprintf( buf, "%s leans over and butchers %s from the corpse of %s.", GET_NAME( ch ),
 					 obj->GetSDesc(), corpse->scalp->name.c_str() );
-			Act( buf, TRUE, ch, NULL, NULL, TO_ROOM );
+			Act( buf, TRUE, ch, NULL, NULL, TO_ROOM, NULL, true );
 		}
 
 		if( subcmd == SCMD_SKIN )
@@ -577,7 +577,7 @@ ACMD( do_butcher )
 					  obj->GetSDesc(), corpse->scalp->name.c_str() );
 			sprintf( buf, "%s leans over and carves %s from the corpse of %s.", GET_NAME( ch ),
 					 obj->GetSDesc(), corpse->scalp->name.c_str() );
-			Act( buf, TRUE, ch, NULL, NULL, TO_ROOM );
+			Act( buf, TRUE, ch, NULL, NULL, TO_ROOM, NULL, true );
 		}
 
 	}
@@ -673,7 +673,7 @@ ACMD( do_scalp )
 		ch->send( "You sever a bloody %s from the corpse of %s.\r\n", type, corpse->scalp->name.c_str() );
 		sprintf( buf, "%s leans over and severs the bloody %s from the corpse of %s.", GET_NAME( ch ), type,
 		         corpse->scalp->name.c_str() );
-		Act( buf, TRUE, ch, 0, 0, TO_ROOM );
+		Act( buf, TRUE, ch, 0, 0, TO_ROOM, NULL, true );
 
 		if( ch->TooHeavyToPickUp( scalpo ) )
 		{
@@ -758,7 +758,7 @@ ACMD( do_ride )
 			MOUNT( ch ) = riding;
 			RIDDEN_BY( riding ) = ch;
 			Act( "You begin riding $N.", FALSE, ch, 0, victim, TO_CHAR );
-			Act( "$n begins riding $N.", FALSE, ch, 0, victim, TO_NOTVICT );
+			Act( "$n begins riding $N.", FALSE, ch, 0, victim, TO_NOTVICT, NULL, true );
 			Act( "$n begins to ride on your back.", FALSE, ch, 0, victim, TO_VICT );
 			char str[16];
 			strcpy(str,"self");
@@ -774,7 +774,7 @@ ACMD( do_dismount )
 	{
 		Act( "You stop riding $N.", FALSE, ch, 0, MOUNT( ch ), TO_CHAR );
 		Act( "$n dismounts from you.", FALSE, ch, 0, MOUNT( ch ), TO_VICT );
-		Act( "$n stops riding $N.", FALSE, ch, 0, MOUNT( ch ), TO_NOTVICT );
+		Act( "$n stops riding $N.", FALSE, ch, 0, MOUNT( ch ), TO_NOTVICT, NULL, true );
 		RIDDEN_BY( MOUNT( ch ) ) = NULL;
 		MOUNT( ch ) = NULL;
 	}
@@ -1495,17 +1495,17 @@ ACMD( do_change )
 		if ( !str_cmp( arg2, "defensive" ) )
 		{
 			ch->stance = STANCE_DEFENSIVE;
-			Act( "$n flows into a defensive battle stance.", TRUE, ch, NULL, 0, TO_ROOM );
+			Act( "$n flows into a defensive battle stance.", TRUE, ch, NULL, 0, TO_ROOM, NULL, true );
 		}
 		else if ( !str_cmp( arg2, "normal" ) )
 		{
 			ch->stance = STANCE_NORMAL;
-			Act( "$n moves into a standard battle stance.", TRUE, ch, NULL, 0, TO_ROOM );
+			Act( "$n moves into a standard battle stance.", TRUE, ch, NULL, 0, TO_ROOM, NULL, true );
 		}
 		else if ( !str_cmp( arg2, "offensive" ) )
 		{
 			ch->stance = STANCE_OFFENSIVE;
-			Act( "$n takes up an offensive battle stance.", TRUE, ch, NULL, 0, TO_ROOM );
+			Act( "$n takes up an offensive battle stance.", TRUE, ch, NULL, 0, TO_ROOM, NULL, true );
 		}
 		else
 		{
@@ -1622,9 +1622,10 @@ ACMD( do_rage )
 	//GET_SHADOW(ch) = MAX( GET_SHADOW(ch) - 40, 0 );
 }
 
-
-
-
+bool Character::disorientRoll()
+{
+	return AFF_FLAGGED(this, AFF_DISORIENT) && MiscUtil::random(1, 2) == 1;
+}
 
 
 

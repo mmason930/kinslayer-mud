@@ -72,3 +72,4 @@ std::string get_true_bool_names_from_array(const std::vector<bool> &values, cons
 
 void toggle_list_int(std::list<int> &li, int i);
 extern const int COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL;
+extern const char *GATEWAY_ROOM_MESSAGE;

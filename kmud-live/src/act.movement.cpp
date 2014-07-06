@@ -88,7 +88,7 @@ void Character::SitOnChair( Object *Chair, bool show)
 	if( show == true )
 	{
 		Act("You sit down on $p.", TRUE, this, Chair, 0, TO_CHAR);
-		Act("$n sits down on $p.", TRUE, this, Chair, 0, TO_ROOM);
+		Act("$n sits down on $p.", TRUE, this, Chair, 0, TO_ROOM, NULL, true);
 	}
 	Chair->SatOnBy = this;
 	this->player.sitting_on = Chair;
@@ -227,12 +227,12 @@ int fade_distance(Character *ch)
 void perform_actual_fade(Character *ch, Room *room)
 {
 	ch->send("You reach out for the shadows as they surround you completely.\r\n");
-	Act("$n is surrounded by shadows and vanishes.", TRUE, ch, 0, 0, TO_ROOM);
+	Act("$n is surrounded by shadows and vanishes.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
 
 	ch->RemoveFromRoom();
 	ch->MoveToRoom(room);
 
-	Act("$n steps out from the dark shadows nearby.", TRUE, ch, 0, 0, TO_ROOM);
+	Act("$n steps out from the dark shadows nearby.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
 
 	look_at_room(ch, 0);
 }
@@ -664,7 +664,7 @@ int Character::SimpleMove(int dir, int need_specials_check, bool flee)
 			sprintf(buf2, "$n leaves %s%s.", dirs[dir], mount_message);
 		else
 			sprintf(buf2, "$n %s %s%s.", this->player.LeaveMessage, dirs[dir], mount_message);
-		Act(buf2, TRUE, this, 0, 0, TO_ROOM);
+		Act(buf2, TRUE, this, 0, 0, TO_ROOM, NULL, true);
 	}
 
 	if (this->ShouldLayTrack() && this->in_room->isTrackable())
@@ -698,7 +698,7 @@ int Character::SimpleMove(int dir, int need_specials_check, bool flee)
 			        ((dir == UP || dir == DOWN) ? "" : "the "),
 			        (dir == UP ? "below": dir == DOWN ? "above" : dirs[rev_dir[dir]]), mount_message);
 
-		Act(buf2, TRUE, this, 0, 0, TO_ROOM);
+		Act(buf2, TRUE, this, 0, 0, TO_ROOM, NULL, true);
 	}
 
 	if (this->desc != NULL)
@@ -837,7 +837,7 @@ ACMD(do_lead)
 	{
 		Act("$N refuses to follow you!", FALSE, ch, 0, target, TO_CHAR);
 		Act("You refuse $n's attemt to lead you.", FALSE, ch, 0, target, TO_VICT);
-		Act("$N refuses $n's attempt to lead $M.", FALSE, ch, 0, target, TO_ROOM);
+		Act("$N refuses $n's attempt to lead $M.", FALSE, ch, 0, target, TO_ROOM, NULL, true);
 		return;
 	}
 }
@@ -1301,7 +1301,7 @@ ACMD(do_gen_door)
 
 	//Notify the room.
 	sprintf(buf, "%s %ss %s%s.", GET_NAME(ch), cmd_door[subcmd], exit ? "the " : "", obj ? obj->GetSDesc() : exit->getKeywords());
-	Act(buf, TRUE, ch, 0, 0, TO_ROOM);
+	Act(buf, TRUE, ch, 0, 0, TO_ROOM, NULL, true);
 
 	Exit *reverse_exit = 0;
 	//Notify the other end of the door if it was an open/close.
@@ -1437,13 +1437,13 @@ ACMD(do_stand)
 			break;
 		case POS_SITTING:
 			Act("You stand up.", FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n clambers to $s feet.", TRUE, ch, 0, 0, TO_ROOM);
+			Act("$n clambers to $s feet.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
 			GET_POS(ch) = POS_STANDING;
 			ch->StandFromChair();
 			break;
 		case POS_RESTING:
 			Act("You stop resting, and stand up.", FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n stops resting, and clambers on $s feet.", TRUE, ch, 0, 0, TO_ROOM);
+			Act("$n stops resting, and clambers on $s feet.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
 			GET_POS(ch) = POS_STANDING;
 			break;
 		case POS_SLEEPING:
@@ -1454,13 +1454,11 @@ ACMD(do_stand)
 			break;
 		case POS_FLYING:
 			Act("You fly down and land on the ground.", FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n swoops down and lands on the ground.", FALSE, ch, 0, 0, TO_ROOM);
+			Act("$n swoops down and lands on the ground.", FALSE, ch, 0, 0, TO_ROOM, NULL, true);
 			break;
 		default:
-			Act("You stop floating around, and put your feet on the ground.",
-			    FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n stops floating around, and puts $s feet on the ground.",
-			    TRUE, ch, 0, 0, TO_ROOM);
+			Act("You stop floating around, and put your feet on the ground.", FALSE, ch, 0, 0, TO_CHAR);
+			Act("$n stops floating around, and puts $s feet on the ground.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
 			GET_POS(ch) = POS_STANDING;
 			break;
 	}
@@ -1498,7 +1496,7 @@ ACMD(do_sit)
 			else
 			{
 				Act("You sit down.", FALSE, ch, 0, 0, TO_CHAR);
-				Act("$n sits down.", FALSE, ch, 0, 0, TO_ROOM);
+				Act("$n sits down.", FALSE, ch, 0, 0, TO_ROOM, NULL, true);
 			}
 			GET_POS(ch) = POS_SITTING;
 			break;
@@ -1507,7 +1505,7 @@ ACMD(do_sit)
 			break;
 		case POS_RESTING:
 			Act("You stop resting, and sit up.", FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n stops resting.", TRUE, ch, 0, 0, TO_ROOM);
+			Act("$n stops resting.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
 			GET_POS(ch) = POS_SITTING;
 			break;
 
@@ -1521,7 +1519,7 @@ ACMD(do_sit)
 
 		default:
 			Act("You stop floating around, and sit down.", FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n stops floating around, and sits down.", TRUE, ch, 0, 0, TO_ROOM);
+			Act("$n stops floating around, and sits down.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
 			GET_POS(ch) = POS_SITTING;
 			break;
 	}
@@ -1533,7 +1531,7 @@ ACMD(do_rest)
 	{
 		case POS_STANDING:
 			Act("You sit down and rest your tired bones.", FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n sits down and rests.", TRUE, ch, 0, 0, TO_ROOM);
+			Act("$n sits down and rests.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
 			GET_POS(ch) = POS_RESTING;
 			break;
 
@@ -1544,7 +1542,7 @@ ACMD(do_rest)
 				return;
 			}
 			Act("You rest your tired bones.", FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n rests.", TRUE, ch, 0, 0, TO_ROOM);
+			Act("$n rests.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
 			GET_POS(ch) = POS_RESTING;
 			break;
 		case POS_RESTING:
@@ -1557,9 +1555,8 @@ ACMD(do_rest)
 			Act("Rest while fighting?  Are you MAD?", FALSE, ch, 0, 0, TO_CHAR);
 			break;
 		default:
-			Act("You stop floating around, and stop to rest your tired bones.",
-			    FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n stops floating around, and rests.", FALSE, ch, 0, 0, TO_ROOM);
+			Act("You stop floating around, and stop to rest your tired bones.", FALSE, ch, 0, 0, TO_CHAR);
+			Act("$n stops floating around, and rests.", FALSE, ch, 0, 0, TO_ROOM, NULL, true);
 			GET_POS(ch) = POS_RESTING;
 			break;
 	}
@@ -1578,7 +1575,7 @@ ACMD(do_sleep)
 				return;
 			}
 			ch->send("You go to sleep.\r\n");
-			Act("$n lies down and falls asleep.", TRUE, ch, 0, 0, TO_ROOM);
+			Act("$n lies down and falls asleep.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
 			GET_POS(ch) = POS_SLEEPING;
 			break;
 		case POS_SLEEPING:
@@ -1589,10 +1586,8 @@ ACMD(do_sleep)
 			break;
 
 		default:
-			Act("You stop floating around, and lie down to sleep.",
-			    FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n stops floating around, and lie down to sleep.",
-			    TRUE, ch, 0, 0, TO_ROOM);
+			Act("You stop floating around, and lie down to sleep.", FALSE, ch, 0, 0, TO_CHAR);
+			Act("$n stops floating around, and lie down to sleep.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
 			GET_POS(ch) = POS_SLEEPING;
 			break;
 	}
@@ -1622,7 +1617,7 @@ ACMD(do_wake)
 		else
 		{
 			Act("You wake $M up.", FALSE, ch, 0, vict, TO_CHAR);
-			Act("You are awakened by $n.", FALSE, ch, 0, vict, TO_VICT | TO_SLEEP);
+			Act("You are awakened by $n.", FALSE, ch, 0, vict, TO_VICT | TO_SLEEP, NULL, true);
 			Act("$N wakes you up.", FALSE, vict, 0, ch, TO_CHAR);
 			GET_POS(vict) = POS_SITTING;
 		}

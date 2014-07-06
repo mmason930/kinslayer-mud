@@ -266,8 +266,8 @@ void Character::InterruptTimer()
 	//if ( this->ShieldBlock )
 	//{
 	//	this->ShieldBlock = false;
-	//	Act("You lower your shield, having failed to anticipate an attack.", FALSE, this, NULL, NULL, TO_CHAR);
-	//	Act("$n lowers $s shield, becoming vulnerable once more.", FALSE, this, NULL, NULL, TO_ROOM);
+	//	act("You lower your shield, having failed to anticipate an attack.", FALSE, this, NULL, NULL, TO_CHAR);
+	//	act("$n lowers $s shield, becoming vulnerable once more.", FALSE, this, NULL, NULL, TO_ROOM);
 	//	WAIT_STATE(this, PULSE_VIOLENCE / 2);
 	//}
 	//else
@@ -1128,20 +1128,20 @@ void dam_message( int dam, Character * ch, Character * victim, int w_type, int B
 	/* damage message to onlookers */
 	buf = replace_string( dam_weapons[ msgnum ].to_room,
 	                      attack_hit_text[ w_type ].singular, attack_hit_text[ w_type ].plural, BodyPart );
-	Act( buf, FALSE, ch, NULL, victim, TO_NOTVICT );
+	Act( buf, FALSE, ch, NULL, victim, TO_NOTVICT, NULL, true );
 
 	/* damage message to damager */
 	ch->send( COLOR_GREEN( ch, CL_COMPLETE ) );
 	buf = replace_string( dam_weapons[ msgnum ].to_char,
 	                      attack_hit_text[ w_type ].singular, attack_hit_text[ w_type ].plural, BodyPart );
-	Act( buf, FALSE, ch, NULL, victim, TO_CHAR, COLOR_GREEN(ch, CL_COMPLETE) );
+	Act( buf, FALSE, ch, NULL, victim, TO_CHAR, COLOR_GREEN(ch, CL_COMPLETE), true );
 	ch->send( COLOR_NORMAL( ch, CL_COMPLETE ) );
 
 	/* damage message to damagee */
 	victim->send( (msgnum == 0 ? "" : COLOR_RED( victim, CL_COMPLETE )) );
 	buf = replace_string( dam_weapons[ msgnum ].to_victim,
 	                      attack_hit_text[ w_type ].singular, attack_hit_text[ w_type ].plural, BodyPart );
-	Act( buf, FALSE, ch, NULL, victim, TO_VICT | TO_SLEEP, (msgnum == 0 ? "" : COLOR_RED( victim, CL_COMPLETE )) );
+	Act( buf, FALSE, ch, NULL, victim, TO_VICT | TO_SLEEP, (msgnum == 0 ? "" : COLOR_RED( victim, CL_COMPLETE )), true );
 	victim->send( COLOR_NORMAL( victim, CL_COMPLETE ) );
 }
 

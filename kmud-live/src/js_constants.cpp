@@ -132,10 +132,10 @@ flusspferd::object makeConstants()
 	o.set_property("AFF_EFFUSION", flusspferd::value(AFF_EFFUSION)); // Char leaves unnoticed
 	o.set_property("AFF_AGILITY", flusspferd::value(AFF_AGILITY)); // More Dodge Bonus
 	o.set_property("AFF_STRENGTH", flusspferd::value(AFF_STRENGTH)); // Char has boosted strength
-	o.set_property("AFF_UNUSED1", flusspferd::value(AFF_UNUSED1)); // Formerly Cover Tracks
+	o.set_property("AFF_DISORIENT", flusspferd::value(AFF_DISORIENT)); // Disorentation effect
 	o.set_property("AFF_DIZZY", flusspferd::value(AFF_DIZZY)); // For Dizziness
-	o.set_property("AFF_WET", flusspferd::value(AFF_WET)); // Char is wet, flusspferd::value(used amplifying weaves.
-	o.set_property("AFF_CONFUSED", flusspferd::value(AFF_CONFUSED)); // Char is confused, flusspferd::value(used for amplifying weaves.
+	o.set_property("AFF_WET", flusspferd::value(AFF_WET)); // Char is wet, used amplifying weaves.
+	o.set_property("AFF_CONFUSED", flusspferd::value(AFF_CONFUSED)); // Char is confused, used for amplifying weaves.
 	o.set_property("AFF_FORCED_PEACE", flusspferd::value(AFF_FORCED_PEACE)); // Char cannot use violent commands.
 	o.set_property("AFF_HIDDEN_INTENT", flusspferd::value(AFF_HIDDEN_INTENT)); // Removes *name* stars.
 	o.set_property("AFF_DISGUISE", flusspferd::value(AFF_DISGUISE)); // Makes them look like a mob.

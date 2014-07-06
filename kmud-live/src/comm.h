@@ -13,19 +13,12 @@
 
 #include "structs.h"
 
-const int NUM_RESERVED_DESCS = 8;
-
 /* comm.c */
-void	sendToAll(const char *messg, bool instant=false);
-void	sendToRoom(const char *messg, Room *room);
-void	sendToOutdoor(const char *messg);
-void	perform_to_all(const char *messg, Character *ch);
+void sendToAll(const char *messg, bool instant=false);
+void sendToRoom(const char *messg, Room *room);
+void sendToOutdoor(const char *messg);
 
-void	perform_act(const char *orig, Character *ch,
-                 Object *obj, const void *vict_obj, Character *to);
-
-void	Act(const char *str, int hide_invisible, Character *ch,
-         Object *obj, const void *vict_obj, int type, const char *bgColor=0);
+void Act(const char *str, int hide_invisible, Character *ch, Object *obj, const void *vict_obj, int type, const char *bgColor=0, bool disorientable=false);
 
 const int TO_ROOM = 1;
 const int TO_VICT = 2;
@@ -44,10 +37,8 @@ extern clock_t GlobalClock;
 
 typedef RETSIGTYPE sigfunc(int);
 
-extern void *Pointer;
 extern std::list< Character* > WaitingList;
 extern class kuDescriptor *gatewayConnection;
-
 
 #define LAG_MONITOR_KJS_HEARTBEAT			 "KJS_HEARTBEAT"
 #define LAG_MONITOR_CHECK_WAIT_STATE		 "CHECK_WAIT_STATE"
@@ -107,9 +98,6 @@ public:
 };
 
 extern class LagMonitor lagMonitor;
-
-
-
 
 #endif
 

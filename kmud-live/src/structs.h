@@ -293,7 +293,7 @@ const int AFF_SHIELD = 16; // Char is blocked from channeling
 const int AFF_EFFUSION = 17; // Char leaves unnoticed
 const int AFF_AGILITY = 18; // More Dodge Bonus
 const int AFF_STRENGTH = 19; // Char has boosted strength
-const int AFF_UNUSED1 = 20; // Formerly Cover Tracks
+const int AFF_DISORIENT = 20; // Disorient effect
 const int AFF_DIZZY = 21; // For Dizziness
 const int AFF_WET = 22; // Char is wet, used amplifying weaves.
 const int AFF_CONFUSED = 23; // Char is confused, used for amplifying weaves.
@@ -1963,6 +1963,7 @@ public:
 	void stopFollowing();
 	bool passwordMatches(const std::string &passwordInput);
 	bool hasWolfbrotherBonuses();
+	bool disorientRoll();
 
 
 	bool ShieldOutOfRange( Character* Target );
@@ -2058,7 +2059,9 @@ public:
 	void SetFighting( Character *vict );
 	void Init();
 	void send( const char *messg, ... );
-	void send( const std::string s );
+	void send( const std::string &s );
+	void sendDisorientableMessage( const char *message, ... );
+	void sendDisorientableMessage( const std::string &s );
 	void HitAllFighting();
 	void PerformFear( Character *victim );
 	void PerformPoison( Character *victim );

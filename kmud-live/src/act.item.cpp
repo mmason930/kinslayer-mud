@@ -222,7 +222,7 @@ int Character::Draw()
 			if (!this->CanDraw( GET_EQ( this, i) ->contains))
 				return 1;
 			this->send( "You draw %s from %s.\r\n", GET_EQ( this, i ) ->contains->GetSDesc(), GET_EQ( this, i ) ->GetSDesc() );
-			Act( "$n draws $p from $P.", TRUE, this, GET_EQ( this, i ) ->contains, GET_EQ( this, i ), TO_ROOM );
+			Act( "$n draws $p from $P.", TRUE, this, GET_EQ( this, i ) ->contains, GET_EQ( this, i ), TO_ROOM, NULL, true);
 			break;
 		}
 	}
@@ -282,19 +282,19 @@ int Character::Sheath()
 			if ( IS_OBJ_STAT( GET_EQ( this, i ), ITEM_DAGGER_SHEATH ) && GET_OBJ_VAL( weapon, 0 ) == WEAPON_SHORT_BLADE )
 			{
 				this->send( "You slide %s into %s.\r\n", weapon->GetSDesc(), GET_EQ( this, i ) ->GetSDesc() );
-				Act( "$n slides $p into $P.", TRUE, this, weapon, GET_EQ( this, i ), TO_ROOM );
+				Act( "$n slides $p into $P.", TRUE, this, weapon, GET_EQ( this, i ), TO_ROOM, NULL, true);
 				break;
 			}
 			else if ( IS_OBJ_STAT( GET_EQ( this, i ), ITEM_SWORD_SHEATH ) && GET_OBJ_VAL( weapon, 0 ) == WEAPON_LONG_BLADE )
 			{
 				this->send( "You sheath %s into %s.\r\n", weapon->GetSDesc(), GET_EQ( this, i ) ->GetSDesc() );
-				Act( "$n sheaths $p into $P.", TRUE, this, weapon, GET_EQ( this, i ), TO_ROOM );
+				Act( "$n sheaths $p into $P.", TRUE, this, weapon, GET_EQ( this, i ), TO_ROOM, NULL, true);
 				break;
 			}
 			else if ( IS_OBJ_STAT( GET_EQ( this, i ), ITEM_SPEAR_SHEATH ) && GET_OBJ_VAL( weapon, 0 ) == WEAPON_SPEAR )
 			{
 				this->send( "You sheath %s into %s.\r\n", weapon->GetSDesc(), GET_EQ( this, i ) ->GetSDesc() );
-				Act( "$n sheaths $p into $P.", TRUE, this, weapon, GET_EQ( this, i ), TO_ROOM );
+				Act( "$n sheaths $p into $P.", TRUE, this, weapon, GET_EQ( this, i ), TO_ROOM, NULL, true);
 				break;
 			}
 		}
@@ -377,7 +377,7 @@ void perform_put( Character * ch, Object * obj, Object * cont )
 		if(!IS_OBJ_STAT((obj), ITEM_INVISIBLE) || GET_LEVEL(ch) >= LVL_IMMORT)
 		{//RHOLLOR 05.03.09 remove msg for invis items
             Act( "You put $p in $P.", FALSE, ch, obj, cont, TO_CHAR );
-            Act( "$n puts $p in $P.", TRUE, ch, obj, cont, TO_ROOM );
+            Act( "$n puts $p in $P.", TRUE, ch, obj, cont, TO_ROOM, NULL, true);
 		}
 
 		if ( IS_OBJ_STAT( cont, ITEM_CHEST ) )
@@ -552,7 +552,7 @@ void perform_get_from_container( Character * ch, Object * obj, Object * cont, in
 			if(!IS_OBJ_STAT((obj), ITEM_INVISIBLE) || GET_LEVEL(ch) >= LVL_IMMORT)
 			{//RHOLLOR 05.03.09 remove message when invis...
                 Act( "You get $p from $P.", FALSE, ch, obj, cont, TO_CHAR );
-                Act( "$n gets $p from $P.", TRUE, ch, obj, cont, TO_ROOM );
+                Act( "$n gets $p from $P.", TRUE, ch, obj, cont, TO_ROOM, NULL, true);
 			}
 
 			if ( IS_OBJ_STAT( cont, ITEM_CHEST ) )
@@ -711,7 +711,7 @@ int perform_get_from_room( Character * ch, Object * obj, bool vaultSave )
 		if(!IS_OBJ_STAT((obj), ITEM_INVISIBLE) || GET_LEVEL(ch) >= LVL_IMMORT)
 		{//RHOLLOR 05.03.09 remove messg when invis
 			Act( "You get $p.", FALSE, ch, obj, 0, TO_CHAR );
-			Act( "$n gets $p.", TRUE, ch, obj, 0, TO_ROOM );
+			Act( "$n gets $p.", TRUE, ch, obj, 0, TO_ROOM, NULL, true);
 		}
 		return 1;
 	}
@@ -880,7 +880,7 @@ int perform_drop( Character *ch, Object *obj, bool vaultSave )
         sprintf( buf, "You drop $p." );
         Act( buf, FALSE, ch, obj, 0, TO_CHAR );
 
-        sprintf( buf, "$n drops $p." );
+        sprintf( buf, "$n drops $p.", NULL, true);
         Act( buf, TRUE, ch, obj, 0, TO_ROOM );
     }
 
@@ -997,7 +997,7 @@ void perform_give( Character *ch, Character *vict, Object *obj )
 	if(!IS_OBJ_STAT((obj), ITEM_INVISIBLE) || GET_LEVEL(vict) >= LVL_IMMORT)
 	{
 		Act( "$n gives you $p.", FALSE, ch, obj, vict, TO_VICT );
-		Act( "$n gives $p to $N.", TRUE, ch, obj, vict, TO_NOTVICT );
+		Act( "$n gives $p to $N.", TRUE, ch, obj, vict, TO_NOTVICT, NULL, true);
 	}
 
 	perform_give_extra( ch, vict, obj );

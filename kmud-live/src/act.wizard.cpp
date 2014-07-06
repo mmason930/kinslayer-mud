@@ -1299,6 +1299,21 @@ ACMD(do_extra)
 		{
 			autoSave();
 		}
+		else if( !str_cmp(vArgs.at(0), "zcmd") )
+		{
+			Zone *zone = ZoneManager::GetManager().GetZoneByRoomVnum(ch->in_room->getVnum());
+
+			for(ResetCommand *resetCommand : zone->cmd)
+			{
+
+				if(resetCommand->command == 'M' && resetCommand->arg3 == real_room(ch->in_room->getVnum()))
+				{
+					ch->send("ID: %d, Mob Vnum: %d, Ptr: %p, Ptr Vnum: %s\r\n", resetCommand->dbID,
+						MobManager::GetManager().GetPrototype(resetCommand->arg1)->getVnum(), resetCommand->mob,
+						(resetCommand->mob ? MiscUtil::toString(resetCommand->mob->getVnum()).c_str() : "<NONE>"));
+				}
+			}
+		}
 		else if( !str_cmp(vArgs.at(0), "corpses") )
 		{
 			int numberOfCorpses = MIN(500, atoi(vArgs.at(1).c_str()));
