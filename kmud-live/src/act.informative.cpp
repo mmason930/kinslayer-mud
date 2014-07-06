@@ -898,18 +898,18 @@ void listObjectToCharacter(Object *listy, Character *ch, int mode, int show)
 				continue;
 
 			hasSeen = false;
-			for(SpamItem spamItem : SpamList)
+			for(auto sIter = SpamList.begin();sIter != SpamList.end();++sIter)
 			{
-				if(mode != 0 && !strcmp(i->GetSDesc(),spamItem.obj->GetSDesc()))
+				if(mode != 0 && !strcmp(i->GetSDesc(),(*sIter).obj->GetSDesc()))
 				{
 					hasSeen = true;
-					++spamItem.count;
+					++(*sIter).count;
 					break;
 				}
-				else if( mode == 0 && !strcmp(i->GetDesc(),spamItem.obj->GetDesc()))
+				else if( mode == 0 && !strcmp(i->GetDesc(),(*sIter).obj->GetDesc()) )
 				{
 					hasSeen = true;
-					++spamItem.count;
+					++(*sIter).count;
 					break;
 				}
 			}
@@ -927,9 +927,9 @@ void listObjectToCharacter(Object *listy, Character *ch, int mode, int show)
 			}
 		}
 
-		for(SpamItem spamItem : SpamList)
+		for(auto sIter = SpamList.begin();sIter != SpamList.end();++sIter)
 		{
-			showObjectToCharacter(spamItem.obj, ch, mode, spamItem.count);
+			showObjectToCharacter((*sIter).obj, ch, mode, (*sIter).count);
 			found = true;
 		}
 	}
@@ -956,6 +956,7 @@ void listObjectToCharacter(Object *listy, Character *ch, int mode, int show)
 	if (!found && show)
 		ch->send(" Nothing.\r\n");
 }
+
 
 
 void diagnoseCharacterToCharacter(Character *i, Character *ch)
@@ -2552,7 +2553,7 @@ void performMortalWhere(Character * ch, char *arg)
 		ch->send("You catch a fleeting whiff of the stench of shadowspawn.\r\n");
 
 	//WOLFBROTHER SENSING BONUS
-	if(ch->getUserClan(CLAN_WOLFBROTHER) && GET_LEVEL(ch) < LVL_IMMORT)
+	if(ch->hasWolfbrotherBonuses() && GET_LEVEL(ch) < LVL_IMMORT)
 	{
 		for(counter = 0;counter < num_trolls;counter++)
 		{

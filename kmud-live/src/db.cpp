@@ -2089,7 +2089,7 @@ Object::~Object()
 		if(d->olc && d->olc->auction_data && d->olc->auction_data->GetItemToSell() == this)
 			d->olc->auction_data->SetItemToSell( 0 );
 	}
-	//Anyone targetting this object must have their otarget set to NULL.
+	//Anyone targeting this object must have their otarget set to NULL.
 	for( Character* ch = character_list;ch;ch = ch->next )
 	{
 		if( ch->player.otarget == this )
