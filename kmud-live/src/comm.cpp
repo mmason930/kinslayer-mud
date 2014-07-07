@@ -2436,10 +2436,12 @@ void PerformAct( const char *orig, Character *ch, Object *obj, const void *vict_
 	*( ++buf ) = '\0';
 
 	if ( to->desc )
+	{
 		to->desc->sendRaw(StringUtil::cap(lbuf));
 
-	if(disorientable && to->disorientRoll())
-		to->desc->sendRaw(StringUtil::cap(lbuf));
+		if(disorientable && to->disorientRoll())
+			to->desc->sendRaw(StringUtil::cap(lbuf));
+	}
 }
 
 
