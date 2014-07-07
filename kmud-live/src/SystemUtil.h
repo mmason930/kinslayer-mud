@@ -11,6 +11,7 @@ public:
 
 	static bool processExists(const unsigned int processId);
 	static FILE *pipeOpen(const char *command, const char *mode);
+	static unsigned int getProcessId();
 };
 
 #endif

@@ -75,6 +75,7 @@
 #include "rooms/Room.h"
 #include "GatewayDescriptorType.h"
 #include "Game.h"
+#include "SystemUtil.h"
 
 #include "ObjectMoveLogger.h"
 #include "MobLoadLogger.h"
@@ -540,13 +541,7 @@ void waitForGatewayConnection() {
 
 					gatewayConnection = desc;
 					std::stringstream processIdMessage;
-					processIdMessage << "ProcessID " <<
-#ifdef WIN32
-						GetCurrentProcessId()
-#else
-						getpid()
-#endif
-					<< std::endl;
+					processIdMessage << "ProcessID " << SystemUtil::getProcessId() << std::endl;
 					desc->socketWriteInstant(processIdMessage.str());
 					break;
 				}

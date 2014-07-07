@@ -78,11 +78,20 @@ bool SystemUtil::processExists(const unsigned int processId)
 #endif
 }
 
-FILE *pipeOpen(const char *command, const char *mode)
+FILE *SystemUtil::pipeOpen(const char *command, const char *mode)
 {
 #ifdef WIN32
 	return _popen(command, mode);
 #else
 	return popen(command, mode);
+#endif
+}
+
+unsigned int SystemUtil::getProcessId()
+{
+#ifdef WIN32
+	return (unsigned int)getCurrentProcessId();
+#else
+	return (unsigned int)getpid();
 #endif
 }
