@@ -26,6 +26,7 @@
 #include "utils.h"
 #include "shop.h"
 #include "mobs.h"
+#include "olc.h"
 
 #include "js_functions.h"
 #include "StringUtil.h"
@@ -919,7 +920,14 @@ char *list_object(Character *ch, Object * obj, int cnt, int index, int shop_nr)
 	strcpy(buf3, obj->GetSDesc());
 
 	if ((obj->getType() == ITEM_DRINKCON) && (GET_OBJ_VAL(obj, 1)))
-		sprintf(END_OF(buf3), " of %s", drinks[obj->GetTotalVal0()]);
+	{
+		int liquidType = GET_OBJ_VAL(obj, 2);
+
+		if(liquidType < 0 || liquidType >= NUM_LIQ_TYPES)
+			MudLog(BRF, LVL_APPR, TRUE, "Object #%d in shop #%d has invalid liquid type of %d.", obj->getVnum(), shop_nr, liquidType);
+		else
+			sprintf(END_OF(buf3), " of %s", drinks[liquidType]);
+	}
 
 	/* FUTURE: */
 	/* Add glow/hum/etc */
