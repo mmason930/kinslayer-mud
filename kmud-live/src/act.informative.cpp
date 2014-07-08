@@ -2265,7 +2265,7 @@ ACMD(do_weather)
 	{
 		ch->send("Imm info\r\nPrecipitation: %d\r\nTemperature: %d\r\nSky: %d\r\nSun: %d\r\nVisibility decrease: %d\r\n",
 		weather->get_precipitation(), weather->get_temp(), weather->get_sky(),
-		weather->getSun(), weather->get_visibility());
+		Weather::getSun(), weather->get_visibility());
 	}
 }
 

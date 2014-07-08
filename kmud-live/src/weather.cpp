@@ -96,8 +96,7 @@ void another_hour(int mode)
 						MudLog(CMP, LVL_GOD, TRUE, "%s has an invalid zone!", GET_NAME(ch));
 					else
 					{
-						Weather *MyWeather = ch->in_room->getZone()->GetWeather();
-						MyWeather->setSun(SUN_RISE);
+						Weather::setSun(SUN_RISE);
 						if(OUTSIDE(ch) && AWAKE(ch))
 						{
 							Zone *zone = ch->in_room->getZone();
@@ -128,7 +127,7 @@ void another_hour(int mode)
 					}
 					else
 					{
-						zone->GetWeather()->setSun(SUN_SET);
+						Weather::setSun(SUN_SET);
 						if(OUTSIDE(ch) && AWAKE(ch))
 						{
 							if(zone->GetSunset().empty())
@@ -145,7 +144,7 @@ void another_hour(int mode)
 				Zone *zone;
 				for (int i = 0 ;(zone = ZoneManager::GetManager().GetZoneByRnum(i)) != NULL; ++i )
 				{
-					zone->GetWeather()->setSun(SUN_DARK);
+					Weather::setSun(SUN_DARK);
 					sendToOutdoor(zone->getVnum(), "The night has begun.\r\n");
 				}
 				break;

@@ -193,7 +193,7 @@ bool Room::isDark()
 		}
 		else
 		{
-			switch (this->getZone()->GetWeather()->getSun())
+			switch (Weather::getSun())
 			{
 			case SUN_DARK:
 				dark = true;

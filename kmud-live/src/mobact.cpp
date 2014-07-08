@@ -302,7 +302,7 @@ void mobileActivity(void)
 			Zone *zone = ch->in_room->getZone();
 			if (!ch->equipment[WEAR_LIGHT])
 			{
-				if (ch->in_room->isDark() || zone->GetWeather()->getSun() == Sun::SUN_DARK || ROOM_FLAGGED(ch->in_room, ROOM_DARK))
+				if (ch->in_room->isDark() || Weather::getSun() == Sun::SUN_DARK || ROOM_FLAGGED(ch->in_room, ROOM_DARK))
 				{
 					for (Object *lightSource = ch->carrying; lightSource; lightSource = lightSource->next_content)
 					{
@@ -316,7 +316,7 @@ void mobileActivity(void)
 			}
 			else
 			{
-				if (zone->GetWeather()->getSun() != Sun::SUN_DARK && !ROOM_FLAGGED(ch->in_room, ROOM_DARK))
+				if (Weather::getSun() != Sun::SUN_DARK && !ROOM_FLAGGED(ch->in_room, ROOM_DARK))
 				{
 					ch->performRemove(WEAR_LIGHT);
 				}

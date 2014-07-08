@@ -126,13 +126,14 @@ class Weather
 
 		void sun_message();
 		
-		const int getSun() const
+		static const int getSun()
 		{
 			return sunlight;
 		}
-		void setSun(Sun i)
+
+		static void setSun(Sun i)
 		{
-			this->sunlight = i;
+			Weather::sunlight = i;
 		}
 
 		const int get_sky() const
@@ -165,7 +166,6 @@ class Weather
 		Weather(const sh_int z)
 		{
 			sky = SKY_CLOUDLESS;
-			sunlight = SUN_LIGHT;
 			base_temperature = 20;
 			temperature = 20;
 			visibility = 0;
@@ -181,7 +181,6 @@ class Weather
 		Weather()
 		{
 			sky = SKY_CLOUDLESS;
-			sunlight = SUN_LIGHT;
 			base_temperature = 20;
 			temperature = 20;
 			visibility = 0;

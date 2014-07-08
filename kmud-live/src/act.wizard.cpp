@@ -1294,7 +1294,6 @@ ACMD(do_extra)
 			ForumUtil::archiveAndRemoveDeletedForumUsers(gameDatabase);
 			ForumUtil::addUsersToForum(gameDatabase);
 		}
-
 		else if( !str_cmp(vArgs.at(0), "autosave") )
 		{
 			autoSave();

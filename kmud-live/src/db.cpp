@@ -613,15 +613,15 @@ void reset_time(void)
 	time_info = *mud_time_passed(time(0), beginning_of_time);
 
 	if (time_info.hours <= 4)
-		weather_info->setSun(SUN_DARK);
+		Weather::setSun(SUN_DARK);
 	else if (time_info.hours == 5)
-		weather_info->setSun(SUN_RISE);
+		Weather::setSun(SUN_RISE);
 	else if (time_info.hours <= 19)
-		weather_info->setSun(SUN_LIGHT);
+		Weather::setSun(SUN_LIGHT);
 	else if (time_info.hours == 20)
-		weather_info->setSun(SUN_SET);
+		Weather::setSun(SUN_SET);
 	else
-		weather_info->setSun(SUN_DARK);
+		Weather::setSun(SUN_DARK);
 
 	Log("   Current Gametime: %dH %dD %dM %dY.", time_info.hours,
 	    time_info.day, time_info.month, time_info.year);
