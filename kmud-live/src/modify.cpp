@@ -386,19 +386,15 @@ void parse_action(int command, char *str, Descriptor *d)
 			break;
 
 		case PARSE_LIST_NUM:
-
-			/*
-			 * Note: Rv's buf, buf1, buf2, and arg variables are defined to 32k so
-			 * they are probly ok for what to do here.
-			 */
-
-			*buf = '\0';
+		{
+			std::stringstream outputStringStream; //This will be used to generate the buffer.
+			char *outputCString = NULL;//We will use this when we call page_string below.
 
 			if (*str != '\0')
 
 				switch (sscanf(str, " %d - %d ", &line_low, &line_high))
 				{
-
+					
 					case 0:
 						line_low = 1;
 						line_high = 999999;
@@ -427,18 +423,21 @@ void parse_action(int command, char *str, Descriptor *d)
 				return;
 			}
 
-			*buf = '\0';
 			i = 1;
 			total_len = 0;
 			s = *d->str;
 
+			//Counts the number of lines in the buffer.
 			while (s && (i < line_low))
+			{
 				if ((s = strchr(s, '\n')) != NULL)
 				{
 					++i;
 					++s;
 				}
+			}
 
+			//Range checks.
 			if ((i < line_low) || (s == NULL))
 			{
 				d->send("Line(s) out of range; no buffer listing.\r\n");
@@ -447,42 +446,52 @@ void parse_action(int command, char *str, Descriptor *d)
 
 			t = s;
 
+			//Now, go through every line and process the output.
 			while (s && (i <= line_high))
+			{
 				if ((s = strchr(s, '\n')) != NULL)
 				{
 					++i;
 					++total_len;
 					++s;
+
+					int lineNumber = (i - 1);
+					
+					//This is a little hack here. We are temporarily null terminating the descriptor's buffer and later putting the old character back.
+					//As a result, "t" will temporarily represent the full line of text.
+					//Probably would be wiser to copy to another buffer instead.
 					temp = *s;
 					*s = '\0';
-					sprintf(buf, "%s%4d:\r\n", buf, (i - 1));
-					strcat(buf, t);
+
+					outputStringStream << std::setw(4) << std::right << lineNumber << ":" << t;
+
 					*s = temp;
 					t = s;
 				}
+			}
 
 			if (s && t)
 			{
 				temp = *s;
 				*s = '\0';
-				strcat(buf, t);
-				*s = temp;
+				outputStringStream << t;
+				*s = temp;L
 			}
 
 			else if (t)
-				strcat(buf, t);
-			/*
-			 * This is kind of annoying .. seeing as the lines are numbered.
-			 */
+				outputStringStream << t;
+			
+			//Create a mutable copy to pass to page_string.
+			std::string outputString = outputStringStream.str();
+			int bufferSizeLimit = outputString.size() + 1;
+			outputCString = new char[ bufferSizeLimit ];
+			snprintf(outputCString, bufferSizeLimit, "%s", outputStringStream.str().c_str());
 
-#if 0
+			page_string(d, outputCString, TRUE);
 
-			sprintf(buf, "%s\r\n%d numbered line%slisted.\r\n", buf, total_len,
-			        ((total_len != 1)?"s ":" "));
-#endif
-
-			page_string(d, buf, TRUE);
+			delete[] outputCString;
 			break;
+		}
 
 		case PARSE_INSERT:
 			HalfChop(str, buf, buf2);
@@ -785,29 +794,35 @@ void string_add(Descriptor *d, char *str)
 				d->send("Invalid option.\r\n");
 				break;
 		}
+		
+		if(!terminator)
+			return;
 	}
 
 
-	if (!(*d->str))
+	if(!terminator)
 	{
-		if (strlen(str) > d->max_str)
+		if (!(*d->str))
 		{
-			d->send("String too long - Truncated.\r\n");
-			*(str + d->max_str) = '\0';
-			/* Changed this to NOT abort out.. just give warning. */
-			/* terminator = 1; */
+			if (strlen(str) > d->max_str)
+			{
+				d->send("String too long - Truncated.\r\n");
+				*(str + d->max_str) = '\0';
+				/* Changed this to NOT abort out.. just give warning. */
+				/* terminator = 1; */
+			}
+			(*d->str) = new char[d->max_str];
+			*(*d->str) = '\0';
+			d->addToString(str);
 		}
-		(*d->str) = new char[d->max_str];
-		*(*d->str) = '\0';
-		d->addToString(str);
+		else
+		{
+			if (!d->addToString(str))
+				d->send("String too long, limit reached on message. Last line ignored.\r\n");
+		}
 	}
-	else
-	{
-		if (!d->addToString(str))
-			d->send("String too long, limit reached on message. Last line ignored.\r\n");
-	}
-
-	if (terminator)
+	
+	if(terminator)
 	{
 		/*
 		 * OLC Edits
