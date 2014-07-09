@@ -47,6 +47,7 @@
 #include "ForumUtil.h"
 #include "ClanUtil.h"
 #include "MailUtil.h"
+#include "SQLUtil.h"
 
 #include "kuSockets.h"
 #include "kuListener.h"
@@ -1046,23 +1047,21 @@ ACMD(do_memory)
 
 ACMD(do_ipfind)
 {
-	char namestr[MAX_INPUT_LENGTH];
-	unsigned int num_rows;
-	std::stringstream Query;
-	sql::Query MyQuery;
-	sql::Row MyRow;
-	std::list<std::string> Hosts, Names;
-	std::list<std::string>::iterator host, name;
+	char nameString[MAX_INPUT_LENGTH];
+	std::stringstream sqlBuffer;
+	sql::Query query;
+	sql::Row row;
+	std::list<std::string> ipAddressList;
+	
+	OneArgument(argument, nameString);
 
-	OneArgument(argument, namestr);
-
-	if(!*namestr)
+	if(!*nameString)
 	{
-		ch->send("Who's alts do you wish to lookup?\r\n");
+		ch->send("Usage: ipfind <player name>\r\n");
 		return;
 	}
 
-	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(namestr);
+	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(nameString);
 
 	if(index == NULL)
 	{
@@ -1070,131 +1069,63 @@ ACMD(do_ipfind)
 		return;
 	}
 
-	Query << "SELECT host "
-		  << "FROM userLogin "
-		  << "WHERE user_id = " << index->id << " "
-		  << "GROUP BY user_id";
+	sqlBuffer	<< " SELECT DISTINCT(host) AS IpAddress"
+				<< " FROM userLogin"
+				<< " WHERE user_id = " << index->id;
 
-	try
-	{
-		MyQuery = gameDatabase->sendQuery(Query.str());
-	}
-	catch( sql::QueryException e )
-	{
-		MudLog(BRF, LVL_IMPL, TRUE, "ipfind : %s", e.message.c_str());
-		ch->send("There was an error with your request.\r\n");
-		return;
-	}
-	if( !(num_rows = MyQuery->numRows()) )
-	{
-		ch->send("This player has no logins recorded.\r\n");
-	}
-	else
-	{
-		//Have the list of ips, just get the uniques.
-		for(;num_rows;--num_rows)
-		{
-			MyRow = MyQuery->getRow();
-			Hosts.push_back( MyRow["host"] );
-		}
-	}
-	//Now that we have a list of unique hosts that this player has used, let's grab the alts.
-
-	if(Hosts.size() == 0)
-	{
-		ch->send("No matches found.\r\n");
-		return;
-	}
-
-	Query.str("");
-	Query << "SELECT users.username "
-		     "FROM userLogin "
-			 "LEFT JOIN users on users.user_id=userLogin.user_id "
-			 "WHERE userLogin.host IN(";
-
-	for(host = Hosts.begin();host != Hosts.end();++host)
-	{
-		if(host != Hosts.begin())
-			Query << ",";
-		Query << "'" << (*host) << "'";
-	}
-
-	Query << ") AND users.username IS NOT NULL GROUP BY users.username";
-	try
-	{		
-		MyQuery = gameDatabase->sendQuery(Query.str());
-	}
-	catch( sql::QueryException e )
-	{
-		MudLog(NRM, LVL_IMPL, TRUE, "ipfind : %s", e.message.c_str());
-		ch->send("There was an error with your request.\r\n");
-		return;
-	}
-	while(MyQuery->hasNextRow())
-	{
-		MyRow = MyQuery->getRow();
-		Names.push_back(MyRow[0]);
-	}//End of row loop.
-	Query.str("");
-	Query << "SELECT username,plr,level FROM users WHERE ";
-
-	/****** LOAD THE PLAYER'S NAME, PLR_FLAGS, AND LEVEL *******/
-	for(name = Names.begin();name != Names.end();++name)
-	{
-		if(name!=Names.begin())
-			Query << " OR ";
-		Query << "username='" << (*name) << "'";
-	}
 	try {
-		MyQuery = gameDatabase->sendQuery(Query.str());
+		query = gameDatabase->sendQuery(sqlBuffer.str());
 	}
 	catch( sql::QueryException e )
 	{
-		MudLog(BRF, LVL_IMPL, TRUE, "ipfind : %s", e.message.c_str());
-		ch->send("There was an error with your request.\r\n");
+		MudLog(BRF, MAX(GET_LEVEL(ch), LVL_APPR), TRUE, "IPFind: %s", e.getMessage().c_str());
 		return;
 	}
 
-	/****** FILTER OUT ALL PLAYERS WITH NO_TRACE SET ******/
-	for(unsigned int i = 0;i < MyQuery->numRows();++i)
+	while(query->hasNextRow())
 	{
-		MyRow = MyQuery->getRow();
-
-		//These are the flags.
-		long bits[PM_ARRAY_MAX];
-		//And convert from std::string to the bitvector
-		ConvertBitvectorFromString(MyRow[1].c_str(), bits, PM_ARRAY_MAX);
-
-		//Block out no_trace flagged players from everyone except for level 105 immortals.
-		if(GET_LEVEL(ch) < LVL_IMPL)
-		{
-			//If no trace is set, but this is the player who we are searching, only add the original name to the list.
-			if(IS_SET_AR(bits, PLR_NO_TRACE) && !str_cmp(MyRow[0], namestr))
-			{
-				Names.clear();
-				Names.push_back(MyRow[0]);
-				break;
-			}
-			//Is notrace set or player level imp?
-			if(IS_SET_AR(bits, PLR_NO_TRACE) || atoi(MyRow[2].c_str()) == LVL_IMPL)
-				Names.remove(MyRow[0]); //If so, remove from the names from list and DON'T print.
-		}
+		row = query->getRow();
+		ipAddressList.push_back(row.getString("IpAddress"));
 	}
-	/****** PRINT ALL OF THE PLAYER'S ALTS *******/
-	ch->send("%s's alts are(green = online): ", namestr);
-	int i;
-	for(i = 0, name = Names.begin();name != Names.end();++name, ++i)
+
+	sqlBuffer.str("");
+
+	sqlBuffer	<< " SELECT"
+				<< "   users.username AS Username,"
+				<< "   COUNT(*) AS Logins,"
+				<< "   users.prf AS PreferenceFlags"
+				<< " FROM users, userLogin"
+				<< " WHERE users.user_id = userLogin.user_id"
+				<< " AND userLogin.host IN " << SQLUtil::buildListSQL(ipAddressList.begin(), ipAddressList.end(), true, true)
+				<< " AND users.level <= " << ((int)GET_LEVEL(ch))
+				<< " GROUP BY users.user_id"
+				<< " ORDER BY COUNT(*) DESC";
+
+	try {
+		query = gameDatabase->sendQuery(sqlBuffer.str());
+	}
+	catch(sql::QueryException e)
 	{
-		Character *boolean;
-		if( !(i % 10) )
-			ch->send("\r\n");
-		if(i)
-			ch->send(", ");
-		if( (boolean = get_player_vis(ch, (char*)(*name).c_str(), FALSE)) )
-			ch->send("%s%s", COLOR_GREEN(ch, CL_NORMAL), COLOR_BOLD(ch, CL_NORMAL));
-		ch->send( (*name).c_str() );
-		if(boolean)
-			ch->send("%s", COLOR_NORMAL(ch, CL_NORMAL));
+		MudLog(BRF, 100, TRUE, "SQL: %s", sqlBuffer.str().c_str());
+		MudLog(BRF, MAX(GET_LEVEL(ch), LVL_APPR), TRUE, "IPFind: %s", e.getErrorMessage().c_str());
+		return;
+	}
+
+	while(query->hasNextRow())
+	{
+		row = query->getRow();
+
+		std::string username = row.getString("Username");
+		int logins = row.getInt("Logins");
+		std::string bitvectorString = row.getString("PreferenceFlags");
+
+		long bits[PM_ARRAY_MAX];
+		ConvertBitvectorFromString(bitvectorString.c_str(), bits, PM_ARRAY_MAX);
+
+		if(IS_SET_AR(bits, PLR_NO_TRACE) && GET_LEVEL(ch) < LVL_IMPL)
+			continue;
+
+		ch->send("%5d: %s\r\n", logins, username.c_str());
 	}
 }
 

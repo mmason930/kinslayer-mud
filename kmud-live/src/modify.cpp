@@ -475,7 +475,7 @@ void parse_action(int command, char *str, Descriptor *d)
 				temp = *s;
 				*s = '\0';
 				outputStringStream << t;
-				*s = temp;L
+				*s = temp;
 			}
 
 			else if (t)
