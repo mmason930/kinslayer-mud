@@ -1516,6 +1516,25 @@ struct PlayerOnlyData
 //Variables only used by MOBs...
 struct MobOnlyData
 {
+	
+	std::list<int> assists;			// List of vnums for MOBs to assist.
+	std::list<long> memory;			// List of attacker's ids to remember.
+	std::list<long> ForgetList;		// List of attackers who the mob should forget.
+	int	attack_type;				// The Attack Type Bit Vector for NPCs.
+	byte default_pos;				// Default position for NPC.
+	byte damnodice;					// The number of damage dices.
+	byte damsizedice;				// The size of the damage dices.
+	byte move_percent;				// Number of moves that the mob regenerates per tic.
+	sh_int wait_state;				// Wait state for bashed mobs.
+	sh_int moves_per_tic;			// Moves regenerated per tic. Assume -1 means it is calculated dynamically.
+	int aggro;
+	int nsects;						// Sectors MOB is not allowed to go into.
+
+	class Kit *primary_kit;			// Primary eq kit.
+	struct FoodUnit *Food;
+	struct SkinningUnit *Skin;
+	bool deleted;
+
 	MobOnlyData()
 	{
 		attack_type = 0;
@@ -1529,6 +1548,7 @@ struct MobOnlyData
 		primary_kit = 0;
 		Food = 0;
 		Skin = 0;
+		moves_per_tic = -1;
 		deleted = false;
 	}
 	~MobOnlyData();
@@ -1544,6 +1564,7 @@ struct MobOnlyData
 		nsects = source->nsects;
 		move_percent = source->move_percent;
 		primary_kit = source->primary_kit;
+		moves_per_tic = source->moves_per_tic;
 
 		if(source->Food)
 			this->Food = new FoodUnit(source->Food);
@@ -1557,22 +1578,6 @@ struct MobOnlyData
 
 		deleted = source->deleted;
 	}
-	std::list<int> assists;				/* List of vnums for MOBs to assist			*/
-	std::list<long> memory;				/* List of attacker's ids to remember		*/
-	std::list<long> ForgetList;			/* List of attackers who the mob should forget */
-	int	attack_type;				/* The Attack Type Bit Vector for NPC's		*/
-	byte default_pos;				/* Default position for NPC					*/
-	byte damnodice;					/* The number of damage dice's				*/
-	byte damsizedice;				/* The size of the damage dice's			*/
-	byte move_percent;
-	sh_int wait_state;					/* Wait state for bashed mobs				*/
-	int aggro;
-	int nsects;					/* Sectors MOB is not allowed to go into	*/
-
-	class Kit *primary_kit;		/* Primary eq kit							*/
-	struct FoodUnit *Food;
-	struct SkinningUnit *Skin;
-	bool deleted;
 };
 
 class Warrant

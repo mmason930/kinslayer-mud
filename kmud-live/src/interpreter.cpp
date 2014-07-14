@@ -249,7 +249,6 @@ ACMD( do_say );
 ACMD( do_speak );
 ACMD( do_save );
 ACMD( do_scan );
-ACMD( do_scite );
 ACMD( do_search );
 ACMD( do_self_delete );
 ACMD( do_send );
@@ -614,7 +613,6 @@ class CommandInfo cmd_info[] =
 	    {	"speak"		, "sp"	, POS_RESTING	, do_speak			, LVL_BLDER	, 0					, 0.0	,  0 	},
 	    {	"save"		, "save", POS_SLEEPING	, do_save			, 0			, 0					, 0.0	,  0 	},
 	    {	"scan"		, "scan", POS_STANDING	, do_scan			, 0			, 0					, 0.0	,  0 	},
-		{	"scite"		, "sci"	, POS_DEAD		, do_scite			, LVL_APPR	, 0					, 0.0	,  0	},
 		{	"search"	, "sea"	, POS_STANDING	, do_search			, 0			, 0					, 0.0	,  0 	},
 	    {	"saveall"	, "sall", POS_DEAD		, do_saveall		, LVL_GOD	, 0					, 0.0	,  0	},
 	    {	"seize"		, "sei"	, POS_RESTING	, do_source			, 0			, SCMD_SEIZE		, 0.0	,  0 	},
@@ -1143,12 +1141,12 @@ void skip_spaces( char **str )
  * Given a string, change all instances of double dollar signs ($$) to
  * single dollar signs ($).  When strings come in, all $'s are changed
  * to $$'s to avoid having users be able to crash the system if the
- * inputted std::string is eventually sent to Act().  If you are using user
+ * inputted string is eventually sent to Act().  If you are using user
  * input to produce screen output AND YOU ARE SURE IT WILL NOT BE SENT
  * THROUGH THE Act() FUNCTION (i.e., do_gecho, do_title, but NOT do_say),
  * you can call delete_doubledollar() to make the output look correct.
  *
- * Modifies the std::string in-place.
+ * Modifies the string in-place.
  */
 char *delete_doubledollar( char *str )
 {
@@ -1287,12 +1285,12 @@ char *TwoArguments( char *argument, char *first_arg, char *second_arg, bool conv
 }
 
 /*
- * determine if a given std::string is an abbreviation of another
+ * determine if a given string is an abbreviation of another
  * (now works symmetrically -- JE 7/25/94)
  *
  * that was dumb.  it shouldn't be symmetrical.  JE 5/1/95
  *
- * returnss 1 if arg1 is an abbreviation of arg2
+ * returns 1 if arg1 is an abbreviation of arg2
  */
 int IsAbbrev( const char *arg1, const char *arg2 )
 {

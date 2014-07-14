@@ -777,6 +777,7 @@ void medit_disp_menu(Descriptor *d)
 	    "%sH%s) Exit Msg  : %s%s\r\n"
 	    "%sI%s) Mob Race  : %s%s\r\n"
 	    "%sV%s) Mob Moves : %s%d\r\n"
+		"%sX%s) Move Regen: %s%d%s\r\n"
 	    "%sK%s) Mob Clan  : %s%s\r\n"
 	    "%sL%s) Mob Rank  : %s%d\r\n"
 	    "%sM%s) Mob Aggros: %s%s\r\n"
@@ -804,6 +805,7 @@ void medit_disp_menu(Descriptor *d)
 	    grn, nrm, cyn, mob->player.LeaveMessage ? mob->player.LeaveMessage : "Default Message",
 	    grn, nrm, cyn, pc_race_types[(int) GET_RACE(mob)],
 	    grn, nrm, cyn, (int)GET_MAX_MOVE(mob),
+		grn, nrm, cyn, (int)mob->MobData->moves_per_tic, (mob->MobData->moves_per_tic == -1 ? "(calculated dynamically)" : ""),
 	    grn, nrm, cyn, clanName.c_str(),
 	    grn, nrm, cyn, userClan ? ((int)userClan->getRank()) : 0,
 	    grn, nrm, cyn, *aggro_list ? aggro_list : "NONE",
@@ -1094,6 +1096,10 @@ void medit_parse(Descriptor *d, char *arg)
 					case 'W':
 						OLC_MODE(d) = MEDIT_WARRANTS;
 						MeditWarrantsMenu(d);
+						return;
+					case 'X':
+						OLC_MODE(d) = MEDIT_MOVES_PER_TIC;
+						d->send("Enter the number of moves that this mob should regenerate while standing, or -1 to for this to be calculated dynamically : ");
 						return;
 					default:
 						medit_disp_menu(d);
@@ -1690,6 +1696,9 @@ void medit_parse(Descriptor *d, char *arg)
 				break;
 			case MEDIT_SDD:
 				GET_SDD(OLC_MOB(d)) = MAX(0, MIN(127, atoi(arg)));
+				break;
+			case MEDIT_MOVES_PER_TIC:
+				OLC_MOB(d)->MobData->moves_per_tic = MIN(-1, MIN(999, atoi(arg)));
 				break;
 			case MEDIT_NUM_HP_DICE:
 				GET_HIT(OLC_MOB(d)) = MAX(0, MIN(30, atoi(arg)));

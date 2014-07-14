@@ -418,15 +418,6 @@ void bootWorld(void)
 	Log("Loading shops.");
 	boot_the_shops();
 
-	if( gamePort == 2230 )
-	{//Live MUD(most likely). Try to initiate the SciTE listening port.
-		JSManager::get()->SciteConnect( 2223 );
-	}
-	else
-	{
-		JSManager::get()->SciteConnect( 3334 );
-	}
-
 //	flusspferd::value JSEnvironment::executeExpression( const std::string &expression )
 }
 void SetupMySQL( bool crash_on_failure )
@@ -509,6 +500,10 @@ void boot_db(void)
     Log("Booting JS Triggers");
     // get() forces the ctoring
     JSManager* temp = JSManager::get();
+
+	temp->loadScriptsFromFilesystem("scripts");
+	temp->loadTriggers();
+	temp->loadScriptMap();
 
 	JSManager::get()->executeExpression("initGlobals();");
 	JSManager::get()->executeExpression("bootProcs();");

@@ -128,8 +128,9 @@ std::string StringUtil::getRandomString(const int size)
 	}
 
 	std::string buffer;
-	static char *symbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
-	int numberOfSymbols = strlen(symbols);
+	static std::string symbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+	int numberOfSymbols = symbols.size();
+
 	for(int i = 0;i < size;++i) {
 
 		buffer += symbols[MiscUtil::random(0,numberOfSymbols-1)];
@@ -141,15 +142,15 @@ std::string StringUtil::getRandomString(const int size)
 //2011-02-06 - Replaces string contents based on the value of toFind.
 void StringUtil::replace(std::string &input, const std::string &toFind, const std::string &replaceWith)
 {
-	std::string::size_type pos = 0;
+	std::string::size_type pos = 0, toFindSize = toFind.size(), replaceWithSize = replaceWith.size();
+
 	while(pos < input.size())
 	{
-		if(input.substr(pos, toFind.size()) == toFind)
+		if(input.substr(pos, toFindSize) == toFind)
 		{
+			input.replace(pos, toFindSize, replaceWith);
 
-			input.replace(pos, toFind.size(), replaceWith);
-
-			pos += replaceWith.size();
+			pos += replaceWithSize;
 		}
 		else {
 

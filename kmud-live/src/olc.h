@@ -564,6 +564,7 @@ const int MEDIT_NSECTS = 51;
 const int MEDIT_SKIN_UNIT = 52;
 const int MEDIT_SKIN_VNUM = 53;
 const int MEDIT_SKIN_REQUIRED = 54;
+const int MEDIT_MOVES_PER_TIC = 55;
 
 /*
  * Submodes of SEDIT connectedness.
@@ -884,7 +885,7 @@ const int JEDIT_NAME						= 1;
 const int JEDIT_ARGS						= 2;
 const int JEDIT_NARG						= 3;
 const int JEDIT_SAVE_CHANGES				= 4;
-const int JEDIT_SCRIPT_BODY					= 5;
+const int JEDIT_SCRIPT_ID					= 5;
 const int JEDIT_SELECT_TYPE					= 6;
 const int JEDIT_TRIGGER_TYPES				= 7;
 const int JEDIT_ALLOW_FLAGS					= 8;

@@ -916,26 +916,6 @@ void string_add(Descriptor *d, char *str)
 					break;
 			}
 		}
-		else if(STATE(d) == CON_JEDIT)
-		{
-			switch(OLC_MODE(d))
-			{
-			case JEDIT_SCRIPT_BODY:
-				if (terminator == 1)
-				{
-					d->olc->jsTrig->text = *d->str;
-					d->olc->jsTrig->code_modified = true;
-				}
-				
-				if (*d->str)
-				{
-					delete *d->str;
-					*d->str = NULL;
-				}
-				JeditDispMenu(d);
-				break;
-			}
-		}
 		else if(STATE(d) == CON_CEDIT)
 		{
 			switch(OLC_MODE(d))

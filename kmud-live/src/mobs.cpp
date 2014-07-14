@@ -232,6 +232,7 @@ Character *MobManager::BootPrototype( sql::Row &MyRow )
 
 	std::string Assists = MyRow["assists"];
 	NewMob->MobData->assists = MiscUtil::splitToIntList(Assists, ' ');
+	NewMob->MobData->moves_per_tic = MyRow.getInt("moves_per_tic");
 
 // Find any js scripts that are listed as attached to this mob in the db, and attach them to it
     NewMob->js_scripts = std::shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
@@ -396,7 +397,7 @@ std::list<std::string> MobManager::GrabSaveQuery( const unsigned int mob_rnum )
 			"aff_flags0,aff_flags1,aff_flags2,aff_flags3,mob_level,maxhit,maxmove,"
 			"maxmana,numdamdice,damsizedice,numhpdice,sizehpdice,hpbonus,damroll,exp,position,default_position,sex,"
 			"race,ob,db,pb,clan,rank,class,primary_kit,food_vnum,food_quantity,skin_vnum,skin_required,skin_skinned,warrants0,warrants1,warrants2,warrants3,"
-			"gold,aggro,nsects,attack,str,dex,intel,wis,con,assists)"
+			"gold,aggro,nsects,attack,str,dex,intel,wis,con,assists,moves_per_tic)"
 			"VALUES(";
 			QueryBuffer << SQLVal(MyMobIndex[m->nr]->vnum);
 			QueryBuffer << SQLVal(sql::escapeString(m->player.name));
@@ -450,7 +451,8 @@ std::list<std::string> MobManager::GrabSaveQuery( const unsigned int mob_rnum )
 			QueryBuffer << SQLVal(m->GetInt());
 			QueryBuffer << SQLVal(m->GetWis());
 			QueryBuffer << SQLVal(m->GetCon());
-			QueryBuffer << SQLVal(AssistsBuffer.str(),true) << ");" << std::endl;
+			QueryBuffer << SQLVal(AssistsBuffer.str(),true);
+			QueryBuffer << SQLVal(m->MobData->moves_per_tic) << ");" << std::endl;
 	}
 	else
 	{//Ugh... Produce the same monstrosity as above, but in the UPDATE form...
@@ -506,7 +508,8 @@ std::list<std::string> MobManager::GrabSaveQuery( const unsigned int mob_rnum )
 		QueryBuffer <<	"intel='"			<< m->GetInt()													<< "',";
 		QueryBuffer <<	"wis='"				<< m->GetWis()													<< "',";
 		QueryBuffer <<	"con='"				<< m->GetCon()													<< "',";
-		QueryBuffer <<	"assists='"			<< AssistsBuffer.str()											<< "'";
+		QueryBuffer <<	"assists='"			<< AssistsBuffer.str()											<< "',";
+		QueryBuffer <<	"moves_per_tic="	<< m->MobData->moves_per_tic;  
 		QueryBuffer <<	"WHERE vnum='"		<< VirtualMobile((u_int)m->nr)									<< "';";
 		QueryBuffer <<	std::endl;
 

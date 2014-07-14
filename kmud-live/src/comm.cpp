@@ -257,6 +257,53 @@ void gettimeofday( struct timeval *t, struct timezone *dummy )
 
 /********** INT MAIN() *************/
 
+void exportScripts()
+{
+	std::stringstream queryBuffer;
+
+	queryBuffer << " SELECT REPLACE(text, '\r', '') AS text, vnum, name"
+				<< " FROM js_scripts";
+
+	sql::Query query = gameDatabase->sendQuery(queryBuffer.str());
+	sql::Row row;
+
+	while(query->hasNextRow())
+	{
+		row = query->getRow();
+
+		int triggerVnum = row.getInt("vnum");
+		std::string triggerName = row.getString("name");
+		std::string body = row.getString("text");
+
+		std::string scriptBuffer;
+
+		if(triggerVnum >= 0)
+		{
+			scriptBuffer = (std::string("var script") + MiscUtil::Convert<std::string>(triggerVnum) + std::string(" = function(self, actor, here, args, extra)\n{\n\t") + body + "\n};\n\n");
+		}
+		else
+			scriptBuffer = body;
+		
+		StringUtil::replace(triggerName, " ", "");
+		StringUtil::replace(triggerName, "/", "");
+		StringUtil::replace(triggerName, "[", "");
+		StringUtil::replace(triggerName, "]", "");
+		StringUtil::replace(triggerName, ".", "_");
+		StringUtil::replace(triggerName, "(", "");
+		StringUtil::replace(triggerName, ")", "");
+
+		std::string fileName = MiscUtil::toString(triggerVnum) + std::string("_") + triggerName + std::string(".js");
+
+		Log("Exporting `%s`...", fileName.c_str());
+
+		std::ofstream outFile(std::string("scripts/") + fileName);
+
+		outFile << scriptBuffer;
+
+		outFile.close();
+	}
+}
+
 int main( int argc, char **argv )
 {
 #if (defined WIN32 && defined _DEBUG && defined _MEM_LEAKS )
@@ -439,6 +486,10 @@ int main( int argc, char **argv )
 			}
 
 			MudLog(BRF, 100, TRUE, "Finished processing player logs.");
+		}
+		else if(!strcmp(subroutine, "ExportScripts"))
+		{
+			exportScripts();
 		}
 		else
 		{
@@ -1588,11 +1639,6 @@ void heartbeat( int pulse )
 	lagMonitor.startClock();
 	ThreadedJobManager::get().cycleThroughFinishedJobs();
 	lagMonitor.stopClock( LAG_MONITOR_THREADED_JOBS );
-
-	/* Get the wait states updates */
-	lagMonitor.startClock();
-	JSManager::get()->SocketEvents();
-	lagMonitor.stopClock( LAG_MONITOR_KJS_SOCKET_EVENTS );
 
 	lagMonitor.startClock();
 	JSManager::get()->heartbeat();

@@ -70,7 +70,7 @@ class JSEnvironment
         // used for executing scripts delayed by timers
         int execute_timer(std::shared_ptr<JSInstance> instance, bool success);
 		flusspferd::value executeExpression( const std::string &expression );
-        bool compile(JSTrigger* trig); // true if compile succeeded, false otherwise.
+		bool compile(const std::string &fileName, std::string &scriptBuffer);// true if compile succeeded, false otherwise.
         void gc(); // garbage collect.
 		__int64 timeSinceLastGC();
 		__int64 getGC_Count();

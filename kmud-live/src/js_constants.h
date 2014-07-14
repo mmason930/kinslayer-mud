@@ -13,6 +13,8 @@
 #ifndef KINSLAYER_JS_CONSTANTS_H
 #define KINSLAYER_JS_CONSTANTS_H
 
+flusspferd::object makeConstants();
+
 namespace JS
 {
     // trigger types

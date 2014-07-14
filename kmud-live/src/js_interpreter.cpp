@@ -29,6 +29,7 @@
 #include "utils.h"
 #include "js_utils.h"
 #include "js_trigger.h"
+#include "Script.h"
 
 #include "StringUtil.h"
 #include "rooms/Room.h"
@@ -222,6 +223,7 @@ JSEnvironment::JSEnvironment()
 	flusspferd::create_native_function(g, "getUserNameByUserId", JS_getUserNameByUserId);
 	flusspferd::create_native_function(g, "getUserIdByUserName", JS_getUserIdByUserName);
 	flusspferd::create_native_function(g, "sendToZone", JS_sendToZone);
+	flusspferd::create_native_function(g, "setTimeout", JS_setTimeout);
 
 //	flusspferd::create<flusspferd::function>("setTimeout", &JS_SetTimeout, flusspferd::param::_container = g);
 
@@ -251,9 +253,18 @@ int JSEnvironment::execute(JSTrigger* trig, JSBindable *self, Character * actor,
 	if (!trig)
 		return -1;
 
-	if (!trig->valid)
+	if(trig->scriptId == -1)
+		return -1;
+
+	Script *script = JSManager::get()->getScript(trig->scriptId);
+
+	if(!script)
+		return -1;
+
+	//See if the method exists.
+	if(!flusspferd::global().has_property(script->getMethodName()))
 	{
-		MudLog(NRM, LVL_BUILDER, TRUE, "Error in script %d : Script is invalid, and will not run. (Compilation error?)", trig->vnum);
+		Log("Attempting to fire trigger #%d with invalid script #%d. Method name: `%s`", trig->vnum, script->getId(), script->getMethodName().c_str());
 		return -1;
 	}
 
@@ -285,7 +296,7 @@ int JSEnvironment::execute(JSTrigger* trig, JSBindable *self, Character * actor,
 	StringUtil::addSlashes( sArgs, "\\" );
 	StringUtil::addSlashes( sArgs, "\"" );
 
-	instance->callstring = "this." + trig->js_name + "(" + (self ? lookupName(self) : "null") + ", "
+	instance->callstring = "this." + script->getMethodName() + "(" + (self ? lookupName(self) : "null") + ", "
 		+ (actor ? lookupName(actor) : "null") + ", "
 		+ (here ? lookupName(here) : "null")
 		+ ", \"" + sArgs + "\", " + extraName  + ")";
@@ -576,14 +587,102 @@ int JSEnvironment::execute(std::shared_ptr<JSInstance> instance)
 	return rVal;
 }
 
-void macro( std::string &source, const std::string find, std::string replace ) {
- 
+void macro( std::string &source, const std::string find, std::string replace )
+{
+	StringUtil::replace(source, find, replace);
+	/***
 	size_t j;
 	for ( ; (j = source.find( find )) != std::string::npos ; ) {
 		source.replace( j, find.length(), replace );
 	}
+	***/
 }
 
+bool JSEnvironment::compile(const std::string &fileName, std::string &scriptBuffer)
+{
+    JSScript *script;
+    JSObject *scriptObj;
+    jsval val;
+
+    std::string formattedScriptBuffer = scriptBuffer;
+    
+	macro(formattedScriptBuffer, "wait ", "yield 6 * ");
+	macro(formattedScriptBuffer, "waitpulse ", "yield ");
+	macro(formattedScriptBuffer, "runTimer", "yield ");
+	macro(formattedScriptBuffer, "_block", "yield '__SPECIAL__BLOCK'");
+	macro(formattedScriptBuffer, "_noblock", "yield '__SPECIAL__NOBLOCK'");
+	
+	try {
+		flusspferd::evaluate(formattedScriptBuffer, fileName.c_str(), 1);
+	}
+	catch(flusspferd::exception e)
+	{
+		Log("Error evaluating script: %s", e.what());
+		exit(1);
+	}
+
+/*
+    //script = JS_CompileScript(raw_context(), JS_GetGlobalObject(raw_context()), formattedScriptBuffer.c_str(), formattedScriptBuffer.size(), fileName.c_str(), 1);
+	jsval result;
+	JSBool returnValue = JS_EvaluateScript(raw_context(), JS_GetGlobalObject(raw_context()), formattedScriptBuffer.c_str(), formattedScriptBuffer.size(), fileName.c_str(), 1, &result);
+
+	jsval exceptionValue;
+	if(JS_GetPendingException(raw_context(), &exceptionValue))
+	{
+		flusspferd::value fExceptionValue(exceptionValue);
+
+		Log("Is String: %s", StringUtil::yesNo(fExceptionValue.is_string()).c_str());
+		Log("Is Bool: %s", StringUtil::yesNo(fExceptionValue.is_bool()).c_str());
+		Log("Is Boolean: %s", StringUtil::yesNo(fExceptionValue.is_boolean()).c_str());
+		Log("Is Double: %s", StringUtil::yesNo(fExceptionValue.is_double()).c_str());
+		Log("Is Function: %s", StringUtil::yesNo(fExceptionValue.is_function()).c_str());
+		Log("Is Int: %s", StringUtil::yesNo(fExceptionValue.is_int()).c_str());
+		Log("Is Object: %s", StringUtil::yesNo(fExceptionValue.is_object()).c_str());
+		Log("Is Number: %s", StringUtil::yesNo(fExceptionValue.is_number()).c_str());
+		
+		Log("Exception Number: %d", fExceptionValue.get_int());
+
+		exit(1);
+
+		return false;
+	}
+
+	Log("SCRIPT: %p", script);
+    if (script == NULL)
+    {
+        return false;
+    }
+
+    scriptObj = JS_NewScriptObject(raw_context(), script);
+    
+	Log("SCRIPT OBJ: %p", scriptObj);
+
+	if (scriptObj == NULL) {
+        JS_DestroyScript(raw_context(), script);
+        return false;
+    }
+	***/
+
+	/***
+    val = OBJECT_TO_JSVAL(scriptObj);
+
+    temp = "__" + trig->js_name; // to distinguish from the function
+    if (!JS_SetProperty(raw_context(), JS_GetGlobalObject(raw_context()), temp.c_str(), &val))
+    {
+        trig->valid = false;
+        return false;
+    }
+	***/
+
+    //jsval result;
+	//JSBool executeScriptResult = JS_ExecuteScript(raw_context(), JS_GetGlobalObject(raw_context()), script, &result);
+
+	//Log("EXECUTE SCRIPT RESULT: %d", executeScriptResult);
+
+    return true;
+}
+
+/***
 bool JSEnvironment::compile(JSTrigger * trig)
 {
     if (!trig)
@@ -644,6 +743,7 @@ bool JSEnvironment::compile(JSTrigger * trig)
     trig->valid = true;
     return true;
 }
+***/
 
 __int64 JSEnvironment::getGC_Count()
 {

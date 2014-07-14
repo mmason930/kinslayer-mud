@@ -157,7 +157,6 @@ ACMD(do_restore);
 ACMD(do_retool);
 ACMD(do_return);
 ACMD(do_saveall);
-ACMD(do_scite);
 ACMD(do_send);
 ACMD(do_set);
 ACMD(do_wshow);
@@ -190,61 +189,6 @@ void perform_immort_vis(Character *ch);
 void perform_warrant(Character *ch, Character *victim, int clan);
 void redit_save_internally(Descriptor *d);
 int topUserId();
-
-/* Galnor - 11/24/2009 - Connect / disconnect Scintilla text editor's listening socket. */
-ACMD(do_scite)
-{
-	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-	int port;
-
-	TwoArguments(argument, arg1, arg2);
-
-	if( !argument || !*arg1 )
-	{
-		ch->send("This command is used to connect the remote Scintilla text editor's listening socket.\r\n"
-			"Syntax: scite connect|disconnect <port>\r\n"
-			"Syntax: scite port\r\n");
-		return;
-	}
-	if( !str_cmp(arg1, "port") )
-	{
-		if( !JSManager::get()->SciteIsConnected() )
-			ch->send("The socket is not listening.\r\n");
-		else
-			ch->send("The socket is listening on port %d\r\n", JSManager::get()->ScitePort());
-		return;
-	}
-	else if( !str_cmp(arg1, "connect") )
-	{
-		if( !*arg2 )
-		{
-			ch->send("To connect, you must specify a port.\r\n");
-			return;
-		}
-		if( !MiscUtil::isNumber(arg2) )
-		{
-			ch->send("The port you specify must be numeric.\r\n");
-			return;
-		}
-		port = atoi(arg2);
-		JSManager::get()->SciteConnect( port );
-
-		ch->send("Attempting to connect to port %d.\r\n", port);
-	}
-	else if( !str_cmp(arg1, "disconnect") )
-	{
-		JSManager::get()->SciteDisconnect();
-
-		ch->send("Disconnecting...");
-
-		return;
-	}
-	else
-	{
-		ch->send("You must either connect to a port, or disconnect.\r\n");
-		return;
-	}
-}
 
 void redit_save_to_disk( int lowVnum, int highVnum );
 
@@ -1106,7 +1050,6 @@ ACMD(do_ipfind)
 	}
 	catch(sql::QueryException e)
 	{
-		MudLog(BRF, 100, TRUE, "SQL: %s", sqlBuffer.str().c_str());
 		MudLog(BRF, MAX(GET_LEVEL(ch), LVL_APPR), TRUE, "IPFind: %s", e.getErrorMessage().c_str());
 		return;
 	}
@@ -1274,6 +1217,22 @@ ACMD(do_extra)
 			pulse -= 1;
 			Seconds = (pulse / PASSES_PER_SEC);
 			//Now we are tic - 1 pulse.
+		}
+		else if(!str_cmp(vArgs.at(0), "js"))
+		{
+			std::string methodName = "script9";
+
+			flusspferd::object globalObject = flusspferd::global();
+
+			ch->send("Has Property: %s", StringUtil::yesNo(globalObject.has_property(methodName)).c_str());
+			ch->send("Has Own Property: %s", StringUtil::yesNo(globalObject.has_property(methodName)).c_str());
+
+				/**
+			for(flusspferd::value propertyValue : globalObject)
+			{
+				ch->send("Property `%s`", propertyValue.)
+			}
+			**/
 		}
 		else bCorrectArgument=false;
 	} catch( std::out_of_range ) {
@@ -5912,11 +5871,6 @@ ACMD(do_wshow)
 
 			sprintf(buf + strlen(buf), " Database: %s\r\n", (gameDatabase->isConnected() ? "Connected" : "Not Connected"));
 
-			std::string sConnected = "Not Connected";
-
-			sConnected = (JSManager::get()->SciteIsConnected() ? "Connected" : "Not Connected");
-
-			sprintf(buf + strlen(buf), " Kinpad Server: %s, Port: %d, Descriptors: %u\r\n", sConnected.c_str(), JSManager::get()->ScitePort(), JSManager::get()->numberOfConnectedDescriptors());
 			sprintf(buf + strlen(buf), " Web Socket Server: %s, Port: %d, Descriptors: %u\r\n", (game->playerPortalServerIsConnected() ? "Connected" : "Not Connected"), game->getPlayerPortalPort(), game->getNumberOfPlayerPortalDescriptors());
 			sprintf(buf + strlen(buf), " Switch: %s\r\n", Conf->play.switch_restriction ? "Restricted" : "Not Restricted");
 			sprintf(buf + strlen(buf), " Flusspferd Garbage Collections: %lld\r\n", JSManager::get()->getGC_Count());

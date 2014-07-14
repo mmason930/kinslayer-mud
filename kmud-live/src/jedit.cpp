@@ -31,6 +31,7 @@
 #include "JSRoom.h"
 #include "js_constants.h"
 #include "js_trigger.h"
+#include "Script.h"
 
 #include "MiscUtil.h"
 #include "StringUtil.h"
@@ -231,12 +232,12 @@ ACMD( do_jstat )
 	sprintbit(jsTrig->allowed_flags, (const char**)JS::js_allow     , buf2, (", "), (yel), (nrm));
 
 	sBuffer << "JavaScript View - Trigger #" << jsTrig->vnum << std::endl;
-	sBuffer << grn << "1" << nrm << " Name            : " << yel << jsTrig->name           << nrm << std::endl;
-	sBuffer << grn << "3" << nrm << " Trigger Types   : " << yel << buf                    << nrm << std::endl;
-	sBuffer << grn << "4" << nrm << " Allowed Flags   : " << yel << buf2                   << nrm << std::endl;
-	sBuffer << grn << "5" << nrm << " Arguments       : " << yel << jsTrig->args           << nrm << std::endl;
-	sBuffer << grn << "6" << nrm << " Numeric Argument: " << yel << jsTrig->narg           << nrm << std::endl;
-	sBuffer << grn << "7" << nrm << " Script Body     : " << cyn << "\r\n"<<jsTrig->text   << nrm << std::endl;
+	sBuffer << grn << "1" << nrm << " Name            : " << yel << jsTrig->name             << nrm << std::endl;
+	sBuffer << grn << "3" << nrm << " Trigger Types   : " << yel << buf                      << nrm << std::endl;
+	sBuffer << grn << "4" << nrm << " Allowed Flags   : " << yel << buf2                     << nrm << std::endl;
+	sBuffer << grn << "5" << nrm << " Arguments       : " << yel << jsTrig->args             << nrm << std::endl;
+	sBuffer << grn << "6" << nrm << " Numeric Argument: " << yel << jsTrig->narg             << nrm << std::endl;
+	sBuffer << grn << "7" << nrm << " Script ID       : " << cyn << "\r\n"<<jsTrig->scriptId << nrm << std::endl;
 	sBuffer << grn << "D" << nrm << " Delete          : " << grn << StringUtil::allUpper(StringUtil::yesNo(jsTrig->deleted)).c_str() << nrm << std::endl;
 
 	d->sendRaw( sBuffer.str().c_str() );
@@ -456,6 +457,15 @@ void JeditDispMenu( Descriptor *d )
 	sprintbit(jsTrig->trigger_flags, (const char**)JS::js_trig_types, buf , (", "), (yel), (nrm));
 	sprintbit(jsTrig->allowed_flags, (const char**)JS::js_allow     , buf2, (", "), (yel), (nrm));
 	sprintbit(jsTrig->option_flags , (const char**)JS::js_options	, buf3, (", "), (yel), (nrm));
+	std::string scriptName;
+	Script *script = NULL;
+
+	if(jsTrig->scriptId == -1)
+		scriptName = std::string(red) + bld + "<No Script>" + nrm;
+	else if( (script = JSManager::get()->getScript(jsTrig->scriptId)) == NULL)
+		scriptName = std::string(red) + bld + "<Invalid Script>" + nrm;
+	else
+		scriptName = std::string(grn) + script->getMethodName() + nrm;
 
 	sBuffer << "JavaScript View - Trigger #" << jsTrig->vnum << std::endl;
 	sBuffer << grn << "1" << nrm << " Name            : " << yel << jsTrig->name           << nrm << std::endl;
@@ -464,8 +474,8 @@ void JeditDispMenu( Descriptor *d )
 	sBuffer << grn << "4" << nrm << " Allowed Flags   : " << yel << buf2                   << nrm << std::endl;
 	sBuffer << grn << "5" << nrm << " Arguments       : " << yel << jsTrig->args           << nrm << std::endl;
 	sBuffer << grn << "6" << nrm << " Numeric Argument: " << yel << jsTrig->narg           << nrm << std::endl;
-	sBuffer << grn << "7" << nrm << " Script Body     : " << cyn << "\r\n"<<jsTrig->text   << nrm << std::endl;
-	sBuffer << grn << "D" << nrm << " Delete          : " << grn << StringUtil::allUpper(StringUtil::yesNo(jsTrig->deleted)).c_str() << nrm << std::endl;
+	sBuffer << grn << "7" << nrm << " Script ID       : " << yel << jsTrig->scriptId << nrm << " - " << grn << scriptName << nrm << std::endl;
+	sBuffer << grn << "D" << nrm << " Delete          : " << (jsTrig->deleted ? red : grn) << StringUtil::allUpper(StringUtil::yesNo(jsTrig->deleted)).c_str() << nrm << std::endl;
 	sBuffer << grn << "Q" << nrm << " Quit"               << std::endl;
 
 	d->sendRaw( sBuffer.str().c_str() );
@@ -575,11 +585,8 @@ void JeditParse( Descriptor *d, const std::string &arg )
 		}
 		else if( atoi(arg.c_str()) == 7 )
 		{
-			OLC_MODE(d)	= JEDIT_SCRIPT_BODY;
-			d->sendRaw(d->olc->jsTrig->text.c_str());
-			d->olc->buf	= str_dup(d->olc->jsTrig->text.c_str());
-			d->str		= &(d->olc->buf);
-			d->max_str	= (MAX_SCRIPT_LENGTH);
+			OLC_MODE(d)	= JEDIT_SCRIPT_ID;
+			d->send("Enter the script ID to attach this trigger to: ");
 			return;
 		}
 		else
@@ -662,6 +669,33 @@ void JeditParse( Descriptor *d, const std::string &arg )
 		d->olc->jsTrig->narg = atoi(arg.c_str());
 		JeditDispMenu(d);
 		break;
+	case JEDIT_SCRIPT_ID:
+	{
+		if(toupper(arg[0]) == 'Q')
+		{
+			d->send("No changes have been made to the script ID.\r\n");
+			JeditDispMenu(d);
+			break;
+		}
+
+		if(!MiscUtil::isNumber(arg.c_str()))
+		{
+			d->send("You must input a number.\r\nTry again: ");
+			break;
+		}
+
+		int scriptId = atoi(arg.c_str());
+
+		if(scriptId != -1 && JSManager::get()->getScript(scriptId) == NULL)
+		{
+			d->send("There is no script #%d in the game.\r\nTry another, enter -1 to detach the script, or 'Q' to exit: ");
+			break;
+		}
+		
+		d->olc->jsTrig->scriptId = scriptId;
+		JeditDispMenu(d);
+		break;
+	}
 	case JEDIT_SAVE_CHANGES:
 		if( leadingChar == 'Y' )
 		{

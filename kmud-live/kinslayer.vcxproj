@@ -163,6 +163,7 @@
     <ClCompile Include="src\spec_procs.cpp" />
     <ClCompile Include="src\spell_parser.cpp" />
     <ClCompile Include="src\spells.cpp" />
+    <ClCompile Include="src\SQLUtil.cpp" />
     <ClCompile Include="src\statedit.cpp" />
     <ClCompile Include="src\stats.cpp" />
     <ClCompile Include="src\SystemUtil.cpp" />
@@ -260,6 +261,7 @@
     <ClInclude Include="src\sha1.h" />
     <ClInclude Include="src\shop.h" />
     <ClInclude Include="src\spells.h" />
+    <ClInclude Include="src\SQLUtil.h" />
     <ClInclude Include="src\stats.h" />
     <ClInclude Include="src\structs.h" />
     <ClInclude Include="src\sysdep.h" />

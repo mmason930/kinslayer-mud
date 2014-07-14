@@ -27,7 +27,7 @@ public:
 				queryBuffer << ',';
 
 			if(quoteElements)
-				queryBuffer << sql::escapeQuoteString((*iter));
+				queryBuffer << sql::escapeQuoteString(MiscUtil::toString(*iter));
 			else
 				queryBuffer << (*iter);
 

@@ -17,12 +17,16 @@
 #include "js_trigger.h"
 #include "js_interpreter.h"
 #include "js_utils.h"
+#include "js_functions.h"
+#include "Script.h"
 
 #include "constants.h"
 #include "structs.h"
 #include "olc.h"
 #include "js.h"
 #include "handler.h"
+
+#include "Game.h"
 
 #include "kuSockets.h"
 #include "kuListener.h"
@@ -32,6 +36,7 @@
 
 #include "CharacterUtil.h"
 #include "StringUtil.h"
+#include "SQLUtil.h"
 #include "rooms/Room.h"
 
 using namespace std;
@@ -39,6 +44,12 @@ using namespace tr1;
 
 extern Descriptor *descriptor_list;
 extern sql::Connection gameDatabase;
+
+std::list<ScriptImportOperation *> ScriptImportOperation::enums;
+
+ScriptImportOperation *ScriptImportOperation::addition = new ScriptImportOperation(0, "Addition");
+ScriptImportOperation *ScriptImportOperation::modification = new ScriptImportOperation(1, "Modification");
+ScriptImportOperation *ScriptImportOperation::deletion = new ScriptImportOperation(2, "Deletion");
 
 JSDepthRegulator::JSDepthRegulator()
 {
@@ -63,58 +74,143 @@ int JSManager::getDepth() {
 	return triggerDepth;
 }
 
-JSManager::JSManager()
+void JSManager::loadScriptMap()
 {
-	env = new JSEnvironment();
-	mapper = unordered_map<int, JSTrigger*>();
+	sql::Row row;
+	sql::Query query;
+	std::stringstream queryBuffer;
 
-	triggerDepth = 0;
-	server = 0;
+	queryBuffer << " SELECT *"
+				<< " FROM `script`";
+
+	query = gameDatabase->sendQuery(queryBuffer.str());
+
+	while(query->hasNextRow())
+	{
+		row = query->getRow();
+
+		int id = row.getInt("id");
+		std::string methodName = row.getString("method_name");
+
+		this->scriptMap[id] = new Script(id, methodName);
+	}
+}
+
+void JSManager::loadTriggers()
+{
 	sql::Query query;
 	sql::Row row;
-	try {
-		
-		int offset = 0;
-		int fetchSize = 100;
-		do
-		{
-			std::stringstream queryBuffer;
-			queryBuffer << "SELECT * FROM js_scripts LIMIT " << offset << "," << fetchSize;
-			query = gameDatabase->sendQuery(queryBuffer.str());
+	std::stringstream queryBuffer;
 
-			while (query->hasNextRow())
-			{
-				row = query->getRow();
-				int vnum = atoi(row["vnum"].c_str());
-				JSTrigger* trigger = new JSTrigger(vnum);
+	queryBuffer << " SELECT *"
+				<< " FROM `scriptTrigger`";
 
-				trigger->text = row["text"];
-				trigger->name = row["name"];
-				trigger->narg = atoi(row["narg"].c_str());
-				trigger->args = row["args"];
-				trigger->trigger_flags = atol(row["trigger_flags"].c_str());
-				trigger->allowed_flags = atol(row["allowed_flags"].c_str());
-				trigger->option_flags = atol(row["option_flags"].c_str());
-				mapper[vnum] = trigger;
+	query = gameDatabase->sendQuery(queryBuffer.str());
 
-				// compile it for future use
-				env->compile(trigger);
-				//			cout << "Trigger " << trigger->vnum << " compile...";
-				//			if (env->compile(trigger))
-				//				cout << "...success!" << endl;
-				//			else
-				//				cout << "FAIL!" << endl;
-
-			}
-
-			offset += fetchSize;
-		} while( query->numRows() > 0 );
-		
-	}
-	catch (sql::QueryException e)
+	while (query->hasNextRow())
 	{
-		cout << "Error loading JS Script in JSManager::init (Exception)" << endl;
-		e.report();
+		row = query->getRow();
+
+		int vnum = row.getInt("vnum");
+		JSTrigger* trigger = new JSTrigger(vnum);
+
+		trigger->scriptId = row.getInt("script_id");
+		trigger->name = row["name"];
+		trigger->narg = atoi(row["narg"].c_str());
+		trigger->args = row["args"];
+		trigger->trigger_flags = atol(row["trigger_flags"].c_str());
+		trigger->allowed_flags = atol(row["allowed_flags"].c_str());
+		trigger->option_flags = atol(row["option_flags"].c_str());
+		mapper[vnum] = trigger;
+	}
+}
+
+void JSManager::loadScriptsFromFilesystem(const std::string &directoryPath)
+{
+	boost::filesystem::path scriptDirectoryPath(directoryPath);
+	boost::filesystem::directory_iterator end;
+	for( boost::filesystem::directory_iterator iter(scriptDirectoryPath) ; iter != end ; ++iter )
+	{
+		boost::filesystem::path iterPath = (*iter).path();
+
+		if(boost::filesystem::is_directory(iterPath))
+		{
+			loadScriptsFromFilesystem(iterPath.string());
+			continue;
+		}
+
+		if( !(*iter).path().has_extension() || str_cmp((*iter).path().extension().string(), ".js") )
+		{
+			continue;
+		}
+
+		if(!loadScriptsFromFile(iterPath.string()))
+		{
+			exit(1);
+		}
+	}
+}
+
+bool JSManager::loadScriptsFromFile(const std::string &filePath)
+{
+	size_t fileSize;
+	char *fileBuffer;
+	FILE *fileHandle = fopen(filePath.c_str(), "r");
+
+	MudLog(BRF, LVL_APPR, TRUE, "Processing Script File `%s`...", filePath.c_str());
+
+	if(!fileHandle)
+	{
+		return false;
+	}
+
+	//Determine the file size.
+	fileSize = fseek(fileHandle, 0, SEEK_END);
+	fileSize = ftell(fileHandle);
+	rewind(fileHandle);
+
+	//Allocate a string large enough to hold the file contents.
+	fileBuffer = new char[fileSize + 1];
+
+	size_t bytesRead = fread(fileBuffer, sizeof(*fileBuffer), fileSize, fileHandle);
+
+	if(ferror(fileHandle))
+	{
+		return false;
+	}
+
+	fclose(fileHandle);
+
+	fileBuffer[bytesRead] = '\0';
+
+	std::string scriptContent(fileBuffer);
+
+	delete[] fileBuffer;
+
+	return env->compile(filePath, scriptContent);
+}
+
+JSManager::JSManager()
+{
+	try
+	{
+		env = new JSEnvironment();
+		mapper = unordered_map<int, JSTrigger*>();
+
+		triggerDepth = 0;
+		server = 0;
+		nextScriptEventId = 0;
+
+		scriptImportReadQueue = new std::list<ScriptImport *>();
+		scriptImportWriteQueue = new std::list<ScriptImport *>();
+
+		this->scriptImportThreadRunning = true;
+		monitorScriptImportTableThread = new std::thread(&JSManager::monitorScriptImportTable, this, dbContext->createConnection());
+	}
+	catch(sql::QueryException queryException)
+	{
+		MudLog(BRF, LVL_BUILDER, TRUE, "Error loading scripts: %s", queryException.getMessage().c_str());
+		exit(1);
 	}
 }
 
@@ -128,6 +224,84 @@ JSManager* JSManager::get()
 	}
 
 	return _self;
+}
+
+void JSManager::monitorScriptImportTable(sql::Connection connection)
+{
+	std::string queryString;
+	
+	{
+		std::stringstream queryBuffer;
+		queryBuffer << " SELECT *"
+					<< " FROM `scriptImportQueue`"
+					<< " ORDER BY id ASC";
+
+		queryString = queryBuffer.str();
+	}
+
+	while(this->scriptImportThreadRunning)
+	{
+		try
+		{
+			sql::Query query;
+			sql::Row row;
+			std::vector<unsigned long long> idDeleteQueue;
+
+			query = connection->sendQuery(queryString);
+
+			while(query->hasNextRow())
+			{
+				ScriptImport *scriptImport = getScriptImport(query->getRow());
+
+				Log("Found Script Import. ID: %llu, File Path `%s`, Queued: %s, Operation: %s", scriptImport->id, scriptImport->filePath.c_str(), scriptImport->queuedDatetime.toString().c_str(), scriptImport->operation->getStandardName().c_str());
+
+				scriptImportWriteQueue->push_back(scriptImport);
+
+				idDeleteQueue.push_back(scriptImport->id);
+			}
+
+			//If we have something queued up then swap the queues so the other thread can get it.
+			if(!scriptImportWriteQueue->empty())
+			{
+				{
+					std::lock_guard<std::mutex> lock(this->scriptImportMutex);
+
+					std::list<ScriptImport *> *temporaryScriptImportList = this->scriptImportWriteQueue;
+					this->scriptImportWriteQueue = this->scriptImportReadQueue;
+					this->scriptImportReadQueue = temporaryScriptImportList;
+				}
+
+				this->scriptImportWriteQueue->clear();
+
+				std::stringstream queryBuffer;
+
+				queryBuffer << " DELETE FROM `scriptImportQueue`"
+							<< " WHERE id IN " << SQLUtil::buildListSQL(idDeleteQueue.begin(), idDeleteQueue.end(), false, true);
+
+				connection->sendRawQuery(queryBuffer.str());
+
+				idDeleteQueue.clear();
+			}
+		}
+		catch(sql::QueryException queryException)
+		{
+			Log("Error while fetching from scriptImportQueue: %s", queryException.getMessage().c_str());
+		}
+		
+		std::this_thread::sleep_for(std::chrono::seconds(5));
+	}
+}
+
+ScriptImport *JSManager::getScriptImport(const sql::Row &row) const
+{
+	ScriptImport *scriptImport = new ScriptImport();
+
+	scriptImport->id = MiscUtil::Convert<unsigned long long>(row.getString("id"));
+	scriptImport->filePath = row.getString("file_path");
+	scriptImport->queuedDatetime = DateTime(row.getTimestamp("queued_datetime"));
+	scriptImport->operation = (ScriptImportOperation*)ScriptImportOperation::getEnumByValue(row.getInt("operation"));
+
+	return scriptImport;
 }
 
 JSTrigger* JSManager::getTrigger(int vnum)
@@ -169,17 +343,20 @@ void JSManager::deleteTrigger(JSTrigger* t)
 {
 	if( !t )
 		return;
+
 	if( mapper.count(t->vnum) == 0 )
 		return;
 
 	std::stringstream QueryBuffer;
 
-	QueryBuffer << "DELETE FROM js_scripts WHERE vnum='" << t->vnum << "';";
+	QueryBuffer << " DELETE FROM `scriptTrigger`"
+				<< " WHERE id = " << t->vnum << ";";
+	
 	try {
 		gameDatabase->sendRawQuery( QueryBuffer.str() );
-	} catch( sql::QueryException e ) {
-		MudLog(NRM, LVL_APPR, TRUE, "Failed to send JSTrigger deletion query for #%d : %s",
-			t->vnum, e.getMessage().c_str());
+	}
+	catch( sql::QueryException e ) {
+		MudLog(NRM, LVL_APPR, TRUE, "Failed to send JSTrigger deletion query for #%d : %s", t->vnum, e.getMessage().c_str());
 		return;
 	}
 }
@@ -187,7 +364,7 @@ void JSManager::deleteTrigger(JSTrigger* t)
 int JSManager::saveTrigger(JSTrigger* t)
 {
 	if (!t)
-		cout << "Null ptr to trigger passed to saveTrigger(). Bad news!" << endl;
+		MudLog(BRF, LVL_BUILDER, TRUE, "Null ptr to trigger passed to saveTrigger(). Bad news!");
 
 	JSTrigger * trig;
 	// if there is nothing there, we just set this as the trigger
@@ -213,15 +390,26 @@ int JSManager::saveTrigger(JSTrigger* t)
 	try
 	{
 		stringstream s;
-		s << "REPLACE DELAYED INTO js_scripts (name,narg,args,trigger_flags,allowed_flags,text,vnum,option_flags) VALUES("
-			<< "'" << sql::escapeString(trig->name) << "',"
-			<< "'" << trig->narg << "',"
-			<< "'" << sql::escapeString(trig->args) << "',"
-			<< "'" << trig->trigger_flags << "',"
-			<< "'" << trig->allowed_flags << "',"
-			<< "'" << sql::escapeString(trig->text) << "',"
-			<< "'" << trig->vnum << "',"
-			<< "'" << trig->option_flags << "');";
+			s	<< " REPLACE DELAYED INTO `scriptTrigger` ("
+				<< "   `name`,"
+				<< "   `narg`,"
+				<< "   `args`,"
+				<< "   `trigger_flags`,"
+				<< "   `allowed_flags`,"
+				<< "   `id`,"
+				<< "   `script_id`,"
+				<< "   `option_flags`"
+				<< " ) VALUES ("
+				<< sql::escapeQuoteString(trig->name) << ","
+				<< trig->narg << ","
+				<< sql::escapeQuoteString(trig->args) << ","
+				<< trig->trigger_flags << ","
+				<< trig->allowed_flags << ","
+				<< trig->vnum << ","
+				<< trig->scriptId << ","
+				<< trig->option_flags
+				<< " );";
+
 		std::string tempstring = s.str();
 		//cout << tempstring << endl;
 		gameDatabase->sendRawQuery(tempstring);
@@ -230,28 +418,6 @@ int JSManager::saveTrigger(JSTrigger* t)
 	{
 		MudLog(BRF, LVL_APPR, TRUE, "Error saving JS Script %d : %s", trig->vnum, e.getErrorMessage().c_str());
 		e.report();
-	}
-
-	// we recompile it if it has changed its code.
-	if (trig->code_modified)
-	{
-		cout << "Compiling trigger " << trig->vnum << "...";
-		trig->code_modified = false;
-		if (!env->compile(trig))
-		{
-			MudLog(NRM, LVL_BUILDER, TRUE, "Failed to compile trigger %d", trig->vnum);
-			return -1;
-		}
-		else
-		{
-			cout << " successful." << endl;
-			return 0;
-		}
-	}
-	else
-	{
-		cout << "not modified " << trig->vnum << endl;
-		return 0;
 	}
 }
 
@@ -292,7 +458,7 @@ void JSManager::heartbeat()
 	static __int64 pulses=0;
 	++pulses;
 
-	if( !( pulses%(10*PASSES_PER_SEC) ) ) {
+	if( !( pulses % (10 * PASSES_PER_SEC) ) ) {
 		JSManager::get()->gc();
 	}
 	list<pair<int, std::shared_ptr<JSInstance> > >::iterator iter = scripts.begin();
@@ -307,17 +473,39 @@ void JSManager::heartbeat()
 		else
 			++iter;
 	}
-	/*** Also, execute the event handling script ***/
-	time_t tBefore = time(0);
-	flusspferd::value f;
-	while( (time(0)-tBefore) < 5 ) {
-		try {
-			f = flusspferd::evaluate("runTimeouts();");
-			if( f.is_int() && f.get_int() == 1 )
-				break;
-		} catch(flusspferd::exception e) {
-			MudLog(NRM, LVL_BUILDER, TRUE, "Error in the runTimeouts() callback : %s", e.what());
+
+	// Also, execute the event handling script
+	runTimeouts();
+
+	// Process script imports.
+	processScriptImports();
+}
+
+void JSManager::processScriptImports()
+{
+	std::list<ScriptImport *> scriptImportsToProcess;
+
+	//There is no need to hold this lock for the entire operation.
+	//Copy everything from the read queue to our locally defined queue.
+	{//Obtain the lock.
+		std::lock_guard<std::mutex> lock(this->scriptImportMutex);
+
+		if(!this->scriptImportReadQueue->empty())
+		{
+			std::copy(this->scriptImportReadQueue->begin(), this->scriptImportReadQueue->end(), std::back_inserter(scriptImportsToProcess));
+
+			this->scriptImportReadQueue->clear();
 		}
+	}//Release the lock.
+
+	//Process everything.
+	for(ScriptImport *scriptImport : scriptImportsToProcess)
+	{
+		MudLog(BRF, LVL_BUILDER, TRUE, "Script import (%s), queued at %s, path `%s`", scriptImport->operation->getStandardName().c_str(), scriptImport->queuedDatetime.toString().c_str(), scriptImport->filePath.c_str());
+
+		this->loadScriptsFromFile(scriptImport->filePath);
+
+		delete scriptImport;
 	}
 }
 
@@ -380,310 +568,6 @@ void JSManager::handleExtraction( JSBindable *ptr )
 	deleteValue( ptr );
 }
 
-void JSManager::test( class Character *ch )
-{
-	std::list<std::pair<int, std::shared_ptr<JSInstance> > >::iterator iter;
-
-	for( iter = scripts.begin();iter != scripts.end();++iter )
-	{
-		if( (*iter).second->state.has_property( "ivy" ) )
-			ch->send("Script #%d\r\n", (*iter).first);
-		if( (*iter).second->self.to_object().has_property( "ivy" ) )
-			ch->send("Script #%d\r\n", (*iter).first);
-		if( (*iter).second->self.to_object().parent().has_property( "ivy" ) )
-			ch->send("Script #%d\r\n", (*iter).first);
-	}
-	if( global().has_property("ivy") )
-		ch->send("Global scope has the variable.\r\n");
-	ch->send("Scanned %d scripts.\r\n", scripts.size());
-}
-
-/*
-int JSManager::execute(JSTrigger* trig, Character* self, Character * actor, const char * args, js_extra_data extra, Room * here)
-{
-return env->execute(trig, self, actor, args, extra, here);
-}
-
-int JSManager::execute(JSTrigger* trig, Character* self, Character * actor, const char * args, Room * here)
-{
-return env->execute(trig, self, actor, args, here);
-}
-
-int JSManager::execute(JSTrigger* trig, Character* self, Character * actor, Room * here)
-{
-return env->execute(trig, self, actor, "", here);
-}
-*/
-
-std::map< int, JSSocketInfo * > JSDescMap;
-
-JSSocketInfo::JSSocketInfo( kuDescriptor *d )
-{
-	dUID = ( d ? d->getUid() : (-1) );
-	scriptVnum = 0;
-	isReadingScript = false;
-	isSendingScript = false;
-	scriptBufferIndex = 0;
-	connectionAuthorized = false;
-}
-
-void JSManager::SciteDisconnect()
-{
-	if( server )
-		delete server;
-	server = 0;
-}
-
-void JSManager::SciteConnect( const int port )
-{
-	if( server )
-		delete server;
-	server = new kuListener(port, TCP);
-
-	if( !server->isBound() || !server->isListening() )
-	{
-		delete server;
-		server = 0;
-		return;
-	}
-}
-bool JSManager::SciteIsConnected()
-{
-	return (server && server->isBound() && server->isListening());
-}
-
-int JSManager::ScitePort()
-{
-	return (SciteIsConnected() ? server->getPort() : 0);
-}
-
-unsigned int JSManager::numberOfConnectedDescriptors()
-{
-	return server ? server->getDescriptors().size() : 0;
-}
-
-/* Galnor 11/23/2009 - For the external editor, handle incoming requests */
-void JSManager::SocketEvents()
-{
-	if( server == 0 )
-		return;
-	std::list< kuDescriptor * > lNewDesc = server->acceptNewHosts();
-	server->pulse();
-	Descriptor *descriptor = NULL;
-
-	std::list< kuDescriptor * > lDescList = server->getDescriptors();
-
-	for( std::list< kuDescriptor * >::iterator dIter = lNewDesc.begin();dIter != lNewDesc.end();++dIter )
-	{
-		//All new descriptors come through here. Give them a JSSocketInfo & add to map...
-		JSDescMap[ (*dIter)->getUid() ] = new JSSocketInfo( (*dIter) );
-	}
-
-	//Now cycle through all live descriptors.
-	for( std::list< kuDescriptor * >::iterator dIter = lDescList.begin();dIter != lDescList.end();++dIter )
-	{
-		JSSocketInfo *sInfo = JSDescMap[ (*dIter)->getUid() ];
-		kuDescriptor *d = (*dIter);
-
-		d->getInputBuffer();
-		std::string Line = d->getCommand();
-
-		//		if( Line.empty() ) continue;
-
-		std::vector< std::string > vArgs = StringUtil::SplitToContainer< std::vector< std::string >, std::string >(Line, ' ');
-
-		//		if( vArgs.empty() ) continue;
-
-		if(sInfo->username.empty() == false) {
-
-			for(descriptor = descriptor_list;descriptor;descriptor = descriptor->next) {
-
-				if(descriptor->character && descriptor->character->player.name == sInfo->username) {
-
-					break;
-				}
-			}
-		}
-
-		int invisLevel = LVL_APPR;
-
-		if(descriptor && descriptor->character) {
-
-			invisLevel = MAX(LVL_APPR, descriptor->character->player.level);
-		}
-
-		if( sInfo->username.empty() && !Line.empty() )
-		{//Socket has not yet submitted a user name. This command _should_ be it.
-			sInfo->username = Line;
-			StringUtil::trim(sInfo->username);
-			d->send("__REQ_PASSWORD\n");
-			continue;
-		}
-		else if( sInfo->password.empty() && !Line.empty() )
-		{//No password submitted yet. This is the passowrd.
-			sInfo->password = Line;
-			StringUtil::trim(sInfo->password);
-
-			//Now we need to authenticate the info...
-
-			Character *user = NULL;
-			if( !(user = CharacterUtil::loadCharacter(sInfo->username)) )
-			{
-				d->socketClose();
-			}
-			else if( user->player.passwd != MD5::getHashFromString(sInfo->password.c_str()) || GET_LEVEL(user) < LVL_APPR )
-			{//Data is invalid.
-				MudLog(BRF, invisLevel, TRUE, "SciTE: %s failed to log in(bad password).",
-					StringUtil::cap(StringUtil::allLower(sInfo->username)).c_str());
-				d->socketClose();
-			}
-			else
-			{
-				MudLog(BRF, invisLevel, TRUE, "SciTE: %s has logged in successfully.",
-					StringUtil::cap(StringUtil::allLower(sInfo->username)).c_str());
-				d->send("__REQ_AUTHORIZED\n");
-				sInfo->connectionAuthorized = true;
-			}
-			sInfo->userLevel = GET_LEVEL(user);
-
-			if(user)
-				delete user;
-			continue;
-		}
-
-		if( !sInfo->connectionAuthorized )
-		{//How did you get here???
-			continue;
-		}
-		//Anything below here should be authorized sockets only. Anything else should get weeded out above here.
-
-		else if( !vArgs.empty() && vArgs[0] == "__SPECIAL_LOAD_SCRIPT" )
-		{
-			if( vArgs.size() != 2 )
-			{//Invalid. Kill.
-				MudLog(BRF, invisLevel, TRUE,
-					"SciTE - Invalid number of load parameters: %d - %s", vArgs.size(), d->getIp().c_str());
-				d->socketClose();
-				continue;
-			}
-			int vnum = atoi( vArgs[1].c_str() );
-
-			JSTrigger *t = JSManager::get()->getTrigger( vnum );
-
-			if( !t )
-				continue;
-
-			sInfo->scriptBuffer = StringUtil::stripCarriageReturn( t->text );
-			sInfo->scriptBuffer+= std::string("__SPECIAL_SCRIPT_END");
-			sInfo->scriptBufferIndex = 0;
-			sInfo->isSendingScript = true;
-
-			sInfo->packetClock.reset( true );
-
-		}
-		else if( !vArgs.empty() && vArgs[0] == "__SPECIAL_SAVE_SCRIPT" )
-		{
-			if( vArgs.size() != 2 )
-			{//invalid.
-				MudLog(BRF, invisLevel, TRUE,
-					"SciTE - Invalid number of save parameters: %d - %s", vArgs.size(), d->getIp().c_str());
-				d->socketClose();
-				continue;
-			}
-			sInfo->isReadingScript = true;
-			sInfo->scriptVnum = atoi( vArgs[1].c_str() );
-		}
-		else if( sInfo->isSendingScript )
-		{
-			float secondsBetweenPackets = (float)(1) / (float)(4);
-			int BYTES_PER_SECOND = (1024*20); //20 kilobytes
-			int BYTES_PER_PACKET = ( BYTES_PER_SECOND * secondsBetweenPackets );
-
-			sInfo->packetClock.turnOff();
-			if( sInfo->packetClock.getSeconds() < (float)((float)1/(float)4) )
-			{
-				sInfo->packetClock.turnOn();
-				continue;
-			}
-
-			std::string substr = sInfo->scriptBuffer.substr( sInfo->scriptBufferIndex, BYTES_PER_PACKET );
-			d->send( substr.c_str() );
-
-			sInfo->scriptBufferIndex += substr.size();
-
-			sInfo->packetClock.reset( true );
-			if( sInfo->scriptBufferIndex >= sInfo->scriptBuffer.size() )
-			{
-				sInfo->scriptBuffer.clear();
-				sInfo->scriptBufferIndex = 0;
-				sInfo->isSendingScript = false;
-			}
-		}
-		else if( sInfo->isReadingScript && !Line.empty() )
-		{
-			std::vector<std::string> commands;
-			std::string sBuf;
-			commands.push_back(Line);
-			while(d->hasCommand())
-			{
-				commands.push_back(d->getCommand());
-			}
-			for(unsigned int index = 0;index < commands.size();++index)
-			{
-				sBuf = commands[ index ];
-				if( sBuf == "__SPECIAL_END" )
-				{
-					JSTrigger *t = JSManager::get()->getTrigger( sInfo->scriptVnum );
-
-					if( !t )
-					{
-						d->socketClose();
-						continue;
-					}
-
-					//					Log("Saving script #%d", sInfo->scriptVnum);
-					MudLog(BRF, invisLevel, TRUE, "SciTE: Remote JSTrigger(#%d) save. sock: %d, d_UID: %d, IP: %s",
-						sInfo->scriptVnum, d->sock, d->getUid(), d->getIp().c_str());
-
-					t->text = sInfo->scriptBuffer;
-					t->code_modified = true;
-					int rs = JSManager::get()->saveTrigger( t );
-					if( rs == -1 )
-					{//Compilation error.
-						MudLog(BRF, invisLevel, TRUE, "Trigger compilation failed.");
-					}
-					sInfo->scriptBuffer.clear();
-					sInfo->isReadingScript = false;
-					sInfo->scriptVnum = 0;
-				}
-				else
-				{//Append...
-					//					Log("Appending: %s", sBuf.c_str());
-					sInfo->scriptBuffer += sBuf;
-					sInfo->scriptBuffer += std::string("\r\n");
-				}
-			}
-		}
-		else if( !vArgs.empty() && vArgs[0] == "__REQ_SEARCH" )
-		{
-			std::string reqStr = Line.substr(vArgs[0].size());
-			std::vector<JSTrigger*> results = searchTrigger(reqStr);
-			unsigned int pos;
-			for(pos = 0;pos < reqStr.size() && reqStr[pos] == ' ';++pos);
-			reqStr = reqStr.substr(pos);
-
-			std::stringstream dStr;
-			dStr << "Request: " << reqStr;
-
-			d->send(dStr.str().c_str());
-			for(unsigned int i = 0;i < results.size();++i)
-			{
-				d->send( results[i]->name.c_str() );
-			}			
-		}
-	}
-}
-
 extern bool keepTriggerOperationalCallbackFunctionAlive;
 extern std::mutex keepTriggerOperationalCallbackFunctionAliveMutex;
 extern std::thread triggerOperationalCallbackThread;
@@ -702,8 +586,92 @@ JSManager::~JSManager()
 		delete iter->second;
 	}
 
+	//We need to kill our script import thread.
+	this->scriptImportThreadRunning = false;
+	this->monitorScriptImportTableThread->join();
+	delete this->monitorScriptImportTableThread;
+
+	//Clean up whatever may still be queued up, and then the queues themselves.
+	while(!this->scriptImportReadQueue->empty())
+	{
+		delete this->scriptImportReadQueue->front();
+		this->scriptImportReadQueue->pop_front();
+	}
+
+	while(!this->scriptImportWriteQueue->empty())
+	{
+		delete this->scriptImportWriteQueue->front();
+		this->scriptImportWriteQueue->pop_front();
+	}
+
+	delete this->scriptImportReadQueue;
+	delete this->scriptImportWriteQueue;
+
 	if (this->server)
 		delete server;
 
 	delete env;
+}
+
+Script *JSManager::getScript(int scriptId)
+{
+	auto iter = this->scriptMap.find(scriptId);
+	
+	return iter == scriptMap.end() ? NULL : this->scriptMap[scriptId];
+}
+
+void JSManager::addScriptEvent(ScriptEvent *scriptEvent)
+{
+	this->scriptEvents.push_back(scriptEvent);
+}
+
+unsigned int JSManager::getNextScriptEventId()
+{
+	return nextScriptEventId++;
+}
+
+void JSManager::runTimeouts()
+{
+	std::vector<ScriptEvent *> scriptEventsToExecute;
+	
+	//We must first put all events that we are to execute into a separate queue.
+	//This is because the callbacks themselves may alter the permanent queue.
+
+	for(auto iter = scriptEvents.begin();iter != scriptEvents.end();)
+	{
+		ScriptEvent *scriptEvent = (*iter);
+		if(--scriptEvent->pulses == 0)
+		{
+			scriptEventsToExecute.push_back(scriptEvent);
+			iter = scriptEvents.erase(iter);
+		}
+		else
+			++iter;
+	}
+
+	//Now go through the temporary queue and execute each callback.
+	for(ScriptEvent *scriptEvent : scriptEventsToExecute)
+	{
+		try
+		{
+			flusspferd::global().apply(scriptEvent->callback, scriptEvent->arguments);
+		}
+		catch(flusspferd::exception e)
+		{
+			MudLog(NRM, LVL_BUILDER, TRUE, "Error in the runTimeouts() callback: %s", e.what());
+		}
+
+		//Failure above should not prevent the next operation from occurring. Therefore we throw it into its own try/catch block.
+		try
+		{
+			//Unroot the event.
+			flusspferd::global().delete_property(scriptEvent->propertyName);
+		}
+		catch(flusspferd::exception e)
+		{
+			MudLog(NRM, LVL_BUILDER, TRUE, "Error in runTimeouts() : Could not delete script event property %s : %s", scriptEvent->propertyName.c_str(), e.what());
+		}
+
+		delete scriptEvent;
+	}
 }

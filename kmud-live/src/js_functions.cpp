@@ -1534,6 +1534,24 @@ void JS_sendToZone(int zoneNumber, flusspferd::string message)
 	sendToZone(message.c_str(), zone->GetRnum());
 }
 
+void JS_setTimeout(unsigned int pulses, flusspferd::function callback, flusspferd::object arguments)
+{
+	if(!arguments.is_array())
+		arguments = flusspferd::object();
+	
+	ScriptEvent *scriptEvent = new ScriptEvent(pulses, callback, arguments, JSManager::get()->getNextScriptEventId());
+	JSManager::get()->addScriptEvent(scriptEvent);
+
+	//We must root the callback and its arguments.
+
+	flusspferd::object scriptEventObject = flusspferd::create_object();
+
+	scriptEventObject.set_property("callback", callback);
+	scriptEventObject.set_property("arguments", arguments);
+
+	flusspferd::global().set_property(scriptEvent->propertyName, scriptEventObject);
+}
+
 flusspferd::object JS_createDatetime(const DateTime &dateTime)
 {
 	std::stringstream buffer;

@@ -173,7 +173,7 @@ void PlayerPortalLoadObjectListCommandProcess::process(PlayerPortalDescriptor *d
 			}
 		}
 
-		Log("Low Vnum: %d, High Vnum: %d, Wear Types: %d, Item Types: %d, Item Extras: %d", lowVnum, highVnum, itemWears.size(), itemTypes.size(), itemExtras.size());
+		Log("Low Vnum: %d, High Vnum: %d, Wear Types: %d, Item Types: %d, Item Extras: %d", lowVnum, highVnum, (int)itemWears.size(), (int)itemTypes.size(), (int)itemExtras.size());
 		Log("LDesc Valid: %s, SDesc Valid: %s, Namelist Valid: %s", StringUtil::yesNo(!sdescRegex.empty()).c_str(), StringUtil::yesNo(!ldescRegex.empty()).c_str(), StringUtil::yesNo(!namelistRegex.empty()).c_str());
 
 		for (Object *objectPrototype : obj_proto)

@@ -10,15 +10,17 @@ using namespace std;
 
 struct JSTrigger
 {
+	//std::string text; // text of the script
+    //std::string js_name; // internal name used by javascript
+
     int vnum;
+	int scriptId;
     bool code_modified;
-    bool valid; // can be validly run
 	bool running; // Is this trigger running?
 	bool deleted; // Is this trigger set to delete over reboot?
-    std::string name; // name displayed to scripters
     short narg; // numerical arg (used by some trigger types)
+    std::string name; // name displayed to scripters
     std::string args; // string args (used by some trigger types)
-    std::string text; // text of the script
     unsigned long long trigger_flags; // type of trigger (greet, etc)
     unsigned long allowed_flags;
 	unsigned long option_flags;
@@ -35,22 +37,19 @@ struct JSTrigger
     void setAllowed(int _flag) { allowed_flags |= Q_BIT(_flag); }
 	void toggleAllowed(int _flag) { TOGGLE_BIT(allowed_flags, Q_BIT(_flag)); }
 
-    std::string js_name; // internal name used by javascript
-
     JSTrigger(int _vnum)
-        : vnum(_vnum), code_modified(false), valid(false), deleted(false) // we need to compile it before its valid.
+        : vnum(_vnum), code_modified(false), deleted(false)
     {
-		narg=trigger_flags=allowed_flags=0;
-        stringstream s;
-        s << "trig" << vnum;
-        js_name = s.str();
-		option_flags = 0;
+		
+		option_flags = narg = trigger_flags = allowed_flags = 0;
+		
+		scriptId = -1;
 	}
 
 	JSTrigger* clone()
 	{
 		JSTrigger * t = new JSTrigger(vnum);
-		t->text = text; // deep copy
+		t->scriptId = scriptId;
 		t->args = args;
 		t->trigger_flags = trigger_flags;
 		t->allowed_flags = allowed_flags;
@@ -58,8 +57,6 @@ struct JSTrigger
 		t->name = name;
 		t->deleted = deleted;
 		t->narg = narg;
-        t->js_name = js_name;
-        t->valid = valid;
 		t->running = running;
 		t->option_flags = option_flags;
 		return t;
@@ -67,16 +64,14 @@ struct JSTrigger
 
     JSTrigger& operator=(JSTrigger& t)
     {
-        text = t.text; // deep copy
+		scriptId = t.scriptId;
         args = t.args;
-        valid = t.valid;
         trigger_flags = t.trigger_flags;
         allowed_flags = t.allowed_flags;
         code_modified = t.code_modified;
         name = t.name;
 		deleted=t.deleted;
         narg = t.narg;
-        js_name = t.js_name;
 		option_flags = t.option_flags;
         return *this;
     }
