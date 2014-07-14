@@ -8,5 +8,6 @@ var script15 = function(self, actor, here, args, extra)
 	{
 		return 0 ;
 	}
+	//
 };
 
