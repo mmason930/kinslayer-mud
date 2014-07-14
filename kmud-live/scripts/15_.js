@@ -11,3 +11,7 @@ var script15 = function(self, actor, here, args, extra)
 	//
 };
 
+var abc123Fn = function()
+{
+	getRoom(1).echo("test from file.");
+}
