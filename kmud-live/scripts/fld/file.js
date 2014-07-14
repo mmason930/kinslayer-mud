@@ -1,1 +1,0 @@
-getRoom(1).echo("Hello from file.js!");

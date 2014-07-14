@@ -1,1 +1,0 @@
-getRoom(1).echo("Test scr2.js");
