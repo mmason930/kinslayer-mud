@@ -192,12 +192,14 @@ $(document).ready(function() {
 
 		e.preventDefault();
 
+		var triggerValue = $("#TriggersInput").val().trim();
+
 		var command = {
 			method: "Load Object List",
 			itemType: reduceInputs($("#itemTypePanel input:checked").toArray()),
 			wearType: reduceInputs($("#itemWearPanel input:checked").toArray()),
 			itemExtra: reduceInputs($("#itemExtrasPanel input:checked").toArray()),
-			triggers: $("#TriggersInput").val().split(/[ ,]/),
+			triggers: triggerValue.length == 0 ? [] : triggerValue.split(/[ ,]/),
 			namelist: $("#NamelistInput").val(),
 			shortDescription: $("#ShortDescriptionInput").val(),
 			longDescription: $("#LongDescriptionInput").val()
