@@ -1,6 +1,13 @@
 #include "SystemUtil.h"
 #include <cstdio>
 #include <cstdlib>
+#include <iostream>
+#include <map>
+#include <vector>
+#include <list>
+
+#include "StringUtil.h"
+#include "MiscUtil.h"
 
 #ifdef WIN32
 #include <Windows.h>
@@ -94,4 +101,58 @@ unsigned int SystemUtil::getProcessId()
 #else
 	return (unsigned int)getpid();
 #endif
+}
+
+std::string SystemUtil::processCommand(const std::string &command)
+{
+	FILE *pipe = pipeOpen(command.c_str(), "r");
+	char temporaryBuffer[ 1024 * 1024 ];
+	std::string buffer;
+
+	if(!pipe)
+	{
+		return "";
+	}
+
+	while(!feof(pipe))
+	{
+		size_t bytesRead = fread(temporaryBuffer, sizeof(char), sizeof(temporaryBuffer) - 1, pipe);
+
+		temporaryBuffer[ bytesRead ] = '\0';
+
+		buffer += temporaryBuffer;
+	}
+
+	fclose(pipe);
+
+	return buffer;
+}
+
+std::map<std::string, std::string> SystemUtil::getSubversionInfoMap(const std::string &url)
+{
+	std::map<std::string, std::string> map;
+
+	std::string escapedUrl = url;
+	StringUtil::replace(escapedUrl, "\\", "\\\\");
+	StringUtil::replace(escapedUrl, "'", "\\'");
+
+	std::string subversionInfo = processCommand(std::string("svn info '") + escapedUrl + "'");
+	std::vector<std::string> outputLines = StringUtil::SplitToVector(subversionInfo, '\n');
+
+	for(std::string outputLine : outputLines)
+	{
+		std::string::size_type colonPosition = outputLine.find(':');
+
+		if(colonPosition == std::string::npos)
+			continue;
+
+		std::string key = outputLine.substr(0, colonPosition);
+		std::string value = outputLine.substr(colonPosition + 1);
+
+		StringUtil::trim(value);
+
+		map[key] = value;
+	}
+
+	return map;
 }

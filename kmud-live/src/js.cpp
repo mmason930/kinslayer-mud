@@ -36,6 +36,7 @@
 
 #include "CharacterUtil.h"
 #include "StringUtil.h"
+#include "SystemUtil.h"
 #include "SQLUtil.h"
 #include "rooms/Room.h"
 
@@ -206,6 +207,11 @@ JSManager::JSManager()
 
 		this->scriptImportThreadRunning = true;
 		monitorScriptImportTableThread = new std::thread(&JSManager::monitorScriptImportTable, this, dbContext->createConnection());
+
+		this->monitorSubversionThreadRunning = true;
+		monitorSubversionThread = new std::thread(&JSManager::monitorSubversion, this, dbContext->createConnection(), game->getSubversionRepositoryUrl());
+
+		lastUpdatedRevision = game->getBootSubversionRevision();
 	}
 	catch(sql::QueryException queryException)
 	{
@@ -289,6 +295,40 @@ void JSManager::monitorScriptImportTable(sql::Connection connection)
 		}
 		
 		std::this_thread::sleep_for(std::chrono::seconds(5));
+	}
+}
+
+void JSManager::monitorSubversion(sql::Connection connection, const std::string &repositoryUrl)
+{
+	while(monitorSubversionThreadRunning)
+	{
+		std::map<std::string, std::string> subversionInfoMap = SystemUtil::getSubversionInfoMap(repositoryUrl);
+
+		std::string revisionString = subversionInfoMap["Revision"];
+
+		if(revisionString.empty())
+		{
+			Log("Could not determine revision!");
+		}
+		else if(!MiscUtil::isInt(revisionString))
+		{
+			Log("Revision `%s` is not a valid integer.", revisionString.c_str());
+		}
+		else
+		{
+			int revision = atoi(revisionString.c_str());
+
+			if(revision != lastUpdatedRevision)
+			{
+				Log("New revision %d found. Old revision was %d.", revision, lastUpdatedRevision);
+
+				//TODO: Do an SVN update and insert modified files into the database queue table.
+
+				lastUpdatedRevision = revision;
+			}
+		}
+
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 }
 
@@ -606,6 +646,11 @@ JSManager::~JSManager()
 
 	delete this->scriptImportReadQueue;
 	delete this->scriptImportWriteQueue;
+
+	//Clean up the subversion monitoring thread.
+	this->monitorSubversionThreadRunning = false;
+	this->monitorSubversionThread->join();
+	delete this->monitorSubversionThread;
 
 	if (this->server)
 		delete server;

@@ -48,6 +48,7 @@
 #include "ClanUtil.h"
 #include "MailUtil.h"
 #include "SQLUtil.h"
+#include "SystemUtil.h"
 
 #include "kuSockets.h"
 #include "kuListener.h"
@@ -1233,6 +1234,22 @@ ACMD(do_extra)
 				ch->send("Property `%s`", propertyValue.)
 			}
 			**/
+		}
+		else if(!str_cmp(vArgs.at(0), "sys"))
+		{
+			char arg1[MAX_INPUT_LENGTH];
+			HalfChop(argument, arg1, argument);
+			skip_spaces(&argument);
+
+			Log("Argument: %s", argument);
+
+			std::string commandResult = SystemUtil::processCommand(argument);
+
+			ch->send("`%s`", commandResult.c_str());
+		}
+		else if(!str_cmp(vArgs.at(0), "svn"))
+		{
+			std::map<std::string, std::string> svnMap = SystemUtil::getSubversionInfoMap("../");
 		}
 		else bCorrectArgument=false;
 	} catch( std::out_of_range ) {

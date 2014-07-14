@@ -16,7 +16,9 @@ protected:
 	std::string version;
 	std::string defaultDirectory;
 	std::string playerLogsDirectory;
+	std::string subversionRepositoryUrl;
 	std::map<std::string, std::string> basicConfig; //The configuration loaded from the BasicConfig file on the server.
+	int bootSubversionRevision; //The revision of the local filesystem at the time of boot.
 
 public:
 
@@ -27,8 +29,13 @@ public:
 	void processPlayerPortalServer();
 	void cleanupPlayerPortalServer();
 
-	std::string getName();
+	std::string getName() const;
 	void setName(const std::string &name);
+
+	std::string getSubversionRepositoryUrl() const;
+	void setSubversionRepositoryUrl(const std::string &subversionRepositoryUrl);
+
+	int getBootSubversionRevision() const;
 
 	void loadBasicConfig();
 	std::string getBasicConfigValue(const std::string &configName);
@@ -36,6 +43,8 @@ public:
 	std::string getVersion();
 	std::string getDefaultDirectory();
 	std::string getPlayerLogsDirectory();
+
+	void loadSubversionInfo();
 
 	bool hasBasicConfiguration(const std::string &basicConfigurationName);
 	void setupFilesystem();

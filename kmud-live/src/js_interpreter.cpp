@@ -22,7 +22,6 @@
 #include "JSRoom.h"
 #include "JSQuery.h"
 #include "JSRow.h"
-#include "JSConstants.h"
 #include "constants.h"
 #include "js.h"
 #include "olc.h"

@@ -110,6 +110,11 @@ class JSManager
 
 		std::thread *monitorScriptImportTableThread;
 		void monitorScriptImportTable(sql::Connection connection);
+		
+		int lastUpdatedRevision;
+		bool monitorSubversionThreadRunning;
+		std::thread *monitorSubversionThread;
+		void monitorSubversion(sql::Connection connection, const std::string &repositoryUrl);
 
     public:
 		

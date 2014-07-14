@@ -5,6 +5,8 @@
 #include "utils.h"
 #include "structs.h"
 
+#include "SystemUtil.h"
+
 extern Character *character_list;
 
 Game *game = NULL;
@@ -39,7 +41,46 @@ void Game::processPlayerPortalServer()
 	playerPortalServer->process();
 }
 
-std::string Game::getName()
+void Game::loadSubversionInfo()
+{
+	std::map<std::string, std::string> subversionInfoMap = SystemUtil::getSubversionInfoMap("../");
+
+	auto subversionInfoMapIterator = subversionInfoMap.find("URL");
+
+	if(subversionInfoMapIterator == subversionInfoMap.end())
+	{
+		Log("Could not determine subversion URL. Aborting.");
+		exit(1);
+	}
+
+	this->setSubversionRepositoryUrl((*subversionInfoMapIterator).second);
+	
+	subversionInfoMapIterator = subversionInfoMap.find("Revision");
+
+	if(subversionInfoMapIterator == subversionInfoMap.end())
+	{
+		Log("Could not determine subversion revision. Aborting.");
+		exit(1);
+	}
+
+	if(!MiscUtil::isInt((*subversionInfoMapIterator).second))
+	{
+		Log("Revision `%s` is not a valid integer. Aborting.");
+		exit(1);
+	}
+
+	this->bootSubversionRevision = atoi((*subversionInfoMapIterator).second.c_str());
+
+	Log("Subversion URL: %s", getSubversionRepositoryUrl().c_str());
+	Log("Subversion Revision: %d", getBootSubversionRevision());
+}
+
+int Game::getBootSubversionRevision() const
+{
+	return bootSubversionRevision;
+}
+
+std::string Game::getName() const
 {
 	return this->name;
 }
@@ -47,7 +88,16 @@ std::string Game::getName()
 void Game::setName(const std::string &name)
 {
 	this->name = name;
+}
 
+std::string Game::getSubversionRepositoryUrl() const
+{
+	return subversionRepositoryUrl;
+}
+
+void Game::setSubversionRepositoryUrl(const std::string &subversionRepositoryUrl)
+{
+	this->subversionRepositoryUrl = subversionRepositoryUrl;
 }
 
 void Game::loadBasicConfig()
