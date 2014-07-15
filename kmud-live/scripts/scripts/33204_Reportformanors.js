@@ -1,0 +1,27 @@
+var script33204 = function(self, actor, here, args, extra) {
+	_block;
+		getCharCols(actor);
+		for each (var mr in global.manors) {
+			if (mr.ownerUserId == actor.id) {
+				var manor = mr;
+				//sendKoradin("worked");
+			}
+		}
+		if (!manor) {
+			actor.send("You don't own a property!");
+			return;
+		}
+		var manorTime = manorTimeToText(timeTillManorExpires(manor));
+		actor.send(bld+"You currently own the "+manor.name+" near "+manor.area+"."+nrm);
+		actor.send(bld+"\nUpkeep has been paid for "+manorTime+"."+nrm);
+		actor.send(bld+"Current Upkeep: "+nrm+actor.numCopperToText(getUpkeep(manor), true)+bld+" per day."+nrm);
+		actor.send(bld+"\nYou've allowed the following players into the "+manor.name+":"+nrm);
+		var users = [];
+		for each (var id in manor.allowedUsers)
+			users.push(getUserNameByUserId(id));
+		if (users.length == 0)
+			actor.send(nrm+"None"+nrm);
+		else
+			actor.send(bld+users.join(", ")+nrm);
+	
+}
