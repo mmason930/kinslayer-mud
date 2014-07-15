@@ -1524,7 +1524,6 @@ struct MobOnlyData
 	byte default_pos;				// Default position for NPC.
 	byte damnodice;					// The number of damage dices.
 	byte damsizedice;				// The size of the damage dices.
-	byte move_percent;				// Number of moves that the mob regenerates per tic.
 	sh_int wait_state;				// Wait state for bashed mobs.
 	sh_int moves_per_tic;			// Moves regenerated per tic. Assume -1 means it is calculated dynamically.
 	int aggro;
@@ -1544,7 +1543,6 @@ struct MobOnlyData
 		wait_state = 0;
 		aggro = 0;
 		nsects = 0;
-		move_percent = 0;
 		primary_kit = 0;
 		Food = 0;
 		Skin = 0;
@@ -1562,7 +1560,6 @@ struct MobOnlyData
 		damsizedice = source->damsizedice;
 		aggro = source->aggro;
 		nsects = source->nsects;
-		move_percent = source->move_percent;
 		primary_kit = source->primary_kit;
 		moves_per_tic = source->moves_per_tic;
 

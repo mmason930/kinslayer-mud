@@ -229,12 +229,15 @@ sh_int Character::MoveGain()
 
 	if (IS_NPC(this))
 	{
-		/* Neat and fast */
-		gain = GET_LEVEL(this);
+		// Nice and fast
+		gain = this->MobData->moves_per_tic == -1 ? GET_LEVEL(this) : this->MobData->moves_per_tic;
 	}
 
 	if(MOB_FLAGGED(this, IS_HORSE(this))) {
-		gain = GET_MAX_MOVE(this) / 4;
+		
+		if(this->MobData->moves_per_tic == -1)
+			gain = GET_MAX_MOVE(this) / 4;
+
 		if(this->player.ridden_by)
 			gain += this->player.ridden_by->GetSkillLevel(SKILL_RIDE);
 

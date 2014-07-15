@@ -59,3 +59,4 @@ CREATE TABLE scriptImportQueue(
   PRIMARY KEY(`id`)
 ) ENGINE=MyISAM;
 
+ALTER TABLE mob_protos ADD `moves_per_tic` smallint(5) not null DEFAULT -1;

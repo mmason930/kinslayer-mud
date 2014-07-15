@@ -451,8 +451,8 @@ std::list<std::string> MobManager::GrabSaveQuery( const unsigned int mob_rnum )
 			QueryBuffer << SQLVal(m->GetInt());
 			QueryBuffer << SQLVal(m->GetWis());
 			QueryBuffer << SQLVal(m->GetCon());
-			QueryBuffer << SQLVal(AssistsBuffer.str(),true);
-			QueryBuffer << SQLVal(m->MobData->moves_per_tic) << ");" << std::endl;
+			QueryBuffer << SQLVal(AssistsBuffer.str());
+			QueryBuffer << SQLVal(m->MobData->moves_per_tic,true) << ");" << std::endl;
 	}
 	else
 	{//Ugh... Produce the same monstrosity as above, but in the UPDATE form...
@@ -509,10 +509,10 @@ std::list<std::string> MobManager::GrabSaveQuery( const unsigned int mob_rnum )
 		QueryBuffer <<	"wis='"				<< m->GetWis()													<< "',";
 		QueryBuffer <<	"con='"				<< m->GetCon()													<< "',";
 		QueryBuffer <<	"assists='"			<< AssistsBuffer.str()											<< "',";
-		QueryBuffer <<	"moves_per_tic="	<< m->MobData->moves_per_tic;  
-		QueryBuffer <<	"WHERE vnum='"		<< VirtualMobile((u_int)m->nr)									<< "';";
+		QueryBuffer <<	"moves_per_tic="	<< m->MobData->moves_per_tic;
+		QueryBuffer <<	" WHERE vnum='"		<< VirtualMobile((u_int)m->nr)									<< "';";
 		QueryBuffer <<	std::endl;
-
+		
 		//Now produce a query to clear the script from the database.
 		RemoveBuffer2 << "DELETE FROM js_attachments WHERE type='M' AND target_vnum='" <<  VirtualMobile((u_int)m->nr) << "';" << std::endl;
 	}

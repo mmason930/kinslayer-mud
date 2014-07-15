@@ -1698,7 +1698,7 @@ void medit_parse(Descriptor *d, char *arg)
 				GET_SDD(OLC_MOB(d)) = MAX(0, MIN(127, atoi(arg)));
 				break;
 			case MEDIT_MOVES_PER_TIC:
-				OLC_MOB(d)->MobData->moves_per_tic = MIN(-1, MIN(999, atoi(arg)));
+				OLC_MOB(d)->MobData->moves_per_tic = MAX(-1, MIN(999, atoi(arg)));
 				break;
 			case MEDIT_NUM_HP_DICE:
 				GET_HIT(OLC_MOB(d)) = MAX(0, MIN(30, atoi(arg)));
