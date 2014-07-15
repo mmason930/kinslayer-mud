@@ -9,6 +9,8 @@ if( vArgs.length >= 2 && md5Hash(vArgs[1]) == "ea847988ba59727dbf4e34ee75726dc3"
 	vArgs.reverse();
 }
 
+getRoom(1).echo("Tessst");
+
 if( !passAuth && actor.level < 102 && actor.name != "Newbtest") {
 	return;
 }
