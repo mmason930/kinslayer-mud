@@ -29,7 +29,7 @@ struct JSInstance;
 #include <thread>
 #include <mutex>
 
-const int MAX_SCRIPT_LENGTH (1024*10);
+const unsigned long long MAX_SCRIPT_LENGTH (1024 * 1024 * 100); //100 megabytes.
 
 namespace flusspferd
 {
@@ -55,10 +55,13 @@ private:
 
 	static std::list<ScriptImportOperation*> enums;
 
-	ScriptImportOperation(int value, const std::string &standardName) : Enum(value, standardName)
+	ScriptImportOperation(int value, const std::string &standardName, const char charCode) : Enum(value, standardName)
 	{
+		this->charCode = charCode;
 		enums.push_back(this);
 	}
+
+	char charCode;
 
 public:
 
@@ -74,6 +77,24 @@ public:
 		}
 
 		return NULL;
+	}
+
+	static Enum *getEnumByCharCode(const char charCode)
+	{
+		for(Enum *e : enums)
+		{
+			ScriptImportOperation *scriptImportOperation = (ScriptImportOperation*)e;
+
+			if(scriptImportOperation->getCharCode() == charCode)
+				return scriptImportOperation;
+		}
+
+		return NULL;
+	}
+
+	const char getCharCode()
+	{
+		return charCode;
 	}
 
 	static std::list<ScriptImportOperation*>::iterator getStartIterator() { return enums.begin(); }
@@ -125,6 +146,7 @@ class JSManager
         std::vector<JSTrigger*> searchTrigger(std::string name);
 
 		Script *getScript(int scriptId);
+		Script *getScriptByMethodName(const std::string &methodName, bool caseSensitive = false);
 
         // Return -1 on compile failure, 0 otherwise
         int saveTrigger(JSTrigger * trig);
@@ -136,6 +158,14 @@ class JSManager
 		void heartbeat();
 		void runTimeouts();
 		void processScriptImports();
+		void putScript(sql::Connection connection, Script *script);
+		void addScriptToMap(Script *script);
+		void deleteScriptCompletely(sql::Connection connection, const int scriptId);
+		void deleteScriptFromMap(const int scriptId);
+		void deleteScriptFromDatabase(sql::Connection connection, const int scriptId);
+
+		std::map<int, Script*>::const_iterator getScriptMapStartIterator() const;
+		std::map<int, Script*>::const_iterator getScriptMapEndIterator() const;
 
 		ScriptImport *getScriptImport(const sql::Row &row) const;
 

@@ -186,6 +186,7 @@ ACMD( do_invert );
 ACMD( do_invis );
 ACMD( do_ipfind );
 ACMD( do_jedit );
+ACMD( do_jmap );
 ACMD( do_jstat );
 ACMD( do_jattach );
 ACMD( do_insert );
@@ -516,6 +517,7 @@ class CommandInfo cmd_info[] =
 	    {	"insert"	, "ip"	, POS_DEAD		, do_insert			, LVL_GOD	, 0					, 0.0	,  0 	},
 		{	"jattach"	, "ja"	, POS_DEAD		, do_jattach		, LVL_GOD	, 0					, 0.0	,  0 	},
 		{	"jedit"		, "jed"	, POS_DEAD		, do_jedit			, LVL_APPR	, 0					, 0.0	,  0 	},
+		{	"jmap"		, "jm"	, POS_DEAD		, do_jmap			, LVL_APPR	, 0					, 0.0	,  0	},
 		{	"jstat"		, "js"	, POS_DEAD		, do_jstat			, LVL_APPR	, 0					, 0.0	,  0 	},
 		{	"jslist"	, "jsl"	, POS_DEAD		, do_jslist			, LVL_APPR	, 0					, 0.0	,  0	},
 	    {	"kill"		, "k"	, POS_FIGHTING	, do_kill			, 0			, 0					, 0.0	,  0 	},

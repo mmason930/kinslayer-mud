@@ -173,7 +173,7 @@ void PlayerPortalLoadObjectListCommandProcess::process(PlayerPortalDescriptor *d
 			}
 		}
 
-		Log("Low Vnum: %d, High Vnum: %d, Wear Types: %d, Item Types: %d, Item Extras: %d", lowVnum, highVnum, (int)itemWears.size(), (int)itemTypes.size(), (int)itemExtras.size());
+		Log("Low Vnum: %d, High Vnum: %d, Wear Types: %d, Item Types: %d, Item Extras: %d, Triggers: %d", lowVnum, highVnum, (int)itemWears.size(), (int)itemTypes.size(), (int)itemExtras.size(), (int)triggerVnums.size());
 		Log("LDesc Valid: %s, SDesc Valid: %s, Namelist Valid: %s", StringUtil::yesNo(!sdescRegex.empty()).c_str(), StringUtil::yesNo(!ldescRegex.empty()).c_str(), StringUtil::yesNo(!namelistRegex.empty()).c_str());
 
 		for (Object *objectPrototype : obj_proto)
@@ -182,26 +182,29 @@ void PlayerPortalLoadObjectListCommandProcess::process(PlayerPortalDescriptor *d
 				continue;
 			if (highVnum != -1 && highVnum < objectPrototype->getVnum())
 				continue;
+			Log("...1");
 			if (!itemTypes.empty() && std::find(itemTypes.begin(), itemTypes.end(), objectPrototype->getType()) == itemTypes.end())
 				continue;
+			Log("...2");
 			if(!itemWears.empty() && std::none_of(itemWears.begin(), itemWears.end(), [&](int itemWear) {
 				return OBJWEAR_FLAGGED(objectPrototype, (1 << itemWear));
 			})) {
 				continue;
 			}
+			Log("...3");
 			if(!itemExtras.empty() && std::none_of(itemExtras.begin(), itemExtras.end(), [&](int itemExtra) {
 				return OBJ_FLAGGED(objectPrototype, itemExtra);
 			})) {
 				continue;
 			}
-
+			Log("...4");
 			if(!triggerVnums.empty() && std::none_of(objectPrototype->js_scripts->begin(), objectPrototype->js_scripts->end(), [&](JSTrigger *trigger) {
 				return std::find(triggerVnums.begin(), triggerVnums.end(), trigger->vnum) != triggerVnums.end();
 			}))
 			{
 				continue;
 			}
-
+			Log("...5");
 			try
 			{
 				if(!ldescRegex.empty() && !boost::regex_search(objectPrototype->description, ldescRegex))
@@ -211,7 +214,7 @@ void PlayerPortalLoadObjectListCommandProcess::process(PlayerPortalDescriptor *d
 			{
 				MudLog(BRF, LVL_APPR, TRUE, "Invalid regular expression: %s", ldescPatternString.c_str());
 			}
-
+			Log("...6");
 			try
 			{
 				if(!sdescRegex.empty() && !boost::regex_search(objectPrototype->short_description, sdescRegex))
@@ -221,7 +224,7 @@ void PlayerPortalLoadObjectListCommandProcess::process(PlayerPortalDescriptor *d
 			{
 				MudLog(BRF, LVL_APPR, TRUE, "Invalid regular expression: %s", sdescPatternString.c_str());
 			}
-
+			Log("...7");
 			try
 			{
 				if(!namelistRegex.empty() && !boost::regex_search(objectPrototype->name, namelistRegex))
@@ -231,7 +234,7 @@ void PlayerPortalLoadObjectListCommandProcess::process(PlayerPortalDescriptor *d
 			{
 				MudLog(BRF, LVL_APPR, TRUE, "Invalid regular expression: %s", namelistPatternString.c_str());
 			}
-			
+			Log("...8");
 			bool skip = false;
 			for(int valueNumber = 0;valueNumber < sizeof(objectPrototype->obj_flags.value);++valueNumber)
 			{
@@ -243,7 +246,7 @@ void PlayerPortalLoadObjectListCommandProcess::process(PlayerPortalDescriptor *d
 					break;
 				}
 			}
-
+			Log("...9");
 			if(skip)
 				continue;
 

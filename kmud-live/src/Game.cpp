@@ -71,6 +71,25 @@ void Game::loadSubversionInfo()
 
 	this->bootSubversionRevision = atoi((*subversionInfoMapIterator).second.c_str());
 
+	subversionInfoMap = SystemUtil::getSubversionInfoMap("./scripts/");
+
+	subversionInfoMapIterator = subversionInfoMap.find("Revision");
+
+	if(subversionInfoMapIterator == subversionInfoMap.end())
+	{
+		Log("Could not determine subversion revision for script directory. Aborting.");
+		exit(1);
+	}
+
+	if(!MiscUtil::isInt((*subversionInfoMapIterator).second))
+	{
+		Log("Revision `%s` is not a valid integer. Aborting.");
+		exit(1);
+	}
+
+	this->bootScriptsDirectorySubversionRevision = atoi( (*subversionInfoMapIterator).second.c_str() );
+
+	Log("Subversion Revision For Script Directory: %d", bootScriptsDirectorySubversionRevision);
 	Log("Subversion URL: %s", getSubversionRepositoryUrl().c_str());
 	Log("Subversion Revision: %d", getBootSubversionRevision());
 }
@@ -78,6 +97,11 @@ void Game::loadSubversionInfo()
 int Game::getBootSubversionRevision() const
 {
 	return bootSubversionRevision;
+}
+
+int Game::getBootScriptsDirectorySubversionRevision() const
+{
+	return bootScriptsDirectorySubversionRevision;
 }
 
 std::string Game::getName() const

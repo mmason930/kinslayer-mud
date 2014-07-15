@@ -2,6 +2,7 @@
 #define JS_SCRIPT_H
 
 #include <string>
+#include "DateTime.h"
 
 #include "DataObjectWithIntId.h"
 
@@ -11,6 +12,10 @@ private:
 protected:
 
 	std::string methodName;
+	int createdByUserId;
+	DateTime createdDatetime;
+	int lastModifiedByUserId;
+	DateTime lastModifiedDatetime;
 
 public:
 
@@ -20,6 +25,18 @@ public:
 
 	std::string getMethodName() const;
 	void setMethodName(const std::string &methodName);
+
+	int getCreatedByUserId() const;
+	void setCreatedByUserId(const int createdByUserId);
+
+	DateTime getCreatedDatetime() const;
+	void setCreatedDatetime(const DateTime &createdDatetime);
+
+	int getLastModifiedByUserId() const;
+	void setLastModifiedByUserId(const int lastModifiedByUserId);
+
+	DateTime getLastModifiedDatetime() const;
+	void setLastModifiedDatetime(const DateTime &lastModifiedDatetime);
 };
 
 #endif

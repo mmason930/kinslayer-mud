@@ -19,6 +19,7 @@ protected:
 	std::string subversionRepositoryUrl;
 	std::map<std::string, std::string> basicConfig; //The configuration loaded from the BasicConfig file on the server.
 	int bootSubversionRevision; //The revision of the local filesystem at the time of boot.
+	int bootScriptsDirectorySubversionRevision;//The revision of the 'kmud-live/scripts' directory at the time of boot.
 
 public:
 
@@ -36,6 +37,7 @@ public:
 	void setSubversionRepositoryUrl(const std::string &subversionRepositoryUrl);
 
 	int getBootSubversionRevision() const;
+	int getBootScriptsDirectorySubversionRevision() const;
 
 	void loadBasicConfig();
 	std::string getBasicConfigValue(const std::string &configName);

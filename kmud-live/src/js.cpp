@@ -10,6 +10,8 @@
 *
 */
 
+#include <boost/regex.hpp>
+
 #include "JSCharacter.h"
 #include "JSObject.h"
 #include "JSRoom.h"
@@ -48,9 +50,9 @@ extern sql::Connection gameDatabase;
 
 std::list<ScriptImportOperation *> ScriptImportOperation::enums;
 
-ScriptImportOperation *ScriptImportOperation::addition = new ScriptImportOperation(0, "Addition");
-ScriptImportOperation *ScriptImportOperation::modification = new ScriptImportOperation(1, "Modification");
-ScriptImportOperation *ScriptImportOperation::deletion = new ScriptImportOperation(2, "Deletion");
+ScriptImportOperation *ScriptImportOperation::addition = new ScriptImportOperation(0, "Addition", 'A');
+ScriptImportOperation *ScriptImportOperation::modification = new ScriptImportOperation(1, "Modification", 'U');
+ScriptImportOperation *ScriptImportOperation::deletion = new ScriptImportOperation(2, "Deletion", 'D');
 
 JSDepthRegulator::JSDepthRegulator()
 {
@@ -136,7 +138,10 @@ void JSManager::loadScriptsFromFilesystem(const std::string &directoryPath)
 
 		if(boost::filesystem::is_directory(iterPath))
 		{
-			loadScriptsFromFilesystem(iterPath.string());
+			if(iterPath.string() == ".svn")
+				Log("Skipping directory `.svn`...");
+			else
+				loadScriptsFromFilesystem(iterPath.string());
 			continue;
 		}
 
@@ -147,7 +152,7 @@ void JSManager::loadScriptsFromFilesystem(const std::string &directoryPath)
 
 		if(!loadScriptsFromFile(iterPath.string()))
 		{
-			exit(1);
+			Log("Error while loading script file `%s`.", iterPath.string().c_str());
 		}
 	}
 }
@@ -158,6 +163,13 @@ bool JSManager::loadScriptsFromFile(const std::string &filePath)
 	char *fileBuffer;
 	FILE *fileHandle = fopen(filePath.c_str(), "r");
 
+	boost::filesystem::path boostFilePath = boost::filesystem::path(filePath);
+	if(!boostFilePath.has_extension() || str_cmp(boostFilePath.extension().string(), ".js"))
+	{
+		MudLog(BRF, LVL_APPR, TRUE, "Ignoring non JavaScript file `%s`.", filePath.c_str());
+		return false;
+	}
+
 	MudLog(BRF, LVL_APPR, TRUE, "Processing Script File `%s`...", filePath.c_str());
 
 	if(!fileHandle)
@@ -166,9 +178,16 @@ bool JSManager::loadScriptsFromFile(const std::string &filePath)
 	}
 
 	//Determine the file size.
-	fileSize = fseek(fileHandle, 0, SEEK_END);
+	fseek(fileHandle, 0, SEEK_END);
 	fileSize = ftell(fileHandle);
 	rewind(fileHandle);
+
+	if(fileSize >= MAX_SCRIPT_LENGTH)
+	{
+		MudLog(BRF, LVL_APPR, TRUE, "File `%s` exceeds the maximum file size of %llu bytes", filePath.c_str(), MAX_SCRIPT_LENGTH);
+		fclose(fileHandle);
+		return false;
+	}
 
 	//Allocate a string large enough to hold the file contents.
 	fileBuffer = new char[fileSize + 1];
@@ -211,7 +230,7 @@ JSManager::JSManager()
 		this->monitorSubversionThreadRunning = true;
 		monitorSubversionThread = new std::thread(&JSManager::monitorSubversion, this, dbContext->createConnection(), game->getSubversionRepositoryUrl());
 
-		lastUpdatedRevision = game->getBootSubversionRevision();
+		lastUpdatedRevision = game->getBootScriptsDirectorySubversionRevision();
 	}
 	catch(sql::QueryException queryException)
 	{
@@ -300,6 +319,14 @@ void JSManager::monitorScriptImportTable(sql::Connection connection)
 
 void JSManager::monitorSubversion(sql::Connection connection, const std::string &repositoryUrl)
 {
+	std::string filePathPattern = "^([UDA])\\s+(.*?)$";
+	std::string updatedRevisionPattern = "Updated to revision ([0-9]+).";
+
+	boost::regex filePathExpression(filePathPattern.c_str());
+	boost::regex updatedRevisionExpression(updatedRevisionPattern.c_str());
+
+	std::string scriptsDirectory = "scripts/";
+
 	while(monitorSubversionThreadRunning)
 	{
 		std::map<std::string, std::string> subversionInfoMap = SystemUtil::getSubversionInfoMap(repositoryUrl);
@@ -322,9 +349,73 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 			{
 				Log("New revision %d found. Old revision was %d.", revision, lastUpdatedRevision);
 
-				//TODO: Do an SVN update and insert modified files into the database queue table.
+				std::string svnUpdateOutput = SystemUtil::processCommand(std::string("svn update ") + scriptsDirectory);
 
-				lastUpdatedRevision = revision;
+				sql::BatchInsertStatement batchInsertStatement(connection, "scriptImportQueue", 1000);
+				
+				batchInsertStatement.addField("file_path");
+				batchInsertStatement.addField("queued_datetime");
+				batchInsertStatement.addField("operation");
+
+				batchInsertStatement.start();
+
+				int numberOfFiles = 0;
+
+				std::vector<std::string> outputLines = StringUtil::SplitToVector(svnUpdateOutput, '\n');
+
+				for(std::string line : outputLines)
+				{
+					boost::match_results<std::string::const_iterator> what;
+					std::string::const_iterator start = line.begin(), end = line.end();
+					if(boost::regex_search(start, end, what, filePathExpression, boost::match_default))
+					{
+						std::string updateType = what[ 1 ];
+						std::string fileName = what[ 2 ];
+
+						Log("Is Directory `%s` : %s", fileName.c_str(), StringUtil::yesNo(boost::filesystem::is_directory(fileName)).c_str());
+
+						if(boost::filesystem::is_directory(fileName))
+						{
+							Log("Skipping Directory `%s`...", fileName.c_str());
+							continue;
+						}
+
+						StringUtil::replace(fileName, scriptsDirectory, "");
+
+						batchInsertStatement.beginEntry();
+						
+						batchInsertStatement.putString(fileName);
+						batchInsertStatement.putString(sql::encodeDate(time(0)));
+						batchInsertStatement.putInt(ScriptImportOperation::getEnumByCharCode(updateType.at(0))->getValue());
+
+						batchInsertStatement.endEntry();
+
+						++numberOfFiles;
+
+						Log("Update Type: %s, File Name: %s", updateType.c_str(), fileName.c_str());
+					}
+
+					if(boost::regex_search(start, end, what, updatedRevisionExpression, boost::match_default))
+					{
+						std::string revisionString = what[ 1 ];
+
+						if(!MiscUtil::isInt(revisionString))
+						{
+							Log("Error: Revision found while doing SVN update was not a valid integer. Revision found: `%s`", revisionString.c_str());
+						}
+						else
+						{
+							lastUpdatedRevision = atoi(revisionString.c_str());
+						}
+					}
+				}
+				
+				if(numberOfFiles > 0)
+				{
+					batchInsertStatement.finish();
+				}
+
+				Log("Updated to revision %d.", lastUpdatedRevision);
 			}
 		}
 
@@ -543,7 +634,14 @@ void JSManager::processScriptImports()
 	{
 		MudLog(BRF, LVL_BUILDER, TRUE, "Script import (%s), queued at %s, path `%s`", scriptImport->operation->getStandardName().c_str(), scriptImport->queuedDatetime.toString().c_str(), scriptImport->filePath.c_str());
 
-		this->loadScriptsFromFile(scriptImport->filePath);
+		if(scriptImport->operation->getValue() == ScriptImportOperation::deletion->getValue())
+		{
+			MudLog(BRF, LVL_BUILDER, TRUE, "Ignoring operation.");
+		}
+		else
+		{
+			this->loadScriptsFromFile(std::string("scripts/") + scriptImport->filePath);
+		}
 
 		delete scriptImport;
 	}
@@ -719,4 +817,105 @@ void JSManager::runTimeouts()
 
 		delete scriptEvent;
 	}
+}
+
+std::map<int, Script*>::const_iterator JSManager::getScriptMapStartIterator() const
+{
+	return scriptMap.begin();
+}
+
+std::map<int, Script*>::const_iterator JSManager::getScriptMapEndIterator() const
+{
+	return scriptMap.end();
+}
+
+Script *JSManager::getScriptByMethodName(const std::string &methodName, bool caseSensitive)
+{
+	for(auto iter = scriptMap.begin();iter != scriptMap.end();++iter)
+	{
+		Script *script = (*iter).second;
+
+		if(caseSensitive)
+		{
+			if(methodName == script->getMethodName())
+				return script;
+		}
+		else
+		{
+			if(!str_cmp(methodName, script->getMethodName()))
+				return script;
+		}
+	}
+
+	return NULL;
+}
+
+void JSManager::putScript(sql::Connection connection, Script *script)
+{
+	std::stringstream sqlBuffer;
+
+	if(script->isNew())
+	{
+		sqlBuffer	<< " INSERT INTO script("
+					<< "   `method_name`,"
+					<< "   `created_by_user_id`,"
+					<< "   `created_datetime`,"
+					<< "   `last_modified_by_user_id`,"
+					<< "   `last_modified_datetime`"
+					<< " ) VALUES ("
+					<< sql::escapeQuoteString(script->getMethodName()) << ","
+					<< script->getCreatedByUserId() << ","
+					<< sql::encodeQuoteDate(script->getCreatedDatetime().getTime()) << ","
+					<< script->getLastModifiedByUserId() << ","
+					<< sql::encodeQuoteDate(script->getLastModifiedDatetime().getTime())
+					<< " )";
+
+		connection->sendRawQuery(sqlBuffer.str());
+
+		script->setId(connection->lastInsertID());
+	}
+	else
+	{
+		sqlBuffer	<< " UPDATE script SET"
+					<< "   method_name = " << sql::escapeQuoteString(script->getMethodName()) << ","
+					<< "   created_by_user_id = " << script->getCreatedByUserId() << ","
+					<< "   created_datetime = " << sql::encodeQuoteDate(script->getCreatedDatetime().getTime()) << ","
+					<< "   last_modified_by_user_id = " << script->getLastModifiedByUserId() << ","
+					<< "   last_modified_datetime = " << sql::encodeQuoteDate(script->getLastModifiedDatetime().getTime())
+					<< " WHERE id = " << script->getId();
+
+		connection->sendRawQuery(sqlBuffer.str());
+	}
+}
+
+void JSManager::addScriptToMap(Script *script)
+{
+	scriptMap[ script->getId() ] = script;
+}
+
+void JSManager::deleteScriptCompletely(sql::Connection connection, const int scriptId)
+{
+	deleteScriptFromMap(scriptId);
+	deleteScriptFromDatabase(connection, scriptId);
+}
+
+void JSManager::deleteScriptFromMap(const int scriptId)
+{
+	auto iter = scriptMap.find(scriptId);
+
+	if(iter != scriptMap.end())
+	{
+		delete (*iter).second;
+		scriptMap.erase(iter);
+	}
+}
+
+void JSManager::deleteScriptFromDatabase(sql::Connection connection, int scriptId)
+{
+	std::stringstream sqlBuffer;
+
+	sqlBuffer	<< " DELETE FROM script"
+				<< " WHERE id = " << scriptId;
+
+	connection->sendRawQuery(sqlBuffer.str());
 }

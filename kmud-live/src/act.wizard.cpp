@@ -63,6 +63,7 @@
 
 #include "Exception.h"
 #include "Game.h"
+#include "Script.h"
 
 /*   external vars  */
 extern GameTime time_info;
@@ -142,6 +143,7 @@ ACMD(do_gecho);
 ACMD(do_goto);
 ACMD(do_invis);
 ACMD(do_ipfind);
+ACMD(do_jmap);
 ACMD(do_lag);
 ACMD(do_last);
 ACMD(do_load);
@@ -1234,22 +1236,6 @@ ACMD(do_extra)
 				ch->send("Property `%s`", propertyValue.)
 			}
 			**/
-		}
-		else if(!str_cmp(vArgs.at(0), "sys"))
-		{
-			char arg1[MAX_INPUT_LENGTH];
-			HalfChop(argument, arg1, argument);
-			skip_spaces(&argument);
-
-			Log("Argument: %s", argument);
-
-			std::string commandResult = SystemUtil::processCommand(argument);
-
-			ch->send("`%s`", commandResult.c_str());
-		}
-		else if(!str_cmp(vArgs.at(0), "svn"))
-		{
-			std::map<std::string, std::string> svnMap = SystemUtil::getSubversionInfoMap("../");
 		}
 		else bCorrectArgument=false;
 	} catch( std::out_of_range ) {
@@ -7278,4 +7264,190 @@ ACMD(do_wotmud)
 
 	CheckWotmudStatusJob *job = new CheckWotmudStatusJob(ch->player.idnum);
 	ThreadedJobManager::get().addJob(job);
+}
+
+ACMD(do_jmap)
+{
+	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
+	std::string syntax = "Syntax: jmap list\r\n"
+						 "        jmap add <method name>\r\n"
+						 "        jmap delete <id | method name>\r\n"
+						 "        jmap rename <id | method name> <new method name>\r\n";
+	std::stringstream outputBuffer;
+
+	if(IS_NPC(ch))
+	{//We need a positive user ID. Do not allow mobs to use this(even though they shouldn't be able to anyway!)
+		ch->send("Mobs cannot use this command.\r\n");
+		return;
+	}
+	
+	std::function<Script *(const char *)> getScriptByIdentifier = [&](const char *scriptIdentifier) -> Script *
+	{
+		Script *script = NULL;
+
+		//If the script identifier begins with a digit, it must be an ID. JavaScript methods cannot begin with a digit.
+		if(isdigit(*scriptIdentifier))
+		{
+			if(!MiscUtil::isInt(scriptIdentifier))
+			{
+				ch->send("The script ID must be a valid integer.\r\n");
+				return NULL;
+			}
+			else if(!(script = JSManager::get()->getScript(atoi(scriptIdentifier))))
+			{
+				ch->send("There is no script #%s.\r\n", scriptIdentifier);
+				return NULL;
+			}
+		}
+		else if(!(script = JSManager::get()->getScriptByMethodName(scriptIdentifier, true)))
+		{
+			ch->send("There is no script with the method `%s`.\r\n", scriptIdentifier);
+			return NULL;
+		}
+
+		if(!script)
+		{//We should not be able to get here, but just in case...
+			ch->send("No script could be found matching your criteria.\r\n");
+			return NULL;
+		}
+
+		return script;
+	};
+
+	OneArgument(TwoArguments(argument, arg1, arg2), arg3);
+
+	if(!*argument || !*arg1)
+	{
+		ch->send(syntax.c_str());
+		return;
+	}
+
+	get_char_cols(ch);
+
+	if(!strn_cmp(arg1, "list", strlen(arg1)))
+	{
+		std::map<int, Script *>::const_iterator startIter = JSManager::get()->getScriptMapStartIterator(), endIter = JSManager::get()->getScriptMapEndIterator(), iter;
+
+		for(iter = startIter;iter != endIter;++iter)
+		{
+			const Script *script = (*iter).second;
+			std::string attachedOrDetached = flusspferd::global().has_property(script->getMethodName()) ? (std::string(grn) + "[Attached]" + nrm) : (std::string(bld) + red + "[Detached]" + nrm);
+
+			outputBuffer << cyn << std::setw(6) << std::right << script->getId() << nrm << ") " << attachedOrDetached << " " << yel << script->getMethodName().c_str() << nrm << std::endl;
+		}
+
+		std::string outputBufferString = outputBuffer.str();
+		char *cBuffer = new char[outputBufferString.size() + 1];
+		memcpy(cBuffer, outputBufferString.c_str(), outputBufferString.size());
+		cBuffer[ outputBufferString.size() ] = '\0';
+
+		page_string(ch->desc, cBuffer, TRUE);
+
+		delete[] cBuffer;
+	}
+	else if(!strn_cmp(arg1, "add", strlen(arg1)))
+	{
+		if(!*arg2)
+		{
+			ch->send(syntax.c_str());
+			return;
+		}
+
+		const char *methodName = arg2;
+
+		Script *scriptWithSameMethodName = JSManager::get()->getScriptByMethodName(methodName, true);
+
+		if(scriptWithSameMethodName != NULL)
+		{
+			ch->send("Script #%d already exists in the map with the method name you provided.\r\n", scriptWithSameMethodName->getId());
+			return;
+		}
+
+		//Let's check the JavaScript environment to ensure there exists a method with this name.
+		if(!flusspferd::global().has_property(methodName))
+		{
+			ch->send("There exists no function on the global scope named `%s`. Please submit a script with that function and try this command again.\r\n", methodName);
+			return;
+		}
+
+		Script *newScript = new Script();
+		DateTime nowDatetime;
+		newScript->setMethodName(methodName);
+		newScript->setCreatedByUserId(ch->getUserId());
+		newScript->setCreatedDatetime(nowDatetime);
+		newScript->setLastModifiedByUserId(ch->getUserId());
+		newScript->setLastModifiedDatetime(nowDatetime);
+		
+		//This operation sets the ID.
+		JSManager::get()->putScript(gameDatabase, newScript);
+		JSManager::get()->addScriptToMap(newScript);
+
+		MudLog(BRF, MAX(GET_INVIS_LEV(ch), LVL_APPR), TRUE, "%s has added script #%d `%s`.", GET_NAME(ch), newScript->getId(), newScript->getMethodName().c_str());
+		ch->send("Script added. ID: %d\r\n", newScript->getId());
+	}
+	else if(!strn_cmp(arg1, "delete", strlen(arg1)))
+	{
+		const char *scriptIdentifier = arg2;
+		Script *scriptToDelete = NULL;
+
+		if(!*scriptIdentifier)
+		{
+			ch->send(syntax.c_str());
+			return;
+		}
+
+		scriptToDelete = getScriptByIdentifier(scriptIdentifier);
+
+		if(!scriptToDelete)
+			return;//Message was sent in the lambda.
+		
+		MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "%s has deleted script #%d `%s`.", GET_NAME(ch), scriptToDelete->getId(), scriptToDelete->getMethodName().c_str());
+		ch->send("Script #%d `%s` has been deleted.\r\n", scriptToDelete->getId(), scriptToDelete->getMethodName().c_str());
+
+		JSManager::get()->deleteScriptCompletely(gameDatabase, scriptToDelete->getId());
+	}
+	else if(!strn_cmp(arg1, "rename", strlen(arg1)))
+	{
+		const char *sourceIdentifier = arg2, *newMethodName = arg3;
+
+		if(!*sourceIdentifier || !*newMethodName)
+		{
+			ch->send(syntax.c_str());
+			return;
+		}
+
+		Script *sourceScript = getScriptByIdentifier(sourceIdentifier);
+		
+		if(!sourceScript)
+			return;
+
+		if(!flusspferd::global().has_property(newMethodName))
+		{
+			ch->send("The method `%s` does not yet exist in the JavaScript environment. It must exist on the global scope.\r\n", newMethodName);
+			return;
+		}
+
+		if(JSManager::get()->getScriptByMethodName(newMethodName, true) != NULL)
+		{
+			ch->send("A script with the method `%s` already exists in the map.\r\n", newMethodName);
+			return;
+		}
+
+		//We should be okay to rename.
+
+		std::string oldMethodName = sourceScript->getMethodName();
+
+		sourceScript->setMethodName(newMethodName);
+		sourceScript->setLastModifiedByUserId(ch->getUserId());
+		sourceScript->setLastModifiedDatetime(DateTime());
+
+		JSManager::get()->putScript(gameDatabase, sourceScript);
+
+		ch->send("You successfully rename script `%s` to `%s`. ID: %d\r\n", oldMethodName.c_str(), newMethodName, sourceScript->getId());
+		MudLog(BRF, MAX(GET_INVIS_LEV(ch), LVL_APPR), TRUE, "%s has renamed script `%s` to `%s`. Script ID: %d", GET_NAME(ch), oldMethodName.c_str(), newMethodName, sourceScript->getId());
+	}
+	else
+	{
+		ch->send(syntax.c_str());
+	}
 }
