@@ -65,7 +65,7 @@ var script8000 = function(self, actor, here, args, extra) {
 			gateKeeper.comm("lock " + gateKeeper.room.doorName(dir) );
 		}
 
-		performCloseGate([gatekeeper]);
+		performCloseGate([gateKeeper]);
 		setTimeout(gateKeeperObject.pulsesToWaitForClose ? gateKeeperObject.pulsesToWaitForClose : 1, performCloseGate, [ gateKeeper ]);
 		return true;
 	}
