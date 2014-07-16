@@ -15,7 +15,7 @@ var script8000 = function(self, actor, here, args, extra) {
 	 }
 	_block;
 	function attemptGateCall()
-	{
+	{//
 		var iRoomVnum = here.vnum;
 		var vGateKeepers = getGateKeeperVector();
 		var index;
