@@ -11,7 +11,7 @@ var script8000 = function(self, actor, here, args, extra) {
 	 **************************************************************************/
 	 global.galnor.send("Test");///
 	 global.galnor.send("Testt");
-	 global.galnor.send("Testt3");//
+	 global.galnor.send("Testt3");///
 	 if(actor.room.vnum == 2305) {
 	 
 		return;
