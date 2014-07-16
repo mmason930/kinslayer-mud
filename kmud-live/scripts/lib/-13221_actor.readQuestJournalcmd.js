@@ -1,7 +1,7 @@
 //Alder December 2009
+/***
 JSCharacter.prototype.viewMercList = function(cmd) {
-	/*Close journal*/
-	getRoom(8081).echo("Command: `" + cmd + "`");
+	//Close journal
 	if ( strn_cmp(cmd,"close",1) ) {
 		this.detach(13221);
 		this.send("You snap closed a leather-bound journal.");
@@ -11,7 +11,7 @@ JSCharacter.prototype.viewMercList = function(cmd) {
 	var entryTotal = this.quest('totalJournalEntries');
 	var lastPage = Math.ceil(entryTotal/2);//Two entries max per page
 	var BUFFER = "\n__________________________________________________________________________\n";
-	/**This first if is only used for printing the journal RIGHT after actor 'reads journal'**/
+	// This first if is only used for printing the journal RIGHT after actor 'reads journal'
 	if ( cmd == "for_initiate_read_journal" ) {
 		if ( this.quest('savedJournalPage') <= lastPage )
 			var currPage = this.quest('savedJournalPage');
@@ -69,3 +69,4 @@ JSCharacter.prototype.viewMercList = function(cmd) {
 	this.send("\n" + pagingPrompt);
 		return;
 }
+***/

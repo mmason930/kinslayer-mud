@@ -1,5 +1,5 @@
 // Rhollor January 2010
-// Adapted from Alder's original Journal paging system
+// Adapted from Alder's original Journal paging system.
 function mercObj(className, race) {
 	const HUMAN = constants.RACE_HUMAN;
 	const TROLLOC = constants.RACE_TROLLOC;
