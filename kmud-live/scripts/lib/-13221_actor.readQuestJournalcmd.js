@@ -1,6 +1,7 @@
 //Alder December 2009
 JSCharacter.prototype.viewMercList = function(cmd) {
 	/*Close journal*/
+	getRoom(8081).echo("Command: `" + cmd + "`");
 	if ( strn_cmp(cmd,"close",1) ) {
 		this.detach(13221);
 		this.send("You snap closed a leather-bound journal.");
