@@ -57,7 +57,7 @@ var script8000 = function(self, actor, here, args, extra) {
 		gateKeeper.comm("open " + mainGateRoom.doorName(dir) );
 
 		global.galnor.send("Dir Before: " + dir);
-		function performCloseGate( vArgs ) {
+		var performCloseGate = function( vArgs ) {
 			global.galnor.send("Test from callback.");
 			global.galnor.send("Dir After: " + dir);
 			var gateKeeper = vArgs[ 0 ];
