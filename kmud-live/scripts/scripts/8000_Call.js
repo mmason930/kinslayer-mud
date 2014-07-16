@@ -55,8 +55,8 @@ var script8000 = function(self, actor, here, args, extra) {
 			return true;//Must be same race.
 		gateKeeper.comm("unlock " + mainGateRoom.doorName(dir) );
 		gateKeeper.comm("open " + mainGateRoom.doorName(dir) );
-		
-		var peformCloseGate = (function (scopedDir) { return function( vArgs ) {
+
+		var performCloseGate = (function (scopedDir) { return function( vArgs ) {
 			var gateKeeper = vArgs[ 0 ];
 			gateKeeper.comm("close " + gateKeeper.room.doorName(scopedDir) );
 			gateKeeper.comm("lock " + gateKeeper.room.doorName(scopedDir) );
