@@ -377,25 +377,14 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 						std::string updateType = what[ 1 ];
 						std::string fileName = what[ 2 ];
 
-						Log("Is Directory `%s` : %s", fileName.c_str(), StringUtil::yesNo(boost::filesystem::is_directory(fileName)).c_str());
-
 						if(boost::filesystem::is_directory(fileName))
 						{
 							Log("Skipping Directory `%s`...", fileName.c_str());
 							continue;
 						}
-
-						Log("File Path Before `%s`", fileName.c_str());
-						Log("Scripts Directory: `%s`", scriptsDirectory.c_str());
-						Log("Starts With: %s", StringUtil::yesNo(StringUtil::startsWith(fileName, scriptsDirectory)).c_str());
+						
 						if(StringUtil::startsWith(fileName, scriptsDirectory))
-						{
 							fileName.erase(0, scriptsDirectory.size());
-						}
-
-						Log("File name after `%s`", fileName.c_str());
-
-						StringUtil::replace(fileName, scriptsDirectory, "");
 
 						batchInsertStatement.beginEntry();
 						
