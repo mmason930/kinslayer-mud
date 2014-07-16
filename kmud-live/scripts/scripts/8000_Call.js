@@ -56,13 +56,15 @@ var script8000 = function(self, actor, here, args, extra) {
 		gateKeeper.comm("unlock " + mainGateRoom.doorName(dir) );
 		gateKeeper.comm("open " + mainGateRoom.doorName(dir) );
 
-		var performCloseGate = (function (scopedDir) { return function( vArgs ) {
+		var performCloseGate2 = (function (scopedDir) { return function( vArgs ) {
+			global.galnor("Really inside.");
+			global.galnor("Dir: " + (typeof scopedDir));
 			var gateKeeper = vArgs[ 0 ];
 			gateKeeper.comm("close " + gateKeeper.room.doorName(scopedDir) );
 			gateKeeper.comm("lock " + gateKeeper.room.doorName(scopedDir) );
 		})(dir));
 
-		setTimeout(gateKeeperObject.pulsesToWaitForClose ? gateKeeperObject.pulsesToWaitForClose : 1, performCloseGate, [ gateKeeper ]);
+		setTimeout(gateKeeperObject.pulsesToWaitForClose ? gateKeeperObject.pulsesToWaitForClose : 1, performCloseGate2, [ gateKeeper ]);
 		return true;
 	}
 	if( !attemptGateCall() ) {
