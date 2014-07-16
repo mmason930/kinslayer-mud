@@ -147,7 +147,7 @@ function bootHelpeditOLC()
 	mode = new Object();
 	mode.mode = "MODE_EDIT_FILE_NAME";
 	mode.parser = function(actor,fLetter,vArgs) 
-	{
+	{//
 		actor.getOLC().helpFile.name = vArgs.join(" ");
 		actor.getOLC().switchToMode("MODE_EDIT_FILE");
 		return;
