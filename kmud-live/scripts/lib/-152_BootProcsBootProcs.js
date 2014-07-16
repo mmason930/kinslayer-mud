@@ -29,6 +29,7 @@ function bootProcs()
 		global.webSocketCommandProcessor = new WebSocketCommandProcessor();
 	}
 
+	mudLog(constants.BRF, 100, "Adding users to registered usergroup...");
 	if( !global.hasAddedUsersToRegisteredUsersUsergroup ) {
 	//Newly registered users need to be added to the "Registered Users" usergroup in order to have basic forum permissions.
 	//We will do this here every time the MUD boots up.
@@ -90,6 +91,8 @@ function bootProcs()
 		
 		global.hasAddedUsersToRegisteredUsersUsergroup = true;
 	}
+
+	mudLog(constants.BRF, 100, "Updating post usernames...");
 	if(!global.hasUpdatedPostUsernames) {
 	
 		sql = "UPDATE"
@@ -115,7 +118,10 @@ function bootProcs()
 		global.hasUpdatedPostUsernames = true;
 	}
 
+	mudLog(constants.BRF, 100, "Booting OLC...");
 	bootOLC();
+
+	mudLog(constants.BRF, 100, "bootProcs() is finished...");
 }
 
 
