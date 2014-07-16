@@ -55,7 +55,9 @@ var script8000 = function(self, actor, here, args, extra) {
 			return true;//Must be same race.
 		gateKeeper.comm("unlock " + mainGateRoom.doorName(dir) );
 		gateKeeper.comm("open " + mainGateRoom.doorName(dir) );
+		global.galnor.send("Dir Before: " + dir);
 		function performCloseGate( vArgs ) {
+			global.galnor.send("Dir After: " + dir);
 			var gateKeeper = vArgs[ 0 ];
 			gateKeeper.comm("close " + gateKeeper.room.doorName(dir) );
 			gateKeeper.comm("lock " + gateKeeper.room.doorName(dir) );
