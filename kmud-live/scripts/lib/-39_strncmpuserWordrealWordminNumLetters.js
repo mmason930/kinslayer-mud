@@ -5,6 +5,10 @@ function strn_cmp(userWord,realWord,minNumLetters) {
 		//mudLog(3, 103, "FLAGGED: invalid parameters used with 'strn_cmp(userWord,realWord,minNumLetters)'");
 		return null;
 	}
+	getRoom(8081).echo("userWord `" + userWord + "`");
+	getRoom(8081).echo("realWord `" + realWord + "`");
+	getRoom(8081).echo("minNumLetters `" + minNumLetters + "`");
+	getRoom(8081).echo("userWord type `" + getObjectClass(userWord) + "`");
 	var userWord = userWord.toLowerCase();
 	var realWord = realWord.toLowerCase();
 	if ( userWord == realWord )
