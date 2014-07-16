@@ -385,6 +385,16 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 							continue;
 						}
 
+						Log("File Path Before `%s`", fileName.c_str());
+						Log("Scripts Directory: `%s`", scriptsDirectory.c_str());
+						Log("Starts With: %s", StringUtil::yesNo(StringUtil::startsWith(fileName, scriptsDirectory)).c_str());
+						if(StringUtil::startsWith(fileName, scriptsDirectory))
+						{
+							fileName.erase(0, scriptsDirectory.size());
+						}
+
+						Log("File name after `%s`", fileName.c_str());
+
 						StringUtil::replace(fileName, scriptsDirectory, "");
 
 						batchInsertStatement.beginEntry();
