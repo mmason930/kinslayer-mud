@@ -30,7 +30,7 @@ var script8000 = function(self, actor, here, args, extra) {
 		if( gateKeeperObject.gateKeeperRoomVnum == undefined || gateKeeperObject.otherRoomVnum == undefined )
 			return false;//Invalid. Both rooms must be set.
 		//Now we'll need to find the exit that links the two rooms together.
-		var dir;
+		var dir = 0;
 		var nrOfDirections = 6;
 		var mainGateRoom = getRoom(gateKeeperObject.gateKeeperRoomVnum);
 		if( !mainGateRoom )
