@@ -9,7 +9,7 @@ var script8000 = function(self, actor, here, args, extra) {
 	 * ~~~ By: Galnor 06/07/2010                                              *
 	 *                                                                        *
 	 **************************************************************************/
-	 global.galnor.send("Test");
+	 global.galnor.send("Test");//
 	 if(actor.room.vnum == 2305) {
 	 
 		return;
