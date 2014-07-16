@@ -177,6 +177,7 @@ bool JSManager::loadScriptsFromFile(const std::string &filePath)
 
 	if(!fileHandle)
 	{
+		MudLog(BRF, LVL_APPR, TRUE, "Failed to open file handle.");
 		return false;
 	}
 
@@ -199,6 +200,7 @@ bool JSManager::loadScriptsFromFile(const std::string &filePath)
 
 	if(ferror(fileHandle))
 	{
+		MudLog(BRF, LVL_APPR, TRUE, "There was an error while reading the file.");
 		return false;
 	}
 
