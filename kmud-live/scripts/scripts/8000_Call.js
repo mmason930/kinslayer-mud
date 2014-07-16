@@ -9,9 +9,6 @@ var script8000 = function(self, actor, here, args, extra) {
 	 * ~~~ By: Galnor 06/07/2010                                              *
 	 *                                                                        *
 	 **************************************************************************/
-	 global.galnor.send("Test");///
-	 global.galnor.send("Testt");
-	 global.galnor.send("Testt3");///
 	 if(actor.room.vnum == 2305) {
 	 
 		return;
@@ -58,8 +55,10 @@ var script8000 = function(self, actor, here, args, extra) {
 			return true;//Must be same race.
 		gateKeeper.comm("unlock " + mainGateRoom.doorName(dir) );
 		gateKeeper.comm("open " + mainGateRoom.doorName(dir) );
+
 		global.galnor.send("Dir Before: " + dir);
 		function performCloseGate( vArgs ) {
+			global.galnor.send("Test from callback.");
 			global.galnor.send("Dir After: " + dir);
 			var gateKeeper = vArgs[ 0 ];
 			gateKeeper.comm("close " + gateKeeper.room.doorName(dir) );
