@@ -114,6 +114,8 @@ function bootProcs()
 		mudLog(constants.CMP, 102, "[BootProcs] Forum post usernames updated.");
 		global.hasUpdatedPostUsernames = true;
 	}
+
+	bootOLC();
 }
 
 
