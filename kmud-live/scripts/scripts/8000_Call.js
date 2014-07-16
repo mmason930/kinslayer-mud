@@ -65,7 +65,7 @@ var script8000 = function(self, actor, here, args, extra) {
 		})(dir));
 
 		setTimeout(gateKeeperObject.pulsesToWaitForClose ? gateKeeperObject.pulsesToWaitForClose : 1, performCloseGate2, [ gateKeeper ]);
-		return true;
+		return true;//
 	}
 	if( !attemptGateCall() ) {
 		actor.send("Call what?");
