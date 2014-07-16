@@ -54,6 +54,9 @@ ScriptImportOperation *ScriptImportOperation::addition = new ScriptImportOperati
 ScriptImportOperation *ScriptImportOperation::modification = new ScriptImportOperation(1, "Modification", 'U');
 ScriptImportOperation *ScriptImportOperation::deletion = new ScriptImportOperation(2, "Deletion", 'D');
 
+void removeTimeout();
+void setupTimeout(bool setScriptEndingTime=true);
+
 JSDepthRegulator::JSDepthRegulator()
 {
 	JSManager::get()->incDepth();
@@ -797,7 +800,9 @@ void JSManager::runTimeouts()
 	{
 		try
 		{
+			setupTimeout();
 			flusspferd::global().apply(scriptEvent->callback, scriptEvent->arguments);
+			removeTimeout();
 		}
 		catch(flusspferd::exception e)
 		{
