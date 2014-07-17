@@ -40,6 +40,4 @@ var script13 = function(self, actor, here, args, extra) {
 	var newHelpFile = childrenFiles[ vArgs[0] - 1 ];
 	global.helpManager.setCurrentFile(actor, newHelpFile.id);
 	global.helpManager.getHelpPage(actor, newHelpFile);
-	
-	
-}
+};
