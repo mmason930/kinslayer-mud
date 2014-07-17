@@ -40,7 +40,7 @@
 using namespace flusspferd;
 
 // in microseconds
-const int TIMEOUT = (15)*(1000000); // Make configurable somehow?
+const int TIMEOUT = (120)*(1000000); // Make configurable somehow?
 const int TIMEOUT_SECONDS = TIMEOUT / 1000000;
 
 JSEnvironment* env;

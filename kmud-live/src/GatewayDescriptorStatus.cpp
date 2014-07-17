@@ -1,6 +1,7 @@
 #include "GatewayDescriptorStatus.h"
 
-std::list<GatewayDescriptorStatus*> GatewayDescriptorStatus::enums;
+template < >
+std::list<Enum<GatewayDescriptorStatus>*> Enum<GatewayDescriptorStatus>::enums = std::list<Enum<GatewayDescriptorStatus>*>();
 
 GatewayDescriptorStatus *GatewayDescriptorStatus::awaitingConnection = new GatewayDescriptorStatus(0, "Awaiting Connection");
 GatewayDescriptorStatus *GatewayDescriptorStatus::retrievingSession = new GatewayDescriptorStatus(1, "Retrieving Session");

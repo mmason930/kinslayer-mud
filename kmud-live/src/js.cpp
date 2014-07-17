@@ -51,7 +51,8 @@ using namespace tr1;
 extern Descriptor *descriptor_list;
 extern sql::Connection gameDatabase;
 
-std::list<ScriptImportOperation *> ScriptImportOperation::enums;
+template < >
+std::list<Enum<ScriptImportOperation>*> Enum<ScriptImportOperation>::enums = std::list<Enum<ScriptImportOperation>*>();
 
 ScriptImportOperation *ScriptImportOperation::addition = new ScriptImportOperation(0, "Addition", 'A');
 ScriptImportOperation *ScriptImportOperation::modification = new ScriptImportOperation(1, "Modification", 'U');
@@ -759,6 +760,11 @@ JSManager::~JSManager()
 	this->monitorSubversionThreadRunning = false;
 	this->monitorSubversionThread->join();
 	delete this->monitorSubversionThread;
+
+	for(auto iter = scriptMap.begin();iter != scriptMap.end();++iter)
+	{
+		delete (*iter).second;
+	}
 
 	if (this->server)
 		delete server;

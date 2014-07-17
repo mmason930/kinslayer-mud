@@ -478,8 +478,9 @@ void BatchInsertStatement::putLong( const long long value )
 void BatchInsertStatement::putChar( char value )
 {
 	char buf[2];
-	sprintf(buf, "%c", value);
-	putString(&value);
+	buf[0] = value;
+	buf[1] = '\0';
+	putString(buf);
 }
 void BatchInsertStatement::putBool( bool value )
 {

@@ -1,18 +1,14 @@
-#ifndef USER_LOGOUT_TYPE_H
-#define USER_LOGOUT_TYPE_H
+#ifndef ENTITY_TYPE_H
+#define ENTITY_TYPE_H
 
 #include <list>
 #include "Enum.h"
 
-class EntityType : public Enum {
+class EntityType : public Enum<EntityType> {
 
 private:
-
-	static std::list<EntityType*> enums;
-
 	EntityType(int value, const std::string &standardName) : Enum(value, standardName)
 	{
-		enums.push_back(this);
 	}
 
 public:

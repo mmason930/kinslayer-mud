@@ -4,15 +4,11 @@
 #include <list>
 #include "Enum.h"
 
-class OlcEditType : public Enum {
+class OlcEditType : public Enum<OlcEditType> {
 
 private:
-
-	static std::list<OlcEditType*> enums;
-
 	OlcEditType(int value, const std::string &standardName) : Enum(value, standardName)
 	{
-		enums.push_back(this);
 	}
 
 public:

@@ -1,6 +1,7 @@
 #include "GatewayDescriptorType.h"
 
-std::list<GatewayDescriptorType*> GatewayDescriptorType::enums;
+template < >
+std::list<Enum<GatewayDescriptorType>*> Enum<GatewayDescriptorType>::enums = std::list<Enum<GatewayDescriptorType>*>();
 
 GatewayDescriptorType *GatewayDescriptorType::unknown = new GatewayDescriptorType(0, "Unknown");
 GatewayDescriptorType *GatewayDescriptorType::rawTCP = new GatewayDescriptorType(1, "Raw TCP");

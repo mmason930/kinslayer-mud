@@ -3,19 +3,14 @@
 
 #include "Enum.h"
 
-class MudStatus : public Enum {
+class MudStatus : public Enum<MudStatus> {
 
 private:
-
-	static std::list<MudStatus*> enums;
-
 	MudStatus(int value, const std::string &standardName) : Enum(value, standardName)
 	{
-		enums.push_back(this);
 	}
 
 public:
-
 
 	static MudStatus *notRunning;
 	static MudStatus *runningNotConnected;

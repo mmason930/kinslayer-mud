@@ -1,6 +1,7 @@
 #include "RoomSector.h"
 
-std::list<RoomSector*> RoomSector::enums;
+template < >
+std::list<Enum<RoomSector>*> Enum<RoomSector>::enums = std::list<Enum<RoomSector>*>();
 
 RoomSector *RoomSector::inside = new RoomSector(		 0, "Inside"		, "SECT_INSIDE"			, 2);
 RoomSector *RoomSector::city = new RoomSector(			 1, "City"			, "SECT_CITY"			, 2);

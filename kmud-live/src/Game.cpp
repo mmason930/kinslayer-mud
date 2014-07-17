@@ -65,7 +65,7 @@ void Game::loadSubversionInfo()
 
 	if(!MiscUtil::isInt((*subversionInfoMapIterator).second))
 	{
-		Log("Revision `%s` is not a valid integer. Aborting.");
+		Log("Revision `%s` is not a valid integer. Aborting.", (*subversionInfoMapIterator).second.c_str());
 		exit(1);
 	}
 
@@ -83,7 +83,7 @@ void Game::loadSubversionInfo()
 
 	if(!MiscUtil::isInt((*subversionInfoMapIterator).second))
 	{
-		Log("Revision `%s` is not a valid integer. Aborting.");
+		Log("Revision `%s` is not a valid integer. Aborting.", (*subversionInfoMapIterator).second.c_str());
 		exit(1);
 	}
 

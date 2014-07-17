@@ -74,6 +74,11 @@
 #include "Descriptor.h"
 #include "rooms/Room.h"
 #include "GatewayDescriptorType.h"
+#include "UserType.h"
+#include "rooms/RoomSector.h"
+#include "PlayerPortalDescriptorStatus.h"
+#include "OlcEditType.h"
+#include "EntityType.h"
 #include "Game.h"
 #include "SystemUtil.h"
 
@@ -999,6 +1004,16 @@ void initiateGame( int port )
 	mobLoadLogger.kill();
 	mobLoadLoggerThread->join();
 	delete mobLoadLoggerThread;
+
+	UserLogoutType::cleanup();
+	MudStatus::cleanup();
+	UserType::cleanup();
+	GatewayDescriptorStatus::cleanup();
+	RoomSector::cleanup();
+	PlayerPortalDescriptorStatus::cleanup();
+	OlcEditType::cleanup();
+	ScriptImportOperation::cleanup();
+	EntityType::cleanup();
 
 	Log("Deleting game object...");
 	delete game;

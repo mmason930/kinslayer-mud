@@ -3,20 +3,15 @@
 
 #include "Enum.h"
 
-class GatewayDescriptorStatus : public Enum {
+class GatewayDescriptorStatus : public Enum<GatewayDescriptorStatus> {
 
 private:
 
-	static std::list<GatewayDescriptorStatus*> enums;
-
 	GatewayDescriptorStatus(int value, const std::string &standardName) : Enum(value, standardName)
 	{
-		enums.push_back(this);
 	}
 
 public:
-
-
 	static GatewayDescriptorStatus *awaitingConnection;
 	static GatewayDescriptorStatus *retrievingSession;
 	static GatewayDescriptorStatus *connected;

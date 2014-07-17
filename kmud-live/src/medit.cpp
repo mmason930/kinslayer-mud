@@ -236,7 +236,7 @@ void MeditDispNsects(Descriptor *d)
 	d->send("\r\nCurrently Set: ");
 	for (auto sectorIter = RoomSector::getStartIterator(); sectorIter != RoomSector::getEndIterator();++sectorIter)
 	{
-		RoomSector *sector = (*sectorIter);
+		RoomSector *sector = (RoomSector*)(*sectorIter);
 		if(IS_SET(mob->MobData->nsects, Q_BIT(sector->getValue())))
 		{
 			d->send(sector->getValue() ? ", " : " ");

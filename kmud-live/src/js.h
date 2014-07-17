@@ -49,36 +49,18 @@ struct JSDepthRegulator
 	bool canProceed();
 };
 
-class ScriptImportOperation : public Enum {
+class ScriptImportOperation : public Enum<ScriptImportOperation> {
 
 private:
-
-	static std::list<ScriptImportOperation*> enums;
-
 	ScriptImportOperation(int value, const std::string &standardName, const char charCode) : Enum(value, standardName)
 	{
 		this->charCode = charCode;
-		enums.push_back(this);
 	}
 
 	char charCode;
 
 public:
-
-	static Enum *getEnumByValue(int v)
-	{
-		for (auto iter = enums.begin(); iter != enums.end(); ++iter)
-		{
-			Enum *e = (*iter);
-			if (e->getValue() == v)
-			{
-				return e;
-			}
-		}
-
-		return NULL;
-	}
-
+	
 	static Enum *getEnumByCharCode(const char charCode)
 	{
 		for(Enum *e : enums)
@@ -97,8 +79,8 @@ public:
 		return charCode;
 	}
 
-	static std::list<ScriptImportOperation*>::iterator getStartIterator() { return enums.begin(); }
-	static std::list<ScriptImportOperation*>::iterator getEndIterator() { return enums.end(); }
+	//static std::list<ScriptImportOperation*>::iterator getStartIterator() { return enums.begin(); }
+	//static std::list<ScriptImportOperation*>::iterator getEndIterator() { return enums.end(); }
 
 	static ScriptImportOperation *addition;
 	static ScriptImportOperation *modification;

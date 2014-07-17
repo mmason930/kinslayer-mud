@@ -3,11 +3,10 @@
 
 #include "../Enum.h"
 
-class RoomSector : public Enum {
+class RoomSector : public Enum<RoomSector> {
 
 private:
 
-	static std::list<RoomSector*> enums;
 	std::string constantName;
 	int movementLoss;
 
@@ -15,30 +14,11 @@ private:
 	{
 		this->constantName = constantName;
 		this->movementLoss = movementLoss;
-		enums.push_back(this);
 	}
 
 public:
-
-	static Enum *getEnumByValue(int v)
-	{
-		for (auto iter = enums.begin(); iter != enums.end(); ++iter)
-		{
-			Enum *e = (*iter);
-			if (e->getValue() == v)
-			{
-				return e;
-			}
-		}
-
-		return NULL;
-	}
-
 	std::string getConstantName() { return constantName; }
 	int getMovementLoss() {	return movementLoss; }
-
-	static std::list<RoomSector*>::iterator getStartIterator() { return enums.begin(); }
-	static std::list<RoomSector*>::iterator getEndIterator() { return enums.end(); }
 
 	static RoomSector *inside;
 	static RoomSector *city;
