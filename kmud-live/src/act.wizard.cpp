@@ -7435,6 +7435,25 @@ ACMD(do_jmap)
 		ch->send("You successfully rename script `%s` to `%s`. ID: %d\r\n", oldMethodName.c_str(), newMethodName, sourceScript->getId());
 		MudLog(BRF, MAX(GET_INVIS_LEV(ch), LVL_APPR), TRUE, "%s has renamed script `%s` to `%s`. Script ID: %d", GET_NAME(ch), oldMethodName.c_str(), newMethodName, sourceScript->getId());
 	}
+	else if(!strn_cmp(arg1, "function", strlen(arg1)))
+	{
+		const char *functionName = arg2;
+		if(!*functionName)
+		{
+			ch->send(syntax.c_str());
+			return;
+		}
+		
+		const char *fileName = JSManager::get()->getFunctionFilename(functionName);
+
+		if(!fileName)
+		{
+			ch->send("That function could not be found on the global scope.");
+			return;
+		}
+
+		ch->send("That function was found in the following file: %s", fileName);
+	}
 	else
 	{
 		ch->send(syntax.c_str());
