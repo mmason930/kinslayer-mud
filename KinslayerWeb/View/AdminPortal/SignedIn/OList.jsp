@@ -225,29 +225,29 @@ $(document).ready(function() {
 		if(!isNaN(highVnum))
 			command["highVnum"] = highVnum;
 		if(!isNaN(val1))
-			command["val1"] = val1;
+			command["val0"] = val0;
 		if(!isNaN(val2))
-			command["val2"] = val2;
+			command["val1"] = val1;
 		if(!isNaN(val3))
-			command["val3"] = val3;
+			command["val2"] = val2;
 		if(!isNaN(val4))
-			command["val4"] = val4;
+			command["val3"] = val3;
 		if(!isNaN(val5))
-			command["val5"] = val5;
+			command["val4"] = val4;
 		if(!isNaN(val6))
-			command["val6"] = val6;
+			command["val5"] = val5;
 		if(!isNaN(val7))
-			command["val7"] = val7;
+			command["val6"] = val6;
 		if(!isNaN(val8))
-			command["val8"] = val8;
+			command["val7"] = val7;
 		if(!isNaN(val9))
-			command["val9"] = val9;
+			command["val8"] = val8;
 		if(!isNaN(val10))
-			command["val10"] = val10;
+			command["val9"] = val9;
 		if(!isNaN(val11))
-			command["val11"] = val11;
+			command["val10"] = val10;
 		if(!isNaN(val12))
-			command["val12"] = val12;
+			command["val11"] = val11;
 
 		socket.sendCommand(command);
 	});
