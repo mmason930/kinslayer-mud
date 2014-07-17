@@ -13,3 +13,16 @@ var script11 = function(self, actor, here, args, extra) {
 	self.comm("close irondoor");
 	self.comm("lock irondoor");
 };
+
+var murashDoorGuardOnEnter = function(self, actor, here, args, extra)
+{
+	if(actor.race != constants.RACE_TROLLOC)
+		return;
+
+	wait 1;
+
+	if(here.doorIsClosed(constants.NORTH))
+	{
+		self.say("Lord Murash does not wish to be disturbed. Request an AUDIENCE if you wish to proceed.");
+	}
+};
