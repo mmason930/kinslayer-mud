@@ -7448,11 +7448,13 @@ ACMD(do_jmap)
 
 		if(!fileName)
 		{
-			ch->send("That function could not be found on the global scope.");
+			ch->send("That function could not be found on the global scope.\r\n");
 			return;
 		}
 
-		ch->send("That function was found in the following file: %s", fileName);
+		get_char_cols(ch);
+
+		ch->send("That function was found in the following file: %s%s%s%s\r\n", bld, cyn, fileName, nrm);
 	}
 	else
 	{
