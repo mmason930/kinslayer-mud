@@ -7,13 +7,18 @@ var script4001 = function(self, actor, here, args, extra) {
 	var preFighting = ch.fighting ? true : false;
 	var skill = ch.getSkill( getSkillVnum("Kick") );
 	var vArgs = getArgList(args);
-	var cooldown = getSval(ch, 4001, "kickCooldown");
+    var now = time();
+	var lastKickUnixTimestamp = getSval(ch, 4001, "lastKickUnixTimestamp") || 0;
+    var secondsSinceLastKick = now - lastKickUnixTimestamp;
+    var secondsToWaitPerKick = 12;
+    var secondsRemainingToWait = Math.max(0, secondsToWaitPerKick - secondsSinceLastKick);
+
 	if( skill == 0 ) {
 		ch.send("You have no idea how.");
 		return;
 	}
-	if( cooldown > 0 ) {
-		ch.send("You still have another "+cooldown+" seconds before you can do that again.");
+	if( secondsRemainingToWait > 0 ) {
+		ch.send("You still have another " + secondsRemainingToWait + " second" + (secondsRemainingToWait == 1 ? "" : "s") + " before you can do that again.");
 		return;
 	}
 	if( room.isFlagged(constants.ROOM_PEACEFUL) ) {
@@ -72,17 +77,6 @@ var script4001 = function(self, actor, here, args, extra) {
 	}
 	ch.setFighting(vict);
 	ch.lag(8);
-	setSval(ch, 4001, "kickCooldown", 12);
-	function updateKickCooldown(vArgs) {
-        var ch = vArgs[0];
-		var cooldownRemaining = getSval(ch, 4001, "kickCooldown") - 1;
-		setSval(ch, 4001, "kickCooldown", cooldownRemaining);
-		if( cooldownRemaining > 0 ) {
-			setTimeout(8, updateKickCooldown, [ch]);
-		}
-	}
-    setTimeout(8, updateKickCooldown, [ch]);
-	
-	
-	
+
+	setSval(ch, 4001, "lastKickUnixTimestamp", now);
 }
