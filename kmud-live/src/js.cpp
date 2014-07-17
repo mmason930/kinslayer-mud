@@ -42,6 +42,9 @@
 #include "SQLUtil.h"
 #include "rooms/Room.h"
 
+#include "js/jsdbgapi.h"
+
+
 using namespace std;
 using namespace tr1;
 
@@ -802,7 +805,9 @@ void JSManager::runTimeouts()
 		try
 		{
 			setupTimeout();
-			flusspferd::global().apply(scriptEvent->callback, scriptEvent->arguments);
+			flusspferd::global().get_property(scriptEvent->propertyName).get_object().call("callback", scriptEvent->arguments);
+			//scriptEvent->callback.call(flusspferd::global(), scriptEvent->arguments);
+			//flusspferd::global().apply(scriptEvent->callback, scriptEvent->arguments);
 			removeTimeout();
 		}
 		catch(flusspferd::exception e)
@@ -924,4 +929,29 @@ void JSManager::deleteScriptFromDatabase(sql::Connection connection, int scriptI
 				<< " WHERE id = " << scriptId;
 
 	connection->sendRawQuery(sqlBuffer.str());
+}
+
+const char *JSManager::getFunctionFilename(const std::string &functionName)
+{
+	if(!flusspferd::global().has_property(functionName) || !flusspferd::global().get_property(functionName).is_function())
+		return NULL;
+
+	JSContext *context = flusspferd::Impl::get_context(flusspferd::current_context());
+
+	if(context == NULL)
+		return NULL;
+
+	JSObject *globalObject = JS_GetGlobalObject(context);
+	jsval methodValue;
+	JS_GetProperty(context, globalObject, functionName.c_str(), &methodValue);
+	JSFunction *function = JS_ValueToFunction(context, methodValue);
+	
+	if(function == NULL)
+		return NULL;
+
+	JSScript *jsScript = JS_GetFunctionScript(context, function);
+	if(jsScript == NULL)
+		return NULL;
+
+	return JS_GetScriptFilename(context, jsScript);
 }

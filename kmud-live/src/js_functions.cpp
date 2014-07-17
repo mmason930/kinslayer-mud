@@ -1534,8 +1534,10 @@ void JS_sendToZone(int zoneNumber, flusspferd::string message)
 	sendToZone(message.c_str(), zone->GetRnum());
 }
 
-void JS_setTimeout(unsigned int pulses, flusspferd::function callback, flusspferd::object arguments)
+void JS_setTimeout(unsigned int pulses, flusspferd::value callback, flusspferd::object arguments)
 {
+	if(!callback.is_function())
+		throw flusspferd::exception("Value is not a function.");
 	if(!arguments.is_array())
 		arguments = flusspferd::object();
 	

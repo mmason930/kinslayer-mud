@@ -616,7 +616,7 @@ bool JSEnvironment::compile(const std::string &fileName, std::string &scriptBuff
 	}
 	catch(flusspferd::exception e)
 	{
-		Log("Error evaluating script: %s", e.what());
+		MudLog(BRF, TRUE, LVL_APPR, "Error evaluating script: %s", e.what());
 	}
 
 /*

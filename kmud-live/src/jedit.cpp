@@ -231,13 +231,27 @@ ACMD( do_jstat )
 	sprintbit(jsTrig->trigger_flags, (const char**)JS::js_trig_types, buf , (", "), (yel), (nrm));
 	sprintbit(jsTrig->allowed_flags, (const char**)JS::js_allow     , buf2, (", "), (yel), (nrm));
 
+	std::string scriptName;
+	const char *fileName;
+	Script *script = NULL;
+
+	if(jsTrig->scriptId == -1)
+		scriptName = std::string(red) + bld + "<No Script>" + nrm;
+	else if( (script = JSManager::get()->getScript(jsTrig->scriptId)) == NULL)
+		scriptName = std::string(red) + bld + "<Invalid Script>" + nrm;
+	else
+	{
+		scriptName = std::string(grn) + script->getMethodName() + nrm;
+		fileName = JSManager::get()->getFunctionFilename(script->getMethodName());//This may be NULL!
+	}
+
 	sBuffer << "JavaScript View - Trigger #" << jsTrig->vnum << std::endl;
 	sBuffer << grn << "1" << nrm << " Name            : " << yel << jsTrig->name             << nrm << std::endl;
 	sBuffer << grn << "3" << nrm << " Trigger Types   : " << yel << buf                      << nrm << std::endl;
 	sBuffer << grn << "4" << nrm << " Allowed Flags   : " << yel << buf2                     << nrm << std::endl;
 	sBuffer << grn << "5" << nrm << " Arguments       : " << yel << jsTrig->args             << nrm << std::endl;
 	sBuffer << grn << "6" << nrm << " Numeric Argument: " << yel << jsTrig->narg             << nrm << std::endl;
-	sBuffer << grn << "7" << nrm << " Script ID       : " << cyn << "\r\n"<<jsTrig->scriptId << nrm << std::endl;
+	sBuffer << grn << "7" << nrm << " Script ID       : " << yel << jsTrig->scriptId << nrm << " - " << grn << scriptName << " : " << red << (fileName == NULL ? "" : fileName) << nrm << std::endl;
 	sBuffer << grn << "D" << nrm << " Delete          : " << grn << StringUtil::allUpper(StringUtil::yesNo(jsTrig->deleted)).c_str() << nrm << std::endl;
 
 	d->sendRaw( sBuffer.str().c_str() );
@@ -458,6 +472,7 @@ void JeditDispMenu( Descriptor *d )
 	sprintbit(jsTrig->allowed_flags, (const char**)JS::js_allow     , buf2, (", "), (yel), (nrm));
 	sprintbit(jsTrig->option_flags , (const char**)JS::js_options	, buf3, (", "), (yel), (nrm));
 	std::string scriptName;
+	const char *fileName;
 	Script *script = NULL;
 
 	if(jsTrig->scriptId == -1)
@@ -465,7 +480,10 @@ void JeditDispMenu( Descriptor *d )
 	else if( (script = JSManager::get()->getScript(jsTrig->scriptId)) == NULL)
 		scriptName = std::string(red) + bld + "<Invalid Script>" + nrm;
 	else
+	{
 		scriptName = std::string(grn) + script->getMethodName() + nrm;
+		fileName = JSManager::get()->getFunctionFilename(script->getMethodName());//This may be NULL!
+	}
 
 	sBuffer << "JavaScript View - Trigger #" << jsTrig->vnum << std::endl;
 	sBuffer << grn << "1" << nrm << " Name            : " << yel << jsTrig->name           << nrm << std::endl;
@@ -474,7 +492,7 @@ void JeditDispMenu( Descriptor *d )
 	sBuffer << grn << "4" << nrm << " Allowed Flags   : " << yel << buf2                   << nrm << std::endl;
 	sBuffer << grn << "5" << nrm << " Arguments       : " << yel << jsTrig->args           << nrm << std::endl;
 	sBuffer << grn << "6" << nrm << " Numeric Argument: " << yel << jsTrig->narg           << nrm << std::endl;
-	sBuffer << grn << "7" << nrm << " Script ID       : " << yel << jsTrig->scriptId << nrm << " - " << grn << scriptName << nrm << std::endl;
+	sBuffer << grn << "7" << nrm << " Script ID       : " << yel << jsTrig->scriptId << nrm << " - " << grn << scriptName << " : " << red << (fileName == NULL ? "" : fileName) << nrm << std::endl;
 	sBuffer << grn << "D" << nrm << " Delete          : " << (jsTrig->deleted ? red : grn) << StringUtil::allUpper(StringUtil::yesNo(jsTrig->deleted)).c_str() << nrm << std::endl;
 	sBuffer << grn << "Q" << nrm << " Quit"               << std::endl;
 

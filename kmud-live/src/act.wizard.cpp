@@ -1223,19 +1223,6 @@ ACMD(do_extra)
 		}
 		else if(!str_cmp(vArgs.at(0), "js"))
 		{
-			std::string methodName = "script9";
-
-			flusspferd::object globalObject = flusspferd::global();
-
-			ch->send("Has Property: %s", StringUtil::yesNo(globalObject.has_property(methodName)).c_str());
-			ch->send("Has Own Property: %s", StringUtil::yesNo(globalObject.has_property(methodName)).c_str());
-
-				/**
-			for(flusspferd::value propertyValue : globalObject)
-			{
-				ch->send("Property `%s`", propertyValue.)
-			}
-			**/
 		}
 		else bCorrectArgument=false;
 	} catch( std::out_of_range ) {
@@ -7331,9 +7318,11 @@ ACMD(do_jmap)
 		for(iter = startIter;iter != endIter;++iter)
 		{
 			const Script *script = (*iter).second;
-			std::string attachedOrDetached = flusspferd::global().has_property(script->getMethodName()) ? (std::string(grn) + "[Attached]" + nrm) : (std::string(bld) + red + "[Detached]" + nrm);
+			bool methodExists = flusspferd::global().has_property(script->getMethodName());
+			std::string attachedOrDetached = methodExists ? (std::string(grn) + "[Attached]" + nrm) : (std::string(bld) + red + "[Detached]" + nrm);
+			const char *fileName = JSManager::get()->getFunctionFilename(script->getMethodName());
 
-			outputBuffer << cyn << std::setw(6) << std::right << script->getId() << nrm << ") " << attachedOrDetached << " " << yel << script->getMethodName().c_str() << nrm << std::endl;
+			outputBuffer << cyn << std::setw(6) << std::right << script->getId() << nrm << ") " << attachedOrDetached << " " << yel << script->getMethodName().c_str() << nrm << " : " << red << (fileName == NULL ? "" : fileName) << nrm << std::endl;
 		}
 
 		std::string outputBufferString = outputBuffer.str();

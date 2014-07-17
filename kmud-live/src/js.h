@@ -167,6 +167,8 @@ class JSManager
 		std::map<int, Script*>::const_iterator getScriptMapStartIterator() const;
 		std::map<int, Script*>::const_iterator getScriptMapEndIterator() const;
 
+		const char *getFunctionFilename(const std::string &functionName);
+
 		ScriptImport *getScriptImport(const sql::Row &row) const;
 
 		unsigned int getNextScriptEventId();
@@ -224,7 +226,7 @@ struct ScriptEvent
 public:
 	
 	unsigned int pulses;
-	flusspferd::function callback;
+	flusspferd::value callback;
 	flusspferd::object arguments;
 	std::string propertyName;
 
@@ -233,7 +235,7 @@ public:
 		this->pulses = 0;
 	}
 
-	ScriptEvent(const unsigned int pulses, const flusspferd::function &callback, const flusspferd::object &arguments, const unsigned int scriptEventId) : arguments(arguments)
+	ScriptEvent(const unsigned int pulses, const flusspferd::value &callback, const flusspferd::object &arguments, const unsigned int scriptEventId) : arguments(arguments)
 	{
 		this->pulses = pulses;
 		this->callback = callback;
