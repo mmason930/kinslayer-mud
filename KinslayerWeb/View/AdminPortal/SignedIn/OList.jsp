@@ -246,8 +246,8 @@ $(document).ready(function() {
 			command["val9"] = val9;
 		if(!isNaN(val10))
 			command["val10"] = val10;
-		if(!isNaN(val11))
-			command["val11"] = val11;
+//		if(!isNaN(val11))
+//			command["val11"] = val11;
 
 		socket.sendCommand(command);
 	});
