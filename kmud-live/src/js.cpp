@@ -329,9 +329,11 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 {
 	std::string filePathPattern = "^([UDA])\\s+(.*?)$";
 	std::string updatedRevisionPattern = "Updated to revision ([0-9]+).";
+	std::string atRevisionPattern = "At revision ([0-9]+).";
 
 	boost::regex filePathExpression(filePathPattern.c_str());
 	boost::regex updatedRevisionExpression(updatedRevisionPattern.c_str());
+	boost::regex atRevisionExpression(atRevisionPattern.c_str());
 
 	std::string scriptsDirectory = "scripts/";
 
@@ -402,7 +404,8 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 						Log("Update Type: %s, File Name: %s", updateType.c_str(), fileName.c_str());
 					}
 
-					if(boost::regex_search(start, end, what, updatedRevisionExpression, boost::match_default))
+					if( boost::regex_search(start, end, what, updatedRevisionExpression, boost::match_default) ||
+						boost::regex_search(start, end, what, atRevisionExpression, boost::match_default))
 					{
 						std::string revisionString = what[ 1 ];
 
