@@ -73,14 +73,15 @@ var script4001 = function(self, actor, here, args, extra) {
 	ch.setFighting(vict);
 	ch.lag(8);
 	setSval(ch, 4001, "kickCooldown", 12);
-	function updateKickCooldown(ch) {
+	function updateKickCooldown(vArgs) {
+        var ch = vArgs[0];
 		var cooldownRemaining = getSval(ch, 4001, "kickCooldown") - 1;
 		setSval(ch, 4001, "kickCooldown", cooldownRemaining);
 		if( cooldownRemaining > 0 ) {
 			setTimeout(8, updateKickCooldown, ch);
 		}
 	}
-    setTimeout(8, updateKickCooldown, ch);
+    setTimeout(8, updateKickCooldown, [ch]);
 	
 	
 	
