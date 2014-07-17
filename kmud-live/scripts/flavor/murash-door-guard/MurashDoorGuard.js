@@ -14,7 +14,7 @@ var script11 = function(self, actor, here, args, extra) {
 	self.comm("lock irondoor");
 };
 
-var murashDoorGuardOnEnter = function(self, actor, here, args, extra)
+var script12 = function(self, actor, here, args, extra)
 {
 	if(actor.race != constants.RACE_TROLLOC)
 		return;
