@@ -7,6 +7,7 @@ var script4001 = function(self, actor, here, args, extra) {
 	var preFighting = ch.fighting ? true : false;
 	var skill = ch.getSkill( getSkillVnum("Kick") );
 	var vArgs = getArgList(args);
+    //Galnor - 2014-07-17 - refactored a little bit to get rid of setTimeout dependency.
     var now = time();
 	var lastKickUnixTimestamp = getSval(ch, 4001, "lastKickUnixTimestamp") || 0;
     var secondsSinceLastKick = now - lastKickUnixTimestamp;
