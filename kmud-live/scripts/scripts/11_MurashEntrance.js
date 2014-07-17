@@ -8,8 +8,8 @@ var script11 = function(self, actor, here, args, extra) {
 	self.comm("unlock irondoor");
 	self.comm("open irondoor");
 	waitpulse 10;
-	self.comm("He will see you now.");
+	self.say("He will see you now.");
 	waitpulse 50;
 	self.comm("close irondoor");
 	self.comm("lock irondoor");
-}
+};
