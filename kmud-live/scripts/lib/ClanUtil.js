@@ -1,4 +1,4 @@
-var ClanUtil = new Object();
+var ClanUtil = {};
 ClanUtil.onUserAddedToClan = function(user, clanId)
 {
 

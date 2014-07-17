@@ -197,8 +197,6 @@ JSRoom.prototype.echoToNeighbors = function(sMessage, iDepth, fPredicate)
         roomsSentTo.push( thisRoom );
         roomsRemaining.splice( 0, 1 );
 
-        //mudLog(constants.BRF, 100, "Trying room #" + thisRoom.vnum);
-
         var people = thisRoom.people;
         for(var i = 0; i < people.length;++i) {
             if( fPredicate == undefined || fPredicate( people[i] ) )
