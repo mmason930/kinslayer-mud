@@ -207,18 +207,18 @@ $(document).ready(function() {
 
 		var lowVnum = parseInt($("#lowVnumInput").val());
 		var highVnum = parseInt($("#highVnumInput").val());
-		var val1 = parseInt($("#Val1").val());
-		var val2 = parseInt($("#Val2").val());
-		var val3 = parseInt($("#Val3").val());
-		var val4 = parseInt($("#Val4").val());
-		var val5 = parseInt($("#Val5").val());
-		var val6 = parseInt($("#Val6").val());
-		var val7 = parseInt($("#Val7").val());
-		var val8 = parseInt($("#Val8").val());
-		var val9 = parseInt($("#Val9").val());
-		var val10 = parseInt($("#Val10").val());
-		var val11 = parseInt($("#Val11").val());
-		var val12 = parseInt($("#Val12").val());
+		var val0 = parseInt($("#Val1").val());
+		var val1 = parseInt($("#Val2").val());
+		var val2 = parseInt($("#Val3").val());
+		var val3 = parseInt($("#Val4").val());
+		var val4 = parseInt($("#Val5").val());
+		var val5 = parseInt($("#Val6").val());
+		var val6 = parseInt($("#Val7").val());
+		var val7 = parseInt($("#Val8").val());
+		var val8 = parseInt($("#Val9").val());
+		var val9 = parseInt($("#Val10").val());
+		var val10 = parseInt($("#Val11").val());
+		//var val11 = parseInt($("#Val12").val());
 
 		if(!isNaN(lowVnum))
 			command["lowVnum"] = lowVnum;
