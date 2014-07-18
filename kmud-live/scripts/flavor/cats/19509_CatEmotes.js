@@ -52,8 +52,10 @@ var script19509 = function(self, actor, here, args, extra) {
 
 		wait 2;
 
-		if(rat.isValid && rat.room.vnum == self.room.vnum)
+		if(rat.isValid && rat.room.vnum == self.room.vnum) {
 			self.setFighting(rat);
+			setSval(self, svalVnum, svalName, rat);
+		}
 
 		return;
 	}
