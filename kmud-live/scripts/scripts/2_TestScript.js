@@ -118,7 +118,7 @@ var script2 = function(self, actor, here, args, extra) {
 								  + "   `user_id`"
 								  + " FROM"
 								  + "   users"
-								  + " WHERE username IN( " sReceiverName + ")";
+								  + " WHERE username IN( " + sReceiverName + ")";
 						
 						var resultSet = sqlQuery(query);
 						if(resultSet.hasNextRow) {
