@@ -96,8 +96,8 @@ var script2 = function(self, actor, here, args, extra) {
 					}
 					var reverseRows = false;
 					
-					var senderId = null;
-					var receiverId = null;
+					var senderId = [];
+					var receiverId = [];
 					if(sSearchName.length > 0) {
 					
 						var query = " SELECT"
@@ -105,12 +105,13 @@ var script2 = function(self, actor, here, args, extra) {
 								  + " FROM"
 								  + "   users"
 								  + " WHERE username IN (" + sSearchName + ")";
-						
+
+
 						var resultSet = sqlQuery(query);
-						if(resultSet.hasNextRow) {
+						while(resultSet.hasNextRow) {
 						
 							var row = resultSet.getRow;
-							senderId = parseInt(row.get("user_id"));
+							senderId.push(parseInt(row.get("user_id")));
 						}
 					}
 					if(sReceiverName.length > 0) {
@@ -124,49 +125,49 @@ var script2 = function(self, actor, here, args, extra) {
 						if(resultSet.hasNextRow) {
 						
 							var row = resultSet.getRow;
-							receiverId = parseInt(row.get("user_id"));
+							receiverId.push(parseInt(row.get("user_id")));
 						}
 					}
 					
 	                if (isNumber(vArgs[2])) {
-	                    var query = "SELECT"
-						          + " u.username AS uname,"
-								  + " c.message,"
-								  + " FROM_UNIXTIME(c.timestamp) AS timestamp,"
-								  + " c.id AS id,"
-								  + " c.type,"
-								  + " u2.username AS receiver "
-						          + "FROM comm c "
-								  + "JOIN users u ON u.user_id=c.sender_id "
-								  + "LEFT JOIN users u2 ON u2.user_id=c.recipient_id "
-								  + "WHERE sender_type='C' "
-								  + (senderId != null ? ("AND sender_id = " + senderId + " ") : "")
-								  + (receiverId != null ? ("AND recipient_type='C' AND recipient_id = " + receiverId + " ") : "")
-								  + "AND c.id >= (" + sSearchWord + "-50) "
-								  + "AND c.id <= (" + sSearchWord + "+" + sNumberToShow + ") "
-								  + (sType.length != 0 ? ("AND c.type='" + sType + "' ") : "")
-								  + (sRoom.length != 0 ? ("AND c.room_vnum=" + parseInt(sRoom) + " ") : "")
-								  + "ORDER BY c.timestamp ASC " 
-								  + "LIMIT " + (sOffset != '' ? (sOffset + ",") : "") + sNumberToShow + ";";
+	                    var query = " SELECT"
+						          + "   u.username AS uname,"
+								  + "   c.message,"
+								  + "   FROM_UNIXTIME(c.timestamp) AS timestamp,"
+								  + "   c.id AS id,"
+								  + "   c.type,"
+								  + "   u2.username AS receiver "
+						          + " FROM (comm c, users u)"
+								  + " LEFT JOIN users u2 ON u2.user_id=c.recipient_id "
+		                          + " WHERE u.user_id = s.sender_id"
+								  + " AND sender_type='C' "
+								  + (senderId.length > 0 ? (" AND sender_id IN ( " + senderId.join(",") + ")") : "")
+								  + (receiverId.length > 0 ? (" AND recipient_type='C' AND recipient_id IN ( " + receiverId.join(",") + ")") : "")
+								  + " AND c.id >= (" + sSearchWord + "-50) "
+								  + " AND c.id <= (" + sSearchWord + "+" + sNumberToShow + ") "
+								  + (sType.length != 0 ? (" AND c.type='" + sType + "'") : "")
+								  + (sRoom.length != 0 ? (" AND c.room_vnum=" + parseInt(sRoom)) : "")
+								  + " ORDER BY c.timestamp ASC "
+								  + " LIMIT " + (sOffset != '' ? (sOffset + ",") : "") + sNumberToShow + ";";
 	                } else {
-	                    var query = "SELECT"
-						          + " u.username,"
-						          + " c.message,"
-								  + " FROM_UNIXTIME(c.timestamp) AS timestamp,"
-								  + " c.id AS id,"
-								  + " c.type,"
-								  + " u2.username AS receiver "
-								  + "FROM comm c "
-								  + "LEFT JOIN users u ON u.user_id=c.sender_id "
-								  + "LEFT JOIN users u2 ON u2.user_id=c.recipient_id "
-								  + "WHERE sender_type='C' "
-								  + (senderId != null ? ("AND sender_id = " + senderId + " ") : "")
-								  + (receiverId != null ? ("AND recipient_type='C' AND recipient_id = " + receiverId + " ") : "")
-								  + (sSearchWord ? ("AND MATCH(c.message) AGAINST('" + sSearchWord + "') ") : (" "))
-								  + (sType.length != 0 ? ("AND c.type='" + sType + "' ") : "")
-								  + (sRoom.length != 0 ? ("AND c.room_vnum=" + parseInt(sRoom) + " ") : "")
-								  + "ORDER BY c.timestamp DESC "
-								  + "LIMIT " + (sOffset != '' ? (sOffset + ",") : "") + sNumberToShow + ";";
+	                    var query = " SELECT"
+						          + "   u.username,"
+						          + "   c.message,"
+								  + "   FROM_UNIXTIME(c.timestamp) AS timestamp,"
+								  + "   c.id AS id,"
+								  + "   c.type,"
+								  + "   u2.username AS receiver "
+								  + " FROM comm c "
+								  + " LEFT JOIN users u ON u.user_id=c.sender_id "
+								  + " LEFT JOIN users u2 ON u2.user_id=c.recipient_id "
+								  + " WHERE sender_type='C' "
+								  + (senderId.length > 0 ? (" AND sender_id IN ( " + senderId.join(",") + ")") : "")
+								  + (receiverId.length > 0 ? (" AND recipient_type='C' AND recipient_id IN ( " + receiverId.join(",") + ")") : "")
+								  + (sSearchWord ? (" AND MATCH(c.message) AGAINST('" + sSearchWord + "')") : (""))
+								  + (sType.length != 0 ? (" AND c.type='" + sType + "' ") : "")
+								  + (sRoom.length != 0 ? (" AND c.room_vnum=" + parseInt(sRoom) + " ") : "")
+								  + " ORDER BY c.timestamp DESC "
+								  + " LIMIT " + (sOffset != '' ? (sOffset + ",") : "") + sNumberToShow + ";";
 								  
 						reverseRows = true;
 	                }
