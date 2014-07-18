@@ -9,7 +9,7 @@ var script19509 = function(self, actor, here, args, extra) {
 
 	var ratHunting = getSval(self, svalVnum, svalName);
 
-	if(ratHunting && ratHunting.room.vnum != self.room.vnum)
+	if(ratHunting && ratHunting.room && ratHunting.room.vnum != self.room.vnum)
 	{//Try to chase the rat...
 
 		if(ratHunting.isValid && ratHunting.room.zoneVnum == here.zoneVnum)
