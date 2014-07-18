@@ -122,7 +122,7 @@ var script2 = function(self, actor, here, args, extra) {
 								  + " WHERE username IN( " + sReceiverName + ")";
 						
 						var resultSet = sqlQuery(query);
-						if(resultSet.hasNextRow) {
+						while(resultSet.hasNextRow) {
 						
 							var row = resultSet.getRow;
 							receiverId.push(parseInt(row.get("user_id")));
