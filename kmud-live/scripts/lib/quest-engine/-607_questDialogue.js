@@ -12,7 +12,7 @@
  *******************************************************************/
 function questDialogue( questMaster, actor, quest )
 {
-	mudLog(constants.BRF, 100, "Quest Master: " + questMaster + ", Actor: " + actor + ", quest: " + quest + ", Pulses: " + quest.dialog[0].pulses);
+	mudLog(constants.BRF, 100, "Quest Master: " + questMaster + ", Actor: " + actor + ", quest: " + quest + ", Pulses: " + quest.dialogue[0].pulses);
 	if( quest.dialogue.length > 0 ) {
 		setTimeout( quest.dialogue[0].pulses, questDlgHandler, [quest, 0, questMaster, actor] );
 	}
