@@ -85,8 +85,8 @@ var script2 = function(self, actor, here, args, extra) {
 	                if (sNumberToShow.length == 0) sNumberToShow = "25";
 	                var sSearchWord = isParam(sqlEsc(vArgs[2])) ? null : sqlEsc(vArgs[2]);
 
-		            if(aSearchName != null)
-		                aSearchName = aSearchName.split(",").map(function(e) { return sqlEscapeQuoteString(e) }).join(",");
+		            if(sSearchName != null)
+		                sSearchName = sSearchName.split(",").map(function(e) { return sqlEscapeQuoteString(e) }).join(",");
 					if(sReceiverName != null)
 						sReceiverName = sReceiverName.split(",").map(function(e) { return sqlEscapeQuoteString(e) }).join(",");
 
@@ -104,7 +104,7 @@ var script2 = function(self, actor, here, args, extra) {
 								  + "   `user_id`"
 								  + " FROM"
 								  + "   users"
-								  + " WHERE username = IN (" + aSearchName + ")";
+								  + " WHERE username = IN (" + sSearchName + ")";
 						
 						var resultSet = sqlQuery(query);
 						if(resultSet.hasNextRow) {
