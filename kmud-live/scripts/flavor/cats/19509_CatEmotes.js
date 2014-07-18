@@ -46,7 +46,7 @@ var script19509 = function(self, actor, here, args, extra) {
 			rat = rats[0];
 	}
 
-	if(rats)
+	if(rat)
 	{//If there is a rat in the room, attack it!
 		act("$n sniffs at something on the ground...", true, self, null, null, constants.TO_ROOM);
 
