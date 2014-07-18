@@ -261,7 +261,7 @@ JSRoom.prototype.getCharacters = function(predicate)
 	for(var index in people)
 	{
 		var person = people[index];
-		if(predicate && predicate(person))
+		if(predicate == null || predicate(person))
 			characterArray.push(person);
 	}
 
