@@ -136,22 +136,4 @@ var script638 = function(self, actor, here, args, extra) {
 				saveManor(manor);
 			}
 		}
-		
-		//Emoticon Quest Status
-		//setTimeout(7, emoticonQuestReportStatus, [actor]);
-		
-	// ...
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-}
+};

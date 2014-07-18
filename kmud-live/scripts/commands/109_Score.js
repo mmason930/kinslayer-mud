@@ -118,8 +118,4 @@ var script109 = function(self, actor, here, args, extra) {
 	if( actor.drunk >= 10 )
 		sBuffer += "\nYou are intoxicated.";
 	actor.send( sBuffer );
-	
-	
-	
-	
-}
+};
