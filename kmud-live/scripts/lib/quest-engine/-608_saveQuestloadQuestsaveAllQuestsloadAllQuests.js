@@ -85,7 +85,7 @@ function loadAllQuests()
 			var row = rsDialogue.peekRow;
 			if( parseInt( row.get("quest_id") ) == quest.databaseID ) {
 
-				if(quest.databaseID == 75)
+				if(quest.databaseID == 79)
 				{
 					mudLog(constants.BRF, 100, "Timeout: " + parseInt(row.get("timeout")));
 				}
