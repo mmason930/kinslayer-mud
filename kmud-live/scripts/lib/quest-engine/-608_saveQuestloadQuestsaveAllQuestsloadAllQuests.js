@@ -93,7 +93,7 @@ function loadAllQuests()
 
 				if(quest.databaseID == 79)
 				{
-					mudLog(constants.BRF, 100, "Timeout: " + dlg.timeout);
+					mudLog(constants.BRF, 100, "Timeout: " + dlg.pulses);
 				}
 				quest.dialogue.push( dlg );
 			}
