@@ -251,6 +251,20 @@ JSRoom.prototype.getMobs = function( mobVnum )
     }
 
     return mobResultArray;
+};
+
+JSRoom.prototype.getCharacters = function(predicate)
+{
+	var characterArray = [];
+
+	for(var index in here.people)
+	{
+		var person = here.people[index];
+		if(predicate && predicate(person))
+			characterArray.push(person);
+	}
+
+	return characterArray;
 }
 
 JSRoom.prototype.getObjects = function(objectVnum)
