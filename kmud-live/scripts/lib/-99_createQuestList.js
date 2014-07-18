@@ -25,7 +25,7 @@ function QuestDlg( _pulses, _handle )
 {
 	this.pulses = _pulses;
 	this.handle = _handle;
-	return this;
+	//return this;
 }
 /*** Dialogue Callback ***/
 function questDlgHandler( aList )
