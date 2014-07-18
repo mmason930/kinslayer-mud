@@ -90,6 +90,11 @@ function loadAllQuests()
 					mudLog(constants.BRF, 100, "Timeout: " + parseInt(row.get("timeout")));
 				}
 				var dlg = new QuestDlg( parseInt(row.get("timeout")), row.get("dialogue") );
+
+				if(quest.databaseID == 79)
+				{
+					mudLog(constants.BRF, 100, "Timeout: " + dlg.timeout);
+				}
 				quest.dialogue.push( dlg );
 			}
 			else break;
