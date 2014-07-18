@@ -22,7 +22,7 @@ JSCharacter.prototype.clan = function(clanNum) {
 		
 		/* Add to clan forum group */
 		
-		var clanGroupNumber = getForumGroupIDFromClanVnum( clanNum );
+		//var clanGroupNumber = getForumGroupIDFromClanVnum( clanNum );
 //Galnor 2010-11-16 - Removing the forum access until we finish it up.
 //		if( clanGroupNumber != undefined ) {
 //			addUserToForumGroup( this.id,  clanGroupNumber);

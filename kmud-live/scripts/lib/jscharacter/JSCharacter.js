@@ -453,3 +453,64 @@ JSCharacter.prototype.killCount = function() {
 JSCharacter.prototype.exp = function ( intExp ) {
 	this.experience += parseInt(intExp);
 };
+
+//Alder
+//February 2011
+/**************************************************************
+ * JSCharacter.findPlayerScalps ( scalpRace, minLevel )       *
+ * scalpRace: integer or string representing race of scalp    *
+ * minLevel: integer representing minimum level of scalp      *
+ * Returns: array of scalp objects matching given criteria    *
+ **************************************************************/
+
+JSCharacter.prototype.findPlayerScalps = function( scalpRace, minLevel ) {
+	// If scalpRace is given as String, convert to number
+	if ( getObjectClass(scalpRace) == "String" ) {
+		scalpRace = parseRace(scalpRace,true);
+	}
+	// If minLevel isNaN, display error
+	if ( !isNumber(minLevel ) ) {
+		mudLog(constants.CMP,102,"Value passed as minLevel isNaN: JSCharacter.findPlayerScalps() :: JS -9800");
+		return null;
+	}
+	minLevel = parseInt(minLevel);
+
+	var matchingScalps = [];				// Holds scalps that match parameters
+	var possessions = this.getAllItems();	// Every item on player
+
+	for each ( var item in possessions ) {
+		if ( item.isPlayerScalp && item.scalpRace == scalpRace && item.scalpLevel >= minLevel ) {
+			matchingScalps.push(item);		// This item is a scalp matching specified criteria
+		}
+	}
+	return matchingScalps;
+};
+
+//Alder
+//May 2010
+/**************************************************************
+ * Returns: true if actor is in void, false if not            *
+ **************************************************************/
+JSCharacter.prototype.isIdle = function() {
+	if ( this.idle >= 5 )
+		return true;
+	return false;
+};
+
+//Alder
+//May 2010
+/**************************************************************
+ * strTitle: the title string to look for (Case sensitive)    *
+ * Returns: true if player has a title which matches strTitle *
+ *          exactly                                           *
+ **************************************************************/
+JSCharacter.prototype.checkTitle = function ( strTitle ) {
+	var strTitle = strTitle+"";
+	var titles = this.titles;
+	for each ( var title in titles ) {
+		if ( title.title == strTitle ) {
+			return true;
+		}
+	}
+	return false;
+};
