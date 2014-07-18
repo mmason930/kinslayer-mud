@@ -30,19 +30,15 @@ function QuestDlg( _pulses, _handle )
 /*** Dialogue Callback ***/
 function questDlgHandler( aList )
 {
-	var quest  = aList[0];
-	var dIndex = aList[1];
-	var self   = aList[2];
-	var actor  = aList[3];
+	var quest   = aList[0];
+	var dIndex  = aList[1];
+	var self    = aList[2];
+	var actor   = aList[3];
+	var dialogs = aList[4];
 
-	mudLog(constants.BRF, 100, "Index: " + dIndex + ", Pulses: " + quest.dialogue[ dIndex ].pulses);
-	if ( quest.dialogue[ dIndex ].pulses >= 0 ) {
-
-		mudLog(constants.BRF, 100, "Passed >= 0 test.");
-		eval( quest.dialogue[ dIndex ].handle );
-		if( ++dIndex < quest.dialogue.length - 1 ) {
-			setTimeout( quest.dialogue[dIndex].pulses, questDlgHandler, [quest,dIndex,self,actor] );
-		}
+	eval( dialogs[ dIndex ].handle );
+	if( ++dIndex < dialogs.length - 1 ) {
+		setTimeout( dialogs[dIndex].pulses, questDlgHandler, [quest,dIndex,self,actor,dialogs] );
 	}
 }
 /*** Get a quest by its name ***/

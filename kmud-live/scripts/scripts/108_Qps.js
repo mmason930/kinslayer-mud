@@ -24,4 +24,4 @@ var script108 = function(self, actor, here, args, extra) {
 			actor.send(player.qp(arg_array[1]));
 		}
 	}
-}
+};

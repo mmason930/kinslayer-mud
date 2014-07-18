@@ -18,4 +18,4 @@ var script120 = function(self, actor, here, args, extra) {
 		global.timeOfLastGoldTally = time();
 		
 	}
-}
+};
