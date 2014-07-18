@@ -37,7 +37,7 @@ function questDlgHandler( aList )
 	var dialogs = aList[4];
 
 	eval( dialogs[ dIndex ].handle );
-	if( ++dIndex < dialogs.length - 1 ) {
+	if( ++dIndex < dialogs.length ) {
 		setTimeout( dialogs[dIndex].pulses, questDlgHandler, [quest,dIndex,self,actor,dialogs] );
 	}
 }
