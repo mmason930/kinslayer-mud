@@ -6,10 +6,5 @@
  * Returns: true if array contains objCheck, else false *
  ********************************************************/
 	function arrContains ( array, objCheck ) {
-		for each ( var thing in array ) {
-			if ( thing == objCheck ) {
-				return true;
-			}
-		}
-		return false;
+		return array.indexOf(objCheck) != -1;
 	}
