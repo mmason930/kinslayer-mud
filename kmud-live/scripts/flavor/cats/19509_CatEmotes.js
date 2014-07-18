@@ -58,7 +58,7 @@ var script19509 = function(self, actor, here, args, extra) {
 		return;
 	}
 
-	var rand = random(1,4);
+	var rand = random(1,16);
 	if( rand == 1 )
 	    here.echo(self.name + " sniffs at something on the ground...");
 	else if( rand == 2 )
