@@ -47,7 +47,7 @@ var script4512 = function(self, actor, here, args, extra) {
 				}
 				if(command == "open") {
 					waitpulse 4;
-					self.comm("emote nods and orders " + self.his_her() + " men to open the gates.");
+					self.comm("emote nods and orders " + self.hisHer() + " men to open the gates.");
 					waitpulse 10;
 					self.room.echo("The guards begin opening the gates.");
 					waitpulse 15;
@@ -66,7 +66,7 @@ var script4512 = function(self, actor, here, args, extra) {
 				if(command == "close") {
 					if(getSval(here,4512, "BAERLON_EAST_GATE_OPEN") && !self.room.doorIsClosed(constants.EAST)) {
 						waitpulse 4;
-						self.comm("emote nods and orders " + self.his_her() + " men to close the gates.");
+						self.comm("emote nods and orders " + self.hisHer() + " men to close the gates.");
 						waitpulse 10;
 						self.room.echo("The gates creak as the guards begin to close them.");
 						waitpulse 15;

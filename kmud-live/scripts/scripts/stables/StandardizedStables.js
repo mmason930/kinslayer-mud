@@ -73,7 +73,7 @@ var script206 = function(self, actor, here, args, extra) {
 		wait 1;
 		self.say("Sorry, but we don't accept that here.");
 		waitpulse 5;
-		self.comm("emote returns the item given to " + self.him_her() + ".");
+		self.comm("emote returns the item given to " + self.himHer() + ".");
 		objectReceived.moveToChar( actor );
 		return;
 	}
@@ -82,7 +82,7 @@ var script206 = function(self, actor, here, args, extra) {
 		wait 1;
 		self.say("You already have a horse issued!");
 		waitpulse 5;
-		self.comm("emote returns the item given to " + self.him_her() + ".");
+		self.comm("emote returns the item given to " + self.himHer() + ".");
 		objectReceived.moveToChar( actor );
 		return;
 	}

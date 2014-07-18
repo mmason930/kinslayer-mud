@@ -71,7 +71,7 @@ var script20970 = function(self, actor, here, args, extra) {
 	vScore += vSub;
 	var pros = [];
 	var cons = [];
-	var he = capFirstLetter(vict.he_she());
+	var he = capFirstLetter(vict.heShe());
 	if (awpn) {
 		awpnWeight = awpn.weight;
 		awpnDmg = Math.floor( (awpn.value(2)+awpn.value(1))/2 );
@@ -88,10 +88,10 @@ var script20970 = function(self, actor, here, args, extra) {
 	else if (!vwpn && vict.race < 4)
 		pros.push(he+" is unarmed.");
 	if (vwpnDmg-awpnDmg>2 && vwpn) {
-		cons.push(capFirstLetter(vict.his_her())+" "+vwpnType+" looks deadly.");
+		cons.push(capFirstLetter(vict.hisHer())+" "+vwpnType+" looks deadly.");
 	}
 	else if (awpnDmg-vwpnDmg>2 && vwpn) {
-		pros.push("Your "+awpnType+" beats "+vict.his_her()+" "+vwpnType+".");
+		pros.push("Your "+awpnType+" beats "+vict.hisHer()+" "+vwpnType+".");
 	}
 	if (vict.mobFlagged(constants.MOB_NOFIGHT)) {
 		pros.push(he+" won't fight back.");
@@ -174,7 +174,7 @@ var script20970 = function(self, actor, here, args, extra) {
 	act("$N considers you.", true, vict, null, actor, constants.TO_CHAR);
 	actor.send("You consider "+nrm+vict.name+nrm+raceMsg+".");
 	if (vict.vnum == -1)
-		actor.send(capFirstLetter(vict.he_she())+"'s "+heavierLighter+", "+tallerShorter+", and "+stocky+" you.");
+		actor.send(capFirstLetter(vict.heShe())+"'s "+heavierLighter+", "+tallerShorter+", and "+stocky+" you.");
 	
 		
 	actor.send(grn+"\nPROS"+nrm+"                                "+red+"CONS"+nrm);

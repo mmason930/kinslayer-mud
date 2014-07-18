@@ -13,7 +13,7 @@ var script9862 = function(self, actor, here, args, extra) {
 				actor.updateJournalTask("A Deadly Breakout",0);
 				if ( actor.checkQuestItem("the corpse of an imprisoned thief",1,qName) == false ) {
 					actor.send("You stoop down and pull the corpse of an imprisoned thief over your shoulder.");
-					actor.room.echoaround(actor,capFirstLetter(actor.name) + " stoops down and pulls the corpse of an imprisoned thief over "+actor.his_her()+" shoulder.");
+					actor.room.echoaround(actor,capFirstLetter(actor.name) + " stoops down and pulls the corpse of an imprisoned thief over "+actor.hisHer()+" shoulder.");
 					actor.addQuestItem(corpse.name,1,qName);
 					corpse.extract();
 				}

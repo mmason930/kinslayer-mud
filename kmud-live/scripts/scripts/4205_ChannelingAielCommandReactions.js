@@ -20,7 +20,7 @@ var script4205 = function(self, actor, here, args, extra) {
 	{
 		_block;
 		actor.send( self.name + " laughs maniacally as you feel the air get sucked out of your lungs!" );
-		echoaround( actor, self.name + " laughs maniacally and " + actor.name + " begins to clutch at " + actor.his_her() + " throat!" );
+		echoaround( actor, self.name + " laughs maniacally and " + actor.name + " begins to clutch at " + actor.hisHer() + " throat!" );
 		actor.damage( 25, self );
 		if( !actor.affectedBy( constants.AFF_SILENCE ) )
 			actor.affect( constants.AFF_SILENCE, 1, 0, 0 );
@@ -31,7 +31,7 @@ var script4205 = function(self, actor, here, args, extra) {
 	{
 		_block;
 		actor.send( self.name + " whips up a small whirlwind, preventing your attack!" );
-		echoaround( actor, self.name + " twirls around " + self.his_her() + " staff, surrounding " + actor.name + " with a small whirlwind!" );
+		echoaround( actor, self.name + " twirls around " + self.hisHer() + " staff, surrounding " + actor.name + " with a small whirlwind!" );
 		actor.lag(12);
 		waitpulse 12;
 		here.echo("The whirlwind breaks off and animates a cloud of dust!");

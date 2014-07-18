@@ -1,8 +1,8 @@
 var script23709 = function(self, actor, here, args, extra) {
 	_block;
 	var newroom = getRoom(23711);
-	echoaround(actor, actor.name + " steps on a board which immediately snaps under " + actor.his_her() + " weight!");
-	echoaround(actor, capFirstLetter(actor.he_she()) + " falls through the floor and out of sight!");
+	echoaround(actor, actor.name + " steps on a board which immediately snaps under " + actor.hisHer() + " weight!");
+	echoaround(actor, capFirstLetter(actor.heShe()) + " falls through the floor and out of sight!");
 	actor.send("You step on one of the loose boards while trying to leave, and it snaps under your weight!");
 	actor.send("You fall through the floor!");
 	newroom.echo("Suddenly the rotted ceiling EXPLODES above you!");
@@ -16,6 +16,6 @@ var script23709 = function(self, actor, here, args, extra) {
 	{
 		actor.position = constants.POS_SITTING;
 		actor.send("You come to and sit up, rubbing your head.");
-		echoaround(actor, actor.name + " comes to and sits up, rubbing " + actor.his_her() + " head.");
+		echoaround(actor, actor.name + " comes to and sits up, rubbing " + actor.hisHer() + " head.");
 	}
 }

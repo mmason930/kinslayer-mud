@@ -55,7 +55,7 @@ var script18601 = function(self, actor, here, args, extra) {
 			//Files will take this format: OWNER_ID.mercEQ.MERC_NUM
 			self.mobSaveEq(owner.id + ".mercEQ." + getSval(self,18600,"mercNum"));
 			owner.attach(18614);
-			owner.send(owner.red(constants.CL_OFF) + "If you rent or quit out you will lose this mercenary and " + self.his_her() +" equipment will not be saved."+ owner.normal(constants.CL_OFF));
+			owner.send(owner.red(constants.CL_OFF) + "If you rent or quit out you will lose this mercenary and " + self.hisHer() +" equipment will not be saved."+ owner.normal(constants.CL_OFF));
 			self.comm("follow " + owner.name);
 		}
 		else {

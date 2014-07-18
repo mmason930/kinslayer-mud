@@ -45,7 +45,7 @@ var script23263 = function(self, actor, here, args, extra) {
 				actor.send("\n"+capFirstLetter( obj.name ) + " slips from your hands and slams down on " + foot_owner.name + "'s foot before rolling off the deck into the water.");
 			else
 				actor.send("\n"+capFirstLetter( obj.name ) + " slips from your hands and slams down on your foot before rolling off the deck into the water.");
-			here.echoaround(foot_owner, foot_owner.name + " screams in pain as " + foot_owner.his_her + " foot is smashed by " + obj.name + ".");
+			here.echoaround(foot_owner, foot_owner.name + " screams in pain as " + foot_owner.hisHer + " foot is smashed by " + obj.name + ".");
 			foot_owner.send("You scream in pain as " + obj.name + " smashes your foot!");
 			foot_owner.damage( damage_amt );
 			obj.extract();

@@ -319,3 +319,137 @@ JSCharacter.prototype.clanCheck = function( arrClanNums ) {
 	}
 	return ( clanCheck );
 };
+
+JSCharacter.prototype.channelingAbility = function() {
+	if( this.class == constants.CLASS_DREADLORD || this.class == constants.CLASS_CHANNELER || this.class == constants.CLASS_DREADGUARD )
+		return true;
+	return false;
+};
+
+//	June 2010 - Fogel
+//	Returns if a character is clanned
+JSCharacter.prototype.isClanned = function()
+{
+	for( var i = 0; i < constants.CLANS_MAX; i++ )
+		if( this.inClan(i) )
+			return true;
+	return false;
+};
+
+//	June 2010 - Fogel
+//	Returns the level of the character's skill
+JSCharacter.prototype.getSkillLevel = function( skillName )
+{
+	return Math.floor( this.getSkill( getSkillVnum(skillName) ) / 12 );
+};
+
+JSCharacter.prototype.hasItem = function(item_vnum, check_inv, check_eq, recursive)
+{
+	if( check_inv ) {
+		for(var i in this.inventory) {
+			if( (getObjectClass(item_vnum) == "Number" && this.inventory[i].vnum == item_vnum) )
+				return this.inventory[i];
+			else if( this.inventory[i].name == item_vnum )
+				return this.inventory[i];
+			if( recursive ) {
+				var obj = this.inventory[i].hasItem(item_vnum, true);
+				if( obj )
+					return obj;
+			}
+		}
+	}
+	if( check_eq ) {
+		for(var i = 0;i < 22;++i) {
+			if( !this.eq(i) )
+				continue;
+			if( (getObjectClass(item_vnum) == "Number" && this.eq(i).vnum == item_vnum) )
+				return this.eq(i);
+			else if( this.eq(i).name == item_vnum )
+				return this.eq(i);
+			if( recursive ) {
+				var obj = this.eq(i).hasItem(item_vnum, true);
+				if( obj )
+					return obj;
+			}
+		}
+	}
+	return null;
+};
+
+JSCharacter.prototype.heShe = function()
+{
+	var he_she = ["it", "he", "she"];
+	if ( this.sex < 0 || this.sex >= he_she.length )
+	{
+		return undefined;
+	}
+	return he_she[this.sex];
+};
+
+JSCharacter.prototype.himHer = function()
+{
+	var him_her = ["it", "him", "her"];
+	if ( this.sex < 0 || this.sex >= him_her.length )
+	{
+		return undefined;
+	}
+	return him_her[this.sex];
+};
+
+JSCharacter.prototype.hisHer = function()
+{
+	var hArr = ["its", "his", "her"];
+	if ( this.sex < 0 || this.sex >= hArr.length )
+	{
+		return undefined;
+	}
+	return hArr[this.sex];
+};
+
+JSCharacter.prototype.__defineGetter__("eqList", function()
+	{
+		var eq = [];
+		for(var i = 0;i < constants.NUM_WEARS;++i) {
+			if( !this.eq( i ) ) continue;
+			eq.push( this.eq( i ) );
+		}
+		return eq;
+	}
+);
+
+JSCharacter.prototype.__defineGetter__("totalQuestPoints",
+	function()
+	{
+		var vClans = this.findClans(true);
+		if( vClans.length == 0 ) return 0;
+
+		var totalQP = 0;
+		for(var i = 0;i < vClans.length;++i) {
+			totalQP += this.qp( vClans[ i ] );
+		}
+		return totalQP;
+	}
+);
+
+//Alder
+//November 2010
+/**********************************************
+ * Temporary killcount getter for JSCharacter *
+ **********************************************/
+JSCharacter.prototype.killCount = function() {
+	if ( this.vnum == -1 ) {
+		var rs = sqlQuery("SELECT pks FROM users WHERE user_id="+sqlEsc(this.id)+";");
+		return parseInt(rs.getRow.get("pks"));
+	}
+
+	return 0;
+};
+
+//Alder
+//April 2010
+/*****************************************
+ * Awards actor intExp experience points *
+ *****************************************/
+JSCharacter.prototype.exp = function ( intExp ) {
+	this.experience += parseInt(intExp);
+};

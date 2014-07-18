@@ -52,7 +52,7 @@ var script19003 = function(self, actor, here, args, extra) {
 		var success = runTimer(self);
 		if(success && actor.room == self.room) {
 			if(self.affectedBy(constants.AFF_SHIELD)){
-				here.echo(capFirstLetter(self.name) + " looks suprised as " + self.he_she() + " fails to reach the source.");
+				here.echo(capFirstLetter(self.name) + " looks suprised as " + self.heShe() + " fails to reach the source.");
 				return;
 			}
 			if(actor.class == constants.CLASS_FADE) {

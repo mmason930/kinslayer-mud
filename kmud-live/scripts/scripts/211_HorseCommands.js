@@ -65,7 +65,7 @@ var script211 = function(self, actor, here, args, extra) {
 		actor.send("You order your mount to return home.");
 		echoaround(actor, actor.name + " gives " + self.name.toLowerCase() + " some orders.");
 		waitpulse 1;
-		echoaround(self, self.name + " gallops back to " + self.his_her() + " stable.");
+		echoaround(self, self.name + " gallops back to " + self.hisHer() + " stable.");
 		self.extract();
 		return;
 	}

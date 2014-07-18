@@ -18,7 +18,7 @@ var script8168 = function(self, actor, here, args, extra) {
 	                waitpulse 5;
 	                actor.moveToRoom(getRoom(8196));
 					actor.send("You enter the flamingdoor, and it swiftly closes behind you.");
-	                getRoom(8196).echoaround(actor, actor.name + " enters from the west, and the shadoweddoor closes behind " + actor.him_her() + ".");
+	                getRoom(8196).echoaround(actor, actor.name + " enters from the west, and the shadoweddoor closes behind " + actor.himHer() + ".");
 					here.echo( actor.name + " is let inside the flamingdoor, which quickly closes afterward." );
 	                actor.comm("look");
 	        }

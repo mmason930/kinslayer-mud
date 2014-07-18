@@ -159,7 +159,7 @@ var script18605 = function(self, actor, here, args, extra) {
 					here.echo(capFirstLetter(self.name) + " tries to pick " + posCont.name + ".");
 				}
 				self.comm("pick " + arg2);
-				owner.send(capFirstLetter(self.name) + " takes " + ylw + "60" + nrm + " copper for " + self.his_her() + " services.");
+				owner.send(capFirstLetter(self.name) + " takes " + ylw + "60" + nrm + " copper for " + self.hisHer() + " services.");
 				actor.gold -= 60;
 				return;
 			}
@@ -330,7 +330,7 @@ var script18605 = function(self, actor, here, args, extra) {
 					here.echo(capFirstLetter(self.name) + " tries to open " + posCont.name + ".");
 				}
 				self.comm("open " + arg2);
-				owner.send(capFirstLetter(self.name) + " takes " + ylw + "40" + nrm + " copper for " + self.his_her() + " services.");
+				owner.send(capFirstLetter(self.name) + " takes " + ylw + "40" + nrm + " copper for " + self.hisHer() + " services.");
 				actor.gold -= 40;
 			}
 		}
@@ -1060,7 +1060,7 @@ var script18605 = function(self, actor, here, args, extra) {
 			}
 			else {
 				self.say("OK I'll see you at the rendezvous!");
-				here.echo(capFirstLetter(self.name) + " makes " + self.his_her() + " way to the rendezvous point.");
+				here.echo(capFirstLetter(self.name) + " makes " + self.hisHer() + " way to the rendezvous point.");
 				self.moveToRoom(rendRoom);
 				rendRoom.echo(capFirstLetter(self.name) + " arrives at the rendezvous point.");
 			}
@@ -1100,7 +1100,7 @@ var script18605 = function(self, actor, here, args, extra) {
 					}
 					cost = Math.floor(0.85*myMercObj.maxSpell);
 					msgToActor = capFirstLetter(self.name) + " makes a small gesture towards you and you feel better.";
-					msgToRoom = capFirstLetter(self.name) + " makes a small gesture towards " + actor.name + " and " + actor.he_she() + " looks better.";
+					msgToRoom = capFirstLetter(self.name) + " makes a small gesture towards " + actor.name + " and " + actor.heShe() + " looks better.";
 					length = 10;
 					target = actor;
 					health = 2*myMercObj.wis + myMercObj.intel;
@@ -1230,7 +1230,7 @@ var script18605 = function(self, actor, here, args, extra) {
 				var success = runTimer(self);
 				if(success && target.room == self.room) {
 					if(self.affectedBy(constants.AFF_SHIELD)){
-						here.echo(capFirstLetter(self.name) + " looks suprised as " + self.he_she() + " fails to reach the source.");
+						here.echo(capFirstLetter(self.name) + " looks suprised as " + self.heShe() + " fails to reach the source.");
 						return;
 					}
 					if(combat) {

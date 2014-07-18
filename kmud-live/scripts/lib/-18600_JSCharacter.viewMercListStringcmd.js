@@ -361,7 +361,7 @@ JSCharacter.prototype.viewMercList = function(cmd) {
 			/* Attach Owner Scripts */
 			this.attach(18614);
 			
-			this.send(red + "If you rent or quit out you will lose this mercenary and " + Merc.his_her() +" equipment will not be saved."+ nrm);
+			this.send(red + "If you rent or quit out you will lose this mercenary and " + Merc.hisHer() +" equipment will not be saved."+ nrm);
 			Merc.comm("follow " + this.name);
 			
 			/** Set the Merc's Stats **/
