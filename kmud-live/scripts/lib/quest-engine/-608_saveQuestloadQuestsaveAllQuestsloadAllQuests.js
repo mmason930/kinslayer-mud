@@ -84,6 +84,11 @@ function loadAllQuests()
 		while( rsDialogue.hasNextRow ) {
 			var row = rsDialogue.peekRow;
 			if( parseInt( row.get("quest_id") ) == quest.databaseID ) {
+
+				if(quest.databaseID == 75)
+				{
+					mudLog(constants.BRF, 100, "Timeout: " + parseInt(row.get("timeout")));
+				}
 				var dlg = new QuestDlg( parseInt(row.get("timeout")), row.get("dialogue") );
 				quest.dialogue.push( dlg );
 			}
