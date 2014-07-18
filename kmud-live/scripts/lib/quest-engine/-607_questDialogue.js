@@ -12,6 +12,7 @@
  *******************************************************************/
 function questDialogue( questMaster, actor, quest )
 {
+	mudLog(constants.BRF, 100, "Test");
 	if( quest.dialogue.length > 0 ) {
 		setTimeout( quest.dialogue[0].pulses, questDlgHandler, [quest, 0, questMaster, actor] );
 	}
