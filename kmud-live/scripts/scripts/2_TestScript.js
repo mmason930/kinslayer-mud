@@ -104,7 +104,7 @@ var script2 = function(self, actor, here, args, extra) {
 								  + "   `user_id`"
 								  + " FROM"
 								  + "   users"
-								  + " WHERE username = IN (" + sSearchName + ")";
+								  + " WHERE username IN (" + sSearchName + ")";
 						
 						var resultSet = sqlQuery(query);
 						if(resultSet.hasNextRow) {
