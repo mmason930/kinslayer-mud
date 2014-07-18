@@ -12,10 +12,12 @@
  *******************************************************************/
 function questDialogue( questMaster, actor, quest )
 {
-	if( quest.dialogue.length > 0 ) {
-		var dialogs = quest.dialogue.filter(function(dialogElement) {
-			return dialogElement.pulses >= 0;
-		});
-		setTimeout( quest.dialogue[0].pulses, questDlgHandler, [quest, 0, questMaster, actor, dialogs] );
+	var dialogs = quest.dialogue.filter(function(dialogElement) {
+		return dialogElement.pulses >= 0;
+	});
+
+	if( dialogs.length > 0 ) {
+
+		setTimeout( dialogs[0].pulses, questDlgHandler, [quest, 0, questMaster, actor, dialogs] );
 	}
 }
