@@ -76,15 +76,20 @@ var script2 = function(self, actor, here, args, extra) {
 	        if (vArgs.length >= 3) {
 	            if (!str_cmp(vArgs[1], "comm")) {
 	                var iStartingIndexForParams = 2;
-	                var sSearchName = sqlEsc(getParam("name", vArgs, iStartingIndexForParams));
-	                var sReceiverName = sqlEsc(getParam("rec", vArgs, iStartingIndexForParams));
+	                var sSearchName = getParam("name", vArgs, iStartingIndexForParams);
+	                var sReceiverName = getParam("rec", vArgs, iStartingIndexForParams);
 	                var sNumberToShow = sqlEsc(getParam("num", vArgs, iStartingIndexForParams));
 					var sType = sqlEsc(getParam("type", vArgs, iStartingIndexForParams));
 					var sRoom = sqlEsc(getParam("room", vArgs, iStartingIndexForParams));
 					var sOffset = sqlEsc(getParam("offset", vArgs, iStartingIndexForParams));
 	                if (sNumberToShow.length == 0) sNumberToShow = "25";
 	                var sSearchWord = isParam(sqlEsc(vArgs[2])) ? null : sqlEsc(vArgs[2]);
-					
+
+		            if(aSearchName != null)
+		                aSearchName = aSearchName.split(",").map(function(e) { return sqlEscapeQuoteString(e) }).join(",");
+					if(sReceiverName != null)
+						sReceiverName = sReceiverName.split(",").map(function(e) { return sqlEscapeQuoteString(e) }).join(",");
+
 					if( !sSearchName && !sReceiverName && !sSearchWord && !sType && !sRoom && !sOffset ) {
 						actor.send("Your search query is too broad.");
 						return;
@@ -99,7 +104,7 @@ var script2 = function(self, actor, here, args, extra) {
 								  + "   `user_id`"
 								  + " FROM"
 								  + "   users"
-								  + " WHERE username = " + sqlEscapeQuoteString(sSearchName);
+								  + " WHERE username = IN (" + aSearchName + ")";
 						
 						var resultSet = sqlQuery(query);
 						if(resultSet.hasNextRow) {
@@ -113,7 +118,7 @@ var script2 = function(self, actor, here, args, extra) {
 								  + "   `user_id`"
 								  + " FROM"
 								  + "   users"
-								  + " WHERE username = " + sqlEscapeQuoteString(sReceiverName);
+								  + " WHERE username IN( " sReceiverName + ")";
 						
 						var resultSet = sqlQuery(query);
 						if(resultSet.hasNextRow) {
