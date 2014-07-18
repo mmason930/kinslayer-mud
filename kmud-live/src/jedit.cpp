@@ -232,7 +232,7 @@ ACMD( do_jstat )
 	sprintbit(jsTrig->allowed_flags, (const char**)JS::js_allow     , buf2, (", "), (yel), (nrm));
 
 	std::string scriptName;
-	const char *fileName;
+	const char *fileName = NULL;
 	Script *script = NULL;
 
 	if(jsTrig->scriptId == -1)
@@ -472,7 +472,7 @@ void JeditDispMenu( Descriptor *d )
 	sprintbit(jsTrig->allowed_flags, (const char**)JS::js_allow     , buf2, (", "), (yel), (nrm));
 	sprintbit(jsTrig->option_flags , (const char**)JS::js_options	, buf3, (", "), (yel), (nrm));
 	std::string scriptName;
-	const char *fileName;
+	const char *fileName = NULL;
 	Script *script = NULL;
 
 	if(jsTrig->scriptId == -1)
