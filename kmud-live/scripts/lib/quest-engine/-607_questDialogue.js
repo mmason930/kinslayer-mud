@@ -13,7 +13,7 @@
 function questDialogue( questMaster, actor, quest )
 {
 	if( quest.dialogue.length > 0 ) {
-		var dialogs = quest.dialog.filter(function(dialogElement) {
+		var dialogs = quest.dialogue.filter(function(dialogElement) {
 			return dialogElement.pulses >= 0;
 		});
 		setTimeout( quest.dialogue[0].pulses, questDlgHandler, [quest, 0, questMaster, actor, dialogs] );
