@@ -256,10 +256,11 @@ JSRoom.prototype.getMobs = function( mobVnum )
 JSRoom.prototype.getCharacters = function(predicate)
 {
 	var characterArray = [];
+	var people = this.people;
 
-	for(var index in here.people)
+	for(var index in people)
 	{
-		var person = here.people[index];
+		var person = people[index];
 		if(predicate && predicate(person))
 			characterArray.push(person);
 	}
