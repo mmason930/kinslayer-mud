@@ -76,7 +76,8 @@ var script4001 = function(self, actor, here, args, extra) {
 		vict.comm("");
 		vict.damage(damage, ch);
 	}
-	ch.setFighting(vict);
+	if(!ch.fighting)
+		ch.setFighting(vict);
 	ch.lag(8);
 
 	setSval(ch, 4001, "lastKickUnixTimestamp", now);
