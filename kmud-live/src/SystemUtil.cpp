@@ -156,3 +156,9 @@ std::map<std::string, std::string> SystemUtil::getSubversionInfoMap(const std::s
 
 	return map;
 }
+/***
+void SystemUtil::printStackTrace()
+{
+
+}
+***/

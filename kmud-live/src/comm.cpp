@@ -324,7 +324,7 @@ int main( int argc, char **argv )
 	logfile = fdopen( STDERR_FILENO, "w" );
 	if ( logfile == NULL )
 	{
-		std::cout << "error opening log file stderr: %s\n" << strerror(errno);
+		std::cout << "error opening log file stderr: " << strerror(errno) << std::endl;
 		exit(1);
 	}
 

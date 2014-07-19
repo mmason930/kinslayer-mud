@@ -319,7 +319,15 @@ void JSManager::monitorScriptImportTable(sql::Connection connection)
 		}
 		catch(sql::QueryException queryException)
 		{
-			Log("Error while fetching from scriptImportQueue: %s", queryException.getMessage().c_str());
+			MudLog(BRF, LVL_APPR, TRUE, "Error while fetching from scriptImportQueue: %s", queryException.getMessage().c_str());
+		}
+		catch(std::exception e)
+		{
+			MudLog(BRF, LVL_APPR, TRUE, "Error while fetching from scriptImportQueue: %s", e.what());
+		}
+		catch(...)
+		{
+			MudLog(BRF, LVL_APPR, TRUE, "Error while fetching from scriptImportQueue: Unknown");
 		}
 		
 		std::this_thread::sleep_for(std::chrono::seconds(5));
@@ -340,97 +348,108 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 
 	while(monitorSubversionThreadRunning)
 	{
-		std::map<std::string, std::string> subversionInfoMap = SystemUtil::getSubversionInfoMap(repositoryUrl);
-
-		std::string revisionString = subversionInfoMap["Revision"];
-
-		if(revisionString.empty())
+		try
 		{
-			Log("Could not determine revision!");
-		}
-		else if(!MiscUtil::isInt(revisionString))
-		{
-			Log("Revision `%s` is not a valid integer.", revisionString.c_str());
-		}
-		else
-		{
-			int revision = atoi(revisionString.c_str());
+			std::map<std::string, std::string> subversionInfoMap = SystemUtil::getSubversionInfoMap(repositoryUrl);
 
-			if(revision != lastUpdatedRevision)
+			std::string revisionString = subversionInfoMap["Revision"];
+
+			if(revisionString.empty())
 			{
-				Log("New revision %d found. Old revision was %d.", revision, lastUpdatedRevision);
-
-				std::string svnUpdateOutput = SystemUtil::processCommand(std::string("svn update ") + scriptsDirectory);
-
-				sql::BatchInsertStatement batchInsertStatement(connection, "scriptImportQueue", 1000);
-				
-				batchInsertStatement.addField("file_path");
-				batchInsertStatement.addField("queued_datetime");
-				batchInsertStatement.addField("operation");
-
-				batchInsertStatement.start();
-
-				int numberOfFiles = 0;
-
-				std::vector<std::string> outputLines = StringUtil::SplitToVector(svnUpdateOutput, '\n');
-
-				for(std::string line : outputLines)
-				{
-					boost::match_results<std::string::const_iterator> what;
-					std::string::const_iterator start = line.begin(), end = line.end();
-					if(boost::regex_search(start, end, what, filePathExpression, boost::match_default))
-					{
-						std::string updateType = what[ 1 ];
-						std::string fileName = what[ 2 ];
-
-						if(boost::filesystem::is_directory(fileName))
-						{
-							Log("Skipping Directory `%s`...", fileName.c_str());
-							continue;
-						}
-						
-						if(StringUtil::startsWith(fileName, scriptsDirectory))
-							fileName.erase(0, scriptsDirectory.size());
-
-						batchInsertStatement.beginEntry();
-						
-						batchInsertStatement.putString(fileName);
-						batchInsertStatement.putString(sql::encodeDate(time(0)));
-						batchInsertStatement.putInt(ScriptImportOperation::getEnumByCharCode(updateType.at(0))->getValue());
-
-						batchInsertStatement.endEntry();
-
-						++numberOfFiles;
-
-						Log("Update Type: %s, File Name: %s", updateType.c_str(), fileName.c_str());
-					}
-
-					if( boost::regex_search(start, end, what, updatedRevisionExpression, boost::match_default) ||
-						boost::regex_search(start, end, what, atRevisionExpression, boost::match_default))
-					{
-						std::string revisionString = what[ 1 ];
-
-						if(!MiscUtil::isInt(revisionString))
-						{
-							Log("Error: Revision found while doing SVN update was not a valid integer. Revision found: `%s`", revisionString.c_str());
-						}
-						else
-						{
-							lastUpdatedRevision = atoi(revisionString.c_str());
-						}
-					}
-				}
-				
-				if(numberOfFiles > 0)
-				{
-					batchInsertStatement.finish();
-				}
-
-				Log("Updated to revision %d.", lastUpdatedRevision);
+				Log("Could not determine revision!");
 			}
-		}
+			else if(!MiscUtil::isInt(revisionString))
+			{
+				Log("Revision `%s` is not a valid integer.", revisionString.c_str());
+			}
+			else
+			{
+				int revision = atoi(revisionString.c_str());
 
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+				if(revision != lastUpdatedRevision)
+				{
+					Log("New revision %d found. Old revision was %d.", revision, lastUpdatedRevision);
+
+					std::string svnUpdateOutput = SystemUtil::processCommand(std::string("svn update ") + scriptsDirectory);
+
+					sql::BatchInsertStatement batchInsertStatement(connection, "scriptImportQueue", 1000);
+				
+					batchInsertStatement.addField("file_path");
+					batchInsertStatement.addField("queued_datetime");
+					batchInsertStatement.addField("operation");
+
+					batchInsertStatement.start();
+
+					int numberOfFiles = 0;
+
+					std::vector<std::string> outputLines = StringUtil::SplitToVector(svnUpdateOutput, '\n');
+
+					for(std::string line : outputLines)
+					{
+						boost::match_results<std::string::const_iterator> what;
+						std::string::const_iterator start = line.begin(), end = line.end();
+						if(boost::regex_search(start, end, what, filePathExpression, boost::match_default))
+						{
+							std::string updateType = what[ 1 ];
+							std::string fileName = what[ 2 ];
+
+							if(boost::filesystem::is_directory(fileName))
+							{
+								Log("Skipping Directory `%s`...", fileName.c_str());
+								continue;
+							}
+						
+							if(StringUtil::startsWith(fileName, scriptsDirectory))
+								fileName.erase(0, scriptsDirectory.size());
+
+							batchInsertStatement.beginEntry();
+						
+							batchInsertStatement.putString(fileName);
+							batchInsertStatement.putString(sql::encodeDate(time(0)));
+							batchInsertStatement.putInt(ScriptImportOperation::getEnumByCharCode(updateType.at(0))->getValue());
+
+							batchInsertStatement.endEntry();
+
+							++numberOfFiles;
+
+							Log("Update Type: %s, File Name: %s", updateType.c_str(), fileName.c_str());
+						}
+
+						if( boost::regex_search(start, end, what, updatedRevisionExpression, boost::match_default) ||
+							boost::regex_search(start, end, what, atRevisionExpression, boost::match_default))
+						{
+							std::string revisionString = what[ 1 ];
+
+							if(!MiscUtil::isInt(revisionString))
+							{
+								Log("Error: Revision found while doing SVN update was not a valid integer. Revision found: `%s`", revisionString.c_str());
+							}
+							else
+							{
+								lastUpdatedRevision = atoi(revisionString.c_str());
+							}
+						}
+					}
+				
+					if(numberOfFiles > 0)
+					{
+						batchInsertStatement.finish();
+					}
+
+					Log("Updated to revision %d.", lastUpdatedRevision);
+				}
+			}
+
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+		}
+		catch(std::exception e)
+		{
+			MudLog(BRF, LVL_APPR, TRUE, "Exception in subversion monitoring thread: %s", e.what());
+		}
+		catch(...)
+		{
+			MudLog(BRF, LVL_APPR, TRUE, "Unknown exception thrown in subversion monitoring thread.");
+		}
 	}
 }
 

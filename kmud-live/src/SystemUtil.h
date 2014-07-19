@@ -16,6 +16,7 @@ public:
 	static unsigned int getProcessId();
 	static std::map<std::string, std::string> getSubversionInfoMap(const std::string &url);
 	static std::string processCommand(const std::string &command);
+//	static void printStackTrace();
 };
 
 #endif
