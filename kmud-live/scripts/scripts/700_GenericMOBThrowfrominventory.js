@@ -2,7 +2,8 @@ var script700 = function(self, actor, here, args, extra) {
 	var vict = actor;
 	
 	// Loop through inventory
-	for each (var item in self.inventory) {
+	for (var _autoKey in self.inventory) {
+		var item = self.inventory[_autoKey];
 		var item_type = item.value(constants.VALUE_WEAPON_TYPE);
 		
 		// If mob has a throwable item in inventory, continue

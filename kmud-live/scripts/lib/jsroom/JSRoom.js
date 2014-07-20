@@ -119,13 +119,15 @@ JSRoom.prototype.doorName_cmp = function( strDoorName ) {
 
 // Purges all of the objects in a room. If skipChests is true, skips all objects flagged with ITEM_CHEST
 JSRoom.prototype.purgeItems = function( skipChests) {
-    for each(var obj in this.items) {
+    for (var _autoKey in this.items) {
+    	var obj = this.items[_autoKey];
         if( !skipChests || !obj.extraFlags(constants.ITEM_CHEST) )
             obj.extract();
     }
 }
 JSRoom.prototype.purgeMobs = function() {
-    for each(var mob in this.people) {
+    for (var _autoKey in this.people) {
+    	var mob = this.people[_autoKey];
         if (mob.vnum > 0)
             mob.extract();
     }
@@ -134,7 +136,8 @@ JSRoom.prototype.purgeMobs = function() {
 // Returns an array of all the connected players within a zone with the specified vnum
 function getPlayersInZone(zone) {
     var players = new Array();
-    for each(var person in getConnectedPlayers()) {
+    for (var _autoKey in getConnectedPlayers()) {
+    	var person = getConnectedPlayers()[_autoKey];
         if( person.room.zoneVnum == zone ) {
             players.push(person);
         }
@@ -239,13 +242,14 @@ JSRoom.prototype.getMobs = function( mobVnum )
     var mobResultArray = [];
 
     //Convert to map with mob virtual number as the index to increase lookup speed below.
-    for each(var tempMobVnum in mobVnumArray)
-    {
+    for (var _autoKey in mobVnumArray) {
+    	var tempMobVnum = mobVnumArray[_autoKey];
         mobVnumMap[ tempMobVnum ] = true;
     }
 
-    for each(var character in this.people)
-    {
+    for (var _autoKey in this.people) {
+
+    	var character = this.people[_autoKey];
         if(mobVnumMap[ character.vnum ] === true)
             mobResultArray.push(character);
     }
@@ -275,13 +279,14 @@ JSRoom.prototype.getObjects = function(objectVnum)
     var objectResultArray = [];
 
     //Convert to map with mob virtual number as the index to increase lookup speed below.
-    for each(var tempObjectVnum in objectVnumArray)
-    {
+    for (var _autoKey in objectVnumArray) {
+    	var tempObjectVnum = objectVnumArray[_autoKey];
         objectVnumMap[ tempObjectVnum ] = true;
     }
 
-    for each(var object in this.items)
-    {
+    for (var _autoKey in this.items) {
+
+    	var object = this.items[_autoKey];
         if(objectVnumMap[ object.vnum ] === true)
             objectResultArray.push(object);
     }

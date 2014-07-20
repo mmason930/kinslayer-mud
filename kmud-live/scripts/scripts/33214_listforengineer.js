@@ -4,10 +4,12 @@ var script33214 = function(self, actor, here, args, extra) {
 	var vArgs = getArgList(args);
 	function getAvailableManorList(actor) {
 		var finalArr = [];
-		for each (var manor in global.manors) {
+		for (var _autoKey in global.manors) {
+			var manor = global.manors[_autoKey];
 			if (manor.hasGate && !manor.gateIsBroken && !manor.isUnderSiege) {
 			/** var online = false;
-				for each (var player in getCurrentPlayers()) {
+				for (var _autoKey in getCurrentPlayers()) {
+					var player = getCurrentPlayers()[_autoKey];
 					if (getSval(player,33214,"hired") != manor.id) {
 						if (player.id == manor.ownerUserId || arrContains(manor.allowedUsers, player.id))
 							online = true;

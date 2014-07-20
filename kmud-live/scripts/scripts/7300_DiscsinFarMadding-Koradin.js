@@ -7,18 +7,18 @@ var script7300 = function(self, actor, here, args, extra) {
 	var area = [north,west,northwest];
 	var arg_array = getArgList(args);
 	_noblock;
-		for each(var room in area[0])
-		{
+		for (var _autoKey in area[0]) {
+			var room = area[0][_autoKey];
 			if (actor.room.vnum == room)
 				var direction = "north"
 		}
-		for each(var room in area[1])
-		{
+		for (var _autoKey in area[1]) {
+			var room = area[1][_autoKey];
 			if (actor.room.vnum == room)
 				var direction = "west"
 		}
-		for each(var room in area[2])
-		{
+		for (var _autoKey in area[2]) {
+			var room = area[2][_autoKey];
 			if (actor.room.vnum == room)
 				var direction = "northwest"
 		}

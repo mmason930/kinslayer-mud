@@ -42,8 +42,8 @@ JSObject.prototype.getItems = function(itemList, recursive)
 	var cContents = this.contents;
 	for(var i in cContents)
 	{
-		for each(var tObj in itemList)
-		{
+		for (var _autoKey in itemList) {
+			var tObj = itemList[_autoKey];
 			if( (getObjectClass(tObj) == "Number" && cContents[i].vnum == tObj) )
 				objArr.push( cContents[i] );
 			else if( cContents[i].name == tObj )

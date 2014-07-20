@@ -188,7 +188,7 @@ var script20801 = function(self, actor, here, args, extra) {
 		saveManor(manor); **/
 	
 	
-	/**for each (var manor in global.manors) {
+	/**for (var _autoKey in global.manors) {	var manor = global.manors[_autoKey];
 		here.echo(manor.allowedUsers)
 		//saveManor(manor);
 	}

@@ -18,8 +18,8 @@ var script20856 = function(self, actor, here, args, extra) {
 		var place = "workshop";
 		var door = "workshop";
 	}
-	for each (var room in self.room.neighbors)
-	{
+	for (var _autoKey in self.room.neighbors) {
+		var room = self.room.neighbors[_autoKey];
 		if (room)
 		{
 			if (self.room.doorName(self.room.firstStep(room)) == door)
@@ -28,8 +28,8 @@ var script20856 = function(self, actor, here, args, extra) {
 	}
 	if (!newRoom)
 		return;
-	for each (var peep in newRoom.people)
-	{
+	for (var _autoKey in newRoom.people) {
+		var peep = newRoom.people[_autoKey];
 		var peepName = peep.namelist.split(" ");
 		if (peep.maxHit > 30000 && peepName[peepName.length-1] == trader)
 			var blackSmith = peep;

@@ -6,8 +6,8 @@ var script20853 = function(self, actor, here, args, extra) {
 	self.echo(fread("Herbalism"));
 	if (fread("Herbalism"))
 		var rooms = fread("Herbalism").split("~");
-	for each (var room in rooms)
-	{
+	for (var _autoKey in rooms) {
+		var room = rooms[_autoKey];
 		if (getRoom(room))
 			getRoom(room).detach(20951);
 	}
@@ -16,8 +16,8 @@ var script20853 = function(self, actor, here, args, extra) {
 	self.echo(fread("Mining"));
 	if (fread("Mining"))
 		var rooms2 = fread("Mining").split("~");
-	for each (var room2 in rooms2)
-	{
+	for (var _autoKey in rooms2) {
+		var room2 = rooms2[_autoKey];
 		if (getRoom(room2))
 			getRoom(room2).detach(20952);
 	}

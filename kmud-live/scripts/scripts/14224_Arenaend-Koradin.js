@@ -23,7 +23,8 @@ var script14224 = function(self, actor, here, args, extra) {
 					global.arenaEndNo = 0;
 					global.arenaEndTimer = 0;
 					putMobsToSleep(false);
-					for each (var player in global.arenaPlayers) {
+					for (var _autoKey in global.arenaPlayers) {
+						var player = global.arenaPlayers[_autoKey];
 						setSval(player, 14224, "endVote", 0);
 						player.detach(14224);
 					}
@@ -42,7 +43,8 @@ var script14224 = function(self, actor, here, args, extra) {
 			global.arenaEndNo = 0;
 			global.arenaEndTimer = 0;
 			putMobsToSleep(false);
-			for each (var player in global.arenaPlayers) {
+			for (var _autoKey in global.arenaPlayers) {
+				var player = global.arenaPlayers[_autoKey];
 				setSval(player, 14224, "endVote", 0);
 				player.detach(14224);
 			}

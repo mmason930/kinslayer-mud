@@ -36,7 +36,8 @@ var script9801 = function(self, actor, here, args, extra) {
 		var buf = "Characters in the game";
 		buf += strPadding("\n","-",buf.length+3,"right");
 		var people = getCurrentPlayers();
-		for each(person in people) {
+		for (var _autoKey in people) {
+			var person = people[_autoKey];
 			if ( person.room == undefined )
 				continue;
 			var clr;

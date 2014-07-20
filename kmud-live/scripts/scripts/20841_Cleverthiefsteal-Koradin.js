@@ -13,8 +13,8 @@ var script20841 = function(self, actor, here, args, extra) {
 		return;
 	var inventory = [];
 	var eq = [];
-	for each (var item in actor.inventory)
-	{
+	for (var _autoKey in actor.inventory) {
+		var item = actor.inventory[_autoKey];
 		if (actor.vnum == -1)
 		{
 			if (item.type != constants.ITEM_WEAPON && item.type != constants.ITEM_CONTAINER && item.type != constants.ITEM_KEY)

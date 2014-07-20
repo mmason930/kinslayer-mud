@@ -56,15 +56,15 @@ var script1255 = function(self, actor, here, args, extra) {
 	cEncoding = _strEncode( cEncoding );
 	//Double encoding is instant death. These codes are found on the black passage.
 	var testA = false, testB = false;
-	for each( var sC in validTokens )
-	{
+	for (var _autoKey in validTokens ) {
+		var sC = validTokens [_autoKey];
 		if( cEncoding == sC ) {
 			testA = true;
 			break;
 		}
 	}
-	for each( var sT in validTargets )
-	{
+	for (var _autoKey in validTargets ) {
+		var sT = validTargets [_autoKey];
 		if( tEncoding == sT ) {
 			testB = true;
 			break;

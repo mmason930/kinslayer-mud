@@ -9,7 +9,8 @@ var script14220 = function(self, actor, here, args, extra) {
 			if (!arrContains(global.arenaCurrentMap.exclusions, i))
 				roomArr.push(i);
 		}
-		for each (var player in room.people) {
+		for (var _autoKey in room.people) {
+			var player = room.people[_autoKey];
 			player.send("You are picked up by the wind and thrown out of the area!");
 			act("$n is picked up by the wind and tossed through the air!",true,player,null,null,constants.TO_ROOM);
 			player.moveToRoom(getRoom(roomArr[random(0,roomArr.length-1)]));

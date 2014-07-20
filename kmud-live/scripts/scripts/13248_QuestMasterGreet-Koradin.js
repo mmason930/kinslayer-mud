@@ -15,11 +15,13 @@ var script13248 = function(self, actor, here, args, extra) {
 	var unstarted = 0;
 	var unfinished = 0;
 	var complete = 0;
-	for each(var quest in actor.getAvailableQuests(self.vnum)) {
+	for (var _autoKey in actor.getAvailableQuests(self.vnum)) {
+		var quest = actor.getAvailableQuests(self.vnum)[_autoKey];
 		var push = false;
 		if ( quest.priorQuests.length > 0 ) {
 			var i = 0;
-			for each( var name in quest.priorQuests ) {
+			for (var _autoKey in quest.priorQuests ) {
+				var name = quest.priorQuests [_autoKey];
 				if ( actor.quest(name) == -1 ) {
 					++i;
 				}

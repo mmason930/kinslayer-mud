@@ -10,7 +10,8 @@ var script14213 = function(self, actor, here, args, extra) {
 		return;
 	}
 	if (stage == constants.ARENA_QUEUE) { // QUEUE STAGE
-		for each (var player in getWaitingPlayers("all")) {
+		for (var _autoKey in getWaitingPlayers("all")) {
+			var player = getWaitingPlayers("all")[_autoKey];
 			getCharCols(player);
 			if (player.affectedBy(constants.AFF_NOQUIT)) { //Can't enter with NOQUIT
 				player.send("You haven't calmed down, and are removed from the Arena queue.");
@@ -32,7 +33,8 @@ var script14213 = function(self, actor, here, args, extra) {
 			else
 				var voteS = "votes have";
 		if (timeLeft > 0) {
-			for each (var player in getWaitingPlayers("all")) {
+			for (var _autoKey in getWaitingPlayers("all")) {
+				var player = getWaitingPlayers("all")[_autoKey];
 				getCharCols(player);
 				player.send("The Arena match will begin when "+mag+votesLeft+nrm+" more "+voteS+" been cast, ");
 				player.send("or in "+mag+timeLeft+nrm+" "+minuteS+", whichever comes first.");
@@ -41,7 +43,8 @@ var script14213 = function(self, actor, here, args, extra) {
 			return;
 		}				
 		else {
-			for each (var player in getWaitingPlayers("all")) {
+			for (var _autoKey in getWaitingPlayers("all")) {
+				var player = getWaitingPlayers("all")[_autoKey];
 				getCharCols(player);
 				player.send(mag+"The time allowed to vote has passed!"+nrm);
 			}

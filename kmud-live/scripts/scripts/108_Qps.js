@@ -17,8 +17,8 @@ var script108 = function(self, actor, here, args, extra) {
 		actor.send("Not a real clan.");
 		return;
 	}
-	for each( var player in players )
-	{
+	for (var _autoKey in players ) {
+		var player = players [_autoKey];
 		if ( player.name.toLowerCase() == arg_array[2].toLowerCase() )
 		{
 			actor.send(player.qp(arg_array[1]));

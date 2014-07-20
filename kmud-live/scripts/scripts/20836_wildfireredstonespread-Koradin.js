@@ -8,8 +8,8 @@ var script20836 = function(self, actor, here, args, extra) {
 		if (!room)
 			return;
 		var items = [];
-		for each (var item in room.items)
-		{
+		for (var _autoKey in room.items) {
+			var item = room.items[_autoKey];
 			if (item.vnum == 9023)
 				item.extract();
 			else if (item.vnum == 9022 && item != self)
@@ -19,20 +19,20 @@ var script20836 = function(self, actor, here, args, extra) {
 			else if (!room.isFlagged(constants.ROOM_VAULT) && item != self && item.type != constants.ITEM_CONTAINER && item.vnum != 9024 && random(1,48) == 1 && item.canWear(constants.ITEM_WEAR_TAKE) && room.vnum != 19304 && room.vnum != 2032)
 				items.push(item);
 		}
-		for each(var it in items)
-		{
+		for (var _autoKey in items) {
+			var it = items[_autoKey];
 			room.echo("The blazing fire consumes " + it.name + ", leaving nothing but charred remains.");
 			it.extract();
 			room.loadObj(9024);
 		}
 		var chars = [];
-		for each (var person in room.people)
-		{
+		for (var _autoKey in room.people) {
+			var person = room.people[_autoKey];
 			if (!person.mobFlagged(constants.MOB_INVIS) && person.level < 100 && random(1,24) == 1)
 				chars.push(person);	
 		}
-		for each(var per in chars)
-		{
+		for (var _autoKey in chars) {
+			var per = chars[_autoKey];
 			per.send("You step too close to the fire and it flares up, burning you!");
 			per.send("Ouch!");
 			act("The blazing wildfire burns $n!",true,per,null,null,constants.TO_ROOM);
@@ -41,16 +41,16 @@ var script20836 = function(self, actor, here, args, extra) {
 			per.damage(random(10,15));
 		}
 		var rooms = [];
-		for each (var rm in room.neighbors)
-		{
+		for (var _autoKey in room.neighbors) {
+			var rm = room.neighbors[_autoKey];
 			if (rm)
 			{
 				if ( Math.floor(rm.vnum / 100) == Math.floor(room.vnum / 100) || random(1,100) == 1 )
 				{
 					var spread_chance = random(1,100);
 					var char_exists = null;
-					for each(var im in rm.items)
-					{
+					for (var _autoKey in rm.items) {
+						var im = rm.items[_autoKey];
 						if (im.vnum == self.vnum)
 							spread_chance += 100;
 						if (im.vnum == 9023)
@@ -63,8 +63,8 @@ var script20836 = function(self, actor, here, args, extra) {
 				}
 			}
 		}
-		for each (var new_room in rooms)
-		{
+		for (var _autoKey in rooms) {
+			var new_room = rooms[_autoKey];
 			if (new_room[1] < 5)
 			{
 				var from_dir = dirToText(revDir(room.firstStep(new_room[0])));
@@ -94,8 +94,8 @@ var script20836 = function(self, actor, here, args, extra) {
 		if (random(1,50) == 1)
 		{
 			room.echo("The fire dies away as quickly as it began, leaving nothing but charred landscape.");
-			for each (var prs in room.people)
-			{
+			for (var _autoKey in room.people) {
+				var prs = room.people[_autoKey];
 				if (prs.affectedBy(constants.AFF_BURN))
 				{
 					prs.unaffect(constants.AFF_BURN)

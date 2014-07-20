@@ -7,8 +7,8 @@ var script20837 = function(self, actor, here, args, extra) {
 	var room = self.room;
 	if (!room)
 	return;
-	for each (var item in room.items)
-	{
+	for (var _autoKey in room.items) {
+		var item = room.items[_autoKey];
 	if (item.vnum == 9025)
 	item.extract();
 	else if (item.vnum == 9015 && item != self)
@@ -17,8 +17,8 @@ var script20837 = function(self, actor, here, args, extra) {
 	var rooms = [];
 	if (self.count < 6)
 	{
-	for each (var rm in room.neighbors)
-	{
+	for (var _autoKey in room.neighbors) {
+		var rm = room.neighbors[_autoKey];
 	if (rm)
 	{
 	if ( Math.floor(rm.vnum / 100) == Math.floor(room.vnum / 100) || random(1,100) == 1 )
@@ -26,8 +26,8 @@ var script20837 = function(self, actor, here, args, extra) {
 	var spread_chance = random(1,100);
 	
 	var char_exists = null;
-	for each(var im in rm.items)
-	{
+	for (var _autoKey in rm.items) {
+		var im = rm.items[_autoKey];
 	if (im.vnum == self.vnum)
 	spread_chance += 100;
 	if (im.vnum == 9025)
@@ -40,8 +40,8 @@ var script20837 = function(self, actor, here, args, extra) {
 	}
 	}
 	}
-	for each (var new_room in rooms)
-	{
+	for (var _autoKey in rooms) {
+		var new_room = rooms[_autoKey];
 	if (new_room[1] < 5)
 	{
 	var from_dir = dirToText(revDir(room.firstStep(new_room[0])));
@@ -71,8 +71,8 @@ var script20837 = function(self, actor, here, args, extra) {
 	}
 	if (random(1,50) == 1)
 	{
-	for each (var person in room.people)
-	{
+	for (var _autoKey in room.people) {
+		var person = room.people[_autoKey];
 	if (getSval(person, 20838, "vines") == 2)
 	return;
 	}

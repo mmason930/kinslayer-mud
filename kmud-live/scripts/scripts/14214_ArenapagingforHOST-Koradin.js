@@ -16,7 +16,8 @@ var script14214 = function(self, actor, here, args, extra) {
 			return;
 		}
 		actor.send("This match's mode has been set to "+gameMode+".");
-		for each (var player in getWaitingPlayers("all")) {
+		for (var _autoKey in getWaitingPlayers("all")) {
+			var player = getWaitingPlayers("all")[_autoKey];
 			getCharCols(player);
 			player.send(mag+"The host has set the match mode to "+gameMode+"!"+nrm);
 			if (global.arenaFreeForAll == true) {
@@ -35,7 +36,8 @@ var script14214 = function(self, actor, here, args, extra) {
 			if (vArgs[0] == (i+1)) {
 				global.arenaCurrentMap = global.arenaAllMaps[i];
 				actor.send("This match's map has been set to "+global.arenaCurrentMap.name+".");
-				for each (var player in getWaitingPlayers("all")) {
+				for (var _autoKey in getWaitingPlayers("all")) {
+					var player = getWaitingPlayers("all")[_autoKey];
 					getCharCols(player);
 					player.send(mag+"The host has set the map to "+global.arenaCurrentMap.name+"!"+nrm);
 				}
@@ -52,7 +54,8 @@ var script14214 = function(self, actor, here, args, extra) {
 	else if (getSval(actor,14214,"hostMenu") == 3) {
 		if (vArgs[0] == 2 || vArgs[0] == 3 || vArgs[0] == 4) {
 			global.arenaTeams = vArgs[0];
-			for each (var play in getWaitingPlayers("all")) {
+			for (var _autoKey in getWaitingPlayers("all")) {
+				var play = getWaitingPlayers("all")[_autoKey];
 				getCharCols(play);
 				play.send(mag+"The host has set the number of teams to "+vArgs[0]+"!"+nrm);
 				if (global.arenaTeams < 4) {
@@ -210,7 +213,8 @@ var script14214 = function(self, actor, here, args, extra) {
 					return;
 				}
 				var teamAI = [];
-				for each (var play in getWaitingPlayers("ai")) {
+				for (var _autoKey in getWaitingPlayers("ai")) {
+					var play = getWaitingPlayers("ai")[_autoKey];
 					if (getTeamName(play.arenaTeam) == color)
 						teamAI.push(play);
 				}
@@ -255,7 +259,8 @@ var script14214 = function(self, actor, here, args, extra) {
 			return;
 		}
 		actor.send("This match's betting mode has been set to "+gameMode+".");
-		for each (var player in getWaitingPlayers("all")) {
+		for (var _autoKey in getWaitingPlayers("all")) {
+			var player = getWaitingPlayers("all")[_autoKey];
 			getCharCols(player);
 			player.send(mag+"The host has set the betting mode to "+gameMode+"!"+nrm);
 		}

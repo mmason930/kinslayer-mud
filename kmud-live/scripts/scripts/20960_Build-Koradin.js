@@ -171,10 +171,10 @@ var script20960 = function(self, actor, here, args, extra) {
 		actor.send("Learn more Survival techniques before attempting to build a " + arg_array[1] + "!");
 		return;
 	}
-	for each (var room_item in actor.room.items)
-	{
-		for each ( var item_num in building_array)
-		{
+	for (var _autoKey in actor.room.items) {
+		var room_item = actor.room.items[_autoKey];
+		for (var _autoKey in building_array) {
+			var item_num = building_array[_autoKey];
 			if (room_item.vnum == item_num)
 			{
 				actor.send("There's already another " + arg_array[1] + " here!");
@@ -243,8 +243,8 @@ var script20960 = function(self, actor, here, args, extra) {
 		fail_score -= 40;
 	else if (actor.room.sector == constants.SECT_FIELD)
 		fail_score -= 30;
-	for each (var item in actor.inventory)
-	{
+	for (var _autoKey in actor.inventory) {
+		var item = actor.inventory[_autoKey];
 		if (item.vnum == item_req)
 		{
 			req_items += 1;
@@ -264,8 +264,10 @@ var script20960 = function(self, actor, here, args, extra) {
 		act("$n" + maybe_drop_room + " starts searching for materials " + purpose, true, actor, null, null, constants.TO_ROOM);
 		if (existing_pile == false)
 		{
-			for each ( var log in item_array)
+			for (var _autoKey in item_array) {
+				var log = item_array[_autoKey];
 				log.extract();
+			}
 			actor.room.loadObj(pile_item);
 		}
 		actor.startTimer(starting_timer);
@@ -350,8 +352,8 @@ var script20960 = function(self, actor, here, args, extra) {
 		act("$n gives up the " + arg_array[1] + " attempt.", true, actor, null, null, constants.TO_ROOM);
 		return;
 	}
-	for each (var itm in actor.room.items)
-	{
+	for (var _autoKey in actor.room.items) {
+		var itm = actor.room.items[_autoKey];
 		if (itm.vnum == pile_item)
 		{
 			var pile_found = true;
@@ -368,8 +370,10 @@ var script20960 = function(self, actor, here, args, extra) {
 	act(endmsg_room, true, actor, null, null, constants.TO_ROOM);
 	if (arg_array[1] == "tower" || arg_array[1] == "bonfire")
 	{
-		for each ( var log in item_array)
+		for (var _autoKey in item_array) {
+			var log = item_array[_autoKey];
 			log.extract();
+		}
 	}
 	pile.extract();
 	actor.room.loadObj(end_item);

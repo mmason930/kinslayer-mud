@@ -60,8 +60,8 @@ var script20805 = function(self, actor, here, args, extra) {
 		var back_item = actor.eq(constants.WEAR_BACK);
 		if (back_item)
 		{
-			for each(var word in back_item.namelist.split(" "))
-			{
+			for (var _autoKey in back_item.namelist.split(" ")) {
+				var word = back_item.namelist.split(" ")[_autoKey];
 				if (word == "quiverforbows")
 					return back_item;
 			}

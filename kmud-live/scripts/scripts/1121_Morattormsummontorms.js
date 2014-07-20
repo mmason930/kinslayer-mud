@@ -8,8 +8,8 @@ var script1121 = function(self, actor, here, args, extra) {
 		here.echo( self.name + " lets out a strange, high pitched whistle." );
 		wait 1;
 		var path = torm.room.pathToRoom( self.room );
-		for each( var dir in path )
-	    {
+		for (var _autoKey in path ) {
+			var dir = path [_autoKey];
 	        if( torm.fighting || torm.room.doorIsClosed(dir) )
 	            break;
 	        waitpulse 2;

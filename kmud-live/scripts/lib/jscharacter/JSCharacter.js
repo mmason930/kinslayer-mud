@@ -176,8 +176,8 @@ JSCharacter.prototype.getItems = function(itemList, checkInv, checkEQ, recursive
 	{
 		for(var i in cInv)
 		{
-			for each(var tObj in itemList)
-			{
+			for (var _autoKey in itemList) {
+				var tObj = itemList[_autoKey];
 				if( (getObjectClass(tObj) == "Number" && cInv[i].vnum == tObj) )
 					objArr.push( cInv[i] );
 				else if( cInv[i].name == tObj )
@@ -194,8 +194,8 @@ JSCharacter.prototype.getItems = function(itemList, checkInv, checkEQ, recursive
 			var eObj = this.eq(i);
 			if( !eObj )
 				continue;
-			for each(var tObj in itemList)
-			{
+			for (var _autoKey in itemList) {
+				var tObj = itemList[_autoKey];
 				if( (getObjectClass(tObj) == "Number" && eObj.vnum == tObj) )
 					objArr.push( eObj );
 				else if( eObj.name == tObj )

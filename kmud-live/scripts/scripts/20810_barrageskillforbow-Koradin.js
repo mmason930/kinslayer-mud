@@ -12,8 +12,8 @@ var script20810 = function(self, actor, here, args, extra) {
 	}
 	//THE FOLLOWING CHECKS TO SEE IF THE BOW IS ON BACK OR IN INVENTORY.
 	var inv_items = actor.inventory;
-	for each(var item in inv_items)
-	{
+	for (var _autoKey in inv_items) {
+		var item = inv_items[_autoKey];
 		if (self == item)
 			var in_inv = 1;
 	}
@@ -68,8 +68,8 @@ var script20810 = function(self, actor, here, args, extra) {
 	//THE FOLLOWING CHECKS TO SEE IF THE ACTOR IS WEARING A QUIVER, AND IF SO, MODIFIES THE ARROWS MESSAGES, AND EFFECTS.
 	if (back_item)
 	{
-		for each(var word in back_item.namelist.split(" "))
-		{
+		for (var _autoKey in back_item.namelist.split(" ")) {
+			var word = back_item.namelist.split(" ")[_autoKey];
 			if (word == "quiverforbows")
 				var quiver = back_item;
 		}

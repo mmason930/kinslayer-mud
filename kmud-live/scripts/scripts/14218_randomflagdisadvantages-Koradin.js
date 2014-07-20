@@ -12,7 +12,8 @@ var script14218 = function(self, actor, here, args, extra) {
 		var team = constants.ARENA_YELLOW;
 	else if (self.vnum == 14204)
 		var team = constants.ARENA_GREEN;
-	for each (var player in global.arenaPlayers) {
+	for (var _autoKey in global.arenaPlayers) {
+		var player = global.arenaPlayers[_autoKey];
 		if (player.arenaTeam == team)
 			return;
 	}

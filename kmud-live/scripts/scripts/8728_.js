@@ -45,8 +45,10 @@ var script8728 = function(self, actor, here, args, extra) {
 		return;
 	}
 	cost *= 4;
-	for each( var follower in actor.followers )
+	for (var _autoKey in actor.followers) {
+		var follower = actor.followers[_autoKey];
 		if ( follower.vnum == -1 ) { cost = cost * 2; }
+	}
 		
 	if( cost == -1 )
 		return;
@@ -87,8 +89,8 @@ var script8728 = function(self, actor, here, args, extra) {
 		actor.comm( "look" );
 		echoaround( actor, capFirstLetter(actor.name) + " steps through a shimmering portal." );
 	}
-	for each( var follower in actor.followers )
-	{
+	for (var _autoKey in actor.followers ) {
+		var follower = actor.followers [_autoKey];
 		if( follower.affectedBy(constants.AFF_NOQUIT) )
 		{
 			self.comm( "say " + capFirstLetter(follower.name) + " Needs to calm down a bit first." );

@@ -4,7 +4,8 @@ var script13254 = function(self, actor, here, args, extra) {
 	if( actor.quest( "Special Delivery" ) != 1 )//1 == crate dragging stage.
 		return;
 	//User is on crate dagging stage. Check to see if there is a crate being dragged by this user.
-	for each(var item in here.items) {
+	for (var _autoKey in here.items) {
+		var item = here.items[_autoKey];
 		if( item.vnum == 21407 && getSval(item, 13252, "draggedBy") == actor )
 		{//Yes!
 			actor.comm("release crate");//Force user to stop dragging this thing.

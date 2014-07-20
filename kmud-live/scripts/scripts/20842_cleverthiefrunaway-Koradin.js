@@ -50,8 +50,8 @@ var script20842 = function(self, actor, here, args, extra) {
 					var inventory = [];
 					var eq = [];
 					var rand_gold = random(5,100);
-					for each (var item in actor.inventory)
-					{
+					for (var _autoKey in actor.inventory) {
+						var item = actor.inventory[_autoKey];
 						if (actor.vnum == -1)
 						{
 							if (item.type != constants.ITEM_WEAPON && item.type != constants.ITEM_CONTAINER)

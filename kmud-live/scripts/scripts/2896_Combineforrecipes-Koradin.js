@@ -19,14 +19,16 @@ var script2896 = function(self, actor, here, args, extra) {
 		iExaView = iExaView.split("~");
 		var views = iExaView.length;
 		//here.echo("starting views = " +views);
-		for each (var item in itemArr) {
+		for (var _autoKey in itemArr) {
+			var item = itemArr[_autoKey];
 			var recType = item.getPval("recType");
 			var recVnum = item.getPval("recVnum");
 			var exaView = item.getPval("exaView");
 			if (recType && recVnum && exaView) {
 				exaView = exaView.split("~");
 				if (recType == iRecType && recVnum == iRecVnum) {
-					for each (var corner in exaView) {
+					for (var _autoKey in exaView) {
+						var corner = exaView[_autoKey];
 						if (!arrContains(iExaView,corner) && arrCompare(iExaView,exaView).length < iExaView.length && arrCompare(iExaView,exaView).length < exaView.length ) {
 							iExaView.push(corner); 
 						}

@@ -21,7 +21,8 @@ var script20930 = function(self, actor, here, args, extra) {
 		return;
 	}
 	var inHand = false;
-	for each (var thing in actor.inventory) {
+	for (var _autoKey in actor.inventory) {
+		var thing = actor.inventory[_autoKey];
 		if (thing.vnum > 14199 && thing.vnum < 14205) {//ACTOR HAS FLAG AND IS TRYING TO SCORE
 			var target = thing;
 			inHand = true;
@@ -94,7 +95,8 @@ var script20930 = function(self, actor, here, args, extra) {
 		if (teamCaps == global.arenaCurrentGame.limit) { // Goal met, game's over
 			var winner = "The "+mRace[0]+" Team";
 			arenaEcho(winner+" has won the Match!");
-			for each (var play in global.arenaPlayers) {
+			for (var _autoKey in global.arenaPlayers) {
+				var play = global.arenaPlayers[_autoKey];
 				if (play.arenaTeam == mRace[1]) 
 					addArenaPoint(play, "teamWins");
 				else 
@@ -203,15 +205,15 @@ var script20930 = function(self, actor, here, args, extra) {
 		var race = "Dark";
 		var vnum = target.vnum + 1;
 	}
-	for each (var item in items_to_cap)
-	{
+	for (var _autoKey in items_to_cap) {
+		var item = items_to_cap[_autoKey];
 		if (target.vnum == item)
 			var go = true;
 	}
 	if (go == false)
 	{
-		for each (var bad_item in items_yours)
-		{
+		for (var _autoKey in items_yours) {
+			var bad_item = items_yours[_autoKey];
 			if (target.vnum == bad_item)
 			{
 				actor.send("You already own " + target.name + "!");

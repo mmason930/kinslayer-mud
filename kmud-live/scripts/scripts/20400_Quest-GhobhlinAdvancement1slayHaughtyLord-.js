@@ -5,8 +5,8 @@ var script20400 = function(self, actor, here, args, extra) {
 		var killer = vArgs[0];
 		var group = [];
 		var onQuest = false;
-		for each (var quest in killer.getIncompleteQuests())
-		{
+		for (var _autoKey in killer.getIncompleteQuests()) {
+			var quest = killer.getIncompleteQuests()[_autoKey];
 			if (quest.questName == "Ghob'hlin Advancement 1")
 				onQuest = true;
 		}
@@ -17,8 +17,8 @@ var script20400 = function(self, actor, here, args, extra) {
 			if (killer.leader)
 			{
 				group.push(killer.leader);
-				for each (var member in killer.leader.followers)
-				{
+				for (var _autoKey in killer.leader.followers) {
+					var member = killer.leader.followers[_autoKey];
 					if (member.room.zoneVnum == killer.room.zoneVnum)
 						group.push(member);
 				}
@@ -27,16 +27,16 @@ var script20400 = function(self, actor, here, args, extra) {
 			else if (killer.followers)
 			{
 				group.push(killer);
-				for each (var member in killer.followers)
-				{
+				for (var _autoKey in killer.followers) {
+					var member = killer.followers[_autoKey];
 					if (member.room.zoneVnum == killer.room.zoneVnum)
 						group.push(member);
 				}
 			}
 		}
 		//killer.room.echo("onQuest: "+onQuest);
-		for each (var person in group)
-		{
+		for (var _autoKey in group) {
+			var person = group[_autoKey];
 			//killer.room.echo("TEST: " + person.name + "'s journal is getting updated!");
 			person.updateJournalTask("Ghob'hlin Advancement 1",0);
 		}

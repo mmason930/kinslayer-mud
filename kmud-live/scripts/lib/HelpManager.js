@@ -168,8 +168,8 @@ HelpManager.prototype.getHelpFileById = function(id)
 
 HelpManager.prototype.getHelpFileByName = function(name)
 {
-	for each(var helpFile in this.helpFiles)
-	{
+	for (var _autoKey in this.helpFiles) {
+		var helpFile = this.helpFiles[_autoKey];
 		if(!str_cmp(name, helpFile.name))
 			return helpFile;
 	}
@@ -180,8 +180,8 @@ HelpManager.prototype.getHelpFileByName = function(name)
 HelpManager.prototype.getHelpFilesByParentId = function(id)
 {
 	var children = [];
-	for each(var helpFile in this.helpFiles)
-	{
+	for (var _autoKey in this.helpFiles) {
+		var helpFile = this.helpFiles[_autoKey];
 		if(helpFile.parentId == id)
 			children.push(helpFile);
 	}
@@ -248,8 +248,8 @@ HelpManager.prototype.getHelpPage = function(actor, file, hideFooter)
 HelpManager.prototype.getSearchedFile = function(term)
 {
 	term = term.toLowerCase();
-	for each (var helpFile in this.helpFiles)
-	{	
+	for (var _autoKey in this.helpFiles) {
+		var helpFile = this.helpFiles[_autoKey];	
 		if(helpFile.keywords != null && helpFile.keywords.length > 0)
 		{// File has keywords
 
@@ -343,8 +343,8 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 	var leg13         = [13,12,"off","   ",0,bld];
 	var leg14         = [14,12,".  ","   ",0,bld];
 	var rooms = [name, name2, name3, name4, name5, name6, hold, stoneRoad, stoneRoadProp, stoneRoad2, keep, nKeep, sKeep, sKeep2, gapProp, gap, niamh, niamh3, niamh2, niamhOgier, nFD, wFD, nFM, FD, wFM, nFM2, wFM2, FM, tvRoad, sTV, TV, tvRoad2, tvProp, FK2, FK, caemRoad, lowCaem, caem, caem2, lowCaem2, sTV2, aRoad, aRoad2, AR, lugRoad, sCaem, sCaem2, LG, sLG, nFarMadding, blackTower, wFK, WB, wFK2, nWB, wWB, wWB2, BR, nRoad, nRoad2, EF, EF2, leg1, leg2, leg3, leg4, leg5, leg6, leg7, leg8, leg9, leg10, leg11, leg12, leg13, leg14];
-	for each (var r in rooms)
-	{
+	for (var _autoKey in rooms) {
+		var r = rooms[_autoKey];
 		//here.echo(actor.room.vnum);
 		if (actor.room.zoneVnum == r[4])
 		{
@@ -363,8 +363,8 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 		//Top line.
 		for (var x = 0; x <= 15; ++x)
 		{
-			for each(var r in rooms)
-			{
+			for (var _autoKey in rooms) {
+				var r = rooms[_autoKey];
 				if (x == 7 && y == 6 && actor.room.zoneVnum == 12 && count < 1) {
 					buffer += yel+bld+"  X"+nrm;
 					count += 1;
@@ -447,8 +447,8 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 			// var coor = [];
 			// coor.push(x);
 			// coor.push(y);
-			for each(var r in rooms)
-			{
+			for (var _autoKey in rooms) {
+				var r = rooms[_autoKey];
 				if (x == 6 && y == 8 && actor.room.zoneVnum == 14 && count < 1) {
 					buffer += yel+bld+"X  "+nrm;
 					count += 1;

@@ -37,7 +37,8 @@ var script20884 = function(self, actor, here, args, extra) {
 				storageList = storageList.split("~");
 				if (storageList.length == 3) {
 					var different = true;
-					for each (var sItem in storageList) {
+					for (var _autoKey in storageList) {
+						var sItem = storageList[_autoKey];
 						sItem = sItem.split(",");
 						if (parseInt(sItem[0]) == item.vnum)
 							different = false;
@@ -59,8 +60,10 @@ var script20884 = function(self, actor, here, args, extra) {
 					storArr.push([itemVnum,itemCount]);
 				}
 				var totalBars = 0;
-				for each (var element in storArr)
+				for (var _autoKey in storArr) {
+					var element = storArr[_autoKey];
 					totalBars += element[1];
+				}
 				if (totalBars < numStored) {
 					var barExists = false;
 					for (j=0;j<storArr.length;j++) {

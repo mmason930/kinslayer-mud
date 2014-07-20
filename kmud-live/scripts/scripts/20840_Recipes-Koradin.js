@@ -40,8 +40,8 @@ var script20840 = function(self, actor, here, args, extra) {
 		// actor.send("Your recipe book is empty!  Go learn some recipes first.");
 		// return;
 	// }
-	// for each (var pVnum in total_pVnums)
-	// {
+	// for (var _autoKey in total_pVnums) { 	var pVnum = total_pVnums[_autoKey];
+	// { }
 		// var potion = getPotionByVnum(pVnum);
 		// var potion_type = potion.name.split(" ");
 		// if (potion_type.pop() == "vial")

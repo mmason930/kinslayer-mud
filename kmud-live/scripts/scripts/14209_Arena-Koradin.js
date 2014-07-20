@@ -85,7 +85,8 @@ var script14209 = function(self, actor, here, args, extra) {
 					var actorName = row.get("username");
 					score = score.split("~");
 					var totalScore = 0;
-					for each (var point in score) {
+					for (var _autoKey in score) {
+						var point = score[_autoKey];
 						totalScore += parseInt(point);
 					}
 					if (totalScore > 0) {
@@ -98,7 +99,8 @@ var script14209 = function(self, actor, here, args, extra) {
 				}
 				arenaLegends.sort(compare);
 				var legendList = [["Unknown",0,0],["Unknown",0,0],["Unknown",0,0],["Unknown",0,0],["Unknown",0,0]];
-				for each (var legend in arenaLegends) {
+				for (var _autoKey in arenaLegends) {
+					var legend = arenaLegends[_autoKey];
 					alreadyListed = false;
 					var score = legend[2];
 					for (i=0; i<legendList.length; i++) {
@@ -214,7 +216,8 @@ var script14209 = function(self, actor, here, args, extra) {
 					actor.send("You're not ready for the voting stage yet!  Type "+mag+"arena"+nrm+" for more information.");
 					return;
 				}
-				for each (var person in getConnectedPlayers()) {
+				for (var _autoKey in getConnectedPlayers()) {
+					var person = getConnectedPlayers()[_autoKey];
 					getCharCols(person);
 					person.send(mag+"An Arena match will start in 10 seconds!"+nrm);
 					if (!arrContains(getWaitingPlayers("all"), person)) {
@@ -222,12 +225,14 @@ var script14209 = function(self, actor, here, args, extra) {
 						person.send("Type "+mag+"enter arena"+nrm+" to join the battle!");
 					}
 				}
-				for each (var player in getWaitingPlayers("all")) {
+				for (var _autoKey in getWaitingPlayers("all")) {
+					var player = getWaitingPlayers("all")[_autoKey];
 					player.attach(14212);
 					setSval(player,14209,"gameStart",1);
 				}
 				waitpulse 70;
-				for each (var player in getWaitingPlayers("all")) {
+				for (var _autoKey in getWaitingPlayers("all")) {
+					var player = getWaitingPlayers("all")[_autoKey];
 					getCharCols(player);
 					setSval(player,14209,"gameStart",0);
 					if (isMatchReady() == true) {
@@ -257,7 +262,8 @@ var script14209 = function(self, actor, here, args, extra) {
 					actor.send("You are not the current host of the Arena!");
 					return;
 				}
-				for each (var player in getWaitingPlayers("all")) {
+				for (var _autoKey in getWaitingPlayers("all")) {
+					var player = getWaitingPlayers("all")[_autoKey];
 					getCharCols(player);
 					player.send(mag+"The host has provided more time to vote!"+nrm);
 				}
@@ -286,7 +292,8 @@ var script14209 = function(self, actor, here, args, extra) {
 				global.arenaEndTimer = time();
 				putMobsToSleep(true);
 				startArenaTimer(15, "End Match");
-				for each (var player in global.arenaPlayers) {
+				for (var _autoKey in global.arenaPlayers) {
+					var player = global.arenaPlayers[_autoKey];
 					getCharCols(player);
 					player.stopFighting();
 					player.attach(14224);
@@ -314,7 +321,8 @@ var script14209 = function(self, actor, here, args, extra) {
 						actor.send("You're already on the Blue Team!");
 						return;
 					}
-					for each (var player in getWaitingPlayers("all")) {
+					for (var _autoKey in getWaitingPlayers("all")) {
+						var player = getWaitingPlayers("all")[_autoKey];
 						getCharCols(player);
 						if (isAI(player))
 							var aName = "(AI) Player";
@@ -326,7 +334,8 @@ var script14209 = function(self, actor, here, args, extra) {
 					}
 				}
 				actor.arenaTeam = constants.ARENA_BLUE;
-				for each (var player in getWaitingPlayers("all")) {
+				for (var _autoKey in getWaitingPlayers("all")) {
+					var player = getWaitingPlayers("all")[_autoKey];
 					getCharCols(player);
 					if (isAI(player))
 						var aName = "(AI) Player";
@@ -352,7 +361,8 @@ var script14209 = function(self, actor, here, args, extra) {
 						actor.send("You're already on the Red Team!");
 						return;
 					}
-					for each (var player in getWaitingPlayers("all")) {
+					for (var _autoKey in getWaitingPlayers("all")) {
+						var player = getWaitingPlayers("all")[_autoKey];
 						getCharCols(player);
 						if (player.race == actor.race)
 							var aName = actor.name;
@@ -362,7 +372,8 @@ var script14209 = function(self, actor, here, args, extra) {
 					}
 				}
 				actor.arenaTeam = constants.ARENA_RED;
-				for each (var player in getWaitingPlayers("all")) {
+				for (var _autoKey in getWaitingPlayers("all")) {
+					var player = getWaitingPlayers("all")[_autoKey];
 					getCharCols(player);
 					if (player.race == actor.race)
 						var aName = actor.name;
@@ -390,7 +401,8 @@ var script14209 = function(self, actor, here, args, extra) {
 						actor.send("You're already on the Yellow Team!");
 						return;
 					}
-					for each (var player in getWaitingPlayers("all")) {
+					for (var _autoKey in getWaitingPlayers("all")) {
+						var player = getWaitingPlayers("all")[_autoKey];
 						getCharCols(player);
 						if (player.race == actor.race)
 							var aName = actor.name;
@@ -400,7 +412,8 @@ var script14209 = function(self, actor, here, args, extra) {
 					}
 				}
 				actor.arenaTeam = constants.ARENA_YELLOW;
-				for each (var player in getWaitingPlayers("all")) {
+				for (var _autoKey in getWaitingPlayers("all")) {
+					var player = getWaitingPlayers("all")[_autoKey];
 					getCharCols(player);
 					if (player.race == actor.race)
 						var aName = actor.name;
@@ -431,7 +444,8 @@ var script14209 = function(self, actor, here, args, extra) {
 						actor.send("You're already on the Green Team!");
 						return;
 					}
-					for each (var player in getWaitingPlayers("all")) {
+					for (var _autoKey in getWaitingPlayers("all")) {
+						var player = getWaitingPlayers("all")[_autoKey];
 						getCharCols(player);
 						if (player.race == actor.race)
 							var aName = actor.name;
@@ -441,7 +455,8 @@ var script14209 = function(self, actor, here, args, extra) {
 					}
 				}
 				actor.arenaTeam = constants.ARENA_GREEN;
-				for each (var player in getWaitingPlayers("all")) {
+				for (var _autoKey in getWaitingPlayers("all")) {
+					var player = getWaitingPlayers("all")[_autoKey];
 					getCharCols(player);
 					if (player.race == actor.race)
 						var aName = actor.name;
@@ -593,8 +608,10 @@ var script14209 = function(self, actor, here, args, extra) {
 				actor.send(" ");
 				actor.send(mag+"Current Votes"+nrm)
 				//actor.send(" ");
-				for each (var game in global.arenaAllGames)
+				for (var _autoKey in global.arenaAllGames) {
+					var game = global.arenaAllGames[_autoKey];
 					actor.send(strPadding(game.name," ",21,"right")+":  "+mag+game.votes+nrm);
+				}
 				if (actor == global.arenaHost) { //Player is host, remind him of options
 					getHostCommands(actor);
 				}
@@ -640,7 +657,8 @@ var script14209 = function(self, actor, here, args, extra) {
 					var blue = 0;
 					var yellow = 0;
 					var green = 0;
-					for each (var player in getWaitingPlayers("all")) {
+					for (var _autoKey in getWaitingPlayers("all")) {
+						var player = getWaitingPlayers("all")[_autoKey];
 					if (player.arenaTeam == constants.ARENA_BLUE)
 						blue += 1;
 					else if (player.arenaTeam == constants.ARENA_RED)
@@ -854,7 +872,8 @@ var script14209 = function(self, actor, here, args, extra) {
 			return;
 		}
 		setArenaStage(constants.ARENA_VOTING);
-		for each (var person in getWaitingPlayers("all")) {
+		for (var _autoKey in getWaitingPlayers("all")) {
+			var person = getWaitingPlayers("all")[_autoKey];
 			person.attach(14212);
 			getArenaStartMenu(person);
 		}

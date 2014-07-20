@@ -3,7 +3,8 @@ var script33212 = function(self, actor, here, args, extra) {
 	getCharCols(actor);
 	if (str_cmp(vArgs[1],"siege") && str_cmp(vArgs[1],"team") && str_cmp(vArgs[1],"member"))
 		return;
-	for each (var per in self.room.people) {
+	for (var _autoKey in self.room.people) {
+		var per = self.room.people[_autoKey];
 		if (per.name == "a member of the siege team")
 			var mob = per;
 	}
@@ -66,7 +67,8 @@ var script33212 = function(self, actor, here, args, extra) {
 		mob.say("Right away!");
 		var newRoom = self.room.direction(dir);
 		act("The siege team rolls the cannon "+dirToText(dir)+".",true,null,self,null,constants.TO_ROOM);
-		for each (var person in self.room.people) {
+		for (var _autoKey in self.room.people) {
+			var person = self.room.people[_autoKey];
 			if (person.name == "a member of the siege team")
 				person.moveToRoom(newRoom);
 		}
@@ -82,7 +84,8 @@ var script33212 = function(self, actor, here, args, extra) {
 		if (manor.gateIsBroken || !manor.hasGate) {
 			mob.say("We don't see anything to destroy!");
 			act("The siege team rolls the cannon away, heading back to camp.", true, null, self, null,constants.TO_ROOM);
-			for each (var person in self.room.people) {
+			for (var _autoKey in self.room.people) {
+				var person = self.room.people[_autoKey];
 				if (person.name == "a member of the siege team")
 					person.moveToRoom(getRoom(20899));
 			}
@@ -95,7 +98,7 @@ var script33212 = function(self, actor, here, args, extra) {
 			return;
 		}
 		mob.say("As you command, "+actor.name+"!");
-		// for each (var perp in getConnectedPlayers()) {
+		// for (var _autoKey in getConnectedPlayers()) { 	var perp = getConnectedPlayers()[_autoKey];
 		//	if (perp.id == manor.ownerUserId || arrContains(manor.allowedUsers, perp.id)) {
 		//		perp.affect(constants.AFF_NOQUIT,5,0,0);
 		//	}
@@ -117,7 +120,8 @@ var script33212 = function(self, actor, here, args, extra) {
 				setSval(self.room,33212,"gate",(time()+1440));
 				wait 2;
 				act("The siege team rolls the cannon away, heading back to camp.", true, null, self,null,constants.TO_ROOM);
-				for each (var person in self.room.people) {
+				for (var _autoKey in self.room.people) {
+					var person = self.room.people[_autoKey];
 					if (person.name == "a member of the siege team")
 						person.moveToRoom(getRoom(20899));
 				}

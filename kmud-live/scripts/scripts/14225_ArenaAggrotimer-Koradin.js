@@ -18,7 +18,8 @@ var script14225 = function(self, actor, here, args, extra) {
 	}
 	var aggArr = [];
 	var assistArr = [];
-	for each (var player in self.room.people) {
+	for (var _autoKey in self.room.people) {
+		var player = self.room.people[_autoKey];
 		if (player != self && !player.mobFlagged(constants.MOB_MOUNT)) {
 			if (self.mobFlagged(constants.MOB_SMOB))
 				aggArr.push(player);

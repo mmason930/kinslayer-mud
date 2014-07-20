@@ -53,7 +53,8 @@ var script20707 = function(self, actor, here, args, extra) {
 		var clan = global.ClanRoom[target_room.vnum];
 		var message = "enter";
 	}
-	for each (var mr in global.manors) {
+	for (var _autoKey in global.manors) {
+		var mr = global.manors[_autoKey];
 		if (actor.room.vnum == mr.outsideGateRoomVnum || actor.room.vnum == mr.insideGateRoomVnum)
 			var manor = mr;
 	}

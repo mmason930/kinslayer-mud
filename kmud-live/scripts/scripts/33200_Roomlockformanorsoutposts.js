@@ -19,7 +19,8 @@ var script33200 = function(self, actor, here, args, extra) {
 			actor.comm("say I'm too afraid to go there!");
 			return;
 		}
-		for each (var neighbor in self.neighbors) {
+		for (var _autoKey in self.neighbors) {
+			var neighbor = self.neighbors[_autoKey];
 			if (neighbor) {
 				if (neighbor.vnum == manor.insideGateRoomVnum)
 					var dir = dirToText(self.firstStep(neighbor));
@@ -28,9 +29,11 @@ var script33200 = function(self, actor, here, args, extra) {
 		if (manor.ownerUserId == 0 && actor.room.vnum != manor.insideGateRoomVnum)
 			var msg = bld+"The "+manor.name+" to the "+dir+" is available! Find the flag and CLAIM it fast!"+nrm;
 		else if (manor.ownerUserId == 0 && actor.room.vnum != manor.insideGateRoomVnum && actor.id != manor.ownerUserId && !arrContains(manor.allowedUsers, actor.id)) {
-			for each (var rRoom in manor.rangeRooms) {
+			for (var _autoKey in manor.rangeRooms) {
+				var rRoom = manor.rangeRooms[_autoKey];
 				rRoom = getRoom(rRoom);
-				for each (var guard in rRoom.people) {
+				for (var _autoKey in rRoom.people) {
+					var guard = rRoom.people[_autoKey];
 					if (guard.vnum > 0) {
 						if (isName("manorArcher", guard.namelist)) {
 							var msg = capFirstLetter(guard.name)+" yells from atop a tower, 'This is the "+manor.name+" of "+manor.ownerUserId+"! Leave now or die!'";

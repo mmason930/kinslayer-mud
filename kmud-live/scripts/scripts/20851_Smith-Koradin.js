@@ -64,8 +64,8 @@ var script20851 = function(self, actor, here, args, extra) {
 	var availableArmor = getSmithableArmorSlots(actor);
 	var availableWeapons = getSmithableWeapons(actor);
 	var availableMats = getSmithableTypes(actor);
-	for each (var armor in availableArmor)
-	{
+	for (var _autoKey in availableArmor) {
+		var armor = availableArmor[_autoKey];
 		if (!str_cmp(vArgs.join(" "),armor[0]))
 		{
 			var type = "abs";
@@ -73,8 +73,8 @@ var script20851 = function(self, actor, here, args, extra) {
 			item_found = true;
 		}
 	}
-	for each (var weapon in availableWeapons)
-	{
+	for (var _autoKey in availableWeapons) {
+		var weapon = availableWeapons[_autoKey];
 		if (!str_cmp(vArgs.join(" "),weapon[0]))
 		{
 			var type = "weapon";
@@ -82,8 +82,8 @@ var script20851 = function(self, actor, here, args, extra) {
 			item_found = true;
 		}
 	}
-	for each (var aMat in availableMats)
-	{
+	for (var _autoKey in availableMats) {
+		var aMat = availableMats[_autoKey];
 		if (!str_cmp(material,aMat[0]))
 		{
 			var end_mat = aMat;
@@ -100,7 +100,8 @@ var script20851 = function(self, actor, here, args, extra) {
 		actor.send("You can't smith that item. Type SMITH to view your currently available items.");
 		return;
 	}
-	for each (var rItem in actor.room.items) {
+	for (var _autoKey in actor.room.items) {
+		var rItem = actor.room.items[_autoKey];
 		var rIName = rItem.namelist.split(" ");
 		if (rIName[rIName.length-1] == "smithingforge")
 			var forge = rItem;
@@ -269,11 +270,14 @@ var script20851 = function(self, actor, here, args, extra) {
 	}
 	var ingredients = [];
 	var totalWeight = 0;
-	for each (var iItem in actor.inventory) {
-		for each (var req in reqs) {
+	for (var _autoKey in actor.inventory) {
+		var iItem = actor.inventory[_autoKey];
+		for (var _autoKey in reqs) {
+			var req = reqs[_autoKey];
 			if (req[2] >= req[1])
 				continue;
-			for each (var vnum in req[0]) {
+			for (var _autoKey in req[0]) {
+				var vnum = req[0][_autoKey];
 				if (iItem.vnum == vnum) {
 					ingredients.push(iItem);
 					req[2] += iItem.weight;
@@ -361,8 +365,10 @@ var script20851 = function(self, actor, here, args, extra) {
 		actor.send("\nYou stop working on the "+end_object[0].toLowerCase()+endMsg);
 		return;
 	}
-	for each (var iIng in ingredients)
+	for (var _autoKey in ingredients) {
+		var iIng = ingredients[_autoKey];
 		iIng.extract();
+	}
 	actor.loadObj(new_obj);
 	new_obj = actor.inventory[0];
 	new_obj.setRetoolSDesc(obj_name);
@@ -379,8 +385,8 @@ var script20851 = function(self, actor, here, args, extra) {
 	actor.send("You finish smithing " +obj_name+ ".");
 	act("$n finishes smithing "+obj_name+", and wipes $s brow.",true,actor,null,null,constants.TO_ROOM);
 	awardPracs(actor,"Smithing",end_mat[0],end_object[0]);
-	for each (var player in getConnectedPlayers())
-	{
+	for (var _autoKey in getConnectedPlayers()) {
+		var player = getConnectedPlayers()[_autoKey];
 		if (player.name == "Koradin")
 			player.send("SMITHING: " +actor.name + " just got " + obj_name);
 	}

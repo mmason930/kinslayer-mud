@@ -14,12 +14,14 @@ var script33208 = function(self, actor, here, args, extra) {
 		var trueCheck = manor.hasPortal;
 	while (timeLeft > 0) {
 		//sendKoradin("checking "+self.vnum);
-		for each (var dude in self.people) {
+		for (var _autoKey in self.people) {
+			var dude = self.people[_autoKey];
 			if (dude.vnum < 0) {
 				if ( (dude.id != manor.ownerUserId && !arrContains(manor.allowedUsers, dude.id)) || trueCheck == false) {
 					getCharCols(dude);
 					dude.send(bld+"You aren't allowed in this room!"+nrm);
-					for each (var neighbor in self.neighbors) {
+					for (var _autoKey in self.neighbors) {
+						var neighbor = self.neighbors[_autoKey];
 						if (neighbor) {
 							if (neighbor.sector != constants.SECT_INSIDE)
 								var dir = neighbor;

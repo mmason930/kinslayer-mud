@@ -5,8 +5,8 @@ var script20863 = function(self, actor, here, args, extra) {
 		actor.send("To light the forge, type 'light forge'.");
 		return;
 	}
-	for each (var per in self.people)
-	{
+	for (var _autoKey in self.people) {
+		var per = self.people[_autoKey];
 		var perName = per.namelist.split(" ");
 		if (per.maxHit > 30000 && perName[perName.length-1] == "blacksmith")
 			var blacksmith = per;
@@ -15,10 +15,11 @@ var script20863 = function(self, actor, here, args, extra) {
 		actor.send("You don't want to attempt this without the blacksmith present!");
 		return;
 	}
-	for each (var item in self.items)
-	{
+	for (var _autoKey in self.items) {
+		var item = self.items[_autoKey];
 		//here.echo(item.name);
-		for each (var iName in item.namelist.split(" ")) {
+		for (var _autoKey in item.namelist.split(" ")) {
+			var iName = item.namelist.split(" ")[_autoKey];
 			if (iName == "smithingforge") {
 				var forge = item;
 			}
@@ -36,7 +37,8 @@ var script20863 = function(self, actor, here, args, extra) {
 			blacksmith.say("Can't you see the forge is already lit?");
 			return;
 		}
-		for each (var item in actor.inventory) {
+		for (var _autoKey in actor.inventory) {
+			var item = actor.inventory[_autoKey];
 			if (item.vnum == 4571)
 				coal.push(item);
 		}
@@ -98,8 +100,10 @@ var script20863 = function(self, actor, here, args, extra) {
 		}
 		setSval(forge,20863,"isLit",time()+timeLit);
 		self.echo("\nThe forge roars to life.");
-		for each (var cItem in coal)
+		for (var _autoKey in coal) {
+			var cItem = coal[_autoKey];
 			cItem.extract();
+		}
 		wait 1;
 		self.echo(capFirstLetter(blacksmith.name) + " looks up from his work, smiling.");
 		blacksmith.say("That'll keep it going for "+timeMessage+", I'd say.");

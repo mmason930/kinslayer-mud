@@ -29,13 +29,13 @@ var script20951 = function(self, actor, here, args, extra) {
 	/********
 	var targets = [];
 	targets.push(actor);
-	for each (var person in actor.followers)
-	{
+	for (var _autoKey in actor.followers) {
+		var person = actor.followers[_autoKey];
 		if (person.room == actor.room)
 			targets.push(person);
 	}
-	for each (var target in targets)
-	{
+	for (var _autoKey in targets) {
+		var target = targets[_autoKey];
 		var msg = "$n leaves " +dirToText(revDir(extra.direction));
 		var enter_msg = "$n has arrived from the " +dirToText(extra.direction);
 		if (target.mount)

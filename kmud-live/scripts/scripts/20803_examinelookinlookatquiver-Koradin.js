@@ -13,8 +13,8 @@ var script20803 = function(self, actor, here, args, extra) {
 		{
 			if (arg_array[1] == "i" || arg_array[1] == "a" || arg_array[1] == "in" || arg_array[1] == "at")
 			{
-				for each(var word in self.namelist.split(" "))
-				{
+				for (var _autoKey in self.namelist.split(" ")) {
+					var word = self.namelist.split(" ")[_autoKey];
 					if (word == arg_array[2])
 						var trigger = 1;
 				}
@@ -29,8 +29,8 @@ var script20803 = function(self, actor, here, args, extra) {
 	{
 		if (arg_array[0] == "exa" || arg_array[0] == "exam" || arg_array[0] == "exami" || arg_array[0] == "examin" || arg_array[0] == "examine")
 		{
-			for each(var word in self.namelist.split(" "))
-			{
+			for (var _autoKey in self.namelist.split(" ")) {
+				var word = self.namelist.split(" ")[_autoKey];
 				if (word == arg_array[1])
 					var trigger = 1;
 			}

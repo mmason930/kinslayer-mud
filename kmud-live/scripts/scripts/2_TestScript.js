@@ -421,8 +421,9 @@ var script2 = function(self, actor, here, args, extra) {
 			var before = new Date().getTime();
 			var wielded = 0;
 			
-			for each(var ch in global.characters)
-			{
+			for (var _autoKey in global.characters) {
+			
+				var ch = global.characters[_autoKey];
 				if(ch.eq(constants.WEAR_WIELD))
 				{
 					++wielded;

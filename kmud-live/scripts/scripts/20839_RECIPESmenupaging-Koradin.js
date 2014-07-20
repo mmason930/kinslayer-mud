@@ -32,8 +32,8 @@ var script20839 = function(self, actor, here, args, extra) {
 	var tailorRecipes = actor.getRecipes(constants.RECIPE_TYPE_TAILORING)
 	var allRecipes = mixRecipes.concat(smithRecipes).concat(tailorRecipes);
 	var spacer = " ";
-	// for each (var pVnum in allRecipes)
-	// {
+	// for (var _autoKey in allRecipes) { 	var pVnum = allRecipes[_autoKey];
+	// { }
 		// var potion = getPotionByVnum(pVnum);
 		// var potion_type = potion.name.split(" ");
 		// if (potion_type.pop() == "vial")

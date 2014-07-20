@@ -54,9 +54,12 @@ var script20878 = function(self, actor, here, args, extra) {
 	}
 	var ingredients = [];
 	var totalWeight = 0;
-	for each (var item in actor.inventory) {
-		for each (var req in reqs) {
-			for each (var vnum in req[0]) {
+	for (var _autoKey in actor.inventory) {
+		var item = actor.inventory[_autoKey];
+		for (var _autoKey in reqs) {
+			var req = reqs[_autoKey];
+			for (var _autoKey in req[0]) {
+				var vnum = req[0][_autoKey];
 				if (item.vnum == vnum) {
 					ingredients.push(item);
 					req[2] += item.weight;
@@ -74,7 +77,8 @@ var script20878 = function(self, actor, here, args, extra) {
 			matPrep = false;
 			totalWeight = 0;
 			ingredients = [];
-			for each (var prepObj in actor.inventory) {
+			for (var _autoKey in actor.inventory) {
+				var prepObj = actor.inventory[_autoKey];
 				var prepProto = getObjProto(prepObj.vnum);
 				if (isName(argArray[1], prepObj.namelist) && !isName("material",prepProto.name) && !isName("square",prepProto.name)) {
 					ingredients.push(prepObj);
@@ -153,8 +157,10 @@ var script20878 = function(self, actor, here, args, extra) {
 				actor.send("Preparing "+mat+" will destroy the following items:");
 				actor.send("______________________________________________________");
 				actor.send(" ");
-				for each (var desItem in ingredients)
+				for (var _autoKey in ingredients) {
+					var desItem = ingredients[_autoKey];
 					actor.send(desItem.name);
+				}
 				actor.send("______________________________________________________");
 				actor.send(" ");
 				actor.send("Are you sure you wish to continue?");
@@ -192,7 +198,8 @@ var script20878 = function(self, actor, here, args, extra) {
 	if (skill > 98)
 		timer -= 2;
 	//here.echo(ingredients);
-	for each (var ingItem in ingredients) {
+	for (var _autoKey in ingredients) {
+		var ingItem = ingredients[_autoKey];
 		ingItem.moveToRoom(getRoom(20800));
 		ingItem.extract();
 	}
@@ -210,8 +217,10 @@ var script20878 = function(self, actor, here, args, extra) {
 		return;
 	}
 	actor.send("\nYou finish weaving the "+mat+" and set it on the rack to dry.");
-	for each (var thing in room.items) {
-		for each (var name in thing.namelist.split(" ")) {
+	for (var _autoKey in room.items) {
+		var thing = room.items[_autoKey];
+		for (var _autoKey in thing.namelist.split(" ")) {
+			var name = thing.namelist.split(" ")[_autoKey];
 			if (name == "dryingrack") {
 				var rack = thing;
 				break;
@@ -219,7 +228,8 @@ var script20878 = function(self, actor, here, args, extra) {
 		}
 	}
 	//here.echo(results);
-	for each (var result in results) {
+	for (var _autoKey in results) {
+		var result = results[_autoKey];
 		wait 5;
 		if (rack) {
 			rack.loadObj(result);

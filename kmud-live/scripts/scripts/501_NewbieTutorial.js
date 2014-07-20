@@ -31,8 +31,10 @@ var script501 = function(self, actor, here, args, extra) {
 				if (actor.eq(i))
 					actor.eq(i).moveToRoom(actor.room);
 			}
-			for each (var thing in actor.inventory)
+			for (var _autoKey in actor.inventory) {
+				var thing = actor.inventory[_autoKey];
 				thing.moveToRoom(actor.room);
+			}
 			actor.gsend("Wonderful! In this short tutorial, you'll learn the basics of the world of Kinslayer.");
 			waitpulse 13;
 			actor.send("The Guardian of Life teleports you to another place.");
@@ -336,7 +338,8 @@ var script501 = function(self, actor, here, args, extra) {
 			_block;
 			for (var i=26; i<40; i++) {
 				var inRoom = false;
-				for each (var person in getRoom(i).people) {
+				for (var _autoKey in getRoom(i).people) {
+					var person = getRoom(i).people[_autoKey];
 					if (person.vnum == -1)
 						inRoom = true;
 				}

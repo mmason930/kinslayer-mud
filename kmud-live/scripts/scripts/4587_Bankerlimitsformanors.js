@@ -3,7 +3,8 @@ var script4587 = function(self, actor, here, args, extra) {
 	var timer = getSval(self,43,actor.name);
 	if (!timer)
 		timer = time()+21600;
-	for each (var mr in global.manors) {
+	for (var _autoKey in global.manors) {
+		var mr = global.manors[_autoKey];
 		if (self.room.vnum == mr.innRoomVnum)
 			var manor = mr;
 	}

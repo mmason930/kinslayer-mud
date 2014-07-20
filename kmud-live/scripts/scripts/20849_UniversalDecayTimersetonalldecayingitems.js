@@ -26,7 +26,8 @@ var script20849 = function(self, actor, here, args, extra) {
 	if (!actor.fighting)
 		return;
 	var multiplier = 4;
-	for each (var person in actor.room.people) {
+	for (var _autoKey in actor.room.people) {
+		var person = actor.room.people[_autoKey];
 		if (person.fighting == actor)
 			multiplier += 1;
 	}

@@ -4,7 +4,8 @@ var script20920 = function(self, actor, here, args, extra) {
 	//Koradin - May 2011
 	var vArgs = getArgList(args);
 	if (!vArgs[1]) {
-		for each (var item in actor.room.items) {
+		for (var _autoKey in actor.room.items) {
+			var item = actor.room.items[_autoKey];
 			if (item.type == constants.ITEM_FOUNTAIN) {
 				var container = item;
 				break;

@@ -23,7 +23,8 @@ var script14211 = function(self, actor, here, args, extra) {
 	}
 	if (arrContains(global.arenaPlayers, actor)) { //Actor is in the arena
 		getCharCols(actor);
-		for each(var thing in actor.inventory) {
+		for (var _autoKey in actor.inventory) {
+			var thing = actor.inventory[_autoKey];
 			if (arrContains(global.arenaItems, thing.vnum)) {
 				if (arrContains(global.arenaZones, actor.room.zoneVnum))
 					actor.comm("drop "+thing.namelist.split(" ")[0]);
@@ -94,7 +95,8 @@ var script14211 = function(self, actor, here, args, extra) {
 			if (global.arenaCurrentGame.totalPlayers > global.arenaPlayers.length)
 				global.arenaCurrentGame.totalPlayers -= 1;
 			if (global.arenaCurrentGame.totalPlayers == 1) { //winning the game
-				for each (var player in global.arenaPlayers) {
+				for (var _autoKey in global.arenaPlayers) {
+					var player = global.arenaPlayers[_autoKey];
 					if (getSval(player,20860,"deathCount") < global.arenaCurrentGame.limit)
 						arenaEcho(player.name+" is the Last Man Standing!");
 				}
@@ -104,7 +106,8 @@ var script14211 = function(self, actor, here, args, extra) {
 		}
 		actor.comm("look");
 		var count = 0;
-		for each (var play in global.arenaPlayers) {
+		for (var _autoKey in global.arenaPlayers) {
+			var play = global.arenaPlayers[_autoKey];
 			if (!isAI(play))
 				count += 1;
 		}

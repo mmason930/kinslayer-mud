@@ -17,7 +17,8 @@ var script14234 = function(self, actor, here, args, extra) {
 	}
 	var existingWager = false;
 	//Check to see if actor has a wager already
-	for each (var bet in global.arenaCurrentWagers) {
+	for (var _autoKey in global.arenaCurrentWagers) {
+		var bet = global.arenaCurrentWagers[_autoKey];
 		if (bet[0] == actor)
 			existingWager = true;
 	}
@@ -51,8 +52,10 @@ var script14234 = function(self, actor, here, args, extra) {
 						global.arenaCurrentWagers = [];
 						arenaEcho("All wagers have been erased.");
 					}
-					for each (var pers in getWaitingPlayers("pc"))
+					for (var _autoKey in getWaitingPlayers("pc")) {
+						var pers = getWaitingPlayers("pc")[_autoKey];
 						pers.detach(14234);
+					}
 					setSval(actor,14209,"wagerMenu",0);
 					actor.detach(14234);
 					return;

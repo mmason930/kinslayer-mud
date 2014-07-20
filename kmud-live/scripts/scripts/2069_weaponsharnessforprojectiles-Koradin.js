@@ -26,8 +26,8 @@ var script2069 = function(self, actor, here, args, extra) {
 	// }
 	// else if (!wielded || !end_item)
 	// {
-		// for each(var item in actor.inventory)
-		// {
+		// for (var _autoKey in actor.inventory) { 	var item = actor.inventory[_autoKey];
+		// { }
 			// if (item.type == constants.ITEM_WEAPON)
 			// {
 				// var item_type = item.value(constants.VALUE_WEAPON_TYPE);

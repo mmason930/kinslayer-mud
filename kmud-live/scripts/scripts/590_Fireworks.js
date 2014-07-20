@@ -1,7 +1,8 @@
 var script590 = function(self, actor, here, args, extra) {
 	waitpulse random(1,32);
 	var worksInManor = false;
-	for each (var manor in global.manors) {
+	for (var _autoKey in global.manors) {
+		var manor = global.manors[_autoKey];
 		if (here.zoneVnum == manor.zoneId)
 			worksInManor = true;
 	}

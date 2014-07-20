@@ -195,8 +195,8 @@ var script13222 = function(self, actor, here, args, extra) {
 	rooms.push(rtitle8);
 	actor.send("You start studying " + self.name + ".");
 	echoaround(actor, actor.name + " starts studying " + self.name + ".");
-	for each (var r in rooms)
-	{
+	for (var _autoKey in rooms) {
+		var r = rooms[_autoKey];
 		//here.echo(actor.room.vnum);
 		if (actor.room.vnum == r[3])
 		{
@@ -213,8 +213,8 @@ var script13222 = function(self, actor, here, args, extra) {
 		buffer += "|";
 		for (var x = 0; x <= 12; ++x)
 		{
-			for each(var r in rooms)
-			{
+			for (var _autoKey in rooms) {
+				var r = rooms[_autoKey];
 				if (r[0] == x && r[1] == y)
 				{
 					
@@ -257,8 +257,8 @@ var script13222 = function(self, actor, here, args, extra) {
 			// var coor = [];
 			// coor.push(x);
 			// coor.push(y);
-			for each(var r in rooms)
-			{
+			for (var _autoKey in rooms) {
+				var r = rooms[_autoKey];
 				if (actor.room.vnum == r[3])
 				{
 					if (r[0] == x && r[1] == y)	
@@ -313,8 +313,8 @@ var script13222 = function(self, actor, here, args, extra) {
 		buffer += "|";
 		for (var x = 0; x <= 12; ++x)
 		{
-			for each(var r in rooms)
-			{
+			for (var _autoKey in rooms) {
+				var r = rooms[_autoKey];
 				if (r[0] == x && r[1] == y)
 				{
 					if (r[3] == 1)

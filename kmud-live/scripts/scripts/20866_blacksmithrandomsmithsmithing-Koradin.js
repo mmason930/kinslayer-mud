@@ -7,7 +7,8 @@ var script20866 = function(self, actor, here, args, extra) {
 	var room = self.room;
 	var name = capFirstLetter(self.name);
 	var smithLitTheForge = false;
-	for each (var rItem in room.items) {
+	for (var _autoKey in room.items) {
+		var rItem = room.items[_autoKey];
 		var rIName = rItem.namelist.split(" ");
 		if (rIName[rIName.length-1] == "smithingforge")
 			var forge = rItem;
@@ -48,24 +49,24 @@ var script20866 = function(self, actor, here, args, extra) {
 	var availableArmor = getSmithableArmorSlots(self);
 	var availableWeapons = getSmithableWeapons(self);
 	var availableMats = getSmithableTypes(self);
-	for each (var armor in availableArmor)
-	{
+	for (var _autoKey in availableArmor) {
+		var armor = availableArmor[_autoKey];
 		if (!str_cmp(itemArg,armor[0]))
 		{
 			var type = "abs";
 			var end_object = armor;
 		}
 	}
-	for each (var weapon in availableWeapons)
-	{
+	for (var _autoKey in availableWeapons) {
+		var weapon = availableWeapons[_autoKey];
 		if (!str_cmp(itemArg,weapon[0]))
 		{
 			var type = "weapon";
 			var end_object = weapon;
 		}
 	}
-	for each (var aMat in availableMats)
-	{
+	for (var _autoKey in availableMats) {
+		var aMat = availableMats[_autoKey];
 		if (!str_cmp(matArg,aMat[0]))
 			var end_mat = aMat;
 	}
@@ -179,10 +180,13 @@ var script20866 = function(self, actor, here, args, extra) {
 	wait 15;
 	room.echo(name + " finishes up the last details of the "+end_object[0].toLowerCase()+", holding it up to the light.");
 	wait 2;
-	for each (var nRoom in self.room.neighbors) {
+	for (var _autoKey in self.room.neighbors) {
+		var nRoom = self.room.neighbors[_autoKey];
 		if (nRoom) {
-			for each (var nPerson in nRoom.people) {
-				for each (var nName in nPerson.namelist.split(" ")) {
+			for (var _autoKey in nRoom.people) {
+				var nPerson = nRoom.people[_autoKey];
+				for (var _autoKey in nPerson.namelist.split(" ")) {
+					var nName = nPerson.namelist.split(" ")[_autoKey];
 					if (nName == "dude")
 						var apprentice = nPerson;
 				}

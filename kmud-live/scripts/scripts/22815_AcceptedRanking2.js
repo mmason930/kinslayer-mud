@@ -15,6 +15,7 @@ var script22815 = function(self, actor, here, args, extra) {
 	var sheriam = here.loadMob(22317);
 	setSval(sheriam,22815,"novice",novice);
 	here.echo("Sheriam enters the room, her blue shawl draped carefully over her shoulders.");
-	for each(var person in here.people){if(person.name == "Sheriam Sedai"){person.comm("phaseone")}};
+	for (var _autoKey in here.people) {
+		var person = here.people[_autoKey];if(person.name == "Sheriam Sedai"){person.comm("phaseone")}};
 	}
 }

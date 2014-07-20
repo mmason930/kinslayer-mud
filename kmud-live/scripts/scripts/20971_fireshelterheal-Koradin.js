@@ -61,8 +61,8 @@ var script20971 = function(self, actor, here, args, extra) {
 		var sps = random(1,4);
 	}
 	wait random(1,5);
-	for each (var person in room.people)
-	{
+	for (var _autoKey in room.people) {
+		var person = room.people[_autoKey];
 		if (person.race == race)
 		{
 			person.hps += hps;
@@ -79,8 +79,8 @@ var script20971 = function(self, actor, here, args, extra) {
 	if (random(1,4) == 1)
 	{
 		wait random(1,5);
-		for each (var person in room.people)
-		{
+		for (var _autoKey in room.people) {
+			var person = room.people[_autoKey];
 			if (person.race == race && !person.isBashed && person.position != constants.POS_FIGHTING)
 			{
 				person.hps += hps;

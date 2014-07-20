@@ -2,7 +2,8 @@ var script20891 = function(self, actor, here, args, extra) {
 	function afterWait(args) {
 		var self = args[0];
 		var actor = args[1];
-		for each (var person in self.room.people) {
+		for (var _autoKey in self.room.people) {
+			var person = self.room.people[_autoKey];
 			var rank = person.getSpecTitle();
 			if (rank) {
 				var title = rank.title.split(" ");

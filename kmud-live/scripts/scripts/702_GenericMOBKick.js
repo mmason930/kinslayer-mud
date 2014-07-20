@@ -7,7 +7,8 @@ var script702 = function(self, actor, here, args, extra) {
 	var kickCooldown = getSval(ch, 4001, "kickCooldown");
 	if (!kickCooldown) {
 		wait random(1, 5);
-		for each (var person in room.people) {
+		for (var _autoKey in room.people) {
+			var person = room.people[_autoKey];
 			if (person.fighting == ch &&
 				person.target == ch
 			) {

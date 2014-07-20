@@ -7,11 +7,11 @@ function echoaroundmany(ignore, message)
     var room = ignore[0].room;
     var people = room.people;
     var fail;
-    for each(var person in people)
-    {
+    for (var _autoKey in people) {
+    	var person = people[_autoKey];
         fail = false;
-        for each(var ignored in ignore)
-        {
+        for (var _autoKey in ignore) {
+        	var ignored = ignore[_autoKey];
             if (ignored == person)
             fail = true;
         }

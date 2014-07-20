@@ -3,7 +3,8 @@ var script701 = function(self, actor, here, args, extra) {
 	
 	// See if bow is in inventory
 	var bowInInventory = false;
-	for each (var item in self.inventory) {
+	for (var _autoKey in self.inventory) {
+		var item = self.inventory[_autoKey];
 		if (item.value(constants.VALUE_WEAPON_TYPE) == constants.WEAPON_BOW) {
 			bowInInventory = true;
 		}
@@ -21,7 +22,8 @@ var script701 = function(self, actor, here, args, extra) {
 			for (i=0; i<here.neighbors.length; i++) {
 				room = here.neighbors[i];
 				if (room) {
-					for each (var person in room.people) {
+					for (var _autoKey in room.people) {
+						var person = room.people[_autoKey];
 						// Shoot the first player in the room
 						if (person.vnum == -1) {
 							smobShoot(ch, person, here.firstStep(room));

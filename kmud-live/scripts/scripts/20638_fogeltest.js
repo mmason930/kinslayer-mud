@@ -110,8 +110,10 @@ var script20638 = function(self, actor, here, args, extra) {
 		var mat = "tin";
 		var totalWeight = 100;
 		var result = getSmeltingResult(mat, totalWeight);
-		for each (var thing in here.items) {
-			for each (var name in thing.namelist.split(" ")) {
+		for (var _autoKey in here.items) {
+			var thing = here.items[_autoKey];
+			for (var _autoKey in thing.namelist.split(" ")) {
+				var name = thing.namelist.split(" ")[_autoKey];
 				if (name == "quenching") {
 					var barrel = thing;
 					break;

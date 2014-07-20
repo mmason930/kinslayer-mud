@@ -117,21 +117,26 @@ var script33203 = function(self, actor, here, args, extra) {
 			noTargMsg = " strikes the ground, its target no longer around.";
 		}
 	}
-	for each (var person in self.room.people) {
+	for (var _autoKey in self.room.people) {
+		var person = self.room.people[_autoKey];
 		act(selfMsg, true, person, null, null, constants.TO_CHAR);
 	}
-	for each (var pers in victim.room.people) {
+	for (var _autoKey in victim.room.people) {
+		var pers = victim.room.people[_autoKey];
 		act(msg, true, pers, null, null, constants.TO_CHAR);
 	}
 	wait waitTime;
 	if (!victim || victim.room != firstRoom) { // target moved/died, not there anymore
-		for each (var endP in firstRoom.people)
+		for (var _autoKey in firstRoom.people) {
+			var endP = firstRoom.people[_autoKey];
 			act(capFirstLetter(obj)+noTargMsg, true, endP, null, null, constants.TO_CHAR);
+		}
 		return;
 	}
 	if (victim.dodge > random(1,200)) {
 		victim.send("You dive out of the way, narrowly avoiding "+obj+"!");
-		for each (var dude in victim.room.people) {
+		for (var _autoKey in victim.room.people) {
+			var dude = victim.room.people[_autoKey];
 			if (dude != victim)
 				act(victim.name+" dives out of the way, narrowly avoiding "+obj+"!",true,dude,null,null,constants.TO_CHAR)
 		}
@@ -143,7 +148,8 @@ var script33203 = function(self, actor, here, args, extra) {
 	else
 		var youR = "you";
 	victim.send(red+capFirstLetter(obj)+dmgMsg1+youR+dmgMsg2+nrm);
-	for each (var dude in victim.room.people) {
+	for (var _autoKey in victim.room.people) {
+		var dude = victim.room.people[_autoKey];
 		if (obj == "a fireball" && dmgMsg1 == " explodes in ")
 			var maybeR = "'s";
 		else

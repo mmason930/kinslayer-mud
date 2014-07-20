@@ -7,8 +7,10 @@ var script1021 = function(self, actor, here, args, extra) {
 		actor.startTimer(2.5);
 		var success = runTimer(actor);
 		if (success){
-			for each (var player in getPlayersInZone(izone))
+			for (var _autoKey in getPlayersInZone(izone)) {
+				var player = getPlayersInZone(izone)[_autoKey];
 				actor.send(player.name);
+			}
 			}
 	}
 }

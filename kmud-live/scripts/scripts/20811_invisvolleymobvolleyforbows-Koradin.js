@@ -43,8 +43,8 @@ var script20811 = function(self, actor, here, args, extra) {
 	//THE FOLLOWING CHECKS TO SEE IF THE ACTOR IS WEARING A QUIVER, AND IF SO, MODIFIES THE ARROWS MESSAGES, AND EFFECTS.
 	if (back_item)
 	{
-		for each(var word in back_item.namelist.split(" "))
-		{
+		for (var _autoKey in back_item.namelist.split(" ")) {
+			var word = back_item.namelist.split(" ")[_autoKey];
 			if (word == "quiverforbows")
 				var quiver = back_item;
 		}

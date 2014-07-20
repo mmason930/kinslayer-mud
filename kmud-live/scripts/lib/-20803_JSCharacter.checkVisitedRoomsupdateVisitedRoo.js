@@ -11,8 +11,11 @@ JSCharacter.prototype.checkVisitedRooms = function ( strQuestName_strTaskName )
 		return false;
 	var pval_array = pval.split("~");
 	var pval_zone = pval_array.shift();
-	for each (var pval_room in pval_array)
+	for (var _autoKey in pval_array) {
+		var pval_room = pval_array[_autoKey];
 		result.push( parseInt(pval_zone+pval_room) );
+
+	}
 	function fSort(a,b) {
 		return ( a - b );
 	}

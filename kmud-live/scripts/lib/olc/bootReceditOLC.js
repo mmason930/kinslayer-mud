@@ -88,8 +88,8 @@ function bootReceditOLC()
 			var recipe = vContainer[ recipeIndex ];
 			var quan = 0;
 			var recipeVnums = [];
-			for each (var ing in recipe.ingredients)
-			{
+			for (var _autoKey in recipe.ingredients) {
+				var ing = recipe.ingredients[_autoKey];
 				quan += ing.quantity;
 				recipeVnums.push(ing.vnum);
 			}

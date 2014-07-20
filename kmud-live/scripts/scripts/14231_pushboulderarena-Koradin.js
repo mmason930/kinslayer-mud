@@ -55,7 +55,8 @@ var script14231 = function(self, actor, here, args, extra) {
 			wait 2;
 			self.moveToRoom(newRoom);
 			newRoom.echo("An enormous boulder crashes into view from up the path!");
-			for each (var player in newRoom.people) {
+			for (var _autoKey in newRoom.people) {
+				var player = newRoom.people[_autoKey];
 				if (player.vnum == -1 && random(1,5) != 1) {
 					var dodge = 33;
 				} 

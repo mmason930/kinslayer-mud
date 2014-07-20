@@ -78,7 +78,8 @@ function loadSmobs() {
 		if (!arrContains(global.arenaCurrentMap.exclusions, i) && !arrContains(global.arenaCurrentMap.redCityRooms, i) && !arrContains(global.arenaCurrentMap.blueCityRooms, i) && !arrContains(global.arenaCurrentMap.yellowCityRooms, i) && !arrContains(global.arenaCurrentMap.greenCityRooms, i))
 			smobRooms.push(i);
 	}
-	for each (var room in smobRooms) {
+	for (var _autoKey in smobRooms) {
+		var room = smobRooms[_autoKey];
 		global.arenaCurrentGame.totalSmobs += 1;
 		getRoom(room).loadMob(getRandomSmobVnum());
 		getRoom(room).people[0].attach(14225);
@@ -88,8 +89,11 @@ function getSmobGameWinner(strType) {
 	if (strType == "ffa") {
 		var pArr = [];
 		var sArr = [];
-		for each (var player in global.arenaPlayers)
+		for (var _autoKey in global.arenaPlayers) {
+			var player = global.arenaPlayers[_autoKey];
 			pArr.push([player,(getSval(player,20860,"smobKills") ? getSval(player,20860,"smobKills") : 0)]);
+
+		}
 		var topVoteIndex = 0;
 		var topVoteValue = 0;
 		for(i=0; i<pArr.length; i++) {
@@ -120,7 +124,8 @@ function getSmobGameWinner(strType) {
 		var redKills = 0;
 		var yellowKills = 0;
 		var greenKills = 0;
-		for each (var player in global.arenaPlayers) {
+		for (var _autoKey in global.arenaPlayers) {
+			var player = global.arenaPlayers[_autoKey];
 			var sKills = (getSval(player,20860,"smobKills") ? getSval(player,20860,"smobKills") : 0);
 			if (player.arenaTeam == constants.ARENA_BLUE)
 				blueKills += sKills;
@@ -155,7 +160,8 @@ function getSmobGameWinner(strType) {
 			var red = 0;
 			var yellow = 0;
 			var green = 0;
-			for each (var player in global.arenaPlayers) {
+			for (var _autoKey in global.arenaPlayers) {
+				var player = global.arenaPlayers[_autoKey];
 				if (arrContains(winArr, player.arenaTeam)) {
 					if (player.arenaTeam == constants.ARENA_BLUE)
 						blue += ( getSval(player, 20860, "arenaScore") ? getSval(player, 20860, "arenaScore") : 0 );
@@ -184,8 +190,11 @@ function getTimeGameWinner(strType) {
 	if (strType == "ffa") {
 		var pArr = [];
 		var sArr = [];
-		for each (var player in global.arenaPlayers)
+		for (var _autoKey in global.arenaPlayers) {
+			var player = global.arenaPlayers[_autoKey];
 			pArr.push([player,(getSval(player,20860,"killCount") ? getSval(player,20860,"killCount") : 0)]);
+
+		}
 		var topVoteIndex = 0;
 		var topVoteValue = 0;
 		for(i=0; i<pArr.length; i++) {
@@ -216,7 +225,8 @@ function getTimeGameWinner(strType) {
 		var redKills = 0;
 		var yellowKills = 0;
 		var greenKills = 0;
-		for each (var player in global.arenaPlayers) {
+		for (var _autoKey in global.arenaPlayers) {
+			var player = global.arenaPlayers[_autoKey];
 			var sKills = (getSval(player,20860,"killCount") ? getSval(player,20860,"killCount") : 0);
 			if (player.arenaTeam == constants.ARENA_BLUE)
 				blueKills += sKills;
@@ -251,7 +261,8 @@ function getTimeGameWinner(strType) {
 			var red = 0;
 			var yellow = 0;
 			var green = 0;
-			for each (var player in global.arenaPlayers) {
+			for (var _autoKey in global.arenaPlayers) {
+				var player = global.arenaPlayers[_autoKey];
 				if (arrContains(winArr, player.arenaTeam)) {
 					if (player.arenaTeam == constants.ARENA_BLUE)
 						blue += ( getSval(player, 20860, "arenaScore") ? getSval(player, 20860, "arenaScore") : 0 );
@@ -344,7 +355,8 @@ function getTarget(actor) {
 	}
 	if (!target) { //no unengaged targets in room
 		if (global.arenaFreeForAll == false) {
-			for each (var player in actor.room.people) {
+			for (var _autoKey in actor.room.people) {
+				var player = actor.room.people[_autoKey];
 				if (arrContains(global.arenaPlayers, player) && player.arenaTeam != actor.arenaTeam)
 					target = player;
 			}
@@ -352,7 +364,8 @@ function getTarget(actor) {
 		else {
 			if (actor.room.people.length > 0) {
 				var targetArr = [];
-				for each (var player in actor.room.people) {
+				for (var _autoKey in actor.room.people) {
+					var player = actor.room.people[_autoKey];
 					if (arrContains(global.arenaPlayers, player) && actor != player)
 						targetArr.push(player);
 				}
@@ -364,7 +377,8 @@ function getTarget(actor) {
 	if (!target) { //no targets in room
 		var targetArr = [];
 		if (global.arenaFreeForAll == false) {
-			for each (var player in global.arenaPlayers) {
+			for (var _autoKey in global.arenaPlayers) {
+				var player = global.arenaPlayers[_autoKey];
 				if (player.arenaTeam != actor.arenaTeam && !player.fighting) {
 					targetArr.push(player);
 				}
@@ -372,7 +386,8 @@ function getTarget(actor) {
 			if (targetArr.length > 0)
 				target = targetArr[random(0,targetArr.length-1)];
 		}
-		for each (var player in global.arenaPlayers) {
+		for (var _autoKey in global.arenaPlayers) {
+			var player = global.arenaPlayers[_autoKey];
 			if (actor != player && !player.fighting)
 				targetArr.push(player);
 		}
@@ -382,7 +397,8 @@ function getTarget(actor) {
 	if (!target) { //no unengaged targets in map
 		var targetArr = [];
 		if (global.arenaFreeForAll == false) {
-			for each (var player in global.arenaPlayers) {
+			for (var _autoKey in global.arenaPlayers) {
+				var player = global.arenaPlayers[_autoKey];
 				if (player.arenaTeam != actor.arenaTeam) {
 					targetArr.push(player);
 				}
@@ -390,7 +406,8 @@ function getTarget(actor) {
 			if (targetArr.length > 0)
 				target = targetArr[random(0,targetArr.length-1)];
 		}
-		for each (var player in global.arenaPlayers) {
+		for (var _autoKey in global.arenaPlayers) {
+			var player = global.arenaPlayers[_autoKey];
 			if (actor != player)
 				targetArr.push(player);
 		}
@@ -440,7 +457,8 @@ JSCharacter.prototype.shouldFlee = function() {
 		return true;
 	var numEnemies = 0;
 	var numAllies = 0;
-	for each (var person in this.room.people) {
+	for (var _autoKey in this.room.people) {
+		var person = this.room.people[_autoKey];
 		if (person.fighting == this)
 			numEnemies += 1;
 		if (person.fighting == this.fighting)
@@ -496,8 +514,11 @@ JSCharacter.prototype.findMount = function() {
 		if (!mobs[i].riddenBy && arrContains(mobs[i].namelist, horse))
 			horses.push([mobs[i],(i+1)]);
 	}
-	for each (var mount in horses)
+	for (var _autoKey in horses) {
+		var mount = horses[_autoKey];
 		this.comm("ride "+mount[1]+"."+horse);
+
+	}
 }
 /** AI ABILITIES **/
 function useAbility(actor, target) {
@@ -549,7 +570,8 @@ function useAbility(actor, target) {
 	}
 }
 function sendKoradin(msg) {
-	for each (var player in getConnectedPlayers()) {
+	for (var _autoKey in getConnectedPlayers()) {
+		var player = getConnectedPlayers()[_autoKey];
 		if (player.name == "Koradin") {
 			player.send(msg);
 			return;
@@ -558,7 +580,8 @@ function sendKoradin(msg) {
 }
 function getArenaKeeper() {
 	var room = getRoom(20800);
-	for each (var mob in room.people) {
+	for (var _autoKey in room.people) {
+		var mob = room.people[_autoKey];
 		//sendKoradin(mob.name);
 		if (mob.vnum == 20804)
 			var finalMob = mob;
@@ -615,7 +638,8 @@ function payWager(payee,payer) {
 		return null;
 	}
 	else if (payee > 0 && payee < 5) { // payout to a TEAM, split evenly
-		for each (var wager in global.arenaCurrentWagers) {
+		for (var _autoKey in global.arenaCurrentWagers) {
+			var wager = global.arenaCurrentWagers[_autoKey];
 			if (wager[1] == payee)//if player team is winning team
 				winners.push(wager[0]);//push player
 			else {
@@ -640,25 +664,35 @@ function payWager(payee,payer) {
 		wFps += getSval(aK,14201,"wFps");
 		if (wWps > 0) {
 			var playerCut = Math.floor(wWps/winners.length);
-			for each (var winner in winners)
+			for (var _autoKey in winners) {
+				var winner = winners[_autoKey];
 				winner.weavePoints += playerCut;
+
+			}
 			arenaEcho("Each winning player receives "+nrm+playerCut+mag+" weave points!");
 		}
 		else if (wFps > 0) {
 			var playerCut = Math.floor(wFps/winners.length);
-			for each (var winner in winners)
+			for (var _autoKey in winners) {
+				var winner = winners[_autoKey];
 				winner.addFeatPoints(playerCut);
+
+			}
 			arenaEcho("Each winning player receives "+nrm+playerCut+mag+" feat points!");
 		}
 		else if (wGold > 0) {
 			var playerCut = Math.floor(wGold/winners.length);
-			for each (var winner in winners)
+			for (var _autoKey in winners) {
+				var winner = winners[_autoKey];
 				winner.gold += playerCut;
+
+			}
 			arenaEcho("Each winning player receives "+winners[0].numCopperToText(playerCut,false)+mag+"!");
 		}
 	}
 	else { //payout to one person
-		for each (var wager in global.arenaCurrentWagers) {
+		for (var _autoKey in global.arenaCurrentWagers) {
+			var wager = global.arenaCurrentWagers[_autoKey];
 			if (wager[0] != payee) { //player is not winner
 				var payer = wager[0];
 				var payAmount = parseInt(wager[3]);
@@ -682,8 +716,11 @@ function payWager(payee,payer) {
 		wGold += aK.gold;
 		wWps += getSval(aK,14201,"wWps");
 		wFps += getSval(aK,14201,"wFps");
-		for each (var item in aK.inventory)
+		for (var _autoKey in aK.inventory) {
+			var item = aK.inventory[_autoKey];
 			wItems.push(item);
+
+		}
 		var arenaMessage = (payee.name+" has won ");
 		if (wWps > 0) {
 			payee.weavePoints += wWps;
@@ -705,7 +742,8 @@ function payWager(payee,payer) {
 			if (wFps > 0 || wWps > 0 || wGold > 0)
 				arenaMessage += (", and ");
 			arenaMessage += ("the following items: ");
-			for each (var itm in wItems) {
+			for (var _autoKey in wItems) {
+				var itm = wItems[_autoKey];
 				itm.moveToChar(payee);
 				arenaMessage += itm.name+" ";
 			}

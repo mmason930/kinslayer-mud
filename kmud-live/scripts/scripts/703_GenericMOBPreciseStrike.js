@@ -5,7 +5,8 @@ var script703 = function(self, actor, here, args, extra) {
 	// Precise Strike the target with the lowest hp currently fighting the MOB
 	var vict = null;
 	var victHit = 1000;
-	for each (var person in room.people) {
+	for (var _autoKey in room.people) {
+		var person = room.people[_autoKey];
 		if (person.fighting == ch &&
 			person.hps < victHit) 
 		{

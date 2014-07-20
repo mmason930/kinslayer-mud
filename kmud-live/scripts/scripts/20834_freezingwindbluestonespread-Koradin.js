@@ -8,8 +8,8 @@ var script20834 = function(self, actor, here, args, extra) {
 	if (!room)
 	return;
 	var items = [];
-	for each (var item in room.items)
-	{
+	for (var _autoKey in room.items) {
+		var item = room.items[_autoKey];
 	if (item.vnum == 9026 && item != self)
 	item.extract();
 	else if (item.vnum == 9027)
@@ -19,15 +19,15 @@ var script20834 = function(self, actor, here, args, extra) {
 	}
 	var chars = [];
 	var itemHit = [];
-	for each (var person in room.people)
-	{
+	for (var _autoKey in room.people) {
+		var person = room.people[_autoKey];
 	if (!person.mobFlagged(constants.MOB_INVIS) && person.level < 100 && random(1,24) == 1)
 	chars.push(person);
 	if (!person.mobFlagged(constants.MOB_INVIS) && person.level < 100)
 	itemHit.push(person);
 	}
-	for each(var it in items)
-	{
+	for (var _autoKey in items) {
+		var it = items[_autoKey];
 	var target = itemHit[random(0,itemHit.length-1)];
 	if (target)
 	{
@@ -44,8 +44,8 @@ var script20834 = function(self, actor, here, args, extra) {
 	}
 	}
 	}
-	for each(var per in chars)
-	{
+	for (var _autoKey in chars) {
+		var per = chars[_autoKey];
 	per.send("You shiver as the icy wind slices through your clothing.");
 	act("$n shivers as the wind picks up.",true,per,null,null,constants.TO_ROOM);
 	if (!per.affectedBy(constants.AFF_CHILL))
@@ -54,16 +54,16 @@ var script20834 = function(self, actor, here, args, extra) {
 	per.affect(constants.AFF_WEAKEN,2,0);
 	}
 	var rooms = [];
-	for each (var rm in room.neighbors)
-	{
+	for (var _autoKey in room.neighbors) {
+		var rm = room.neighbors[_autoKey];
 	if (rm)
 	{
 	if ( Math.floor(rm.vnum / 100) == Math.floor(room.vnum / 100) || random(1,100) == 1 )
 	{
 	var spread_chance = random(1,100);
 	var char_exists = null;
-	for each(var im in rm.items)
-	{
+	for (var _autoKey in rm.items) {
+		var im = rm.items[_autoKey];
 	if (im.vnum == self.vnum)
 	spread_chance += 100;
 	if (im.vnum == 9027)
@@ -76,8 +76,8 @@ var script20834 = function(self, actor, here, args, extra) {
 	}
 	}
 	}
-	for each (var new_room in rooms)
-	{
+	for (var _autoKey in rooms) {
+		var new_room = rooms[_autoKey];
 	if (new_room[1] < 5)
 	{
 	var from_dir = dirToText(revDir(room.firstStep(new_room[0])));

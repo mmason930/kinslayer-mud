@@ -2,8 +2,8 @@ var script20807 = function(self, actor, here, args, extra) {
 	//POWER SHOT ABILITY FOR BOW USERS.
 	//KORADIN - DECEMBER 2009
 	var inv_items = actor.inventory;
-	for each(var item in inv_items)
-	{
+	for (var _autoKey in inv_items) {
+		var item = inv_items[_autoKey];
 		if (self == item)
 			var in_inv = 1;
 	}

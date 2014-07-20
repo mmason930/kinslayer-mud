@@ -276,14 +276,16 @@ var script33201 = function(self, actor, here, args, extra) {
 				actor.send(bld+"You already own this "+manor.name+"!"+nrm);
 				return;
 			}
-			for each (var mr in global.manors) {
+			for (var _autoKey in global.manors) {
+				var mr = global.manors[_autoKey];
 				if (mr.ownerUserId == actor.id) {
 					actor.send(bld+"You already own the "+mr.name+" near "+mr.area+"!"+nrm);
 					return;
 				}
 			}
 			var allowedOnline = false;
-			for each (var player in getCurrentPlayers()) {
+			for (var _autoKey in getCurrentPlayers()) {
+				var player = getCurrentPlayers()[_autoKey];
 				if (arrContains(manor.allowedUsers, player.id))
 					allowedOnline = true;
 			}
@@ -305,7 +307,8 @@ var script33201 = function(self, actor, here, args, extra) {
 				getCharCols(owner);
 				owner.send(bld+"Your "+manor.name+" near "+manor.area+" is under attack!"+nrm);
 			}
-			for each (var play in getConnectedPlayers()) {
+			for (var _autoKey in getConnectedPlayers()) {
+				var play = getConnectedPlayers()[_autoKey];
 				if (arrContains(manor.allowedUsers, play.id)) {
 					getCharCols(play);
 					play.send(bld+getUserNameByUserId(manor.ownerUserId)+"'s "+manor.name+" near "+manor.area+" is under attack!"+nrm);
@@ -426,7 +429,8 @@ var script33201 = function(self, actor, here, args, extra) {
 		}
 		if (arrContains(manor.allowedUsers, allowed)) {
 			actor.send(bld+"You revoke your permission for "+getUserNameByUserId(allowed)+"!"+nrm);
-			for each (var player in getConnectedPlayers()) {
+			for (var _autoKey in getConnectedPlayers()) {
+				var player = getConnectedPlayers()[_autoKey];
 				if (player.id == allowed)
 					var aPlayer = player;
 			}
@@ -440,14 +444,16 @@ var script33201 = function(self, actor, here, args, extra) {
 		actor.send(bld+"You allow "+getUserNameByUserId(allowed)+" to peacefully enter the "+manor.name+"."+nrm);
 		updateAllowed(manor, allowed);
 		saveManor(manor);
-		for each (var player in getConnectedPlayers()) {
+		for (var _autoKey in getConnectedPlayers()) {
+			var player = getConnectedPlayers()[_autoKey];
 			if (player.id == allowed)
 				var aPlayer = player;
 		}
 		if (aPlayer) {
 			getCharCols(aPlayer);
 			aPlayer.send(bld+actor.name+" has allowed you to enter the "+manor.name+"!"+nrm);
-			for each (var thing in aPlayer.room.people) {
+			for (var _autoKey in aPlayer.room.people) {
+				var thing = aPlayer.room.people[_autoKey];
 				if (thing.fighting == aPlayer)
 					thing.stopFighting();
 				if (aPlayer.fighting) {
@@ -472,8 +478,10 @@ var script33201 = function(self, actor, here, args, extra) {
 		actor.send(bld+"Current Upkeep: "+nrm+actor.numCopperToText(getUpkeep(manor), true)+bld+" per day."+nrm);
 		actor.send(bld+"\nYou've allowed the following players into the "+manor.name+":"+nrm);
 		var users = [];
-		for each (var id in manor.allowedUsers)
+		for (var _autoKey in manor.allowedUsers) {
+			var id = manor.allowedUsers[_autoKey];
 			users.push(getUserNameByUserId(id));
+		}
 		if (users.length == 0)
 			actor.send("None"+nrm);
 		else

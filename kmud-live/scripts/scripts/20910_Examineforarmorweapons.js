@@ -13,16 +13,21 @@ var script20910 = function(self, actor, here, args, extra) {
 	}
 	var exaArr = [];
 	if(!listView){
-		for each (var thingster in actor.inventory) //load items carried
+		for (var _autoKey in actor.inventory) {//load items carried
+			var thingster = actor.inventory[_autoKey];
 			exaArr.push([thingster, "carried"]);
+		}
 		for (i=0; i<22; i++) {
 			if (actor.eq(i))
 				exaArr.push([actor.eq(i), "equipped"]); //load items equipped
 		}
-		for each (var thingie in actor.room.items) //load items on ground
+		for (var _autoKey in actor.room.items) {//load items on ground
+			var thingie = actor.room.items[_autoKey];
 			exaArr.push([thingie, "on ground"]);
+		}
 	}
-	for each (var person in actor.room.people) { //load PC eq
+	for (var _autoKey in actor.room.people) {
+		var person = actor.room.people[_autoKey]; //load PC eq
 		var playCheck = true;
 		if(listView){ playCheck = (person.name.toLowerCase() == vArgs[2].toLowerCase()); }
 		if (person.vnum == -1 && person != actor && playCheck) {
@@ -32,7 +37,8 @@ var script20910 = function(self, actor, here, args, extra) {
 			}
 		}
 	}
-	for each (var person in actor.room.people) { //load Mob eq
+	for (var _autoKey in actor.room.people) {
+		var person = actor.room.people[_autoKey]; //load Mob eq
 		var mobCheck = true;
 		if(listView){ mobCheck = arrContains(person.namelist.split(" "), vArgs[2].toLowerCase()); }
 		//sendKoradin("listView: "+listView+" and mobCheck: "+mobCheck+" for "+person.name);
@@ -81,7 +87,9 @@ var script20910 = function(self, actor, here, args, extra) {
 	if (isName("masterweapon", obj.namelist)) // Master weapon check
 		color = grn;
 	
-	for each (var peep in actor.room.people) {
+	for (var _autoKey in actor.room.people) {
+	
+		var peep = actor.room.people[_autoKey];
 		if (isName(peep.name, baseObjLoc) && peep != actor) {
 			if (actor.fighting) {
 				actor.send("You're too busy to examine that right now!");
@@ -222,7 +230,8 @@ var script20910 = function(self, actor, here, args, extra) {
 					actor.send("Nothing.")
 					return;
 				}
-				for each (var content in finalArr) {
+				for (var _autoKey in finalArr) {
+					var content = finalArr[_autoKey];
 					var quantity = "";
 					if (content[1] > 1)
 						quantity = " ["+content[1]+"]";

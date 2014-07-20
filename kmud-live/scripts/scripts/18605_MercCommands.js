@@ -940,8 +940,8 @@ var script18605 = function(self, actor, here, args, extra) {
 					self.say("I don't seem to have a " + arg3 + " to put " + target.name + " in.");
 					return;
 				}
-				for each(var item in self.inventory)
-				{
+				for (var _autoKey in self.inventory) {
+					var item = self.inventory[_autoKey];
 					self.comm("put " + item.namelist.split(" ")[0] + " " + arg3);
 				}
 				return;

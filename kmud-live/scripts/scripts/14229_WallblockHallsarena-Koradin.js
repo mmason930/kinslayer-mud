@@ -3,9 +3,11 @@ var script14229 = function(self, actor, here, args, extra) {
 	var rand = random(1,3);
 	if (global.arenaCurrentMap.currentBlockedRooms) {
 	if (global.arenaCurrentMap.currentBlockedRooms.length > 0) {
-	for each (var room in global.arenaCurrentMap.currentBlockedRooms) {
+	for (var _autoKey in global.arenaCurrentMap.currentBlockedRooms) {
+		var room = global.arenaCurrentMap.currentBlockedRooms[_autoKey];
 		if (room) {
-			for each (var neighbor in room.neighbors) {
+			for (var _autoKey in room.neighbors) {
+				var neighbor = room.neighbors[_autoKey];
 				if (neighbor)
 					neighbor.echo("A slight shimmer in the air to the "+dirToText( neighbor.firstStep(room) )+" plays tricks on your eyes...");
 			}
@@ -22,7 +24,8 @@ var script14229 = function(self, actor, here, args, extra) {
 		var newRoom = getRoom(roomArr[ random(0,roomArr.length-1) ]);
 		global.arenaCurrentMap.currentBlockedRooms.push(newRoom);
 		newRoom.attach(14230);
-		for each (var neighbor in newRoom.neighbors) {
+		for (var _autoKey in newRoom.neighbors) {
+			var neighbor = newRoom.neighbors[_autoKey];
 			if (neighbor)
 				neighbor.echo("A slight shimmer in the air to the "+dirToText( neighbor.firstStep(newRoom) )+" plays tricks on your eyes...");
 		}

@@ -10,8 +10,11 @@ function setArenaStage(intStage) {
 		return;
 	}
 	if (intStage == constants.ARENA_QUEUE) {
-		for each (var player in getWaitingPlayers("all"))
+		for (var _autoKey in getWaitingPlayers("all")) {
+			var player = getWaitingPlayers("all")[_autoKey];
 			player.detach(14212);
+
+		}
 		global.arenaPlayers = [];
 		global.arenaTotalVotes = 0;
 		global.arenaVotingTimeLimit = 3;
@@ -31,7 +34,8 @@ function areTeamsEven() {
 	var blue = 0;
 	var yellow = 0;
 	var green = 0;
-	for each (var player in getWaitingPlayers("all")) {
+	for (var _autoKey in getWaitingPlayers("all")) {
+		var player = getWaitingPlayers("all")[_autoKey];
 		if (player.arenaTeam == constants.ARENA_BLUE)
 			blue += 1;
 		else if (player.arenaTeam == constants.ARENA_RED)
@@ -69,7 +73,8 @@ function isMatchReady(reason) {
 		var blue = 0;
 		var yellow = 0;
 		var green = 0;
-		for each (var player in getWaitingPlayers("all")) {
+		for (var _autoKey in getWaitingPlayers("all")) {
+			var player = getWaitingPlayers("all")[_autoKey];
 			if (player.arenaTeam == constants.ARENA_BLUE)
 				blue += 1;
 			else if (player.arenaTeam == constants.ARENA_RED)
@@ -121,7 +126,8 @@ JSCharacter.prototype.addToArenaQueue = function() {
 	}
 	this.send(" ");
 	this.send("Type "+mag+"arena"+nrm+" for more information.");
-	for each (var peep in getWaitingPlayers("all")) { //Alert rest of queue. Check for NOQUIT and remove from queue anyone who has it
+	for (var _autoKey in getWaitingPlayers("all")) {
+		var peep = getWaitingPlayers("all")[_autoKey]; //Alert rest of queue. Check for NOQUIT and remove from queue anyone who has it
 		if (peep.affectedBy(constants.AFF_NOQUIT)) {
 			getCharCols(peep);
 			peep.send("You are too worked up to enter the Arena!");
@@ -140,7 +146,8 @@ JSCharacter.prototype.addToArenaQueue = function() {
 	}
 	if (isMatchReady() == true && !isAI(this)) { // minimum has been met, notify HOST
 		getCharCols(global.arenaHost);
-		for each (var person in getWaitingPlayers("all")) {
+		for (var _autoKey in getWaitingPlayers("all")) {
+			var person = getWaitingPlayers("all")[_autoKey];
 			getCharCols(person);
 			if (person == global.arenaHost) {
 				person.send(" ");
@@ -226,7 +233,8 @@ function getHostMenus(actor, strType) {
 			var reda = 0;
 			var green = 0;
 			var yellow = 0;
-			for each (var ai in getWaitingPlayers("ai")) {
+			for (var _autoKey in getWaitingPlayers("ai")) {
+				var ai = getWaitingPlayers("ai")[_autoKey];
 				if (ai.arenaTeam == constants.ARENA_BLUE)
 					blue += 1;
 				else if (ai.arenaTeam == constants.ARENA_RED)
@@ -274,7 +282,8 @@ JSCharacter.prototype.removeFromArenaQueue = function() {
 			global.arenaHost.send(mag+"You have been made HOST of the Arena!"+nrm);
 			getHostCommands(global.arenaHost);
 		}
-		for each (var player in getWaitingPlayers("all")) { //Alert other players
+		for (var _autoKey in getWaitingPlayers("all")) {
+			var player = getWaitingPlayers("all")[_autoKey]; //Alert other players
 			getCharCols(player);
 			if (isAI(this))
 				var playerName = "(AI) Player";
@@ -308,7 +317,8 @@ function getWaitingPlayers(race) {
 	var peopleArr = [];
 	//if (!race)
 	//	race = "all";
-	for each (var ai in getRoom(20896).people) {
+	for (var _autoKey in getRoom(20896).people) {
+		var ai = getRoom(20896).people[_autoKey];
 		if (isAI(ai))
 			peopleArr.push(ai);
 	}
@@ -316,7 +326,8 @@ function getWaitingPlayers(race) {
 		return peopleArr;
 	if (race == "pc")
 		peopleArr = [];
-	for each (var player in getConnectedPlayers()) {
+	for (var _autoKey in getConnectedPlayers()) {
+		var player = getConnectedPlayers()[_autoKey];
 		if (getSval(player,14210,"arenaQueue") == 1) {
 			if (race == "pc" || race == "all" || player.race == race) {
 				peopleArr.push(player);
@@ -405,7 +416,8 @@ function startArenaMatch(objGameType) {
 	global.arenaStage = constants.ARENA_PLAYING;
 	global.arenaCurrentGame = objGameType;
 	global.arenaCurrentGame.limit = Math.ceil(global.arenaCurrentGame.limit);
-	for each (var per in getWaitingPlayers("all")) {
+	for (var _autoKey in getWaitingPlayers("all")) {
+		var per = getWaitingPlayers("all")[_autoKey];
 		if (!arrContains(global.arenaPlayers,per))
 			global.arenaPlayers.push(per);
 	}
@@ -413,7 +425,8 @@ function startArenaMatch(objGameType) {
 	getRoom(parseInt(global.arenaZoneVnum+"00")).zreset();
 	getRoom(14200).zreset();
 	getRoom(14400).zreset();
-	for each (var player in global.arenaPlayers) {
+	for (var _autoKey in global.arenaPlayers) {
+		var player = global.arenaPlayers[_autoKey];
 		player.hps = player.maxHit;
 		player.sps = player.maxSpell;
 		player.mvs = player.maxMove;
@@ -516,14 +529,20 @@ function startArenaMatch(objGameType) {
 		loadHill();
 	}
 	else if (global.arenaCurrentGame == global.arenaGameSM) {
-		for each (var player in global.arenaPlayers)
+		for (var _autoKey in global.arenaPlayers) {
+			var player = global.arenaPlayers[_autoKey];
 			setSval(player,20860,"arenaScore",getArenaScore(player));
+
+		}
 		loadSmobs();
 		global.arenaCurrentGame.timer = global.arenaCurrentGame.limit;
 	}
 	else if (global.arenaCurrentGame == global.arenaGameTB) {
-		for each (var player in global.arenaPlayers)
+		for (var _autoKey in global.arenaPlayers) {
+			var player = global.arenaPlayers[_autoKey];
 			setSval(player,20860,"arenaScore",getArenaScore(player));
+
+		}
 		global.arenaCurrentGame.timer = global.arenaCurrentGame.limit;
 	}
 	else if (global.arenaCurrentGame == global.arenaGameLMS) {
@@ -653,7 +672,8 @@ function getArenaStats(actor) {
 	var totalAllDeaths = 0;
 	var totalAllAssists = 0;
 	if (global.arenaFreeForAll == false) {
-		for each (var player in global.arenaPlayers) {
+		for (var _autoKey in global.arenaPlayers) {
+			var player = global.arenaPlayers[_autoKey];
 			if (player.arenaTeam == constants.ARENA_BLUE)
 				blueArr.push(player);
 			else if (player.arenaTeam == constants.ARENA_RED)
@@ -665,7 +685,8 @@ function getArenaStats(actor) {
 		}
 	}
 	else {
-		for each (var player in global.arenaPlayers) {
+		for (var _autoKey in global.arenaPlayers) {
+			var player = global.arenaPlayers[_autoKey];
 			if (player.race == constants.RACE_HUMAN)
 				blueArr.push(player);
 			else if (player.race == constants.RACE_TROLLOC)
@@ -676,7 +697,8 @@ function getArenaStats(actor) {
 				greenArr.push(player);
 		}
 	}
-	for each (var player in blueArr) {
+	for (var _autoKey in blueArr) {
+		var player = blueArr[_autoKey];
 		var pName = cyn+player.name+nrm;
 		var pKills = getSval(player,20860,"killCount");
 		if (!pKills)
@@ -736,7 +758,8 @@ function getArenaStats(actor) {
 	var totalKills = 0;
 	var totalDeaths = 0;
 	var totalAssists = 0;
-	for each (var player in redArr) {
+	for (var _autoKey in redArr) {
+		var player = redArr[_autoKey];
 		var pName = red+player.name+nrm;
 		var pKills = getSval(player,20860,"killCount");
 		if (!pKills)
@@ -798,7 +821,8 @@ function getArenaStats(actor) {
 	var totalKills = 0;
 	var totalDeaths = 0;
 	var totalAssists = 0;
-	for each (var player in yellowArr) {
+	for (var _autoKey in yellowArr) {
+		var player = yellowArr[_autoKey];
 		var pName = yel+player.name+nrm;
 		var pKills = getSval(player,20860,"killCount");
 		if (!pKills)
@@ -860,7 +884,8 @@ function getArenaStats(actor) {
 	var totalKills = 0;
 	var totalDeaths = 0;
 	var totalAssists = 0;
-	for each (var player in greenArr) {
+	for (var _autoKey in greenArr) {
+		var player = greenArr[_autoKey];
 		var pName = grn+player.name+nrm;
 		var pKills = getSval(player,20860,"killCount");
 		if (!pKills)
@@ -913,7 +938,8 @@ function getArenaStats(actor) {
 	// }
 	if (global.arenaCurrentGame == global.arenaGameKH) {
 		var totalTime = 0;
-		for each (var player in global.arenaPlayers) {
+		for (var _autoKey in global.arenaPlayers) {
+			var player = global.arenaPlayers[_autoKey];
 			var playTime = getSval(player,20799,"khTime");
 			if (!playTime)
 				playTime = 0;
@@ -926,7 +952,8 @@ function getArenaStats(actor) {
 	}
 	else if (global.arenaCurrentGame == global.arenaGameLMS) {
 		var ffaPoints = 0;
-		for each (var player in global.arenaPlayers) {
+		for (var _autoKey in global.arenaPlayers) {
+			var player = global.arenaPlayers[_autoKey];
 			var lLeft = ( global.arenaCurrentGame.limit - ( getSval(player,20860,"deathCount") ? getSval(player,20860,"deathCount") : 0) );
 			ffaPoints += ( lLeft>0 ? lLeft : 0);
 		}
@@ -948,19 +975,23 @@ function getArenaStats(actor) {
 /** ARENA BROADCAST MESSAGE **/
 function arenaEcho(strMsg, arrExc) {
 	var finalArr = [];
-	for each (var per in global.arenaPlayers) {
+	for (var _autoKey in global.arenaPlayers) {
+		var per = global.arenaPlayers[_autoKey];
 		if (!arrContains(arrExc, per))
 			finalArr.push(per);
 	}
-	for each (var play in global.arenaWatchers) {
+	for (var _autoKey in global.arenaWatchers) {
+		var play = global.arenaWatchers[_autoKey];
 		if (!arrContains(arrExc, play))
 			finalArr.push(play);
 	}
-	for each (var playe in getWaitingPlayers("all")) {
+	for (var _autoKey in getWaitingPlayers("all")) {
+		var playe = getWaitingPlayers("all")[_autoKey];
 		if (!arrContains(arrExc, playe) && !arrContains(finalArr, playe))
 			finalArr.push(playe);
 	}
-	for each (var player in finalArr) {
+	for (var _autoKey in finalArr) {
+		var player = finalArr[_autoKey];
 		getCharCols(player);
 		player.send(mag+strMsg+nrm);
 	}
@@ -1010,7 +1041,8 @@ function addArenaPoint(actor, strType, special) {
 		currentRank.maxScore = getArenaScoreRange(currentRank.name)[1];
 	var numAI = 0;
 	var numPC = 0;
-	for each (var perp in global.arenaPlayers) {
+	for (var _autoKey in global.arenaPlayers) {
+		var perp = global.arenaPlayers[_autoKey];
 		if (isAI(perp))
 			numAI += 1;
 		else
@@ -1458,7 +1490,8 @@ function kickArenaPlayer(bool) {
 		global.arenaKickPlayer = null;
 		global.arenaKickTimer = 0;
 		putMobsToSleep(false);
-		for each (var player in global.arenaPlayers) {
+		for (var _autoKey in global.arenaPlayers) {
+			var player = global.arenaPlayers[_autoKey];
 			setSval(player, 14223, "kickVote", 0);
 			player.detach(14222);
 			player.detach(14223);
@@ -1479,9 +1512,11 @@ function getWager(actor) {
 	else if (actor > 0 && actor < 5) { //TEAM game
 		var team = actor;
 		var teamName = getTeamName(team);
-		for each (var person in getWaitingPlayers("pc")) {
+		for (var _autoKey in getWaitingPlayers("pc")) {
+			var person = getWaitingPlayers("pc")[_autoKey];
 			if (person.arenaTeam == team) {
-				for each (var wager in global.arenaCurrentWagers) {
+				for (var _autoKey in global.arenaCurrentWagers) {
+					var wager = global.arenaCurrentWagers[_autoKey];
 					if (wager[0] == person) {
 						if (wager[2] == 3)
 							wGold += parseInt(wager[3]);
@@ -1498,7 +1533,8 @@ function getWager(actor) {
 	else { // FFA game
 		getCharCols(actor);
 		var finalActor = actor;
-		for each (var wager in global.arenaCurrentWagers) {
+		for (var _autoKey in global.arenaCurrentWagers) {
+			var wager = global.arenaCurrentWagers[_autoKey];
 			if (wager[0] == actor) {
 				if (wager[2] == 3)
 					wGold = wager[3];
@@ -1551,7 +1587,8 @@ function getCurrentWagers(actor) {
 		return;
 	}
 	else { // FFA game, list players
-		for each (var player in getWaitingPlayers("pc")) {
+		for (var _autoKey in getWaitingPlayers("pc")) {
+			var player = getWaitingPlayers("pc")[_autoKey];
 			if (player.race == constants.RACE_TROLLOC)
 				var raceCol = red;
 			else if (player.race == constants.RACE_HUMAN)
@@ -1669,7 +1706,8 @@ function getWagerMenu(actor) {
 /** PUT MOBS TO SLEEP / WAKE THEM UP **/
 function putMobsToSleep(bool) {
 	for (i=global.arenaCurrentMap.min; i<global.arenaCurrentMap.max+1; i++) {
-		for each (var mob in getRoom(i).people) {
+		for (var _autoKey in getRoom(i).people) {
+			var mob = getRoom(i).people[_autoKey];
 			if (mob.vnum > 0 && !isAI(mob)) {
 				if (bool == true)
 					mob.position = constants.POS_SLEEPING;
@@ -1713,7 +1751,8 @@ function startArenaTimer(intSec, strType) {
 				global.arenaEndNo = 0;
 				global.arenaEndTimer = 0;
 				putMobsToSleep(false);
-				for each (var player in global.arenaPlayers) {
+				for (var _autoKey in global.arenaPlayers) {
+					var player = global.arenaPlayers[_autoKey];
 					setSval(player, 14224, "endVote", 0);
 					player.detach(14224);
 				}
@@ -1759,7 +1798,8 @@ function updateArenaLegendTitle(actor) {
 }
 /** RESET ARENA **/
 function resetArena(actor) {
-	for each (var player in global.arenaWatchers) { //send stats to observors
+	for (var _autoKey in global.arenaWatchers) {
+		var player = global.arenaWatchers[_autoKey]; //send stats to observors
 		if (!isAI(player))
 			getArenaStats(player);
 		player.send(" ");
@@ -1770,17 +1810,21 @@ function resetArena(actor) {
 		arenaEcho("The Arena has been reset by "+actor.name+"!");
 		global.arenaStage = constants.ARENA_OFF;
 	}
-	for each (var play in getWaitingPlayers("all")) {
+	for (var _autoKey in getWaitingPlayers("all")) {
+		var play = getWaitingPlayers("all")[_autoKey];
 		if (!arrContains(global.arenaPlayers,play))
 			global.arenaPlayers.push(play);
 	}
-	for each (var player in global.arenaPlayers) { // separate loop needed to retain all players in stat screen
+	for (var _autoKey in global.arenaPlayers) {
+		var player = global.arenaPlayers[_autoKey]; // separate loop needed to retain all players in stat screen
 		if (!isAI(player))
 			getArenaStats(player);
 	}
-	for each (var player in global.arenaPlayers) {  //Reset players
+	for (var _autoKey in global.arenaPlayers) {
+		var player = global.arenaPlayers[_autoKey];  //Reset players
 		if (player) {
-		for each(var thing in player.inventory) {
+		for (var _autoKey in player.inventory) {
+			var thing = player.inventory[_autoKey];
 			if (arrContains(global.arenaItems, thing.vnum)) //DELETE ARENA-SPECIFIC OBJECTS FROM PLAYER INVENTORIES
 				thing.extract();
 		}

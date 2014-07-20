@@ -12,8 +12,8 @@ var script2033 = function(self, actor, here, args, extra) {
 	}
 	else
 	{
-		for each(var word in self.namelist.split(" "))
-		{
+		for (var _autoKey in self.namelist.split(" ")) {
+			var word = self.namelist.split(" ")[_autoKey];
 			if (arg_array[1] == word)
 				var vial = 1;
 		}

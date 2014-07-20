@@ -12,7 +12,8 @@ var script104 = function(self, actor, here, args, extra) {
 	}
 	var type = vArgs[1];
 	var found = false;
-	for each(var t in types) {
+	for (var _autoKey in types) {
+		var t = types[_autoKey];
 		if( t== type.toLowerCase() ) {
 			found = true;
 			break;

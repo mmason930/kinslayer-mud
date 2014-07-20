@@ -6,8 +6,8 @@ var script20989 = function(self, actor, here, args, extra) {
 		return;
 	}
 	var trigger = false;
-	for each (var name in self.namelist.split(" "))
-	{
+	for (var _autoKey in self.namelist.split(" ")) {
+		var name = self.namelist.split(" ")[_autoKey];
 		if (!str_cmp(vArgs[1],name))
 			trigger = true;
 	}

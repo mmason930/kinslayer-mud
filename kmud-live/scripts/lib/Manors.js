@@ -3,7 +3,8 @@ function getManor(room) {
 	if (!room) {
 		return null;
 	}
-	for each (var manor in global.manors) {
+	for (var _autoKey in global.manors) {
+		var manor = global.manors[_autoKey];
 		if (manor.zoneId == room.zoneVnum)
 			return manor;
 	}
@@ -11,7 +12,8 @@ function getManor(room) {
 }
 /** RETURN MANOR OWNER PLAYER IF ONLINE **/
 function getManorOwnerById(id) {
-	for each (var player in getCurrentPlayers()) {
+	for (var _autoKey in getCurrentPlayers()) {
+		var player = getCurrentPlayers()[_autoKey];
 		if (player.id == id)
 			return player;
 	}
@@ -311,26 +313,35 @@ function resetManor(manor) {
 	manor.expireDatetime = new Date(time()*1000);
 	getRoom(manor.outsideGateRoomVnum).unlockDoor(getRoom(manor.outsideGateRoomVnum).firstStep(getRoom(manor.insideGateRoomVnum)), true);
 	getRoom(manor.outsideGateRoomVnum).openDoor(getRoom(manor.outsideGateRoomVnum).firstStep(getRoom(manor.insideGateRoomVnum)), true);
-	for each (var gRoom in manor.guardRooms)
+	for (var _autoKey in manor.guardRooms) {
+		var gRoom = manor.guardRooms[_autoKey];
 		manor.guardsPurchased[gRoom] = 0;
+
+	}
 	manor.allowedUsers = [];
 
 	var rooms = getAllRoomsInZone(manor.zoneId);
 	var dumpRoom = getRoom(20899);
 	var outsideGateRoom = getRoom(manor.outsideGateRoomVnum);
-	for each (var room in rooms) {
+	for (var _autoKey in rooms) {
+		var room = rooms[_autoKey];
 		if (room) {
 			if (room.vnum == manor.storageRoomVnum) {
-				for each (var item in room.items)
+				for (var _autoKey in room.items) {
+					var item = room.items[_autoKey];
 					item.moveToRoom(outsideGateRoom);
+
+				}
 			}
 			else {
-				for each (var item in room.items) {
+				for (var _autoKey in room.items) {
+					var item = room.items[_autoKey];
 					item.moveToRoom(dumpRoom);
 					//item.extract();
 				}
 			}
-			for each (var mob in room.people) {
+			for (var _autoKey in room.people) {
+				var mob = room.people[_autoKey];
 				if (mob.vnum > -1 && !mob.riddenBy && !isName("merc",mob.namelist)) {
 					mob.moveToRoom(dumpRoom);
 					//mob.extract();
@@ -404,7 +415,8 @@ function manorTimeToText(intTime) {
 
 /** GECHO FOR CTF MESSAGES **/
 function ctfEcho(msg) {
-	for each (var player in getConnectedPlayers()) {
+	for (var _autoKey in getConnectedPlayers()) {
+		var player = getConnectedPlayers()[_autoKey];
 		getCharCols(player);
 		player.send(bld+msg+nrm);
 	}
@@ -425,7 +437,8 @@ function getUpkeep(manor) {
 		price += 3;
 	if (manor.hasBar == true)
 		price += 3;
-	for each (var room in manor.guardRooms) {
+	for (var _autoKey in manor.guardRooms) {
+		var room = manor.guardRooms[_autoKey];
 		var add = (numGuardsBought(getRoom(room))*3)
 		price += add;
 	}
@@ -462,7 +475,8 @@ function getManorTarget(guard) {
 	var targetArr = [];
 	if (!isName("manorArcher", guard.namelist)) { // if a scout, warrior, or channie, look in room first
 		//sendKoradin("searching room for "+guard.name);
-		for each (var targ in guard.room.people) {
+		for (var _autoKey in guard.room.people) {
+			var targ = guard.room.people[_autoKey];
 			if ( targ.vnum != 20720 && targ.level < 100 && !isName("horse", targ.namelist) && (manorOwner ? !targ.isGroupedWith(manorOwner) : true) && !targ.riddenBy && (targ.vnum < 20700 || targ.vnum > 20715) && targ.id != manor.ownerUserId && !arrContains(manor.allowedUsers, targ.id)) {
 				//sendKoradin(targ.vnum + " "+guard.vnum+ "pushing first");
 				targetArr.push(targ);
@@ -473,11 +487,13 @@ function getManorTarget(guard) {
 	}
 	if (isName("manorArcher", guard.namelist) || isName("manorChanneler", guard.namelist)) { //channie/archer ranged
 		//sendKoradin("searching shot rooms for "+guard.name);
-		for each (var mRoom in manor.shotRooms) {
+		for (var _autoKey in manor.shotRooms) {
+			var mRoom = manor.shotRooms[_autoKey];
 			//sendKoradin("searching "+mRoom);
 			mRoom = getRoom(mRoom);
 			//sendKoradin("searching "+mRoom.name);
-			for each (var fTarg in mRoom.people) {
+			for (var _autoKey in mRoom.people) {
+				var fTarg = mRoom.people[_autoKey];
 				if ( fTarg.vnum != 20720 && fTarg.level < 100 && !isName("horse", fTarg.namelist) && (manorOwner ? !fTarg.isGroupedWith(manorOwner) : true) && !fTarg.riddenBy && (fTarg.vnum < 20700 || fTarg.vnum > 20715) && fTarg.id != manor.ownerUserId && !arrContains(manor.allowedUsers, fTarg.id))
 					targetArr.push(fTarg);
 			}
@@ -509,7 +525,8 @@ function getAllRoomsInZone(zoneVnum) {
 
 /** RETURN WHETHER ACTOR IS STANDING OUTSIDE A ROOM **/
 JSRoom.prototype.hasNeighbor = function(roomVnum) {
-	for each (var room in this.neighbors) {
+	for (var _autoKey in this.neighbors) {
+		var room = this.neighbors[_autoKey];
 		if (room) {
 			if (room.vnum == roomVnum)
 				return true;
@@ -522,7 +539,8 @@ JSRoom.prototype.hasNeighbor = function(roomVnum) {
 function isBeingClaimed(manor) {
 	if (!manor)
 		return false;
-	for each (var person in getRoom(manor.flagRoomVnum).people) {
+	for (var _autoKey in getRoom(manor.flagRoomVnum).people) {
+		var person = getRoom(manor.flagRoomVnum).people[_autoKey];
 		//sendKoradin(getSval(person,33200,"claim"));
 		if (getSval(person,33200,"claim") == 1)
 			return true;
@@ -579,7 +597,8 @@ function isCharAllowedAndInManor(actor, zoneId) {
 		return false;
 	var allowed = false;
 	var inManor = false;
-	for each (var manor in global.manors) {
+	for (var _autoKey in global.manors) {
+		var manor = global.manors[_autoKey];
 		if (actor.id == manor.ownerUserId || arrContains(manor.allowedUsers, actor.id))
 			allowed = true;
 		if (zoneId == manor.zoneId)

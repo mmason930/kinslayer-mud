@@ -1,7 +1,8 @@
 var script2899 = function(self, actor, here, args, extra) {
 	var typeRoll = random(0,2);
 	var skillArr = [0,0,0];
-	for each (var person in self.room.people) {
+	for (var _autoKey in self.room.people) {
+		var person = self.room.people[_autoKey];
 		//sendKoradin(person.name)
 		var skillLevelArr = [ person.getSkill(getSkillVnum("Smithing")), person.getSkill(getSkillVnum("Tailoring")), person.getSkill(getSkillVnum("Mixing")) ];
 		for (var i = 0; i < skillLevelArr.length; i++) {

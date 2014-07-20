@@ -28,8 +28,8 @@ var script20850 = function(self, actor, here, args, extra) {
 		var wield_item = actor.eq(constants.WEAR_HOLD);
 		if (wield_item)
 		{
-			for each(var word in wield_item.namelist.split(" "))
-			{
+			for (var _autoKey in wield_item.namelist.split(" ")) {
+				var word = wield_item.namelist.split(" ")[_autoKey];
 				if (word == "pickformining")
 					return wield_item;
 			}
@@ -44,8 +44,8 @@ var script20850 = function(self, actor, here, args, extra) {
 	}
 	var room = actor.room;
 	var room_count = 0;
-	for each (var person in room.people)
-	{
+	for (var _autoKey in room.people) {
+		var person = room.people[_autoKey];
 		if (getPick( person ) && person != actor)
 			room_count += 1;
 	}
@@ -159,8 +159,8 @@ var script20850 = function(self, actor, here, args, extra) {
 		if (random(1,100) < 6 && skill < 99) {
 			awardPracs(actor,"Mining",null,"randomMining");
 		}
-		for each (var player in getConnectedPlayers())
-		{
+		for (var _autoKey in getConnectedPlayers()) {
+			var player = getConnectedPlayers()[_autoKey];
 			if (player.name == "Koradin")
 				player.send("SCATTER MINING: " +actor.name + " just got " + sName);
 		}
@@ -207,8 +207,8 @@ var script20850 = function(self, actor, here, args, extra) {
 		if (result != null && random(0,scaling_skill_roll) == 1)
 		{
 			var result_vnum = result[0];
-			for each (var player in getConnectedPlayers())
-			{
+			for (var _autoKey in getConnectedPlayers()) {
+				var player = getConnectedPlayers()[_autoKey];
 				if (player.name == "Koradin")
 					player.send("MINING: " +actor.name + " just got " + getObjProto(result_vnum).name);
 			}

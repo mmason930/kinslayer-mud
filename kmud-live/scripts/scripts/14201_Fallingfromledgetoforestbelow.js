@@ -7,11 +7,13 @@ var script14201 = function(self, actor, here, args, extra) {
 	else if (self.vnum == 14239)
 		var destination = random(14211,14210);
 	var peopleArr = [];
-	for each (var person in self.people) {
+	for (var _autoKey in self.people) {
+		var person = self.people[_autoKey];
 		if (random(1,3) < 3)
 			peopleArr.push(person);
 	}
-	for each (var victim in peopleArr) {
+	for (var _autoKey in peopleArr) {
+		var victim = peopleArr[_autoKey];
 		victim.send("You lose your footing and go plummeting into the forest!");
 		victim.send(" ");
 		act("$n loses $s footing and goes plummeting into the forest below!",true,victim,null,null,constants.TO_ROOM);

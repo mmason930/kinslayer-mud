@@ -6,7 +6,8 @@ var script20857 = function(self, actor, here, args, extra) {
 		var place = "workshop";
 	else if (namelist[namelist.length-1] == "blacksmith")
 		var place = "forge";
-	for each (var room in self.room.neighbors) {
+	for (var _autoKey in self.room.neighbors) {
+		var room = self.room.neighbors[_autoKey];
 		if (room)
 			var newRoom = room;
 	}
@@ -15,8 +16,8 @@ var script20857 = function(self, actor, here, args, extra) {
 	bootTime = parseInt(bootTime);
 	if (time() < bootTime)
 		return;
-	for each (var person in self.room.people)
-	{
+	for (var _autoKey in self.room.people) {
+		var person = self.room.people[_autoKey];
 		if (person.name == smither)
 			actor = person;
 	}

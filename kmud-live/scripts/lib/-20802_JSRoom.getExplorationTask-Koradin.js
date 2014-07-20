@@ -38,8 +38,8 @@ function getExplorationTask( rVnum )
 	total_areas.push( [4500,"explore the town of Baerlon"] );
 	total_areas.push( [5300,"explore the forest north of Whitebridge"] );
 	//
-	for each (var area in total_areas)
-	{
+	for (var _autoKey in total_areas) {
+		var area = total_areas[_autoKey];
 		if (getRoom(area[0]))
 		{
 			//if (getRoom(area[0]).zoneIsOpen() == true)

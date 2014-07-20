@@ -29,13 +29,13 @@ var script20875 = function(self, actor, here, args, extra) {
 	}
 	var availableArmor = getTailoringArmorSlots(self);
 	var availableMats = getTailoringTypes(self, type);
-	for each (var armor in availableArmor)
-	{
+	for (var _autoKey in availableArmor) {
+		var armor = availableArmor[_autoKey];
 		if (!str_cmp(itemArg,armor[0]))
 			var end_object = armor;
 	}
-	for each (var aMat in availableMats)
-	{
+	for (var _autoKey in availableMats) {
+		var aMat = availableMats[_autoKey];
 		if (!str_cmp(matArg,aMat[0]))
 			var end_mat = aMat;
 	}
@@ -85,10 +85,13 @@ var script20875 = function(self, actor, here, args, extra) {
 	wait 15;
 	room.echo(name + " finishes up the last details of the "+end_object[0].toLowerCase()+", holding it up to the light.");
 	wait 2;
-	for each (var nRoom in self.room.neighbors) {
+	for (var _autoKey in self.room.neighbors) {
+		var nRoom = self.room.neighbors[_autoKey];
 		if (nRoom) {
-			for each (var nPerson in nRoom.people) {
-				for each (var nName in nPerson.namelist.split(" ")) {
+			for (var _autoKey in nRoom.people) {
+				var nPerson = nRoom.people[_autoKey];
+				for (var _autoKey in nPerson.namelist.split(" ")) {
+					var nName = nPerson.namelist.split(" ")[_autoKey];
 					if (nName == "dude")
 						var apprentice = nPerson;
 				}

@@ -28,8 +28,8 @@ var script20890 = function(self, actor, here, args, extra) {
 	var wield_item = actor.eq(constants.WEAR_WIELD);
 	if (wield_item)
 	{
-	for each(var word in wield_item.namelist.split(" "))
-	{
+	for (var _autoKey in wield_item.namelist.split(" ")) {
+		var word = wield_item.namelist.split(" ")[_autoKey];
 	if (word == "rodforfishing")
 	return wield_item;
 	}
@@ -49,8 +49,8 @@ var script20890 = function(self, actor, here, args, extra) {
 	return;
 	}
 	var room_count = 0;
-	for each (var person in room.people)
-	{
+	for (var _autoKey in room.people) {
+		var person = room.people[_autoKey];
 	if (getRod( person ) && person != actor)
 	room_count += 1;
 	}
@@ -149,8 +149,8 @@ var script20890 = function(self, actor, here, args, extra) {
 	if (result != null && random(0,scaling_skill_roll) == 1)
 	{
 	var result_vnum = result[0];
-	for each (var player in getConnectedPlayers())
-	{
+	for (var _autoKey in getConnectedPlayers()) {
+		var player = getConnectedPlayers()[_autoKey];
 	if (player.name == "Koradin")
 	player.send("FISHING: " +actor.name + " just got " + result_vnum);
 	}

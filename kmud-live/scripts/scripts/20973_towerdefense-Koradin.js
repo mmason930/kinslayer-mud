@@ -8,26 +8,26 @@ var script20973 = function(self, actor, here, args, extra) {
 		var race = constants.RACE_TROLLOC;
 	var first_ring = here.neighbors;
 	var area_of_effect = [];
-	for each (var room in first_ring)
-	{
+	for (var _autoKey in first_ring) {
+		var room = first_ring[_autoKey];
 		if (room)
 		{
 			if (room.sector != constants.SECT_INSIDE && room.sector != constants.SECT_CITY)
 				area_of_effect.push(room);
-			for each (var room2 in room.neighbors)
-			{
+			for (var _autoKey in room.neighbors) {
+				var room2 = room.neighbors[_autoKey];
 				if (room2)
 				{
 					if (room2.sector != constants.SECT_INSIDE && room2.sector != constants.SECT_CITY)
 						area_of_effect.push(room2);
-					for each (var room3 in room2.neighbors)
-					{
+					for (var _autoKey in room2.neighbors) {
+						var room3 = room2.neighbors[_autoKey];
 						if (room3)
 						{
 							if (room3.sector != constants.SECT_INSIDE && room3.sector != constants.SECT_CITY)
 								area_of_effect.push(room3);
-							for each (var room4 in room3.neighbors)
-							{
+							for (var _autoKey in room3.neighbors) {
+								var room4 = room3.neighbors[_autoKey];
 								if (room4)
 								{
 									if (room4.sector != constants.SECT_INSIDE && room4.sector != constants.SECT_CITY)
@@ -54,16 +54,18 @@ var script20973 = function(self, actor, here, args, extra) {
 		}
 		final_array.push(area_of_effect[indices[0]]);
 		indices.reverse();
-		for each(var dex in indices)
+		for (var _autoKey in indices) {
+			var dex = indices[_autoKey];
 			area_of_effect.splice(dex,1);
+		}
 		indices = [];
 		x += 1;
 	}
-	for each (var area in final_array)
-	{
+	for (var _autoKey in final_array) {
+		var area = final_array[_autoKey];
 		if( !area ) continue;
-		for each (var person in area.people)
-		{
+		for (var _autoKey in area.people) {
+			var person = area.people[_autoKey];
 			if (person.race != race && person.vnum == -1 && person.level < 100 && person.level > 14)
 			{
 				targets.push(person);

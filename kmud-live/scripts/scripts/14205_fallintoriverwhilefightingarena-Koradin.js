@@ -17,7 +17,8 @@ var script14205 = function(self, actor, here, args, extra) {
 		var nextRoom = 14250;
 	else if (self.vnum == 14261 || self.vnum == 14235 )
 		var nextRoom = 14251;
-	for each (var thing in actor.inventory) {
+	for (var _autoKey in actor.inventory) {
+		var thing = actor.inventory[_autoKey];
 		if (arrContains(global.arenaItems, thing.vnum))
 			actor.comm("drop "+thing.namelist.split(" ")[0]);
 	}

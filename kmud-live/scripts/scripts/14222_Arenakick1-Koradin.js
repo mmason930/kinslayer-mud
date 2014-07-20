@@ -36,7 +36,8 @@ var script14222 = function(self, actor, here, args, extra) {
 	global.arenaKickTimer = time();
 	putMobsToSleep(true);
 	startArenaTimer(15, "Kick Player");
-	for each (var player in global.arenaPlayers) {
+	for (var _autoKey in global.arenaPlayers) {
+		var player = global.arenaPlayers[_autoKey];
 		getCharCols(player);
 		player.stopFighting();
 		player.send(" ");

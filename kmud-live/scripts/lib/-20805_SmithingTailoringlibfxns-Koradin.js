@@ -16,8 +16,9 @@ function getSmithableArmorSlots( actor )
 	var shield = ["Shield",      65,12,"              ",  9,"a",        9,["buckler","shield"],["aegis","tower shield","kite shield"]];
 	var slots = [boots,hands,belt,shoulders,hat,legs,arms,plate,shield];
 	
-	for each ( var slot in slots )
-	{
+	for (var _autoKey in slots ) {
+	
+		var slot = slots [_autoKey];
 		if (skill >= slot[1])
 			results.push(slot);
 	}
@@ -39,8 +40,9 @@ function getTailoringArmorSlots( actor )
 		var shield = ["Cloak",        90,12,"              ",  9,"a",        9,["cloak","robe","cape","gown"],["coat","jacket","cloak","mantle"] ];
 		var slots = [boots,hands,belt,shoulders,hat,legs,arms,plate,shield];
 	
-		for each ( var slot in slots )
-		{
+		for (var _autoKey in slots ) {
+	
+			var slot = slots [_autoKey];
 			if (skill >= slot[1])
 				results.push(slot);
 		}
@@ -62,8 +64,8 @@ function getSmithableWeapons( actor )
 	var sword = ["Long Blade",        50,18,"          ",       8,"a",8,["long blade","longsword","war sword","scimitar","sword","cutlass"],["double-bladed war sword","claymore","broadsword"]];
 	var club = ["Club",               60,20,"                ",9,"a",8,["club","spiked mace","cudgel","hammer"],["truncheon","mallet","war club","war hammer"]];
 	var weapons = [prodagger,prospear,dagger,spear,lance,staff,chain,axe,sword,club];
-	for each (var weapon in weapons)
-	{
+	for (var _autoKey in weapons) {
+		var weapon = weapons[_autoKey];
 		if (skill >= weapon[1])
 			results.push(weapon);
 	}
@@ -84,8 +86,8 @@ function getSmithableTypes( actor )
 	var Platinum = ["Platinum",90,9,"          "];
 	var Obsidian = ["Obsidian",99,9,"          "];
 	var types = [Tin,Aluminum,Copper,Iron,Steel,Bronze,Silver,Gold,Platinum,Obsidian]
-	for each (var type in types)
-	{
+	for (var _autoKey in types) {
+		var type = types[_autoKey];
 		if (skill >= type[1])
 			results.push(type);
 	}
@@ -106,8 +108,8 @@ function getTailoringTypes( actor, kind )
 		var Silver = ["Velvet",90,8,"          "];
 		var Gold = ["Fur",99,7,"             "];
 		var types = [Tin,Aluminum,Copper,Iron,Steel,Bronze,Silver,Gold]
-		for each (var type in types)
-		{
+		for (var _autoKey in types) {
+			var type = types[_autoKey];
 			if (skill >= type[1])
 				results.push(type);
 		}
@@ -126,8 +128,8 @@ function getTailoringTypes( actor, kind )
 		var Silver = ["Scale",90,8,"                 "];
 		var Gold = ["Brigandine",99,7,"            "];
 		var types = [Tin,Aluminum,Copper,Iron,Steel,Bronze,Silver,Gold]
-		for each (var type in types)
-		{
+		for (var _autoKey in types) {
+			var type = types[_autoKey];
 			if (skill >= type[1])
 				results.push(type);
 		}
@@ -365,23 +367,23 @@ function awardPracs( actor, type, material, item )
 	var skill_level = Math.floor(skill/10);
 	if (type == "Smithing")
 	{
-		for each (var arm in getSmithableArmorSlots(actor))
-		{
+		for (var _autoKey in getSmithableArmorSlots(actor)) {
+			var arm = getSmithableArmorSlots(actor)[_autoKey];
 			if (item == arm[0])
 				var item_level = arm[4];
 		}
 		if (!item_level)
 		{
-			for each (var weap in getSmithableWeapons(actor))
-			{
+			for (var _autoKey in getSmithableWeapons(actor)) {
+				var weap = getSmithableWeapons(actor)[_autoKey];
 				if (item == weap[0])
 					var item_level = weap[4];
 			}
 		}
 		if (!item_level)
 			return null;
-		for each (var mat in getSmithableTypes(actor))
-		{
+		for (var _autoKey in getSmithableTypes(actor)) {
+			var mat = getSmithableTypes(actor)[_autoKey];
 			if (material == mat[0].toLowerCase())
 				var mat_level = Math.floor(mat[1]/10);
 		}
@@ -437,8 +439,9 @@ function awardPracs( actor, type, material, item )
 		else
 			var prac_award = 1;
 			
-		for each ( var mType in ores )
-		{
+		for (var _autoKey in ores ) {
+			
+			var mType = ores [_autoKey];
 			if (material == mType[1])
 				var item_type = mType;
 		}
@@ -497,22 +500,22 @@ function awardPracs( actor, type, material, item )
 	}
 	else if (type == "Tailoring")
 	{
-		for each (var arm in getTailoringArmorSlots(actor))
-		{
+		for (var _autoKey in getTailoringArmorSlots(actor)) {
+			var arm = getTailoringArmorSlots(actor)[_autoKey];
 			if (item == arm[0])
 				var item_level = arm[4];
 		}
 		if (!item_level)
 			return null;
-		for each (var mat in getTailoringTypes(actor,"dodge"))
-		{
+		for (var _autoKey in getTailoringTypes(actor,"dodge")) {
+			var mat = getTailoringTypes(actor,"dodge")[_autoKey];
 			if (material == mat[0].toLowerCase())
 				var mat_level = Math.floor(mat[1]/10);
 		}
 		if (!mat_level)
 		{
-			for each (var mt in getTailoringTypes(actor,"combo"))
-			{
+			for (var _autoKey in getTailoringTypes(actor,"combo")) {
+				var mt = getTailoringTypes(actor,"combo")[_autoKey];
 				if (material == mt[0].toLowerCase())
 					var mat_level = Math.floor(mt[1]/10);
 			}
@@ -770,7 +773,8 @@ function getCostMultiplier(strName) {
 	var name = strName.split(" ");
 	var cond = 0;
 	for (k=0; k<condArr.length; k++) {
-		for each (var word in name) {
+		for (var _autoKey in name) {
+			var word = name[_autoKey];
 			if (isName(word, condArr[k])) {
 				cond = 9-k;
 				//sendKoradin(cond);

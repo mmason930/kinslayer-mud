@@ -18,8 +18,8 @@ var script20950 = function(self, actor, here, args, extra) {
 			return;
 		}
 		var people = actor.room.people;
-		for each(var person in people)
-		{
+		for (var _autoKey in people) {
+			var person = people[_autoKey];
 			if (person.race == actor.race)
 			{
 				person.send(strColFormat(capFirstLetter(text),80) + "  [" + actor.name + "]");

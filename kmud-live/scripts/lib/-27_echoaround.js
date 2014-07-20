@@ -5,8 +5,8 @@ function echoaround(ignore, message)
     var room = ignore.room;
     var people = room.people;
     var fail;
-    for each(var person in people)
-    {
+    for (var _autoKey in people) {
+    	var person = people[_autoKey];
         fail = false;
         if (ignore == person)
 			fail = true;

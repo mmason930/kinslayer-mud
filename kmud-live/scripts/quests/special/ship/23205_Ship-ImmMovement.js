@@ -84,7 +84,8 @@ var script23205 = function(self, actor, here, args, extra) {
 			return;
 		}
 		var quests = getQuestsByMob( arg_list[2] );
-		for each( q in quests ) {
+		for (var _autoKey in quests ) {
+			var q = quests [_autoKey];
 			if( target.quest( q.questName ) )
 				target.qval( q.questName, 0 );
 			if( target.quest( q.questName + "-NR_COMPLETED" ) )

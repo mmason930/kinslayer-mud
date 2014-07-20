@@ -128,7 +128,8 @@ var script638 = function(self, actor, here, args, extra) {
 			actor.send("The Arena is currently open! Type "+mag+"enter arena"+nrm+" to join the battle!");
 		}
 	// Pay Property Owner gold that is due
-		for each (var manor in global.manors) {
+		for (var _autoKey in global.manors) {
+			var manor = global.manors[_autoKey];
 			if (manor.goldOwed > 0 && actor.id == manor.ownerUserId) {
 				actor.gold += manor.goldOwed;
 				getCharCols(actor);

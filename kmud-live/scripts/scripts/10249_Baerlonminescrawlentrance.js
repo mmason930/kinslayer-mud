@@ -13,7 +13,8 @@ var script10249 = function(self, actor, here, args, extra) {
 	        actor.moveToRoom(getRoom(10250));
 	        getRoom(10250).echoaround(actor, actor.name + " crawls in from outside.");
 	        actor.comm("look");
-	for each( var follower in actor.followers ) {
+	for (var _autoKey in actor.followers ) {
+		var follower = actor.followers [_autoKey];
 	        if( follower.position != constants.POS_STANDING )
 	        {
 	                continue;

@@ -703,8 +703,11 @@ function bootQueditOLC()
 			actor.getOLC().showGivenBy = quest.showGivenBy;
 			actor.getOLC().ownerVnum = [];
 			if ( getObjectClass(quest.ownerVnum) == "Array" ) {
-				for each ( var vnum in quest.ownerVnum )
+				for (var _autoKey in quest.ownerVnum) {
+					var vnum = quest.ownerVnum[_autoKey];
 				actor.getOLC().ownerVnum.push(vnum);
+
+				}
 			}
 			else {
 				actor.getOLC().ownerVnum[0] = quest.ownerVnum;

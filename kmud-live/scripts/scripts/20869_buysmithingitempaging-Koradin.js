@@ -1,6 +1,8 @@
 var script20869 = function(self, actor, here, args, extra) {
-	for each (var person in actor.room.people) {
-		for each (var pName in person.namelist.split(" ")) {
+	for (var _autoKey in actor.room.people) {
+		var person = actor.room.people[_autoKey];
+		for (var _autoKey in person.namelist.split(" ")) {
+			var pName = person.namelist.split(" ")[_autoKey];
 			if (pName == "dude") {
 				var apprentice = person;
 				break;

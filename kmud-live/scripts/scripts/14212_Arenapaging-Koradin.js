@@ -134,7 +134,8 @@ var script14212 = function(self, actor, here, args, extra) {
 		setSval(actor,14212,"arenaVote",gameVote);
 		setSval(actor,14212,"votePaging",0);
 		global.arenaPlayers.push(actor);
-		for each (var person in arenaPlayers) {
+		for (var _autoKey in arenaPlayers) {
+			var person = arenaPlayers[_autoKey];
 			if (person != actor) {
 				if (actor.race != person.race)
 					var playerName = "Someone";
@@ -162,8 +163,10 @@ var script14212 = function(self, actor, here, args, extra) {
 		if (global.arenaTotalVotes == getWaitingPlayers("pc").length) {
 			var gameType = getArenaGameType(global.arenaAllGames);
 			gameType.limit = Math.floor(gameType.limit / gameType.votes);
-			for each (var ai in getWaitingPlayers("ai"))
+			for (var _autoKey in getWaitingPlayers("ai")) {
+				var ai = getWaitingPlayers("ai")[_autoKey];
 				global.arenaPlayers.push(ai);
+			}
 			startArenaMatch(gameType);
 		}
 		return;

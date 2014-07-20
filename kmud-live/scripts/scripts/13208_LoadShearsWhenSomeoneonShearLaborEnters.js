@@ -5,7 +5,8 @@ var script13208 = function(self, actor, here, args, extra) {
 	}
 	var check1 = false;
 	var check2 = false;
-	for each( var item in self.items ) {
+	for (var _autoKey in self.items ) {
+		var item = self.items [_autoKey];
 		if (item.vnum == 13208)
 			check1 = true;
 		if ( item.vnum == 20994 )

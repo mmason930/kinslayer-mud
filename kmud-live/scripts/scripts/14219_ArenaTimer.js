@@ -15,8 +15,10 @@ var script14219 = function(self, actor, here, args, extra) {
 		if (global.arenaCurrentGame == global.arenaGameLMS) { //LMS battle, different timer rules
 			var rooms = [ getRoom(14201), getRoom(14299), getRoom(14415), getRoom(14499) ];
 			var players = [];
-			for each (var room in rooms) {
-				for each (var play in room.people) {
+			for (var _autoKey in rooms) {
+				var room = rooms[_autoKey];
+				for (var _autoKey in room.people) {
+					var play = room.people[_autoKey];
 					if (play.vnum == -1 && (getSval(play,20860,"respawnTime") - time()) < 10 && getSval(play,20860,"deathCount") < global.arenaCurrentGame.limit) {
 						players.push([play, room]);
 						getCharCols(play);
@@ -25,7 +27,8 @@ var script14219 = function(self, actor, here, args, extra) {
 				}
 			}
 			wait 10;
-			for each (var player in players) {
+			for (var _autoKey in players) {
+				var player = players[_autoKey];
 				if (player[0].room == player[1] && (getSval(player[0],20860,"respawnTime") - time()) < 10) {
 					player[0].comm("enter arena");
 				}
@@ -45,7 +48,8 @@ var script14219 = function(self, actor, here, args, extra) {
 					var winner = getSmobGameWinner("ffa");
 					arenaEcho("Time's up! "+winner.name +" has won the match!");
 					addArenaPoint(winner, "soloWins");
-					for each (var player in global.arenaPlayers) {
+					for (var _autoKey in global.arenaPlayers) {
+						var player = global.arenaPlayers[_autoKey];
 						player.send(" ");
 						if (player != winner)
 							addArenaPoint(player, "soloLosses");
@@ -56,7 +60,8 @@ var script14219 = function(self, actor, here, args, extra) {
 				else { //Regular smob battle
 					var winner = getSmobGameWinner("reg");
 					arenaEcho("Time's up! The "+getTeamName(winner) +" Team has won the match!");
-					for each (var player in global.arenaPlayers) {
+					for (var _autoKey in global.arenaPlayers) {
+						var player = global.arenaPlayers[_autoKey];
 						if (player.arenaTeam == winner)
 							addArenaPoint(player, "teamWins");
 						else 
@@ -72,7 +77,8 @@ var script14219 = function(self, actor, here, args, extra) {
 					var winner = getTimeGameWinner("ffa");
 					addArenaPoint(winner, "soloWins");
 					arenaEcho("Time's up! "+winner.name +" has won the match!");
-					for each (var player in global.arenaPlayers) {
+					for (var _autoKey in global.arenaPlayers) {
+						var player = global.arenaPlayers[_autoKey];
 						player.send(" ");
 						if (player != winner)
 							addArenaPoint(player, "soloLosses");
@@ -83,7 +89,8 @@ var script14219 = function(self, actor, here, args, extra) {
 				else { //Regular timed battle
 					var winner = getTimeGameWinner("reg");
 					arenaEcho("Time's up! The "+getTeamName(winner)+" Team has won the match!");
-					for each (var player in global.arenaPlayers) {
+					for (var _autoKey in global.arenaPlayers) {
+						var player = global.arenaPlayers[_autoKey];
 						if (player.arenaTeam == winner)
 							addArenaPoint(player, "teamWins");
 						else 

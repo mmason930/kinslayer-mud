@@ -3,8 +3,8 @@ var script20835 = function(self, actor, here, args, extra) {
 	//Koradin - April 2010
 	var room = actor.room;
 	var trigger = false;
-	for each (var thing in room.items)
-	{
+	for (var _autoKey in room.items) {
+		var thing = room.items[_autoKey];
 	if (thing.vnum == 9022 && self.vnum == 20836)
 	var event = " raging fire";
 	else if (thing.vnum == 9015 && self.vnum == 20837)
@@ -43,8 +43,8 @@ var script20835 = function(self, actor, here, args, extra) {
 	var end_obj = 9015;
 	}
 	waitpulse 1;
-	for each (var item in room.items)
-	{
+	for (var _autoKey in room.items) {
+		var item = room.items[_autoKey];
 	if (item == self)
 	trigger = true;
 	}

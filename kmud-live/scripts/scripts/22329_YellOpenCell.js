@@ -9,8 +9,9 @@ var script22329 = function(self, actor, here, args, extra) {
 			var guardRoom = getRoom(22328);
 			var guard = null;
 			
-			for each(var mob in guardRoom.people)
-			{
+			for (var _autoKey in guardRoom.people) {
+			
+				var mob = guardRoom.people[_autoKey];
 				if(mob.vnum == 22328)
 				{
 					guard = mob;

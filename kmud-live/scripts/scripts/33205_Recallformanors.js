@@ -1,7 +1,8 @@
 var script33205 = function(self, actor, here, args, extra) {
 	_block;
 	var manors = [];
-	for each (var mr in global.manors) {
+	for (var _autoKey in global.manors) {
+		var mr = global.manors[_autoKey];
 		if (mr.ownerUserId == actor.id || arrContains(mr.allowedUsers, actor.id))
 			manors.push(mr);
 	}
@@ -10,7 +11,8 @@ var script33205 = function(self, actor, here, args, extra) {
 		return;
 	}
 	getCharCols(actor);
-	for each (var mnr in manors) {
+	for (var _autoKey in manors) {
+		var mnr = manors[_autoKey];
 		if (isBeingClaimed(mnr))
 			var manor = mnr;
 	}

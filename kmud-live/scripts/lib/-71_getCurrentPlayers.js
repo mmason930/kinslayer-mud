@@ -17,7 +17,8 @@ function getCurrentPlayers() {
 function getPlayerByName(sName) {
 	var players = getCurrentPlayers();
 	var regex = new RegExp(sName, "i");
-	for each (var p in players) {
+	for (var _autoKey in players) {
+		var p = players[_autoKey];
 		if (regex.test(p.name)) {
 			return p;
 		}

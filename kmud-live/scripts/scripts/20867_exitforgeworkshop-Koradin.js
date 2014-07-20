@@ -8,7 +8,8 @@ var script20867 = function(self, actor, here, args, extra) {
 	wait 1;
 	actor.send("The "+type+" door is opened just wide enough for you to leave.");
 	act("$n leaves the "+type+", closing the door behind $m.",true,actor,null,null,constants.TO_ROOM);
-	for each (var room in actor.room.neighbors) {
+	for (var _autoKey in actor.room.neighbors) {
+		var room = actor.room.neighbors[_autoKey];
 		if (room)
 			var newRoom = room;
 	}
@@ -16,8 +17,10 @@ var script20867 = function(self, actor, here, args, extra) {
 	actor.comm("look");
 	act("The "+type+" door opens, and $n steps out.",true,actor,null,null,constants.TO_ROOM);
 	waitpulse 2;
-	for each (var per in newRoom.people) {
-		for each (var pName in per.namelist.split(" ")) {
+	for (var _autoKey in newRoom.people) {
+		var per = newRoom.people[_autoKey];
+		for (var _autoKey in per.namelist.split(" ")) {
+			var pName = per.namelist.split(" ")[_autoKey];
 			if (pName == "dude") {
 				per.say("Welcome back, "+actor.name+"! The "+type+" is still yours. Just knock on the door to be let in.");
 				return;

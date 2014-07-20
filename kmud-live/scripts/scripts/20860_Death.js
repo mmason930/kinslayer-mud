@@ -57,7 +57,8 @@ var script20860 = function(self, actor, here, args, extra) {
 				eq.extract();
 			}
 		}
-		for each (var item in self.inventory) {
+		for (var _autoKey in self.inventory) {
+			var item = self.inventory[_autoKey];
 			item.moveToRoom(getRoom(20899));
 			item.extract();
 		}
@@ -110,7 +111,8 @@ var script20860 = function(self, actor, here, args, extra) {
 			}
 			addArenaPoint(actor, "smobKills");
 			if (global.arenaCurrentGame.totalSmobs < 1) {
-				for each (var player in global.arenaPlayers) {
+				for (var _autoKey in global.arenaPlayers) {
+					var player = global.arenaPlayers[_autoKey];
 					getCharCols(player);
 					player.send(mag+"More SuperMOBS have entered the Arena!"+nrm);
 				}
@@ -122,7 +124,8 @@ var script20860 = function(self, actor, here, args, extra) {
 	//sendKoradin(self.name+" just died in zone "+self.room.zoneVnum+"!!!");
 	if ((self.room.zoneVnum == global.arenaZoneVnum && self.vnum == -1) || isAI(self)) {  //If person who dies is inside arena and is a PC
 		//sendKoradin(self.name+" ARENA");
-		for each (var thing in self.inventory) { //Make person drop any flags from CTF
+		for (var _autoKey in self.inventory) {
+			var thing = self.inventory[_autoKey]; //Make person drop any flags from CTF
 			if (arrContains(global.arenaItems, thing.vnum)) {
 				thing.moveToRoom(self.room);
 				self.detach(14215);
@@ -130,7 +133,8 @@ var script20860 = function(self, actor, here, args, extra) {
 		}
 		//ASSISTS v
 		var assistArr = [];
-		for each (var person in self.room.people) {
+		for (var _autoKey in self.room.people) {
+			var person = self.room.people[_autoKey];
 			if (global.arenaFreeForAll == true) {//FFA on, count assist for anyone
 				if (person != self && (person.vnum == -1 || isAI(person)) && person.fighting == self) {
 					var assistCount = getSval(person,20860,"assistCount");
@@ -159,7 +163,8 @@ var script20860 = function(self, actor, here, args, extra) {
 			}
 		}
 		if (isAI(self)) {
-			for each (var player in global.arenaPlayers) {
+			for (var _autoKey in global.arenaPlayers) {
+				var player = global.arenaPlayers[_autoKey];
 				if (player.vnum == self.vnum)
 					self = player;
 			}
@@ -245,7 +250,8 @@ var script20860 = function(self, actor, here, args, extra) {
 					victim.send(" ");
 				}
 				if (global.arenaCurrentGame.totalPlayers == 1) { //winning the game
-					for each (var player in global.arenaPlayers) {
+					for (var _autoKey in global.arenaPlayers) {
+						var player = global.arenaPlayers[_autoKey];
 						if (getSval(player,20860,"deathCount") < global.arenaCurrentGame.limit) {
 							arenaEcho(player.name+" is the Last Man Standing!");
 							addArenaPoint(player, "soloWins");
@@ -262,7 +268,8 @@ var script20860 = function(self, actor, here, args, extra) {
 				if (global.arenaFreeForAll == true) { //FFA mode is ON
 					if (getSval(killer,20860,"killCount") == global.arenaCurrentGame.limit) { //Player wins
 						arenaEcho(killer.name+" has won the Death Match!");
-						for each (var player in global.arenaPlayers) {
+						for (var _autoKey in global.arenaPlayers) {
+							var player = global.arenaPlayers[_autoKey];
 							if (player != killer)
 								addArenaPoint(player, "soloLosses");
 							player.send(" ");
@@ -277,7 +284,8 @@ var script20860 = function(self, actor, here, args, extra) {
 					var blueKills = 0;
 					var yellowKills = 0;
 					var greenKills = 0;
-					for each (var player in global.arenaPlayers) {
+					for (var _autoKey in global.arenaPlayers) {
+						var player = global.arenaPlayers[_autoKey];
 						if (player.arenaTeam == constants.ARENA_BLUE)
 							blueKills += getSval(player,20860,"killCount");
 						else if (player.arenaTeam == constants.ARENA_RED)
@@ -297,7 +305,8 @@ var script20860 = function(self, actor, here, args, extra) {
 						var winner = constants.ARENA_GREEN;
 					if (winner) { //Team won the match
 						arenaEcho("The "+getTeamName(winner)+" Team has won the Death Match!");
-						for each (var player in global.arenaPlayers) {
+						for (var _autoKey in global.arenaPlayers) {
+							var player = global.arenaPlayers[_autoKey];
 							if (player.arenaTeam == winner)
 								addArenaPoint(player, "teamWins");
 							else
@@ -447,7 +456,8 @@ var script20860 = function(self, actor, here, args, extra) {
 			}
 			// If player is manor owner/allowed, keep NOQUIT for 6 tics.
 			var allowed = false;
-			for each (var manor in global.manors) {
+			for (var _autoKey in global.manors) {
+				var manor = global.manors[_autoKey];
 				if (victim.id == manor.ownerUserId || arrContains(manor.allowedUsers, victim.id)) {
 					allowed = true;
 					var mr = manor;

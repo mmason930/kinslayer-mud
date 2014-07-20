@@ -50,7 +50,7 @@ function getQuestByName( qName )
 	
 	var index = binarySearch( global.vQuests, qName, getKey, 0, global.vQuests.length-1 );
 	return ( index == -1 ? null : global.vQuests[index] );
-	// for each( var quest in global.vQuests ) {
+	// for (var _autoKey in global.vQuests ) { 	var quest = global.vQuests [_autoKey];
 		// if ( !str_cmp(quest.questName,qName) ) {
 			// return quest;
 		// }
@@ -61,7 +61,8 @@ function getQuestByName( qName )
 function getQuestsByMob( mVnum ) {
 	var myQuests = [];
 	if ( mVnum != -1 ) {
-		for each(var quest in global.vQuests) {
+		for (var _autoKey in global.vQuests) {
+			var quest = global.vQuests[_autoKey];
 			if( arrContains(quest.ownerVnum,mVnum) == true )
 				myQuests.push( quest );
 		}

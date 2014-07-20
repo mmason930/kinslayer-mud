@@ -16,15 +16,18 @@ var script14233 = function(self, actor, here, args, extra) {
 	vArgs = vArgs.join(" ");
 	var aName = actor.name;
 	var allPlayers = [];
-	for each (var player in global.arenaPlayers) {
+	for (var _autoKey in global.arenaPlayers) {
+		var player = global.arenaPlayers[_autoKey];
 		if (player.arenaTeam == actor.arenaTeam)
 			allPlayers.push(player);
 	}
-	for each (var imm in getConnectedPlayers()) {
+	for (var _autoKey in getConnectedPlayers()) {
+		var imm = getConnectedPlayers()[_autoKey];
 		if (imm.level > 50)
 			allPlayers.push(imm);
 	}
-	for each (var person in allPlayers) {
+	for (var _autoKey in allPlayers) {
+		var person = allPlayers[_autoKey];
 		getCharCols(person);
 		if (actor.arenaTeam == constants.ARENA_BLUE)
 			var color = cyn;

@@ -447,8 +447,8 @@ CoachManager.prototype.loadCoaches = function()
 	
 	
 	//Everything below here should remain unchanged when we switch to database storage.
-	for each(var coach in this.coaches)
-	{
+	for (var _autoKey in this.coaches) {
+		var coach = this.coaches[_autoKey];
 		var coachRides = coach.getCoachRides();
 		
 		if(coachRides.length == 0)

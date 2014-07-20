@@ -29,8 +29,8 @@ var script2901 = function(self, actor, here, args, extra) {
 		}
 	}
 	_block;
-	for each (var rec in actor.getRecipes(recType))
-	{
+	for (var _autoKey in actor.getRecipes(recType)) {
+		var rec = actor.getRecipes(recType)[_autoKey];
 		if (recipe.vnum == rec.vnum)
 		{
 		actor.send("You already know this recipe!");

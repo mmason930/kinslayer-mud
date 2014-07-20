@@ -1,6 +1,6 @@
 var script14206 = function(self, actor, here, args, extra) {
 	var timeToFlood = getSval(getRoom(14350),14206,"river");
-	// for each (var player in getConnectedPlayers()) {
+	// for (var _autoKey in getConnectedPlayers()) { 	var player = getConnectedPlayers()[_autoKey];
 		// if (player.name == "Koradin")
 			// player.send("Time till next flood: "+(timeToFlood-time()));
 	// }
@@ -30,18 +30,25 @@ var script14206 = function(self, actor, here, args, extra) {
 	var altMsg42 = ", sweeping you away!";
 	setSval(self,14206,"running",1);
 	self.echo(msg1);
-	for each (var roomVnum in roomArr)
+	for (var _autoKey in roomArr) {
+		var roomVnum = roomArr[_autoKey];
 		getRoom(roomVnum).echo(altMsg1);
+	}
 	wait 6;
 	self.echo(msg2);
-	for each (var roomVnum in roomArr)
+	for (var _autoKey in roomArr) {
+		var roomVnum = roomArr[_autoKey];
 		getRoom(roomVnum).echo(altMsg2);
+	}
 	wait 6;
 	self.echo(msg3);
-	for each (var roomVnum in roomArr)
+	for (var _autoKey in roomArr) {
+		var roomVnum = roomArr[_autoKey];
 		getRoom(roomVnum).echo(altMsg3);
+	}
 	if (self.vnum == 14350) {
-		for each (var person in self.people) {
+		for (var _autoKey in self.people) {
+			var person = self.people[_autoKey];
 			act("You watch in horror as $n is crushed by the falling rock and water.",true,person,null,null,constants.TO_ROOM);
 			person.damage(10000);
 		}
@@ -49,14 +56,17 @@ var script14206 = function(self, actor, here, args, extra) {
 	wait 6;
 	setSval(self,14206,"running",0);
 	self.echo(msg4);
-	for each (var roomVnum in roomArr) {
+	for (var _autoKey in roomArr) {
+		var roomVnum = roomArr[_autoKey];
 		getRoom(roomVnum).echo(altMsg41+dirToText(getRoom(roomVnum).firstStep(getRoom(14350)))+altMsg42);
-		for each (var pers in getRoom(roomVnum).people) {
+		for (var _autoKey in getRoom(roomVnum).people) {
+			var pers = getRoom(roomVnum).people[_autoKey];
 			act("$n is swept away by the force of the water!",true,pers,null,null,constants.TO_ROOM);
 			pers.damage(10000);
 		}
 	}
-	for each (var per in self.people) {
+	for (var _autoKey in self.people) {
+		var per = self.people[_autoKey];
 		act("$n is swept away by the force of the water!",true,per,null,null,constants.TO_ROOM);
 		per.damage(10000);
 	}
@@ -67,6 +77,8 @@ var script14206 = function(self, actor, here, args, extra) {
 	}
 	getRoom(14356).echo("Water rushes in to fill the tunnel below, gurgling up around your feet.");
 	getRoom(14343).echo("Water rushes in to fill the tunnel below, gurgling up around your feet.");
-	for each (var roomVnum in farRoomArr)
+	for (var _autoKey in farRoomArr) {
+		var roomVnum = farRoomArr[_autoKey];
 		getRoom(roomVnum).echo("The sound of rushing water can be heard farther down the tunnel...");
+	}
 }

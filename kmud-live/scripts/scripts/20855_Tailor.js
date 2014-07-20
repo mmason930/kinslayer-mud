@@ -69,16 +69,16 @@ var script20855 = function(self, actor, here, args, extra) {
 	var availableArmor = getTailoringArmorSlots(actor);
 	var availableDodgeMats = getTailoringTypes(actor,"dodge");
 	var availableComboMats = getTailoringTypes(actor,"combo");
-	for each (var armor in availableArmor)
-	{
+	for (var _autoKey in availableArmor) {
+		var armor = availableArmor[_autoKey];
 		if (!str_cmp(item_arg,armor[0]))
 		{
 			var end_object = armor;
 			item_found = true;
 		}
 	}
-	for each (var cMat in availableComboMats)
-	{
+	for (var _autoKey in availableComboMats) {
+		var cMat = availableComboMats[_autoKey];
 		if (!str_cmp(vArgs,cMat[0]))
 		{
 			var type = "combo";
@@ -86,8 +86,8 @@ var script20855 = function(self, actor, here, args, extra) {
 			mat_found = true;
 		}
 	}
-	for each (var mat in availableDodgeMats)
-	{
+	for (var _autoKey in availableDodgeMats) {
+		var mat = availableDodgeMats[_autoKey];
 		if (!str_cmp(vArgs,mat[0]))
 		{
 			var type = "dodge";
@@ -224,11 +224,14 @@ var script20855 = function(self, actor, here, args, extra) {
 	}
 	var ingredients = [];
 	var totalWeight = 0;
-	for each (var iItem in actor.inventory) {
-		for each (var req in reqs) {
+	for (var _autoKey in actor.inventory) {
+		var iItem = actor.inventory[_autoKey];
+		for (var _autoKey in reqs) {
+			var req = reqs[_autoKey];
 			if (req[2] >= req[1])
 				continue;
-			for each (var vnum in req[0]) {
+			for (var _autoKey in req[0]) {
+				var vnum = req[0][_autoKey];
 				if (iItem.vnum == vnum) {
 					ingredients.push(iItem);
 					//here.echo("pushing "+iItem.name);
@@ -245,8 +248,8 @@ var script20855 = function(self, actor, here, args, extra) {
 	for (i = 0; i < reqs.length; i++) {
 		if (reqs[i][2] < reqs[i][1]) {
 			// here.echo(reqs[i][0]+" "+reqs[i][2]);
-			// for each (var ingg in ingredients)
-				// here.echo(ingg.name);
+			// for (var _autoKey in ingredients) { 	var ingg = ingredients[_autoKey];
+				// here.echo(ingg.name); }
 			actor.send("You don't have enough materials to tailor that!  Check your recipe book.");
 			return;
 		}
@@ -299,8 +302,10 @@ var script20855 = function(self, actor, here, args, extra) {
 		actor.send("\nYou stop working on the "+end_object[0].toLowerCase()+".");
 		return;
 	}
-	for each (var iIng in ingredients)
+	for (var _autoKey in ingredients) {
+		var iIng = ingredients[_autoKey];
 		iIng.extract();
+	}
 	here.echo("As the "+end_object[0].toLowerCase()+cool+cool_msg);
 	var new_obj = getBaseObject(end_mat[0],end_object[0],null,strAttribute);
 	new_obj = (new_obj+cond[3]);

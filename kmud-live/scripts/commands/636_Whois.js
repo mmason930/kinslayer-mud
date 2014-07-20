@@ -172,7 +172,8 @@ var script636 = function(self, actor, here, args, extra) {
 			var arrDisp = getArgList(disp);
 			disp = arrDisp.join(" ");
 			var manorOwner = false;
-			for each (var manor in global.manors) {
+			for (var _autoKey in global.manors) {
+				var manor = global.manors[_autoKey];
 				if (!str_cmp(searchName, getUserNameByUserId(manor.ownerUserId))) {
 					manorOwner = true;
 					disp += "\n"+bld+capFirstLetter(searchName)+" owns the "+manor.name+" near "+manor.area+"."+nrm;

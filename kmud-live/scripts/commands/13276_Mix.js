@@ -25,8 +25,10 @@ var script13276 = function(self, actor, here, args, extra) {
 		}
 		actor.send(message);
 		act(message2,true,actor,null,null,constants.TO_ROOM);
-		for each(var item in contents)
+		for (var _autoKey in contents) {
+			var item = contents[_autoKey];
 			item.extract();
+		}
 		container.loadObj(20981);
 	}
 	var container = actor.hasItem(2030,true,true,false);

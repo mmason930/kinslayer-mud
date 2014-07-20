@@ -15,8 +15,8 @@ var script20870 = function(self, actor, here, args, extra) {
 		}
 		if (actor.vnum != -1 || actor.room == undefined || getExplorationTask(actor.room.vnum)[1] == 0)
 			return;
-		for each (var quest in actor.getIncompleteQuests())
-		{
+		for (var _autoKey in actor.getIncompleteQuests()) {
+			var quest = actor.getIncompleteQuests()[_autoKey];
 			//here.echo(quest.questName);
 			if (checkTag(quest.questName,"Exploration") == true && actor.room.zoneVnum == getExplorationTask(actor.room.vnum)[2].zoneVnum)
 			{

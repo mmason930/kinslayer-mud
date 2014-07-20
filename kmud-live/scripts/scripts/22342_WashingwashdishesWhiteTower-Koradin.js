@@ -14,7 +14,8 @@ var script22342 = function(self, actor, here, args, extra) {
 	if (roomRaked > 10) {
 		_block;
 		actor.send("The dishes are all clean!");
-		for each (var thing in self.items) {
+		for (var _autoKey in self.items) {
+			var thing = self.items[_autoKey];
 			if (thing.vnum == 22318) {
 				thing.moveToRoom(getRoom(20800));
 				thing.extract();

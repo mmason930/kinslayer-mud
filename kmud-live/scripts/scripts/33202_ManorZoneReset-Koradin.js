@@ -44,7 +44,8 @@ var script33202 = function(self, actor, here, args, extra) {
 	var barTapFound = false;
 	var bankerFound = false;
 	var portFound = false;
-	for each (var dude in getRoom(manor.innRoomVnum).people) {
+	for (var _autoKey in getRoom(manor.innRoomVnum).people) {
+		var dude = getRoom(manor.innRoomVnum).people[_autoKey];
 		if (dude.vnum == innKeepToFind)
 			innKeepFound = true;
 		if (dude.vnum == bankerToFind)
@@ -54,19 +55,22 @@ var script33202 = function(self, actor, here, args, extra) {
 		getRoom(manor.innRoomVnum).loadMob(innKeepToFind);
 	if (bankerFound == false)
 		getRoom(manor.innRoomVnum).loadMob(bankerToFind);
-	for each (var dude in getRoom(manor.portalRoomVnum).people) {
+	for (var _autoKey in getRoom(manor.portalRoomVnum).people) {
+		var dude = getRoom(manor.portalRoomVnum).people[_autoKey];
 		if (dude.vnum == portToFind)
 			portFound = true;
 	}
 	if (portFound == false)
 		getRoom(manor.portalRoomVnum).loadMob(portToFind);
-	for each (var dude in getRoom(manor.barRoomVnum).people) {
+	for (var _autoKey in getRoom(manor.barRoomVnum).people) {
+		var dude = getRoom(manor.barRoomVnum).people[_autoKey];
 		if (dude.vnum == barKeepToFind)
 			barKeepFound = true;
 	}
 	if (barKeepFound == false)
 		getRoom(manor.barRoomVnum).loadMob(barKeepToFind);
-	for each (var thingie in getRoom(manor.barRoomVnum).items) {
+	for (var _autoKey in getRoom(manor.barRoomVnum).items) {
+		var thingie = getRoom(manor.barRoomVnum).items[_autoKey];
 		if (thingie.vnum == barTap)
 			barTapFound = true;
 	}
@@ -74,7 +78,8 @@ var script33202 = function(self, actor, here, args, extra) {
 		getRoom(manor.barRoomVnum).loadObj(barTap);
 	sendKoradin("Resetting the "+manor.area+" "+manor.name+"...");
 	sendKoradin("Current Owner: "+getUserNameByUserId(manor.ownerUserId));
-	for each (var room in manor.guardRooms) {
+	for (var _autoKey in manor.guardRooms) {
+		var room = manor.guardRooms[_autoKey];
 		room = getRoom(room);
 		var curGuards = numGuardsBought(room);
 		sendKoradin("Current Guards for room "+room.vnum+": "+curGuards);
@@ -100,7 +105,8 @@ var script33202 = function(self, actor, here, args, extra) {
 		}
 		var flagFound = false;
 		if (room.vnum == manor.flagRoomVnum) {
-			for each (var item in room.items) {
+			for (var _autoKey in room.items) {
+				var item = room.items[_autoKey];
 				if (item.vnum == 21010)
 					flagFound = true;
 			}
@@ -116,8 +122,10 @@ var script33202 = function(self, actor, here, args, extra) {
 				else if (room.vnum == 33400) //gap outpost
 					var checkArr = [33400,33413,33414,33415];
 				var countOutsideGuards = 0;
-				for each (var rm in checkArr) {
-					for each (var mb in getRoom(rm).people) {
+				for (var _autoKey in checkArr) {
+					var rm = checkArr[_autoKey];
+					for (var _autoKey in getRoom(rm).people) {
+						var mb = getRoom(rm).people[_autoKey];
 						if (mb.vnum == guardArr[0])
 							countOutsideGuards += 1;
 					}
@@ -132,7 +140,8 @@ var script33202 = function(self, actor, here, args, extra) {
 			}
 			for (var i=0; i<curGuards; i++) {
 				var found = 0;
-				for each (var mob in room.people) {
+				for (var _autoKey in room.people) {
+					var mob = room.people[_autoKey];
 					if (mob.vnum == guardArr[i])
 						found += 1;
 				}

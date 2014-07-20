@@ -1,7 +1,8 @@
 var script33204 = function(self, actor, here, args, extra) {
 	_block;
 		getCharCols(actor);
-		for each (var mr in global.manors) {
+		for (var _autoKey in global.manors) {
+			var mr = global.manors[_autoKey];
 			if (mr.ownerUserId == actor.id) {
 				var manor = mr;
 				//sendKoradin("worked");
@@ -17,8 +18,10 @@ var script33204 = function(self, actor, here, args, extra) {
 		actor.send(bld+"Current Upkeep: "+nrm+actor.numCopperToText(getUpkeep(manor), true)+bld+" per day."+nrm);
 		actor.send(bld+"\nYou've allowed the following players into the "+manor.name+":"+nrm);
 		var users = [];
-		for each (var id in manor.allowedUsers)
+		for (var _autoKey in manor.allowedUsers) {
+			var id = manor.allowedUsers[_autoKey];
 			users.push(getUserNameByUserId(id));
+		}
 		if (users.length == 0)
 			actor.send(nrm+"None"+nrm);
 		else

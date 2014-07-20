@@ -5,8 +5,8 @@ var script20830 = function(self, actor, here, args, extra) {
 	while (total_time > 0)
 	{
 		var people = self.people;
-		for each(var person in people)
-		{
+		for (var _autoKey in people) {
+			var person = people[_autoKey];
 			if (person.hasSource() && !person.isBashed && random(1,5) == 1)
 			{
 				person.send("Your surroundings make you lose focus!");

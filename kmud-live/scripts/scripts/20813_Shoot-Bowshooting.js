@@ -19,8 +19,8 @@ var script20813 = function(self, actor, here, args, extra) {
 	var backItem = actor.eq(constants.WEAR_BACK);
 	if (backItem)
 	{
-		for each(var word in backItem.namelist.split(" "))
-		{
+		for (var _autoKey in backItem.namelist.split(" ")) {
+			var word = backItem.namelist.split(" ")[_autoKey];
 			if (word == "quiverforbows")
 				var quiver = backItem;
 		}

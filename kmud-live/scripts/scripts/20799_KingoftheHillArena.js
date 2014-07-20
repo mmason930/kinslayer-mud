@@ -12,7 +12,8 @@ var script20799 = function(self, actor, here, args, extra) {
 		var outsideGreen = false;
 		var hillRoom = self.room;
 		var rooms = hillRoom.neighbors;
-		for each (var player in hillRoom.people) {
+		for (var _autoKey in hillRoom.people) {
+			var player = hillRoom.people[_autoKey];
 			if (player.vnum == -1 && !player.fighting) {
 				var acuTime = getSval(player,20799,"khTime");
 				if (!acuTime)
@@ -36,9 +37,11 @@ var script20799 = function(self, actor, here, args, extra) {
 			global.arenaCurrentGame.yellowHillTimer += 10;
 		if (mainGreen == true)
 			global.arenaCurrentGame.greenHillTimer += 10;
-		for each (var neighbor in rooms) {
+		for (var _autoKey in rooms) {
+			var neighbor = rooms[_autoKey];
 			if (neighbor) {
-				for each (var person in neighbor.people) {
+				for (var _autoKey in neighbor.people) {
+					var person = neighbor.people[_autoKey];
 					if (person.vnum == -1 && !person.fighting) {
 						var acuTime = getSval(person,20799,"khTime");
 						if (!acuTime)
@@ -66,13 +69,15 @@ var script20799 = function(self, actor, here, args, extra) {
 			global.arenaCurrentGame.greenHillTimer += 2;
 		/**winning the match**/
 		if (global.arenaFreeForAll == true) { //FFA mode on
-			for each (var player in global.arenaPlayers) {
+			for (var _autoKey in global.arenaPlayers) {
+				var player = global.arenaPlayers[_autoKey];
 				var pTime = getSval(player,20799,"khTime");
 				pTime = Math.floor(pTime/10);
 				var goal = global.arenaCurrentGame.limit*60;
 				if (pTime >= goal) {//Player has met the goal, wins
 					arenaEcho("Time's up! "+player.name+" has been crowned King of the Hill!");
-					for each (var person in global.arenaPlayers) {
+					for (var _autoKey in global.arenaPlayers) {
+						var person = global.arenaPlayers[_autoKey];
 						person.send(" ");
 						if (person != player) {
 							addArenaPoint(person, "soloLosses");
@@ -98,7 +103,8 @@ var script20799 = function(self, actor, here, args, extra) {
 				var winner = constants.ARENA_GREEN;
 			if (winner) {	
 				arenaEcho("Time's up! The "+getTeamName(winner)+" Team has been crowned King of the Hill!");
-				for each (var person in global.arenaPlayers) {
+				for (var _autoKey in global.arenaPlayers) {
+					var person = global.arenaPlayers[_autoKey];
 					var hillTime = (getSval(person,20799,"khTime") ? getSval(person,20799,"khTime") : 0);	
 					person.send(" ");
 					if (person.arenaTeam == winner)
@@ -116,7 +122,8 @@ var script20799 = function(self, actor, here, args, extra) {
 			var timeCalc = (global.arenaCurrentGame.blueHillTimer+global.arenaCurrentGame.redHillTimer+global.arenaCurrentGame.yellowHillTimer+global.arenaCurrentGame.greenHillTimer);
 		else {
 			var timeCalc = 0;
-			for each (var player in global.arenaPlayers) {
+			for (var _autoKey in global.arenaPlayers) {
+				var player = global.arenaPlayers[_autoKey];
 				var tSval = getSval(player,20799,"khTime");
 				if (!tSval)
 					tSval = 0;

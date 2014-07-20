@@ -25,8 +25,8 @@ function getAllTokens()
 }
 function getTokens( actor, strTokenType )
 {
-	for each ( var token in getAllTokens() )
-	{
+	for (var _autoKey in getAllTokens() ) {
+		var token = getAllTokens() [_autoKey];
 		if (strTokenType == token[0])
 		{
 			if (actor.quest("TOKENS_"+token[0]) > 0 )
@@ -39,8 +39,8 @@ function updateTokens( actor, strTokenType, number )
 {
 	getCharCols(actor);
 	var trigger = false;
-	for each (var token in getAllTokens())
-	{
+	for (var _autoKey in getAllTokens()) {
+		var token = getAllTokens()[_autoKey];
 		if (token[0] == strTokenType)
 			trigger = true;
 	}

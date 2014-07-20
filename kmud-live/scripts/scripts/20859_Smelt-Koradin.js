@@ -48,9 +48,12 @@ var script20859 = function(self, actor, here, args, extra) {
 	}
 	var ingredients = [];
 	var totalWeight = 0;
-	for each (var item in actor.inventory) {
-		for each (var req in reqs) {
-			for each (var vnum in req[0]) {
+	for (var _autoKey in actor.inventory) {
+		var item = actor.inventory[_autoKey];
+		for (var _autoKey in reqs) {
+			var req = reqs[_autoKey];
+			for (var _autoKey in req[0]) {
+				var vnum = req[0][_autoKey];
 				if (item.vnum == vnum) {
 					ingredients.push(item);
 					req[2] += item.weight;
@@ -68,7 +71,8 @@ var script20859 = function(self, actor, here, args, extra) {
 			oreSmelt = false;
 			totalWeight = 0;
 			ingredients = [];
-			for each (var smeltObj in actor.inventory) {
+			for (var _autoKey in actor.inventory) {
+				var smeltObj = actor.inventory[_autoKey];
 				var smeltProto = getObjProto(smeltObj.vnum);
 				if (isName(argArray[1], smeltObj.namelist) && !isName("ore",smeltProto.name) && !isName("bar",smeltProto.name)) {
 					ingredients.push(smeltObj);
@@ -127,8 +131,10 @@ var script20859 = function(self, actor, here, args, extra) {
 				actor.send("Smelting "+argArray[1]+" will destroy the following items:");
 				actor.send("______________________________________________________");
 				actor.send(" ");
-				for each (var desItem in ingredients)
+				for (var _autoKey in ingredients) {
+					var desItem = ingredients[_autoKey];
 					actor.send(desItem.name);
+				}
 				actor.send("______________________________________________________");
 				actor.send(" ");
 				actor.send("Are you sure you wish to continue?");
@@ -166,7 +172,8 @@ var script20859 = function(self, actor, here, args, extra) {
 	if (skill > 98)
 		timer -= 2;
 	//here.echo(ingredients);
-	for each (var ingItem in ingredients) {
+	for (var _autoKey in ingredients) {
+		var ingItem = ingredients[_autoKey];
 		ingItem.moveToRoom(getRoom(20899));
 		ingItem.extract();
 	}
@@ -188,8 +195,10 @@ var script20859 = function(self, actor, here, args, extra) {
 	}
 	actor.send("\nAs the impurities are burned off, the molten "+mat+" flows into the molding and begins to cool.");
 	room.echo("The forge quiets, leaving only glowing coals.");
-	for each (var thing in room.items) {
-		for each (var name in thing.namelist.split(" ")) {
+	for (var _autoKey in room.items) {
+		var thing = room.items[_autoKey];
+		for (var _autoKey in thing.namelist.split(" ")) {
+			var name = thing.namelist.split(" ")[_autoKey];
 			if (name == "quenching") {
 				var barrel = thing;
 				break;
@@ -197,7 +206,8 @@ var script20859 = function(self, actor, here, args, extra) {
 		}
 	}
 	//here.echo(results);
-	for each (var result in results) {
+	for (var _autoKey in results) {
+		var result = results[_autoKey];
 		wait 5;
 		if (barrel) {
 			barrel.loadObj(result);

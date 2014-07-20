@@ -22,7 +22,8 @@ var script14216 = function(self, actor, here, args, extra) {
 	function afterWait(args) {
 		var actor = args[0];
 		var self = args[1];
-		for each (var person in actor.room.people) {
+		for (var _autoKey in actor.room.people) {
+			var person = actor.room.people[_autoKey];
 			if (person.hasItem(self.vnum,true,false,false)) {
 				if (person.arenaTeam != actor.arenaTeam) {   //person given to is wrong team, return the flag
 					arenaEcho(capFirstLetter(self.name)+" has been returned by "+person.name+".");

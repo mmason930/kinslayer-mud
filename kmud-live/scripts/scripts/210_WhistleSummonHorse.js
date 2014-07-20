@@ -22,8 +22,8 @@ var script210 = function(self, actor, here, args, extra) {
 		if( mount.fighting )
 			mount.comm("flee");
 		var path = mount.room.pathToRoom( actor.room );
-		for each( var dir in path )
-		{
+		for (var _autoKey in path ) {
+			var dir = path [_autoKey];
 			if( mount.fighting || mount.room.doorIsClosed(dir) )
 				break;
 			waitpulse 2;

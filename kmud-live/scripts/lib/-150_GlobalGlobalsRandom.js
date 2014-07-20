@@ -407,7 +407,8 @@ function initGlobals()
 			var actorName = row.get("username");
 			score = score.split("~");
 			var totalScore = 0;
-			for each (var point in score) {
+			for (var _autoKey in score) {
+				var point = score[_autoKey];
 				totalScore += parseInt(point);
 			}
 			if (totalScore > 0) {
@@ -419,7 +420,8 @@ function initGlobals()
 		}
 		arenaLegends.sort(compare);
 		var legendList = [["Unknown",0],["Unknown",0],["Unknown",0],["Unknown",0],["Unknown",0]];
-		for each (var legend in arenaLegends) {
+		for (var _autoKey in arenaLegends) {
+			var legend = arenaLegends[_autoKey];
 			alreadyListed = false;
 			var score = legend[1];
 			for (i=0; i<legendList.length; i++) {
@@ -430,8 +432,11 @@ function initGlobals()
 			}
 		}
 		global.arenaLegends = [];
-		for each (var legend in legendList)
+		for (var _autoKey in legendList) {
+			var legend = legendList[_autoKey];
 			global.arenaLegends.push(legend[0]);
+
+		}
 	}
 	
 	

@@ -2,13 +2,16 @@ var script20871 = function(self, actor, here, args, extra) {
 	var pack = self.eq(constants.WEAR_BACK);
 	if (!pack)
 		return;
-	for each (var person in self.room.people) {
+	for (var _autoKey in self.room.people) {
+		var person = self.room.people[_autoKey];
 		if (person.vnum == -1)
 			return;
 	}
 	if (pack.contents.length > 15) {
-		for each (var item in pack.contents)
+		for (var _autoKey in pack.contents) {
+			var item = pack.contents[_autoKey];
 			item.extract();
+		}
 		return;
 	}
 	if (random(1,25) == 1 && pack.contents.length > 0)
