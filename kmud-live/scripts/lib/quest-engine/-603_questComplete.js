@@ -106,7 +106,7 @@ function questComplete(self, actor, quests, arg, clanVnum) {
 	}
 	//Reward items.	
 	if (quest.itemReward && !isEmpty(quest.itemReward)) {
-		var slotArray = quest.itemReward;
+		var slots = quest.itemReward;
 		for (var id in slots) {
 			var slot = slots[id];
 			for (var i = 0; i < slot.length; i++) {
