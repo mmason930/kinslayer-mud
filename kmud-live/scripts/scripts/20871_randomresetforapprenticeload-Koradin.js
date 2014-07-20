@@ -10,9 +10,9 @@ var script20871 = function(self, actor, here, args, extra) {
 	if (pack.contents.length > 15) {
 		for (var _autoKey in pack.contents) {
 			global.alder.send("pack.contents[" +_autoKey+"]");
-			var item = pack.contents[_autoKey];
-			item.extract();
+			pack.contents[_autoKey].extract();
 		}
+		self.comm("save");
 		return;
 	}
 	if (random(1,25) == 1 && pack.contents.length > 0)
