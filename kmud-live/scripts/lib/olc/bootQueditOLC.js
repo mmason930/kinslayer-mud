@@ -1744,13 +1744,13 @@ function bootQueditOLC()
 		if ( action == -1 ) {
 			actor.send(bld+"Select item to remove or Q to return: "+nrm);
 		}
-		else if ( action == "vnum" || action == "OVERWRITE" ) {
+		else if ( action == 0 || action == "OVERWRITE" ) {
 			actor.send(bld+"Enter item vnum or Q to return: "+nrm);
 		}
-		else if ( action == "count" ) {
+		else if ( action == 1 ) {
 			actor.send(bld+"Enter item amount: "+nrm);
 		}
-		else if ( action == "loadPercent" ) {
+		else if ( action == 2 ) {
 			actor.send(bld+"Enter item load percent: "+nrm);
 		}
 		else if ( action == 3 ) {
