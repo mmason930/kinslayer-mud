@@ -1471,7 +1471,13 @@ function bootQueditOLC()
 				actor.send("That slot ID already exists for this quest.\nTry again or press Q to return: ");
 				return;
 			}
-			OLC.itemReward[id] = [];
+			if (action == "NEW SLOT")
+				OLC.itemReward[id] = [];
+			else {
+				OLC.itemReward[id] = OLC.itemReward[slot.id];
+				delete OLC.itemReward[slot.id];
+				slot.id = id;
+			}
 			OLC.action = 0;
 			OLC.switchToMode("MODE_REWARDED_ITEMS_SLOT");
 			return;
