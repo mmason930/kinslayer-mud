@@ -1888,6 +1888,10 @@ function bootQueditOLC()
 		}
 		//Entering dialogue string
 		else if ( actor.getOLC().action == 0 ) {
+			if ( fLetter == "Q" ) {
+				actor.getOLC().switchToMode("MODE_DIALOGUE");
+				return;
+			}
 			var index = actor.getOLC().index;
 			var str = vArgs.join(" ");
 			actor.getOLC().dialogue[index] = new QuestDlg('#', "<empty>");
@@ -1917,7 +1921,7 @@ function bootQueditOLC()
 			actor.send(bld+"Select dialogue line to remove or Q to quit: "+nrm);
 		}
 		else if ( action == 0 ) {
-			actor.send(bld+'Enter dialogue JS code: \n'+'Ex: self.tell( actor, "\Hello, "\ + actor.name);'+nrm);
+			actor.send(bld+'Enter dialogue JS code or Q to quit: \n'+'Ex: self.tell( actor, "\Hello, "\ + actor.name);'+nrm);
 		}
 		else {
 			actor.send(bld+"Enter waitpulse value(7 = 1 sec) or -1 for begin dialogue, or -2 for completion dialogue: "+nrm);
