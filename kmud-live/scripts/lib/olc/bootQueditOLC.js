@@ -1476,7 +1476,7 @@ function bootQueditOLC()
 			else {
 				OLC.itemReward[id] = OLC.itemReward[OLC.slot];
 				delete OLC.itemReward[OLC.slot];
-				slot.id = id;
+				OLC.slot = id;
 			}
 			OLC.action = 0;
 			OLC.switchToMode("MODE_REWARDED_ITEMS_SLOT");
