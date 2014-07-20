@@ -1,6 +1,6 @@
 ﻿var Quest = (function (Q) {
 	var BEGUN_STR = "-HAS-BEGUN";
-	var COMPLETED_STR = "-NR-COMPLETED";
+	var COMPLETED_STR = "-NR_COMPLETED";
 
 	function Quest() {
 		this.questName = "";

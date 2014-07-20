@@ -16,7 +16,7 @@ var script10613 = function(self, actor, here, args, extra) {
 			 getRoom(1474).echoaround(actor, actor.name + " enters from the up.");
 			 actor.comm("look");
 			 for (var _autoKey in actor.followers ) {
-			 	var follower = actor.followers [_autoKey];
+			 	var follower = actor.followers[_autoKey];
 				if( follower.room != here )
 				{
 						continue;
