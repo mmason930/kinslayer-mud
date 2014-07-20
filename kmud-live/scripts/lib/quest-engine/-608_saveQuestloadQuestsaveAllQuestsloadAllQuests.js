@@ -85,16 +85,7 @@ function loadAllQuests()
 			var row = rsDialogue.peekRow;
 			if( parseInt( row.get("quest_id") ) == quest.databaseID ) {
 
-				if(quest.databaseID == 79)
-				{
-					mudLog(constants.BRF, 100, "Timeout: " + parseInt(row.get("timeout")));
-				}
 				var dlg = new QuestDlg( parseInt(row.get("timeout")), row.get("dialogue") );
-
-				if(quest.databaseID == 79)
-				{
-					mudLog(constants.BRF, 100, "Timeout: " + dlg.pulses);
-				}
 				quest.dialogue.push( dlg );
 			}
 			else break;
