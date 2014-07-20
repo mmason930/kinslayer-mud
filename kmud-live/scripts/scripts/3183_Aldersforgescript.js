@@ -14,11 +14,13 @@ var script3183 = function(self, actor, here, args, extra) {
 	if ( recipe && actor.isRecipeUnlocked(recipe) ) {
 		act("\nWithin $p, something can be seen taking shape amidst the red hot embers as its previous contents are incinerated.", true, null, container, null, constants.TO_ROOM);
 		// Incinerate forge contents
-		for each ( var item in container.contents ) {
+		for (var _autoKey in container.contents) {
+			var item = container.contents[_autoKey];
 			item.extract();
 		}
 		// Load results into the forge
-		for each ( var result in recipe.results ) {
+		for (var _autoKey in recipe.results) {
+			var result = recipe.results[_autoKey];
 			var i = 0;
 			// Load correct quantity
 			while ( i < result.quantity ) {

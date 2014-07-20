@@ -166,9 +166,11 @@ function loadAllQuests()
 		function sortByTier(a,b) {
 			return ( a.tier - b.tier );
 		}
-		for each ( var id in idArray ) {
+		for (var _autoKey in idArray) {
+			var id = idArray[_autoKey];
 			var group = [];				// Grouping items with like IDs
-			for each ( var item in rewardItems ) {
+			for (var _autoKey in rewardItems) {
+				var item = rewardItems[_autoKey];
 				if ( item.id == id && item.id.length != 0 ) {
 					group.push(item);
 				}
@@ -324,7 +326,8 @@ function saveQuest( quest )
 	
 	/**** Item Rewards ****/
 	var itemReward = [];
-	for each ( var slot in quest.itemReward ) {
+	for (var _autoKey in quest.itemReward) {
+		var slot = quest.itemReward[_autoKey];
 		itemReward = itemReward.concat(slot);
 	}
 	for(var i = 0;i < itemReward.length;++i) {

@@ -35,7 +35,8 @@ var script40 = function(self, actor, here, args, extra) {
 			if ( vArgs[2] ) {
 				here.echo("Entries "+cmd+"ed.");
 				if ( vArgs[2] == "all" ) {
-					for each ( var quest in vQuests ) {
+					for (var _autoKey in vQuests) {
+						var quest = vQuests[_autoKey];
 						actor.journalEdit(cmd,quest.questName,false);
 					}
 				}
@@ -50,7 +51,8 @@ var script40 = function(self, actor, here, args, extra) {
 						qName.push( vArgs[i] );
 					}
 					qName = qName.join(" ");
-					for each ( var quest in vQuests ) {
+					for (var _autoKey in vQuests) {
+						var quest = vQuests[_autoKey];
 						if ( !str_cmp(quest.questName,qName) ) {
 							actor.journalEdit(cmd,quest.questName,false);
 							break;
@@ -61,7 +63,8 @@ var script40 = function(self, actor, here, args, extra) {
 		}
 		here.echo(actor.cyan(constants.CL_OFF)+"Your entries:"+actor.normal(constants.CL_OFF));
 		if ( actor.journal ) {
-			for each ( var entry in actor.journal.entries ) {
+			for (var _autoKey in actor.journal.entries) {
+				var entry = actor.journal.entries[_autoKey];
 				here.echo(entry.questName);
 			}
 			here.echo(actor.cyan(constants.CL_OFF)+actor.journal.entries.length+" total entries."+actor.normal(constants.CL_OFF));

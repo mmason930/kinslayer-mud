@@ -5,8 +5,10 @@
  *******************************************************/
 function getAllAchTags() {
 	var vTags = [];
-	for each ( var ach in global.vAchievements ) {
-		for each ( var tag in ach.achTags ) {
+	for (var _autoKey in global.vAchievements) {
+		var ach = global.vAchievements[_autoKey];
+		for (var _autoKey in ach.achTags) {
+			var tag = ach.achTags[_autoKey];
 			if ( arrContains(vTags,tag) == false ) {
 				vTags.push(tag);
 			}

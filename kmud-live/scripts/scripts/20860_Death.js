@@ -409,13 +409,15 @@ var script20860 = function(self, actor, here, args, extra) {
 			}
 			// Koradin's PK Quests
 			var crossRaceQuests = getQuestsByTag("Cross-Race PK",killer);
-			for each ( var quest in crossRaceQuests ) {
+			for (var _autoKey in crossRaceQuests) {
+				var quest = crossRaceQuests[_autoKey];
 				if ( killer.race != victim.race ) {
 					killer.updateJournalTask(quest.questName,0);
 				}
 			}
 			var sameRaceQuests = getQuestsByTag("Same-Race PK",killer);
-			for each ( var qst in sameRaceQuests ) {
+			for (var _autoKey in sameRaceQuests) {
+				var qst = sameRaceQuests[_autoKey];
 				if ( killer.race == victim.race ) {
 					killer.updateJournalTask(qst.questName,0);
 				}

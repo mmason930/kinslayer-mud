@@ -66,7 +66,8 @@ function questComplete(self,actor,quests,arg,clanVnum)
 		return;
     }
     //At this point, we know the actor has completed the quest. Be sure to extract all of the items that were required.
-	for each ( var line in quest.dialogue ) {
+	for (var _autoKey in quest.dialogue) {
+		var line = quest.dialogue[_autoKey];
 		if ( line.pulses == '-2' || line.pulses == -2 ) {
 			eval(line.handle);
 		}
@@ -75,11 +76,13 @@ function questComplete(self,actor,quests,arg,clanVnum)
 		var special_dialogue = quest.dialogue[quest.dialogue.length - 1].split("~");
 		self.comm("tell " + actor.name + " " + special_dialogue[1]);
 	}
-    for(var i = 0;i < vObjects.length;++i) {
-        vObjects[i].extract();
-    }
+
+	for(var i = 0;i < vObjects.length;++i) {
+			vObjects[i].extract();
+	}
 	//Remove any qinventory items
-	for each ( var item in actor._questInv ) {
+	for (var _autoKey in actor._questInv) {
+		var item = actor._questInv[_autoKey];
 		if ( item.questName == quest.questName ) {
 			actor.remQuestItem( item.itemName, item.itemAmount, item.questName );
 		}
@@ -107,7 +110,8 @@ function questComplete(self,actor,quests,arg,clanVnum)
     //Reward items.	
     if( quest.itemReward && quest.itemReward.length ) {
 		var slotArray = quest.itemReward;
-		for each ( var slot in slotArray ) {
+		for (var _autoKey in slotArray) {
+			var slot = slotArray[_autoKey];
 			outerloop:
 			for ( var i = 0; i < slot.length; ++i ) {
 				var item = slot[i];
@@ -130,15 +134,17 @@ function questComplete(self,actor,quests,arg,clanVnum)
 		}
     }
     //Mark quest as complete.
-	var nrComp = actor.quest( quest.questName + "-NR_COMPLETED" );
-	++nrComp;
+	var nrComp = actor.quest( quest.questName + "-NR_COMPLETED" ) + 1;
+
 	if( quest.num > 0 && ( quest.num == 1 || nrComp >= quest.num ) )
 		actor.qval( quest.questName, -1 );
-    actor.qval( quest.questName + "-NR_COMPLETED", nrComp );
+
+	actor.qval( quest.questName + "-NR_COMPLETED", nrComp );
 	actor.updateJournalTask(quest.questName,null);//Displays a journal update to player
 	if ( nrComp < quest.num || quest.num < 1 ) {
 		// actor.qval(quest.questName, 0);
-		for each ( var task in quest.taskArray ) {
+		for (var _autoKey in quest.taskArray) {
+			var task = quest.taskArray[_autoKey];
 			if ( task[1] == null || task[1] == '' ) {
 				actor.qval(quest.questName+"_"+task[0],0);
 			}
@@ -157,9 +163,11 @@ function questComplete(self,actor,quests,arg,clanVnum)
 			}
 			var masterVnums = [];
 			var questNames = [];
-			for each ( var quest in unlockedQuests ) {
+			for (var _autoKey in unlockedQuests) {
+				var quest = unlockedQuests[_autoKey];
 				if ( quest.ownerVnum.length > 0 ) {
-					for each ( var num in actor.isQuestAvailable(quest.questName)[1] ) {
+					for (var _autoKey in actor.isQuestAvailable(quest.questName)[1]) {
+						var num = actor.isQuestAvailable(quest.questName)[1][_autoKey];
 						if ( arrContains(masterVnums,num) == false ) {
 							masterVnums.push(num);
 						}
@@ -168,14 +176,17 @@ function questComplete(self,actor,quests,arg,clanVnum)
 				questNames.push(quest.questName);
 			}
 			actor.send( bld+"You have unlocked the following quest"+end+": "+nrm+grn+questNames.join(nrm+bld+", "+nrm+grn)+nrm+bld+".\n"+nrm);
-			for each ( var quest in unlockedQuests ) {
+			for (var _autoKey in unlockedQuests) {
+				var quest = unlockedQuests[_autoKey];
 				if ( quest.ownerVnum.length == 0 ) {
 					actor.journalEdit("ADD",quest.questName);
 				}
 			}
-			for each ( var vnum in masterVnums ) {
+			for (var _autoKey in masterVnums) {
+				var vnum = masterVnums[_autoKey];
 				var count = 0;
-				for each ( var quest in unlockedQuests ) {
+				for (var _autoKey in unlockedQuests) {
+					var quest = unlockedQuests[_autoKey];
 					if ( arrContains(quest.ownerVnum,vnum) )
 						++count;
 				}

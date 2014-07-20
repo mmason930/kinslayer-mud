@@ -11,7 +11,8 @@ function arrCompare( fArr, sArr ) {
 		return null;
 	}
 	var cArr = [];	// Holds common elements
-	for each ( var element in fArr ) {
+	for (var _autoKey in fArr) {
+		var element = fArr[_autoKey];
 		if ( arrContains(sArr,element) ) {
 			cArr.push(element);
 		}

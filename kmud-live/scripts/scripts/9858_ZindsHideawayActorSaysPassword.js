@@ -4,11 +4,13 @@ var script9858 = function(self, actor, here, args, extra) {
 		actor.detach(9858);
 		if ( password == word && actor.affectedBy(constants.AFF_NOQUIT) == false ) {
 			var playerCount = 0;
-			for each ( var person in actor.room.people ) {
+			for (var _autoKey in actor.room.people) {
+				var person = actor.room.people[_autoKey];
 				if ( person.vnum == -1 )
 					++playerCount;
 			}
-			for each ( var person in getRoom(9860).people ) {
+			for (var _autoKey in getRoom(9860).people) {
+				var person = getRoom(9860).people[_autoKey];
 				if ( person.vnum == 9860 ) {
 					function checkQvals(element, elementIndex, targetArray) {
 						if ( actor.quest(element.questName) == -1 ) {
@@ -42,7 +44,8 @@ var script9858 = function(self, actor, here, args, extra) {
 				actor.moveToRoom(getRoom(9860));
 				actor.comm("look");
 				if ( actor.quest("A Floating Liaison") == 1 ) {
-					for each ( var person in actor.room.people ) {
+					for (var _autoKey in actor.room.people) {
+						var person = actor.room.people[_autoKey];
 						if ( person.vnum == 9860 ) {
 							var zind = person;
 						}

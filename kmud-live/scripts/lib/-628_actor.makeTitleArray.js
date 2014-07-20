@@ -2,7 +2,8 @@
 //May 2010
 //Add to global array of player title arrays
 JSCharacter.prototype.makeTitleArray = function() {
-	for each ( var array in global.playerTitleArrays ) {
+	for (var _autoKey in global.playerTitleArrays) {
+		var array = global.playerTitleArrays[_autoKey];
 		if ( array[0] == this.id ) {
 			// this.send("Your title array exists globally.");
 			return ( array );

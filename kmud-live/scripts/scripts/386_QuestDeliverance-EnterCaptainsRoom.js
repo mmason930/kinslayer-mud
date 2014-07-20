@@ -9,7 +9,8 @@ var script386 = function(self, actor, here, args, extra) {
 		var captain = self;
 		var fade = getSval(actor,385,"DELIVERANCE_FADE");
 		fade.moveToRoom(here);
-		for each ( var follower in fade.followers ) {
+		for (var _autoKey in fade.followers) {
+			var follower = fade.followers[_autoKey];
 			follower.moveToRoom(here);
 		}
 		getCharCols(actor);

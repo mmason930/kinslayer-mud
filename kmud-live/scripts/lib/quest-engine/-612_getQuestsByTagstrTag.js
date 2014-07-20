@@ -14,7 +14,8 @@ function getQuestsByTag( strTag, actor ) {
 		actor = undefined;
 	}
 	var tQuests = [];
-	for each ( var quest in global.vQuests ) {
+	for (var _autoKey in global.vQuests) {
+		var quest = global.vQuests[_autoKey];
 		if ( viewer != undefined && ( !arrContains(global.questMasters,viewer.name) || viewer.quest("QUEDIT_DISP_TOG") != 0 ) && !arrContains(quest.editors,viewer.name) ) {
 			continue;
 		}

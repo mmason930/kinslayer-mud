@@ -296,10 +296,12 @@ function bootAcheditOLC()
 			actor.getOLC().achName = ach.achName;				//Copy name
 			actor.getOLC().achDesc = ach.achDesc;				//Copy desc
 			actor.getOLC().alwaysAwardFeatPoints = ach.alwaysAwardFeatPoints;	//Copy always reward value
-			for each ( var thing in ach.achExecutions ) {
+			for (var _autoKey in ach.achExecutions) {
+				var thing = ach.achExecutions[_autoKey];
 				actor.getOLC().achExecutions.push(thing);		//Non-linked copy of JSCode lines
 			}
-			for each ( var tag in ach.achTags ) {
+			for (var _autoKey in ach.achTags) {
+				var tag = ach.achTags[_autoKey];
 				actor.getOLC().achTags.push(tag);				//Non-linked copy of tags
 			}
 		}
@@ -327,7 +329,8 @@ function bootAcheditOLC()
 		var cmd = vArgs[0];
 		if ( isNumber(cmd) && cmd > 0 ) {
 			var vnums = [];
-			for each ( var ach in global.vAchievements ) {
+			for (var _autoKey in global.vAchievements) {
+				var ach = global.vAchievements[_autoKey];
 				if ( ach != actor.getOLC().selAch )
 					vnums.push(ach.achVnum);
 			}

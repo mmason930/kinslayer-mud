@@ -6,7 +6,8 @@ Indents each line with length lineLength of str after the first, indentDist numb
 function hangIndentStr(str,lineLength,indentDist) {
 	var lines = str.split("\n");
 	var totLines = [];
-	for each ( var line in lines ) {
+	for (var _autoKey in lines) {
+		var line = lines[_autoKey];
 		var text = strColFormat(line,lineLength);
 		var newLines = text.split("\n");
 	}

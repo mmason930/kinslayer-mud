@@ -8,7 +8,8 @@
 	function checkTag ( strQName, strTag ) {
 		var objQuest = getQuestByName(strQName);
 		strTag = strTag+"";
-		for each ( var tag in objQuest.tags ) {
+		for (var _autoKey in objQuest.tags) {
+			var tag = objQuest.tags[_autoKey];
 			if ( tag == strTag ) {
 				return true;
 			}

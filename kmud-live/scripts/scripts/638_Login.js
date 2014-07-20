@@ -57,7 +57,8 @@ var script638 = function(self, actor, here, args, extra) {
 		}
 	// Unlock clan related achievements
 		var clans = actor.findClans();
-		for each ( var num in clans ) {
+		for (var _autoKey in clans) {
+			var num = clans[_autoKey];
 			var cName = clanNumToText(num);
 			var council = actor.isCouncil(num);
 			actor.setPval("CLAN_SCRIPT_NAME_SAVE",cName);

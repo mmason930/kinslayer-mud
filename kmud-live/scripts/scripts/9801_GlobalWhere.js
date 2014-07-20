@@ -14,7 +14,8 @@ var script9801 = function(self, actor, here, args, extra) {
 		}
 		var buf = "Characters at '"+capFirstLetter(getRoom(rNum).name)+"' ["+actor.green(constants.CL_OFF)+rNum+actor.normal(constants.CL_OFF)+"]";
 		buf += strPadding("\n","-",buf.length-6,"right");
-		for each ( var person in getRoom(rNum).people ) {
+		for (var _autoKey in getRoom(rNum).people) {
+			var person = getRoom(rNum).people[_autoKey];
 			var clr = "";
 			if ( person.vnum == -1 ) {
 				if ( person.level >= 100 )
@@ -58,7 +59,8 @@ var script9801 = function(self, actor, here, args, extra) {
 			if ( !people ) {
 				continue;
 			}
-			for each ( var person in people ) {
+			for (var _autoKey in people) {
+				var person = people[_autoKey];
 				if ( person.vnum == -1 ) {
 					if ( person.level >= 100 )
 						clr = actor.cyan(constants.CL_OFF);

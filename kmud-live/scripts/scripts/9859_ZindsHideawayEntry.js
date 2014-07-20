@@ -9,7 +9,8 @@ var script9859 = function(self, actor, here, args, extra) {
 			actor.send("You knock on the hatch.");
 			self.echoaround(actor, capFirstLetter(actor.name)+" knocks on the hatch.");
 			var playerCount = 0;
-			for each ( var person in self.people ) {
+			for (var _autoKey in self.people) {
+				var person = self.people[_autoKey];
 				if ( person.vnum == -1 )
 					++playerCount;
 			}

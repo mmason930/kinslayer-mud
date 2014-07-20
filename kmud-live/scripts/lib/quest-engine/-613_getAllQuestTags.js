@@ -5,11 +5,13 @@
  *************************************************/
 function getAllQuestTags(viewer) {
 	var vTags = [];
-	for each ( var quest in global.vQuests ) {
+	for (var _autoKey in global.vQuests) {
+		var quest = global.vQuests[_autoKey];
 		if ( viewer && ( !arrContains(global.questMasters,viewer.name) || viewer.quest("QUEDIT_DISP_TOG") != 0 ) && !arrContains(quest.editors,viewer.name) ) {
 			continue;
 		}
-		for each ( var tag in quest.tags ) {
+		for (var _autoKey in quest.tags) {
+			var tag = quest.tags[_autoKey];
 			if ( arrContains(vTags,tag) == false ) {
 				vTags.push(tag);
 			}

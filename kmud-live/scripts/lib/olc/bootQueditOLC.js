@@ -130,7 +130,8 @@ function bootQueditOLC()
 	mode.display = function(actor)
 	{
 		var creators = [];
-		for each ( var quest in global.vQuests ) {
+		for (var _autoKey in global.vQuests) {
+			var quest = global.vQuests[_autoKey];
 			var creator = quest.editors[0];
 			if ( !arrContains(creators,creator) ) {
 				creators.push(creator);
@@ -155,8 +156,10 @@ function bootQueditOLC()
 	{
 		var questIDArray = actor.getRecentlyViewedQuests();
 		var quests = [];
-		for each ( var id in questIDArray ) {
-			for each ( var quest in global.vQuests ) {
+		for (var _autoKey in questIDArray) {
+			var id = questIDArray[_autoKey];
+			for (var _autoKey in global.vQuests) {
+				var quest = global.vQuests[_autoKey];
 				if ( quest.databaseID == id ) {
 					quests.push(quest);
 					break;
@@ -190,8 +193,10 @@ function bootQueditOLC()
 		//Establish array of quests
 		var questIDArray = actor.getRecentlyViewedQuests();
 		var recentQuests = [];
-		for each ( var id in questIDArray ) {
-			for each ( var quest in global.vQuests ) {
+		for (var _autoKey in questIDArray) {
+			var id = questIDArray[_autoKey];
+			for (var _autoKey in global.vQuests) {
+				var quest = global.vQuests[_autoKey];
 				if ( quest.databaseID == id ) {
 					recentQuests.push(quest);
 					break;
@@ -293,7 +298,8 @@ function bootQueditOLC()
 	mode.display = function(actor)
 	{
 		var quests = [];
-		for each ( var quest in global.vQuests ) {
+		for (var _autoKey in global.vQuests) {
+			var quest = global.vQuests[_autoKey];
 			if ( ( !arrContains(global.questMasters,actor.name) || actor.quest("QUEDIT_DISP_TOG") != 0 ) && !arrContains(quest.editors,actor.name) ) {
 				continue;
 			}
@@ -332,7 +338,8 @@ function bootQueditOLC()
 		if ( vList == 0 ) {
 			var title = strPadding("Quests By Name\n","_",85,"right")+"\n";
 			var quests = [];
-			for each ( var quest in global.vQuests ) {
+			for (var _autoKey in global.vQuests) {
+				var quest = global.vQuests[_autoKey];
 				if ( ( !arrContains(global.questMasters,actor.name) || actor.quest("QUEDIT_DISP_TOG") != 0 ) && !arrContains(quest.editors,actor.name) ) {
 					continue;
 				}
@@ -720,7 +727,9 @@ function bootQueditOLC()
 			actor.getOLC().dialogue = clone(quest.dialogue);			
 			actor.getOLC().skillArray = clone(quest.skillArray);
 			
-			for each ( var task in quest.taskArray ) {
+			for (var _autoKey in quest.taskArray) {
+			
+				var task = quest.taskArray[_autoKey];
 				var cpy = clone(task);
 				if ( cpy[1] == "null" )
 					cpy[1] = null;
@@ -732,7 +741,8 @@ function bootQueditOLC()
 		actor.send("Quest Data Input\n"+strPadding("","_",85,"right")+"\n");
 		actor.send(strPadding(grn+"A"+nrm+") "," ",3,"left")+strPadding("Name"," ",18,"right")+": "+cyn+actor.getOLC().qName+nrm);
 		var parts = [];
-		for each ( var num in actor.getOLC().ownerVnum ) {
+		for (var _autoKey in actor.getOLC().ownerVnum) {
+			var num = actor.getOLC().ownerVnum[_autoKey];
 			parts.push(getMobName(num)+" ("+num+")");
 		}
 		actor.send(strPadding(grn+"B"+nrm+") "," ",3,"left")+strPadding("Owner Vnums"," ",18,"right")+": "+cyn+(actor.getOLC().ownerVnum.length == 0 ? "No Master" : parts.join(" "))+nrm);
@@ -762,7 +772,8 @@ function bootQueditOLC()
 		actor.send(strPadding(grn+"X"+nrm+") "," ",3,"left")+strPadding("Extra Checks"," ",18,"right")+": "+cyn+(actor.getOLC().extras.length > 0 ? strAbbrev(actor.getOLC().extras+"",65) : "<none>")+nrm);
 		actor.send(strPadding(grn+"Y"+nrm+") "," ",3,"left")+strPadding("FP Reward"," ",18,"right")+": "+cyn+actor.getOLC().fp+nrm);
 		var names = [];
-		for each ( var num in actor.getOLC().open ) {
+		for (var _autoKey in actor.getOLC().open) {
+			var num = actor.getOLC().open[_autoKey];
 			names.push(capFirstLetter(raceNumToText(num))+"s");
 		}
 		actor.send(strPadding(grn+"O"+nrm+") "," ",3,"left")+strPadding("Open to"," ",18,"right")+": "+cyn+(actor.getOLC().open.length == 0 ? "None" : names.join(", "))+nrm);
@@ -840,7 +851,8 @@ function bootQueditOLC()
 	mode.display = function(actor) {
 		getCharCols(actor);
 		var names = [];
-		for each ( var num in actor.getOLC().open ) {
+		for (var _autoKey in actor.getOLC().open) {
+			var num = actor.getOLC().open[_autoKey];
 			names.push(capFirstLetter(raceNumToText(num))+"s");
 		}
 		actor.send(grn+"0"+nrm+") Humans");
@@ -1456,7 +1468,8 @@ function bootQueditOLC()
 				return;
 			}
 			var id = vArgs.join(" ");
-			for each ( var slot in actor.getOLC().itemReward ) {
+			for (var _autoKey in actor.getOLC().itemReward) {
+				var slot = actor.getOLC().itemReward[_autoKey];
 				if ( slot.id == id ) {
 					actor.send("That slot ID already exists for this quest.\nTry again or press Q to return: ");
 					return;
@@ -2046,7 +2059,8 @@ function bootQueditOLC()
 		var display = [];
 		for ( var i = 0; i < actor.getOLC().taskArray.length; i++ ) {
 			var arrDisp = [];
-			for each ( var elem in actor.getOLC().taskArray[i] ) {
+			for (var _autoKey in actor.getOLC().taskArray[i]) {
+				var elem = actor.getOLC().taskArray[i][_autoKey];
 				if ( elem == null ) {
 					arrDisp.push("(qval task)");
 				}

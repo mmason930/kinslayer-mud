@@ -30,7 +30,8 @@
 		var actor = this;
 		/**LOOK FOR EXISTING ENTRY**/
 		var targetEntry = false;
-		for each ( var entry in journal.entries ) {
+		for (var _autoKey in journal.entries) {
+			var entry = journal.entries[_autoKey];
 			if ( !str_cmp(entry.quest.questName,strQName) ) {
 				targetEntry = entry;//This is the entry object we are looking for
 				// this.send("EXISTING ENTRY FOUND: "+targetEntry.questName);

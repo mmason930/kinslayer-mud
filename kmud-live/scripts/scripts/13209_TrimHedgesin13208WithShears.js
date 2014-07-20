@@ -24,7 +24,8 @@ var script13209 = function(self, actor, here, args, extra) {
 	var success = runTimer(actor);
 	if ( success ) {
 		actor.send("\nThe hedges look perfect! Your work here is done.\n");
-		for each ( var item in actor.inventory ) {
+		for (var _autoKey in actor.inventory) {
+			var item = actor.inventory[_autoKey];
 			if ( item.vnum == 13208 ) {
 				item.extract();
 				break;

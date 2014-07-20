@@ -37,7 +37,8 @@ var script9852 = function(self, actor, here, args, extra) {
 				self.comm("open "+self.room.doorName(self.room.firstStep(destination)));
 			}
 			self.comm(dirToText(self.room.firstStep(destination)));
-			for each ( var person in self.room.people ) {
+			for (var _autoKey in self.room.people) {
+				var person = self.room.people[_autoKey];
 				if ( person.vnum == -1 && person.quest("CHECK_Just Think...") == 0 && person.race == constants.RACE_HUMAN && person.affectedBy(constants.AFF_NOQUIT) == false) {
 					person.qval("CHECK_Just Think...",1);
 					setTimeout(2,afterWait,[person]);

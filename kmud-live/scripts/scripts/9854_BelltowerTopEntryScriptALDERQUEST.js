@@ -1,6 +1,7 @@
 var script9854 = function(self, actor, here, args, extra) {
 		var mob = undefined;
-		for each ( var person in self.people ) {
+		for (var _autoKey in self.people) {
+			var person = self.people[_autoKey];
 			if ( person.vnum == 9854 )
 				var mob = person;
 		}
@@ -14,7 +15,8 @@ var script9854 = function(self, actor, here, args, extra) {
 		else {
 			waitpulse 1;
 			var playerCount = 0;
-			for each ( var person in self.people ) {
+			for (var _autoKey in self.people) {
+				var person = self.people[_autoKey];
 				if ( person.vnum == -1 )
 					++playerCount;
 			}

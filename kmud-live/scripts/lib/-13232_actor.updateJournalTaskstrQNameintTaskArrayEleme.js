@@ -15,7 +15,8 @@ JSCharacter.prototype.updateJournalTask = function(strQName,taskArrayIndex,boolS
         var entries = this.journal.entries;
         var targetEntry;
         var dispMsg = false;//Determines whether update message is shown
-        for each ( var entry in entries ) {
+        for (var _autoKey in entries) {
+        	var entry = entries[_autoKey];
 			if ( !str_cmp(strQName,entry.quest.questName) ) {
 					targetEntry = entry;
 			}
@@ -68,7 +69,8 @@ JSCharacter.prototype.updateJournalTask = function(strQName,taskArrayIndex,boolS
                 var entries = actor.journal.entries;
                 var targetEntry;
                 var dispMsg = false;//Determines whether update message is shown
-                for each ( var entry in entries ) {
+                for (var _autoKey in entries) {
+                	var entry = entries[_autoKey];
                         if ( !str_cmp(strQName,entry.quest.questName) ) {
                                 targetEntry = entry;
                         }

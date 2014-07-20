@@ -5,7 +5,8 @@ var script9880 = function(self, actor, here, args, extra) {
 			var people = args[0];
 			var vnum = args[1];
 			var qName = "Monopolize";
-			for each ( var person in people ) {
+			for (var _autoKey in people) {
+				var person = people[_autoKey];
 				if ( person.quest(qName) > 0 ) {
 					if ( vnum == 4519 )
 						person.updateJournalTask(qName,0);

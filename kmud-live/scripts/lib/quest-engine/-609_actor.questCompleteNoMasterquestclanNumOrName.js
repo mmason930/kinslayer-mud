@@ -87,7 +87,8 @@ JSCharacter.prototype.questCompleteNoMaster = function ( quest, clanNum ) {
     if( quest.itemReward && quest.itemReward.length ) {
 		var slotArray = quest.itemReward;
 		outerloop:
-		for each ( var slot in slotArray ) {
+		for (var _autoKey in slotArray) {
+			var slot = slotArray[_autoKey];
 			for ( var i = 0; i < slot.length; ++i ) {
 				var item = slot[i];
 				var pLoad = item[2];				
@@ -127,9 +128,11 @@ JSCharacter.prototype.questCompleteNoMaster = function ( quest, clanNum ) {
 			}
 			var masterVnums = [];
 			var questNames = [];
-			for each ( var quest in unlockedQuests ) {
+			for (var _autoKey in unlockedQuests) {
+				var quest = unlockedQuests[_autoKey];
 				if ( quest.ownerVnum.length > 0 ) {
-					for each ( var num in actor.isQuestAvailable(quest.questName)[1] ) {
+					for (var _autoKey in actor.isQuestAvailable(quest.questName)[1]) {
+						var num = actor.isQuestAvailable(quest.questName)[1][_autoKey];
 						if ( arrContains(masterVnums,num) == false ) {
 							masterVnums.push(num);
 						}
@@ -138,14 +141,17 @@ JSCharacter.prototype.questCompleteNoMaster = function ( quest, clanNum ) {
 				questNames.push(quest.questName);
 			}
 			actor.send( bld+"You have unlocked the following quest"+end+": "+nrm+grn+questNames.join(", ")+nrm+bld+".\n"+nrm);
-			for each ( var quest in unlockedQuests ) {
+			for (var _autoKey in unlockedQuests) {
+				var quest = unlockedQuests[_autoKey];
 				if ( quest.ownerVnum.length == 0 ) {
 					actor.journalEdit("ADD",quest.questName);
 				}
 			}
-			for each ( var vnum in masterVnums ) {
+			for (var _autoKey in masterVnums) {
+				var vnum = masterVnums[_autoKey];
 				var count = 0;
-				for each ( var quest in unlockedQuests ) {
+				for (var _autoKey in unlockedQuests) {
+					var quest = unlockedQuests[_autoKey];
 					if ( arrContains(quest.ownerVnum,vnum) )
 						++count;
 				}

@@ -10,9 +10,9 @@ JSCharacter.prototype.getUnlockedQuests = function ( strQName ) {
 	var owners = objQuest.ownerVnum;
 	// //Quests with same owner as this one
 	// if ( owners != undefined && owners.length > 0 ) {
-		// for each ( var vnum in owners ) {
+		// for (var _autoKey in owners) { 	var vnum = owners[_autoKey];
 			// var theseQuests = this.getAvailableQuests(vnum);
-			// for each ( var quest in theseQuests ) {
+			// for (var _autoKey in theseQuests) { 	var quest = theseQuests[_autoKey];
 				// if ( arrContains(tempQuests,quest) == false )
 					// tempQuests.push(quest);
 			// }
@@ -21,9 +21,9 @@ JSCharacter.prototype.getUnlockedQuests = function ( strQName ) {
 	// var tags = objQuest.tags;
 	// //Quests with same tag as this one
 	// if ( tags != undefined && tags.length > 0 ) {
-		// for each ( var tag in tags ) {
+		// for (var _autoKey in tags) { 	var tag = tags[_autoKey];
 			// var taggedQuests = getQuestsByTag(tag,this);
-			// for each ( var quest in taggedQuests ) {
+			// for (var _autoKey in taggedQuests) { 	var quest = taggedQuests[_autoKey];
 				// if ( arrContains(tempQuests,quest) == false )
 					// tempQuests.push(quest);
 			// }

@@ -323,7 +323,8 @@ function getVendorRecipes(vendorVnum, recipeType) {
 	/**Determine Vendor's Available Recipes**/
 	//Get Vendor's Mixing Recipes
 	var myMix = [];
-	for each ( var recipe in mixRec ) {
+	for (var _autoKey in mixRec) {
+		var recipe = mixRec[_autoKey];
 		if ( arrContains(recipe.vendors, vendorVnum) ) {
 			myMix.push(recipe);
 		}
@@ -333,7 +334,8 @@ function getVendorRecipes(vendorVnum, recipeType) {
 	}
 	//Get Vendor's Smithing Recipes
 	var mySmith = [];
-	for each ( var recipe in smithRec ) {
+	for (var _autoKey in smithRec) {
+		var recipe = smithRec[_autoKey];
 		if ( arrContains(recipe.vendors, vendorVnum) ) {
 			mySmith.push(recipe);
 		}
@@ -343,7 +345,8 @@ function getVendorRecipes(vendorVnum, recipeType) {
 	}
 	//Get Vendor's Tailoring Recipes
 	var myTailor = [];
-	for each ( var recipe in tailRec ) {
+	for (var _autoKey in tailRec) {
+		var recipe = tailRec[_autoKey];
 		if ( arrContains(recipe.vendors, vendorVnum) ) {
 			myTailor.push(recipe);
 		}

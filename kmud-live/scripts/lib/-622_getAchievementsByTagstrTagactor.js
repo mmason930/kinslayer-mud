@@ -9,7 +9,8 @@
 function getAchievementsByTag( strTag, actor ) {
 	strTag = strTag+"";
 	var tAchs = [];
-	for each ( var ach in global.vAchievements ) {
+	for (var _autoKey in global.vAchievements) {
+		var ach = global.vAchievements[_autoKey];
 		var vnum = ach.achVnum;
 		if ( arrContains(ach.achTags,strTag) == true ) {
 			if ( actor && getObjectClass(actor) == 'JSCharacter' ) {

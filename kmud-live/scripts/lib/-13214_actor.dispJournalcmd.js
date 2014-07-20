@@ -19,7 +19,8 @@
                 var completedEntries = [];//4
                 var allEntries = [];//5
 				var achievements = [];//7
-				for each ( var ach in global.vAchievements ) {
+				for (var _autoKey in global.vAchievements) {
+					var ach = global.vAchievements[_autoKey];
 					if ( this.isAchUnlocked(ach.achVnum) || !ach.achHide ) {
 						achievements.push(ach);
 					}

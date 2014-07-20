@@ -62,7 +62,8 @@ JSCharacter.prototype.unlockRecipe = function( iVnum, sType )
 }
 JSCharacter.prototype.isRecipeUnlocked = function( vRecipe ) {
 	var vnum = vRecipe.vnum;
-	for each ( var recipe in this.getRecipes(vRecipe.type) ) {
+	for (var _autoKey in this.getRecipes(vRecipe.type)) {
+		var recipe = this.getRecipes(vRecipe.type)[_autoKey];
 		if ( recipe.vnum == vnum ) {
 			return true;
 		}

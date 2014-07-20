@@ -123,7 +123,8 @@ var script13250 = function(self, actor, here, args, extra) {
 						return;
 				}
 				/**SPECIAL DIALOGUE**/
-				for each ( var line in quest.dialogue ) {
+				for (var _autoKey in quest.dialogue) {
+					var line = quest.dialogue[_autoKey];
 					if ( line.pulses == '-1' || line.pulses == -1 ) {
 						if ( line.handle[line.handle.length - 1] != ';' ) {
 							line.handle += ';';

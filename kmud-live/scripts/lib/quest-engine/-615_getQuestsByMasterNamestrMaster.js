@@ -6,8 +6,10 @@
  **************************************************************************/
 function getQuestsByMasterName( strMaster ) {
 	var tQuests = [];
-	for each ( var quest in global.vQuests ) {
-		for each ( var vnum in quest.ownerVnum ) {
+	for (var _autoKey in global.vQuests) {
+		var quest = global.vQuests[_autoKey];
+		for (var _autoKey in quest.ownerVnum) {
+			var vnum = quest.ownerVnum[_autoKey];
 			if ( vnum > -1 && getMobName(vnum) == strMaster && !arrContains(tQuests,quest) ) {
 				tQuests.push(quest);
 			}

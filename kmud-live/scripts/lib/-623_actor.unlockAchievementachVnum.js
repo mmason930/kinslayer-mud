@@ -34,7 +34,8 @@ JSCharacter.prototype.unlockAchievement = function(achVnum,bAlwaysExecute) {
 		if ( !unlocked || bAlwaysExecute == true ) {
 			var actor = this;
 			var here = this.room;
-			for each ( var exec in ach.achExecutions ) {
+			for (var _autoKey in ach.achExecutions) {
+				var exec = ach.achExecutions[_autoKey];
 				eval(exec);
 			}
 		}

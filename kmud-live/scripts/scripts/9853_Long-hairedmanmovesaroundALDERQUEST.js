@@ -1,6 +1,6 @@
 var script9853 = function(self, actor, here, args, extra) {
 		if ( self.vnum == 9850 ) {
-			// for each ( var person in getConnectedPlayers() ) {
+			// for (var _autoKey in getConnectedPlayers()) { 	var person = getConnectedPlayers()[_autoKey];
 				// if ( person.name == "Alder" ) {
 					// var room = person.room;
 					// break;

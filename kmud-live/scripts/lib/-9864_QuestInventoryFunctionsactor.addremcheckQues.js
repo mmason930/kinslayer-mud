@@ -85,7 +85,8 @@ JSCharacter.prototype.checkQuestItem = function ( itemName, itemAmount, questNam
 	itemName += "";
 	itemAmount = Number(itemAmount);
 	questName += "";
-	for each ( var item in this._questInv ) {
+	for (var _autoKey in this._questInv) {
+		var item = this._questInv[_autoKey];
 		if ( item.itemName == itemName && item.itemAmount >= itemAmount && item.questName == questName ) {
 			return true;
 		}

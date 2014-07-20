@@ -14,7 +14,7 @@ var script41 = function(self, actor, here, args, extra) {
 		// // here.echo(false);
 	// global.playerTitleArrays = [];
 	// here.echo(global.playerTitleArrays.length);
-	// for each ( var player in getCurrentPlayers() ) {
+	// for (var _autoKey in getCurrentPlayers()) { 	var player = getCurrentPlayers()[_autoKey];
 		// var title = player.getSpecTitle();
 		// if ( title ) {
 			// actor.send(player.name+": ");

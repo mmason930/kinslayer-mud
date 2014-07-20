@@ -65,7 +65,8 @@ var script9815 = function(self, actor, here, args, extra) {
 		}
 		var item = account[itemNumber-1];
 		item.moveToChar(self);
-		for each ( var obj in account ) {
+		for (var _autoKey in account) {
+			var obj = account[_autoKey];
 			if ( obj.id != item.id ) {
 				obj.extract();
 			}

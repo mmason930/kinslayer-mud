@@ -6,7 +6,8 @@ function getAchByVnum(achVnum) {
 		return false;
 	}
 	achVnum = Math.floor(achVnum);
-	for each ( var ach in global.vAchievements ) {
+	for (var _autoKey in global.vAchievements) {
+		var ach = global.vAchievements[_autoKey];
 		if ( ach.achVnum == achVnum ) {
 			return ach;
 		}

@@ -59,7 +59,8 @@ var script635 = function(self, actor, here, args, extra) {
 		var ss = [];		// Seanchan-side
 		var as = [];		// Aiel-side
 		var immortals = []; // Immortals
-		for each ( var player in players ) {
+		for (var _autoKey in players) {
+			var player = players[_autoKey];
 			if ( !player.isValid ) {
 				continue;
 			}
@@ -186,7 +187,8 @@ var script635 = function(self, actor, here, args, extra) {
 					// right += (raceColor ? bld+rcol+" *"+nrm : "");
 				var wanted = "";
 				var aClans = actor.findClans(true);
-				for each ( var num in aClans ) {
+				for (var _autoKey in aClans) {
+					var num = aClans[_autoKey];
 					if ( player.wantedBy(num) ) {
 						wanted += nrm+B+" ("+clanNumToText(num).toUpperCase()+" WARRANT)"+nrm;
 					}

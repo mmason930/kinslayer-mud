@@ -6,7 +6,8 @@ var script9864 = function(self, actor, here, args, extra) {
 			getCharCols(actor,constants.CL_OFF);
 			var qInv = actor._questInv;
 			actor.send(bld+"Quest Inventory:"+nrm);
-			for each ( var item in qInv ) {
+			for (var _autoKey in qInv) {
+				var item = qInv[_autoKey];
 				var amt = item.itemAmount;
 				actor.send(cyn+item.itemName+(amt > 1 ? " ["+item.itemAmount+"]" : "")+nrm);
 			}

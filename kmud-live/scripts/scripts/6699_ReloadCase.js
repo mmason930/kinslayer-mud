@@ -2,7 +2,8 @@ var script6699 = function(self, actor, here, args, extra) {
 	//Alder
 	//August 2010
 	var items = self.items;
-	for each ( var item in items ) {
+	for (var _autoKey in items) {
+		var item = items[_autoKey];
 		if ( item.vnum == 6698 ) {
 			var vCase = item;
 		}

@@ -5,7 +5,8 @@
  *********************************************************/
 function getAllQuestMasters( viewer ) {
 	var vMasters = [];
-	for each ( var quest in global.vQuests ) {
+	for (var _autoKey in global.vQuests) {
+		var quest = global.vQuests[_autoKey];
 		if ( viewer && ( !arrContains(global.questMasters,viewer.name) || viewer.quest("QUEDIT_DISP_TOG") != 0 ) && !arrContains(quest.editors,viewer.name) ) {
 			continue;
 		}
@@ -17,7 +18,8 @@ function getAllQuestMasters( viewer ) {
 				continue;
 			}
 		}
-		for each ( var vnum in quest.ownerVnum ) {
+		for (var _autoKey in quest.ownerVnum) {
+			var vnum = quest.ownerVnum[_autoKey];
 			var name = getMobName(vnum);
 			if ( arrContains(vMasters,name) == false && vnum > -1 ) {
 				vMasters.push(name);

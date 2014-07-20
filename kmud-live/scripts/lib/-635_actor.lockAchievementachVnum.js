@@ -10,7 +10,8 @@ JSCharacter.prototype.lockAchievement = function(achVnum) {
 			if ( !cVal && this.name == "Alder" )
 				this.send(cyn+"Achievement locked: "+nrm+bld+ach.achName+nrm+"\n");
 			sqlQuery("DELETE FROM userAchievement WHERE player_name='"+sqlEsc(this.name)+"' && achievement_vnum="+sqlEsc(achVnum)+";");
-			for each ( var title in this.getTitlesByAchievement(achVnum) ) {
+			for (var _autoKey in this.getTitlesByAchievement(achVnum)) {
+				var title = this.getTitlesByAchievement(achVnum)[_autoKey];
 				// this.send("LOCKING A TITLE IN lockAchievement");
 				// this.send("'"+title.title+"'");
 				// this.send("'"+title.type+"'");

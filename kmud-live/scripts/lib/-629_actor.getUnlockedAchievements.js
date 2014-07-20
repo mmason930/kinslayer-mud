@@ -5,7 +5,8 @@
  *******************************************************************************/
 JSCharacter.prototype.getUnlockedAchievements = function () {
 	var uAchs = [];
-	for each ( var ach in global.vAchievements ) {
+	for (var _autoKey in global.vAchievements) {
+		var ach = global.vAchievements[_autoKey];
 		if ( this.isAchUnlocked(ach.achVnum) ) {
 			uAchs.push(ach);
 		}

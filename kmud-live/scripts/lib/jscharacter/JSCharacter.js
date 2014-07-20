@@ -63,12 +63,14 @@ JSCharacter.prototype.findScalpsByNameAndRace = function ( names, scalpRace ) {
 		scalpRace = parseRace(scalpRace);
 	}
 	var scalpNames = [];
-	for each ( var name in names ) {
+	for (var _autoKey in names) {
+		var name = names[_autoKey];
 		scalpNames.push("a bloody scalp of "+name);
 	}
 	var matchScalps = [];
 	var items = this.getAllItems();
-	for each ( var item in items ) {
+	for (var _autoKey in items) {
+		var item = items[_autoKey];
 		if ( arrContains(scalpNames,item.name) && item.scalpRace == scalpRace ) {
 			matchScalps.push(item);
 		}
@@ -478,7 +480,9 @@ JSCharacter.prototype.findPlayerScalps = function( scalpRace, minLevel ) {
 	var matchingScalps = [];				// Holds scalps that match parameters
 	var possessions = this.getAllItems();	// Every item on player
 
-	for each ( var item in possessions ) {
+	for (var _autoKey in possessions) {
+
+		var item = possessions[_autoKey];
 		if ( item.isPlayerScalp && item.scalpRace == scalpRace && item.scalpLevel >= minLevel ) {
 			matchingScalps.push(item);		// This item is a scalp matching specified criteria
 		}
@@ -507,7 +511,8 @@ JSCharacter.prototype.isIdle = function() {
 JSCharacter.prototype.checkTitle = function ( strTitle ) {
 	var strTitle = strTitle+"";
 	var titles = this.titles;
-	for each ( var title in titles ) {
+	for (var _autoKey in titles) {
+		var title = titles[_autoKey];
 		if ( title.title == strTitle ) {
 			return true;
 		}
