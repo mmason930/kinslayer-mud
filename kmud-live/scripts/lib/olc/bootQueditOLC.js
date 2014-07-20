@@ -1442,7 +1442,7 @@ function bootQueditOLC()
 			var tierCount = slot.length;
 			var id = slot.id || "Unnamed Slot";
 			var s = (tierCount == 1 ? "" : "s");
-			actor.send(grn+(i+1)+nrm+") "+cyn+slot.id+nrm+bld+" ["+tierCount+" item"+s+"]"+nrm);
+			actor.send(grn+(i+1)+nrm+") "+cyn+id+nrm+bld+" ["+tierCount+" item"+s+"]"+nrm);
 		}
 		actor.send( grn+"\nA"+nrm+") Add Slot" );
 		actor.send( grn+"B"+nrm+") Remove Slot" );
@@ -1607,7 +1607,7 @@ function bootQueditOLC()
 			return;
 		}
 		else {
-			actor.send("Rewarded Items Slot: "+cyn+actor.getOLC().itemReward[actor.getOLC().slot].id+nrm+"\n"+strPadding("","_",85,"right")+"\n");
+			actor.send("Rewarded Items Slot: "+cyn+(actor.getOLC().itemReward[actor.getOLC().slot].id || "Unnamed Slot")+nrm+"\n"+strPadding("","_",85,"right")+"\n");
 			quest = getQuestByName(actor.getOLC().questName);
 			var itemList = actor.getOLC().itemReward[actor.getOLC().slot];
 			for ( var i = 0; i < itemList.length; i++ ) {
