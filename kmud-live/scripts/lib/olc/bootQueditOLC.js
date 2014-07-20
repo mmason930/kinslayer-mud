@@ -1634,7 +1634,7 @@ function bootQueditOLC()
 	mode.mode = "MODE_REWARDED_ITEMS_EDIT";
 	mode.parser = function(actor,fLetter,vArgs) 
 	{
-		var OLC = OLC;
+		var OLC = actor.getOLC();
 		var cmd = vArgs[0];
 		var action = OLC.action;
 		var tier = OLC.tier;
