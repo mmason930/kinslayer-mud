@@ -12,7 +12,7 @@ var script22306 = function(self, actor, here, args, extra) {
 			wait 1;
 			if( target && target.room == self.room ) {
 				self.comm("scribbles a line in the large book and blots it with sand.");
-				actor.clan(16);
+				self.comm("clan " + actor.name + " 16");
 			}
 			wait 2;
 			if( target && target.room == self.room ) {
