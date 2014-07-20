@@ -8,9 +8,9 @@ var script20871 = function(self, actor, here, args, extra) {
 			return;
 	}
 	if (pack.contents.length > 15) {
-		for (var _autoKey in pack.contents) {
-			global.alder.send("pack.contents[" +_autoKey+"]");
-			pack.contents[_autoKey].extract();
+		var contents = pack.contents.slice(0);
+		for (var _autoKey in contents) {
+			contents[_autoKey].extract();
 		}
 		self.comm("save");
 		return;
