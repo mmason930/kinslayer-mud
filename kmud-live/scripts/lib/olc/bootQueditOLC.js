@@ -1474,8 +1474,8 @@ function bootQueditOLC()
 			if (action == "NEW SLOT")
 				OLC.itemReward[id] = [];
 			else {
-				OLC.itemReward[id] = OLC.itemReward[slot.id];
-				delete OLC.itemReward[slot.id];
+				OLC.itemReward[id] = OLC.itemReward[OLC.slot];
+				delete OLC.itemReward[OLC.slot];
 				slot.id = id;
 			}
 			OLC.action = 0;
