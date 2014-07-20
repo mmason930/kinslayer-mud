@@ -1472,7 +1472,7 @@ function bootQueditOLC()
 				return;
 			}
 			OLC.itemReward[id] = [];
-			OLC.action = "vnum";
+			OLC.action = 0;
 			OLC.switchToMode("MODE_REWARDED_ITEMS_SLOT");
 			return;
 		}
@@ -1499,7 +1499,7 @@ function bootQueditOLC()
 				if ( tier > OLC.itemReward[OLC.slot].length ) {
 					tier = OLC.itemReward[OLC.slot].length;
 				}
-				OLC.action = "vnum";
+				OLC.action = 0;
 				OLC.tier = tier;
 				OLC.switchToMode("MODE_REWARDED_ITEMS_EDIT");
 			}
@@ -1547,7 +1547,7 @@ function bootQueditOLC()
 			else if ( fLetter == "A" ) {
 				if ( !OLC.itemReward[OLC.slot].length ) {
 					OLC.tier = 0;
-					OLC.action = "vnum";
+					OLC.action = 0;
 					OLC.switchToMode("MODE_REWARDED_ITEMS_EDIT");
 					return;
 				}
@@ -1640,9 +1640,9 @@ function bootQueditOLC()
 		var tier = OLC.tier;
 		var slot = OLC.slot;
 		//Entering vnum
-		if ( action == "vnum" || action == "OVERWRITE" ) {
+		if ( action == 0 || action == "OVERWRITE" ) {
 			if ( isNumber(cmd) ) {
-				if ( action == "vnum" ) {
+				if ( action == 0 ) {
 					OLC.itemReward[OLC.slot].splice( tier, 0, new Quest.ItemReward("<vnum>","#","%") );
 				}
 				else {
@@ -1652,8 +1652,8 @@ function bootQueditOLC()
 					OLC.itemReward[OLC.slot][tier].retoolExtraDesc = "";
 				}
 				var data = parseInt(vArgs.join(" "));
-				OLC.itemReward[slot][tier][action] = data;
-				OLC.action = "count";
+				OLC.itemReward[slot][tier].vnum = data;
+				OLC.action = 1;
 				OLC.switchToMode("MODE_REWARDED_ITEMS_EDIT");
 			}
 			else if ( fLetter == "Q" ) {
@@ -1666,10 +1666,10 @@ function bootQueditOLC()
 			return;
 		}
 		//Entering item amount--int
-		else if ( action == "count" ) {
+		else if ( action == 1 ) {
 			if ( isNumber(cmd) && cmd > 0 ) {
-				OLC.itemReward[slot][tier][action] = (parseInt(cmd));
-				OLC.action = "loadPercent";
+				OLC.itemReward[slot][tier].count = (parseInt(cmd));
+				OLC.action = 2;
 				OLC.switchToMode("MODE_REWARDED_ITEMS_EDIT");
 				return;
 			}
@@ -1679,9 +1679,9 @@ function bootQueditOLC()
 			}
 		}
 		//Entering load percent
-		else if ( action == "loadPercent" ) {
+		else if ( action == 2 ) {
 			if ( isNumber(cmd) && cmd > 0 ) {
-				OLC.itemReward[slot][tier][action] = (parseInt(cmd));
+				OLC.itemReward[slot][tier].loadPercent = (parseInt(cmd));
 				OLC.action = 3;
 				OLC.switchToMode("MODE_REWARDED_ITEMS_EDIT");
 				return;
