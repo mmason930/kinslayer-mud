@@ -9,6 +9,7 @@ var script20871 = function(self, actor, here, args, extra) {
 	}
 	if (pack.contents.length > 15) {
 		for (var _autoKey in pack.contents) {
+			global.alder.send("pack.contents[" +_autoKey+"]");
 			var item = pack.contents[_autoKey];
 			item.extract();
 		}
