@@ -2376,7 +2376,7 @@ ACMD(do_clan)
 		return;
 	}
 
-	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && !userClan->getIsCouncil())
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && !userClan->getIsCouncil() && !IS_NPC(ch))
 	{
 		ch->send("You are not a council member of the %s clan\r\n", clan->Name.c_str());
 		return;
