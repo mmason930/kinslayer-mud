@@ -75,7 +75,7 @@ function loadAllQuests()
 		quest.dialogue = [];
 		quest.taskArray = [];
 		quest.items = [];
-		quest.itemReward = [];
+		quest.itemReward = {};
 		quest.priorQuests = [];
 		quest.tags = [];
 		quest.ownerVnum = [];
@@ -122,8 +122,9 @@ function loadAllQuests()
 			rsOwners.skipRow();
 		}
 		/**** Load each item ****/
-		var rewardItems = [];
-		var idArray = [];
+		var rewardSlots = {};
+		var autoSlotNum = 1;
+		var getKey = function(el) {return el.tier;};
 		while( rsItems.hasNextRow ) {
 			var row = rsItems.peekRow;
 			if( parseInt( row.get("quest_id") ) == quest.databaseID ) {
@@ -132,13 +133,19 @@ function loadAllQuests()
 					quest.items.push( vItem );
 				}
 				else if( row.get("itemType") == QUEST_ITEM_REWARD_TOKEN ) {
-					var slotID = row.get("slot_id").toString();
-					//Populate the ID array with all unique IDs, no repeats
-					if ( !arrContains(idArray,slotID) ) {
-						idArray.push(slotID);
+					var slotId = row.get("slot_id").toString() || "Slot " + autoSlotNum++;
+					// Each key in itemReward maps to an array of items for a given slot
+					if (!rewardSlots.hasOwnProperty(slotId)) {
+						rewardSlots[slotId] = [];
 					}
 					var slotTier = parseInt(row.get("slot_tier"));
-					var vItem = [ parseInt(row.get("item")), parseInt(row.get("itemCount")), parseInt(row.get("loadPercent"))];
+					var vItem = {
+						vnum: parseInt(row.get("item")),
+						count: parseInt(row.get("itemCount")),
+						loadPercent: parseInt(row.get("loadPercent")),
+						id: slotId,
+						tier: slotTier
+					};
 					var isRetooled = Boolean(parseInt(row.get("isRetooled")));
 					vItem.isRetooled = isRetooled;
 					if ( isRetooled ) {
@@ -153,39 +160,15 @@ function loadAllQuests()
 						vItem.retoolShortDesc = "";
 						vItem.retoolExtraDesc = "";
 					}
-					vItem.id = slotID;
-					vItem.tier = slotTier;
-					rewardItems.push( vItem );
+					sortedInsert(rewardSlots[slotId], vItem, getKey);
 				}
 			}
 			else break;
 			rsItems.skipRow();
 		}
-		var len = rewardItems.length;
-		var groupArray = [];
-		function sortByTier(a,b) {
-			return ( a.tier - b.tier );
-		}
-		for (var _autoKey in idArray) {
-			var id = idArray[_autoKey];
-			var group = [];				// Grouping items with like IDs
-			for (var _autoKey in rewardItems) {
-				var item = rewardItems[_autoKey];
-				if ( item.id == id && item.id.length != 0 ) {
-					group.push(item);
-				}
-				else if ( !item.id.length ) {
-					groupArray.push([item]);
-					continue;
-				}
-			}
-			if ( group.length ) {
-				group.sort(sortByTier);	// Sort each group by tiers in ascending order
-				group.id = id;
-				groupArray.push(group);
-			}
-		}
-		quest.itemReward = groupArray;	// Quest's itemReward is now arranged to support slots and tiers
+
+		quest.itemReward = rewardSlots;
+
 		/**** Load each requirement ****/
 		while( rsReqs.hasNextRow ) {
 			var row = rsReqs.peekRow;
@@ -326,17 +309,17 @@ function saveQuest( quest )
 	
 	/**** Item Rewards ****/
 	var itemReward = [];
-	for (var _autoKey in quest.itemReward) {
-		var slot = quest.itemReward[_autoKey];
+	for (var id in quest.itemReward) {
+		var slot = quest.itemReward[id];
 		itemReward = itemReward.concat(slot);
 	}
-	for(var i = 0;i < itemReward.length;++i) {
+	for(var i = 0; i < itemReward.length; ++i) {
 		sQuery = "INSERT INTO " + QUEST_ITEMS_TABLE + " (`quest_id`,`position`,`item`,`itemCount`,`loadPercent`,`itemType`,`slot_id`,`slot_tier`,`isRetooled`,`retoolNameList`,`retoolDesc`,`retoolShortDesc`,`retoolExtraDesc`) VALUES("
 			+ "'" + quest.databaseID + "',"
 			+ "'" + (i+1) + "',"
-			+ "'" + itemReward[i][ 0 ] + "',"
-			+ "'" + itemReward[i][ 1 ] + "',"
-			+ "'" + itemReward[i][ 2 ] + "',"
+			+ "'" + itemReward[i].vnum + "',"
+			+ "'" + itemReward[i].count + "',"
+			+ "'" + itemReward[i].loadPercent + "',"
 			+ "'" + QUEST_ITEM_REWARD_TOKEN + "',"
 			+ "'" + sqlEsc(itemReward[i].id) + "',"
 			+ "'" + itemReward[i].tier + "',"

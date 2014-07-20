@@ -68,7 +68,7 @@ function bootQueditOLC()
 		actor.getOLC().fp = 0;
 		actor.getOLC().gold = 0;
 		actor.getOLC().items = [];
-		actor.getOLC().itemReward = [];
+		actor.getOLC().itemReward = {};
 		actor.getOLC().dialogue = [];
 		actor.getOLC().skillArray = [];
 		actor.getOLC().taskArray = [];
@@ -763,7 +763,7 @@ function bootQueditOLC()
 		actor.send(strPadding(grn+"F"+nrm+") "," ",3,"left")+strPadding("QP Reward"," ",18,"right")+": "+cyn+actor.getOLC().qp+nrm);
 		actor.send(strPadding(grn+"G"+nrm+") "," ",3,"left")+strPadding("Copper Reward"," ",18,"right")+": "+cyn+actor.getOLC().gold+nrm);
 		actor.send(strPadding(grn+"H"+nrm+") "," ",3,"left")+strPadding("Required Items"," ",18,"right")+": "+cyn+(actor.getOLC().items.length > 0 ? actor.getOLC().items : "<none>")+nrm);
-		actor.send(strPadding(grn+"I"+nrm+") "," ",3,"left")+strPadding("Rewarded Items"," ",18,"right")+": "+cyn+(actor.getOLC().itemReward.length > 0 ? actor.getOLC().itemReward : "<none>")+nrm);
+		actor.send(strPadding(grn+"I"+nrm+") "," ",3,"left")+strPadding("Rewarded Items"," ",18,"right")+": "+cyn+(!isEmpty(actor.getOLC().itemReward) ? keyCount(actor.getOLC().itemReward) + " slots" : "<none>")+nrm);
 		actor.send(strPadding(grn+"J"+nrm+") "," ",3,"left")+strPadding("Info"," ",18,"right")+": "+cyn+(actor.getOLC().dialogue.length > 0 ? strAbbrev(actor.getOLC().dialogue+"",65) : "<none>")+nrm);
 		actor.send(strPadding(grn+"K"+nrm+") "," ",3,"left")+strPadding("Skills"," ",18,"right")+": "+cyn+(actor.getOLC().skillArray.length > 0 ? actor.getOLC().skillArray : "<none>")+nrm);
 		actor.send(strPadding(grn+"L"+nrm+") "," ",3,"left")+strPadding("Tasks"," ",18,"right")+": "+cyn+(actor.getOLC().taskArray.length > 0 ? strAbbrev(actor.getOLC().taskArray+"",65) : "<none>")+nrm);
@@ -1408,20 +1408,18 @@ function bootQueditOLC()
 			return;
 		}
 		else if ( fLetter == "A" ) {
-			actor.getOLC().itemReward.push([]);
 			actor.getOLC().action = "NEW SLOT";//Edit slot
-			actor.getOLC().slot = ( actor.getOLC().itemReward.length - 1 );
 			actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_SLOT");
 			return;
 		}
-		else if ( fLetter == "B" && actor.getOLC().itemReward.length > 0 ) {
+		else if ( fLetter == "B" && !isEmpty(actor.getOLC().itemReward) ) {
 			actor.getOLC().action = "REM SLOT";//Remove slot
 			actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_SLOT");
 			return;
 		}
-		else if ( isNumber(vArgs[0]) && vArgs[0] > 0 && vArgs[0] <= actor.getOLC().itemReward.length ) {
+		else if ( isNumber(vArgs[0]) && vArgs[0] > 0 && vArgs[0] <= keyCount(actor.getOLC().itemReward) ) {
 			actor.getOLC().action = "EDIT SLOT";//Edit slot
-			actor.getOLC().slot = (vArgs[0]-1);//Store index of slot to edit
+			actor.getOLC().slot = Object.keys(actor.getOLC().itemReward)[vArgs[0] - 1]; //Store id of slot to edit
 			actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_SLOT");
 			return;
 		}
@@ -1437,12 +1435,12 @@ function bootQueditOLC()
 		actor.send("Rewarded Items Menu\n"+strPadding("","_",85,"right")+"\n");
 		quest = getQuestByName(actor.getOLC().questName);
 		var itemReward = actor.getOLC().itemReward;
-		for ( var i = 0; i < itemReward.length; i++ ) {
-			var slot = itemReward[i];
+		var num = 1;
+		for (var id in itemReward) {
+			var slot = itemReward[id];
 			var tierCount = slot.length;
-			var id = slot.id || "Unnamed Slot";
 			var s = (tierCount == 1 ? "" : "s");
-			actor.send(grn+(i+1)+nrm+") "+cyn+id+nrm+bld+" ["+tierCount+" item"+s+"]"+nrm);
+			actor.send(grn+(num++)+nrm+") "+cyn+id+nrm+bld+" ["+tierCount+" item"+s+"]"+nrm);
 		}
 		actor.send( grn+"\nA"+nrm+") Add Slot" );
 		actor.send( grn+"B"+nrm+") Remove Slot" );
@@ -1454,44 +1452,40 @@ function bootQueditOLC()
 	mode.mode = "MODE_REWARDED_ITEMS_SLOT";
 	mode.parser = function(actor,fLetter,vArgs) 
 	{
-		var action = actor.getOLC().action;
+		var OLC = actor.getOLC();
+		var action = OLC.action;
 		var cmd = vArgs[0];
 		// When creating a new slot, prompt ID
 		if ( action == "NEW SLOT" || action == "RENAME" ) {
 			if ( !str_cmp(vArgs.join(" "),"Q") ) {
-				actor.getOLC().action = undefined;
+				OLC.action = undefined;
 				var toMode = "MODE_REWARDED_ITEMS";
 				if ( action == "RENAME" ) {
 					toMode = "MODE_REWARDED_ITEMS_SLOT";
 				}
-				else if ( action == "NEW SLOT" ) {
-					actor.getOLC().itemReward.pop();
-				}
-				actor.getOLC().switchToMode(toMode);
+				OLC.switchToMode(toMode);
 				return;
 			}
 			var id = vArgs.join(" ");
-			for (var _autoKey in actor.getOLC().itemReward) {
-				var slot = actor.getOLC().itemReward[_autoKey];
-				if ( slot.id == id ) {
-					actor.send("That slot ID already exists for this quest.\nTry again or press Q to return: ");
-					return;
-				}
+			if (OLC.itemReward[id]) {
+				actor.send("That slot ID already exists for this quest.\nTry again or press Q to return: ");
+				return;
 			}
-			actor.getOLC().itemReward[actor.getOLC().slot].id = vArgs.join(" ");
-			actor.getOLC().action = 0;
-			actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_SLOT");
+			OLC.itemReward[id] = [];
+			OLC.action = "vnum";
+			OLC.switchToMode("MODE_REWARDED_ITEMS_SLOT");
 			return;
 		}
 		// When removing a slot, prompt slot list position
 		if ( action == "REM SLOT" ) {
-			if ( isNumber(cmd) && cmd > 0 && cmd <= actor.getOLC().itemReward.length ) {
-				actor.getOLC().itemReward.splice( (cmd-1), 1 );
-				actor.getOLC().action = undefined;
-				actor.getOLC().switchToMode("MODE_REWARDED_ITEMS");
+			if (isNumber(cmd) && cmd > 0 && cmd <= keyCount(OLC.itemReward)) {
+				var id = Object.keys(OLC.itemReward)[cmd - 1];
+				delete OLC.itemReward[id];
+				OLC.action = undefined;
+				OLC.switchToMode("MODE_REWARDED_ITEMS");
 			}
 			else if ( fLetter == "Q" ) {
-				actor.getOLC().switchToMode("MODE_REWARDED_ITEMS");
+				OLC.switchToMode("MODE_REWARDED_ITEMS");
 			}
 			else {
 				actor.send("You must select a slot in the above list to remove, or press Q to return.\nTry again: ");
@@ -1502,16 +1496,16 @@ function bootQueditOLC()
 		else if ( action == "SPLICE" ) {
 			if ( isNumber(cmd) && cmd > 0 ) {
 				var tier = (parseInt(cmd)-1);
-				if ( tier > actor.getOLC().itemReward[actor.getOLC().slot].length ) {
-					tier = actor.getOLC().itemReward[actor.getOLC().slot].length;
+				if ( tier > OLC.itemReward[OLC.slot].length ) {
+					tier = OLC.itemReward[OLC.slot].length;
 				}
-				actor.getOLC().action = 0;
-				actor.getOLC().tier = tier;
-				actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_EDIT");
+				OLC.action = "vnum";
+				OLC.tier = tier;
+				OLC.switchToMode("MODE_REWARDED_ITEMS_EDIT");
 			}
 			else if ( fLetter == "Q" ) {
-				actor.getOLC().action = undefined;
-				actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_SLOT");
+				OLC.action = undefined;
+				OLC.switchToMode("MODE_REWARDED_ITEMS_SLOT");
 			}
 			else {
 				actor.send("You must input an integer greater than zero.\nTry again: ");
@@ -1520,14 +1514,14 @@ function bootQueditOLC()
 		}
 		// When removing an item, prompt tier position
 		else if ( action == "REMOVE" ) {
-			if ( isNumber(cmd) && cmd > 0 && cmd <= actor.getOLC().itemReward[actor.getOLC().slot].length ) {
-				actor.getOLC().itemReward[actor.getOLC().slot].splice( (parseInt(cmd)-1), 1 );
-				actor.getOLC().action = undefined;
-				actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_SLOT");
+			if ( isNumber(cmd) && cmd > 0 && cmd <= OLC.itemReward[OLC.slot].length ) {
+				OLC.itemReward[OLC.slot].splice( (parseInt(cmd)-1), 1 );
+				OLC.action = undefined;
+				OLC.switchToMode("MODE_REWARDED_ITEMS_SLOT");
 			}
 			else if ( fLetter == "Q" ) {
-				actor.getOLC().action = undefined;
-				actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_SLOT");
+				OLC.action = undefined;
+				OLC.switchToMode("MODE_REWARDED_ITEMS_SLOT");
 			}
 			else {
 				actor.send("You must select an item in the above list to remove, or press Q to return.\nTry again: ");
@@ -1536,47 +1530,47 @@ function bootQueditOLC()
 		}
 		else {
 			if ( fLetter == "Q" ) {
-				if ( !actor.getOLC().itemReward[actor.getOLC().slot].length ) {
-					actor.getOLC().itemReward.splice(actor.getOLC().slot,1);
+				if ( !OLC.itemReward[OLC.slot].length ) {
+					delete OLC.itemReward[OLC.slot];
 				}
 				else {
-					var slot = actor.getOLC().itemReward[actor.getOLC().slot];
+					var slot = OLC.itemReward[OLC.slot];
 					// Attribute each item in the slot with id and tier
 					for ( var i = 0; i < slot.length; i++ ) {
 						slot[i].tier = i;
-						slot[i].id = actor.getOLC().itemReward[actor.getOLC().slot].id;
+						slot[i].id = OLC.slot;
 					}
 				}
-				actor.getOLC().switchToMode("MODE_REWARDED_ITEMS");
+				OLC.switchToMode("MODE_REWARDED_ITEMS");
 				return;
 			}
 			else if ( fLetter == "A" ) {
-				if ( !actor.getOLC().itemReward[actor.getOLC().slot].length ) {
-					actor.getOLC().tier = 0;
-					actor.getOLC().action = 0;
-					actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_EDIT");
+				if ( !OLC.itemReward[OLC.slot].length ) {
+					OLC.tier = 0;
+					OLC.action = "vnum";
+					OLC.switchToMode("MODE_REWARDED_ITEMS_EDIT");
 					return;
 				}
 				else {
-					actor.getOLC().action = "SPLICE";
+					OLC.action = "SPLICE";
 				}
-				actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_SLOT");
+				OLC.switchToMode("MODE_REWARDED_ITEMS_SLOT");
 				return;
 			}
-			else if ( fLetter == "B" && actor.getOLC().itemReward[actor.getOLC().slot].length > 0 ) {
-				actor.getOLC().action = "REMOVE";//Remove item
-				actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_SLOT");
+			else if ( fLetter == "B" && OLC.itemReward[OLC.slot].length > 0 ) {
+				OLC.action = "REMOVE";//Remove item
+				OLC.switchToMode("MODE_REWARDED_ITEMS_SLOT");
 				return;
 			}
 			else if ( fLetter == "C" ) {
-				actor.getOLC().action = "RENAME";//Remove item
-				actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_SLOT");
+				OLC.action = "RENAME";//Remove item
+				OLC.switchToMode("MODE_REWARDED_ITEMS_SLOT");
 				return;
 			}
-			else if ( isNumber(vArgs[0]) && vArgs[0] > 0 && vArgs[0] <= actor.getOLC().itemReward[actor.getOLC().slot].length ) {
-				actor.getOLC().action = "OVERWRITE";//Edit tier
-				actor.getOLC().tier = (vArgs[0]-1);//Store index of tier to edit
-				actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_EDIT");
+			else if ( isNumber(vArgs[0]) && vArgs[0] > 0 && vArgs[0] <= OLC.itemReward[OLC.slot].length ) {
+				OLC.action = "OVERWRITE";//Edit tier
+				OLC.tier = (vArgs[0]-1);//Store index of tier to edit
+				OLC.switchToMode("MODE_REWARDED_ITEMS_EDIT");
 				return;
 			}
 			else {
@@ -1607,14 +1601,14 @@ function bootQueditOLC()
 			return;
 		}
 		else {
-			actor.send("Rewarded Items Slot: "+cyn+(actor.getOLC().itemReward[actor.getOLC().slot].id || "Unnamed Slot")+nrm+"\n"+strPadding("","_",85,"right")+"\n");
+			actor.send("Rewarded Items Slot: "+cyn+actor.getOLC().slot+nrm+"\n"+strPadding("","_",85,"right")+"\n");
 			quest = getQuestByName(actor.getOLC().questName);
 			var itemList = actor.getOLC().itemReward[actor.getOLC().slot];
 			for ( var i = 0; i < itemList.length; i++ ) {
 				var item = itemList[i];
-				var amount = item[1];
-				var loadPerc = item[2];
-				var vnum = item[0];
+				var amount = item.count;
+				var loadPerc = item.loadPercent;
+				var vnum = item.vnum;
 				var name = vnum+nrm+red+" (not made yet)"+nrm;
 				if ( getObjProto(vnum) != undefined ) {
 					if ( item.isRetooled ) {
@@ -1640,31 +1634,31 @@ function bootQueditOLC()
 	mode.mode = "MODE_REWARDED_ITEMS_EDIT";
 	mode.parser = function(actor,fLetter,vArgs) 
 	{
+		var OLC = OLC;
 		var cmd = vArgs[0];
-		var action = actor.getOLC().action;
-		var tier = actor.getOLC().tier;
-		var slot = actor.getOLC().slot;
+		var action = OLC.action;
+		var tier = OLC.tier;
+		var slot = OLC.slot;
 		//Entering vnum
-		if ( action == 0 || action == "OVERWRITE" ) {
+		if ( action == "vnum" || action == "OVERWRITE" ) {
 			if ( isNumber(cmd) ) {
-				if ( action == 0 ) {
-					actor.getOLC().itemReward[actor.getOLC().slot].splice( tier, 0, ["<vnum>","#","%"] );
+				if ( action == "vnum" ) {
+					OLC.itemReward[OLC.slot].splice( tier, 0, new Quest.ItemReward("<vnum>","#","%") );
 				}
 				else {
-					actor.getOLC().itemReward[actor.getOLC().slot][tier].retoolShortDesc = "";
-					actor.getOLC().itemReward[actor.getOLC().slot][tier].retoolRoomDesc = "";
-					actor.getOLC().itemReward[actor.getOLC().slot][tier].retoolNameList = "";
-					actor.getOLC().itemReward[actor.getOLC().slot][tier].retoolExtraDesc = "";
+					OLC.itemReward[OLC.slot][tier].retoolShortDesc = "";
+					OLC.itemReward[OLC.slot][tier].retoolRoomDesc = "";
+					OLC.itemReward[OLC.slot][tier].retoolNameList = "";
+					OLC.itemReward[OLC.slot][tier].retoolExtraDesc = "";
 				}
-				action = 0;
 				var data = parseInt(vArgs.join(" "));
-				actor.getOLC().itemReward[slot][tier][action] = (data);
-				actor.getOLC().action = 1;
-				actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_EDIT");
+				OLC.itemReward[slot][tier][action] = data;
+				OLC.action = "count";
+				OLC.switchToMode("MODE_REWARDED_ITEMS_EDIT");
 			}
 			else if ( fLetter == "Q" ) {
-				actor.getOLC().action = undefined;
-				actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_SLOT");
+				OLC.action = undefined;
+				OLC.switchToMode("MODE_REWARDED_ITEMS_SLOT");
 			}
 			else {
 				actor.send("Item vnum must be an integer greater than zero or Q to return.\nTry again: ");
@@ -1672,11 +1666,11 @@ function bootQueditOLC()
 			return;
 		}
 		//Entering item amount--int
-		else if ( action == 1 ) {
+		else if ( action == "count" ) {
 			if ( isNumber(cmd) && cmd > 0 ) {
-				actor.getOLC().itemReward[slot][tier][action] = (parseInt(cmd));
-				actor.getOLC().action = 2;
-				actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_EDIT");
+				OLC.itemReward[slot][tier][action] = (parseInt(cmd));
+				OLC.action = "loadPercent";
+				OLC.switchToMode("MODE_REWARDED_ITEMS_EDIT");
 				return;
 			}
 			else {
@@ -1685,11 +1679,11 @@ function bootQueditOLC()
 			}
 		}
 		//Entering load percent
-		else if ( action == 2 ) {
+		else if ( action == "loadPercent" ) {
 			if ( isNumber(cmd) && cmd > 0 ) {
-				actor.getOLC().itemReward[slot][tier][action] = (parseInt(cmd));
-				actor.getOLC().action = 3;
-				actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_EDIT");
+				OLC.itemReward[slot][tier][action] = (parseInt(cmd));
+				OLC.action = 3;
+				OLC.switchToMode("MODE_REWARDED_ITEMS_EDIT");
 				return;
 			}
 			else {
@@ -1700,47 +1694,47 @@ function bootQueditOLC()
 		//Ask if you want to retool
 		else if ( action == 3 ) {
 			if ( fLetter == "Y" ) {
-				actor.getOLC().itemReward[slot][tier].isRetooled = true;
-				actor.getOLC().action = 4;
-				actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_EDIT");
+				OLC.itemReward[slot][tier].isRetooled = true;
+				OLC.action = 4;
+				OLC.switchToMode("MODE_REWARDED_ITEMS_EDIT");
 			}
 			else {
-				actor.getOLC().action = undefined;
-				actor.getOLC().itemReward[slot][tier].isRetooled = false;
-				actor.getOLC().itemReward[actor.getOLC().slot][tier].retoolShortDesc = "";
-				actor.getOLC().itemReward[actor.getOLC().slot][tier].retoolRoomDesc = "";
-				actor.getOLC().itemReward[actor.getOLC().slot][tier].retoolNameList = "";
-				actor.getOLC().itemReward[actor.getOLC().slot][tier].retoolExtraDesc = "";
-				actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_SLOT");
+				OLC.action = undefined;
+				OLC.itemReward[slot][tier].isRetooled = false;
+				OLC.itemReward[OLC.slot][tier].retoolShortDesc = "";
+				OLC.itemReward[OLC.slot][tier].retoolRoomDesc = "";
+				OLC.itemReward[OLC.slot][tier].retoolNameList = "";
+				OLC.itemReward[OLC.slot][tier].retoolExtraDesc = "";
+				OLC.switchToMode("MODE_REWARDED_ITEMS_SLOT");
 			}
 			return;
 		}
 		//Retooling shortdesc
 		else if ( action == 4 ) {
-			actor.getOLC().itemReward[slot][tier].retoolShortDesc = vArgs.join(" ");
-			actor.getOLC().action = 5;
-			actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_EDIT");
+			OLC.itemReward[slot][tier].retoolShortDesc = vArgs.join(" ");
+			OLC.action = 5;
+			OLC.switchToMode("MODE_REWARDED_ITEMS_EDIT");
 			return;
 		}
 		//Retooling room description
 		else if ( action == 5 ) {
-			actor.getOLC().itemReward[slot][tier].retoolRoomDesc = vArgs.join(" ");
-			actor.getOLC().action = 6;
-			actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_EDIT");
+			OLC.itemReward[slot][tier].retoolRoomDesc = vArgs.join(" ");
+			OLC.action = 6;
+			OLC.switchToMode("MODE_REWARDED_ITEMS_EDIT");
 			return;
 		}
 		//Retooling extra description
 		else if ( action == 6 ) {
-			actor.getOLC().itemReward[slot][tier].retoolExtraDesc = vArgs.join(" ");
-			actor.getOLC().action = 7;
-			actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_EDIT");
+			OLC.itemReward[slot][tier].retoolExtraDesc = vArgs.join(" ");
+			OLC.action = 7;
+			OLC.switchToMode("MODE_REWARDED_ITEMS_EDIT");
 			return;
 		}
 		//Retooling namelist
 		else if ( action == 7 ) {
-			actor.getOLC().itemReward[slot][tier].retoolNameList = vArgs.join(" ");
-			actor.getOLC().action = undefined;
-			actor.getOLC().switchToMode("MODE_REWARDED_ITEMS_SLOT");
+			OLC.itemReward[slot][tier].retoolNameList = vArgs.join(" ");
+			OLC.action = undefined;
+			OLC.switchToMode("MODE_REWARDED_ITEMS_SLOT");
 			return;
 		}
 	}
@@ -1750,13 +1744,13 @@ function bootQueditOLC()
 		if ( action == -1 ) {
 			actor.send(bld+"Select item to remove or Q to return: "+nrm);
 		}
-		else if ( action == 0 || action == "OVERWRITE" ) {
+		else if ( action == "vnum" || action == "OVERWRITE" ) {
 			actor.send(bld+"Enter item vnum or Q to return: "+nrm);
 		}
-		else if ( action == 1 ) {
+		else if ( action == "count" ) {
 			actor.send(bld+"Enter item amount: "+nrm);
 		}
-		else if ( action == 2 ) {
+		else if ( action == "loadPercent" ) {
 			actor.send(bld+"Enter item load percent: "+nrm);
 		}
 		else if ( action == 3 ) {
