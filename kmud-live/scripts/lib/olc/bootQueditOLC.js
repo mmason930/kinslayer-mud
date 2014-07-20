@@ -1440,7 +1440,7 @@ function bootQueditOLC()
 		for ( var i = 0; i < itemReward.length; i++ ) {
 			var slot = itemReward[i];
 			var tierCount = slot.length;
-			var id = slot.id;
+			var id = slot.id || "Unnamed Slot";
 			var s = (tierCount == 1 ? "" : "s");
 			actor.send(grn+(i+1)+nrm+") "+cyn+slot.id+nrm+bld+" ["+tierCount+" item"+s+"]"+nrm);
 		}
