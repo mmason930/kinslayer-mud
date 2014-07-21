@@ -74,6 +74,7 @@ RewriteRule ^mining-on-darkside(.*)$		/? [L,R=301]
 RewriteRule ^mining-as-human(.*)$		/? [L,R=301]
 RewriteRule ^mud.php(.*)			/about-kinslayermud? [L,R=301]
 RewriteRule ^mud-applet(.*) 			/mud-client/mud-client.php? [L,R=301]
+RewriteRule ^mudclient/mudclient.php(.*)$	/mudclient/mudclient.html [L,QSA,R=301]
 RewriteRule ^mud-clients(.*)$			/? [L,R=301]
 RewriteRule ^moving-around(.*)$			/? [L,R=301]
 
@@ -97,6 +98,8 @@ RewriteRule ^player-portal(.*)$				./PlayerPortalSignInMenu.do$1 [QSA,L]
 RewriteRule ^player-trades(.*)$				./TradesIntroduction.do$1 [QSA,L]
 
 RewriteRule ^quickguide.php(.*)			/about-kinslayermud? [L,R=301]
+
+RewriteRule ^play(.*)$					/mudclient/mudclient.html [L,QSA]
 
 RewriteRule ^ranger-skills/(.*)$		/? [L,R=301]
 RewriteRule ^ranger-skills(.*)$			/? [L,R=301]
