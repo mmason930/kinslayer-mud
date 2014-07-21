@@ -359,10 +359,14 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 	{
 		try
 		{
+			MudLog(BRF, -1, TRUE, "Clearing subversion info map.");
 			subversionInfoMap.clear();
+			MudLog(BRF, -1, TRUE, "Obtaining subversion info map.");
 			subversionInfoMap = SystemUtil::getSubversionInfoMap(repositoryUrl);
 
 			std::string revisionString = subversionInfoMap["Revision"];
+
+			MudLog(BRF, -1, TRUE, "Revision String `%s`", revisionString.c_str());
 
 			if(revisionString.empty())
 			{
@@ -378,9 +382,11 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 
 				if(revision != lastUpdatedRevision)
 				{
-					MudLog(BRF, LVL_BLDER, TRUE, "New revision %d found. Old revision was %d.", revision, lastUpdatedRevision);
+					MudLog(BRF, -1, TRUE, "New revision %d found. Old revision was %d.", revision, lastUpdatedRevision);
 
 					std::string svnUpdateOutput = SystemUtil::processCommand(std::string("svn update ") + scriptsDirectory);
+
+					MudLog(BRF, -1, TRUE, "SVN Update Output: `%s`", svnUpdateOutput.c_str());
 
 					sql::BatchInsertStatement batchInsertStatement(connection, "scriptImportQueue", 1000);
 				
@@ -396,6 +402,7 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 
 					for(std::string line : outputLines)
 					{
+						MudLog(BRF, -1, TRUE, "Processing line: `%s`", line.c_str());
 						boost::match_results<std::string::const_iterator> what;
 						std::string::const_iterator start = line.begin(), end = line.end();
 						if(boost::regex_search(start, end, what, filePathExpression, boost::match_default))
@@ -441,6 +448,7 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 						}
 					}
 				
+					MudLog(BRF, -1, TRUE, "Number Of Files: %d", numberOfFiles);
 					if(numberOfFiles > 0)
 					{
 						batchInsertStatement.finish();

@@ -433,6 +433,7 @@ flusspferd::object makeConstants()
 	o.set_property("APPLY_RACE", flusspferd::value(APPLY_RACE));
 
 	o.set_property("COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL", COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL);
+	o.set_property("EXP_MULTIPLIER", Conf->play.ExpMultiplier);
 
 	return o;
 }

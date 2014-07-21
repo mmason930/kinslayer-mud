@@ -622,8 +622,8 @@ void MudLog(int type, int level, int file, const char *str, ...)
 	va_list args;
 
 	va_start(args, str);
-	//	vsnprintf(format, sizeof(format), str, args);
-	vsprintf(format, str, args);
+	vsnprintf(format, sizeof(format), str, args);
+	//vsprintf(format, str, args);
 	va_end(args);
 
 	if (file)
