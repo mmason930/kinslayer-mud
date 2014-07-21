@@ -226,6 +226,7 @@ const int MOB_TRADE_TRAINER = 24; //Mob will teach trade skills(mining,fishing,s
 const int MOB_NOTRACK = 25; //Mob will not lay tracks.
 const int MOB_NOGROUP = 26; //Mob cannot be grouped.
 const int MOB_OGIER_MOUNT = 27; //Mob is an ogier horse
+const int MOB_SMOB_FOLLOWER = 28; //Mob follows a SMOB leader or is otherwise related to a SMOB.
 
 
 /* Preference flags: used by class Character.player_specials.pref					*/

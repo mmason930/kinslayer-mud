@@ -91,6 +91,7 @@ flusspferd::object makeConstants()
 	o.set_property("MOB_NOTRACK", flusspferd::value(MOB_NOTRACK));
 	o.set_property("MOB_NOGROUP", flusspferd::value(MOB_NOGROUP));
 	o.set_property("MOB_OGIER_MOUNT", flusspferd::value(MOB_OGIER_MOUNT));
+	o.set_property("MOB_SMOB_FOLLOWER", flusspferd::value(MOB_SMOB_FOLLOWER));
 
 
 	o.set_property("SEX_NEUTRAL", flusspferd::value(SEX_NEUTRAL));

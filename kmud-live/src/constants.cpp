@@ -238,7 +238,7 @@ const char * weather_storm_names[] =
 
 /* MOB_x */
 const char *action_bits[] = {
-                          "SPEC",					//0
+                          "SPEC",				//0
                           "SENTINEL",
                           "SCAVENGER",
                           "ISNPC",
@@ -253,7 +253,7 @@ const char *action_bits[] = {
                           "TRACK",
                           "BASH",
                           "AWARD",
-                          "SHADOW_MOUNT",			//15
+                          "SHADOW_MOUNT",		//15
                           "NOFIGHT",
                           "INVIS",
                           "GHOST",
@@ -263,9 +263,10 @@ const char *action_bits[] = {
 						  "POKER DEALER",
 						  "SMOB LEADER",
 						  "TRADE TRAINER",
-						  "!TRACK",
+						  "!TRACK",				//25
 						  "!GROUP",
 						  "OGIER_MOUNT",
+						  "SMOB FOLLOWER",
                           "\n"
                       };
 

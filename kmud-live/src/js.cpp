@@ -334,6 +334,14 @@ void JSManager::monitorScriptImportTable(sql::Connection connection)
 	}
 }
 
+void printSubversionInfoMap(const std::map<std::string, std::string> &subversionInfoMap)
+{
+	for(auto iter = subversionInfoMap.begin();iter != subversionInfoMap.end();++iter)
+	{
+		MudLog(BRF, LVL_APPR, TRUE, "subversionInfoMap[\"%s\"] = `%s`", (*iter).first.c_str(), (*iter).second.c_str());
+	}
+}
+
 void JSManager::monitorSubversion(sql::Connection connection, const std::string &repositoryUrl)
 {
 	std::string filePathPattern = "^([UDA])\\s+(.*?)$";
@@ -345,22 +353,24 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 	boost::regex atRevisionExpression(atRevisionPattern.c_str());
 
 	std::string scriptsDirectory = "scripts/";
+	std::map<std::string, std::string> subversionInfoMap;
 
 	while(monitorSubversionThreadRunning)
 	{
 		try
 		{
-			std::map<std::string, std::string> subversionInfoMap = SystemUtil::getSubversionInfoMap(repositoryUrl);
+			subversionInfoMap.clear();
+			subversionInfoMap = SystemUtil::getSubversionInfoMap(repositoryUrl);
 
 			std::string revisionString = subversionInfoMap["Revision"];
 
 			if(revisionString.empty())
 			{
-				Log("Could not determine revision!");
+				MudLog(BRF, LVL_BLDER, TRUE, "Could not determine revision!");
 			}
 			else if(!MiscUtil::isInt(revisionString))
 			{
-				Log("Revision `%s` is not a valid integer.", revisionString.c_str());
+				MudLog(BRF, LVL_BLDER, TRUE, "Revision `%s` is not a valid integer.", revisionString.c_str());
 			}
 			else
 			{
@@ -368,7 +378,7 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 
 				if(revision != lastUpdatedRevision)
 				{
-					Log("New revision %d found. Old revision was %d.", revision, lastUpdatedRevision);
+					MudLog(BRF, LVL_BLDER, TRUE, "New revision %d found. Old revision was %d.", revision, lastUpdatedRevision);
 
 					std::string svnUpdateOutput = SystemUtil::processCommand(std::string("svn update ") + scriptsDirectory);
 
@@ -395,7 +405,7 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 
 							if(boost::filesystem::is_directory(fileName))
 							{
-								Log("Skipping Directory `%s`...", fileName.c_str());
+								MudLog(BRF, LVL_BLDER, TRUE, "Skipping Directory `%s`...", fileName.c_str());
 								continue;
 							}
 						
@@ -412,7 +422,7 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 
 							++numberOfFiles;
 
-							Log("Update Type: %s, File Name: %s", updateType.c_str(), fileName.c_str());
+							MudLog(BRF, LVL_BLDER, TRUE, "Update Type: %s, File Name: %s", updateType.c_str(), fileName.c_str());
 						}
 
 						if( boost::regex_search(start, end, what, updatedRevisionExpression, boost::match_default) ||
@@ -422,7 +432,7 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 
 							if(!MiscUtil::isInt(revisionString))
 							{
-								Log("Error: Revision found while doing SVN update was not a valid integer. Revision found: `%s`", revisionString.c_str());
+								MudLog(BRF, LVL_BLDER, TRUE, "Error: Revision found while doing SVN update was not a valid integer. Revision found: `%s`", revisionString.c_str());
 							}
 							else
 							{
@@ -436,7 +446,7 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 						batchInsertStatement.finish();
 					}
 
-					Log("Updated to revision %d.", lastUpdatedRevision);
+					MudLog(BRF, LVL_BLDER, TRUE, "Updated to revision %d.", lastUpdatedRevision);
 				}
 			}
 
@@ -445,10 +455,17 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 		catch(std::exception e)
 		{
 			MudLog(BRF, LVL_APPR, TRUE, "Exception in subversion monitoring thread: %s", e.what());
+			printSubversionInfoMap(subversionInfoMap);
+		}
+		catch(sql::QueryException e)
+		{
+			MudLog(BRF, LVL_APPR, TRUE, "SQL Exception in subversion monitoring thread: %s", e.getMessage().c_str());
+			printSubversionInfoMap(subversionInfoMap);
 		}
 		catch(...)
 		{
 			MudLog(BRF, LVL_APPR, TRUE, "Unknown exception thrown in subversion monitoring thread.");
+			printSubversionInfoMap(subversionInfoMap);
 		}
 	}
 }
