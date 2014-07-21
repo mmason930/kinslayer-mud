@@ -6,4 +6,4 @@ var script19569 = function(self, actor, here, args, extra) {
 	actor.comm("look");
 	here.echo("A cloud of smoke fills the room!");
 	self.extract();
-};////
+};//////
