@@ -1,4 +1,5 @@
 var aldertest = function(self, actor, here, args, extra) {
+	_block;
 	// actor.lockAchievement(53);
 	// actor.lockAchievement(54);
 	// actor.lockTitle("Ghob'hlin","normal",53);
