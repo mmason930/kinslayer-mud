@@ -34,6 +34,8 @@ var script13224 = function(self, actor, here, args, extra) {
 			return;
 		}
 
+		getCharCols(actor);
+
 		if (self.class == constants.CLASS_THIEF && actor.class == constants.CLASS_THIEF && actor.getSkill(constants.SKILL_SHORT_BLADE) == 0) {
 
 			self.say("You are a thief, " + actor.name + ", one of my kind. I recommend you " + bld + cyn + "PRACTICE SHORT BLADES" + nrm);
