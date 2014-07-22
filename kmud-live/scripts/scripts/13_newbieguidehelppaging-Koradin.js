@@ -34,7 +34,7 @@ var script13 = function(self, actor, here, args, extra) {
 	{
 		getCharCols(actor);
 		actor.send(red + "That is not a valid choice." + nrm);
-
+//
 		setTimeout(3, function() {
 
 			var helpFile = global.helpManager.getCurrentFile(actor);

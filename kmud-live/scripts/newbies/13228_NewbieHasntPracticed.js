@@ -17,7 +17,7 @@ var script13228 = function(self, actor, here, args, extra) {
 			return;
 
 		getCharCols(actor);
-		
+
 		waitpulse 1;
 		actor.send(bld + red + "You are leaving the main area of the village without fully training your skills." + nrm);
 		actor.send(bld + red + "Return " + bld + cyn + dirToText(extra.direction).toUpperCase() + bld + red + " to practice your skills." + nrm);
