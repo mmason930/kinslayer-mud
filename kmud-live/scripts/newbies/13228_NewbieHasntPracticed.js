@@ -1,7 +1,7 @@
 var script13228 = function(self, actor, here, args, extra) {
 
 	here.echo("Test");
-	if(actor.level == 1 && actor.getSkillPractices() >= 6)
+	if(actor.level == 1 && actor.skillPractices >= 6)
 	{
 		here.echo("Dir: " + extra.dir);
 		getCharCols(actor);
