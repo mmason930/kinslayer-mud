@@ -40,8 +40,8 @@ var script13224 = function(self, actor, here, args, extra) {
 		}
 		else if(self.class == constants.CLASS_WARRIOR)
 		{
-			if(actor.class == constants.CLASS_THIEf)
-				self.say("You are a thief, " + actor.name + ". While you may want to learn some of my skills, you should really go see a thief trainer. They will know how to train your kind!");
+			if(actor.class == constants.CLASS_THIEF)
+				self.say("You are a thief, " + actor.name + ". While you may want to learn some of my skills, you should really go see a thief trainer west of here. They will know how to train your kind!");
 			else
 			{
 
