@@ -772,12 +772,17 @@ ACMD( do_get )
 {
 	char arg1[ MAX_INPUT_LENGTH ];
 	char arg2[ MAX_INPUT_LENGTH ];
+	std::string originalArg1;
 
 	int cont_dotmode, found = 0, mode;
 	Object *cont;
 	Character *tmp_char;
 
+	Log("Argument `%s`", argument);
+
 	TwoArguments( argument, arg1, arg2 );
+
+	Log("Arg1 `%s`, arg2 `%s`", arg1, arg2);
 
 	if ( IS_CARRYING_N( ch ) >= CAN_CARRY_N( ch ) )
 		ch->send( "Your arms are already full!\r\n" );
@@ -787,9 +792,12 @@ ACMD( do_get )
 		get_from_room( ch, arg1 );
 	else
 	{
+		originalArg1 = arg1;
 		cont_dotmode = find_all_dots( arg2 );
 
-		if ( cont_dotmode == FIND_INDIV || FIND_OBJ_EQUIP )
+		Log("Dot Mode: %d Arg2 `%s`", cont_dotmode, arg2);
+
+		if ( cont_dotmode == FIND_INDIV )
 		{
 			mode = generic_find( arg2, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP, ch, &tmp_char, &cont );
 
@@ -805,12 +813,14 @@ ACMD( do_get )
 
 		else
 		{
+			Log("Processing All Dot.");
 			if ( cont_dotmode == FIND_ALLDOT && !*arg2 )
 			{
 				ch->send( "Get from all of what?\r\n" );
 				return ;
 			}
 
+			Log("About to go through inventory. arg1 `%s`", arg1);
 			for ( cont = ch->carrying; cont; cont = cont->next_content )
 				if ( CAN_SEE_OBJ( ch, cont ) && ( cont_dotmode == FIND_ALL || isname( arg2, cont->getName() ) ) )
 				{
@@ -818,6 +828,7 @@ ACMD( do_get )
 					{
 						found = 1;
 						get_from_container( ch, cont, arg1, FIND_OBJ_INV );
+						snprintf(arg1, sizeof(arg1), "%s", originalArg1.c_str());
 					}
 					else if ( cont_dotmode == FIND_ALLDOT )
 					{
@@ -825,13 +836,17 @@ ACMD( do_get )
 						Act( "$p is not a container.", FALSE, ch, cont, 0, TO_CHAR );
 					}
 				}
+
+				Log("About to go through room contents. Arg1 `%s`");
 			for ( cont = ch->in_room->contents; cont; cont = cont->next_content )
 			{
 				if ( ( cont_dotmode == FIND_ALL || isname( arg2, cont->getName() ) ) )
 				{
+					Log("Passed test with item on ground: %s", cont->short_description);
 					if (  cont ->getType() == ITEM_CONTAINER )
 					{
 						get_from_container( ch, cont, arg1, FIND_OBJ_ROOM );
+						snprintf(arg1, sizeof(arg1), "%s", originalArg1.c_str());
 						found = 1;
 					}
 
@@ -841,6 +856,8 @@ ACMD( do_get )
 						found = 1;
 					}
 				}
+				else
+					Log("Failed test with item on ground. Item: %s", cont->short_description);
 			}
 
 			if ( !found )
