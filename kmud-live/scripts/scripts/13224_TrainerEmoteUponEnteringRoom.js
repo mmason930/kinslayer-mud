@@ -62,19 +62,19 @@ var script13224 = function(self, actor, here, args, extra) {
 					return item.type == constants.ITEM_WEAPON;
 				});
 
-				if(weapon)
+				if(weaponWielded)
 				{
-					if(weapon.value(0) == constants.WEAPON_SHORT_BLADE) {
+					if(weaponWielded.value(0) == constants.WEAPON_SHORT_BLADE) {
 						self.say("I see that you are wielding a short blade, " + actor.name + ". Short blades are a thief's tool. You should use another weapon instead!");
 						return;
 					}
 					else
 					{
-						var weaponData = weaponTypeToData[ weapon.value(0) ];
+						var weaponData = weaponTypeToData[ weaponWielded.value(0) ];
 
 						if(!weaponData)
 						{
-							mudLog(constants.BRF, 100, "Unknown weapon type `" + weapon.value(0) + "` for item #" + weapon.value + ". script13224.");
+							mudLog(constants.BRF, 100, "Unknown weapon type `" + weaponWielded.value(0) + "` for item #" + weaponWielded.value(0) + ". script13224.");
 							return;
 						}
 
