@@ -1,5 +1,4 @@
-var script41 = function(self, actor, here, args, extra) {
-	_block;
+var alderTest = function(self, actor, here, args, extra) {
 	// actor.lockAchievement(53);
 	// actor.lockAchievement(54);
 	// actor.lockTitle("Ghob'hlin","normal",53);
@@ -33,13 +32,5 @@ var script41 = function(self, actor, here, args, extra) {
 	// var unlocked = sqlQuery("SELECT * FROM userAchievement WHERE player_name='"+sqlEsc(actor.name)+"' && achievement_vnum="+sqlEsc(73)+";").hasNextRow;
 	// here.echo(unlocked);
 	
-	var strQName = "Quest Alpha";
-	var status = "New quest";
-	
-	actor.send(
-		actor.yellow(constants.CL_OFF) + actor.bold(constants.CL_OFF) + 
-		"Journal Updated -- Quest: '" + strQName + "' -- " +
-		actor.cyan(constants.CL_OFF) + status + actor.normal(constants.CL_OFF) );
-	
-	
+	actor.send(this.name);
 }
