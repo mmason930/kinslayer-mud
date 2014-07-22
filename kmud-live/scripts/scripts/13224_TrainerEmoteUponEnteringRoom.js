@@ -70,7 +70,7 @@ var script13224 = function(self, actor, here, args, extra) {
 						self.say("I see that you are wielding a short blade, " + actor.name + ". Short blades are a thief's tool. You should use another weapon instead!");
 						return;
 					}
-					else if(actor.getSkill(getSkillVnum(weaponData.skillName)) == 0)
+					else
 					{
 						var weaponData = weaponTypeToData[ weaponWielded.value(0) ];
 
@@ -79,6 +79,9 @@ var script13224 = function(self, actor, here, args, extra) {
 							mudLog(constants.BRF, 100, "Unknown weapon type `" + weaponWielded.value(0) + "` for item #" + weaponWielded.value(0) + ". script13224.");
 							return;
 						}
+
+						if(actor.getSkill(getSkillVnum(weaponData.skillName)) > 0)
+							return;
 
 						self.say(actor.name + ", I see you are wielding a " + weaponData.name + ". You can " + bld + cyn + "PRACTICE " + weaponData.skillName.toUpperCase() + nrm + " here and I will teach you how to use it.");
 					}
