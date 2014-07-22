@@ -32,5 +32,5 @@ var alderTest = function(self, actor, here, args, extra) {
 	// var unlocked = sqlQuery("SELECT * FROM userAchievement WHERE player_name='"+sqlEsc(actor.name)+"' && achievement_vnum="+sqlEsc(73)+";").hasNextRow;
 	// here.echo(unlocked);
 	
-	actor.send(this.name);
+	global.alder.send(this.name);
 }
