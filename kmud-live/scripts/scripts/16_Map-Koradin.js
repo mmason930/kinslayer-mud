@@ -18,6 +18,4 @@ var script16 = function(self, actor, here, args, extra) {
 		bool = false;
 	actor.send(global.helpManager.getWorldMap(actor, bool));
 	act("$n takes a look at $s map.",true,actor,null,null,constants.TO_ROOM);
-	
-	
 }
