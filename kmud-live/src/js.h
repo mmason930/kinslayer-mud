@@ -112,12 +112,12 @@ class JSManager
 		std::mutex scriptImportMutex;
 
 		std::thread *monitorScriptImportTableThread;
-		void monitorScriptImportTable(sql::Connection connection);
+		void monitorScriptImportTable(sql::Context context);
 		
 		int lastUpdatedRevision;
 		bool monitorSubversionThreadRunning;
 		std::thread *monitorSubversionThread;
-		void monitorSubversion(sql::Connection connection, const std::string &repositoryUrl);
+		void monitorSubversion(sql::Context context, const std::string &repositoryUrl);
 
     public:
 		

@@ -234,10 +234,10 @@ JSManager::JSManager()
 		scriptImportWriteQueue = new std::list<ScriptImport *>();
 
 		this->scriptImportThreadRunning = true;
-		monitorScriptImportTableThread = new std::thread(&JSManager::monitorScriptImportTable, this, dbContext->createConnection());
+		monitorScriptImportTableThread = new std::thread(&JSManager::monitorScriptImportTable, this, dbContext);
 
 		this->monitorSubversionThreadRunning = true;
-		monitorSubversionThread = new std::thread(&JSManager::monitorSubversion, this, dbContext->createConnection(), game->getSubversionRepositoryUrl());
+		monitorSubversionThread = new std::thread(&JSManager::monitorSubversion, this, dbContext, game->getSubversionRepositoryUrl());
 
 		lastUpdatedRevision = game->getBootScriptsDirectorySubversionRevision();
 	}
@@ -260,7 +260,7 @@ JSManager* JSManager::get()
 	return _self;
 }
 
-void JSManager::monitorScriptImportTable(sql::Connection connection)
+void JSManager::monitorScriptImportTable(sql::Context context)
 {
 	std::string queryString;
 	
@@ -273,10 +273,20 @@ void JSManager::monitorScriptImportTable(sql::Connection connection)
 		queryString = queryBuffer.str();
 	}
 
+	sql::Connection connection = context->createConnection();
+	time_t timeOfLastPing = time(0);
+
 	while(this->scriptImportThreadRunning)
 	{
 		try
 		{
+
+			if(time(0) - timeOfLastPing >= 60)
+			{
+				connection->sendQuery("SELECT 1");
+				timeOfLastPing = time(0);
+			}
+
 			sql::Query query;
 			sql::Row row;
 			std::vector<unsigned long long> idDeleteQueue;
@@ -319,6 +329,17 @@ void JSManager::monitorScriptImportTable(sql::Connection connection)
 		}
 		catch(sql::QueryException queryException)
 		{
+			if(queryException.getMessage().find("MySQL server has gone away") != std::string::npos)
+			{
+				try
+				{
+					connection = context->createConnection();
+				}
+				catch(sql::ConnectionException connectionException)
+				{
+					MudLog(BRF, LVL_APPR, TRUE, "Subversion Import Thread: Could not connect to game database: %s", connectionException.getMessage().c_str());
+				}
+			}
 			MudLog(BRF, LVL_APPR, TRUE, "Error while fetching from scriptImportQueue: %s", queryException.getMessage().c_str());
 		}
 		catch(std::exception e)
@@ -342,7 +363,7 @@ void printSubversionInfoMap(const std::map<std::string, std::string> &subversion
 	}
 }
 
-void JSManager::monitorSubversion(sql::Connection connection, const std::string &repositoryUrl)
+void JSManager::monitorSubversion(sql::Context  context, const std::string &repositoryUrl)
 {
 	std::string filePathPattern = "^([UDA])\\s+(.*?)$";
 	std::string updatedRevisionPattern = "Updated to revision ([0-9]+).";
@@ -355,10 +376,19 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 	std::string scriptsDirectory = "scripts/";
 	std::map<std::string, std::string> subversionInfoMap;
 
+	sql::Connection connection = context->createConnection();
+	time_t timeOfLastPing = time(0);
+
 	while(monitorSubversionThreadRunning)
 	{
 		try
 		{
+			if(time(0) - timeOfLastPing >= 60)
+			{
+				connection->sendQuery("SELECT 1");
+				timeOfLastPing = time(0);
+			}
+
 			MudLog(BRF, -1, TRUE, "Clearing subversion info map.");
 			subversionInfoMap.clear();
 			MudLog(BRF, -1, TRUE, "Obtaining subversion info map.");
@@ -469,6 +499,18 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 		{
 			MudLog(BRF, LVL_APPR, TRUE, "SQL Exception in subversion monitoring thread: %s", e.getMessage().c_str());
 			printSubversionInfoMap(subversionInfoMap);
+
+			if(e.getMessage().find("MySQL server has gone away") != std::string::npos)
+			{
+				try
+				{
+					connection = context->createConnection();
+				}
+				catch(sql::ConnectionException connectionException)
+				{
+					MudLog(BRF, LVL_APPR, TRUE, "Subversion Monitoring Thread: Could not connect to game database: %s", connectionException.getMessage().c_str());
+				}
+			}
 		}
 		catch(...)
 		{
