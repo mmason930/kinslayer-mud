@@ -36,7 +36,7 @@ var script13224 = function(self, actor, here, args, extra) {
 
 		getCharCols(actor);
 
-		if (self.class == constants.CLASS_THIEF && actor.class == constants.CLASS_THIEF && actor.getSkill(constants.SKILL_SHORT_BLADE) == 0) {
+		if (self.class == constants.CLASS_THIEF && actor.class == constants.CLASS_THIEF && actor.getSkill(getSkillVnum("Short Blades")) == 0) {
 
 			self.say("You are a thief, " + actor.name + ", one of my kind. I recommend you " + bld + cyn + "PRACTICE SHORT BLADES" + nrm);
 		}
@@ -70,7 +70,7 @@ var script13224 = function(self, actor, here, args, extra) {
 						self.say("I see that you are wielding a short blade, " + actor.name + ". Short blades are a thief's tool. You should use another weapon instead!");
 						return;
 					}
-					else
+					else if(actor.getSkill(getSkillVnum(weaponData.skillName)) == 0)
 					{
 						var weaponData = weaponTypeToData[ weaponWielded.value(0) ];
 
