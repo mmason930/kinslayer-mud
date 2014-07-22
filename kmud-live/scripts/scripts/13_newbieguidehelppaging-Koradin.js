@@ -33,7 +33,16 @@ var script13 = function(self, actor, here, args, extra) {
 	if (isNaN(vArgs[0]) || vArgs[0] < 1 || vArgs[0] > childrenFiles.length)
 	{
 		getCharCols(actor);
-		actor.send(red+"That is not a valid choice."+nrm);
+		actor.send(red + "That is not a valid choice." + nrm);
+
+		setTimeout(3, function() {
+
+			var helpFile = global.helpManager.getCurrentFile(actor);
+
+			if(helpFile != null) {
+				global.helpManager.getHelpPage(actor, helpFile);
+			}
+		});
 		return;
 	}
 	
