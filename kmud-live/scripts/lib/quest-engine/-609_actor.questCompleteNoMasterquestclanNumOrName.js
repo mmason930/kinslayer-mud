@@ -50,15 +50,14 @@ JSCharacter.prototype.questCompleteNoMaster = function (quest, clanNum) {
 		this.send("You have not yet completed this quest. You still have work to do.");
 		this.send(" ");
 		this.send(this.cyan(constants.CL_OFF) + "1" + this.normal(constants.CL_OFF) + ")  You may want to check your " + this.bold(constants.CL_OFF) + "quest journal" + this.normal(constants.CL_OFF) + " by typing '" + this.cyan(constants.CL_OFF) + "read journal" + this.normal(constants.CL_OFF) + "'.");
-		this.send(this.cyan(constants.CL_OFF) + "3" + this.normal(constants.CL_OFF) + ")  Remember to check the tasks in your journal to see if you are\n    ready to complete a quest.");
+		this.send(this.cyan(constants.CL_OFF) + "2" + this.normal(constants.CL_OFF) + ")  Remember to check the tasks in your journal to see if you are\n    ready to complete a quest.");
 		return;
 	}
 	//At this point, we know the this has completed the quest. Be sure to extract all of the items that were required.
 	var actor = this;
 	for (var i = 0; i < quest.dialogue.length; i++) {
 		var line = quest.dialogue[i];
-		if (line.pulses == '-1' || line.pulses == -1) {
-			this.send(line.handle);
+		if (line.pulses == '-2' || line.pulses == -2) {
 			eval(line.handle);
 		}
 	}
