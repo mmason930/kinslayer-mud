@@ -6,7 +6,7 @@ var script13228 = function(self, actor, here, args, extra) {
 			13233: constants.SOUTH,
 			13247: constants.WEST,
 			13338: constants.EAST
-		}
+		};
 
 		var directionRequired = directionMap[here.vnum];
 
@@ -17,8 +17,10 @@ var script13228 = function(self, actor, here, args, extra) {
 			return;
 
 		getCharCols(actor);
+		
+		waitpulse 1;
 		actor.send(bld + red + "You are leaving the main area of the village without fully training your skills." + nrm);
-		actor.send(bld + red + "Return " + bld + cyn + dirToText(revDir(extra.direction)).toUpperCase() + bld + red + " to practice your skills." + nrm);
+		actor.send(bld + red + "Return " + bld + cyn + dirToText(extra.direction).toUpperCase() + bld + red + " to practice your skills." + nrm);
 		actor.send(bld + red + "If you have trouble finding the trainers, be sure to " + bld + cyn + "READ MAP" + nrm + ".");
 	}
 };
