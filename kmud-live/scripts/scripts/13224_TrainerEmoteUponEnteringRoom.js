@@ -78,7 +78,7 @@ var script13224 = function(self, actor, here, args, extra) {
 							return;
 						}
 
-						self.say("I see you are wielding a " + weaponData.name + ". You can train in that weapon here by entering " + bld + cyn + "PRACTICE " + weaponData.skillName.toUpperCase() + nrm);
+						self.say(actor.name + ", I see you are wielding a " + weaponData.name + ". You can " + bld + cyn + "PRACTICE " + weaponData.skillName.toUpperCase() + nrm + " here and I will teach you how to use it.");
 					}
 				}
 			}
