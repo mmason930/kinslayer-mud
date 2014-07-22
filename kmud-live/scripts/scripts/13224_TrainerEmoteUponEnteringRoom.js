@@ -56,7 +56,7 @@ var script13224 = function(self, actor, here, args, extra) {
 				weaponTypeToData[constants.WEAPON_SPEAR] = {name: "spear", skillName: "spears"};
 				weaponTypeToData[constants.WEAPON_LANCE] = {name: "lance", skillName: "lances"};
 				weaponTypeToData[constants.WEAPON_CHAIN] = {name: "chain", skillName: "chains"};
-				weaponTypeToData[constants.WEAPON_LANCE] = {name: "lance", skillName: "lances"};
+				weaponTypeToData[constants.WEAPON_LANCE] = {name: "lance", skillName: "lance"};
 
 				//Figure out which weapon they are most likely to use.
 				var weaponWielded = actor.eq(constants.WEAR_WIELD);
