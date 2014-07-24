@@ -355,7 +355,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 	var aMob = getMobAtRoom(20800, 20804);
 	var damaneZones = [];
 	if(aMob){
-		sendKoradin("pushing svals");
+		actor.send("pushing svals");
 		damaneZones.push(parseInt(getSval(aMob, 20980, 1122)));
 		damaneZones.push(parseInt(getSval(aMob, 20980, 1123)));
 		damaneZones.push(parseInt(getSval(aMob, 20980, 1124)));
@@ -363,7 +363,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 		damaneZones.push(parseInt(getSval(aMob, 20980, 1126)));
 		damaneZones.push(parseInt(getSval(aMob, 20980, 1127)));
 	}
-	sendKoradin(damaneZones.join(" "));
+	actor.send("zones: "+damaneZones.join(" "));
 	var buffer = "";
 	if (actor.quest("MapLegend") != 2 || bool == true)
 		var limit = 13;
@@ -378,7 +378,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 			for (var _autoKey in rooms) {
 				var r = rooms[_autoKey];
 				if(arrContains(damaneZones,r[4])){
-					sendKoradin("damane zone");
+					actor.send("damane zone");
 					var hlColor = bld+grn;
 				}else if(r[5]){
 					var hlColor = r[5];
@@ -467,7 +467,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 			for (var _autoKey in rooms) {
 				var r = rooms[_autoKey];
 				if(arrContains(damaneZones,r[4])){
-					sendKoradin("damane zone");
+					actor.send("damane zone");
 					var hlColor = bld+grn;
 				}else if(r[5]){
 					var hlColor = r[5];
