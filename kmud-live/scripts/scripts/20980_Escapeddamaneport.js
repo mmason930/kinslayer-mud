@@ -7,7 +7,7 @@ var script20980 = function(self, actor, here, args, extra) {
 		var aMob = getMobAtRoom(20800, 20804);
 		if(aMob){
 			setSval(aMob, 20980, self.vnum, newRoom.zoneVnum);
-			sendKoradin(getSval(aMob, 20980, self.vnum));
+			//sendKoradin(getSval(aMob, 20980, self.vnum));
 		}
 	}
 }
