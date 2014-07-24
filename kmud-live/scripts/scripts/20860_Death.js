@@ -18,7 +18,7 @@ var script20860 = function(self, actor, here, args, extra) {
 	if(self.vnum < 1128 && self.vnum > 1121){
 		var aMob = getMobAtRoom(20800, 20804);
 		if(aMob){
-			setSval(aMob, 20980, self.vnum, -1);
+			setSval(aMob, 20980, self.vnum, -2);
 		}
 	}	
 
