@@ -355,6 +355,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 	var aMob = getMobAtRoom(20800, 20804);
 	var damaneZones = [];
 	if(aMob){
+		sendKoradin("pushing svals");
 		damaneZones.push(parseInt(getSval(aMob, 20980, 1122)));
 		damaneZones.push(parseInt(getSval(aMob, 20980, 1123)));
 		damaneZones.push(parseInt(getSval(aMob, 20980, 1124)));
