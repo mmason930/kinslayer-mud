@@ -139,7 +139,7 @@ var script2 = function(self, actor, here, args, extra) {
 								  + "   u2.username AS receiver "
 						          + " FROM (comm c, users u)"
 								  + " LEFT JOIN users u2 ON u2.user_id=c.recipient_id "
-		                          + " WHERE u.user_id = s.sender_id"
+		                          + " WHERE u.user_id = c.sender_id"
 								  + " AND sender_type='C' "
 								  + (senderId.length > 0 ? (" AND sender_id IN ( " + senderId.join(",") + ")") : "")
 								  + (receiverId.length > 0 ? (" AND recipient_type='C' AND recipient_id IN ( " + receiverId.join(",") + ")") : "")
