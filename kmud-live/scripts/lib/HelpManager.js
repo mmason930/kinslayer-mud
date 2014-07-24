@@ -267,7 +267,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 	var count = 0;
 			//            X Y   name      vnum
 	var name          = [2,1,"   ","   ",-1, bld];
-	var name2         = [3,1," Ki"," Wo",-1, bld];
+	var name2         = [3,1," K "," Wo",-1, bld];
 	var name3         = [4,1,"nsl","rld",-1, bld];
 	var name4         = [5,1,"aye"," Ma",-1, bld];
 	var name5         = [6,1,"r  ","p  ",-1, bld];
