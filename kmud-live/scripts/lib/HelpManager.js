@@ -362,6 +362,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 		damaneZones.push(parseInt(getSval(aMob, 20980, 1125)));
 		damaneZones.push(parseInt(getSval(aMob, 20980, 1126)));
 		damaneZones.push(parseInt(getSval(aMob, 20980, 1127)));
+		var questIsOn = getSval(aMob, 20980, "active");
 	}
 	//sendKoradin("koradin test: zones: "+damaneZones.join(" "));
 	var buffer = "";
@@ -377,7 +378,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 		{
 			for (var _autoKey in rooms) {
 				var r = rooms[_autoKey];
-				if(arrContains(damaneZones,r[4])){
+				if(arrContains(damaneZones,r[4]) && questIsOn){
 					//sendKoradin("koradin test: damane zone");
 					var hlColor = bld+grn;
 				}else if(r[5]){
@@ -466,7 +467,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 			// coor.push(y);
 			for (var _autoKey in rooms) {
 				var r = rooms[_autoKey];
-				if(arrContains(damaneZones,r[4])){
+				if(arrContains(damaneZones,r[4]) && questIsOn){
 					//sendKoradin("koradin test: damane zone");
 					var hlColor = bld+grn;
 				}else if(r[5]){
