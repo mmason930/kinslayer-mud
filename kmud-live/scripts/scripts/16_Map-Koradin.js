@@ -15,6 +15,7 @@ var script16 = function(self, actor, here, args, extra) {
 		}else{
 			here.echo("Damane tracking is OFF.");
 		}
+		return;
 	}
 	if (strn_cmp(vArgs[1], "legend", 3)) {
 		var legToggle = actor.quest("MapLegend");
