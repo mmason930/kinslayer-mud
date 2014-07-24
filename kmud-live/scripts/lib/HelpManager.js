@@ -352,6 +352,16 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 			//here.echo(actor_room);
 		}
 	}
+	var aMob = getMobAtRoom(20800, 20804);
+	var damaneZones = [];
+	if(aMob){
+		damaneZones.push(parseInt(getSval(aMob, 20980, 1122)));
+		damaneZones.push(parseInt(getSval(aMob, 20980, 1123)));
+		damaneZones.push(parseInt(getSval(aMob, 20980, 1124)));
+		damaneZones.push(parseInt(getSval(aMob, 20980, 1125)));
+		damaneZones.push(parseInt(getSval(aMob, 20980, 1126)));
+		damaneZones.push(parseInt(getSval(aMob, 20980, 1127)));
+	}
 	var buffer = "";
 	if (actor.quest("MapLegend") != 2 || bool == true)
 		var limit = 13;
@@ -365,6 +375,13 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 		{
 			for (var _autoKey in rooms) {
 				var r = rooms[_autoKey];
+				if(arrContains(damaneZones(r[4]){
+					var hlColor = bld+mag;
+				}else if(r[5]){
+					var hlColor = r[5];
+				}else{
+					var hlColor = nrm;
+				}
 				if (x == 7 && y == 6 && actor.room.zoneVnum == 12 && count < 1) {
 					buffer += yel+bld+"  X"+nrm;
 					count += 1;
@@ -401,10 +418,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 				}
 				else if (r[0] == x && r[1] == y)
 				{
-					if (r[5])
-						buffer += r[5]+r[2]+nrm;
-					else
-						buffer += r[2];
+					buffer += hlColor + r[2] + nrm;
 					count += 1;
 				}
 			}
@@ -449,6 +463,13 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 			// coor.push(y);
 			for (var _autoKey in rooms) {
 				var r = rooms[_autoKey];
+				if(arrContains(damaneZones(r[4]){
+					var hlColor = bld+mag;
+				}else if(r[5]){
+					var hlColor = r[5];
+				}else{
+					var hlColor = nrm;
+				}
 				if (x == 6 && y == 8 && actor.room.zoneVnum == 14 && count < 1) {
 					buffer += yel+bld+"X  "+nrm;
 					count += 1;
@@ -483,10 +504,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 				}
 				else if (r[0] == x && r[1] == y)
 				{
-					if (r[5])
-						buffer += r[5]+r[3]+nrm;
-					else
-						buffer += r[3];
+					buffer += hlColor + r[3] + nrm;
 					count += 1;
 				}
 			}
