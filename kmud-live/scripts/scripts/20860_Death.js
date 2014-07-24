@@ -14,6 +14,14 @@ var script20860 = function(self, actor, here, args, extra) {
 		actor.loadObj(meats[random(0,meats.length-1)]);
 	}
 	
+	// Damane global event July 2014
+	if(self.vnum < 1128 && self.vnum > 1121){
+		var aMob = getMobAtRoom(20800, 20804);
+		if(aMob){
+			setSval(aMob, 20980, self.vnum, -1);
+		}
+	}	
+
 	//Emoticon Quest
 	if(actor.vnum == 50 || actor.vnum == 51 || actor.vnum == 56 || actor.vnum == 57 || actor.vnum == 58 && self.vnum == -1)
 	{
