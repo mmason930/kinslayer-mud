@@ -1,5 +1,6 @@
 var script20980 = function(self, actor, here, args, extra) {
-	var newRoom = getRandomRoom();
+	var roomArr = [81, 10, 333, 80, 85, 20, 332, 18, 66, 181, 206, 193, 64, 17, 93, 19, 334, 103, 70, 100, 3, 1, 70, 214, 217, 4, 31, 201, 9, 230, 235, 100, 186, 53, 101, 102, 45, 134, 132];
+	var newRoom = roomArr[random(0,roomArr.length-1)];
 	if(newRoom && !self.isBashed){
 		act(self.name+" disappears in a flash of bright light.",true,self,null,null,constants.TO_ROOM);
 		self.moveToRoom(newRoom);
