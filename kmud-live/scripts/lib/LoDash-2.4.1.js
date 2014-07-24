@@ -5334,20 +5334,20 @@
 
 		/**
 		 * Creates a function that will delay the execution of `func` until after
-		 * `wait` milliseconds have elapsed since the last time it was invoked.
+		 * `wayt` milliseconds have elapsed since the last time it was invoked.
 		 * Provide an options object to indicate that `func` should be invoked on
-		 * the leading and/or trailing edge of the `wait` timeout. Subsequent calls
+		 * the leading and/or trailing edge of the `wayt` timeout. Subsequent calls
 		 * to the debounced function will return the result of the last `func` call.
 		 *
 		 * Note: If `leading` and `trailing` options are `true` `func` will be called
 		 * on the trailing edge of the timeout only if the the debounced function is
-		 * invoked more than once during the `wait` timeout.
+		 * invoked more than once during the `wayt` timeout.
 		 *
 		 * @static
 		 * @memberOf _
 		 * @category Functions
 		 * @param {Function} func The function to debounce.
-		 * @param {number} wait The number of milliseconds to delay.
+		 * @param {number} wayt The number of milliseconds to delay.
 		 * @param {Object} [options] The options object.
 		 * @param {boolean} [options.leading=false] Specify execution on the leading edge of the timeout.
 		 * @param {number} [options.maxWait] The maximum time `func` is allowed to be delayed before it's called.
@@ -5371,7 +5371,7 @@
      *   'maxWait': 1000
      * }, false);
 		 */
-		function debounce(func, wait, options) {
+		function debounce(func, wayt, options) {
 			var args,
 				maxTimeoutId,
 				result,
@@ -5386,17 +5386,17 @@
 			if (!isFunction(func)) {
 				throw new TypeError;
 			}
-			wait = nativeMax(0, wait) || 0;
+			wayt = nativeMax(0, wayt) || 0;
 			if (options === true) {
 				var leading = true;
 				trailing = false;
 			} else if (isObject(options)) {
 				leading = options.leading;
-				maxWait = 'maxWait' in options && (nativeMax(wait, options.maxWait) || 0);
+				maxWait = 'maxWait' in options && (nativeMax(wayt, options.maxWait) || 0);
 				trailing = 'trailing' in options ? options.trailing : trailing;
 			}
 			var delayed = function() {
-				var remaining = wait - (now() - stamp);
+				var remaining = wayt - (now() - stamp);
 				if (remaining <= 0) {
 					if (maxTimeoutId) {
 						clearTimeout(maxTimeoutId);
@@ -5420,7 +5420,7 @@
 					clearTimeout(timeoutId);
 				}
 				maxTimeoutId = timeoutId = trailingCall = undefined;
-				if (trailing || (maxWait !== wait)) {
+				if (trailing || (maxWait !== wayt)) {
 					lastCalled = now();
 					result = func.apply(thisArg, args);
 					if (!timeoutId && !maxTimeoutId) {
@@ -5458,8 +5458,8 @@
 				if (isCalled && timeoutId) {
 					timeoutId = clearTimeout(timeoutId);
 				}
-				else if (!timeoutId && wait !== maxWait) {
-					timeoutId = setTimeout(delayed, wait);
+				else if (!timeoutId && wayt !== maxWait) {
+					timeoutId = setTimeout(delayed, wayt);
 				}
 				if (leadingCall) {
 					isCalled = true;
@@ -5496,14 +5496,14 @@
 		}
 
 		/**
-		 * Executes the `func` function after `wait` milliseconds. Additional arguments
+		 * Executes the `func` function after `wayt` milliseconds. Additional arguments
 		 * will be provided to `func` when it is invoked.
 		 *
 		 * @static
 		 * @memberOf _
 		 * @category Functions
 		 * @param {Function} func The function to delay.
-		 * @param {number} wait The number of milliseconds to delay execution.
+		 * @param {number} wayt The number of milliseconds to delay execution.
 		 * @param {...*} [arg] Arguments to invoke the function with.
 		 * @returns {number} Returns the timer id.
 		 * @example
@@ -5511,12 +5511,12 @@
 		 * _.delay(function(text) { console.log(text); }, 1000, 'later');
 		 * // => logs 'later' after one second
 		 */
-		function delay(func, wait) {
+		function delay(func, wayt) {
 			if (!isFunction(func)) {
 				throw new TypeError;
 			}
 			var args = slice(arguments, 2);
-			return setTimeout(function() { func.apply(undefined, args); }, wait);
+			return setTimeout(function() { func.apply(undefined, args); }, wayt);
 		}
 
 		/**
@@ -5664,20 +5664,20 @@
 
 		/**
 		 * Creates a function that, when executed, will only call the `func` function
-		 * at most once per every `wait` milliseconds. Provide an options object to
+		 * at most once per every `wayt` milliseconds. Provide an options object to
 		 * indicate that `func` should be invoked on the leading and/or trailing edge
-		 * of the `wait` timeout. Subsequent calls to the throttled function will
+		 * of the `wayt` timeout. Subsequent calls to the throttled function will
 		 * return the result of the last `func` call.
 		 *
 		 * Note: If `leading` and `trailing` options are `true` `func` will be called
 		 * on the trailing edge of the timeout only if the the throttled function is
-		 * invoked more than once during the `wait` timeout.
+		 * invoked more than once during the `wayt` timeout.
 		 *
 		 * @static
 		 * @memberOf _
 		 * @category Functions
 		 * @param {Function} func The function to throttle.
-		 * @param {number} wait The number of milliseconds to throttle executions to.
+		 * @param {number} wayt The number of milliseconds to throttle executions to.
 		 * @param {Object} [options] The options object.
 		 * @param {boolean} [options.leading=true] Specify execution on the leading edge of the timeout.
 		 * @param {boolean} [options.trailing=true] Specify execution on the trailing edge of the timeout.
@@ -5693,7 +5693,7 @@
      *   'trailing': false
      * }));
 		 */
-		function throttle(func, wait, options) {
+		function throttle(func, wayt, options) {
 			var leading = true,
 				trailing = true;
 
@@ -5707,10 +5707,10 @@
 				trailing = 'trailing' in options ? options.trailing : trailing;
 			}
 			debounceOptions.leading = leading;
-			debounceOptions.maxWait = wait;
+			debounceOptions.maxWait = wayt;
 			debounceOptions.trailing = trailing;
 
-			return debounce(func, wait, debounceOptions);
+			return debounce(func, wayt, debounceOptions);
 		}
 
 		/**
