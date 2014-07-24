@@ -375,7 +375,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 		{
 			for (var _autoKey in rooms) {
 				var r = rooms[_autoKey];
-				if(arrContains(damaneZones(r[4]){
+				if(arrContains(damaneZones(r[4])){
 					var hlColor = bld+mag;
 				}else if(r[5]){
 					var hlColor = r[5];
@@ -463,7 +463,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 			// coor.push(y);
 			for (var _autoKey in rooms) {
 				var r = rooms[_autoKey];
-				if(arrContains(damaneZones(r[4]){
+				if(arrContains(damaneZones(r[4])){
 					var hlColor = bld+mag;
 				}else if(r[5]){
 					var hlColor = r[5];
