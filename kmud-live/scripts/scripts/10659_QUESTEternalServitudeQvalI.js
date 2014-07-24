@@ -7,7 +7,7 @@ var script10659 = function(self, actor, here, args, extra) {
 	if( !points ) { 
 	   points = 0;
 	}
-	if ( actor.questInProgress(qName) && !actor.questTaskProgress(qName)[1].comp && here.vnum == 20624 || here.vnum == 20622 ) {
+	if ( actor.questInProgress(qName) && !actor.questTaskProgress(qName)[1].comp && (here.vnum == 20624 || here.vnum == 20622) ) {
 	   if ( points >= 2) {
 	     getCharCols(actor);     
 	     actor.send(bld+cyn+"You lay waste to the Shienaran Camp!"+nrm);
