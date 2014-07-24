@@ -362,6 +362,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 		damaneZones.push(parseInt(getSval(aMob, 20980, 1126)));
 		damaneZones.push(parseInt(getSval(aMob, 20980, 1127)));
 	}
+	sendKoradin(damaneZones.join(" "));
 	var buffer = "";
 	if (actor.quest("MapLegend") != 2 || bool == true)
 		var limit = 13;
