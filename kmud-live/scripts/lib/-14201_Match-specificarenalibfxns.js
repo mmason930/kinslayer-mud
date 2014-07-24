@@ -1,5 +1,6 @@
 //Match-specific lib fxns
 //Koradin - July 2011
+// hello 
 function resetFlag(flag, actor) { //CTF flag return
 	if (!flag)
 		return;

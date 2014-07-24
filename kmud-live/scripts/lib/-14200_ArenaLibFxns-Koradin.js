@@ -1,5 +1,5 @@
 //Arena functions
-//Koradin - June 2011
+//Koradin - June 2011 and commented in July 2014!
 function getArenaStage() { 
 	return global.arenaStage;
 }
