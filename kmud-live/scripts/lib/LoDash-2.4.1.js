@@ -9,6 +9,7 @@
  */
 ;var _ = (function() {
 
+	mudLog(constants.BRF, 100, "In Lo Dash!");
 	/** Used as a safe reference for `undefined` in pre ES5 environments */
 	var undefined;
 
