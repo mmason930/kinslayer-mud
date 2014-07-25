@@ -51,7 +51,11 @@ var script19003 = function(self, actor, here, args, extra) {
 		self.startTimer(length);
 		var success = runTimer(self);
 		if(success && actor.room == self.room) {
-			if(self.affectedBy(constants.AFF_SHIELD)){
+			var neck1 = self.eq(constants.WEAR_NECK_1);
+			if(neck1){ neck1 = neck1.vnum; }
+			var neck2 = self.eq(constants.WEAR_NECK_2);
+			if(neck2){ neck2 = neck2.vnum; }
+			if(self.affectedBy(constants.AFF_SHIELD) || neck1 == 1120 || neck2 == 1120){
 				here.echo(capFirstLetter(self.name) + " looks suprised as " + self.heShe() + " fails to reach the source.");
 				return;
 			}
