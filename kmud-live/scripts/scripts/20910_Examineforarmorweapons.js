@@ -70,6 +70,10 @@ var script20910 = function(self, actor, here, args, extra) {
 		_noblock;
 		return;
 	}
+	if (isName("quiverforbows", obj.namelist)) {
+		_noblock;
+		return;
+	}
 	if (obj.countJS(2900) > 0) {
 		_noblock;
 		return;
