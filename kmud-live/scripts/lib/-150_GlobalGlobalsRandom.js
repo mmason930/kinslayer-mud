@@ -449,6 +449,11 @@ function initGlobals()
 	global.siegeCost = 1000;
 	global.gateCost = 1000;
 	
+/** GLOBAL EVENT JULY 31, 2014 **/
+
+	global.dsAdam = null;
+	global.lsAdam = null;
+	
 }
 
 
