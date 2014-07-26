@@ -55,7 +55,7 @@ var script20860 = function(self, actor, here, args, extra) {
 			self.loadObj(rareArr[random(0,7)]);
 		var vialArr = [random(2700,2729),random(2790,2799)];
 		if (random(0,100) < 10) // load vial
-			self.loadObj(rareArr[random(0,1)]);
+			self.loadObj(vialArr[random(0,1)]);
 	}
 	if (self.vnum > 0 && self.room.zoneVnum == global.arenaZoneVnum) {
 		for (i=0;i<constants.NUM_WEARS;i++) {
@@ -94,6 +94,8 @@ var script20860 = function(self, actor, here, args, extra) {
 			self.loadObj(random(20985,20998));
 		if (random(0,100) < 20) // load spool
 			self.loadObj(random(4940,4947));
+		if (random(0,100) < 3) // load fireworks
+			self.loadObj(590);
 		/**Arena SMOB game**/
 		if (self.room.zoneVnum == global.arenaZoneVnum) { //smob died in the arena
 			global.arenaCurrentGame.totalSmobs -= 1;
