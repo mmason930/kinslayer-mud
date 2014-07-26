@@ -202,7 +202,7 @@ var script20801 = function(self, actor, here, args, extra) {
 	**/
 	
 	var item = actor.inventory[0];
-	here.echo("item: "+item.name+", rnum: "+item.id);
-	var newItem = getObjProtoByRnum(item.id);
+	here.echo("item: "+item.name+", rnum: "+item.rnum);
+	var newItem = getObjProtoByRnum(item.rnum);
 	here.echo("item: "+newItem.name);
 }
