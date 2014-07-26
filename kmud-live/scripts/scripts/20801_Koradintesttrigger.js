@@ -201,8 +201,8 @@ var script20801 = function(self, actor, here, args, extra) {
 	self.room.people[0].deletePval("rakingTimeOfLastReward",true);
 	**/
 	
-	var date = new Date();
-	here.echo(date.getDate());
-	here.echo(date.getMonth());
-	here.echo(date.getYear());
+	var item = actor.inventory[0];
+	here.echo("item: "+item.name+", rnum: "+item.id);
+	var newItem = getObjProtoByRnum(item.id);
+	here.echo("item: "+newItem.name);
 }
