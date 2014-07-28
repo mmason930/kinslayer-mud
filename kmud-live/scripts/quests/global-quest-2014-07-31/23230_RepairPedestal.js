@@ -17,7 +17,7 @@ var script23230 = function(self, actor, here, args, extra) {
 		return;
 	}
 
-	if(targetObject.vnum != global2014Util.pedestalObjectId)
+	if(targetObject.vnum != global.global2014Util.pedestalObjectId)
 	{
 		actor.send("You can't repair " + targetObject.name + "!");
 		return;
