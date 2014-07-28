@@ -121,8 +121,10 @@ var script20980 = function(self, actor, here, args, extra) {
 			}
 			if(attackArr.length > 0){
 				var target = attackArr[random(0, attackArr.length-1)];
-				self.say("Get away from me!");
-				self.comm("k "+target.name);
+				if(!self.fighting){
+					self.say("Get away from me!");
+					self.comm("k "+target.name);
+				}
 			}
 		}
 	}
