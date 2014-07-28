@@ -97,7 +97,7 @@ var script20980 = function(self, actor, here, args, extra) {
 	if(neck1){ neck1 = neck1.vnum; }
 	var neck2 = self.eq(constants.WEAR_NECK_2);
 	if(neck2){ neck2 = neck2.vnum; }
-	if(newRoom && !self.isBashed && random(1,20) == 1 && neck1 != 1120 && neck2 != 1120){
+	if(newRoom && !self.isBashed && random(1,25) == 1 && neck1 != 1120 && neck2 != 1120){
 		if(arrContains(roomArr, newRoom.zoneVnum)){
 			act(self.name+" disappears in a flash of bright light.",true,self,null,null,constants.TO_ROOM);
 			self.moveToRoom(newRoom);
@@ -111,7 +111,26 @@ var script20980 = function(self, actor, here, args, extra) {
 			global.Global2014Util.damaneZones[self.vnum] = self.room.zoneVnum;
 		}
 	}
-	function attackPCs(self, here){
+	if(self.fighting && random(0,100) < 2){ // call patrol
+		var room = here;
+		room.echo("The screaming cry of a beast can be heard from somewhere above you!");
+		wait 1;
+		if(self.room == room){
+			room.echo("A Seanchan scouting party has arrived!");
+			room.loadMob(1135);
+			var leader = room.people[0];
+			room.loadMob(10259);
+			room.people[0].comm("follow leader");
+			room.loadMob(1136);
+			room.people[0].comm("follow leader");
+			room.loadMob(1136);
+			room.people[0].comm("follow leader");
+			leader.comm("group all");
+			leader.say("There she is! Go and collect her!");
+		}
+		mudLog(2, 102, self.name+" generated a seanchan patrol in room "+self.room.vnum);
+	}
+	function attackPCs(self, here){ // aggro
 		if(self && here){
 			var attackArr = [];
 			for(var i=0;i<here.people.length;i++){
@@ -133,6 +152,29 @@ var script20980 = function(self, actor, here, args, extra) {
 	attackPCs(self, here);
 }
 
+/** PATROL AUTO RESCUE DAMANE **/
+var script20987 = function(self, actor, here, args, extra) {
+	if(global.Global2014Util){
+		function rescueDamane(self, here){
+			if(self && here){
+				var people = here.people;
+				for(var i=0;i<people.length;i++){
+					if(arrContains(global.Global2014Util.damaneVnums, people[i].vnum)){
+						if(people[i].fighting){
+							self.say("The girl must survive to be collared!");
+							self.comm("rescue damane");
+						}
+					}
+				}
+			}
+		}
+		rescueDamane(self, here);
+		wait 6;
+		rescueDamane(self, here);
+	}
+}
+
+/** LEASH DAMANE command for a'dam object **/
 var script20983 = function(self, actor, here, args, extra) {
 	if(global.Global2014Util){
 		_block;
