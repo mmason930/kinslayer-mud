@@ -453,7 +453,7 @@ function initGlobals()
 
 	global.dsAdam = null;
 	global.lsAdam = null;
-	
+	global.eventIsActive = false;
 }
 
 
