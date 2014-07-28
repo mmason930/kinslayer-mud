@@ -47,8 +47,7 @@ var script23231 = function(self, actor, here, args, extra) {
 	act("You begin assaulting $P.", false, actor, null, targetObject, constants.TO_CHAR);
 
 	actor.startTimer(10);
-	run_timer(actor);
-	var success = actor.runTimer();
+	var success = runTimer(actor);
 
 	here.echo("timer succeeded: " + success);
 };
