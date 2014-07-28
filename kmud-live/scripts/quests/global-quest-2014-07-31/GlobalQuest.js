@@ -414,7 +414,7 @@ var script20991 = function(self, actor, here, args, extra) {
 					actor.comm("follow self");
 					here.loadObj(20960);
 					global.Global2014Util.updatePoints(1, leader.race);
-					here.echo(cyn+bld+leader.name+" has captured a damane and scored a point for the "+(actor.leader.race==constants.RACE_TROLLOC?"Dark":"Light")+"!"+nrm);
+					here.echo(cyn+bld+leader.name+" has captured a damane and scored a point for the "+(leader.race==constants.RACE_TROLLOC?"Dark":"Light")+"!"+nrm);
 				}
 			}
 		}
