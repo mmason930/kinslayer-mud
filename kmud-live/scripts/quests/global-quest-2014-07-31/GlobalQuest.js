@@ -127,8 +127,9 @@ var script20980 = function(self, actor, here, args, extra) {
 			loadRoom.loadMob(1136);
 			loadRoom.people[0].comm("follow leader");
 			leader.comm("group all");
+			waitpulse 1;
 			for(var i=0;i<loadRoom.people.length;i++){
-				sendKoradin("moving "+loadRoom.people[i].name);
+				//sendKoradin("moving "+loadRoom.people[i].name);
 				loadRoom.people[i].moveToRoom(room);
 			}
 			leader.say("There she is! Go and collect her!");
