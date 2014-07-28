@@ -70,6 +70,12 @@ var script20910 = function(self, actor, here, args, extra) {
 		var pedestal = global.Global2014Util.objectIdToPedestalMap[ obj.id ];
 		if(pedestal){
 			actor.send(" ");
+			if(pedestal.race == constants.RACE_TROLLOC){
+				var ld = "DARK";
+			}else{
+				var ld = "LIGHT";
+			}
+			actor.send("This pedestal belongs to the "+ld+".");
 			actor.send("This pedestal currently has "+pedestal.getHitPoints()+" out of "+pedestal.getMaxHitPoints()+" hit points.");
 			_block;
 			return;
