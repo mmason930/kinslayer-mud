@@ -405,15 +405,16 @@ var script20991 = function(self, actor, here, args, extra) {
 	if(global.Global2014Util && self && actor){
 		if(arrContains(global.Global2014Util.damaneVnums, actor.vnum)){ // damane has entered
 			if(actor.leader){ // damane has a leader
-				if(actor.leader.room == self.room && actor.room == self.room){ // damane and leader are in room
-					getCharCols(actor.leader);
-					self.say("Nice work, "+actor.leader.name+"!");
+				var leader = actor.leader;
+				if(leader.room == self.room && actor.room == self.room){ // damane and leader are in room
+					getCharCols(leader);
+					self.say("Nice work, "+leader.name+"!");
 					here.echo(self.name+" shoves "+actor.name+" inside a nearby cage and locks the door.");
 					actor.moveToRoom(getRoom(20800));
 					actor.comm("follow self");
 					here.loadObj(20960);
-					global.Global2014Util.updatePoints(1, actor.leader.race);
-					here.echo(cyn+bld+actor.leader.name+" has captured a damane and scored a point for the "+(actor.leader.race==constants.RACE_TROLLOC?"Dark":"Light")+"!"+nrm);
+					global.Global2014Util.updatePoints(1, leader.race);
+					here.echo(cyn+bld+leader.name+" has captured a damane and scored a point for the "+(actor.leader.race==constants.RACE_TROLLOC?"Dark":"Light")+"!"+nrm);
 				}
 			}
 		}
