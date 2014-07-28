@@ -8,7 +8,8 @@ function Global2014Util()
 
 	this.objectIdToPedestalMap = {};
 	
-	
+	this.lsBaseRoomVnum = 20650;
+	this.dsBaseRoomVnum = 20643;
 	this.dsAdam = null;
 	this.lsAdam = null;
 	this.eventIsActive = false;
