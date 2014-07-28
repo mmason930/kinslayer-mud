@@ -66,6 +66,15 @@ var script20910 = function(self, actor, here, args, extra) {
 		}
 		return;
 	}
+	if(global.Global2014Util){ // examining pedestals for global event
+		var pedestal = global.global2014Util.objectIdToPedestalMap[ obj.id ];
+		if(pedestal){
+			actor.send(" ");
+			actor.send("This pedestal currently has "+pedestal.getHitPoints()+" out of "+pedestal.getMaxHitPoints()+" hit points.");
+			_block;
+			return;
+		}
+	}
 	if (isName("corpse", obj.namelist)) {
 		_noblock;
 		return;

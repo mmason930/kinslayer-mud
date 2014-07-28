@@ -178,13 +178,13 @@ var script20985 = function(self, actor, here, args, extra) {
 						}
 					}
 				}
-				self.loadObj(1120);
+				var newAdam = self.loadObj(1120);
 				if(self.race == constants.RACE_TROLLOC){
-					global.Global2014Util.dsAdam = self.inventory[0];
+					global.Global2014Util.dsAdam = newAdam;
 				}else{
-					global.Global2014Util.lsAdam = self.inventory[0];
+					global.Global2014Util.lsAdam = newAdam;
 				}
-				self.inventory[0].moveToChar(actor);
+				newAdam.moveToChar(actor);
 				self.tell(actor, "Use it wisely.");
 			}
 		}
