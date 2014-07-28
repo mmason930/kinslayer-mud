@@ -1,4 +1,5 @@
 var script20981 = function(self, actor, here, args, extra) { // murash/agelmar enter script
+	sendKoradin("working1");
 	if(global.eventIsActive && actor.race == self.race){
 		sendKoradin("working");
 		waitpulse 1;
