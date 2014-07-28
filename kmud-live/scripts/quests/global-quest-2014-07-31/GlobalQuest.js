@@ -156,7 +156,7 @@ var script20983 = function(self, actor, here, args, extra) {
 		self.moveToChar(damane);
 		damane.comm("wear adam");
 		damane.comm("follow "+actor.name);
-		mudLog(2, actor.name+" just leashed "+damane.name+" for the "+(actor.race==constants.RACE_TROLLOC?"DARK":"LIGHT"));	
+		mudLog(2, 102, actor.name+" just leashed "+damane.name+" for the "+(actor.race==constants.RACE_TROLLOC?"DARK":"LIGHT"));	
 	}
 }
 
