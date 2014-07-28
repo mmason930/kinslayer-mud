@@ -37,17 +37,53 @@ var script23231 = function(self, actor, here, args, extra) {
 		return;
 	}
 
-	if(pedestal.isDisabled())
+	var checks = function()
 	{
-		actor.send("The pedestal is already disabled!");
+		if(pedestal.isDisabled())
+		{
+			actor.send("The pedestal is already disabled!");
+			return false;
+		}
+
+		if(actor.fighting)
+		{
+			actor.send("You can't assault that while engaged!");
+			return false;
+		}
+
+		if(actor.position <= constants.POS_FIGHTING)
+		{
+			actor.send("You must be STANDING to do that!");
+			return false;
+		}
+	};
+
+	if(!checks())
+	{
 		return;
 	}
 
 	act("$n begins assaulting $P.", false, actor, null, targetObject, constants.TO_ROOM);
 	act("You begin assaulting $P.", false, actor, null, targetObject, constants.TO_CHAR);
 
-	actor.startTimer(10);
-	var success = runTimer(actor);
+	while(true)
+	{
+		actor.startTimer(10);
+		var success = runTimer(actor);
 
-	here.echo("timer succeeded: " + success);
+		if(!success || !checks())
+		{
+			break;
+		}
+
+		pedestal.takeDamage(actor, random(10, 30));
+		act("$n delivers a damaging blow to $P!", false, actor, null, targetObject, constants.TO_ROOM);
+		act("You deliver a damaging blow to $P!", false, actor, null, targetObject, constants.TO_CHAR);
+
+		if(pedestal.isDisabled())
+		{
+			act("$p topples over and falls to the ground!", false, null, targetObject, null, constants.TO_ROOM);
+			break;
+		}
+	}
 };
