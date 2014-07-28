@@ -8,27 +8,27 @@ function Global2014Pedestal(object, maxHitPoints, race)
 	this.objectId = object.id;
 }
 
-Global2014Pedestal.getObject = function()
+Global2014Pedestal.prototype.getObject = function()
 {
 	return this.object;
 };
 
-Global2014Pedestal.getMaxHitPoints = function()
+Global2014Pedestal.prototype.getMaxHitPoints = function()
 {
 	return this.maxHitPoints;
 };
 
-Global2014Pedestal.getHitPoints = function()
+Global2014Pedestal.prototype.getHitPoints = function()
 {
 	return this.hitPoints;
 };
 
-Global2014Pedestal.getRace = function()
+Global2014Pedestal.prototype.getRace = function()
 {
 	return this.race;
 };
 
-Global2014Pedestal.takeDamage = function(character, damageAmount)
+Global2014Pedestal.prototype.takeDamage = function(character, damageAmount)
 {
 	if(!this.object.isValid)
 	{
