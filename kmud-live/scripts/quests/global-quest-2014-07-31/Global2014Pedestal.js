@@ -28,6 +28,11 @@ Global2014Pedestal.prototype.getRace = function()
 	return this.race;
 };
 
+Global2014Pedestal.prototype.isDisabled = function()
+{
+	return this.getHitPoints() == 0;
+};
+
 Global2014Pedestal.prototype.takeDamage = function(character, damageAmount)
 {
 	if(!this.object.isValid)
@@ -56,7 +61,7 @@ Global2014Pedestal.prototype.takeDamage = function(character, damageAmount)
 
 	if(this.hitPoints <= 0)
 	{
-		mudLog(constants.BRF, 100, "Pedestal in room #" + this.roomVnum + " has been destroyed.");
-		this.getObject().extract();
+		mudLog(constants.BRF, 100, "Pedestal in room #" + this.roomVnum + " has been disabled.");
+		//this.getObject().extract();
 	}
 };
