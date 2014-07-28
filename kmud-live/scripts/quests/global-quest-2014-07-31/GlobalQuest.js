@@ -81,21 +81,21 @@ var script20986 = function(self, actor, here, args, extra) {
 		return;
 	}
 	if(strn_cmp(vArgs[1], "on", 2)){
-		global.Global2014Util = new Global2014Util();
-		global.Global2014Util.eventIsActive = true;
+		global.global2014Util = new Global2014Util();
+		global.global2014Util.eventIsActive = true;
 		mudLog(2, 100, "The global event has been turned ON by "+actor.name+".");
 		mudLog(2, 100, "A'dams and player arrays have been wiped.");
 	}else if(strn_cmp(vArgs[1], "off", 3)){
-		if(global.Global2014Util){
-			global.Global2014Util.eventIsActive = false;
-			global.Global2014Util.dsAdam = null;
-			global.Global2014Util.lsAdam = null;
-			global.Global2014Util.dsPlayers = [];
-			global.Global2014Util.lsPlayers = [];
-			global.Global2014Util = null;
+		if(global.global2014Util){
+			global.global2014Util.eventIsActive = false;
+			global.global2014Util.dsAdam = null;
+			global.global2014Util.lsAdam = null;
+			global.global2014Util.dsPlayers = [];
+			global.global2014Util.lsPlayers = [];
+			global.global2014Util = null;
 		}
 		mudLog(2, 100, "The global event has been turned OFF by "+actor.name+".");
-		mudLog(2, 104, "global.Global2014Util set to NULL.");
+		mudLog(2, 104, "global.global2014Util set to NULL.");
 	}else{
 		actor.send("The global event can be turned ON or OFF.");
 		return;
@@ -117,13 +117,13 @@ var script20980 = function(self, actor, here, args, extra) {
 			act(self.name+" disappears in a flash of bright light.",true,self,null,null,constants.TO_ROOM);
 			self.moveToRoom(newRoom);
 			act(self.name+" arrives in a flash of bright light!",true,self,null,null,constants.TO_ROOM);
-			if(global.Global2014Util){
-				global.Global2014Util.damaneZones[self.vnum] = newRoom.zoneVnum;
+			if(global.global2014Util){
+				global.global2014Util.damaneZones[self.vnum] = newRoom.zoneVnum;
 			}
 		}
 	}else{
-		if(global.Global2014Util){
-			global.Global2014Util.damaneZones[self.vnum] = self.room.zoneVnum;
+		if(global.global2014Util){
+			global.global2014Util.damaneZones[self.vnum] = self.room.zoneVnum;
 		}
 	}
 	if(neck1 != 1120 && neck2 != 1120){ // aggro/call mob if not collared
@@ -201,13 +201,13 @@ var script20980 = function(self, actor, here, args, extra) {
 
 /** PATROL AUTO RESCUE DAMANE **/
 var script20987 = function(self, actor, here, args, extra) {
-	if(global.Global2014Util){
+	if(global.global2014Util){
 		function rescueDamane(self, here){
 			if(self && here){
 				var people = here.people;
 				for(var i=0;i<people.length;i++){
 					if(people[i].fighting){
-						if(arrContains(global.Global2014Util.damaneVnums, people[i].fighting.vnum)){
+						if(arrContains(global.global2014Util.damaneVnums, people[i].fighting.vnum)){
 							if(people[i].vnum == 1135 || people[i].vnum == 1136){
 								people[i].stopFighting();
 							}else{
@@ -227,7 +227,7 @@ var script20987 = function(self, actor, here, args, extra) {
 
 /** LEASH DAMANE command for a'dam object **/
 var script20983 = function(self, actor, here, args, extra) {
-	if(global.Global2014Util){
+	if(global.global2014Util){
 		_block;
 		var vArgs = args.split(" ");
 		var damane = getCharInListVis(actor, vArgs[1], actor.room.people, false);
@@ -235,7 +235,7 @@ var script20983 = function(self, actor, here, args, extra) {
 			actor.send("Leash who?");
 			return;
 		}
-		if(!arrContains(global.Global2014Util.damaneVnums, damane.vnum)){
+		if(!arrContains(global.global2014Util.damaneVnums, damane.vnum)){
 			actor.send(damane.heShe()+" would probably not appreciate that.");
 			return;
 		}
@@ -276,8 +276,8 @@ var script20983 = function(self, actor, here, args, extra) {
 /** LOGIN NOTIFICATION **/
 var script20981 = function(self, actor, here, args, extra) { 
 	//sendKoradin("working1");
-	if(global.Global2014Util){
-		if(global.Global2014Util.eventIsActive){
+	if(global.global2014Util){
+		if(global.global2014Util.eventIsActive){
 			//sendKoradin("working");
 			waitpulse 1;
 			getCharCols(actor);
@@ -298,14 +298,14 @@ var script20982 = function(self, actor, here, args, extra) {
 		actor.send("Type JOIN EVENT to join the global event.");
 		return;
 	}
-	if(global.Global2014Util){
-		if(!global.Global2014Util.eventIsActive){
+	if(global.global2014Util){
+		if(!global.global2014Util.eventIsActive){
 			actor.send("The global event is not currently running! Log in on Thursday, July 31 at 8pm EST.");
 			return;
 		}
 		if(actor.race == constants.RACE_HUMAN){ // humans
 			var adamMsg = "We've been sent items that will help you catch the damane. Come see me and I'll entrust one to you.";
-			var adam = global.Global2014Util.lsAdam;
+			var adam = global.global2014Util.lsAdam;
 			if(adam){
 				if(adam.isValid){
 					var adamHolder = adam.findHolder;
@@ -316,12 +316,12 @@ var script20982 = function(self, actor, here, args, extra) {
 					}
 				}
 			}
-			var players = global.Global2014Util.lsPlayers;
+			var players = global.global2014Util.lsPlayers;
 			var head = "Agelmar, Lord of Fal Dara";
 			var script = ["I am looking for brave warriors to round these women up and bring them to a rendezvous point in Tarwin's Gap for transport to the White Tower.  The Amyrlin wishes to study them.", "Lord Marshall Uno is waiting in Tarwin's Gap. He will give you further instructions when you bring the damane to him.", adamMsg];
 		}else{ // trolls
 			var adamMsg = "The Dreadlord has leashes for the pink ones. Come see me to get one.";
-			var adam = global.Global2014Util.dsAdam;
+			var adam = global.global2014Util.dsAdam;
 			if(adam){
 				if(adam.isValid){
 					var adamHolder = adam.findHolder;
@@ -332,7 +332,7 @@ var script20982 = function(self, actor, here, args, extra) {
 					}
 				}
 			}
-			var players = global.Global2014Util.dsPlayers;
+			var players = global.global2014Util.dsPlayers;
 			var head = "Murash";
 			var script = ["The Dreadlord wants these scum for his own pleasure. Round them up and bring them to Tarwin's Gap for transport.", "Syyggar is waiting there. He will give you further instructions when you bring the damane to him.", adamMsg];; 
 		}
@@ -360,15 +360,15 @@ var script20982 = function(self, actor, here, args, extra) {
 
 /** MURASH / AGELMAR ISSUE ANOTHER A'DAM ON ENTER **/
 var script20985 = function(self, actor, here, args, extra) { 
-	if(global.Global2014Util){
+	if(global.global2014Util){
 		waitpulse 1;
 		if(actor && self){
 			if(self.vnum == 1700){ // murash
-				var players = global.Global2014Util.dsPlayers;
-				var adam = global.Global2014Util.dsAdam;
+				var players = global.global2014Util.dsPlayers;
+				var adam = global.global2014Util.dsAdam;
 			}else{
-				var players = global.Global2014Util.lsPlayers;
-				var adam = global.Global2014Util.lsAdam;
+				var players = global.global2014Util.lsPlayers;
+				var adam = global.global2014Util.lsAdam;
 			}
 			if(actor.race == self.race && arrContains(players, actor)){
 				if(adam){
@@ -386,9 +386,9 @@ var script20985 = function(self, actor, here, args, extra) {
 				}
 				var newAdam = self.loadObj(1120);
 				if(self.race == constants.RACE_TROLLOC){
-					global.Global2014Util.dsAdam = newAdam;
+					global.global2014Util.dsAdam = newAdam;
 				}else{
-					global.Global2014Util.lsAdam = newAdam;
+					global.global2014Util.lsAdam = newAdam;
 				}
 				newAdam.moveToChar(actor);
 				self.tell(actor, "Use this to LEASH the damane.");
@@ -402,8 +402,8 @@ var script20985 = function(self, actor, here, args, extra) {
 /** DAMANE TURN IN AT UNO/SYYGGAR IN GAP **/
 var script20991 = function(self, actor, here, args, extra) {
 	waitpulse 1;
-	if(global.Global2014Util && self && actor){
-		if(arrContains(global.Global2014Util.damaneVnums, actor.vnum)){ // damane has entered
+	if(global.global2014Util && self && actor){
+		if(arrContains(global.global2014Util.damaneVnums, actor.vnum)){ // damane has entered
 			if(actor.leader){ // damane has a leader
 				var leader = actor.leader;
 				if(leader.room == self.room && actor.room == self.room){ // damane and leader are in room
@@ -413,7 +413,7 @@ var script20991 = function(self, actor, here, args, extra) {
 					actor.moveToRoom(getRoom(20800));
 					actor.comm("follow self");
 					here.loadObj(20960);
-					global.Global2014Util.updatePoints(1, leader.race);
+					global.global2014Util.updatePoints(1, leader.race);
 					gecho(cyn+bld+leader.name+" has captured a damane and scored a point for the "+(leader.race==constants.RACE_TROLLOC?"Dark":"Light")+"!"+nrm);
 					actor.extract();
 				}
