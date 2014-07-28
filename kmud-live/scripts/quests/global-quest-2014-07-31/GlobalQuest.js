@@ -84,8 +84,9 @@ var script20986 = function(self, actor, here, args, extra) {
 			global.Global2014Util.lsAdam = null;
 			global.Global2014Util.dsPlayers = [];
 			global.Global2014Util.lsPlayers = [];
+			global.Global2014Util = null;
 			here.echo("The global event has been turned OFF.");
-			here.echo("A'dams and player arrays have been wiped.");
+			here.echo("global.Global2014Util set to NULL.");
 		}
 	}else{
 		actor.send("The global event can be turned ON or OFF.");
