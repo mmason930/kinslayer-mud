@@ -155,7 +155,8 @@ var script20983 = function(self, actor, here, args, extra) {
 		act("A look of horror crosses "+damane.name+"'s face as "+actor.name+" snaps an a'dam around her neck!",true, actor,null,null,constants.TO_ROOM);
 		self.moveToChar(damane);
 		damane.comm("wear adam");
-		damane.comm("follow actor");
+		damane.comm("follow "+actor.name);
+		mudLog(2, actor.name+" just leashed "+damane.name+" for the "+(actor.race==constants.RACE_TROLLOC?"DARK":"LIGHT"));	
 	}
 }
 
