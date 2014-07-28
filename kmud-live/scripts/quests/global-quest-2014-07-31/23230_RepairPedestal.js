@@ -10,9 +10,10 @@ var script23230 = function(self, actor, here, args, extra) {
 
 	var targetObject = getObjInListVis(actor, targetString, here.items);
 
+	_block;
 	if(!targetObject)
 	{
-		actor.send("You don't see a `" + targetObject + "` here.");
+		actor.send("You don't see a `" + targetString + "` here.");
 		return;
 	}
 
