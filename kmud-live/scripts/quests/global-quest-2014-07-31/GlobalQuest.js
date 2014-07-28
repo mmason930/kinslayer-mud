@@ -226,7 +226,7 @@ var script20983 = function(self, actor, here, args, extra) {
 		}
 		actor.send("You start sneaking up on "+damane.name+", a'dam in hand...");
 		act(actor.name+" sneaks up behind "+damane.name+", a'dam in hand...",true, actor,null,null,constants.TO_ROOM);
-		actor.startTimer(7);
+		actor.startTimer(random(5,8));
 		var success = runTimer(actor);
 		if(!success || !actor || !self){
 			return;
