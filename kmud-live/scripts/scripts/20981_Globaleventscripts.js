@@ -10,6 +10,7 @@ var script20981 = function(self, actor, here, args, extra) { // login notificati
 
 var script20982 = function(self, actor, here, args, extra) { // login notification
 	getCharCols(actor);
+	_block;
 	var vArgs = args.split(" ");
 	if(!strn_cmp(vArgs[1], "event", 5)){
 		actor.send("Type JOIN EVENT to join the global event.");
