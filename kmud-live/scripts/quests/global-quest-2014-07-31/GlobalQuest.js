@@ -111,7 +111,7 @@ var script20980 = function(self, actor, here, args, extra) {
 			global.Global2014Util.damaneZones[self.vnum] = self.room.zoneVnum;
 		}
 	}
-	if(self.fighting && random(0,100) < 99){ // call patrol
+	if(self.fighting && random(0,100) < 2){ // call patrol
 		var room = here;
 		room.echo("The screaming cry of a beast can be heard from somewhere above you!");
 		wait 1;
