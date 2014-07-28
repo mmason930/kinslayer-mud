@@ -160,7 +160,7 @@ var script20987 = function(self, actor, here, args, extra) {
 				var people = here.people;
 				for(var i=0;i<people.length;i++){
 					if(people[i].fighting){
-						if(arrContains(global.Global2014Util.damaneVnums, people[i].fighting.vnum){
+						if(arrContains(global.Global2014Util.damaneVnums, people[i].fighting.vnum)){
 							self.say("The girl must survive to be collared!");
 							self.comm("rescue damane");
 						}
