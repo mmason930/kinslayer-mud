@@ -160,7 +160,7 @@ var script20987 = function(self, actor, here, args, extra) {
 				var people = here.people;
 				for(var i=0;i<people.length;i++){
 					if(people[i].fighting){
-						if(arrContains(global.Global2014Util.damaneVnums, people[i].fighting.vnum) && ){
+						if(arrContains(global.Global2014Util.damaneVnums, people[i].fighting.vnum)){
 							if(people[i].vnum == 1135 || people[i].vnum == 1136){
 								people[i].stopFighting();
 							}else{
