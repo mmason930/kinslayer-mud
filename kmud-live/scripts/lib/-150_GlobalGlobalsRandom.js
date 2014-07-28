@@ -454,6 +454,8 @@ function initGlobals()
 	global.dsAdam = null;
 	global.lsAdam = null;
 	global.eventIsActive = false;
+	global.dsPlayers = [];
+	global.lsPlayers = [];
 }
 
 
