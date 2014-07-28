@@ -1,9 +1,9 @@
 var script20981 = function(self, actor, here, args, extra) { // murash/agelmar enter script
-	sendKoradin("working1");
-	if(global.eventIsActive && actor.race == self.race){
-		sendKoradin("working");
+	//sendKoradin("working1");
+	if(global.eventIsActive){
+		//sendKoradin("working");
 		waitpulse 1;
 		getCharCols(actor);
-		actor.send(cyn+bld+self.name+" has a special assignment! Type JOIN EVENT to get started."+nrm);
+		actor.send(cyn+bld+"Welcome to the global Kinslayer event! Type JOIN EVENT to get started."+nrm);
 	}
 }
