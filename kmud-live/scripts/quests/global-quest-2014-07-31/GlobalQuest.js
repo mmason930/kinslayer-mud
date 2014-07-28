@@ -378,7 +378,7 @@ var script20985 = function(self, actor, here, args, extra) {
 					global.Global2014Util.lsAdam = newAdam;
 				}
 				newAdam.moveToChar(actor);
-				self.tell(actor, "Use it wisely.");
+				self.tell(actor, "Use this to LEASH the damane.");
 				actor.send(self.name+" gives you "+newAdam.name+".");
 				act(self.name+" gives "+actor.name+" "+newAdam.name+".", true, actor, null, null, constants.TO_ROOM);
 			}
