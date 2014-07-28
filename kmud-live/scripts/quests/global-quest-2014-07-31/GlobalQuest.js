@@ -97,7 +97,9 @@ var script20980 = function(self, actor, here, args, extra) {
 	if(neck1){ neck1 = neck1.vnum; }
 	var neck2 = self.eq(constants.WEAR_NECK_2);
 	if(neck2){ neck2 = neck2.vnum; }
-	if(newRoom && !self.isBashed && random(1,25) == 1 && neck1 != 1120 && neck2 != 1120){
+	var randomRoll = 20;
+	if(self.fighting){ randomRoll = 40; }
+	if(newRoom && !self.isBashed && random(1, randomRoll) == 1 && neck1 != 1120 && neck2 != 1120){
 		if(arrContains(roomArr, newRoom.zoneVnum)){
 			act(self.name+" disappears in a flash of bright light.",true,self,null,null,constants.TO_ROOM);
 			self.moveToRoom(newRoom);
