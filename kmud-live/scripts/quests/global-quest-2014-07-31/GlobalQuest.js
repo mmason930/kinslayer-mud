@@ -11,11 +11,12 @@ function Global2014Util()
 
 Global2014Util.prototype.setupStage3 = function()
 {
+	var self = this;
 	for(var race in this.pedestalRoomIds)
 	{
 		this.pedestalRoomIds[race].forEach(function(roomId) {
 
-			this.setupPedestal(race, roomId);
+			self.setupPedestal(race, roomId);
 		});
 	}
 };
