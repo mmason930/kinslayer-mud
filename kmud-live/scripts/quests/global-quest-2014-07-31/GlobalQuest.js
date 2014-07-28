@@ -161,11 +161,31 @@ var script20985 = function(self, actor, here, args, extra) {
 		if(actor && self){
 			if(self.vnum == 1700){ // murash
 				var players = global.Global2014Util.dsPlayers;
+				var adam = global.Global2014Util.dsAdam;
 			}else{
 				var players = global.Global2014Util.lsPlayers;
+				var adam = global.Global2014Util.lsAdam;
 			}
 			if(actor.race == self.race && arrContains(players, actor)){
-			
+				if(adam){
+					if(adam.isValid){
+						var adamHolder = adam.findHolder;
+						if(adamHolder){
+							if(adamHolder.race == actor.race){
+								self.tell(actor, "I've given the a'dam to "+adamHolder.name);
+								return;
+							}
+						}
+					}
+				}
+				self.loadObj(1120);
+				if(self.race == constants.RACE_TROLLOC){
+					global.Global2014Util.dsAdam = self.inventory[0];
+				}else{
+					global.Global2014Util.lsAdam = self.inventory[0];
+				}
+				self.inventory[0].moveToChar(actor);
+				self.tell(actor, "Use it wisely.");
 			}
 		}
 	}
