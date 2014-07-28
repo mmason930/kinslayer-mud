@@ -83,8 +83,8 @@ var script20986 = function(self, actor, here, args, extra) {
 	if(strn_cmp(vArgs[1], "on", 2)){
 		global.Global2014Util = new Global2014Util();
 		global.Global2014Util.eventIsActive = true;
-		here.echo("The global event has been turned ON.");
-		here.echo("A'dams and player arrays have been wiped.");
+		mudLog(2, 100, "The global event has been turned ON.");
+		mudLog(2, 100, "A'dams and player arrays have been wiped.");
 	}else if(strn_cmp(vArgs[1], "off", 3)){
 		if(global.Global2014Util){
 			global.Global2014Util.eventIsActive = false;
@@ -94,8 +94,8 @@ var script20986 = function(self, actor, here, args, extra) {
 			global.Global2014Util.lsPlayers = [];
 			global.Global2014Util = null;
 		}
-		here.echo("The global event has been turned OFF.");
-		here.echo("global.Global2014Util set to NULL.");
+		mudLog(2, 100, "The global event has been turned OFF.");
+		mudLog(2, 104, "global.Global2014Util set to NULL.");
 	}else{
 		actor.send("The global event can be turned ON or OFF.");
 		return;
