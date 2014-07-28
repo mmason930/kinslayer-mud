@@ -43,5 +43,8 @@ var script23231 = function(self, actor, here, args, extra) {
 		return;
 	}
 
-	actor.send("You are assaulting " + targetObject.name);
+	act("$n begins assaulting $P.", false, actor, null, targetObject, constants.TO_ROOM);
+	act("You begin assaulting $P.", false, actor, null, targetObject, constants.TO_CHAR);
+
+	//function act(str, hide_invis, ch, obj, vict_obj, type)
 };
