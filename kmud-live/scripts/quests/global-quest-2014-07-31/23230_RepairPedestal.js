@@ -27,7 +27,7 @@ var script23230 = function(self, actor, here, args, extra) {
 
 	if(!pedestal)
 	{
-		mudLog(constants.BRF, Math.max(actor.invisLevel, 100), "Character `" + actor.name + "` is attempting to repair an invalid pedestal in room #" + here.vnum + ".");
+		mudLog(constants.BRF, Math.max(actor.invis, 100), "Character `" + actor.name + "` is attempting to repair an invalid pedestal in room #" + here.vnum + ".");
 		return;
 	}
 
