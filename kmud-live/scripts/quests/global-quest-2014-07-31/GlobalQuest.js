@@ -116,6 +116,7 @@ var script20980 = function(self, actor, here, args, extra) {
 var script20983 = function(self, actor, here, args, extra) {
 	if(global.Global2014Util){
 		_block;
+		var vArgs = args.split(" ");
 		var damane = getCharInListVis(actor, vArgs[1], actor.room.people, false);
 		if (!damane) {
 			actor.send("Leash who?");
