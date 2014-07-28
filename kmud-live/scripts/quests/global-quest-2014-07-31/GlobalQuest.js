@@ -89,7 +89,7 @@ var script20986 = function(self, actor, here, args, extra) {
 	}
 }
 
-/** DAMANE PORTING / UPDATING TRACKING ON MAP **/
+/** DAMANE PORTING / UPDATING TRACKING ON MAP / AGGROING / CALL PATROL **/
 var script20980 = function(self, actor, here, args, extra) {
 	var roomArr = [81, 10, 333, 80, 85, 20, 332, 18, 66, 181, 206, 193, 64, 17, 93, 19, 334, 103, 70, 100, 3, 1, 70, 214, 217, 4, 31, 201, 9, 230, 235, 100, 186, 53, 101, 102, 45, 134, 132];
 	var newRoom = getRandomRoom();
@@ -111,6 +111,23 @@ var script20980 = function(self, actor, here, args, extra) {
 			global.Global2014Util.damaneZones[self.vnum] = self.room.zoneVnum;
 		}
 	}
+	function attackPCs(self, here){
+		if(self && here){
+			var attackArr = [];
+			for(var i=0;i<here.people.length;i++){
+				if(here.people[i].vnum == -1){
+					attackArr.push(here.people[i]);
+				}
+			}
+			if(attackArr.length > 0){
+				var target = attackArr[random(0, attackArr.length-1)];
+				self.say("Get away from me!");
+				self.comm("k "+target.name);
+			}
+		}
+	}
+	attackPCs(self, here);
+	setTimeout(function(){attackPCs(self, here);}, 6500);
 }
 
 var script20983 = function(self, actor, here, args, extra) {
