@@ -12,9 +12,16 @@ function Global2014Util()
 Global2014Util.prototype.setupStage3 = function()
 {
 	var self = this;
+	this.objectIdToPedestalMap = {};
+
 	for(var race in this.pedestalRoomIds)
 	{
 		this.pedestalRoomIds[race].forEach(function(roomId) {
+
+			getRoom(roomId).getObjects(function(self.pedestalObjectId)).forEach(function(oldPedestal) {
+
+				mudLog(constants.BRF, 100, "Extracting old pedestal in room #" + roomId + ".");
+			});
 
 			self.setupPedestal(race, roomId);
 		});
