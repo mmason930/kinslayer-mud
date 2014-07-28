@@ -127,7 +127,8 @@ var script20980 = function(self, actor, here, args, extra) {
 		}
 	}
 	attackPCs(self, here);
-	setTimeout(function(){attackPCs(self, here);}, 6500);
+	wait 6.5;
+	attackPCs(self, here);
 }
 
 var script20983 = function(self, actor, here, args, extra) {
