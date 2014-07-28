@@ -37,7 +37,7 @@ var script23231 = function(self, actor, here, args, extra) {
 		return;
 	}
 
-	var checks = function()
+	var checks = function(actor, pedestal)
 	{
 		if(pedestal.isDisabled())
 		{
@@ -58,8 +58,9 @@ var script23231 = function(self, actor, here, args, extra) {
 		}
 	};
 
-	if(!checks())
+	if(!checks(actor, pedestal))
 	{
+		here.echo("Checks failed.");
 		return;
 	}
 
@@ -71,7 +72,7 @@ var script23231 = function(self, actor, here, args, extra) {
 		actor.startTimer(10);
 		var success = runTimer(actor);
 
-		if(!success || !checks())
+		if(!success || !checks(actor, pedestal))
 		{
 			break;
 		}
