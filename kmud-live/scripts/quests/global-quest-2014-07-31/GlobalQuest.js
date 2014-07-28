@@ -418,6 +418,15 @@ var script20991 = function(self, actor, here, args, extra) {
 					actor.extract();
 				}
 			}
+		}else if(actor.vnum == -1){ // PC entering
+			getCharCols(actor);
+			actor.send(cyn+bld+"Say INFO to learn more from "+self.name+"."+nrm);
 		}
 	}
+}
+
+
+/** UNO/SYYGGAR STAGE 3 INFO SCRIPTS **/
+var script20991 = function(self, actor, here, args, extra) {
+
 }
