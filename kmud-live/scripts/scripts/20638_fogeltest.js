@@ -449,7 +449,15 @@ var script20638 = function(self, actor, here, args, extra) {
 		high = [30612, 30719];
 		
 		for(i=0; i < low.length; i++) {
-			actor.send(low[i] + " - " + high[i]);
+			//actor.send(low[i] + " - " + high[i]);
+			for(j=low[i]; j <= high[i]; j++) {
+				actor.comm("oedit " + j);
+				actor.comm("6");
+				actor.comm("6");
+				actor.comm("0");
+				actor.comm("q");
+				actor.comm("y");
+			}
 		}
 	}
 }
