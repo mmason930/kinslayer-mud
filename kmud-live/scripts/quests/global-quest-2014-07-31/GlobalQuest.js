@@ -22,6 +22,18 @@ function Global2014Util()
 	this.damaneZones[1125] = 0;
 	this.damaneZones[1126] = 0;
 	this.damaneZones[1127] = 0;
+	
+	this.pointMap = {};
+	this.pointMap[constants.RACE_HUMAN] = 0;
+	this.pointMap[constants.RACE_TROLLOC] = 0;
+}
+
+Global2014Util.prototype.getPoints = function(race){
+	return this.pointMap[race];
+}
+
+Global2014Util.prototype.updatePoints = function(num, race){
+	this.pointMap[race] += num;
 }
 
 Global2014Util.prototype.setupStage3 = function()
