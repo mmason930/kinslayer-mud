@@ -67,14 +67,8 @@ var script20986 = function(self, actor, here, args, extra) {
 		return;
 	}
 	if(strn_cmp(vArgs[1], "on", 2)){
-		if(!global.Global2014Util){
-			global.Global2014Util = new Global2014Util();
-		}
+		global.Global2014Util = new Global2014Util();
 		global.Global2014Util.eventIsActive = true;
-		global.Global2014Util.dsAdam = null;
-		global.Global2014Util.lsAdam = null;
-		global.Global2014Util.dsPlayers = [];
-		global.Global2014Util.lsPlayers = [];
 		here.echo("The global event has been turned ON.");
 		here.echo("A'dams and player arrays have been wiped.");
 	}else if(strn_cmp(vArgs[1], "off", 3)){
