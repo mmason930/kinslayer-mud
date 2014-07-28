@@ -114,33 +114,6 @@ var script20980 = function(self, actor, here, args, extra) {
 		}
 	}
 	if(neck1 != 1120 && neck2 != 1120){ // aggro/call mob if not collared
-		if(self.fighting && random(0,100) < 5){ // call patrol
-			var room = here;
-			room.echo("The screaming cry of a beast can be heard from somewhere above you!");
-			wait 1;
-			if(self.room == room){
-				room.echo("A Seanchan scouting party has arrived!");
-				var loadRoom = getRoom(20900);
-				loadRoom.loadMob(1135);
-				var leader = loadRoom.people[0];
-				loadRoom.loadMob(10259);
-				var raken = loadRoom.people[0];
-				loadRoom.people[0].comm("follow leader");
-				loadRoom.loadMob(1136);
-				var scout1 = loadRoom.people[0];
-				loadRoom.people[0].comm("follow leader");
-				loadRoom.loadMob(1136);
-				var scout2 = loadRoom.people[0];
-				loadRoom.people[0].comm("follow leader");
-				leader.comm("group all");
-				leader.moveToRoom(room);
-				raken.moveToRoom(room);
-				scout1.moveToRoom(room);
-				scout2.moveToRoom(room);
-				leader.say("There she is! Go and collect her!");
-			}
-			mudLog(2, 102, self.name+" generated a seanchan patrol in room "+self.room.vnum);
-		}
 		function attackPCs(self, here){ // aggro
 			if(self && here){
 				var attackArr = here.getMobs(-1);
@@ -177,6 +150,39 @@ var script20980 = function(self, actor, here, args, extra) {
 		followRandomPC(self, here);
 		wait 6;
 		followRandomPC(self, here);
+	}
+	wait random(0,3);
+	if(self){
+		here = self.room;
+		var patrolRoll = here.getMobs(-1).length * 5;
+		if(patrolRoll > 25){ patrolRoll = 25; }
+		if(self.fighting && random(0,100) < patrolRoll){ // call patrol
+			var room = here;
+			room.echo("The screaming cry of a beast can be heard from somewhere above you!");
+			wait 1;
+			if(self.room == room){
+				room.echo("A Seanchan scouting party has arrived!");
+				var loadRoom = getRoom(20900);
+				loadRoom.loadMob(1135);
+				var leader = loadRoom.people[0];
+				loadRoom.loadMob(10259);
+				var raken = loadRoom.people[0];
+				loadRoom.people[0].comm("follow leader");
+				loadRoom.loadMob(1136);
+				var scout1 = loadRoom.people[0];
+				loadRoom.people[0].comm("follow leader");
+				loadRoom.loadMob(1136);
+				var scout2 = loadRoom.people[0];
+				loadRoom.people[0].comm("follow leader");
+				leader.comm("group all");
+				leader.moveToRoom(room);
+				raken.moveToRoom(room);
+				scout1.moveToRoom(room);
+				scout2.moveToRoom(room);
+				leader.say("There she is! Go and collect her!");
+			}
+			mudLog(2, 102, self.name+" generated a seanchan patrol in room "+self.room.vnum);
+		}
 	}
 }
 
