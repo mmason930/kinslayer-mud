@@ -60,11 +60,11 @@ var script20982 = function(self, actor, here, args, extra) { // login notificati
 	players.push(actor);
 	actor.send(cyn+bld+"You join the global event!"+nrm);
 	actor.send(" ");
-	actor.send("We have had a report of six damane that escaped and are traveling around the world.");
+	actor.send(red+head+" tells you, 'We have had a report of six damane that escaped and are traveling around the world.'"+nrm);
 	actor.send(" ");
-	actor.send(script[0]);
+	actor.send(red+head+" tells you, '"+script[0]+"'"+nrm);
 	actor.send(" ");
-	actor.send(script[1]);
+	actor.send(red+head+" tells you, '"+script[1]+"'"+nrm);
 	actor.send(" ");
-	actor.send(script[2]);
+	actor.send(red+head+" tells you, '"+script[2]+"'"+nrm);
 }
