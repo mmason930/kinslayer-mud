@@ -355,7 +355,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 	var damaneZones = [];
 	if(global.Global2014Util){
 		if(global.Global2014Util.eventIsActive){
-			//sendKoradin("koradin test: pushing svals");
+			sendKoradin("koradin test: pushing svals");
 			damaneZones.push(global.Global2014Util.damaneZones[1122]);
 			damaneZones.push(global.Global2014Util.damaneZones[1123]);
 			damaneZones.push(global.Global2014Util.damaneZones[1124]);
