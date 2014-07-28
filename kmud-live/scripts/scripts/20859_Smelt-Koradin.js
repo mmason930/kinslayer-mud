@@ -175,7 +175,7 @@ var script20859 = function(self, actor, here, args, extra) {
 	for (var _autoKey in ingredients) {
 		var ingItem = ingredients[_autoKey];
 		ingItem.moveToRoom(getRoom(20899));
-		ingItem.extract();
+		//ingItem.extract();
 	}
 	waitpulse 1;
 	actor.send("\nYou place the materials in the forge and start to work the bellows...");
