@@ -409,7 +409,7 @@ var script20991 = function(self, actor, here, args, extra) {
 					getCharCols(actor.leader);
 					self.say("Nice work, "+actor.leader.name+"!");
 					here.echo(self.name+" shoves "+actor.name+" inside a nearby cage and locks the door.");
-					actor.moveToRoom(20800);
+					actor.moveToRoom(getRoom(20800));
 					actor.comm("follow self");
 					here.loadObj(20960);
 					global.Global2014Util.updatePoints(1, actor.leader.race);
