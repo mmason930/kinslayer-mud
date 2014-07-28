@@ -206,3 +206,11 @@ var script20801 = function(self, actor, here, args, extra) {
 	var newItem = getObjProtoByRnum(item.rnum);
 	here.echo("item: "+newItem.name);
 }
+
+var script20897 = function(self, actor, here, args, extra) {
+	var item = here.items[0];
+	if(item){
+		here.echo("Cleaning up "+item.name);
+		item.extract();
+	}
+}
