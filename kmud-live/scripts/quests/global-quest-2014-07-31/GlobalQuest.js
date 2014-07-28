@@ -47,3 +47,102 @@ Global2014Util.prototype.setupPedestal = function(race, roomId)
 };
 
 global.global2014Util = new Global2014Util();
+
+/** DAMANE PORTING / UPDATING TRACKING ON MAP **/
+var script20980 = function(self, actor, here, args, extra) {
+	var roomArr = [81, 10, 333, 80, 85, 20, 332, 18, 66, 181, 206, 193, 64, 17, 93, 19, 334, 103, 70, 100, 3, 1, 70, 214, 217, 4, 31, 201, 9, 230, 235, 100, 186, 53, 101, 102, 45, 134, 132];
+	var newRoom = getRandomRoom();
+	var aMob = getMobAtRoom(20800, 20804);
+	var neck1 = self.eq(constants.WEAR_NECK_1);
+	if(neck1){ neck1 = neck1.vnum; }
+	var neck2 = self.eq(constants.WEAR_NECK_2);
+	if(neck2){ neck2 = neck2.vnum; }
+	if(newRoom && !self.isBashed && random(1,20) == 1 && neck1 != 1120 && neck2 != 1120){
+		if(arrContains(roomArr, newRoom.zoneVnum)){
+			act(self.name+" disappears in a flash of bright light.",true,self,null,null,constants.TO_ROOM);
+			self.moveToRoom(newRoom);
+			act(self.name+" arrives in a flash of bright light!",true,self,null,null,constants.TO_ROOM);
+			if(aMob){
+				setSval(aMob, 20980, self.vnum, newRoom.zoneVnum);
+				//sendKoradin(getSval(aMob, 20980, self.vnum));
+			}
+		}
+	}else{
+		if(aMob){
+			setSval(aMob, 20980, self.vnum, self.room.zoneVnum);
+		}
+	}
+}
+
+/** LOGIN NOTIFICATION **/
+var script20981 = function(self, actor, here, args, extra) { 
+	//sendKoradin("working1");
+	if(global.eventIsActive){
+		//sendKoradin("working");
+		waitpulse 1;
+		getCharCols(actor);
+		actor.send(cyn+bld+"Welcome to the global Kinslayer event! Type JOIN EVENT to get started."+nrm);
+	}
+}
+
+/** JOIN EVENT global command **/
+var script20982 = function(self, actor, here, args, extra) { 
+	getCharCols(actor);
+	_block;
+	var vArgs = args.split(" ");
+	if(!strn_cmp(vArgs[1], "event", 5)){
+		actor.send("Type JOIN EVENT to join the global event.");
+		return;
+	}
+	if(!global.eventIsActive){
+		actor.send("The global event is not currently running! Log in on Thursday, July 31 at 8pm EST.");
+		return;
+	}
+	if(actor.race == constants.RACE_HUMAN){ // humans
+		var adamMsg = "We've been sent an item that will help you catch the damane. Come see me and I'll entrust it to you.";
+		var adam = global.lsAdam;
+		if(adam){
+			if(adam.isValid){
+				var adamHolder = adam.findHolder;
+				if(adamHolder){
+					if(adamHolder.race == constants.RACE_HUMAN){
+						adamMsg = "We've been sent an item that will help you catch the damane, but I've already entrusted it to "+adamHolder.name+".  Find "+adamHolder.himHer()+" and assist us in this quest.";
+					}
+				}
+			}
+		}
+		var players = global.lsPlayers;
+		var head = "Agelmar, Lord of Fal Dara";
+		var script = ["I am looking for brave warriors to round these women up and bring them to a rendezvous point in Tarwin's Gap for transport to the White Tower.  The Amyrlin wishes to study them.", "Lord Marshall Uno is waiting in Tarwin's Gap. He will give you further instructions when you bring the damane to him.", adamMsg];
+	}else{ // trolls
+		var adamMsg = "The Dreadlord has leashes for the pink ones. Come see me to get one.";
+		var adam = global.dsAdam;
+		if(adam){
+			if(adam.isValid){
+				var adamHolder = adam.findHolder;
+				if(adamHolder){
+					if(adamHolder.race == constants.RACE_TROLLOC){
+						adamMsg = "The Dreadlord has leashes for the pink ones, but I've already give one to "+adamHolder.name+".  Find "+adamHolder.himHer()+".";
+					}
+				}
+			}
+		}
+		var players = global.dsPlayers;
+		var head = "Murash";
+		var script = ["The Dreadlord wants these scum for his own pleasure. Round them up and bring them to Tarwin's Gap for transport.", "Syyggar is waiting there. He will give you further instructions when you bring the damane to him.", adamMsg];; 
+	}
+	if(arrContains(players, actor)){
+		actor.send("You've already joined the global event!");
+		return;
+	}
+	players.push(actor);
+	actor.send(cyn+bld+"You join the global event!"+nrm);
+	actor.send(" ");
+	actor.send(red+head+" tells you, 'We have had a report of six damane that escaped and are traveling around the world.'"+nrm);
+	actor.send(" ");
+	actor.send(red+head+" tells you, '"+script[0]+"'"+nrm);
+	actor.send(" ");
+	actor.send(red+head+" tells you, '"+script[1]+"'"+nrm);
+	actor.send(" ");
+	actor.send(red+head+" tells you, '"+script[2]+"'"+nrm);
+}
