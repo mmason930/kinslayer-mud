@@ -102,14 +102,14 @@ var script20982 = function(self, actor, here, args, extra) {
 			return;
 		}
 		if(actor.race == constants.RACE_HUMAN){ // humans
-			var adamMsg = "We've been sent an item that will help you catch the damane. Come see me and I'll entrust it to you.";
+			var adamMsg = "We've been sent items that will help you catch the damane. Come see me and I'll entrust one to you.";
 			var adam = global.Global2014Util.lsAdam;
 			if(adam){
 				if(adam.isValid){
 					var adamHolder = adam.findHolder;
 					if(adamHolder){
 						if(adamHolder.race == constants.RACE_HUMAN){
-							adamMsg = "We've been sent an item that will help you catch the damane, but I've already entrusted it to "+adamHolder.name+".  Find "+adamHolder.himHer()+" and assist us in this quest.";
+							adamMsg = "We've been sent items that will help you catch the damane, but I've already entrusted one to "+adamHolder.name+".  Find "+adamHolder.himHer()+" and assist us in this quest.";
 						}
 					}
 				}
