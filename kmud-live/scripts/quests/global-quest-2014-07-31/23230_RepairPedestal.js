@@ -23,5 +23,25 @@ var script23230 = function(self, actor, here, args, extra) {
 		return;
 	}
 
+	var pedestal = global.global2014Util.objectIdToPedestalMap[targetObject.id];
+
+	if(!pedestal)
+	{
+		mudLog(constants.BRF, Math.max(actor.invisLevel, 100), "Character `" + actor.name + "` is attempting to repair an invalid pedestal in room #" + here.vnum + ".");
+		return;
+	}
+
+	if(pedestal.getRace() != actor.race)
+	{
+		actor.send("Repair an enemy's pedestal??? Are you crazy?!?");
+		return;
+	}
+
+	if(!pedestal.isDisabled())
+	{
+		actor.send("The pedestal is not disabled. You cannot repair it yet!");
+		return;
+	}
+
 	actor.send("You are repairing " + targetObject.name);
 };
