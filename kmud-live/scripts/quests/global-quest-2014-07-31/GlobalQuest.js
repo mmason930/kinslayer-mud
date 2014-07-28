@@ -18,7 +18,7 @@ Global2014Util.prototype.setupStage3 = function()
 	{
 		this.pedestalRoomIds[race].forEach(function(roomId) {
 
-			getRoom(roomId).getObjects(function(self.pedestalObjectId)).forEach(function(oldPedestal) {
+			getRoom(roomId).getObjects(self.pedestalObjectId).forEach(function(oldPedestal) {
 
 				mudLog(constants.BRF, 100, "Extracting old pedestal in room #" + roomId + ".");
 			});
