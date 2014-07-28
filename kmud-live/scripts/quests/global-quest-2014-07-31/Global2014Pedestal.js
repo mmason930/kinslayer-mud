@@ -65,3 +65,4 @@ Global2014Pedestal.prototype.takeDamage = function(character, damageAmount)
 		//this.getObject().extract();
 	}
 };
+
