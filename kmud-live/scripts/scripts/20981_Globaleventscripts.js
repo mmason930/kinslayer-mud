@@ -57,7 +57,7 @@ var script20982 = function(self, actor, here, args, extra) { // login notificati
 		actor.send("You've already joined the global event!");
 		return;
 	}
-	global.lsPlayers.push(actor);
+	players.push(actor);
 	actor.send(cyn+bld+"You join the global event!"+nrm);
 	actor.send(" ");
 	actor.send("We have had a report of six damane that escaped and are traveling around the world.");
