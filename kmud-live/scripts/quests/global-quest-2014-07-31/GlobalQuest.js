@@ -7,6 +7,13 @@ function Global2014Util()
 	this.pedestalRoomIds[constants.RACE_TROLLOC] = [4,7,6];
 
 	this.objectIdToPedestalMap = {};
+	
+	
+	this.dsAdam = null;
+	this.lsAdam = null;
+	this.eventIsActive = false;
+	this.dsPlayers = [];
+	this.lsPlayers = [];
 }
 
 Global2014Util.prototype.setupStage3 = function()
