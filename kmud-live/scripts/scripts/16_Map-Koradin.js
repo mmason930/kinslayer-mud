@@ -1,7 +1,7 @@
 var script16 = function(self, actor, here, args, extra) {
 	_block;
 	var vArgs = getArgList(args);
-	if(strn_cmp(vArgs[1], "highlight", 4) && actor.level > 100){
+	/*if(strn_cmp(vArgs[1], "highlight", 4) && actor.level > 100){
 		var aMob = getMobAtRoom(20800, 20804);
 		if(aMob){
 			var dTracking = getSval(aMob, 20980, "active");
@@ -16,7 +16,7 @@ var script16 = function(self, actor, here, args, extra) {
 			here.echo("Damane tracking is OFF.");
 		}
 		return;
-	}
+	}*/
 	if (strn_cmp(vArgs[1], "legend", 3)) {
 		var legToggle = actor.quest("MapLegend");
 		if (legToggle == 2) {

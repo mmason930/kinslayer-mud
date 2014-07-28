@@ -352,17 +352,18 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 			//here.echo(actor_room);
 		}
 	}
-	var aMob = getMobAtRoom(20800, 20804);
 	var damaneZones = [];
-	if(aMob){
-		//sendKoradin("koradin test: pushing svals");
-		damaneZones.push(parseInt(getSval(aMob, 20980, 1122)));
-		damaneZones.push(parseInt(getSval(aMob, 20980, 1123)));
-		damaneZones.push(parseInt(getSval(aMob, 20980, 1124)));
-		damaneZones.push(parseInt(getSval(aMob, 20980, 1125)));
-		damaneZones.push(parseInt(getSval(aMob, 20980, 1126)));
-		damaneZones.push(parseInt(getSval(aMob, 20980, 1127)));
-		var questIsOn = getSval(aMob, 20980, "active");
+	if(global.Global2014Util){
+		if(global.Global2014Util.eventIsActive){
+			//sendKoradin("koradin test: pushing svals");
+			damaneZones.push(global.Global2014Util.damaneZones[1122]);
+			damaneZones.push(global.Global2014Util.damaneZones[1123]);
+			damaneZones.push(global.Global2014Util.damaneZones[1124]);
+			damaneZones.push(global.Global2014Util.damaneZones[1125]);
+			damaneZones.push(global.Global2014Util.damaneZones[1126]);
+			damaneZones.push(global.Global2014Util.damaneZones[1127]);
+			var questIsOn = true;
+		}
 	}
 	//sendKoradin("koradin test: zones: "+damaneZones.join(" "));
 	var buffer = "";
