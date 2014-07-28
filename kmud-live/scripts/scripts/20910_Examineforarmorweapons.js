@@ -67,8 +67,8 @@ var script20910 = function(self, actor, here, args, extra) {
 		return;
 	}
 	if(global.global2014Util){ // examining pedestals for global event
-		sendKoradin("pedestals engaged");
-		var pedestal = global.Global2014Util.objectIdToPedestalMap[ obj.id ];
+		//sendKoradin("pedestals engaged");
+		var pedestal = global.global2014Util.objectIdToPedestalMap[ obj.id ];
 		if(pedestal){
 			actor.send(" ");
 			if(pedestal.race == constants.RACE_TROLLOC){
