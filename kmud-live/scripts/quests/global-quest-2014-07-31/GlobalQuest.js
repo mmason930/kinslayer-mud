@@ -48,6 +48,40 @@ Global2014Util.prototype.setupPedestal = function(race, roomId)
 
 global.global2014Util = new Global2014Util();
 
+/** TURN GLOBAL EVENT ON OR OFF **/
+var script20980 = function(self, actor, here, args, extra) {
+	if(actor.level < 104){
+		return;
+	}
+	_block;
+	var vArgs = args.split(" ");
+	if(!vArgs[1]){
+		actor.send("ON or OFF?");
+		return;
+	}
+	if(strn_cmp(vArgs[1], "on", 2)){
+		if(!global.Global2014Util){
+			global.Global2014Util = new Global2014Util();
+		}
+		global.Global2014Util.eventIsActive = true;
+		global.Global2014Util.dsAdam = null;
+		global.Global2014Util.lsAdam = null;
+		global.Global2014Util.dsPlayers = [];
+		global.Global2014Util.lsPlayers = [];
+	}else if(strn_cmp(vArgs[1], "off", 3)){
+		if(global.Global2014Util){
+			global.Global2014Util.eventIsActive = false;
+			global.Global2014Util.dsAdam = null;
+			global.Global2014Util.lsAdam = null;
+			global.Global2014Util.dsPlayers = [];
+			global.Global2014Util.lsPlayers = [];
+		}
+	}else{
+		actor.send("The global event can be turned ON or OFF.");
+		return;
+	}
+}
+
 /** DAMANE PORTING / UPDATING TRACKING ON MAP **/
 var script20980 = function(self, actor, here, args, extra) {
 	var roomArr = [81, 10, 333, 80, 85, 20, 332, 18, 66, 181, 206, 193, 64, 17, 93, 19, 334, 103, 70, 100, 3, 1, 70, 214, 217, 4, 31, 201, 9, 230, 235, 100, 186, 53, 101, 102, 45, 134, 132];
