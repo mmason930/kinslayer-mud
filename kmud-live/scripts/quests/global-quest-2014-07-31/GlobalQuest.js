@@ -174,9 +174,11 @@ var script20985 = function(self, actor, here, args, extra) {
 						var adamHolder = adam.findHolder;
 						if(adamHolder){
 							if(adamHolder.race == actor.race){
-								self.tell(actor, "I've given the a'dam to "+adamHolder.name);
+								self.tell(actor, "I've given an a'dam to "+adamHolder.name);
 								return;
 							}
+						}else{
+							adam.extract();
 						}
 					}
 				}
@@ -188,6 +190,8 @@ var script20985 = function(self, actor, here, args, extra) {
 				}
 				newAdam.moveToChar(actor);
 				self.tell(actor, "Use it wisely.");
+				actor.send(self.name+" gives you "+newAdam.name+".");
+				act(self.name+" gives "+actor.name+" "+newAdam.name+".", true, actor, null, null, constants.TO_ROOM);
 			}
 		}
 	}
