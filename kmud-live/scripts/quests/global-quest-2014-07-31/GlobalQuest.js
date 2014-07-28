@@ -148,6 +148,8 @@ var script20982 = function(self, actor, here, args, extra) {
 		actor.send(red+head+" tells you, '"+script[1]+"'"+nrm);
 		actor.send(" ");
 		actor.send(red+head+" tells you, '"+script[2]+"'"+nrm);
+		actor.send(" ");
+		actor.send(red+head+" tells you, 'Reports of the damane whereabouts will show up in green on your MAP as they come in.'"+nrm);
 	}else{
 		actor.send("The global event is not currently running! Log in on Thursday, July 31 at 8pm EST.");
 		return;
