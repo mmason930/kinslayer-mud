@@ -38,12 +38,12 @@ var script20982 = function(self, actor, here, args, extra) { // login notificati
 		var script = ["I am looking for brave warriors to round these women up and bring them to a rendezvous point in Tarwin's Gap for transport to the White Tower.  The Amyrlin wishes to study them.", "Lord Marshall Uno is waiting in Tarwin's Gap. He will give you further instructions when you bring the damane to him.", adamMsg];
 	}else{ // trolls
 		var adamMsg = "The Dreadlord has leashes for the pink ones. Come see me to get one.";
-		var adam = global.lsAdam;
+		var adam = global.dsAdam;
 		if(adam){
 			if(adam.isValid){
 				var adamHolder = adam.findHolder;
 				if(adamHolder){
-					if(adamHolder.race == constants.RACE_HUMAN){
+					if(adamHolder.race == constants.RACE_TROLLOC){
 						adamMsg = "The Dreadlord has leashes for the pink ones, but I've already give one to "+adamHolder.name+".  Find them.";
 					}
 				}
