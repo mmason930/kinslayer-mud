@@ -49,7 +49,7 @@ Global2014Util.prototype.setupPedestal = function(race, roomId)
 global.global2014Util = new Global2014Util();
 
 /** TURN GLOBAL EVENT ON OR OFF **/
-var script20980 = function(self, actor, here, args, extra) {
+var script20986 = function(self, actor, here, args, extra) {
 	if(actor.level < 104){
 		return;
 	}
