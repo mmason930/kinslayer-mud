@@ -77,7 +77,7 @@ var script20980 = function(self, actor, here, args, extra) {
 /** LOGIN NOTIFICATION **/
 var script20981 = function(self, actor, here, args, extra) { 
 	//sendKoradin("working1");
-	if(global.eventIsActive){
+	if(global.Global2014Util.eventIsActive){
 		//sendKoradin("working");
 		waitpulse 1;
 		getCharCols(actor);
@@ -94,13 +94,13 @@ var script20982 = function(self, actor, here, args, extra) {
 		actor.send("Type JOIN EVENT to join the global event.");
 		return;
 	}
-	if(!global.eventIsActive){
+	if(!global.Global2014Util.eventIsActive){
 		actor.send("The global event is not currently running! Log in on Thursday, July 31 at 8pm EST.");
 		return;
 	}
 	if(actor.race == constants.RACE_HUMAN){ // humans
 		var adamMsg = "We've been sent an item that will help you catch the damane. Come see me and I'll entrust it to you.";
-		var adam = global.lsAdam;
+		var adam = global.Global2014Util.lsAdam;
 		if(adam){
 			if(adam.isValid){
 				var adamHolder = adam.findHolder;
@@ -111,12 +111,12 @@ var script20982 = function(self, actor, here, args, extra) {
 				}
 			}
 		}
-		var players = global.lsPlayers;
+		var players = global.Global2014Util.lsPlayers;
 		var head = "Agelmar, Lord of Fal Dara";
 		var script = ["I am looking for brave warriors to round these women up and bring them to a rendezvous point in Tarwin's Gap for transport to the White Tower.  The Amyrlin wishes to study them.", "Lord Marshall Uno is waiting in Tarwin's Gap. He will give you further instructions when you bring the damane to him.", adamMsg];
 	}else{ // trolls
 		var adamMsg = "The Dreadlord has leashes for the pink ones. Come see me to get one.";
-		var adam = global.dsAdam;
+		var adam = global.Global2014Util.dsAdam;
 		if(adam){
 			if(adam.isValid){
 				var adamHolder = adam.findHolder;
@@ -127,7 +127,7 @@ var script20982 = function(self, actor, here, args, extra) {
 				}
 			}
 		}
-		var players = global.dsPlayers;
+		var players = global.Global2014Util.dsPlayers;
 		var head = "Murash";
 		var script = ["The Dreadlord wants these scum for his own pleasure. Round them up and bring them to Tarwin's Gap for transport.", "Syyggar is waiting there. He will give you further instructions when you bring the damane to him.", adamMsg];; 
 	}
@@ -145,4 +145,19 @@ var script20982 = function(self, actor, here, args, extra) {
 	actor.send(red+head+" tells you, '"+script[1]+"'"+nrm);
 	actor.send(" ");
 	actor.send(red+head+" tells you, '"+script[2]+"'"+nrm);
+}
+
+/** MURASH / AGELMAR ISSUE ANOTHER A'DAM ON ENTER **/
+var script20985 = function(self, actor, here, args, extra) { 
+	waitpulse 1;
+	if(actor && self){
+		if(self.vnum == 1700){ // murash
+			var players = global.Global2014Util.dsPlayers;
+		}else{
+			var players = global.Global2014Util.lsPlayers;
+		}
+		if(actor.race == self.race && arrContains(players, actor)){
+			
+		}
+	}
 }
