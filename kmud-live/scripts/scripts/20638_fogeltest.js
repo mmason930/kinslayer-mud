@@ -443,4 +443,13 @@ var script20638 = function(self, actor, here, args, extra) {
 		actor.send(buffer);
 	
 	}
+	
+	if (argArray[1] == "fix_chains") {
+		low = [30540, 30621];
+		high = [30612, 30719];
+		
+		for(i=0; i < low.length; i++) {
+			actor.send(low[i] + " - " + high[i]);
+		}
+	}
 }
