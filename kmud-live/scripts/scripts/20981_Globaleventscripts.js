@@ -28,7 +28,7 @@ var script20982 = function(self, actor, here, args, extra) { // login notificati
 				var adamHolder = adam.findHolder;
 				if(adamHolder){
 					if(adamHolder.race == constants.RACE_HUMAN){
-						adamMsg = "We've been sent an item that will help you catch the damane, but I've already entrusted it to "+adamHolder.name+".  Find them and assist us in this quest.";
+						adamMsg = "We've been sent an item that will help you catch the damane, but I've already entrusted it to "+adamHolder.name+".  Find "+adamHolder.himHer()+" and assist us in this quest.";
 					}
 				}
 			}
@@ -44,7 +44,7 @@ var script20982 = function(self, actor, here, args, extra) { // login notificati
 				var adamHolder = adam.findHolder;
 				if(adamHolder){
 					if(adamHolder.race == constants.RACE_TROLLOC){
-						adamMsg = "The Dreadlord has leashes for the pink ones, but I've already give one to "+adamHolder.name+".  Find them.";
+						adamMsg = "The Dreadlord has leashes for the pink ones, but I've already give one to "+adamHolder.name+".  Find "+adamHolder.himHer()+".";
 					}
 				}
 			}
