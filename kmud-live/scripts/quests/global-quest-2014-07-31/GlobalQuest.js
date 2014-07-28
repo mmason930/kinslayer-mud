@@ -113,53 +113,71 @@ var script20980 = function(self, actor, here, args, extra) {
 			global.Global2014Util.damaneZones[self.vnum] = self.room.zoneVnum;
 		}
 	}
-	if(self.fighting && random(0,100) < 5){ // call patrol
-		var room = here;
-		room.echo("The screaming cry of a beast can be heard from somewhere above you!");
-		wait 1;
-		if(self.room == room){
-			room.echo("A Seanchan scouting party has arrived!");
-			var loadRoom = getRoom(20900);
-			loadRoom.loadMob(1135);
-			var leader = loadRoom.people[0];
-			loadRoom.loadMob(10259);
-			var raken = loadRoom.people[0];
-			loadRoom.people[0].comm("follow leader");
-			loadRoom.loadMob(1136);
-			var scout1 = loadRoom.people[0];
-			loadRoom.people[0].comm("follow leader");
-			loadRoom.loadMob(1136);
-			var scout2 = loadRoom.people[0];
-			loadRoom.people[0].comm("follow leader");
-			leader.comm("group all");
-			leader.moveToRoom(room);
-			raken.moveToRoom(room);
-			scout1.moveToRoom(room);
-			scout2.moveToRoom(room);
-			leader.say("There she is! Go and collect her!");
-		}
-		mudLog(2, 102, self.name+" generated a seanchan patrol in room "+self.room.vnum);
-	}
-	function attackPCs(self, here){ // aggro
-		if(self && here){
-			var attackArr = [];
-			for(var i=0;i<here.people.length;i++){
-				if(here.people[i].vnum == -1){
-					attackArr.push(here.people[i]);
-				}
+	if(neck1 != 1120 && neck2 != 1120){ // aggro/call mob if not collared
+		if(self.fighting && random(0,100) < 5){ // call patrol
+			var room = here;
+			room.echo("The screaming cry of a beast can be heard from somewhere above you!");
+			wait 1;
+			if(self.room == room){
+				room.echo("A Seanchan scouting party has arrived!");
+				var loadRoom = getRoom(20900);
+				loadRoom.loadMob(1135);
+				var leader = loadRoom.people[0];
+				loadRoom.loadMob(10259);
+				var raken = loadRoom.people[0];
+				loadRoom.people[0].comm("follow leader");
+				loadRoom.loadMob(1136);
+				var scout1 = loadRoom.people[0];
+				loadRoom.people[0].comm("follow leader");
+				loadRoom.loadMob(1136);
+				var scout2 = loadRoom.people[0];
+				loadRoom.people[0].comm("follow leader");
+				leader.comm("group all");
+				leader.moveToRoom(room);
+				raken.moveToRoom(room);
+				scout1.moveToRoom(room);
+				scout2.moveToRoom(room);
+				leader.say("There she is! Go and collect her!");
 			}
-			if(attackArr.length > 0){
-				var target = attackArr[random(0, attackArr.length-1)];
-				if(!self.fighting){
-					self.say("Get away from me!");
-					self.comm("k "+target.name);
+			mudLog(2, 102, self.name+" generated a seanchan patrol in room "+self.room.vnum);
+		}
+		function attackPCs(self, here){ // aggro
+			if(self && here){
+				var attackArr = here.getMobs(-1);
+				if(attackArr.length > 0){
+					var target = attackArr[random(0, attackArr.length-1)];
+					if(!self.fighting){
+						self.say("Get away from me!");
+						self.comm("k "+target.name);
+					}
 				}
 			}
 		}
+		attackPCs(self, here);
+		wait 3;
+		attackPCs(self, here);
+	}else{ // collared
+		function followRandomPC(self, here){
+			if(self && here){
+				if(!self.leader){
+					var followArr = here.getMobs(-1);
+					if(followArr.length > 0){
+						self.comm("follow "+followArr[random(0,followArr.length-1)].name);
+					}
+				}else{
+					if(self.leader.room != self.room){
+						var followArr = here.getMobs(-1);
+						if(followArr.length > 0){
+							self.comm("follow "+followArr[random(0,followArr.length-1)].name);
+						}
+					}
+				}
+			}
+		}
+		followRandomPC(self, here);
+		wait 6;
+		followRandomPC(self, here);
 	}
-	attackPCs(self, here);
-	wait 3;
-	attackPCs(self, here);
 }
 
 /** PATROL AUTO RESCUE DAMANE **/
