@@ -67,6 +67,7 @@ var script20910 = function(self, actor, here, args, extra) {
 		return;
 	}
 	if(global.Global2014Util){ // examining pedestals for global event
+		sendKoradin("pedestals engaged");
 		var pedestal = global.Global2014Util.objectIdToPedestalMap[ obj.id ];
 		if(pedestal){
 			actor.send(" ");
