@@ -408,7 +408,7 @@ var script20991 = function(self, actor, here, args, extra) {
 				var leader = actor.leader;
 				if(leader.room == self.room && actor.room == self.room){ // damane and leader are in room
 					getCharCols(leader);
-					self.say("Nice work, "+leader.name+"!");
+					self.say("Nice work, "+leader.name+"! See "+(leader.race==constants.RACE_TROLLOC?"Murash":"Agelmar")+" for another a'dam.");
 					here.echo(self.name+" shoves "+actor.name+" inside a nearby cage and locks the door.");
 					actor.moveToRoom(getRoom(20800));
 					actor.comm("follow self");
