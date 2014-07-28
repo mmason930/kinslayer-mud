@@ -125,7 +125,7 @@ var script20981 = function(self, actor, here, args, extra) {
 	}
 }
 
-/** JOIN EVENT global command **/
+/** JOIN EVENT global command for event **/
 var script20982 = function(self, actor, here, args, extra) { 
 	getCharCols(actor);
 	_block;
