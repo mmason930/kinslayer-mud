@@ -121,17 +121,19 @@ var script20980 = function(self, actor, here, args, extra) {
 			loadRoom.loadMob(1135);
 			var leader = loadRoom.people[0];
 			loadRoom.loadMob(10259);
+			var raken = loadRoom.people[0];
 			loadRoom.people[0].comm("follow leader");
 			loadRoom.loadMob(1136);
+			var scout1 = loadRoom.people[0];
 			loadRoom.people[0].comm("follow leader");
 			loadRoom.loadMob(1136);
+			var scout2 = loadRoom.people[0];
 			loadRoom.people[0].comm("follow leader");
 			leader.comm("group all");
-			waitpulse 1;
-			for(var i=0;i<loadRoom.people.length;i++){
-				//sendKoradin("moving "+loadRoom.people[i].name);
-				loadRoom.people[i].moveToRoom(room);
-			}
+			leader.moveToRoom(room);
+			raken.moveToRoom(room);
+			scout1.moveToRoom(room);
+			scout2.moveToRoom(room);
 			leader.say("There she is! Go and collect her!");
 		}
 		mudLog(2, 102, self.name+" generated a seanchan patrol in room "+self.room.vnum);
