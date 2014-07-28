@@ -6,16 +6,16 @@ function Global2014Util()
 	this.pedestalRoomIds[constants.RACE_HUMAN] = [1,2,3];
 	this.pedestalRoomIds[constants.RACE_TROLLOC] = [4,7,6];
 
-	this.pedestals = [];
+	this.objectIdToPedestalMap = {};
 }
 
-Global2014Util.prototype.setupState3 = function()
+Global2014Util.prototype.setupStage3 = function()
 {
 	for(var race in this.pedestalRoomIds)
 	{
 		this.pedestalRoomIds[race].forEach(function(roomId) {
 
-			getRoom(1).echo("Room ID: " + roomId);
+			this.setupPedestal(race, roomId);
 		});
 	}
 };
@@ -26,6 +26,7 @@ Global2014Util.prototype.setupPedestal = function(race, roomId)
 
 	var pedestal = new Global2014Pedestal(object, this.pedestalMaxHitPoints, race);
 
+	this.objectIdToPedestalMap[object.id] = pedestal;
 	mudLog(constants.BRF, 100, "Pedestal loaded in room #" + roomId + " for race " + raceNumToText(race) + ".");
 };
 
