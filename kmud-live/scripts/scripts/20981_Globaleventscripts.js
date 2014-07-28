@@ -49,12 +49,12 @@ var script20982 = function(self, actor, here, args, extra) { // login notificati
 				}
 			}
 		}
-		var players = global.lsPlayers;
+		var players = global.dsPlayers;
 		var head = "Murash";
 		var script = ["The Dreadlord wants these scum for his own pleasure. Round them up and bring them to Tarwin's Gap for transport.", "Syyggar is waiting there. He will give you further instructions when you bring the damane to him.", adamMsg];; 
 	}
 	if(arrContains(players, actor)){
-		actor.send("You've already joined the event!");
+		actor.send("You've already joined the global event!");
 		return;
 	}
 	global.lsPlayers.push(actor);
