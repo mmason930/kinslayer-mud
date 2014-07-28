@@ -1040,7 +1040,7 @@ ACMD(do_ipfind)
 	sqlBuffer	<< " SELECT"
 				<< "   users.username AS Username,"
 				<< "   COUNT(*) AS Logins,"
-				<< "   users.prf AS PreferenceFlags"
+				<< "   users.plr AS PlayerFlags"
 				<< " FROM users, userLogin"
 				<< " WHERE users.user_id = userLogin.user_id"
 				<< " AND userLogin.host IN " << SQLUtil::buildListSQL(ipAddressList.begin(), ipAddressList.end(), true, true)
@@ -1063,12 +1063,9 @@ ACMD(do_ipfind)
 
 		std::string username = row.getString("Username");
 		int logins = row.getInt("Logins");
-		std::string bitvectorString = row.getString("PreferenceFlags");
+		int playerFlags = row.getInt("PlayerFlags");
 
-		long bits[PM_ARRAY_MAX];
-		ConvertBitvectorFromString(bitvectorString.c_str(), bits, PM_ARRAY_MAX);
-
-		if(IS_SET_AR(bits, PLR_NO_TRACE) && GET_LEVEL(ch) < LVL_IMPL)
+		if(IS_SET(playerFlags, (1 << PLR_NO_TRACE)) && GET_LEVEL(ch) < LVL_IMPL)
 			continue;
 
 		ch->send("%5d: %s\r\n", logins, username.c_str());
