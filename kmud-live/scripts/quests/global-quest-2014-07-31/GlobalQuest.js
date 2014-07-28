@@ -14,6 +14,7 @@ function Global2014Util()
 	this.eventIsActive = false;
 	this.dsPlayers = [];
 	this.lsPlayers = [];
+	this.damaneVnums = [1122,1123,1124,1125,1126,1127];
 	this.damaneZones = {};
 	this.damaneZones[1122] = 0;
 	this.damaneZones[1123] = 0;
@@ -109,6 +110,51 @@ var script20980 = function(self, actor, here, args, extra) {
 		if(global.Global2014Util){
 			global.Global2014Util.damaneZones[self.vnum] = self.room.zoneVnum;
 		}
+	}
+}
+
+var script20983 = function(self, actor, here, args, extra) {
+	if(global.Global2014Util){
+		_block;
+		var damane = getCharInListVis(actor, vArgs[1], actor.room.people, false);
+		if (!damane) {
+			actor.send("Leash who?");
+			return;
+		}
+		if(!arrContains(global.Global2014Util.damaneVnums, damane.vnum)){
+			actor.send(damane.heShe()+" would probably not appreciate that.");
+			return;
+		}
+		if((damane.fighting && !damane.isBashed) || actor.fighting){
+			actor.send("You can't get close enough!");
+			return;
+		}
+		actor.send("You start sneaking up on "+damane.name+", a'dam in hand...");
+		act(actor.name+" sneaks up behind "+damane.name+", a'dam in hand...",true, actor,null,null,constants.TO_ROOM);
+		actor.startTimer(7);
+		var success = runTimer(actor);
+		if(!success || !actor || !self){
+			return;
+		}
+		if(!damane || damane.room != actor.room){
+			actor.send("Drats! You were only a couple steps away!");
+			return;
+		}
+		if((damane.fighting && !damane.isBashed) || actor.fighting){
+			actor.send("You can't get close enough!");
+			return;
+		}
+		for(var i=0; i<actor.room.people.length; i++){
+			var peep = actor.room.people[i];
+			if(peep == damane || peep.fighting == damane){
+				peep.stopFighting();
+			}
+		}
+		actor.send("You snap the a'dam around "+damane.name+"'s neck!");
+		act("A look of horror crosses "+damane.name+"'s face as "+actor.name+" snaps an a'dam around her neck!",true, actor,null,null,constants.TO_ROOM);
+		self.moveToChar(damane);
+		damane.comm("wear adam");
+		damane.comm("follow actor");
 	}
 }
 
