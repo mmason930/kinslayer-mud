@@ -77,11 +77,13 @@ var script20980 = function(self, actor, here, args, extra) {
 /** LOGIN NOTIFICATION **/
 var script20981 = function(self, actor, here, args, extra) { 
 	//sendKoradin("working1");
-	if(global.Global2014Util.eventIsActive){
-		//sendKoradin("working");
-		waitpulse 1;
-		getCharCols(actor);
-		actor.send(cyn+bld+"Welcome to the global Kinslayer event! Type JOIN EVENT to get started."+nrm);
+	if(global.Global2014Util){
+		if(global.Global2014Util.eventIsActive){
+			//sendKoradin("working");
+			waitpulse 1;
+			getCharCols(actor);
+			actor.send(cyn+bld+"Welcome to the global Kinslayer event! Type JOIN EVENT to get started."+nrm);
+		}
 	}
 }
 
@@ -94,70 +96,77 @@ var script20982 = function(self, actor, here, args, extra) {
 		actor.send("Type JOIN EVENT to join the global event.");
 		return;
 	}
-	if(!global.Global2014Util.eventIsActive){
+	if(global.Global2014Util){
+		if(!global.Global2014Util.eventIsActive){
+			actor.send("The global event is not currently running! Log in on Thursday, July 31 at 8pm EST.");
+			return;
+		}
+		if(actor.race == constants.RACE_HUMAN){ // humans
+			var adamMsg = "We've been sent an item that will help you catch the damane. Come see me and I'll entrust it to you.";
+			var adam = global.Global2014Util.lsAdam;
+			if(adam){
+				if(adam.isValid){
+					var adamHolder = adam.findHolder;
+					if(adamHolder){
+						if(adamHolder.race == constants.RACE_HUMAN){
+							adamMsg = "We've been sent an item that will help you catch the damane, but I've already entrusted it to "+adamHolder.name+".  Find "+adamHolder.himHer()+" and assist us in this quest.";
+						}
+					}
+				}
+			}
+			var players = global.Global2014Util.lsPlayers;
+			var head = "Agelmar, Lord of Fal Dara";
+			var script = ["I am looking for brave warriors to round these women up and bring them to a rendezvous point in Tarwin's Gap for transport to the White Tower.  The Amyrlin wishes to study them.", "Lord Marshall Uno is waiting in Tarwin's Gap. He will give you further instructions when you bring the damane to him.", adamMsg];
+		}else{ // trolls
+			var adamMsg = "The Dreadlord has leashes for the pink ones. Come see me to get one.";
+			var adam = global.Global2014Util.dsAdam;
+			if(adam){
+				if(adam.isValid){
+					var adamHolder = adam.findHolder;
+					if(adamHolder){
+						if(adamHolder.race == constants.RACE_TROLLOC){
+							adamMsg = "The Dreadlord has leashes for the pink ones, but I've already give one to "+adamHolder.name+".  Find "+adamHolder.himHer()+".";
+						}
+					}
+				}
+			}
+			var players = global.Global2014Util.dsPlayers;
+			var head = "Murash";
+			var script = ["The Dreadlord wants these scum for his own pleasure. Round them up and bring them to Tarwin's Gap for transport.", "Syyggar is waiting there. He will give you further instructions when you bring the damane to him.", adamMsg];; 
+		}
+		if(arrContains(players, actor)){
+			actor.send("You've already joined the global event!");
+			return;
+		}
+		players.push(actor);
+		actor.send(cyn+bld+"You join the global event!"+nrm);
+		actor.send(" ");
+		actor.send(red+head+" tells you, 'We have had a report of six damane that escaped and are traveling around the world.'"+nrm);
+		actor.send(" ");
+		actor.send(red+head+" tells you, '"+script[0]+"'"+nrm);
+		actor.send(" ");
+		actor.send(red+head+" tells you, '"+script[1]+"'"+nrm);
+		actor.send(" ");
+		actor.send(red+head+" tells you, '"+script[2]+"'"+nrm);
+	}else{
 		actor.send("The global event is not currently running! Log in on Thursday, July 31 at 8pm EST.");
 		return;
 	}
-	if(actor.race == constants.RACE_HUMAN){ // humans
-		var adamMsg = "We've been sent an item that will help you catch the damane. Come see me and I'll entrust it to you.";
-		var adam = global.Global2014Util.lsAdam;
-		if(adam){
-			if(adam.isValid){
-				var adamHolder = adam.findHolder;
-				if(adamHolder){
-					if(adamHolder.race == constants.RACE_HUMAN){
-						adamMsg = "We've been sent an item that will help you catch the damane, but I've already entrusted it to "+adamHolder.name+".  Find "+adamHolder.himHer()+" and assist us in this quest.";
-					}
-				}
-			}
-		}
-		var players = global.Global2014Util.lsPlayers;
-		var head = "Agelmar, Lord of Fal Dara";
-		var script = ["I am looking for brave warriors to round these women up and bring them to a rendezvous point in Tarwin's Gap for transport to the White Tower.  The Amyrlin wishes to study them.", "Lord Marshall Uno is waiting in Tarwin's Gap. He will give you further instructions when you bring the damane to him.", adamMsg];
-	}else{ // trolls
-		var adamMsg = "The Dreadlord has leashes for the pink ones. Come see me to get one.";
-		var adam = global.Global2014Util.dsAdam;
-		if(adam){
-			if(adam.isValid){
-				var adamHolder = adam.findHolder;
-				if(adamHolder){
-					if(adamHolder.race == constants.RACE_TROLLOC){
-						adamMsg = "The Dreadlord has leashes for the pink ones, but I've already give one to "+adamHolder.name+".  Find "+adamHolder.himHer()+".";
-					}
-				}
-			}
-		}
-		var players = global.Global2014Util.dsPlayers;
-		var head = "Murash";
-		var script = ["The Dreadlord wants these scum for his own pleasure. Round them up and bring them to Tarwin's Gap for transport.", "Syyggar is waiting there. He will give you further instructions when you bring the damane to him.", adamMsg];; 
-	}
-	if(arrContains(players, actor)){
-		actor.send("You've already joined the global event!");
-		return;
-	}
-	players.push(actor);
-	actor.send(cyn+bld+"You join the global event!"+nrm);
-	actor.send(" ");
-	actor.send(red+head+" tells you, 'We have had a report of six damane that escaped and are traveling around the world.'"+nrm);
-	actor.send(" ");
-	actor.send(red+head+" tells you, '"+script[0]+"'"+nrm);
-	actor.send(" ");
-	actor.send(red+head+" tells you, '"+script[1]+"'"+nrm);
-	actor.send(" ");
-	actor.send(red+head+" tells you, '"+script[2]+"'"+nrm);
 }
 
 /** MURASH / AGELMAR ISSUE ANOTHER A'DAM ON ENTER **/
 var script20985 = function(self, actor, here, args, extra) { 
-	waitpulse 1;
-	if(actor && self){
-		if(self.vnum == 1700){ // murash
-			var players = global.Global2014Util.dsPlayers;
-		}else{
-			var players = global.Global2014Util.lsPlayers;
-		}
-		if(actor.race == self.race && arrContains(players, actor)){
+	if(global.Global2014Util){
+		waitpulse 1;
+		if(actor && self){
+			if(self.vnum == 1700){ // murash
+				var players = global.Global2014Util.dsPlayers;
+			}else{
+				var players = global.Global2014Util.lsPlayers;
+			}
+			if(actor.race == self.race && arrContains(players, actor)){
 			
+			}
 		}
 	}
 }
