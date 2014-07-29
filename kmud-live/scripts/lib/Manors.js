@@ -329,14 +329,18 @@ function resetManor(manor) {
 			if (room.vnum == manor.storageRoomVnum) {
 				for (var _autoKey in room.items) {
 					var item = room.items[_autoKey];
-					item.moveToRoom(outsideGateRoom);
+					if(item){
+						item.moveToRoom(outsideGateRoom);
+					}
 
 				}
 			}
 			else {
 				for (var _autoKey in room.items) {
 					var item = room.items[_autoKey];
-					item.moveToRoom(dumpRoom);
+					if(item){
+						item.moveToRoom(dumpRoom);
+					}
 					//item.extract();
 				}
 			}
