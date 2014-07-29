@@ -940,10 +940,10 @@ var script18605 = function(self, actor, here, args, extra) {
 					self.say("I don't seem to have a " + arg3 + " to put " + target.name + " in.");
 					return;
 				}
-				for (var _autoKey in self.inventory) {
-					var item = self.inventory[_autoKey];
+
+				self.inventory.forEach(function(item) {
 					self.comm("put " + item.namelist.split(" ")[0] + " " + arg3);
-				}
+				});
 				return;
 			}
 			var target = getObjInListVis(self,arg2,self.inventory);
