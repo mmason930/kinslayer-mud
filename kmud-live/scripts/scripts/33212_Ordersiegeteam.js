@@ -69,8 +69,10 @@ var script33212 = function(self, actor, here, args, extra) {
 		act("The siege team rolls the cannon "+dirToText(dir)+".",true,null,self,null,constants.TO_ROOM);
 		for (var _autoKey in self.room.people) {
 			var person = self.room.people[_autoKey];
+			if(person){
 			if (person.name == "a member of the siege team")
 				person.moveToRoom(newRoom);
+			}
 		}
 		self.moveToRoom(newRoom);
 		act("A siege team has arrived, slowly rolling an iron cannon between them.",true,null,self,null,constants.TO_ROOM);
