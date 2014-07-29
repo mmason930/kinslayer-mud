@@ -98,7 +98,7 @@ Global2014Pedestal.prototype.repair = function(character, amount)
 
 	mudLog(constants.BRF, 100, "Pedestal in room #" + this.roomVnum + " is now at " + this.getRepairPercent() + "% repaired.");
 
-	if(this.hitPoints <= 0)
+	if(this.getRepairPercent() >= 100)
 	{
 		mudLog(constants.BRF, 100, "Pedestal in room #" + this.roomVnum + " has been enabled.");
 		this.hitPoints = this.getMaxHitPoints();

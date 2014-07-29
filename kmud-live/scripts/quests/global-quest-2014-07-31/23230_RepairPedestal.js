@@ -37,11 +37,55 @@ var script23230 = function(self, actor, here, args, extra) {
 		return;
 	}
 
-	if(!pedestal.isDisabled())
+	var checks = function()
 	{
-		actor.send("The pedestal is not disabled. You cannot repair it yet!");
+		if(!pedestal.isDisabled())
+		{
+			actor.send("The pedestal is not disabled. You cannot repair it yet!");
+			return false;
+		}
+
+		if(actor.fighting)
+		{
+			actor.send("You can't repair that while engaged!");
+			return false;
+		}
+
+		if(actor.position <= constants.POS_FIGHTING)
+		{
+			actor.send("You must be STANDING to do that!");
+			return false;
+		}
+
+		return true;
+	};
+
+	if(!checks())
+	{
 		return;
 	}
 
-	actor.send("You are repairing " + targetObject.name);
+	act("$n begins repairing $P.", false, actor, null, targetObject, constants.TO_ROOM);
+	act("You begin repairing $P.", false, actor, null, targetObject, constants.TO_CHAR);
+
+	while(true)
+	{
+		actor.startTimer(10);
+		var success = runTimer(actor);
+
+		if(!success || !checks())
+		{
+			break;
+		}
+
+		pedestal.repair(actor, random(3, 7));
+		act("$n repairs a portion of $P!", false, actor, null, targetObject, constants.TO_ROOM);
+		act("You repair a portion of $P!", false, actor, null, targetObject, constants.TO_CHAR);
+
+		if(pedestal.isDisabled())
+		{
+			act("$p topples over and falls to the ground!", false, null, targetObject, null, constants.TO_ROOM);
+			break;
+		}
+	}
 };
