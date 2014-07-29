@@ -99,7 +99,6 @@ var script20986 = function(self, actor, here, args, extra) {
 		global.global2014Util = new Global2014Util();
 		global.global2014Util.eventIsActive = true;
 		mudLog(2, 100, "The global event has been turned ON by "+actor.name+".");
-		mudLog(2, 100, "Loading Uno and Syyggar in gap.");
 	}else if(strn_cmp(vArgs[1], "off", 3)){
 		if(global.global2014Util){
 			global.global2014Util.eventIsActive = false;
