@@ -67,7 +67,6 @@ Global2014Util.prototype.setupPedestal = function(race, roomId)
 	mudLog(constants.BRF, 100, "Pedestal loaded in room #" + roomId + " for race " + raceNumToText(race) + ".");
 };
 
-global.global2014Util = new Global2014Util();
 
 /** TURN GLOBAL EVENT ON OR OFF **/
 var script20986 = function(self, actor, here, args, extra) {
