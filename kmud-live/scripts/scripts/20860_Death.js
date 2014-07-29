@@ -16,7 +16,7 @@ var script20860 = function(self, actor, here, args, extra) {
 	
 	// Damane global event July 2014
 	if(global.global2014Util){
-		if(arrContains(global.global2014util.damaneVnums, self.vnum)){
+		if(arrContains(global.global2014Util.damaneVnums, self.vnum)){
 			mudLog(2, 100, self.name+" has been killed by "+actor.name);
 			global.global2014Util.damaneZoneVnums[self.vnum] = 0;
 		}
