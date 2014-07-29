@@ -30,13 +30,39 @@ function Global2014Util()
 	this.pointMap[constants.RACE_TROLLOC] = 0;
 }
 
+Global2014Util.prototype.setupPedestalPointTimeout = function()
+{
+	var self = this;
+	var callback = function() {
+
+		var pointsToReward = {};
+
+		for(var objectId in self.objectIdToPedestalMap)
+		{
+			var pedestal = self.objectIdToPedestalMap[objectId];
+
+			if(!pointsToReward.hasOwnProperty[pedestal.getRace()])
+				pointsToReward[pedestal.getRace()] = 0;
+
+			if(!pedestal.isDisabled())
+				pointsToReward[pedestal.getRace()]++;
+		}
+
+		mudLog("Light points: " + pointsToReward[constants.RACE_HUMAN] + ", Shadow points: " + pointsToReward[constants.RACE_TROLLOC]);
+
+		self.setupPedestalPointTimeout();
+	};
+
+	setTimeout(60*6, callback);
+};
+
 Global2014Util.prototype.getPoints = function(race){
 	return this.pointMap[race];
-}
+};
 
 Global2014Util.prototype.updatePoints = function(num, race){
 	this.pointMap[race] += num;
-}
+};
 
 Global2014Util.prototype.loadMobs = function(){
 	var uno = getRoom(this.lsBaseRoomVnum).loadMob(1711);
@@ -49,7 +75,7 @@ Global2014Util.prototype.loadMobs = function(){
 		var damane = room.loadMob(this.damaneVnums[i]);
 		mudLog(2,100,"Loading "+damane.name+" at room "+room.vnum);
 	}
-}
+};
 
 Global2014Util.prototype.setupStage3 = function()
 {
@@ -118,7 +144,7 @@ var script20986 = function(self, actor, here, args, extra) {
 		actor.send("\nglobevent < ON / OFF / LOADMOBS / STAGE3 >");
 		return;
 	}
-}
+};
 
 /** DAMANE PORTING / UPDATING TRACKING ON MAP / AGGROING / CALL PATROL **/
 var script20980 = function(self, actor, here, args, extra) {
@@ -337,7 +363,10 @@ var script20982 = function(self, actor, here, args, extra) {
 			}
 			var players = global.global2014Util.lsPlayers;
 			var head = "Agelmar, Lord of Fal Dara";
-			var script = ["I am looking for brave warriors to round these women up and bring them to a rendezvous point in Tarwin's Gap for transport to the White Tower.  The Amyrlin wishes to study them.", "Lord Marshall Uno is waiting in Tarwin's Gap. He will give you further instructions when you bring the damane to him.", adamMsg];
+			var script = [
+				"I am looking for brave warriors to round these women up and bring them to a rendezvous point in Tarwin's Gap for transport to the White Tower.  The Amyrlin wishes to study them.",
+				"Lord Marshall Uno is waiting in Tarwin's Gap. He will give you further instructions when you bring the damane to him.",
+				adamMsg];
 		}else{ // trolls
 			var adamMsg = "The Dreadlord has leashes for the pink ones. Come see me to get one.";
 			var adam = global.global2014Util.dsAdam;
