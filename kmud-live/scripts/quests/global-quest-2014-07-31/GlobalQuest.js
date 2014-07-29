@@ -44,15 +44,20 @@ Global2014Util.prototype.setupPedestalPointTimeout = function()
 			if(!pointsToReward.hasOwnProperty[pedestal.getRace()])
 				pointsToReward[pedestal.getRace()] = 0;
 
-			if(!pedestal.isDisabled())
+			if(!pedestal.isDisabled()) {
+
+				var pb = pointsToReward[pedestal.getRace()];
 				pointsToReward[pedestal.getRace()]++;
+
+				getRoom(2).echo("Awarding race " + pedestal.getRace() + ". Points now: " + pointsToReward[pedestal.getRace()] + ", Before: " + pb);
+			}
 		}
 
 		mudLog(constants.BRF, 100, "Light points: " + pointsToReward[constants.RACE_HUMAN] + ", Shadow points: " + pointsToReward[constants.RACE_TROLLOC]);
 
 		if(self.eventStage == 3)
 			self.setupPedestalPointTimeout();
-		
+
 		for(var race in pointsToReward)
 		{
 			var points = pointsToReward[race];
@@ -102,7 +107,8 @@ Global2014Util.prototype.setupStage3 = function()
 			self.setupPedestal(race, roomId);
 		});
 	}
-	
+
+	this.setupPedestalPointTimeout();
 	this.eventStage = 3;
 };
 
