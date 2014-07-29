@@ -41,8 +41,10 @@ Global2014Util.prototype.setupPedestalPointTimeout = function()
 		{
 			var pedestal = self.objectIdToPedestalMap[objectId];
 
-			if(!pointsToReward.hasOwnProperty[pedestal.getRace()])
+			if(pointsToReward[pedestal.getRace()] == undefined) {
 				pointsToReward[pedestal.getRace()] = 0;
+				getRoom(2).echo("Property undefined. Key: " + pedestal.getRace());
+			}
 
 			if(!pedestal.isDisabled()) {
 
