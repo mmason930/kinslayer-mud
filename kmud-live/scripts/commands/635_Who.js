@@ -328,6 +328,11 @@ var script635 = function(self, actor, here, args, extra) {
 				hDate = arr.join(nrm+"-"+infoColor);
 				disp += "The record high of "+infoColor+gHigh+nrm+" players was reached on "+infoColor+hDate+nrm+".";
 			}
+			if(global.global2014Util){ // global event
+				if(global.global2014Util.eventIsActive){
+					disp += cyn+bld+"\nThe Kinslayer global event is currently running! Light Points: "+global.global2014Util.pointMap[constants.RACE_HUMAN]+"  Dark Points: "+global.global2014Util.pointMap[constants.RACE_TROLLOC]+nrm;
+				}
+			}
 		}
 		else {
 			disp += "\n---------------------------------------";
