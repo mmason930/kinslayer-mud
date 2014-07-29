@@ -403,6 +403,7 @@ var script20985 = function(self, actor, here, args, extra) {
 var script20991 = function(self, actor, here, args, extra) {
 	waitpulse 1;
 	if(global.global2014Util && self && actor){
+		sendKoradin("testing");
 		if(arrContains(global.global2014Util.damaneVnums, actor.vnum)){ // damane has entered
 			if(actor.leader){ // damane has a leader
 				var leader = actor.leader;
