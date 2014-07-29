@@ -342,6 +342,7 @@ function resetManor(manor) {
 			}
 			for (var _autoKey in room.people) {
 				var mob = room.people[_autoKey];
+				if(mob){
 				if (mob.vnum > -1 && !mob.riddenBy && !isName("merc",mob.namelist)) {
 					mob.moveToRoom(dumpRoom);
 					//mob.extract();
@@ -350,6 +351,7 @@ function resetManor(manor) {
 					mob.moveToRoom(outsideGateRoom);
 					mob.comm("look");
 					mob.send("You have been kicked out of the "+manor.name+".");
+				}
 				}
 			}
 		}
