@@ -82,7 +82,7 @@ var script23230 = function(self, actor, here, args, extra) {
 		act("$n repairs a portion of $P!", false, actor, null, targetObject, constants.TO_ROOM);
 		act("You repair a portion of $P!", false, actor, null, targetObject, constants.TO_CHAR);
 
-		if(pedestal.isDisabled())
+		if(!pedestal.isDisabled())
 		{
 			act("$p is erected back into place, fully repaired!", false, null, targetObject, null, constants.TO_ROOM);
 			break;
