@@ -353,15 +353,15 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 		}
 	}
 	var damaneZones = [];
-	if(global.Global2014Util){
-		if(global.Global2014Util.eventIsActive){
+	if(global.global2014Util){
+		if(global.global2014Util.eventIsActive){
 			//sendKoradin("koradin test: pushing svals");
-			damaneZones.push(global.Global2014Util.damaneZones[1122]);
-			damaneZones.push(global.Global2014Util.damaneZones[1123]);
-			damaneZones.push(global.Global2014Util.damaneZones[1124]);
-			damaneZones.push(global.Global2014Util.damaneZones[1125]);
-			damaneZones.push(global.Global2014Util.damaneZones[1126]);
-			damaneZones.push(global.Global2014Util.damaneZones[1127]);
+			damaneZones.push(global.global2014Util.damaneZones[1122]);
+			damaneZones.push(global.global2014Util.damaneZones[1123]);
+			damaneZones.push(global.global2014Util.damaneZones[1124]);
+			damaneZones.push(global.global2014Util.damaneZones[1125]);
+			damaneZones.push(global.global2014Util.damaneZones[1126]);
+			damaneZones.push(global.global2014Util.damaneZones[1127]);
 			var questIsOn = true;
 		}
 	}
