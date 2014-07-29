@@ -15,12 +15,12 @@ var script20860 = function(self, actor, here, args, extra) {
 	}
 	
 	// Damane global event July 2014
-	if(self.vnum < 1128 && self.vnum > 1121){
-		var aMob = getMobAtRoom(20800, 20804);
-		if(aMob){
-			setSval(aMob, 20980, self.vnum, -2);
+	if(global.global2014Util){
+		if(arrContains(global.global2014util.damaneVnums, self.vnum)){
+			mudLog(2, 100, self.name+" has been killed by "+actor.name);
+			global.global2014Util.damaneZoneVnums[self.vnum] = 0;
 		}
-	}	
+	}
 
 	//Emoticon Quest
 	if(actor.vnum == 50 || actor.vnum == 51 || actor.vnum == 56 || actor.vnum == 57 || actor.vnum == 58 && self.vnum == -1)
