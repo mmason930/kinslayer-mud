@@ -3,8 +3,8 @@ function Global2014Util()
 	this.pedestalObjectId = 23204;
 	this.pedestalMaxHitPoints = 500;
 	this.pedestalRoomIds = {};
-	this.pedestalRoomIds[constants.RACE_HUMAN] = [20651,20648,20649];
-	this.pedestalRoomIds[constants.RACE_TROLLOC] = [20645,20644,20642];
+	this.pedestalRoomIds[constants.RACE_HUMAN] = [1,2,3];
+	this.pedestalRoomIds[constants.RACE_TROLLOC] = [4,7,6];
 
 	this.objectIdToPedestalMap = {};
 	
@@ -13,6 +13,7 @@ function Global2014Util()
 	this.dsAdam = null;
 	this.lsAdam = null;
 	this.eventIsActive = false;
+	this.eventStage = 1;
 	this.dsPlayers = [];
 	this.lsPlayers = [];
 	this.damaneVnums = [1122,1123,1124,1125,1126,1127];
@@ -37,6 +38,19 @@ Global2014Util.prototype.updatePoints = function(num, race){
 	this.pointMap[race] += num;
 }
 
+Global2014Util.prototype.loadMobs = function(){
+	var uno = getRoom(this.lsBaseRoomVnum).loadMob(1711);
+	mudLog(2,100,"Loading "+uno.name+" at room "+this.lsBaseRoomVnum);
+	var syg = getRoom(this.dsBaseRoomVnum).loadMob(5609);
+	mudLog(2,100,"Loading "+syg.name+" at room "+this.dsBaseRoomVnum);
+	var damaneStartRooms = [3138, 1041, 13389, 5308, 18164, 20128];
+	for(var i=0;i<this.damaneVnums.length;i++){
+		var room = getRoom(damaneStartRooms[i]);
+		var damane = room.loadMob(this.damaneVnums[i]);
+		mudLog(2,100,"Loading "+damane.name+" at room "+room.vnum);
+	}
+}
+
 Global2014Util.prototype.setupStage3 = function()
 {
 	var self = this;
@@ -55,6 +69,8 @@ Global2014Util.prototype.setupStage3 = function()
 			self.setupPedestal(race, roomId);
 		});
 	}
+	
+	this.eventStage = 3;
 };
 
 Global2014Util.prototype.setupPedestal = function(race, roomId)
@@ -83,7 +99,7 @@ var script20986 = function(self, actor, here, args, extra) {
 		global.global2014Util = new Global2014Util();
 		global.global2014Util.eventIsActive = true;
 		mudLog(2, 100, "The global event has been turned ON by "+actor.name+".");
-		mudLog(2, 100, "A'dams and player arrays have been wiped.");
+		mudLog(2, 100, "Loading Uno and Syyggar in gap.");
 	}else if(strn_cmp(vArgs[1], "off", 3)){
 		if(global.global2014Util){
 			global.global2014Util.eventIsActive = false;
@@ -427,7 +443,17 @@ var script20991 = function(self, actor, here, args, extra) {
 }
 
 
-/** UNO/SYYGGAR STAGE 3 INFO SCRIPTS **/
+/** UNO/SYYGGAR STAGE 3 INFO **/
 var script20992 = function(self, actor, here, args, extra) {
-
+	waitpulse 5;
+	if(self && actor && global.global2014Util){
+		if(self.race == actor.race){
+			getCharCols(actor);
+			if(global.global2014Util.eventStage == 3){
+				
+			}else{
+				
+			}
+		}
+	}
 }
