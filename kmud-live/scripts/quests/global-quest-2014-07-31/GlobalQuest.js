@@ -428,6 +428,6 @@ var script20991 = function(self, actor, here, args, extra) {
 
 
 /** UNO/SYYGGAR STAGE 3 INFO SCRIPTS **/
-var script20991 = function(self, actor, here, args, extra) {
+var script20992 = function(self, actor, here, args, extra) {
 
 }
