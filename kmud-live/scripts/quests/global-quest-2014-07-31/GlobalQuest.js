@@ -67,7 +67,7 @@ Global2014Util.prototype.setupPedestalPointTimeout = function()
 			            + grn + "The Light has earned " + pointsToReward[constants.RACE_TROLLOC] + " point" + (pointsToReward[constants.RACE_TROLLOC] == 1 ? "" : "s") + "." + nrm + "\n";
 
 			player.send(message);
-		});
+		});//
 	};
 
 	setTimeout(60*6, callback);
