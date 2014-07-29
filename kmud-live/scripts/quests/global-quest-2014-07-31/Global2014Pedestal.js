@@ -86,7 +86,7 @@ Global2014Pedestal.prototype.repair = function(character, amount)
 		return;
 	}
 
-	if(damageAmount <= 0)
+	if(amount <= 0)
 	{
 		mudLog(constants.BRF, 100, "Pedestal `" + this.objectId + "` in room #" + this.roomVnum + " is being repaired a negative amount(" + amount + ") from " + character.name + ".");
 		return;
