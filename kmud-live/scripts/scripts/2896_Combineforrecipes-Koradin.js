@@ -6,14 +6,15 @@ var script2896 = function(self, actor, here, args, extra) {
 		// return;
 	// }
 	for (i=0;i<itemArr.length;i++) {
-		if (itemArr[i].vnum < 2896 || itemArr[i].vnum > 2899)
+		var nextItem = itemArr[i];
+		if (nextItem.vnum < 2896 || nextItem.vnum > 2899)
 			continue;
-		var iRecType = itemArr[i].getPval("recType");
-		var iRecVnum = itemArr[i].getPval("recVnum");
-		var iExaView = itemArr[i].getPval("exaView");
+		var iRecType = nextItem.getPval("recType");
+		var iRecVnum = nextItem.getPval("recVnum");
+		var iExaView = nextItem.getPval("exaView");
 		var newView = [];
 		if (!iRecType || !iExaView || !iRecVnum) {
-			//here.echo(itemArr[i].name + " failed");
+			//here.echo(nextItem.name + " failed");
 			continue;
 		}
 		iExaView = iExaView.split("~");
@@ -70,13 +71,13 @@ var script2896 = function(self, actor, here, args, extra) {
 						newObj.setPval("recType",iRecType,true);
 						newObj.setPval("recVnum",iRecVnum,true);
 						newObj.setPval("exaView",iExaView,true);
-						var namelist = itemArr[i].namelist.split(" ");
+						var namelist = nextItem.namelist.split(" ");
 						newObj.setRetoolName(namelist[0]+" "+namelist[1]+" "+namelist[2]+" "+aType+" "+alias);
 						item.moveToRoom(getRoom(20899));
-						//here.echo("combining "+item.getPval("exaView") + " - " + item.getPval("recVnum") +" with " +itemArr[i].getPval("exaView") + " - " + itemArr[i].getPval("recVnum")); 
+						//here.echo("combining "+item.getPval("exaView") + " - " + item.getPval("recVnum") +" with " +nextItem.getPval("exaView") + " - " + nextItem.getPval("recVnum")); 
 						item.extract();
-						itemArr[i].moveToRoom(getRoom(20899));
-						itemArr[i].extract();
+						nextItem.moveToRoom(getRoom(20899));
+						nextItem.extract();
 						actor.send("You finish combining the recipe.");
 						act("The sound of crackling paper ceases as $n finishes $s work.", true, actor, null, null, constants.TO_ROOM);
 						return;
