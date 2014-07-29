@@ -78,7 +78,7 @@ var script23231 = function(self, actor, here, args, extra) {
 			break;
 		}
 
-		pedestal.takeDamage(actor, random(10, 30));
+		pedestal.takeDamage(actor, random(30, 90));
 		act("$n delivers a damaging blow to $P!", false, actor, null, targetObject, constants.TO_ROOM);
 		act("You deliver a damaging blow to $P!", false, actor, null, targetObject, constants.TO_CHAR);
 
