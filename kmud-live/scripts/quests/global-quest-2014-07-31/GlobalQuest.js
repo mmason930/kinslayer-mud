@@ -56,7 +56,7 @@ Global2014Util.prototype.setupPedestalPointTimeout = function()
 			self.setupPedestalPointTimeout();
 
 		Object.keys(pointsToReward).forEach(function(race) {
-			self.updatePoints(points, pointsToReward[race]);
+			self.updatePoints(race, pointsToReward[race]);
 		}, this);
 
 		self.dsPlayers.concat(self.lsPlayers).forEach(function(player) {
