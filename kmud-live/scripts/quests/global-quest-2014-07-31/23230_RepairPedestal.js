@@ -84,7 +84,7 @@ var script23230 = function(self, actor, here, args, extra) {
 
 		if(pedestal.isDisabled())
 		{
-			act("$p topples over and falls to the ground!", false, null, targetObject, null, constants.TO_ROOM);
+			act("$p is erected back into place, fully repaired!", false, null, targetObject, null, constants.TO_ROOM);
 			break;
 		}
 	}

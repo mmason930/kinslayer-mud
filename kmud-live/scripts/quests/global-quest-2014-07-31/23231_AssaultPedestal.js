@@ -78,13 +78,13 @@ var script23231 = function(self, actor, here, args, extra) {
 			break;
 		}
 
-		pedestal.takeDamage(actor, random(30, 90));
+		pedestal.takeDamage(actor, random(30, 120));
 		act("$n delivers a damaging blow to $P!", false, actor, null, targetObject, constants.TO_ROOM);
 		act("You deliver a damaging blow to $P!", false, actor, null, targetObject, constants.TO_CHAR);
 
 		if(pedestal.isDisabled())
 		{
-			act("$p is erected back into place, fully repaired!", false, null, targetObject, null, constants.TO_ROOM);
+			act("$p topples over and falls to the ground!", false, null, targetObject, null, constants.TO_ROOM);
 			break;
 		}
 	}
