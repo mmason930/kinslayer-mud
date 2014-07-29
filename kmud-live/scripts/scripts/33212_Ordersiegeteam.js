@@ -124,8 +124,10 @@ var script33212 = function(self, actor, here, args, extra) {
 				act("The siege team rolls the cannon away, heading back to camp.", true, null, self,null,constants.TO_ROOM);
 				for (var _autoKey in self.room.people) {
 					var person = self.room.people[_autoKey];
+					if(person){
 					if (person.name == "a member of the siege team")
 						person.moveToRoom(getRoom(20899));
+					}
 				}
 				setSval(actor,33214,"hired",0);
 				self.moveToRoom(getRoom(20899));
