@@ -92,7 +92,7 @@ var script20986 = function(self, actor, here, args, extra) {
 	_block;
 	var vArgs = args.split(" ");
 	if(!vArgs[1]){
-		actor.send("ON or OFF?");
+		actor.send("globevent < ON / OFF / LOADMOBS >");
 		return;
 	}
 	if(strn_cmp(vArgs[1], "on", 2)){
