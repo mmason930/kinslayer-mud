@@ -147,8 +147,9 @@ var script20986 = function(self, actor, here, args, extra) {
 			global.global2014Util.eventIsActive = false;
 			global.global2014Util.dsAdam = null;
 			global.global2014Util.lsAdam = null;
-			global.global2014Util.dsPlayers = [];
-			global.global2014Util.lsPlayers = [];
+			global.global2014Util.dsPlayers.length = 0;
+			global.global2014Util.lsPlayers.length = 0;
+			global.global2014Util.eventStage = 0;
 			global.global2014Util = null;
 		}
 		mudLog(2, 100, "The global event has been turned OFF by "+actor.name+".");
