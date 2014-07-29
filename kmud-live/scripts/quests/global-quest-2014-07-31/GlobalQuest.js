@@ -128,6 +128,7 @@ var script20980 = function(self, actor, here, args, extra) {
 	if(self.fighting){ randomRoll = 40; }
 	if(newRoom && !self.isBashed && random(1, randomRoll) == 1 && neck1 != 1120 && neck2 != 1120){
 		if(arrContains(roomArr, newRoom.zoneVnum)){
+			mudLog(2,100,self.name+" teleported to new room "+newRoom.vnum+" while "+(self.fighting?"":"dis")+"engaged");
 			act(self.name+" disappears in a flash of bright light.",true,self,null,null,constants.TO_ROOM);
 			self.moveToRoom(newRoom);
 			act(self.name+" arrives in a flash of bright light!",true,self,null,null,constants.TO_ROOM);
