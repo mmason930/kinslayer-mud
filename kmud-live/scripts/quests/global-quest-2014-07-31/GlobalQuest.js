@@ -501,11 +501,40 @@ var script20992 = function(self, actor, here, args, extra) {
 	waitpulse 5;
 	if(self && actor && global.global2014Util){
 		if(self.race == actor.race){
+			if(self.race == constants.RACE_HUMAN){
+				var gater = "Amyrlin";
+				var otherRace = "trollocs";
+				var direction = "east";
+				var cityH = "Agelmar";
+			}else{
+				var gater = "Dreadlord";
+				var otherRace = "humans";
+				var direction = "west";
+				var cityH = "Murash";
+			}
 			getCharCols(actor);
 			if(global.global2014Util.eventStage == 3){
-				
+				self.tell(actor, "I've sent word to the "+gater+" to begin weaving a gate.");
+				actor.send(" ");
+				self.tell(actor, "These three pedestals will amplify the distance that the gate can be weaved.");
+				actor.send(" ");
+				self.tell(actor, "We need them intact for as long as possible so the "+gater+" can open the gate and we can transport the damane out.");
+				actor.send(" ");
+				self.tell(actor, "I need you to guard them and REPAIR them if they become disabled.");
+				actor.send(" ");
+				self.tell(actor, "The "+otherRace+" are camped just "+direction+" of here, and it appears they're using the same ter'angreal pedestals we are.");
+				actor.send(" ");
+				self.tell(actor, "Go and ASSAULT their pedestals to disable them!");
+				actor.send(" ");
+				self.tell(actor, "I'll let you know when the gate appears.");
 			}else{
-				
+				self.tell(actor, "We need to round up the six escaped damane!");
+				actor.send(" ");
+				self.tell(actor, "Go get an a'dam from "+cityH+" and then search for them using your MAP.");
+				actor.send(" ");
+				self.tell(actor, "After you LEASH them, they'll follow you, so just bring them here and I'll take care of the rest.");
+				actor.send(" ");
+				self.tell(actor, "Hurry now!  I think the "+otherRace+" know and are planning to beat you to them!");
 			}
 		}
 	}
