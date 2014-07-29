@@ -58,7 +58,7 @@ var script8278 = function(self, actor, here, args, extra) {
 	cost *= 9;
 	for (var _autoKey in actor.followers ) {
 		var follower = actor.followers [_autoKey];
-		if( follower.id != manor.ownerUserId && !arrContains(manor.allowedUsers, follower.id) )
+		if( follower.vnum == -1 && follower.id != manor.ownerUserId && !arrContains(manor.allowedUsers, follower.id) )
 		{
 			self.comm( "say I won't provide services to " + capFirstLetter(follower.name) + "!" );
 			return;
