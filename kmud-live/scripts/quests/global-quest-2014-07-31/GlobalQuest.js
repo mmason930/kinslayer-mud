@@ -402,8 +402,8 @@ var script20985 = function(self, actor, here, args, extra) {
 /** DAMANE TURN IN AT UNO/SYYGGAR IN GAP **/
 var script20991 = function(self, actor, here, args, extra) {
 	waitpulse 1;
+	sendKoradin(global.global2014Util+" "+self.name+" "+actor.name);
 	if(global.global2014Util && self && actor){
-		sendKoradin("testing");
 		if(arrContains(global.global2014Util.damaneVnums, actor.vnum)){ // damane has entered
 			if(actor.leader){ // damane has a leader
 				var leader = actor.leader;
