@@ -48,9 +48,16 @@ Global2014Util.prototype.setupPedestalPointTimeout = function()
 				pointsToReward[pedestal.getRace()]++;
 		}
 
-		mudLog("Light points: " + pointsToReward[constants.RACE_HUMAN] + ", Shadow points: " + pointsToReward[constants.RACE_TROLLOC]);
+		mudLog(constants.BRF, 100, "Light points: " + pointsToReward[constants.RACE_HUMAN] + ", Shadow points: " + pointsToReward[constants.RACE_TROLLOC]);
 
-		self.setupPedestalPointTimeout();
+		if(self.eventStage == 3)
+			self.setupPedestalPointTimeout();
+		
+		for(var race in pointsToReward)
+		{
+			var points = pointsToReward[race];
+			self.updatePoints(points, race);
+		}
 	};
 
 	setTimeout(60*6, callback);
