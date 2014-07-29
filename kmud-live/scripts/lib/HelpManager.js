@@ -396,6 +396,10 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 					buffer += yel+bld+"X  "+nrm;
 					count += 1;
 				}
+				if (x == 2 && y == 6 && actor.room.zoneVnum == 43 && count < 1) {
+					buffer += yel+bld+"  X"+nrm;
+					count += 1;
+				}
 				if (actor.room.zoneVnum == r[4])
 				{
 					if (r[0] == x && r[1] == y) {
