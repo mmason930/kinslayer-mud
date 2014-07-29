@@ -62,7 +62,6 @@ var script23231 = function(self, actor, here, args, extra) {
 
 	if(!checks())
 	{
-		here.echo("Checks failed.");
 		return;
 	}
 
