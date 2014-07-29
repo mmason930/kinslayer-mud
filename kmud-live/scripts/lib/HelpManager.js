@@ -284,6 +284,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 	var niamh         = [13,2,"_  "," `",66];
 	var niamh3        = [13,2,""   ,"N"  ,181, bld];
 	var niamh2        = [14,2,"   ","P  ",181, bld];
+	var maerwynn      = [14,3,"   ","   ",237];
 	var gap           = [12,3,"TG",""   ,206, bld];
 	var niamhOgier    = [13,3,"__/" ,"   ",181];
 	var nFD           = [12,3,""   ,"__/",193];
@@ -342,7 +343,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 	var leg12         = [12,12,"on/","   ",-1,bld];
 	var leg13         = [13,12,"off","   ",-1,bld];
 	var leg14         = [14,12,".  ","   ",-1,bld];
-	var rooms = [name, name2, name3, name4, name5, name6, hold, stoneRoad, stoneRoadProp, stoneRoad2, keep, nKeep, sKeep, sKeep2, gapProp, gap, niamh, niamh3, niamh2, niamhOgier, nFD, wFD, nFM, FD, wFM, nFM2, wFM2, FM, tvRoad, sTV, TV, tvRoad2, tvProp, FK2, FK, caemRoad, lowCaem, caem, caem2, lowCaem2, sTV2, aRoad, aRoad2, AR, lugRoad, sCaem, sCaem2, LG, sLG, nFarMadding, blackTower, wFK, WB, wFK2, nWB, wWB, wWB2, BR, nRoad, nRoad2, EF, EF2, leg1, leg2, leg3, leg4, leg5, leg6, leg7, leg8, leg9, leg10, leg11, leg12, leg13, leg14];
+	var rooms = [name, name2, name3, name4, name5, name6, hold, stoneRoad, stoneRoadProp, stoneRoad2, keep, nKeep, sKeep, sKeep2, gapProp, gap, niamh, niamh3, niamh2, niamhOgier, maerwynn, nFD, wFD, nFM, FD, wFM, nFM2, wFM2, FM, tvRoad, sTV, TV, tvRoad2, tvProp, FK2, FK, caemRoad, lowCaem, caem, caem2, lowCaem2, sTV2, aRoad, aRoad2, AR, lugRoad, sCaem, sCaem2, LG, sLG, nFarMadding, blackTower, wFK, WB, wFK2, nWB, wWB, wWB2, BR, nRoad, nRoad2, EF, EF2, leg1, leg2, leg3, leg4, leg5, leg6, leg7, leg8, leg9, leg10, leg11, leg12, leg13, leg14];
 	for (var _autoKey in rooms) {
 		var r = rooms[_autoKey];
 		//here.echo(actor.room.vnum);
@@ -389,6 +390,10 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 				}
 				if (x == 7 && y == 6 && actor.room.zoneVnum == 12 && count < 1) {
 					buffer += yel+bld+"  X"+nrm;
+					count += 1;
+				}
+				if (x == 3 && y == 14 && actor.room.zoneVnum == 237 && count < 1) {
+					buffer += yel+bld+"X  "+nrm;
 					count += 1;
 				}
 				if (actor.room.zoneVnum == r[4])
