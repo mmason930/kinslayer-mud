@@ -43,15 +43,10 @@ Global2014Util.prototype.setupPedestalPointTimeout = function()
 
 			if(pointsToReward[pedestal.getRace()] == undefined) {
 				pointsToReward[pedestal.getRace()] = 0;
-				getRoom(2).echo("Property undefined. Key: " + pedestal.getRace());
 			}
 
 			if(!pedestal.isDisabled()) {
-
-				var pb = pointsToReward[pedestal.getRace()];
 				pointsToReward[pedestal.getRace()]++;
-
-				getRoom(2).echo("Awarding race " + pedestal.getRace() + ". Points now: " + pointsToReward[pedestal.getRace()] + ", Before: " + pb);
 			}
 		}
 
@@ -60,11 +55,19 @@ Global2014Util.prototype.setupPedestalPointTimeout = function()
 		if(self.eventStage == 3)
 			self.setupPedestalPointTimeout();
 
-		for(var race in pointsToReward)
-		{
-			var points = pointsToReward[race];
-			self.updatePoints(points, race);
-		}
+		Object.keys(pointsToReward).forEach(function(race) {
+			self.updatePoints(points, pointsToReward[race]);
+		}, this);
+
+		self.dsPlayers.concat(self.lsPlayers).forEach(function(player) {
+
+			getCharCols(player);
+
+			var message = yel + "The Shadow has earned " + pointsToReward[constants.RACE_TROLLOC] + " point" + (pointsToReward[constants.RACE_TROLLOC] == 1 ? "" : "s") + "." + nrm + "\n"
+			            + grn + "The Light has earned " + pointsToReward[constants.RACE_TROLLOC] + " point" + (pointsToReward[constants.RACE_TROLLOC] == 1 ? "" : "s") + "." + nrm + "\n";
+
+			player.send(message);
+		});
 	};
 
 	setTimeout(60*6, callback);
