@@ -415,6 +415,7 @@ var script20991 = function(self, actor, here, args, extra) {
 					here.loadObj(20960);
 					global.global2014Util.updatePoints(1, leader.race);
 					gecho(cyn+bld+leader.name+" has captured a damane and scored a point for the "+(leader.race==constants.RACE_TROLLOC?"Dark":"Light")+"!"+nrm);
+					global.global2014Util.damaneZones[actor.vnum] = 0;
 					actor.extract();
 				}
 			}
