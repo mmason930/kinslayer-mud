@@ -360,7 +360,7 @@ var script20982 = function(self, actor, here, args, extra) {
 			return;
 		}
 		players.push(actor);
-		mudLog(2,100,actor.name+" joins the global event. Current numbers:  LS: "+global.global2014Util.lsPlayers.length+", DS:"+global.global2014Util.dsPlayers.length);
+		mudLog(2,100,actor.name+" joins the global event. Current numbers:  LS: "+global.global2014Util.lsPlayers.length+", DS: "+global.global2014Util.dsPlayers.length);
 		actor.send(cyn+bld+"You join the global event!"+nrm);
 		actor.send(" ");
 		actor.send(red+head+" tells you, 'We have had a report of six damane that escaped and are traveling around the world.'"+nrm);
