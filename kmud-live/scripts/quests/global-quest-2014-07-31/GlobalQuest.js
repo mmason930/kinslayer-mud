@@ -99,6 +99,8 @@ var script20986 = function(self, actor, here, args, extra) {
 		global.global2014Util = new Global2014Util();
 		global.global2014Util.eventIsActive = true;
 		mudLog(2, 100, "The global event has been turned ON by "+actor.name+".");
+	}else if(strn_cmp(vArgs[1], "loadmobs", 4)){
+		global.global2014Util.loadMobs();
 	}else if(strn_cmp(vArgs[1], "off", 3)){
 		if(global.global2014Util){
 			global.global2014Util.eventIsActive = false;
@@ -111,7 +113,7 @@ var script20986 = function(self, actor, here, args, extra) {
 		mudLog(2, 100, "The global event has been turned OFF by "+actor.name+".");
 		mudLog(2, 104, "global.global2014Util set to NULL.");
 	}else{
-		actor.send("The global event can be turned ON or OFF.");
+		actor.send("globevent < ON / OFF / LOADMOBS >");
 		return;
 	}
 }
