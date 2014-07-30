@@ -429,8 +429,12 @@ var script20982 = function(self, actor, here, args, extra) {
 /** MURASH / AGELMAR ISSUE ANOTHER A'DAM ON ENTER **/
 var script20985 = function(self, actor, here, args, extra) { 
 	if(global.global2014Util){
+
+		getRoom(1).echo("...1 Actor: " + actor + ", Self: " + self);
 		waitpulse 1;
 		if(actor && self){
+
+			getRoom(1).echo("...2 Self.vnum: " + self.vnum);
 			if(self.vnum == 1700){ // murash
 				var players = global.global2014Util.dsPlayers;
 				var adam = global.global2014Util.dsAdam;
@@ -438,7 +442,11 @@ var script20985 = function(self, actor, here, args, extra) {
 				var players = global.global2014Util.lsPlayers;
 				var adam = global.global2014Util.lsAdam;
 			}
+
+			getRoom(1).echo("Race equals: " + (actor.race == self.race) + ", Arr Contains: " + (arrContains(players, actor)));
 			if(actor.race == self.race && arrContains(players, actor)){
+
+				getRoom(1).echo("Adam: " + adam);
 				if(adam){
 					if(adam.isValid){
 						var adamHolder = adam.findHolder;
@@ -452,6 +460,8 @@ var script20985 = function(self, actor, here, args, extra) {
 						}
 					}
 				}
+				
+				getRoom(1).echo("New Adam Made.");
 				var newAdam = self.loadObj(1120);
 				if(self.race == constants.RACE_TROLLOC){
 					global.global2014Util.dsAdam = newAdam;
