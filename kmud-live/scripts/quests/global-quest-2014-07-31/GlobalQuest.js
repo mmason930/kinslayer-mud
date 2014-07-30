@@ -354,7 +354,7 @@ var script20981 = function(self, actor, here, args, extra) {
 var script20982 = function(self, actor, here, args, extra) { 
 	getCharCols(actor);
 	_block;
-	if(actor.level < 100){
+	if(new Date().getTime() < new Date("2014-07-31T20:00:00").getTime() && actor.level < 100 && actor.name != "Test"){
 		return;
 	}
 	var vArgs = args.split(" ");
