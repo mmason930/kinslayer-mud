@@ -435,7 +435,7 @@ var script20985 = function(self, actor, here, args, extra) {
 		if(actor && self){
 
 			getRoom(1).echo("...2 Self.vnum: " + self.vnum);
-			if(self.vnum == 1700){ // murash
+			if(self.vnum != 1700){ // murash
 				var players = global.global2014Util.dsPlayers;
 				var adam = global.global2014Util.dsAdam;
 			}else{
@@ -460,7 +460,7 @@ var script20985 = function(self, actor, here, args, extra) {
 						}
 					}
 				}
-				
+
 				getRoom(1).echo("New Adam Made.");
 				var newAdam = self.loadObj(1120);
 				if(self.race == constants.RACE_TROLLOC){
