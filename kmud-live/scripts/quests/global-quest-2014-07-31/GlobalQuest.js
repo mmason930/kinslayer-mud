@@ -107,7 +107,8 @@ Global2014Util.prototype.endEvent = function()
 				
 				getCharCols(player);
 
-				player.moveToRoom(getRoom(20800));
+				player.moveToRoom(getRoom(20898));
+				player.comm("look");
 				player.send(cyn+bld+"You've been teleported to the rewards area!"+nrm);
 			});
 			mudLog(2,100,"Koradin has ended the global event.");
