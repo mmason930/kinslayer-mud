@@ -78,11 +78,11 @@ Global2014Util.prototype.endEvent = function()
 			}
 		}
 		setTimeout(20, function(){
-			for(var i=0;i<this.lsPlayers;i++){
+			for(var i=0;i<this.lsPlayers.length;i++){
 				getCharCols(this.lsPlayers[i]);
 				this.lsPlayers[i].send(cyn+bld+"Thank you for attending the Kinslayer global event! Stay tuned to the forums at kinslayermud.org/forums for future events."+nrm);
 			}
-			for(var i=0;i<this.dsPlayers;i++){
+			for(var i=0;i<this.dsPlayers.length;i++){
 				getCharCols(this.dsPlayers[i]);
 				this.dsPlayers[i].send(cyn+bld+"Thank you for attending the Kinslayer global event! Stay tuned to the forums at kinslayermud.org/forums for future events."+nrm);
 			}
