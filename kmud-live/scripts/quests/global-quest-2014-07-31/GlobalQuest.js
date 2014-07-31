@@ -80,6 +80,7 @@ Global2014Util.prototype.endEvent = function()
 	for(var i=0;i<this.dsPlayers;i++){
 		this.dsPlayers[i].send(cyn+bld+"Thank you for attending the Kinslayer global event! Stay tuned to the forums at kinslayermud.org/forums for future events."+nrm);
 	}
+	mudLog(2,100,"Koradin has ended the global event.");
 }
 
 Global2014Util.prototype.setupPedestalPointTimeout = function()
