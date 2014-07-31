@@ -229,6 +229,8 @@ Global2014Util.prototype.setupPedestal = function(race, roomId)
 {
 	var object = getRoom(roomId).loadObj(this.pedestalObjectId);
 
+	object.setRetoolDesc(this.pedestalNames[this.getRetoolIndex(100)])
+
 	var pedestal = new Global2014Pedestal(object, this.pedestalMaxHitPoints, race);
 
 	this.objectIdToPedestalMap[object.id] = pedestal;
