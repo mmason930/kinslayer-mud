@@ -32,6 +32,56 @@ function Global2014Util()
 	this.pointMap[constants.RACE_TROLLOC] = 0;
 }
 
+Global2014Util.prototype.endEvent() = function()
+{
+	getCharCols(getConnectedPlayers()[0]);
+	var lsRoom = getRoom(this.lsBaseRoomVnum);
+	var dsRoom = getRoom(this.dsBaseRoomVnum);
+	var lsGate = lsRoom.loadObj(22823);
+	var dsGate = dsRoom.loadObj(22823);
+	waitpulse 5;
+	var syg = getMobAtRoom(this.dsBaseRoomVnum, 5609);
+	syg.comm("narrate The gate has been opened! Let's get these damane ou....");
+	var uno = getMobAtRoom(this.lsBaseRoomVnum, 1711);
+	uno.comm("narrate Well done! The gate has been opened! Let's get these damane ou....");
+	lsRoom.echo("The High Lord Turak steps through the gate with an escort of morat'torm.");
+	dsRoom.echo("The High Lord Turak steps through the gate with an escort of morat'torm.");
+	gecho(red+"The High Lord Turak shouts, 'Fools! We'll take our property back now.'"+nrm);
+	lsRoom.echo("The High Lord Turak takes Uno's head off in one quick slice!");
+	dsRoom.echo("The High Lord Turak takes Syyggar's head off in one quick slice!");
+	syg.damage(5000);
+	uno.damage(5000);
+	lsRoom.echo("The Seanchan shove the cages back through the gate, and leave just as quickly.");
+	dsRoom.echo("The Seanchan shove the cages back through the gate, and leave just as quickly.");
+	lsRoom.echo("A shimmering portal winks out of existence.");
+	dsRoom.echo("A shimmering portal winks out of existence.");
+	lsGate.moveToRoom(getRoom(20899));
+	dsGate.moveToRoom(getRoom(20899));
+	for(var i=0;i<lsRoom.items.length;i++){
+		var thisItem = lsRoom.items[i];
+		if(thisItem){
+			if(thisItem.vnum == 20960){
+				thisItem.moveToRoom(getRoom(20899));
+			}	
+		}
+	}
+	for(var i=0;i<dsRoom.items.length;i++){
+		var thisItem = lsRoom.items[i];
+		if(thisItem){
+			if(thisItem.vnum == 20960){
+				thisItem.moveToRoom(getRoom(20899));
+			}	
+		}
+	}
+	wait 2;
+	for(var i=0;i<this.lsPlayers;i++){
+		this.lsPlayers[i].send(cyn+bld+"Thank you for attending the Kinslayer global event! Stay tuned to the forums at kinslayermud.org/forums for future events."+nrm);
+	}
+	for(var i=0;i<this.dsPlayers;i++){
+		this.dsPlayers[i].send(cyn+bld+"Thank you for attending the Kinslayer global event! Stay tuned to the forums at kinslayermud.org/forums for future events."+nrm);
+	}
+}
+
 Global2014Util.prototype.setupPedestalPointTimeout = function()
 {
 	var self = this;
