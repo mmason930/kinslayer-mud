@@ -5,6 +5,7 @@ var script23230 = function(self, actor, here, args, extra) {
 
 	if(targetString === undefined)
 	{
+		actor.send("Repair the PEDESTAL.");
 		return;
 	}
 

@@ -5,7 +5,8 @@ var script23231 = function(self, actor, here, args, extra) {
 
 	if(targetString === undefined)
 	{
-		actor.send("Assault the PEDESTAL");
+		actor.send("Assault the PEDESTAL.");
+		return;
 	}
 
 	var targetObject = getObjInListVis(actor, targetString, here.items);
