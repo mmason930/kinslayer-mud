@@ -38,6 +38,7 @@ Global2014Util.prototype.endEvent = function()
 	var dsRoom = getRoom(this.dsBaseRoomVnum);
 	var lsGate = lsRoom.loadObj(22823);
 	var dsGate = dsRoom.loadObj(22823);
+	getCharCols(this.lsPlayers[0]);
 	setTimeout(5, function(){
 		var syg = getMobAtRoom(20643, 5609);
 		//syg.comm("narrate The gate has been opened! Let's get these damane ou....");
@@ -45,17 +46,19 @@ Global2014Util.prototype.endEvent = function()
 		//uno.comm("narrate Well done! The gate has been opened! Let's get these damane ou....");
 		lsRoom.echo("The High Lord Turak steps through the gate with an escort of morat'torm.");
 		dsRoom.echo("The High Lord Turak steps through the gate with an escort of morat'torm.");
-		lsRoom.echo("The High Lord Turak shouts, 'Fools! We'll take our property back now.'");
+		//gecho(red+"The High Lord Turak shouts, 'Fools! We'll take our property back now.'"+nrm);
 		lsRoom.echo("The High Lord Turak takes Uno's head off in one quick slice!");
 		dsRoom.echo("The High Lord Turak takes Syyggar's head off in one quick slice!");
 		lsRoom.echo("Lord Marshall Uno is dead! R.I.P.");
 		dsRoom.echo("The Myrddraal Syyggar is dead! R.I.P.");
 		syg.moveToRoom(getRoom(20899));
 		uno.moveToRoom(getRoom(20899));
-		lsRoom.echo("The Seanchan shove the cages back through the gate, and leave just as quickly.");
-		dsRoom.echo("The Seanchan shove the cages back through the gate, and leave just as quickly.");
-		lsRoom.echo("A shimmering portal winks out of existence.");
-		dsRoom.echo("A shimmering portal winks out of existence.");
+		setTimeout(5, function(){
+			lsRoom.echo("The Seanchan shove the cages back through the gate, and leave just as quickly.");
+			dsRoom.echo("The Seanchan shove the cages back through the gate, and leave just as quickly.");
+			lsRoom.echo("A shimmering portal winks out of existence.");
+			dsRoom.echo("A shimmering portal winks out of existence.");
+		});
 		lsGate.moveToRoom(getRoom(20899));
 		dsGate.moveToRoom(getRoom(20899));
 		for(var i=0;i<lsRoom.items.length;i++){
@@ -74,11 +77,13 @@ Global2014Util.prototype.endEvent = function()
 				}	
 			}
 		}
-		setTimeout(2000, function(){
+		setTimeout(20, function(){
 			for(var i=0;i<this.lsPlayers;i++){
+				getCharCols(this.lsPlayers[i]);
 				this.lsPlayers[i].send(cyn+bld+"Thank you for attending the Kinslayer global event! Stay tuned to the forums at kinslayermud.org/forums for future events."+nrm);
 			}
 			for(var i=0;i<this.dsPlayers;i++){
+				getCharCols(this.dsPlayers[i]);
 				this.dsPlayers[i].send(cyn+bld+"Thank you for attending the Kinslayer global event! Stay tuned to the forums at kinslayermud.org/forums for future events."+nrm);
 			}
 			mudLog(2,100,"Koradin has ended the global event.");
