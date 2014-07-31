@@ -104,13 +104,11 @@ Global2014Util.prototype.endEvent = function()
 		}
 		setTimeout(20, function(){
 			self.dsPlayers.concat(self.lsPlayers).forEach(function(player) {
-
+				
 				getCharCols(player);
 
-				var message = yel + "The Shadow has earned " + pointsToReward[constants.RACE_TROLLOC] + " point" + (pointsToReward[constants.RACE_TROLLOC] == 1 ? "" : "s") + "." + nrm + "\n"
-					+ grn + "The Light has earned " + pointsToReward[constants.RACE_TROLLOC] + " point" + (pointsToReward[constants.RACE_TROLLOC] == 1 ? "" : "s") + "." + nrm;
-
-				player.send(message);
+				player.moveToRoom(getRoom(20800));
+				player.send(cyn+bld+"You've been teleported to the rewards area!"+nrm);
 			});
 			mudLog(2,100,"Koradin has ended the global event.");
 		});
