@@ -141,6 +141,8 @@ Global2014Util.prototype.getPoints = function(race){
 };
 
 Global2014Util.prototype.updatePoints = function(num, race){
+
+	mudLog(constants.BRF, 100, "Awarding " + num + " point" + (num == 1 ? "" : "s") + " to " + raceNumToText(race) + ".");
 	this.pointMap[race] += num;
 };
 
