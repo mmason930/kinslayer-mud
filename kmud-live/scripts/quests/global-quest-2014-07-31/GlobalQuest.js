@@ -30,7 +30,31 @@ function Global2014Util()
 	this.pointMap = {};
 	this.pointMap[constants.RACE_HUMAN] = 0;
 	this.pointMap[constants.RACE_TROLLOC] = 0;
+
+	this.pedestalNames = [
+		"An ancient pedestal is here, embedded in the ground. (DISABLED)",//0
+		"An ancient pedestal is here, embedded in the ground. (CRUMBLING)", //1 - 24
+		"An ancient pedestal is here, embedded in the ground. (WEAK)", //25 - 49
+		"An ancient pedestal is here, embedded in the ground. (STABLE)", //50 - 74
+		"An ancient pedestal is here, embedded in the ground. (STRONG)", //75 - 99
+		"An ancient pedestal is here, embedded in the ground. (FULL)", //100
+	];
 }
+
+Global2014Util.prototype.getRetoolIndex = function(percent)
+{
+	if(percent == 0)
+		return 0;
+	if(percent >= 1 && percent <= 24)
+		return 1;
+	if(percent >= 25 && percent <= 49)
+		return 2;
+	if(percent >= 50 && percent <= 74)
+		return 3;
+	if(percent >= 75 && percent <= 99)
+		return 4;
+	return 5;
+};
 
 Global2014Util.prototype.endEvent = function()
 {

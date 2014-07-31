@@ -37,7 +37,7 @@ Global2014Pedestal.prototype.isDisabled = function()
 Global2014Pedestal.prototype.getRepairPercent = function()
 {
 	return this.repairPercent;
-}
+};
 
 Global2014Pedestal.prototype.takeDamage = function(character, damageAmount)
 {
@@ -70,6 +70,10 @@ Global2014Pedestal.prototype.takeDamage = function(character, damageAmount)
 		mudLog(constants.BRF, 100, "Pedestal in room #" + this.roomVnum + " has been disabled.");
 		this.repairPercent = 0;
 	}
+
+	var percentHitPoints = Math.floor((this.getHitPoints() / this.getMaxHitPoints()) * 100);
+
+	this.object.setRetoolDesc(global.global2014Util.pedestalNames[global.global2014Util.getRetoolIndex(percentHitPoints)]);
 };
 
 Global2014Pedestal.prototype.repair = function(character, amount)
@@ -103,4 +107,6 @@ Global2014Pedestal.prototype.repair = function(character, amount)
 		mudLog(constants.BRF, 100, "Pedestal in room #" + this.roomVnum + " has been enabled.");
 		this.hitPoints = this.getMaxHitPoints();
 	}
+
+	this.object.setRetoolDesc(global.global2014Util.pedestalNames[global.global2014Util.getRetoolIndex(this.getRepairPercent())]);
 };
