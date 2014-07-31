@@ -126,8 +126,8 @@ Global2014Util.prototype.setupPedestalPointTimeout = function()
 
 			getCharCols(player);
 
-			var message = yel + "The Shadow has earned " + pointsToReward[constants.RACE_TROLLOC] + " point" + (pointsToReward[constants.RACE_TROLLOC] == 1 ? "" : "s") + "." + nrm + "\n"
-			            + grn + "The Light has earned " + pointsToReward[constants.RACE_TROLLOC] + " point" + (pointsToReward[constants.RACE_TROLLOC] == 1 ? "" : "s") + "." + nrm;
+			var message = yel + "The Shadow has earned " + pointsToReward[constants.RACE_TROLLOC] + " point" + (pointsToReward[constants.RACE_TROLLOC] == 1 ? "" : "s") + " for active pedestals!" + nrm + "\n"
+			            + grn + "The Light has earned " + pointsToReward[constants.RACE_HUMAN] + " point" + (pointsToReward[constants.RACE_HUMAN] == 1 ? "" : "s") + " for active pedestals!" + nrm;
 
 			player.send(message);
 		});
