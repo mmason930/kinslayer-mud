@@ -38,7 +38,7 @@ Global2014Util.prototype.endEvent = function()
 	var dsRoom = getRoom(this.dsBaseRoomVnum);
 	var lsGate = lsRoom.loadObj(22823);
 	var dsGate = dsRoom.loadObj(22823);
-	setTimeout(function(){
+	setTimeout(5, function(){
 		var syg = getMobAtRoom(this.dsBaseRoomVnum, 5609);
 		syg.comm("narrate The gate has been opened! Let's get these damane ou....");
 		var uno = getMobAtRoom(this.lsBaseRoomVnum, 1711);
@@ -72,7 +72,7 @@ Global2014Util.prototype.endEvent = function()
 				}	
 			}
 		}
-		setTimeout(function(){
+		setTimeout(2000, function(){
 			for(var i=0;i<this.lsPlayers;i++){
 				this.lsPlayers[i].send(cyn+bld+"Thank you for attending the Kinslayer global event! Stay tuned to the forums at kinslayermud.org/forums for future events."+nrm);
 			}
@@ -80,8 +80,8 @@ Global2014Util.prototype.endEvent = function()
 				this.dsPlayers[i].send(cyn+bld+"Thank you for attending the Kinslayer global event! Stay tuned to the forums at kinslayermud.org/forums for future events."+nrm);
 			}
 			mudLog(2,100,"Koradin has ended the global event.");
-		}, 2000);
-	}, 5);
+		});
+	});
 }
 
 Global2014Util.prototype.setupPedestalPointTimeout = function()
