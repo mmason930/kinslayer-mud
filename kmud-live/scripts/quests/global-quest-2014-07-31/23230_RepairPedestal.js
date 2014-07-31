@@ -70,7 +70,7 @@ var script23230 = function(self, actor, here, args, extra) {
 
 	while(true)
 	{
-		actor.startTimer(10);
+		actor.startTimer(5);
 		var success = runTimer(actor);
 
 		if(!success || !checks())
@@ -78,7 +78,7 @@ var script23230 = function(self, actor, here, args, extra) {
 			break;
 		}
 
-		pedestal.repair(actor, random(3, 7));
+		pedestal.repair(actor, random(12, 15));
 		act("$n repairs a portion of $P!", false, actor, null, targetObject, constants.TO_ROOM);
 		act("You repair a portion of $P!", false, actor, null, targetObject, constants.TO_CHAR);
 

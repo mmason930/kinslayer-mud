@@ -70,7 +70,7 @@ var script23231 = function(self, actor, here, args, extra) {
 
 	while(true)
 	{
-		actor.startTimer(10);
+		actor.startTimer(5);
 		var success = runTimer(actor);
 
 		if(!success || !checks())
@@ -78,7 +78,7 @@ var script23231 = function(self, actor, here, args, extra) {
 			break;
 		}
 
-		pedestal.takeDamage(actor, random(30, 120));
+		pedestal.takeDamage(actor, random(30, 60));
 		act("$n delivers a damaging blow to $P!", false, actor, null, targetObject, constants.TO_ROOM);
 		act("You deliver a damaging blow to $P!", false, actor, null, targetObject, constants.TO_CHAR);
 

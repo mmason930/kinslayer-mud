@@ -1,7 +1,7 @@
 function Global2014Util()
 {
 	this.pedestalObjectId = 23204;
-	this.pedestalMaxHitPoints = 500;
+	this.pedestalMaxHitPoints = 300;
 	this.pedestalRoomIds = {};
 	this.pedestalRoomIds[constants.RACE_HUMAN] = [20648, 20649, 20651];
 	this.pedestalRoomIds[constants.RACE_TROLLOC] = [20642, 20644, 20645];
