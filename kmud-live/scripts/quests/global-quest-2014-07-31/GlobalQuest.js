@@ -38,6 +38,8 @@ Global2014Util.prototype.endEvent = function()
 	var dsRoom = getRoom(this.dsBaseRoomVnum);
 	var lsGate = lsRoom.loadObj(22823);
 	var dsGate = dsRoom.loadObj(22823);
+	var self = this;
+
 	getCharCols(this.lsPlayers[0]);
 	setTimeout(5, function(){
 		var syg = getMobAtRoom(20643, 5609);
