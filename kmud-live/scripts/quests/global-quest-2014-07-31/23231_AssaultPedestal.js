@@ -3,6 +3,7 @@ var script23231 = function(self, actor, here, args, extra) {
 	var vArgs = getArgList(args);
 	var targetString = vArgs[1];
 
+	_block;
 	if(targetString === undefined)
 	{
 		actor.send("Assault the PEDESTAL.");

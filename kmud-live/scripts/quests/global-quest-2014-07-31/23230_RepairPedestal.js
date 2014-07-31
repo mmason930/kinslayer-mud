@@ -3,6 +3,7 @@ var script23230 = function(self, actor, here, args, extra) {
 	var vArgs = getArgList(args);
 	var targetString = vArgs[1];
 
+	_block;
 	if(targetString === undefined)
 	{
 		actor.send("Repair the PEDESTAL.");
