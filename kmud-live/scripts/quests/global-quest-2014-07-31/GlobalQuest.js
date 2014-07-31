@@ -259,7 +259,7 @@ var script20980 = function(self, actor, here, args, extra) {
 		if(item)
 			neckItems.push(item.vnum);
 
-		return neckItems.any(function(vnum) {
+		return _.any(neckItems, function(vnum) {
 
 			return vnum == 1120;
 		});
