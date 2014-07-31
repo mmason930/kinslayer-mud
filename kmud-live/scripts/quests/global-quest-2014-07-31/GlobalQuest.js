@@ -78,14 +78,15 @@ Global2014Util.prototype.endEvent = function()
 			}
 		}
 		setTimeout(20, function(){
-			for(var i=0;i<this.lsPlayers.length;i++){
-				getCharCols(this.lsPlayers[i]);
-				this.lsPlayers[i].send(cyn+bld+"Thank you for attending the Kinslayer global event! Stay tuned to the forums at kinslayermud.org/forums for future events."+nrm);
-			}
-			for(var i=0;i<this.dsPlayers.length;i++){
-				getCharCols(this.dsPlayers[i]);
-				this.dsPlayers[i].send(cyn+bld+"Thank you for attending the Kinslayer global event! Stay tuned to the forums at kinslayermud.org/forums for future events."+nrm);
-			}
+			self.dsPlayers.concat(self.lsPlayers).forEach(function(player) {
+
+				getCharCols(player);
+
+				var message = yel + "The Shadow has earned " + pointsToReward[constants.RACE_TROLLOC] + " point" + (pointsToReward[constants.RACE_TROLLOC] == 1 ? "" : "s") + "." + nrm + "\n"
+					+ grn + "The Light has earned " + pointsToReward[constants.RACE_TROLLOC] + " point" + (pointsToReward[constants.RACE_TROLLOC] == 1 ? "" : "s") + "." + nrm;
+
+				player.send(message);
+			});
 			mudLog(2,100,"Koradin has ended the global event.");
 		});
 	});
