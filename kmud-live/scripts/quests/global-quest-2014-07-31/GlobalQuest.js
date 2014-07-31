@@ -98,6 +98,9 @@ Global2014Util.prototype.setupPedestalPointTimeout = function()
 	var self = this;
 	var callback = function() {
 
+		if(self.eventStage != 3)
+			return;
+
 		var pointsToReward = {};
 
 		for(var objectId in self.objectIdToPedestalMap)
