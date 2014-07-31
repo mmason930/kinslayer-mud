@@ -136,7 +136,7 @@ Global2014Util.prototype.setupPedestalPointTimeout = function()
 		});
 	};
 
-	setTimeout(60*6, callback);
+	setTimeout(90*6, callback);
 };
 
 Global2014Util.prototype.getPoints = function(race){
@@ -195,6 +195,10 @@ Global2014Util.prototype.setupStage3 = function()
 
 	this.setupPedestalPointTimeout();
 	this.eventStage = 3;
+	var syg = getMobAtRoom(20643, 5609);
+	syg.comm("narrate The damane have all been captured!  See me for more information.");
+	var uno = getMobAtRoom(20650, 1711);
+	uno.comm("narrate The damane have all been captured!  See me for more information.");
 };
 
 Global2014Util.prototype.setupPedestal = function(race, roomId)
