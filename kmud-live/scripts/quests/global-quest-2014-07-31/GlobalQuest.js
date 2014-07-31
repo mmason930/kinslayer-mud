@@ -41,12 +41,12 @@ Global2014Util.prototype.endEvent = function()
 	getCharCols(this.lsPlayers[0]);
 	setTimeout(5, function(){
 		var syg = getMobAtRoom(20643, 5609);
-		//syg.comm("narrate The gate has been opened! Let's get these damane ou....");
+		syg.comm("narrate The gate has been opened! Let's get these damane ou....");
 		var uno = getMobAtRoom(20650, 1711);
-		//uno.comm("narrate Well done! The gate has been opened! Let's get these damane ou....");
+		uno.comm("narrate Well done! The gate has been opened! Let's get these damane ou....");
 		lsRoom.echo("The High Lord Turak steps through the gate with an escort of morat'torm.");
 		dsRoom.echo("The High Lord Turak steps through the gate with an escort of morat'torm.");
-		//gecho(red+"The High Lord Turak shouts, 'Fools! We'll take our property back now.'"+nrm);
+		gecho(red+"The High Lord Turak shouts, 'Fools! We'll take our property back now.'"+nrm);
 		lsRoom.echo("The High Lord Turak takes Uno's head off in one quick slice!");
 		dsRoom.echo("The High Lord Turak takes Syyggar's head off in one quick slice!");
 		lsRoom.echo("Lord Marshall Uno is dead! R.I.P.");
