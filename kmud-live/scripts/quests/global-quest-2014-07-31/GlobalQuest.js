@@ -24,6 +24,8 @@ function Global2014Util()
 	this.damaneZones[1125] = 0;
 	this.damaneZones[1126] = 0;
 	this.damaneZones[1127] = 0;
+
+	this.damaneMobs = [];
 	
 	this.pointMap = {};
 	this.pointMap[constants.RACE_HUMAN] = 0;
@@ -84,14 +86,26 @@ Global2014Util.prototype.updatePoints = function(num, race){
 Global2014Util.prototype.loadMobs = function(){
 	var uno = getRoom(this.lsBaseRoomVnum).loadMob(1711);
 	mudLog(2,100,"Loading "+uno.name+" at room "+this.lsBaseRoomVnum);
+
 	var syg = getRoom(this.dsBaseRoomVnum).loadMob(5609);
 	mudLog(2,100,"Loading "+syg.name+" at room "+this.dsBaseRoomVnum);
+
 	var damaneStartRooms = [3138, 1041, 13389, 5308, 18164, 20128];
 	for(var i=0;i<this.damaneVnums.length;i++){
 		var room = getRoom(damaneStartRooms[i]);
 		var damane = room.loadMob(this.damaneVnums[i]);
 		mudLog(2,100,"Loading "+damane.name+" at room "+room.vnum);
+
+		this.damaneMobs.push(damane);
 	}
+};
+
+Global2014Util.prototype.numberOfDamaneRemaining = function()
+{
+	return this.damaneMobs.reduce(function(sum, damane) {
+
+		return sum + (damane.isValid ? 1 : 0);
+	});
 };
 
 Global2014Util.prototype.setupStage3 = function()
