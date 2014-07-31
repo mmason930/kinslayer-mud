@@ -40,9 +40,9 @@ Global2014Util.prototype.endEvent = function()
 	var dsGate = dsRoom.loadObj(22823);
 	setTimeout(5, function(){
 		var syg = getMobAtRoom(20643, 5609);
-		syg.comm("narrate The gate has been opened! Let's get these damane ou....");
+		//syg.comm("narrate The gate has been opened! Let's get these damane ou....");
 		var uno = getMobAtRoom(20650, 1711);
-		uno.comm("narrate Well done! The gate has been opened! Let's get these damane ou....");
+		//uno.comm("narrate Well done! The gate has been opened! Let's get these damane ou....");
 		lsRoom.echo("The High Lord Turak steps through the gate with an escort of morat'torm.");
 		dsRoom.echo("The High Lord Turak steps through the gate with an escort of morat'torm.");
 		lsRoom.echo("The High Lord Turak shouts, 'Fools! We'll take our property back now.'");
@@ -547,8 +547,7 @@ var script20985 = function(self, actor, here, args, extra) {
 
 /** DAMANE TURN IN AT UNO/SYYGGAR IN GAP **/
 var script20991 = function(self, actor, here, args, extra) {
-	waitpulse
-	1;
+	waitpulse 1;
 	//sendKoradin(global.global2014Util+" "+self.name+" "+actor.name);
 	if (global.global2014Util && self && actor) {
 		if (arrContains(global.global2014Util.damaneVnums, actor.vnum)) { // damane has entered
