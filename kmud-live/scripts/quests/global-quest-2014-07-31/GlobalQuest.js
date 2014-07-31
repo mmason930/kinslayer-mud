@@ -567,5 +567,8 @@ var script20992 = function(self, actor, here, args, extra) {
 
 var script20993 = function(self, actor, here, args, extra) {
 
+	if(!global.global2014Util)
+		return;
+
 	mudLog(constants.BRF, 100, "Damane Remaining: " + global.global2014Util.numberOfDamaneRemaining());
 };
