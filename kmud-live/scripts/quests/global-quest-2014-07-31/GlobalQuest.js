@@ -105,7 +105,7 @@ Global2014Util.prototype.numberOfDamaneRemaining = function()
 	return this.damaneMobs.reduce(function(sum, damane) {
 
 		return sum + (damane.isValid ? 1 : 0);
-	});
+	}, 0);
 };
 
 Global2014Util.prototype.setupStage3 = function()
