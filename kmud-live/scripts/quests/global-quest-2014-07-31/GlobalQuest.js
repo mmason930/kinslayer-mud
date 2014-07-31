@@ -34,7 +34,6 @@ function Global2014Util()
 
 Global2014Util.prototype.endEvent = function()
 {
-	getCharCols(getConnectedPlayers()[0]);
 	var lsRoom = getRoom(this.lsBaseRoomVnum);
 	var dsRoom = getRoom(this.dsBaseRoomVnum);
 	var lsGate = lsRoom.loadObj(22823);
@@ -46,7 +45,7 @@ Global2014Util.prototype.endEvent = function()
 	uno.comm("narrate Well done! The gate has been opened! Let's get these damane ou....");
 	lsRoom.echo("The High Lord Turak steps through the gate with an escort of morat'torm.");
 	dsRoom.echo("The High Lord Turak steps through the gate with an escort of morat'torm.");
-	lsRoom.echo(red+"The High Lord Turak shouts, 'Fools! We'll take our property back now.'"+nrm);
+	lsRoom.echo("The High Lord Turak shouts, 'Fools! We'll take our property back now.'");
 	lsRoom.echo("The High Lord Turak takes Uno's head off in one quick slice!");
 	dsRoom.echo("The High Lord Turak takes Syyggar's head off in one quick slice!");
 	syg.damage(5000);
