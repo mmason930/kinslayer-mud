@@ -39,9 +39,9 @@ Global2014Util.prototype.endEvent = function()
 	var lsGate = lsRoom.loadObj(22823);
 	var dsGate = dsRoom.loadObj(22823);
 	setTimeout(5, function(){
-		var syg = getMobAtRoom(this.dsBaseRoomVnum, 5609);
+		var syg = getMobAtRoom(20643, 5609);
 		syg.comm("narrate The gate has been opened! Let's get these damane ou....");
-		var uno = getMobAtRoom(this.lsBaseRoomVnum, 1711);
+		var uno = getMobAtRoom(20650, 1711);
 		uno.comm("narrate Well done! The gate has been opened! Let's get these damane ou....");
 		lsRoom.echo("The High Lord Turak steps through the gate with an escort of morat'torm.");
 		dsRoom.echo("The High Lord Turak steps through the gate with an escort of morat'torm.");
