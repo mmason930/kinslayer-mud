@@ -46,7 +46,7 @@ Global2014Util.prototype.endEvent = function()
 	uno.comm("narrate Well done! The gate has been opened! Let's get these damane ou....");
 	lsRoom.echo("The High Lord Turak steps through the gate with an escort of morat'torm.");
 	dsRoom.echo("The High Lord Turak steps through the gate with an escort of morat'torm.");
-	gecho(red+"The High Lord Turak shouts, 'Fools! We'll take our property back now.'"+nrm);
+	lsRoom.echo(red+"The High Lord Turak shouts, 'Fools! We'll take our property back now.'"+nrm);
 	lsRoom.echo("The High Lord Turak takes Uno's head off in one quick slice!");
 	dsRoom.echo("The High Lord Turak takes Syyggar's head off in one quick slice!");
 	syg.damage(5000);
@@ -200,7 +200,7 @@ var script20986 = function(self, actor, here, args, extra) {
 	_block;
 	var vArgs = args.split(" ");
 	if(!vArgs[1]){
-		actor.send("\nglobevent < ON / OFF / LOADMOBS / STAGE3 >");
+		actor.send("\nglobevent < ON / OFF / LOADMOBS / STAGE3 / END >");
 		return;
 	}
 	if(strn_cmp(vArgs[1], "on", 2)){
@@ -209,6 +209,8 @@ var script20986 = function(self, actor, here, args, extra) {
 		mudLog(2, 100, "The global event has been turned ON by "+actor.name+".");
 	}else if(strn_cmp(vArgs[1], "loadmobs", 4)){
 		global.global2014Util.loadMobs();
+	}else if(strn_cmp(vArgs[1], "end", 4)){
+		global.global2014Util.endEvent();
 	}else if(strn_cmp(vArgs[1], "stage3", 4)){
 		global.global2014Util.setupStage3();
 	}else if(strn_cmp(vArgs[1], "off", 3)){
