@@ -573,6 +573,7 @@ var script20991 = function(self, actor, here, args, extra) {
 					gecho(cyn + bld + leader.name + " has captured a damane and scored a point for the " + (leader.race == constants.RACE_TROLLOC ? "Dark" : "Light") + "!" + nrm);
 					global.global2014Util.damaneZones[actor.vnum] = 0;
 					actor.extract();
+					mudLog(2,100,leader.name+" just scored a point for the "+numRaceToText(leader.race)+" by turning a damane in");
 				}
 			}
 		} else if (actor.vnum == -1 && actor.race == self.race) { // PC entering
