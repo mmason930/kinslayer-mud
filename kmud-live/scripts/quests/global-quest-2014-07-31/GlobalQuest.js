@@ -246,13 +246,28 @@ var script20986 = function(self, actor, here, args, extra) {
 var script20980 = function(self, actor, here, args, extra) {
 	var roomArr = [81, 10, 333, 80, 85, 20, 332, 18, 66, 181, 206, 193, 64, 17, 93, 19, 334, 103, 70, 100, 3, 1, 70, 214, 217, 4, 31, 201, 9, 230, 235, 100, 186, 53, 101, 102, 45, 134, 132];
 	var newRoom = getRandomRoom();
-	var neck1 = self.eq(constants.WEAR_NECK_1);
-	if(neck1){ neck1 = neck1.vnum; }
-	var neck2 = self.eq(constants.WEAR_NECK_2);
-	if(neck2){ neck2 = neck2.vnum; }
+
+	var hasCollar = function() {
+
+		var neckItems = [];
+
+		var item = self.eq(constants.WEAR_NECK_1);
+		if(item)
+			neckItems.push(item.vnum);
+
+		item = self.eq(constants.WEAR_NECK_2);
+		if(item)
+			neckItems.push(item.vnum);
+
+		return neckItems.any(function(vnum) {
+
+			return vnum == 1120;
+		});
+	};
+
 	var randomRoll = 20;
 	if(self.fighting){ randomRoll = 40; }
-	if(newRoom && !self.isBashed && random(1, randomRoll) == 1 && neck1 != 1120 && neck2 != 1120){
+	if(newRoom && !self.isBashed && random(1, randomRoll) == 1 && !hasCollar()){
 		if(arrContains(roomArr, newRoom.zoneVnum)){
 			mudLog(2,100,self.name+" teleported to new room "+newRoom.vnum+" while "+(self.fighting?"":"dis")+"engaged");
 			act(self.name+" disappears in a flash of bright light.",true,self,null,null,constants.TO_ROOM);
@@ -267,13 +282,13 @@ var script20980 = function(self, actor, here, args, extra) {
 			global.global2014Util.damaneZones[self.vnum] = self.room.zoneVnum;
 		}
 	}
-	if(neck1 != 1120 && neck2 != 1120){ // aggro/call mob if not collared
+	if(!hasCollar()) { // aggro/call mob if not collared
 		function attackPCs(self, here){ // aggro
 			if(self && here){
 				var attackArr = here.getMobs(-1);
 				if(attackArr.length > 0){
 					var target = attackArr[random(0, attackArr.length-1)];
-					if(!self.fighting){
+					if(!self.fighting && !hasCollar()){
 						self.say("Get away from me!");
 						self.comm("k "+target.name);
 					}
