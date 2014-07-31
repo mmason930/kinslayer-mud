@@ -32,7 +32,7 @@ function Global2014Util()
 	this.pointMap[constants.RACE_TROLLOC] = 0;
 }
 
-Global2014Util.prototype.endEvent() = function()
+Global2014Util.prototype.endEvent = function()
 {
 	getCharCols(getConnectedPlayers()[0]);
 	var lsRoom = getRoom(this.lsBaseRoomVnum);
