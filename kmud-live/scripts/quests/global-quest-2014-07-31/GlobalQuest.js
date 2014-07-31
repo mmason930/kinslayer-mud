@@ -577,7 +577,7 @@ var script20991 = function(self, actor, here, args, extra) {
 		if (arrContains(global.global2014Util.damaneVnums, actor.vnum)) { // damane has entered
 			if (actor.leader) { // damane has a leader
 				var leader = actor.leader;
-				if (leader.room == self.room && actor.room == self.room) { // damane and leader are in room
+				if (leader.room == self.room && actor.room == self.room && leader.race == self.race) { // damane and leader are in room
 					getCharCols(leader);
 					self.say("Nice work, " + leader.name + "! See " + (leader.race == constants.RACE_TROLLOC ? "Murash" : "Agelmar") + " for another a'dam.");
 					here.echo(self.name + " shoves " + actor.name + " inside a nearby cage and locks the door.");
