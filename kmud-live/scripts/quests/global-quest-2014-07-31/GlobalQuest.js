@@ -48,8 +48,10 @@ Global2014Util.prototype.endEvent = function()
 		lsRoom.echo("The High Lord Turak shouts, 'Fools! We'll take our property back now.'");
 		lsRoom.echo("The High Lord Turak takes Uno's head off in one quick slice!");
 		dsRoom.echo("The High Lord Turak takes Syyggar's head off in one quick slice!");
-		syg.damage(5000);
-		uno.damage(5000);
+		lsRoom.echo("Lord Marshall Uno is dead! R.I.P.");
+		dsRoom.echo("The Myrddraal Syyggar is dead! R.I.P.");
+		syg.moveToRoom(getRoom(20899));
+		uno.moveToRoom(getRoom(20899));
 		lsRoom.echo("The Seanchan shove the cages back through the gate, and leave just as quickly.");
 		dsRoom.echo("The Seanchan shove the cages back through the gate, and leave just as quickly.");
 		lsRoom.echo("A shimmering portal winks out of existence.");
