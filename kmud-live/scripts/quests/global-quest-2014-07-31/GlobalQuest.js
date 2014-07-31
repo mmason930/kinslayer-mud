@@ -210,7 +210,7 @@ var script20986 = function(self, actor, here, args, extra) {
 		mudLog(2, 100, "The global event has been turned ON by "+actor.name+".");
 	}else if(strn_cmp(vArgs[1], "loadmobs", 4)){
 		global.global2014Util.loadMobs();
-	}else if(strn_cmp(vArgs[1], "end", 4)){
+	}else if(strn_cmp(vArgs[1], "end", 3)){
 		global.global2014Util.endEvent();
 	}else if(strn_cmp(vArgs[1], "stage3", 4)){
 		global.global2014Util.setupStage3();
