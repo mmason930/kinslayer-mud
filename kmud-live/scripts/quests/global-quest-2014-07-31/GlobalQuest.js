@@ -39,7 +39,7 @@ Global2014Util.prototype.endEvent = function()
 	var lsGate = lsRoom.loadObj(22823);
 	var dsGate = dsRoom.loadObj(22823);
 	var self = this;
-
+	self.eventStage = 4;
 	setTimeout(5, function(){
 		var syg = getMobAtRoom(20643, 5609);
 		syg.comm("narrate The gate has been opened! Let's get these damane ou....");
