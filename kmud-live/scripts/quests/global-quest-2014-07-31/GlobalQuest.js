@@ -349,7 +349,7 @@ var script20983 = function(self, actor, here, args, extra) {
 		damane.comm("follow "+actor.name);
 		mudLog(2, 102, actor.name+" just leashed "+damane.name+" for the "+(actor.race==constants.RACE_TROLLOC?"DARK":"LIGHT"));	
 	}
-}
+};
 
 /** LOGIN NOTIFICATION **/
 var script20981 = function(self, actor, here, args, extra) { 
@@ -493,31 +493,32 @@ var script20985 = function(self, actor, here, args, extra) {
 
 /** DAMANE TURN IN AT UNO/SYYGGAR IN GAP **/
 var script20991 = function(self, actor, here, args, extra) {
-	waitpulse 1;
+	waitpulse
+	1;
 	//sendKoradin(global.global2014Util+" "+self.name+" "+actor.name);
-	if(global.global2014Util && self && actor){
-		if(arrContains(global.global2014Util.damaneVnums, actor.vnum)){ // damane has entered
-			if(actor.leader){ // damane has a leader
+	if (global.global2014Util && self && actor) {
+		if (arrContains(global.global2014Util.damaneVnums, actor.vnum)) { // damane has entered
+			if (actor.leader) { // damane has a leader
 				var leader = actor.leader;
-				if(leader.room == self.room && actor.room == self.room){ // damane and leader are in room
+				if (leader.room == self.room && actor.room == self.room) { // damane and leader are in room
 					getCharCols(leader);
-					self.say("Nice work, "+leader.name+"! See "+(leader.race==constants.RACE_TROLLOC?"Murash":"Agelmar")+" for another a'dam.");
-					here.echo(self.name+" shoves "+actor.name+" inside a nearby cage and locks the door.");
+					self.say("Nice work, " + leader.name + "! See " + (leader.race == constants.RACE_TROLLOC ? "Murash" : "Agelmar") + " for another a'dam.");
+					here.echo(self.name + " shoves " + actor.name + " inside a nearby cage and locks the door.");
 					actor.moveToRoom(getRoom(20800));
 					actor.comm("follow self");
 					here.loadObj(20960);
 					global.global2014Util.updatePoints(1, leader.race);
-					gecho(cyn+bld+leader.name+" has captured a damane and scored a point for the "+(leader.race==constants.RACE_TROLLOC?"Dark":"Light")+"!"+nrm);
+					gecho(cyn + bld + leader.name + " has captured a damane and scored a point for the " + (leader.race == constants.RACE_TROLLOC ? "Dark" : "Light") + "!" + nrm);
 					global.global2014Util.damaneZones[actor.vnum] = 0;
 					actor.extract();
 				}
 			}
-		}else if(actor.vnum == -1 && actor.race == self.race){ // PC entering
+		} else if (actor.vnum == -1 && actor.race == self.race) { // PC entering
 			getCharCols(actor);
-			actor.send(cyn+bld+"Say INFO to learn more from "+self.name+"."+nrm);
+			actor.send(cyn + bld + "Say INFO to learn more from " + self.name + "." + nrm);
 		}
 	}
-}
+};
 
 
 /** UNO/SYYGGAR STAGE 3 INFO **/
@@ -562,4 +563,9 @@ var script20992 = function(self, actor, here, args, extra) {
 			}
 		}
 	}
-}
+};
+
+var script20993 = function(self, actor, here, args, extra) {
+
+	mudLog(constants.BRF, 100, "Damane Remaining: " + global.global2014Util.numberOfDamaneRemaining());
+};
