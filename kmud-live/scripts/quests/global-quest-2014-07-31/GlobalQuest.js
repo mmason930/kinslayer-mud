@@ -82,7 +82,7 @@ Global2014Util.prototype.endEvent = function()
 		setTimeout(20, function(){
 			self.dsPlayers.concat(self.lsPlayers).forEach(function(player) {
 
-				getCharCols(player);
+				//getCharCols(player);
 
 				var message = yel + "The Shadow has earned " + pointsToReward[constants.RACE_TROLLOC] + " point" + (pointsToReward[constants.RACE_TROLLOC] == 1 ? "" : "s") + "." + nrm + "\n"
 					+ grn + "The Light has earned " + pointsToReward[constants.RACE_TROLLOC] + " point" + (pointsToReward[constants.RACE_TROLLOC] == 1 ? "" : "s") + "." + nrm;
