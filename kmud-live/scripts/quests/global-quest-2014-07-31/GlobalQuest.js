@@ -65,7 +65,7 @@ Global2014Util.prototype.endEvent = function()
 			}
 		}
 		for(var i=0;i<dsRoom.items.length;i++){
-			var thisItem = lsRoom.items[i];
+			var thisItem = dsRoom.items[i];
 			if(thisItem){
 				if(thisItem.vnum == 20960){
 					thisItem.moveToRoom(getRoom(20899));
