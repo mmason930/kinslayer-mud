@@ -71,7 +71,7 @@ Global2014Util.prototype.endEvent = function()
 			}else{
 				player.moveToRoom(getRoom(20643));
 			}
-		}
+		});
 		var syg = getMobAtRoom(20643, 5609);
 		syg.comm("narrate The gate has been opened! Let's get these damane ou....");
 		var uno = getMobAtRoom(20650, 1711);
