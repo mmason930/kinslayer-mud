@@ -65,6 +65,13 @@ Global2014Util.prototype.endEvent = function()
 	var self = this;
 	self.eventStage = 4;
 	setTimeout(5, function(){
+		self.dsPlayers.concat(self.lsPlayers).forEach(function(player) {
+			if(player.race == constants.RACE_HUMAN){
+				player.moveToRoom(getRoom(20650));
+			}else{
+				player.moveToRoom(getRoom(20643));
+			}
+		}
 		var syg = getMobAtRoom(20643, 5609);
 		syg.comm("narrate The gate has been opened! Let's get these damane ou....");
 		var uno = getMobAtRoom(20650, 1711);
