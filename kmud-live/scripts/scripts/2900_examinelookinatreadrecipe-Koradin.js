@@ -53,6 +53,8 @@ var script2900 = function(self, actor, here, args, extra) {
 		var newView = "yel+     _________________\n+yel+    |                 |\n+yel+    |                 |\n+yel+    |    +  Mix+ing +    |+nrm+    All but the bottom left corner of a recipe for:\n+yel+    |________         |+nrm+\n    |        +yel+|        |+nrm+\n    |        +yel+|ipe     | +nrm+   +getObjProto(recVnum).name+\n    |        +yel+|        |+nrm+\n    |________+yel+|________|+nrm+\n";
 	else if (sTest == "bL~bR~tL~tR")
 		var newView = "yel+     _________________\n+yel+    |                 |\n+yel+    |                 |\n+yel+    |    +  Mix+ing +    |+nrm+    The recipe for:\n+yel+    |                 |+nrm+\n    +yel+|                 |+nrm+\n    +yel+|      Recipe     | +nrm+   +getObjProto(recVnum).name+\n    +yel+|                 |+nrm+\n    +yel+|_________________|+nrm+\n";
+	else
+		var newView = "";
 	var rString = "";
 	newView = newView.split("+");
 	for (i=0;i<newView.length;i++)
