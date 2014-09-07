@@ -1,6 +1,7 @@
 var script1003 = function(self, actor, here, args, extra) {
 	waitpulse 5;
-		if (actor.race == constants.RACE_HUMAN && actor.room == here)
+	if(actor.room == here) {
+		if (actor.race == constants.RACE_HUMAN)
 			actor.send("A brutish footpad says, 'Hello stranger, goodnight.'");
 			waitpulse 2;
 			if (actor.race == constants.RACE_HUMAN)
@@ -13,4 +14,5 @@ var script1003 = function(self, actor, here, args, extra) {
 				actor.damage(50);
 			if (actor.race == constants.RACE_HUMAN)
 				actor.send("You wake up some time later, with an incredible headache.");
+	}
 }
