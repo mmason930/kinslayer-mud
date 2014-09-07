@@ -71,7 +71,7 @@ var script2899 = function(self, actor, here, args, extra) {
 			break;
 		}
 	}
-	var recipe = getRecipeByVnum(recVnum, rType).name;
+	var recipe = getRecipeByVnum(recVnum, rType);
 
 	if(recipe == null) {
 
