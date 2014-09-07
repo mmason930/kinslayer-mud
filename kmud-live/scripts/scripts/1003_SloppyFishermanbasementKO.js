@@ -1,6 +1,6 @@
 var script1003 = function(self, actor, here, args, extra) {
 	waitpulse 5;
-		if (actor.race == constants.RACE_HUMAN)
+		if (actor.race == constants.RACE_HUMAN && actor.room == here)
 			actor.send("A brutish footpad says, 'Hello stranger, goodnight.'");
 			waitpulse 2;
 			if (actor.race == constants.RACE_HUMAN)
