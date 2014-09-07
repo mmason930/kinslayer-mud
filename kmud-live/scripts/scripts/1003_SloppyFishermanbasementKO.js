@@ -11,7 +11,7 @@ var script1003 = function(self, actor, here, args, extra) {
 			if (actor.race == constants.RACE_HUMAN)	
 				actor.comm("u");
 			if (actor.race == constants.RACE_HUMAN)
-				actor.damage(50);
+				actor.damage(min(actor.hps*.1,25));
 			if (actor.race == constants.RACE_HUMAN)
 				actor.send("You wake up some time later, with an incredible headache.");
 	}
