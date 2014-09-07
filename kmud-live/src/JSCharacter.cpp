@@ -236,6 +236,8 @@ flusspferd::array JSCharacter::getFollowers()
 
 flusspferd::value JSCharacter::eq(int pos)
 {
+	if(pos < 0 || pos >= NUM_WEARS)
+		return lookupValue(0);
 	return lookupValue(real && !real->IsProto() ? GET_EQ(real, pos) : 0);
 }
 

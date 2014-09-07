@@ -1335,8 +1335,6 @@ ACMD( do_gen_tog )
 	         "You will no longer have your communication repeated.\r\n"},
 	        {"HolyLight mode off.\r\n",
 	         "HolyLight mode on.\r\n"},
-	        {"Nameserver_is_slow changed to NO; IP addresses will now be resolved.\r\n",
-	         "Nameserver_is_slow changed to YES; sitenames will no longer be resolved.\r\n"},
 	        {"Autoexits disabled.\r\n",
 	         "Autoexits enabled.\r\n"},
 	        {"Buildwalk now OFF.\r\n",

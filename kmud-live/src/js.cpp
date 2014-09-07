@@ -389,14 +389,10 @@ void JSManager::monitorSubversion(sql::Context  context, const std::string &repo
 				timeOfLastPing = time(0);
 			}
 
-			MudLog(BRF, -1, TRUE, "Clearing subversion info map.");
 			subversionInfoMap.clear();
-			MudLog(BRF, -1, TRUE, "Obtaining subversion info map.");
 			subversionInfoMap = SystemUtil::getSubversionInfoMap(repositoryUrl);
 
 			std::string revisionString = subversionInfoMap["Revision"];
-
-			MudLog(BRF, -1, TRUE, "Revision String `%s`", revisionString.c_str());
 
 			if(revisionString.empty())
 			{
@@ -477,8 +473,7 @@ void JSManager::monitorSubversion(sql::Context  context, const std::string &repo
 							}
 						}
 					}
-				
-					MudLog(BRF, -1, TRUE, "Number Of Files: %d", numberOfFiles);
+					
 					if(numberOfFiles > 0)
 					{
 						batchInsertStatement.finish();
