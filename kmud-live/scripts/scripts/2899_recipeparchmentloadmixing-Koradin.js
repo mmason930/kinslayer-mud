@@ -71,7 +71,16 @@ var script2899 = function(self, actor, here, args, extra) {
 			break;
 		}
 	}
-	var recName = getRecipeByVnum(recVnum, rType).name;
+	var recipe = getRecipeByVnum(recVnum, rType).name;
+
+	if(recipe == null) {
+
+		mudLog(constants.BRF, 100, "Recipe #" + recVnum + ", Type: " + rType + " is null. Self vnum: " + self.vnum);
+		return;
+	}
+
+	var recName = recipe.name;
+
 	//sendKoradin(recName);
 	var rName = [];
 	recName = recName.split(" ");
