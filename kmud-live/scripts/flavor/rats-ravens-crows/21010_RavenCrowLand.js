@@ -1,4 +1,4 @@
-var ravenCrowLand = function(self, actor, here, args, extra) {
+var 21010_ravenCrowLand = function(self, actor, here, args, extra) {
 	if(self.position == constants.POS_FLYING) {
 		self.comm("say Flying!");
 	} else {
