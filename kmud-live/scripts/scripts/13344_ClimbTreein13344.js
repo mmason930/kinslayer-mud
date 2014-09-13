@@ -8,6 +8,7 @@ var script13344 = function(self, actor, here, args, extra) {
 		actor.send("What is it you are trying to climb exactly?");
 	}
 	else {
+	actor.send("value" + actor.quest('Sunny Side Up'));
 		if ( actor.quest('Sunny Side Up') >= 1 ) {
 			if ( actor.mount == null ) {
 				if ( actor.dexterity >= 18 ) {
