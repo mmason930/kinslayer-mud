@@ -8,7 +8,7 @@ var script13344 = function(self, actor, here, args, extra) {
 		actor.send("What is it you are trying to climb exactly?");
 	}
 	else {
-		if ( actor.quest('Sunny Side Up') > 1 ) {
+		if ( actor.quest('Sunny Side Up') >= 1 ) {
 			if ( actor.mount == null ) {
 				if ( actor.dexterity >= 18 ) {
 					actor.send("You clamber on to the log and start climbing up the tree.");
