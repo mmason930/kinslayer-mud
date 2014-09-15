@@ -20,7 +20,16 @@ var script115 = function(self, actor, here, args, extra) {
 		if(vict.level > actor.level) {
 			continue;
 		}
-		vict.stopFighting();
-		vict.position = constants.POS_SITTING;
+
+		if(vict.fighting) {
+
+			if(vict.level <= actor.level) {
+				vict.stopFighting();
+
+			//	if(vict.level < actor.level) {
+			//		vict.position = constants.POS_SITTING;
+			//	}
+			}
+		}
 	}
 };
