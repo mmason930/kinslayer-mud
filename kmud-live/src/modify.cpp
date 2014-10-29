@@ -932,7 +932,7 @@ void string_add(Descriptor *d, char *str)
 		{
 			if (terminator == 1)
 			{
-				if (strlen(*d->str) == 0)
+				if (*d->str && strlen(*d->str) == 0)
 				{
 					delete (*d->str);
 					*d->str = NULL;

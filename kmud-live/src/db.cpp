@@ -1547,8 +1547,7 @@ bool Character::basicSave()
 	Query << "title = '" << sql::escapeString(this->player.title)			<< "',";
 	Query << "whois_extra = '" << sql::escapeString(this->points.whois_extra)			<< "',";
 
-	if(this->player.description)
-		Query << "description = '" << sql::escapeString(this->player.description)			<< "',";
+	Query << "description = '" << sql::escapeString(this->player.description == NULL ? "" : this->player.description)			<< "',";
 
 	if(this->player.time.logon.after(DateTime(0))) {
 		Query << "last_logon = FROM_UNIXTIME("  << this->player.time.logon.getTime()		<< "),";

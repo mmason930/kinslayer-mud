@@ -7298,7 +7298,7 @@ ACMD(do_jmap)
 		return script;
 	};
 
-	OneArgument(TwoArguments(argument, arg1, arg2), arg3);
+	OneArgument(TwoArguments(argument, arg1, arg2, false), arg3, false);
 
 	if(!*argument || !*arg1)
 	{
