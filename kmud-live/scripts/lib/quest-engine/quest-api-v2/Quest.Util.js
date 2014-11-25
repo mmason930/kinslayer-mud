@@ -181,7 +181,6 @@
 		},
 
 		listQuests: function(actor, quests, questMaster) {
-			mudLog(constants.BRF, 100, quests);
 			//List all the available quests.
 			getCharCols(actor, constants.CL_OFF);
 			actor.send(red + " Available Quests" + nrm);
