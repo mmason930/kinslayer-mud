@@ -32,9 +32,9 @@
 		var targetEntry = false;
 		for (var _autoKey in journal.entries) {
 			var entry = journal.entries[_autoKey];
-			if ( !str_cmp(entry.quest.questName,strQName) ) {
+			if ( !str_cmp(entry.quest.name,strQName) ) {
 				targetEntry = entry;//This is the entry object we are looking for
-				// this.send("EXISTING ENTRY FOUND: "+targetEntry.questName);
+				// this.send("EXISTING ENTRY FOUND: "+targetEntry.name);
 					break;
 			}
 		}
@@ -77,7 +77,7 @@
 				for ( var i = 0; i < journal.entries.length; i++ ) {
 					var thisEntry = journal.entries[i];
 					thisEntry.entryNum = i + 1;
-					// this.send("READJUSTING ENTRIES: "+thisEntry.questName+" to position "+thisEntry.entryNum);
+					// this.send("READJUSTING ENTRIES: "+thisEntry.name+" to position "+thisEntry.entryNum);
 				}
 			}
 			else {
@@ -85,11 +85,11 @@
 			}
 			/**REMOVE ALL QVALS FOR QUEST UPON REMOVAL**/
 			this.qval(strQName, 0);//Set qval to 'Not Started'
-			var taskArray = quest.taskArray;
+			var tasks = quest.tasks;
 			// this.send(strQName+": "+this.quest(strQName));
 			var exploreTag = checkTag(strQName,'Exploration');
-			for ( var j = 0; j < taskArray.length; j++ ) {
-				var task = taskArray[j];
+			for ( var j = 0; j < tasks.length; j++ ) {
+				var task = tasks[j];
 				if ( exploreTag == true ) {
 					actor.deletePval(strQName+"_"+task[0]);
 				}

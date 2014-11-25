@@ -19,7 +19,7 @@ function getQuestsByTag( strTag, actor ) {
 		if ( viewer != undefined && ( !arrContains(global.questMasters,viewer.name) || viewer.quest("QUEDIT_DISP_TOG") != 0 ) && !arrContains(quest.editors,viewer.name) ) {
 			continue;
 		}
-		var qName = quest.questName
+		var qName = quest.name
 		if ( checkTag(qName,strTag) == true ) {
 			if ( actor && getObjectClass(actor) == 'JSCharacter' ) {
 				var push = actor.isQuestAvailable(qName)[0];

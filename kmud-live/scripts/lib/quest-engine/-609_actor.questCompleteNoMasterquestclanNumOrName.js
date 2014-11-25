@@ -10,7 +10,7 @@
  *                                                                                   *
  *************************************************************************************/
 JSCharacter.prototype.questCompleteNoMaster = function (quest, clanNum) {
-	var qName = quest.questName;
+	var qName = quest.name;
 	var guardian = getMobAtRoom(500, 500);
 	var here = this.room;
 	//Quest is valid and not yet completed.
@@ -83,8 +83,8 @@ JSCharacter.prototype.questCompleteNoMaster = function (quest, clanNum) {
 		this.send("You acquire" + this.numCopperToText(quest.gold, true) + ".");
 	}
 	//Reward items.	
-	if (quest.itemReward && !isEmpty(quest.itemReward)) {
-		var slots = quest.itemReward;
+	if (quest.itemRewards && !isEmpty(quest.itemRewards)) {
+		var slots = quest.itemRewards;
 		for (var id in slots) {
 			var slot = slots[id];
 			for (var i = 0; i < slot.length; i++) {
@@ -109,7 +109,7 @@ JSCharacter.prototype.questCompleteNoMaster = function (quest, clanNum) {
 	//Mark quest as complete.
 	var nrComp = this.quest(qName + "-NR_COMPLETED");
 	++nrComp;
-	if (quest.num == 1 || nrComp >= quest.num)
+	if (quest.maxCompletions == 1 || nrComp >= quest.maxCompletions)
 		this.qval(qName, -1);
 	this.qval(qName + "-NR_COMPLETED", nrComp);
 	getCharCols(this, constants.CL_OFF)
@@ -118,7 +118,7 @@ JSCharacter.prototype.questCompleteNoMaster = function (quest, clanNum) {
 	function afterWait(vArgs) {
 		var quest = vArgs[0];
 		var actor = vArgs[1];
-		var unlockedQuests = actor.getUnlockedQuests(quest.questName);
+		var unlockedQuests = actor.getUnlockedQuests(quest.name);
 		if (unlockedQuests && unlockedQuests.length > 0) {
 			var end = "";
 			if (unlockedQuests.length > 1) {
@@ -128,21 +128,21 @@ JSCharacter.prototype.questCompleteNoMaster = function (quest, clanNum) {
 			var questNames = [];
 			for (var _autoKey in unlockedQuests) {
 				var quest = unlockedQuests[_autoKey];
-				if (quest.ownerVnum.length > 0) {
-					for (var _autoKey in actor.isQuestAvailable(quest.questName)[1]) {
-						var num = actor.isQuestAvailable(quest.questName)[1][_autoKey];
+				if (quest.ownerVnums.length > 0) {
+					for (var _autoKey in actor.isQuestAvailable(quest.name)[1]) {
+						var num = actor.isQuestAvailable(quest.name)[1][_autoKey];
 						if (arrContains(masterVnums, num) == false) {
 							masterVnums.push(num);
 						}
 					}
 				}
-				questNames.push(quest.questName);
+				questNames.push(quest.name);
 			}
 			actor.send(bld + "You have unlocked the following quest" + end + ": " + nrm + grn + questNames.join(", ") + nrm + bld + ".\n" + nrm);
 			for (var _autoKey in unlockedQuests) {
 				var quest = unlockedQuests[_autoKey];
-				if (quest.ownerVnum.length == 0) {
-					actor.journalEdit("ADD", quest.questName);
+				if (quest.ownerVnums.length == 0) {
+					actor.journalEdit("ADD", quest.name);
 				}
 			}
 			for (var _autoKey in masterVnums) {
@@ -150,7 +150,7 @@ JSCharacter.prototype.questCompleteNoMaster = function (quest, clanNum) {
 				var count = 0;
 				for (var _autoKey in unlockedQuests) {
 					var quest = unlockedQuests[_autoKey];
-					if (arrContains(quest.ownerVnum, vnum))
+					if (arrContains(quest.ownerVnums, vnum))
 						++count;
 				}
 				var mobName = getMobName(vnum);

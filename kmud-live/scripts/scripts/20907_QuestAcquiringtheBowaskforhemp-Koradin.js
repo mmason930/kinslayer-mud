@@ -1,7 +1,7 @@
 var script20907 = function(self, actor, here, args, extra) {
 	//For quest: Acquiring the Bow
 	//Koradin - January 2010
-	if (actor.quest('Acquiring the Bow') < 1)
+	if (!Quest.getByName('Acquiring the Bow').hasBegun(actor))
 		return;
 	else if (actor.hasItem(1715,true,true,true))
 	{

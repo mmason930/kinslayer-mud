@@ -1,7 +1,7 @@
 var script6448 = function(self, actor, here, args, extra) {
 		var qName = "Drop Dead";
 		if ( extra.direction == constants.WEST ) {
-			if ( actor.quest(qName) == 2 ) {
+			if ( Quest.getByName(qName).tasks[1].isInProgress(actor) ) {
 				_block;
 				function afterWait(args) {
 					var actor = args[0];

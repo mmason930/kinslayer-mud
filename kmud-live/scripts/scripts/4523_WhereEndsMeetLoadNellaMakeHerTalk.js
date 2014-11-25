@@ -3,7 +3,7 @@ var script4523 = function(self, actor, here, args, extra) {
 	//Where Ends Meet: Load Nella Make Her Talk
 	if ( actor.quest("NELLA_DEAD") != 1 ) {
 		var qName = "Where Ends Meet";
-		if ( actor.quest(qName) == 1 ) {
+		if (Quest.getByName(qName).tasks[0].isInProgress(actor)) {
 			self.loadMob(9870);
 			actor.qval(qName,2);
 			var nella = self.people[0];
@@ -19,7 +19,7 @@ var script4523 = function(self, actor, here, args, extra) {
 			actor.updateJournalTask(qName,0);
 			return;
 		}
-		else if ( actor.quest(qName) == -1 && actor.quest("Branching Out") == 0 ) {
+		else if ( Quest.getByName(qName).hasCompleted(actor) && !Quest.getByName("Branching Out").hasBegun(actor) ) {
 			self.loadMob(9870);
 		}
 	}

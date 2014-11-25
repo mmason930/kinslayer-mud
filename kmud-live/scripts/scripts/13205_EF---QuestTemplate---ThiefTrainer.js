@@ -51,16 +51,16 @@ var script13205 = function(self, actor, here, args, extra) {
 	                return;
 	        }
 	        waitpulse 5;
-	        if( actor.quest(quests[qNum].questName) == -1 ) {
+	        if( Quest.getByName(quests[qNum].name).hasCompleted(actor) ) {
 	            actor.send("You've already completed that quest!");
 					return;
 	        }
-	        if( actor.quest(quests[qNum].questName) != 1 ) {
+	        if( actor.quest(quests[qNum].name) != 1 ) {
 	            actor.send("You have not yet begun that quest.");
 					return;
 	        }
 	        /** 'Finding the Blade' Dialogue **/
-			if( quests[qNum].questName == 'Finding the Blade' ) {
+			if( quests[qNum].name == 'Finding the Blade' ) {
 					actor.send( capFirstLetter(self.name) + " looks you up and down with a smug expression on her face." );
 					wait 2.5;
 	                self.comm("tell " + actor.name + " Since you don't look to be a useless fool, I'll let you in on a little secret.");
@@ -74,7 +74,7 @@ var script13205 = function(self, actor, here, args, extra) {
 					self.comm("tell " + actor.name + " Oh, and by the way, if I were you I would get pretty good at picking locks and hiding from people.");
 			}
 			/** 'A Lethal Art' Dialogue **/
-			else if ( quests[qNum].questName == 'A Lethal Art' ) {
+			else if ( quests[qNum].name == 'A Lethal Art' ) {
 				actor.send( capFirstLetter(self.name) + " looks around carefully, as if there may be someone eavesdropping on her.");
 				wait 2.5;
 				self.comm("tell " + actor.name + " What I'm about to tell you can never be repeated anywhere around this village, you hear?");
@@ -101,16 +101,16 @@ var script13205 = function(self, actor, here, args, extra) {
 	                return;
 	        }
 	        waitpulse 5;
-	        if( actor.quest(quests[qNum].questName) == -1 ) {
+	        if( Quest.getByName(quests[qNum].name).hasCompleted(actor) ) {
 	            actor.send("You've already completed that quest!");
 	                return;
 	        }
-			else if ( actor.quest(quests[qNum].questName) > 0 ) {
+			else if ( actor.quest(quests[qNum].name) > 0 ) {
 				actor.send("You've already begun that quest!");
 	                return;
 			}
-	        actor.qval(quests[qNum].questName, 1);
-	        actor.send("You begin the quest '" + actor.bold(constants.CL_COMPLETE) + actor.cyan(constants.CL_COMPLETE) + quests[qNum].questName + actor.normal(constants.CL_COMPLETE) + "'");
+	        actor.qval(quests[qNum].name, 1);
+	        actor.send("You begin the quest '" + actor.bold(constants.CL_COMPLETE) + actor.cyan(constants.CL_COMPLETE) + quests[qNum].name + actor.normal(constants.CL_COMPLETE) + "'");
 	        actor.send("To receive information on this quest, type 'quest info " + (qNum+1) + "'");
 			//If actor doesn't have a journal, give them one
 			if ( !actor.hasItem(13220,true,true,true) ) {
@@ -124,7 +124,7 @@ var script13205 = function(self, actor, here, args, extra) {
 				self.say("And if for any reason you lose your journal, just type 'quest journal please' at a quest giver and you'll be given a new one.");
 			}
 			var quest = quests[qNum];
-			var qName = quests[qNum].questName;
+			var qName = quests[qNum].name;
 			//Create a journal entry for this quest
 			waitpulse 1;
 			actor.editQuestJournal(qName,true);

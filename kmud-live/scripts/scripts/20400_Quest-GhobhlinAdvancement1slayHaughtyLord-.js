@@ -7,7 +7,7 @@ var script20400 = function(self, actor, here, args, extra) {
 		var onQuest = false;
 		for (var _autoKey in killer.getIncompleteQuests()) {
 			var quest = killer.getIncompleteQuests()[_autoKey];
-			if (quest.questName == "Ghob'hlin Advancement 1")
+			if (quest.name == "Ghob'hlin Advancement 1")
 				onQuest = true;
 		}
 		/**THE KILLER IS A MOB OR IS ON THE QUEST**/

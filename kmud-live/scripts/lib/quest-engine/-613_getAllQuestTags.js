@@ -7,7 +7,7 @@ function getAllQuestTags(viewer) {
 	var vTags = [];
 	for (var _autoKey in global.vQuests) {
 		var quest = global.vQuests[_autoKey];
-		if ( viewer && ( !arrContains(global.questMasters,viewer.name) || viewer.quest("QUEDIT_DISP_TOG") != 0 ) && !arrContains(quest.editors,viewer.name) ) {
+		if ( viewer && viewer.quest("QUEDIT_DISP_TOG") != 0 && !arrContains(quest.editors, viewer.name)) {
 			continue;
 		}
 		for (var _autoKey in quest.tags) {

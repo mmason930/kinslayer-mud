@@ -284,7 +284,6 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 	var niamh         = [13,2,"_  "," `",66];
 	var niamh3        = [13,2,""   ,"N"  ,181, bld];
 	var niamh2        = [14,2,"   ","P  ",181, bld];
-	//var maerwynn      = [14,3,"   ","   ",237];
 	var gap           = [12,3,"TG",""   ,206, bld];
 	var niamhOgier    = [13,3,"__/" ,"   ",181];
 	var nFD           = [12,3,""   ,"__/",193];
@@ -353,18 +352,17 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 			//here.echo(actor_room);
 		}
 	}
+	var aMob = getMobAtRoom(20800, 20804);
 	var damaneZones = [];
-	if(global.global2014Util){
-		if(global.global2014Util.eventIsActive){
-			//sendKoradin("koradin test: pushing svals");
-			damaneZones.push(global.global2014Util.damaneZones[1122]);
-			damaneZones.push(global.global2014Util.damaneZones[1123]);
-			damaneZones.push(global.global2014Util.damaneZones[1124]);
-			damaneZones.push(global.global2014Util.damaneZones[1125]);
-			damaneZones.push(global.global2014Util.damaneZones[1126]);
-			damaneZones.push(global.global2014Util.damaneZones[1127]);
-			var questIsOn = true;
-		}
+	if(aMob){
+		//sendKoradin("koradin test: pushing svals");
+		damaneZones.push(parseInt(getSval(aMob, 20980, 1122)));
+		damaneZones.push(parseInt(getSval(aMob, 20980, 1123)));
+		damaneZones.push(parseInt(getSval(aMob, 20980, 1124)));
+		damaneZones.push(parseInt(getSval(aMob, 20980, 1125)));
+		damaneZones.push(parseInt(getSval(aMob, 20980, 1126)));
+		damaneZones.push(parseInt(getSval(aMob, 20980, 1127)));
+		var questIsOn = getSval(aMob, 20980, "active");
 	}
 	//sendKoradin("koradin test: zones: "+damaneZones.join(" "));
 	var buffer = "";
@@ -389,14 +387,6 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 					var hlColor = nrm;
 				}
 				if (x == 7 && y == 6 && actor.room.zoneVnum == 12 && count < 1) {
-					buffer += yel+bld+"  X"+nrm;
-					count += 1;
-				}
-				if (x == 14 && y == 3 && actor.room.zoneVnum == 237 && count < 1) {
-					buffer += yel+bld+"X  "+nrm;
-					count += 1;
-				}
-				if (x == 2 && y == 6 && actor.room.zoneVnum == 43 && count < 1) {
 					buffer += yel+bld+"  X"+nrm;
 					count += 1;
 				}
@@ -487,10 +477,6 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 				}
 				if (x == 6 && y == 8 && actor.room.zoneVnum == 14 && count < 1) {
 					buffer += yel+bld+"X  "+nrm;
-					count += 1;
-				}
-				if (x == 2 && y == 6 && actor.room.zoneVnum == 24 && count < 1) {
-					buffer += yel+bld+" X "+nrm;
 					count += 1;
 				}
 				if (actor.room.zoneVnum == r[4])

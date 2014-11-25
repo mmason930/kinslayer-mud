@@ -431,14 +431,14 @@ var script20860 = function(self, actor, here, args, extra) {
 			for (var _autoKey in crossRaceQuests) {
 				var quest = crossRaceQuests[_autoKey];
 				if ( killer.race != victim.race ) {
-					killer.updateJournalTask(quest.questName,0);
+					quest.updateTask(killer, 0);
 				}
 			}
 			var sameRaceQuests = getQuestsByTag("Same-Race PK",killer);
 			for (var _autoKey in sameRaceQuests) {
 				var qst = sameRaceQuests[_autoKey];
 				if ( killer.race == victim.race ) {
-					killer.updateJournalTask(qst.questName,0);
+					qst.updateTask(killer, 0);
 				}
 			}
 			//Send messages

@@ -17,20 +17,20 @@ var script20870 = function(self, actor, here, args, extra) {
 			return;
 		for (var _autoKey in actor.getIncompleteQuests()) {
 			var quest = actor.getIncompleteQuests()[_autoKey];
-			//here.echo(quest.questName);
-			if (checkTag(quest.questName,"Exploration") == true && actor.room.zoneVnum == getExplorationTask(actor.room.vnum)[2].zoneVnum)
+			//here.echo(quest.name);
+			if (checkTag(quest.name,"Exploration") == true && actor.room.zoneVnum == getExplorationTask(actor.room.vnum)[2].zoneVnum)
 			{
 				//here.echo(actor.name +" is on the quest");
 				var task_name = getExplorationTask(actor.room.vnum);
 				if (task_name)
 					task_name = task_name[0];
 				//here.echo(task_name);
-				var index = getTaskIndex(quest.questName,task_name);
+				var index = getTaskIndex(quest.name,task_name);
 				//here.echo(index);
-				if (index > -1 && actor.checkVisitedRooms(quest.questName+"_"+task_name) == false)
+				if (index > -1 && actor.checkVisitedRooms(quest.name+"_"+task_name) == false)
 				{
-					actor.updateJournalTask(quest.questName,index);
-					actor.updateVisitedRooms(quest.questName+"_"+task_name);
+					quest.updateTask(actor, index);
+					actor.updateVisitedRooms(quest.name+"_"+task_name);
 				}
 			}
 		}

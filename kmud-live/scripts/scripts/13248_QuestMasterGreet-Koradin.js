@@ -11,58 +11,35 @@ var script13248 = function(self, actor, here, args, extra) {
 	var nrm = actor.normal(constants.CL_OFF);
 	var bld = actor.bold(constants.CL_OFF);
 	var yellow = actor.yellow(constants.CL_OFF);
-	var quest_qvals = [];
 	var unstarted = 0;
 	var unfinished = 0;
 	var complete = 0;
-	for (var _autoKey in actor.getAvailableQuests(self.vnum)) {
-		var quest = actor.getAvailableQuests(self.vnum)[_autoKey];
-		var push = false;
-		if ( quest.priorQuests.length > 0 ) {
-			var i = 0;
-			for (var _autoKey in quest.priorQuests ) {
-				var name = quest.priorQuests [_autoKey];
-				if ( actor.quest(name) == -1 ) {
-					++i;
-				}
-			}
-			if ( i == quest.priorQuests.length ) {
-				push = true;
-			}
-		}
-		else {
-			push = true;
-		}
-		if ( push == true ) {
-			quest_qvals.push(actor.quest(quest.questName));
-		}
-	}
-	for (var i = 0; i < quest_qvals.length; i++)
+	var quests = actor.getAvailableQuests(self.vnum);
+	for (var i = 0; i < quests.length; i++)
 	{
-		if (quest_qvals[i] == -1)
+		var quest = quests[i];
+		if (quest.hasCompleted(actor))
 			complete += 1;
-		else if (quest_qvals[i] == 0)
+		else if (!quest.hasBegun(actor))
 			unstarted += 1;
-		else if (quest_qvals[i] > 0)
+		else
 			unfinished += 1;
 	}
-	if (complete == quest_qvals.length)
+	if (complete == quests.length)
 		return;
 	else if (unfinished > 0)
 	{
-		if (unfinished == 1)
-			unfinished = "1 quest";
-		else if (unfinished > 1)
-			unfinished = (unfinished + " quests");
-		actor.send(yellow + bld + capFirstLetter(self.name) + " is waiting for you to complete " + unfinished + "." + nrm);
+		var str = unfinished + " quest";
+		if (unfinished > 1)
+			str += "s";
+		actor.send(yellow + bld + capFirstLetter(self.name) + " is waiting for you to complete " + str + "." + nrm);
 	}
 	if (unstarted > 0)
 	{
-		if (unstarted == 1)
-			unstarted = "1 new quest";
-		else if (unstarted > 1)
-			unstarted = (unstarted + " new quests");
-		actor.send(yellow + bld + capFirstLetter(self.name) + " has " + unstarted + " available for you!" + nrm);
+		var str = unstarted + " new quest";
+		if (unstarted > 1)
+			str += "s";
+		actor.send(yellow + bld + capFirstLetter(self.name) + " has " + str + " available for you!" + nrm);
 	}
 	actor.send(" ");
 	actor.send("Type '" + cyan + "quest" + nrm + "' at the quest master for more information.");

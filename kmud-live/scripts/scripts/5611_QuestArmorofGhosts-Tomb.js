@@ -4,7 +4,7 @@ var script5611 = function(self, actor, here, args, extra) {
 	//Quest: Armor of Ghosts
 	/** Command Trigger: -read- **/
 	var qName = "Armor of Ghosts";
-	if ( actor.quest(qName) == 2 ) {
+	if ( Quest.getByName(qName).tasks[1].isInProgress(actor) ) {
 		_block;
 		getCharCols(actor);
 		actor.send(bld+cyn+"As you study the inscription on the tomb's wall, you feel imbued with some hidden knowledge."+nrm);

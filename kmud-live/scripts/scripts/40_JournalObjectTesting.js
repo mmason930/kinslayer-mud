@@ -37,12 +37,12 @@ var script40 = function(self, actor, here, args, extra) {
 				if ( vArgs[2] == "all" ) {
 					for (var _autoKey in vQuests) {
 						var quest = vQuests[_autoKey];
-						actor.journalEdit(cmd,quest.questName,false);
+						actor.journalEdit(cmd,quest.name,false);
 					}
 				}
 				else if ( isNumber(vArgs[2]) == true ) {
 					for ( var i = 0; i <= (vArgs[2]-1) && i < vQuests.length; i++ ) {
-						actor.journalEdit(cmd,vQuests[i].questName,false);
+						actor.journalEdit(cmd,vQuests[i].name,false);
 					}
 				}
 				else {
@@ -53,8 +53,8 @@ var script40 = function(self, actor, here, args, extra) {
 					qName = qName.join(" ");
 					for (var _autoKey in vQuests) {
 						var quest = vQuests[_autoKey];
-						if ( !str_cmp(quest.questName,qName) ) {
-							actor.journalEdit(cmd,quest.questName,false);
+						if ( !str_cmp(quest.name,qName) ) {
+							actor.journalEdit(cmd,quest.name,false);
 							break;
 						}
 					}
@@ -65,7 +65,7 @@ var script40 = function(self, actor, here, args, extra) {
 		if ( actor.journal ) {
 			for (var _autoKey in actor.journal.entries) {
 				var entry = actor.journal.entries[_autoKey];
-				here.echo(entry.questName);
+				here.echo(entry.name);
 			}
 			here.echo(actor.cyan(constants.CL_OFF)+actor.journal.entries.length+" total entries."+actor.normal(constants.CL_OFF));
 		}

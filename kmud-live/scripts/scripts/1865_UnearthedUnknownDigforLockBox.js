@@ -2,6 +2,7 @@ var script1865 = function(self, actor, here, args, extra) {
 	// Alder
 	// Quest: Unearthed, Unknown
 	var qName = "Unearthed, Unknown";
+	var quest = Quest.getByName(qName);
 	if ( actor.quest(qName) && !actor.questTaskProgress(qName)[1].comp ) {
 		_block;
 		if ( !actor.hasItem(13205,false,true,false) ) {
@@ -15,7 +16,7 @@ var script1865 = function(self, actor, here, args, extra) {
 		if ( success ) {
 			act("\nYour shovel strikes something metallic and you pry the object from the ground.", true, actor, null, null, constants.TO_CHAR);
 			act("$n's shovel strikes something metallic and $e pries the object from the ground.", true, actor, null, null, constants.TO_ROOM);
-			actor.addQuestItem("a rusty lock box",1,qName);
+			actor.addQuestItem("a rusty lock box",1,quest);
 			actor.updateJournalTask(qName,0);
 		}
 		else {

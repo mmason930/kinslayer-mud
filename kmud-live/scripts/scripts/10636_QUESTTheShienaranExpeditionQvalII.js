@@ -1,6 +1,7 @@
 var script10636 = function(self, actor, here, args, extra) {
 	var qName = 'The Shienaran Expedition';
-	var hasPackage = actor.checkQuestItem("a large package of provisions",1,qName);
+	var quest = Quest.getByName(qName);
+	var hasPackage = actor.checkQuestItem("a large package of provisions",1,quest);
 	if ( actor.questInProgress(qName) && !actor.questTaskProgress(qName)[2].comp && hasPackage ) {
 	     _block;
 	     waitpulse 5;
@@ -20,7 +21,7 @@ var script10636 = function(self, actor, here, args, extra) {
 	     actor.send("A Shienaran Blight scout says, 'in bloody no man's land! Open it up!'");
 	     waitpulse 10;
 	     actor.updateJournalTask(qName, 1);
-	     actor.remQuestItem("a large package of provisions",-1,qName);
+	     actor.remQuestItem("a large package of provisions",-1,quest);
 	     
 	}
 }

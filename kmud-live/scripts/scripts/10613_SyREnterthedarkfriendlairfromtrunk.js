@@ -4,7 +4,7 @@ var script10613 = function(self, actor, here, args, extra) {
 	var correctCommand = ( strn_cmp(cmd,"enter",2) || strn_cmp(cmd,"search",2) || strn_cmp(cmd,"open",2) );
 	if ( correctCommand ) {
 		var targetStr = vArgs[1];
-		if ( actor.quest('Search and Rescue') > 0 && targetStr == "trunk" && !actor.questTaskProgress('Search and Rescue')[4].comp ) {
+		if ( Quest.getByName('Search and Rescue').hasBegun(actor) && targetStr == "trunk" && !actor.questTaskProgress('Search and Rescue')[4].comp ) {
 			 _block;
 			 getCharCols(actor);
 			 actor.send(bld+cyn+"Breaking away the bark reveals a way inside the trunk!"+nrm);

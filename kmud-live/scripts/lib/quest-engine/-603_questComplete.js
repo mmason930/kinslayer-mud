@@ -10,11 +10,11 @@ function questComplete(self, actor, quests, arg, clanVnum) {
 		return;
 	}
 	var quest = quests[qNum];
-	if (actor.quest(quest.questName) == -1) {
+	if (Quest.getByName(quest.name).hasCompleted(actor)) {
 		actor.send("You have already completed that quest.");
 		return;
 	}
-	if (actor.quest(quest.questName) == 0) {
+	if (actor.quest(quest.name) == 0) {
 		actor.send("You have not yet begun that quest.");
 		return;
 	}
@@ -51,7 +51,7 @@ function questComplete(self, actor, quests, arg, clanVnum) {
 	}
 	/**Check to see if all tasks are complete**/
 	if ((quest.items.length > 0 && completed == true) || !quest.items.length) {
-		if (actor.questTaskProgress(quest.questName)[0] == true)
+		if (actor.questTaskProgress(quest.name)[0] == true)
 			completed = true;
 		else
 			completed = false;
@@ -82,8 +82,8 @@ function questComplete(self, actor, quests, arg, clanVnum) {
 	//Remove any qinventory items
 	for (var _autoKey in actor._questInv) {
 		var item = actor._questInv[_autoKey];
-		if (item.questName == quest.questName) {
-			actor.remQuestItem(item.itemName, item.itemAmount, item.questName);
+		if (item.name == quest.name) {
+			actor.remQuestItem(item.itemName, item.itemAmount, item.name);
 		}
 	}
 	//Reward QP.
@@ -105,8 +105,8 @@ function questComplete(self, actor, quests, arg, clanVnum) {
 		actor.send(capFirstLetter(self.name) + " gives you" + actor.numCopperToText(quest.gold, true) + ".");
 	}
 	//Reward items.	
-	if (quest.itemReward && !isEmpty(quest.itemReward)) {
-		var slots = quest.itemReward;
+	if (quest.itemRewards && !isEmpty(quest.itemRewards)) {
+		var slots = quest.itemRewards;
 		for (var id in slots) {
 			var slot = slots[id];
 			for (var i = 0; i < slot.length; i++) {
@@ -130,28 +130,28 @@ function questComplete(self, actor, quests, arg, clanVnum) {
 		}
 	}
 	//Mark quest as complete.
-	var nrComp = actor.quest(quest.questName + "-NR_COMPLETED") + 1;
+	var nrComp = actor.quest(quest.name + "-NR_COMPLETED") + 1;
 
-	if (quest.num > 0 && (quest.num == 1 || nrComp >= quest.num))
-		actor.qval(quest.questName, -1);
+	if (quest.maxCompletions > 0 && (quest.maxCompletions == 1 || nrComp >= quest.maxCompletions))
+		actor.qval(quest.name, -1);
 
-	actor.qval(quest.questName + "-NR_COMPLETED", nrComp);
-	actor.updateJournalTask(quest.questName, null);//Displays a journal update to player
-	if (nrComp < quest.num || quest.num < 1) {
-		// actor.qval(quest.questName, 0);
-		for (var _autoKey in quest.taskArray) {
-			var task = quest.taskArray[_autoKey];
+	actor.qval(quest.name + "-NR_COMPLETED", nrComp);
+	quest.updateTask(actor,  null);//Displays a journal update to player
+	if (nrComp < quest.maxCompletions || quest.maxCompletions < 1) {
+		// actor.qval(quest.name, 0);
+		for (var _autoKey in quest.tasks) {
+			var task = quest.tasks[_autoKey];
 			if (task[1] == null || task[1] == '') {
-				actor.qval(quest.questName + "_" + task[0], 0);
+				actor.qval(quest.name + "_" + task[0], 0);
 			}
 		}
-		actor.send(bld + "You may complete the following quest " + cyn + (quest.num > 0 ? intToText((quest.num - nrComp)) : "many") + nrm + bld + " more time(s): '" + nrm + grn + quest.questName + nrm + bld + "'." + nrm);
+		actor.send(bld + "You may complete the following quest " + cyn + (quest.maxCompletions > 0 ? intToText((quest.maxCompletions - nrComp)) : "many") + nrm + bld + " more time(s): '" + nrm + grn + quest.name + nrm + bld + "'." + nrm);
 	}
 	/**********AFTER THE WAIT CHECK TO UNLOCK*************/
 	function afterWait(vArgs) {
 		var quest = vArgs[0];
 		var actor = vArgs[1];
-		var unlockedQuests = actor.getUnlockedQuests(quest.questName);
+		var unlockedQuests = actor.getUnlockedQuests(quest.name);
 		if (unlockedQuests && unlockedQuests.length > 0) {
 			var end = "";
 			if (unlockedQuests.length > 1) {
@@ -161,21 +161,21 @@ function questComplete(self, actor, quests, arg, clanVnum) {
 			var questNames = [];
 			for (var _autoKey in unlockedQuests) {
 				var quest = unlockedQuests[_autoKey];
-				if (quest.ownerVnum.length > 0) {
-					for (var _autoKey in actor.isQuestAvailable(quest.questName)[1]) {
-						var num = actor.isQuestAvailable(quest.questName)[1][_autoKey];
+				if (quest.ownerVnums.length > 0) {
+					for (var _autoKey in actor.isQuestAvailable(quest.name)[1]) {
+						var num = actor.isQuestAvailable(quest.name)[1][_autoKey];
 						if (arrContains(masterVnums, num) == false) {
 							masterVnums.push(num);
 						}
 					}
 				}
-				questNames.push(quest.questName);
+				questNames.push(quest.name);
 			}
 			actor.send(bld + "You have unlocked the following quest" + end + ": " + nrm + grn + questNames.join(nrm + bld + ", " + nrm + grn) + nrm + bld + ".\n" + nrm);
 			for (var _autoKey in unlockedQuests) {
 				var quest = unlockedQuests[_autoKey];
-				if (quest.ownerVnum.length == 0) {
-					actor.journalEdit("ADD", quest.questName);
+				if (quest.ownerVnums.length == 0) {
+					actor.journalEdit("ADD", quest.name);
 				}
 			}
 			for (var _autoKey in masterVnums) {
@@ -183,7 +183,7 @@ function questComplete(self, actor, quests, arg, clanVnum) {
 				var count = 0;
 				for (var _autoKey in unlockedQuests) {
 					var quest = unlockedQuests[_autoKey];
-					if (arrContains(quest.ownerVnum, vnum))
+					if (arrContains(quest.ownerVnums, vnum))
 						++count;
 				}
 				var mobName = getMobName(vnum);

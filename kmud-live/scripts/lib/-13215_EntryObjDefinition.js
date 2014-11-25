@@ -7,7 +7,7 @@ function EntryObj(actor,quest) {
 	/**CREATE ENTRY FIELDS**/
 	this.journal = actor.journal;//Entry's journal
 	this.quest = quest;
-	this.questOwnerName = (quest.ownerVnum.length > 0 && quest.showGivenBy ? getMobName(actor.quest(quest.questName+"_GIVER")) : '');
+	this.questOwnerName = (quest.ownerVnums.length > 0 && quest.showGivenBy ? getMobName(actor.quest(quest.name+"_GIVER")) : '');
 	this.entryNum = actor.journal.entries.length + 1;
 }
 
@@ -15,12 +15,12 @@ function EntryObj(actor,quest) {
  * Display status of entry's quest     *
  ***************************************/	
 EntryObj.prototype.dispStatus = function(actor) {
-	var qName = this.quest.questName;
+	var qName = this.quest.name;
 	/**COMPLETED**/
-	if ( actor.quest(qName) == -1 )
+	if ( Quest.getByName(qName).hasCompleted(actor) )
 		return ( "Completed" );
-	else if ( actor.quest(qName) > 0 ) {
-		var taskData = actor.questTaskProgress(this.quest.questName);
+	else if ( Quest.getByName(qName).hasBegun(actor) ) {
+		var taskData = actor.questTaskProgress(this.quest.name);
 		var tasksCompleted = taskData[0];//Boolean--Are all tasks complete?
 		var taskStarted = taskData[taskData.length-1];//Boolean--Is any task started?
 		/**READY TO TURN IN**/
@@ -41,10 +41,10 @@ EntryObj.prototype.dispStatus = function(actor) {
 EntryObj.prototype.compile = function(actor,quest) {
 	/**MAKE SHORTCUTS FOR ENTRY FIELDS AND COLORS**/
 	var mobName = this.questOwnerName;
-	var qName = quest.questName;
-	var strSummary = quest.strSummary;
-	var skillArray = quest.skillArray;
-	var taskArray = quest.taskArray;
+	var qName = quest.name;
+	var summary = quest.summary;
+	var skills = quest.skills;
+	var tasks = quest.tasks;
 	var cyn = actor.cyan(constants.CL_OFF);
 	var ylw = actor.yellow(constants.CL_OFF);
 	var grn = actor.green(constants.CL_OFF);
@@ -57,16 +57,16 @@ EntryObj.prototype.compile = function(actor,quest) {
 	var taskBuff = "\n";//Align tasks on separate lines
 	var taskData = actor.questTaskProgress(qName);
 	/**ENTRY SKILLS**/
-	if ( !skillArray[0] )
+	if ( !skills[0] )
 		var skills = "";
 	else
-		var skills = cyn + "\n\nSkills: " + nrm + skillArray.join(skillsBuff);
+		var skills = cyn + "\n\nSkills: " + nrm + skills.join(skillsBuff);
 	
 	/**ENTRY TASKS**/
 	var tasks = [];
-	if ( taskArray.length > 0 ) {
-		for ( var i = 0; i < taskArray.length; i++ ) {
-			var task = taskArray[i];
+	if ( tasks.length > 0 ) {
+		for ( var i = 0; i < tasks.length; i++ ) {
+			var task = tasks[i];
 			if ( i != 0 && task[3] != undefined && task[3] > -1 && actor.quest(qName) != -1 ) {
 				if ( taskData[parseInt(task[3])+1].crnt < taskData[parseInt(task[3])+1].req )
 					continue;//This task is locked and the unlocker task is not complete,do not show in journal
@@ -94,7 +94,7 @@ EntryObj.prototype.compile = function(actor,quest) {
 				crnt = req;
 			}
 			//Brackets and / are colored depending on quest status
-			if ( actor.quest(qName) == -1 ) {
+			if ( Quest.getByName(qName).hasCompleted(actor) ) {
 				crnt = req;//Since quest is completed, set tasks to complete
 			}
 			if ( crnt < req ) {
@@ -116,9 +116,9 @@ EntryObj.prototype.compile = function(actor,quest) {
 	var tasksCompleted = taskData[0];
 	//getRoom(13203).echo("taskData[0] = " + taskData[0]);
 	var taskStarted = taskData[taskData.length-1];//Last element in actor array--boolean value
-	if ( actor.quest(qName) == -1 )
+	if ( Quest.getByName(qName).hasCompleted(actor) )
 		comp = red + "Complete" + nrm;
-	else if ( actor.quest(qName) > 0 ) {
+	else if ( Quest.getByName(qName).hasBegun(actor) ) {
 		if ( !taskStarted )//Player has quest, but no tasks have been attempted
 			comp = cyn + bld + "New Quest" + nrm;
 		else if ( tasksCompleted ) //All tasks complete
@@ -132,12 +132,12 @@ EntryObj.prototype.compile = function(actor,quest) {
 	/**ENTRY SUMMARY**/
 	var wrap = true;
 	if ( arrContains(quest.tags,"Zind Password") == true ) {
-		var summArray = strSummary.split("ALDER_ZIND_PASSWORD");
-		strSummary = summArray[0];
-		strSummary += cyn+(actor.getPval("ZIND_PASS") != null ? actor.getPval("ZIND_PASS") : "no longer available")+nrm;
-		strSummary += summArray[1];
+		var summArray = summary.split("ALDER_ZIND_PASSWORD");
+		summary = summArray[0];
+		summary += cyn+(actor.getPval("ZIND_PASS") != null ? actor.getPval("ZIND_PASS") : "no longer available")+nrm;
+		summary += summArray[1];
 	}
-	var summary = "\n" + ( wrap == true ? strColFormat(strSummary,55) : strSummary );//Summary is wrapped at column 55
+	var summary = "\n" + ( wrap == true ? strColFormat(summary,55) : summary );//Summary is wrapped at column 55
 	/**ENTRY REQUIREMENTS**/
 	if ( tasks.length > 0 || skills.length > 0 )
 		var requirements = cyn + skills + tasks;

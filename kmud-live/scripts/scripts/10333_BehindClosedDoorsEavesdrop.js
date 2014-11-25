@@ -1,7 +1,7 @@
 var script10333 = function(self, actor, here, args, extra) {
 	//Alder
 		var qName = "Behind Closed Doors";
-		if ( actor.quest(qName) == 1 ) {
+		if (Quest.getByName(qName).tasks[0].isInProgress(actor)) {
 			_block;
 			actor.qval(qName,2);
 			getCharCols(actor);

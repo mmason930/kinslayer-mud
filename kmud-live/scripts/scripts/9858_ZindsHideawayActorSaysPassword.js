@@ -13,14 +13,14 @@ var script9858 = function(self, actor, here, args, extra) {
 				var person = getRoom(9860).people[_autoKey];
 				if ( person.vnum == 9860 ) {
 					function checkQvals(element, elementIndex, targetArray) {
-						if ( actor.quest(element.questName) == -1 ) {
+						if ( Quest.getByName(element.name).hasCompleted(actor) ) {
 							return ( element );
 						}
 						
 						return null;
 					}
 					var quests = actor.getAvailableQuests(9860);
-					if ( quests.every(checkQvals) == true && actor.quest("A Floating Liaison") < 1 ) {
+					if ( quests.every(checkQvals) == true && !Quest.getByName("A Floating Liaison").hasBegun(actor) ) {
 						waitpulse 7;
 						actor.room.echo("A muffled voice from somewhere beyond the wall can be heard: 'There's nothing for you right now.'");
 						return;
@@ -43,7 +43,7 @@ var script9858 = function(self, actor, here, args, extra) {
 				actor.room.echoaround(actor, "The hatch quickly slams shut behind "+actor.name+".");
 				actor.moveToRoom(getRoom(9860));
 				actor.comm("look");
-				if ( actor.quest("A Floating Liaison") == 1 ) {
+				if ( Quest.getByName("A Floating Liaison").hasBegun(actor) ) {
 					for (var _autoKey in actor.room.people) {
 						var person = actor.room.people[_autoKey];
 						if ( person.vnum == 9860 ) {

@@ -1,7 +1,7 @@
 var script10612 = function(self, actor, here, args, extra) {
 	var vArgs = getArgList(args);
 	var targetStr = vArgs[1];
-	if ( targetStr == "leaftrap" && actor.quest('Search and Rescue') > 0 ) {
+	if ( targetStr == "leaftrap" && Quest.getByName('Search and Rescue').hasBegun(actor) ) {
 		_block;
 		getCharCols(actor);
 		actor.send(bld+cyn+"You dig under the leaves and discover a trap door!"+nrm);

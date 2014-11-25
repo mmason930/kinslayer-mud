@@ -1,7 +1,7 @@
-﻿function keyCount(x) {
-	return Object.keys(x).length;
+﻿function keyCount(o) {
+	return Object.keys(o).length;
 }
 
-function isEmpty(x) {
-	return keyCount(x) == 0;
+function isEmpty(o) {
+	return keyCount(o) == 0;
 }

@@ -15,6 +15,7 @@ function loadAllQuests()
 	mudLog(constants.BRF, 102, "Loading quests...");
 	var sQuery;
 	var vQuests = [];
+	Quest.clearQuests();
 	
 	sqlQuery("DELETE FROM " + QUEST_DIALOGUE_TABLE + " WHERE quest_id NOT IN(SELECT id FROM " + QUEST_DATA_TABLE + ");");
 	sqlQuery("DELETE FROM " + QUEST_ITEMS_TABLE + " WHERE quest_id NOT IN(SELECT id FROM " + QUEST_DATA_TABLE + ");");
@@ -33,7 +34,7 @@ function loadAllQuests()
 	sQuery = "SELECT * FROM " + QUEST_ITEMS_TABLE + " ORDER BY quest_id ASC,position ASC;";
 	var rsItems = sqlQuery( sQuery );
 	
-	sQuery = "SELECT * FROM " + QUEST_TASK_TABLE + " ORDER BY quest_id ASC,position ASC;";
+	sQuery = "SELECT * FROM " + QUEST_TASK_TABLE + " ORDER BY quest_id ASC,position ASC, unlockerIndex ASC;";
 	var rsTasks = sqlQuery( sQuery );
 	
 	sQuery = "SELECT * FROM " + QUEST_OWNER_VNUM_TABLE + " ORDER BY quest_id ASC;";
@@ -50,42 +51,33 @@ function loadAllQuests()
 	
 	while( rs.hasNextRow ) {
 		var row = rs.getRow;
-		var quest = new Object();
+		var quest = new Quest();
 		
-		quest.questName = row.get("questName");
+		quest.name = row.get("questName");
 		quest.qp = parseInt( row.get("qpReward") );
 		quest.fp = parseInt( row.get("fpReward") );
 		quest.exp = parseInt( row.get("expReward") );
 		quest.gold = parseInt( row.get("goldReward") );
-		quest.num = parseInt( row.get("numCanComplete") );
-		quest.strSummary = row.get("strSummary");
-		quest.skillArray = row.get("skillArray").split( QUEST_SKILL_ARRAY_SEPARATOR );
+		quest.maxCompletions = parseInt( row.get("numCanComplete") );
+		quest.summary = row.get("strSummary");
+		quest.skills = _.pull(row.get("skillArray").split(QUEST_SKILL_ARRAY_SEPARATOR), "");
 		quest.unlockRank = parseInt( row.get("unlockRank") );
 		quest.showGivenBy = parseInt( row.get("showGivenBy") );
 		quest.databaseID = parseInt( row.get("id") );
 		quest.editors = row.get("editors").split(QUEST_EDITORS_SEPARATOR);
-		var room = getRoom(18610);
+
 		var strNums = row.get("open").split(";");
-		quest.open = [];
 		for ( var i = 0; i < strNums.length; i++ ) {
 			if ( isNumber(strNums[i]) && strNums[i].length > 0 )
-				quest.open.push(parseInt(strNums[i]));
+				quest.allowedRaces.push(parseInt(strNums[i]));
 		}
 		
-		quest.dialogue = [];
-		quest.taskArray = [];
-		quest.items = [];
-		quest.itemReward = {};
-		quest.priorQuests = [];
-		quest.tags = [];
-		quest.ownerVnum = [];
-		quest.extras = [];
 		/**** Load each dialogue ****/
 		while( rsDialogue.hasNextRow ) {
 			var row = rsDialogue.peekRow;
 			if( parseInt( row.get("quest_id") ) == quest.databaseID ) {
 
-				var dlg = new QuestDlg( parseInt(row.get("timeout")), row.get("dialogue") );
+				var dlg = new Quest.Dialogue( parseInt(row.get("timeout")), row.get("dialogue") );
 				quest.dialogue.push( dlg );
 			}
 			else break;
@@ -95,9 +87,10 @@ function loadAllQuests()
 		/**** Load each task ****/
 		while( rsTasks.hasNextRow ) {
 			var row = rsTasks.peekRow;
-			if( parseInt( row.get("quest_id") ) == quest.databaseID ) {
-				var vTask = [ row.get("taskName"), row.get("taskProgress"), row.get("taskRequirement"), row.get("unlockerIndex") ];
-				quest.taskArray.push( vTask );
+			if(parseInt(row.get("quest_id")) == quest.databaseID) {
+				//var vTask = [ row.get("taskName"), row.get("taskProgress"), row.get("taskRequirement"), row.get("unlockerIndex") ];
+				// Since we order by position, pushing will guarantee correct order of tasks array
+				quest.tasks.push(new Quest.Task(row.get("id"), quest, row.get("taskName"), row.get("taskProgress"), row.get("taskRequirement"), row.get("unlockerIndex")));
 			}
 			else break;
 			rsTasks.skipRow();
@@ -107,7 +100,7 @@ function loadAllQuests()
 			var row = rsOwners.peekRow;
 			if( parseInt( row.get("quest_id") ) == quest.databaseID ) {
 				var vOwner = parseInt( row.get("owner_vnum") );
-				quest.ownerVnum.push( vOwner );
+				quest.ownerVnums.push( vOwner );
 			}
 			else break;
 			rsOwners.skipRow();
@@ -125,7 +118,7 @@ function loadAllQuests()
 				}
 				else if( row.get("itemType") == QUEST_ITEM_REWARD_TOKEN ) {
 					var slotId = row.get("slot_id").toString() || "Slot " + autoSlotNum++;
-					// Each key in itemReward maps to an array of items for a given slot
+					// Each key in itemRewards maps to an array of items for a given slot
 					if (!rewardSlots.hasOwnProperty(slotId)) {
 						rewardSlots[slotId] = [];
 					}
@@ -158,13 +151,13 @@ function loadAllQuests()
 			rsItems.skipRow();
 		}
 
-		quest.itemReward = rewardSlots;
+		quest.itemRewards = rewardSlots;
 
 		/**** Load each requirement ****/
 		while( rsReqs.hasNextRow ) {
 			var row = rsReqs.peekRow;
 			if( parseInt( row.get("quest_id") ) == quest.databaseID ) {
-				quest.priorQuests.push( row.get("required_quest_name") );
+				quest.priorQuests.push( row.get("required_quest_id") );
 			}
 			else break;
 			rsReqs.skipRow();
@@ -173,7 +166,7 @@ function loadAllQuests()
 		while( rsExtras.hasNextRow ) {
 			var row = rsExtras.peekRow;
 			if( parseInt( row.get("quest_id") ) == quest.databaseID ) {
-				quest.extras.push( row.get("extra_check") );
+				quest.extraChecks.push( row.get("extra_check") );
 			}
 			else break;
 			rsExtras.skipRow();
@@ -188,14 +181,16 @@ function loadAllQuests()
 			else break;
 			rsTags.skipRow();
 		}
-		sortedInsert( vQuests, quest, function(q){return q.questName;} );
-		// vQuests.push( quest );
+		sortedInsert( vQuests, quest, function(q){return q.name;} );
+
+		// Store this quest in a globally accessible location
+		Quest.addQuest(quest);
 	}
 	global.vQuests = vQuests;
 	// function fSort(a,b) {
-		// var cmpArr = [a.questName,b.questName];
+		// var cmpArr = [a.name,b.name];
 		// cmpArr.sort();
-		// if ( cmpArr[0] == a.questName )
+		// if ( cmpArr[0] == a.name )
 			// return -1;
 		// else
 			// return 1;
@@ -228,7 +223,7 @@ function deleteQuestFromDatabase( quest, bShowMsg )
 	
 	quest.databaseID = undefined;
 	if ( bShowMsg != false )
-		mudLog(constants.BRF, 102, "Quest deleted: "+quest.questName);
+		mudLog(constants.BRF, 102, "Quest deleted: "+quest.name);
 }
 function saveQuest( quest )
 {
@@ -237,19 +232,18 @@ function saveQuest( quest )
 	var editors = quest.editors ? sqlEsc( quest.editors.join(QUEST_EDITORS_SEPARATOR) ) : "";
 	if( quest.databaseID == undefined ) {
 		//Entry does NOT yet exist in the database.
-		var sQuery = "INSERT INTO " + QUEST_DATA_TABLE + " (`questName`,`open`,`ownerVnum`,`qpReward`,`fpReward`,`expReward`,`goldReward`,`numCanComplete`,`strSummary`,`skillArray`,`showGivenBy`,`unlockRank`,`editors`) VALUES("
-			+ "'" + sqlEsc( quest.questName ) + "',"
-			+ "'" + quest.ownerVnum + "',"
+		var sQuery = "INSERT INTO " + QUEST_DATA_TABLE + " (`questName`,`open`,`qpReward`,`fpReward`,`expReward`,`goldReward`,`numCanComplete`,`strSummary`,`skillArray`,`showGivenBy`,`unlockRank`,`editors`) VALUES("
+			+ "'" + sqlEsc( quest.name ) + "',"
+			+ "'" + quest.allowedRaces.join(";") + "',"
 			+ "'" + quest.qp + "',"
 			+ "'" + quest.fp + "',"
 			+ "'" + quest.exp + "',"
 			+ "'" + quest.gold + "',"
-			+ "'" + quest.num + "',"
-			+ "'" + sqlEsc( quest.strSummary ) + "',"
-			+ "'" + (quest.skillArray ? sqlEsc( quest.skillArray.join( QUEST_SKILL_ARRAY_SEPARATOR ) ) : "") + "',"
+			+ "'" + quest.maxCompletions + "',"
+			+ "'" + sqlEsc( quest.summary ) + "',"
+			+ "'" + (quest.skills ? sqlEsc( quest.skills.join( QUEST_SKILL_ARRAY_SEPARATOR ) ) : "") + "',"
 			+ "'" + quest.showGivenBy + "',"
 			+ "'" + quest.unlockRank + "',"
-			+ "'" + quest.open.join(";") + "',"
 			+ "'" + editors + "'"
 			+ ");";
 		sqlQuery( sQuery );
@@ -259,26 +253,25 @@ function saveQuest( quest )
 		var nameQuery = "SELECT questName FROM " + QUEST_DATA_TABLE + " WHERE id = "+quest.databaseID+";";
 		if ( nameQuery.hasNextRow ) {
 			var oldName = nameQuery.peekRow.get('questName');
-			if ( str_cmp(oldName,quest.questName) ) {
-				var qvalUpdate = "UPDATE quests SET quest_name='"+sqlEsc(quest.questName)+"' WHERE quest_name='"+oldName+"';";
+			if ( str_cmp(oldName,quest.name) ) {
+				var qvalUpdate = "UPDATE quests SET quest_name='"+sqlEsc(quest.name)+"' WHERE quest_name='"+oldName+"';";
 				sqlQuery(qvalUpdate);
 			}
 		}
 		
 		//Entry does exist. We'll do an update.
 		var sQuery = "UPDATE " + QUEST_DATA_TABLE + " SET"
-			+ " questName='" + sqlEsc( quest.questName ) + "',"
-			+ " ownerVnum='" + quest.ownerVnum + "',"
+			+ " questName='" + sqlEsc( quest.name ) + "',"
 			+ " qpReward='" + quest.qp + "',"
 			+ " fpReward='" + quest.fp + "',"
 			+ " expReward='" + quest.exp + "',"
 			+ " goldReward='" + quest.gold + "',"
-			+ " numCanComplete='" + quest.num + "',"
-			+ " strSummary='" + sqlEsc( quest.strSummary ) + "',"
-			+ " skillArray='" + (quest.skillArray ? sqlEsc( quest.skillArray.join( QUEST_SKILL_ARRAY_SEPARATOR ) ) : "") + "',"
+			+ " numCanComplete='" + quest.maxCompletions + "',"
+			+ " strSummary='" + sqlEsc( quest.summary ) + "',"
+			+ " skillArray='" + (quest.skills ? sqlEsc( quest.skills.join( QUEST_SKILL_ARRAY_SEPARATOR ) ) : "") + "',"
 			+ " showGivenBy='" + Number(quest.showGivenBy) + "',"
 			+ " unlockRank='" + quest.unlockRank + "',"
-			+ " open='" + sqlEsc( quest.open.join(";") ) + "',"
+			+ " open='" + sqlEsc( quest.allowedRaces.join(";") ) + "',"
 			+ " editors='" + editors + "'"
 			+ " WHERE id='" + quest.databaseID + "';";
 		sqlQuery( sQuery );
@@ -299,26 +292,26 @@ function saveQuest( quest )
 	}
 	
 	/**** Item Rewards ****/
-	var itemReward = [];
-	for (var id in quest.itemReward) {
-		var slot = quest.itemReward[id];
-		itemReward = itemReward.concat(slot);
+	var itemRewards = [];
+	for (var id in quest.itemRewards) {
+		var slot = quest.itemRewards[id];
+		itemRewards = itemRewards.concat(slot);
 	}
-	for(var i = 0; i < itemReward.length; ++i) {
+	for(var i = 0; i < itemRewards.length; ++i) {
 		sQuery = "INSERT INTO " + QUEST_ITEMS_TABLE + " (`quest_id`,`position`,`item`,`itemCount`,`loadPercent`,`itemType`,`slot_id`,`slot_tier`,`isRetooled`,`retoolNameList`,`retoolDesc`,`retoolShortDesc`,`retoolExtraDesc`) VALUES("
 			+ "'" + quest.databaseID + "',"
 			+ "'" + (i+1) + "',"
-			+ "'" + itemReward[i].vnum + "',"
-			+ "'" + itemReward[i].count + "',"
-			+ "'" + itemReward[i].loadPercent + "',"
+			+ "'" + itemRewards[i].vnum + "',"
+			+ "'" + itemRewards[i].count + "',"
+			+ "'" + itemRewards[i].loadPercent + "',"
 			+ "'" + QUEST_ITEM_REWARD_TOKEN + "',"
-			+ "'" + sqlEsc(itemReward[i].id) + "',"
-			+ "'" + itemReward[i].tier + "',"
-			+ "'" + Number(itemReward[i].isRetooled) + "',"
-			+ "'" + sqlEsc(itemReward[i].retoolNameList) + "',"	//Namelist
-			+ "'" + sqlEsc(itemReward[i].retoolRoomDesc) + "',"	//Room desc
-			+ "'" + sqlEsc(itemReward[i].retoolShortDesc) + "',"//Name
-			+ "'" + sqlEsc(itemReward[i].retoolExtraDesc) + "'"	//Extra desc
+			+ "'" + sqlEsc(itemRewards[i].id) + "',"
+			+ "'" + itemRewards[i].tier + "',"
+			+ "'" + Number(itemRewards[i].isRetooled) + "',"
+			+ "'" + sqlEsc(itemRewards[i].retoolNameList) + "',"	//Namelist
+			+ "'" + sqlEsc(itemRewards[i].retoolRoomDesc) + "',"	//Room desc
+			+ "'" + sqlEsc(itemRewards[i].retoolShortDesc) + "',"	//Name
+			+ "'" + sqlEsc(itemRewards[i].retoolExtraDesc) + "'"	//Extra desc
 			+ ");";
 		sqlQuery( sQuery );
 	}
@@ -326,7 +319,7 @@ function saveQuest( quest )
 	/**** Dialogue ****/
 	sqlQuery("DELETE FROM " + QUEST_DIALOGUE_TABLE + " WHERE quest_id='" + quest.databaseID + "';");
 	for(var i = 0;i < quest.dialogue.length;++i) {
-		if( getObjectClass(quest.dialogue[ i ]) == "QuestDlg" ) {
+		if( getObjectClass(quest.dialogue[ i ]) == "Quest.Dialogue" ) {
 			var sHandle = sqlEsc(quest.dialogue[ i ].handle);
 			var iPulses = quest.dialogue[ i ].pulses;
 		}
@@ -346,7 +339,7 @@ function saveQuest( quest )
 	/**** Prior Quests ****/
 	sqlQuery("DELETE FROM " + QUEST_REQUIREMENT_TABLE + " WHERE quest_id='" + quest.databaseID + "';");
 	for(var i = 0;i < quest.priorQuests.length;++i) {
-		sQuery = "INSERT INTO " + QUEST_REQUIREMENT_TABLE + " (`quest_id`,`position`,`required_quest_name`) VALUES("
+		sQuery = "INSERT INTO " + QUEST_REQUIREMENT_TABLE + " (`quest_id`,`position`,`required_quest_id`) VALUES("
 			+ "'" + quest.databaseID + "',"
 			+ "'" + (i+1) + "',"
 			+ "'" + sqlEsc(quest.priorQuests[ i ]) + "'"
@@ -355,28 +348,36 @@ function saveQuest( quest )
 	}
 	
 	/**** Extra Checks ****/
-	if( quest.extras != undefined && quest.extras.length > 0 ) {
+	if( quest.extraChecks != undefined && quest.extraChecks.length > 0 ) {
 		sqlQuery("DELETE FROM " + QUEST_EXTRAS_TABLE + " WHERE quest_id='" + quest.databaseID + "';");
-		for(var i = 0;i < quest.extras.length;++i) {
+		for(var i = 0;i < quest.extraChecks.length;++i) {
 			sQuery = "INSERT INTO " + QUEST_EXTRAS_TABLE + " (`quest_id`,`extra_check`) VALUES("
 				+ "'" + quest.databaseID + "',"
-				+ "'" + sqlEsc(quest.extras[ i ]) + "'"
+				+ "'" + sqlEsc(quest.extraChecks[ i ]) + "'"
 				+ ");";
 			sqlQuery( sQuery );
 		}
 	}
 	
 	/**** Quest Tasks ****/
-	sqlQuery("DELETE FROM " + QUEST_TASK_TABLE + " WHERE quest_id='" + quest.databaseID + "';");
-	for(var i = 0;i < quest.taskArray.length;++i) {
-		sQuery = "INSERT INTO " + QUEST_TASK_TABLE + " (`quest_id`,`position`,`taskName`,`taskProgress`,`taskRequirement`,`unlockerIndex`) VALUES("
-			+ "'" + quest.databaseID + "',"
-			+ "'" + (i+1) + "',"
-			+ "'" + sqlEsc(quest.taskArray[ i ][ 0 ]) + "',"
-			+ "'" + sqlEsc(quest.taskArray[ i ][ 1 ]) + "',"
-			+ "'" + sqlEsc(quest.taskArray[ i ][ 2 ]) + "',"
-			+ "'" + sqlEsc(quest.taskArray[ i ][ 3 ]) + "'"
-			+ ");";
+	var taskIds = _.map(quest.tasks, "id");
+	if (taskIds.length > 0)
+		sqlQuery("DELETE FROM " + QUEST_TASK_TABLE + " WHERE quest_id='" + quest.databaseID + "' AND id NOT IN(" + taskIds.join(",") + ");");
+
+	for(var i = 0, task; task = quest.tasks[i++];) {
+		sQuery = prepareStatement(
+			"UPDATE " + QUEST_TASK_TABLE + " SET position = {0}, taskName = '{1}', taskProgress = '{2}', taskRequirement = '{3}', unlockerIndex = {4} " +
+			"WHERE quest_id = {5} && id = {6};",
+			i + 1, task.name, task._dynamicProgress, task._completedExpr, task.unlockerTaskIndex, quest.databaseID, task.id
+		);
+		//sQuery = "INSERT INTO " + QUEST_TASK_TABLE + " (`quest_id`,`position`,`taskName`,`taskProgress`,`taskRequirement`,`unlockerIndex`) VALUES("
+		//	+ "'" + quest.databaseID + "',"
+		//	+ "'" + (i+1) + "',"
+		//	+ "'" + sqlEsc(quest.tasks[ i ][ 0 ]) + "',"
+		//	+ "'" + sqlEsc(quest.tasks[ i ][ 1 ]) + "',"
+		//	+ "'" + sqlEsc(quest.tasks[ i ][ 2 ]) + "',"
+		//	+ "'" + sqlEsc(quest.tasks[ i ][ 3 ]) + "'"
+		//	+ ");";
 		sqlQuery( sQuery );
 	}
 	/**** Quest Tags ****/
@@ -392,20 +393,20 @@ function saveQuest( quest )
 		}
 	}
 	/**** Quest Owner Vnums ****/
-	if( quest.ownerVnum != undefined ) {
+	if( quest.ownerVnums != undefined ) {
 		sqlQuery("DELETE FROM " + QUEST_OWNER_VNUM_TABLE + " WHERE quest_id='" + quest.databaseID + "';");
-		if ( getObjectClass(quest.ownerVnum) != "Array" ) {
-			quest.ownerVnum = [quest.ownerVnum];
+		if ( getObjectClass(quest.ownerVnums) != "Array" ) {
+			quest.ownerVnums = [quest.ownerVnums];
 		}
-		for(var i = 0;i < quest.ownerVnum.length;++i) {
+		for(var i = 0;i < quest.ownerVnums.length;++i) {
 			sQuery = "INSERT INTO " + QUEST_OWNER_VNUM_TABLE + " (`quest_id`,`owner_vnum`) VALUES("
 				+ "'" + quest.databaseID + "',"
-				+ "'" + sqlEsc(quest.ownerVnum[ i ]) + "'"
+				+ "'" + sqlEsc(quest.ownerVnums[ i ]) + "'"
 				+ ");";
 			sqlQuery( sQuery );
 		}
 	}
-	mudLog(constants.BRF, 102, "Quest saved: "+quest.questName);
+	mudLog(constants.BRF, 102, "Quest saved: "+quest.name);
 }
 function loadQuest( sQuestName )
 {

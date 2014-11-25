@@ -1,3 +1,3 @@
 var script4511 = function(self, actor, here, args, extra) {
-	actor.updateJournalTask('Low on Pens',0);
+	Quest.getByName('Low on Pens').updateTask(actor, 0);
 };

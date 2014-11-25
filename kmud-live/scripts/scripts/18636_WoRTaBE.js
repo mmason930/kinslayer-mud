@@ -2,7 +2,7 @@ var script18636 = function(self, actor, here, args, extra) {
 	//WoR_TaBE
 	//Rhollor April 2010
 	var qName = "WoR: Turn a Blind Eye";
-	if(actor.quest(qName) > 0) {
+	if(Quest.getByName(qName).hasBegun(actor)) {
 		if(isName("cannot", args)) {
 			self.comm("say That is too bad " + actor.name + ".");
 			self.comm("kill " + actor.name);

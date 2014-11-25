@@ -39,11 +39,11 @@ var script13257 = function(self, actor, here, args, extra) {
 		}
 	}
 	var people = here.people;
+	var hilt = here.loadObj( 13202 );
 	for(var i = 0;i < people.length;++i) {
 		getCharCols(people[i], constants.CL_NORMAL);
-		var hilt = here.loadObj( 13202 );
 		people[i].send(bld + cyn + capFirstLetter(hilt.name) + " falls to the ground from behind the shattered wall." + nrm);
-		actor.qval(questName, 10);
 	}
+	actor.qval(questName, 10);
 	
 }

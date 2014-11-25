@@ -7,7 +7,7 @@
 JSCharacter.prototype.getUnlockedQuests = function ( strQName ) {
 	var objQuest = getQuestByName(strQName);
 	var tempQuests = [];
-	var owners = objQuest.ownerVnum;
+	var owners = objQuest.ownerVnums;
 	// //Quests with same owner as this one
 	// if ( owners != undefined && owners.length > 0 ) {
 		// for (var _autoKey in owners) { 	var vnum = owners[_autoKey];
@@ -40,7 +40,7 @@ JSCharacter.prototype.getUnlockedQuests = function ( strQName ) {
 		}
 		for ( var j = 0; j < priors.length; j++ ) {
 			// This means completed quest is a requirement to unlock examined quest
-			if ( priors[j] == objQuest.questName ) {
+			if ( priors[j] == objQuest.name ) {
 				unlockableQuests.push(tempQuests[i]);
 			}
 		}
@@ -53,7 +53,7 @@ JSCharacter.prototype.getUnlockedQuests = function ( strQName ) {
 	if ( unlockableQuests.length > 0 ) {
 		for ( var k = 0; k < unlockableQuests.length; k++ ) {
 			unlockQuest = unlockableQuests[k];
-			if ( this.isQuestAvailable(unlockQuest.questName)[0] == true ) {
+			if ( this.isQuestAvailable(unlockQuest.name)[0] == true ) {
 				unlockedQuests.push(unlockQuest);
 			}
 		}

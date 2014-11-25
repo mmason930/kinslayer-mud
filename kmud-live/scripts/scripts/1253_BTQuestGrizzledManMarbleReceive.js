@@ -2,7 +2,7 @@ var script1253 = function(self, actor, here, args, extra) {
 	waitpulse 1;
 	if( extra.obj.vnum == 3173 ) {
 	    extra.obj.extract();
-		if( actor.quest('The Haunted Well') == -1 || actor.quest('The Haunted Well') >= 100 )
+		if( Quest.getByName('The Haunted Well').hasCompleted(actor) || actor.quest('The Haunted Well') >= 100 )
 		    return;
 		wait 3;
 	    self.comm("smile");

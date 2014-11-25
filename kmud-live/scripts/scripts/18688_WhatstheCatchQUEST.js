@@ -2,7 +2,7 @@ var script18688 = function(self, actor, here, args, extra) {
 	//What's the Catch?
 	//Rhollor April 2010
 	var qName = "What's the Catch?";
-	if(actor.quest(qName) > 0) {
+	if(Quest.getByName(qName).hasBegun(actor)) {
 		waitpulse 1;
 		if(self.vnum == 20900)
 			actor.updateJournalTask(qName,0);

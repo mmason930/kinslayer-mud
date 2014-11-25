@@ -15,7 +15,7 @@ var script10661 = function(self, actor, here, args, extra) {
 	var recruit4 = actor.getCharRoomVis("4.QUEST_PLAIN");
 	var recruit5 = actor.getCharRoomVis("5.QUEST_PLAIN");
 	var qName = 'Eternal Servitude';
-	if ( actor.quest(qName) > 0 && recruit != undefined && recruit2 != undefined && recruit3 != undefined && recruit4 != undefined && recruit5 != undefined && actor == 
+	if ( Quest.getByName(qName).hasBegun(actor) && recruit != undefined && recruit2 != undefined && recruit3 != undefined && recruit4 != undefined && recruit5 != undefined && actor == 
 	recruit.leader && actor.questTaskProgress(qName)[2].comp && !actor.questTaskProgress(qName)[3].comp ) {
 	   waitpulse 10;
 	   self.say("So you've brought me five recruits...good job, " + actor.name + "!" );

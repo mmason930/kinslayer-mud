@@ -86,10 +86,10 @@ var script23205 = function(self, actor, here, args, extra) {
 		var quests = getQuestsByMob( arg_list[2] );
 		for (var _autoKey in quests ) {
 			var q = quests [_autoKey];
-			if( target.quest( q.questName ) )
-				target.qval( q.questName, 0 );
-			if( target.quest( q.questName + "-NR_COMPLETED" ) )
-				target.qval( q.questName + "-NR_COMPLETED", 0 );
+			if( target.quest( q.name ) )
+				target.qval( q.name, 0 );
+			if( target.quest( q.name + "-NR_COMPLETED" ) )
+				target.qval( q.name + "-NR_COMPLETED", 0 );
 		}
 		actor.send( capFirstLetter(actor.name) + "'s quests reset for owner #" + arg_list[2] + "." );
 		actor.send("Number of quests reset: " + quests.length);

@@ -1,6 +1,6 @@
 var script10602 = function(self, actor, here, args, extra) {
 	_block;
-	if ( actor.quest('Search and Rescue') > 0 && !actor.questTaskProgress('Search and Rescue')[3].comp ) {
+	if ( Quest.getByName('Search and Rescue').hasBegun(actor) && !actor.questTaskProgress('Search and Rescue')[3].comp ) {
 		wait 2;
 		actor.send(self.name + " glances around quickly before motioning you forward.");
 		wait 4;

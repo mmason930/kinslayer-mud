@@ -1,5 +1,5 @@
 var script13225 = function(self, actor, here, args, extra) {
-	if ( actor.quest('The Bashful Rider') < 1 ) {
+	if ( !Quest.getByName('The Bashful Rider').hasBegun(actor) ) {
 		return;
 	}
 	if ( self.isBashed == true ) {

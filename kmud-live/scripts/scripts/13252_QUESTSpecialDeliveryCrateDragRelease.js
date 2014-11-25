@@ -1,5 +1,5 @@
 var script13252 = function(self, actor, here, args, extra) {
-	if( actor.quest( "Special Delivery" ) < 1 )
+	if( !Quest.getByName( "Special Delivery" ).hasBegun(actor) )
 		return;
 	var vArgs = getArgList( args );
 	if( vArgs.length >= 2 && !str_cmp(vArgs[1], "crate") )

@@ -20,11 +20,11 @@ var script9854 = function(self, actor, here, args, extra) {
 				if ( person.vnum == -1 )
 					++playerCount;
 			}
-			if ( actor.race != constants.RACE_HUMAN || actor.quest("Just Think...") != 1 || actor.affectedBy(constants.AFF_NOQUIT) == true || playerCount > 1 ) {
-				if ( playerCount > 1 && actor.quest("Just Think...") > 0 && actor.race == constants.RACE_HUMAN ) {
+			if ( actor.race != constants.RACE_HUMAN || !Quest.getByName("Just Think...").hasBegun(actor) || actor.affectedBy(constants.AFF_NOQUIT) == true || playerCount > 1 ) {
+				if ( playerCount > 1 && Quest.getByName("Just Think...").hasBegun(actor) && actor.race == constants.RACE_HUMAN ) {
 					actor.send("This has to be the place the riddle was talking about, but it did say to come alone...");
 				}
-				else if ( playerCount == 1 && actor.quest("Just Think...") > 0 && actor.race == constants.RACE_HUMAN && actor.affectedBy(constants.AFF_NOQUIT) == true ) {
+				else if ( playerCount == 1 && Quest.getByName("Just Think...").hasBegun(actor) && actor.race == constants.RACE_HUMAN && actor.affectedBy(constants.AFF_NOQUIT) == true ) {
 					actor.send("This has to be the place the riddle was talking about, but you should probably come back when your heart rate has slowed to look around.");
 				}
 					return;

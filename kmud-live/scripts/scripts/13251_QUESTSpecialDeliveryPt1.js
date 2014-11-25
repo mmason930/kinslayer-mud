@@ -1,5 +1,5 @@
 var script13251 = function(self, actor, here, args, extra) {
-	if( actor.quest( 'Special Delivery' ) < 1 )
+	if( !Quest.getByName( 'Special Delivery' ).hasBegun(actor) )
 		return;
 	wait 1;
 	self.say("Excellent! Let me fetch the crate!");

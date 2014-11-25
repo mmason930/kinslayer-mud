@@ -19,10 +19,6 @@ function questCommandUsage(self,actor)
 	actor.send("To "+bld+"abandon"+nrm+" a quest........................Type: "+cyn+"quest abandon <QuestNumber>"+nrm);
 	actor.send(" ");
 	actor.send("To toggle quest "+bld+"greetings"+nrm+" on and off......Type: "+cyn+"quest greetings"+nrm);
-	actor.send(" ");
-	actor.send("To toggle quest "+bld+"updates"+nrm+" on and off........Type: "+cyn+"quest updates"+nrm);
-	//actor.send(" ");
-	//actor.send("To receive a new "+bld+"quest journal"+nrm+"............Type: "+cyn+"quest journal please"+nrm);
 	if(actor.room.zoneVnum == 132)
 	{
 		actor.send(" ");

@@ -45,16 +45,16 @@ var script20900 = function(self, actor, here, args, extra) {
 	                return;
 	        }
 	        waitpulse 5;
-	        if( actor.quest(quests[qNum].questName) == -1 ) {
+	        if( Quest.getByName(quests[qNum].name).hasCompleted(actor) ) {
 	            actor.send("You've already completed that quest!");
 					return;
 	        }
-	        // if( actor.quest(quests[qNum].questName) != 1 ) {
+	        // if( actor.quest(quests[qNum].name) != 1 ) {
 	            // actor.send("You have not yet begun that quest.");
 					// return;
 	        // }
 		/**** Quest Dialog goes below ****/
-		if( quests[qNum].questName == 'Snakes and Berries' ) {
+		if( quests[qNum].name == 'Snakes and Berries' ) {
 			self.comm("nod");
 			wait 2;
 			self.comm("tell " + actor.name + " There are some wild berries growing along the river north of town.");
@@ -78,17 +78,17 @@ var script20900 = function(self, actor, here, args, extra) {
 	                return;
 	        }
 	        waitpulse 5;
-	        if( actor.quest(quests[qNum].questName) == -1 ) {
+	        if( Quest.getByName(quests[qNum].name).hasCompleted(actor) ) {
 	            actor.send("You've already completed that quest!");
 	                return;
 	        }
-			else if ( actor.quest(quests[qNum].questName) > 0 ) {
+			else if ( actor.quest(quests[qNum].name) > 0 ) {
 				actor.send("You've already begun that quest!");
 	                return;
 			}
 			self.say("Fantastic! Thank you so much, " + actor.name + "!");
-	        actor.qval(quests[qNum].questName, 1);
-	        actor.send("You begin the quest '" + actor.bold(constants.CL_OFF) + actor.cyan(constants.CL_OFF) + quests[qNum].questName + actor.normal(constants.CL_OFF) + "'");
+	        actor.qval(quests[qNum].name, 1);
+	        actor.send("You begin the quest '" + actor.bold(constants.CL_OFF) + actor.cyan(constants.CL_OFF) + quests[qNum].name + actor.normal(constants.CL_OFF) + "'");
 	        actor.send("To receive information on this quest, type "+actor.cyan(constants.CL_OFF)+"'quest info " + (qNum+1) + "'"+actor.normal(constants.CL_OFF));
 			//If actor doesn't have a journal, give them one
 			if ( !actor.hasItem(13220,true,true,true) ) {
@@ -102,7 +102,7 @@ var script20900 = function(self, actor, here, args, extra) {
 				self.say("And if for any reason you lose your journal, just type 'quest journal please' at a quest master and you'll be given a new one.");
 			}
 			var quest = quests[qNum];
-			var qName = quests[qNum].questName;
+			var qName = quests[qNum].name;
 			//Create a journal entry for this quest
 			waitpulse 1;
 			actor.editQuestJournal(qName,true);

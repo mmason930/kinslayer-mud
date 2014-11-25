@@ -1,7 +1,7 @@
 var script10610 = function(self, actor, here, args, extra) {
 	var qName = 'Search and Rescue';
 	var rescued = actor.getCharRoomVis("mara");
-	if ( actor.quest(qName) > 0 && rescued != undefined && actor == rescued.leader && !actor.questTaskProgress(qName)[6].comp ) {
+	if ( Quest.getByName(qName).hasBegun(actor) && rescued != undefined && actor == rescued.leader && !actor.questTaskProgress(qName)[6].comp ) {
 	     waitpulse 7
 	     getCharCols(actor);
 	     actor.send(bld+cyn+"Cheers circulate around the base as Mara returns."+nrm);

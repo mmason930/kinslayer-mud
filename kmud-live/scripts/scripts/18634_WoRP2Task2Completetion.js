@@ -2,7 +2,7 @@ var script18634 = function(self, actor, here, args, extra) {
 	//WoR_P2 Speak to Kharsk
 	//Rhollor April 2010
 	var qName = "Confront the Merchant";
-	if(actor.quest(qName) > 0) {
+	if(Quest.getByName(qName).hasBegun(actor)) {
 		var quest = getQuestByName(qName);
 		waitpulse 1;
 		wait 1;

@@ -12,7 +12,7 @@ var script18632 = function(self, actor, here, args, extra) {
 		if(actor.quest(qName) > 1) {
 			return;
 		}
-		else if(actor.quest(qName) > 0) {
+		else if(Quest.getByName(qName).hasBegun(actor)) {
 			wait 1;
 			actor.send("You notice a symbol that you have seen before below this house's plaque!");
 			actor.updateJournalTask(qName, 0);

@@ -1,7 +1,7 @@
 var script9870 = function(self, actor, here, args, extra) {
 	//Alder
 	var qName = "Behind Closed Doors";
-	if ( actor.quest(qName) == 2 ) {
+	if ( Quest.getByName(qName).tasks[1].isInProgress(actor) ) {
 		self.moveToRoom(getRoom(501));
 		getCharCols(actor);
 		actor.send(bld+"The woman yields, knowing you have control of the situation."+nrm);

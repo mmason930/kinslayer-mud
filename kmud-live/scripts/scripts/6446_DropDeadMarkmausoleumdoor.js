@@ -1,7 +1,7 @@
 var script6446 = function(self, actor, here, args, extra) {
 		var qName = "Drop Dead";
 		var taskData = actor.questTaskProgress(qName);
-		if ( actor.quest(qName) == 1 && taskData[2].comp == true ) {
+		if ( Quest.getByName(qName).tasks[0].isInProgress(actor) && taskData[2].comp == true ) {
 			_block;
 			actor.qval(qName,2);
 			actor.send("You grab a stone from the ground and scratch a small 'x' on the mausoleumdoor.");

@@ -1,17 +1,17 @@
-function createQuest(questName, itemsRequired, qpReward, itemReward, exp, gold, num)
+function createQuest(questName, itemsRequired, qpReward, itemRewards, exp, gold, num)
 {
-    this.questName = questName;
+    this.name = questName;
 //    this.qval = qval;
     this.items = itemsRequired;
     this.qp = qpReward;
-    this.itemReward = itemReward;
+    this.itemRewards = itemRewards;
 	this.exp = exp;
 	this.gold = gold;
 	this.dialogue = [];
 	this.priorQuests = [];
-	this.skillArray;
+	this.skills;
 	if( num )
-        this.num = num
+        this.maxCompletions = num
 	else
-	    this.num = 1;
+	    this.maxCompletions = 1;
 }

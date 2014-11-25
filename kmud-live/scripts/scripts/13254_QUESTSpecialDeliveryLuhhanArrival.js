@@ -1,7 +1,7 @@
 var script13254 = function(self, actor, here, args, extra) {
 	waitpulse 2;
 	//Check to see if the char is even on the quest.
-	if( actor.quest( "Special Delivery" ) != 1 )//1 == crate dragging stage.
+	if( !Quest.getByName("Special Delivery").hasBegun(actor) )//1 == crate dragging stage.
 		return;
 	//User is on crate dagging stage. Check to see if there is a crate being dragged by this user.
 	for (var _autoKey in here.items) {

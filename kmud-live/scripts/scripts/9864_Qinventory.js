@@ -4,14 +4,13 @@ var script9864 = function(self, actor, here, args, extra) {
 		if ( strn_cmp(getArgList(args)[0],"qinventory",2) == true ) {
 			_block;
 			getCharCols(actor,constants.CL_OFF);
-			var qInv = actor._questInv;
+			var inv = actor.getQuestInventory();
 			actor.send(bld+"Quest Inventory:"+nrm);
-			for (var _autoKey in qInv) {
-				var item = qInv[_autoKey];
-				var amt = item.itemAmount;
-				actor.send(cyn+item.itemName+(amt > 1 ? " ["+item.itemAmount+"]" : "")+nrm);
+			for (var i = 0, item; item = inv[i++];) {
+				var amt = item.count;
+				actor.send(cyn+item.name+(amt > 1 ? " ["+item.count+"]" : "")+nrm);
 			}
-			if ( qInv.length == 0 ) {
+			if (!inv.length) {
 				actor.send(cyn+" Nothing."+nrm);
 			}
 		}

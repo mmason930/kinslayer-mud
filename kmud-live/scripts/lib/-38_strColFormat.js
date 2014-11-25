@@ -16,7 +16,7 @@ function strColFormat( /*String*/sBuffer, /*Integer*/colWidth )
 	for(var index = 0;index < bufferLength;)
 	{
 		//Find the start of the next word.
-		for(;index < bufferLength && unprintable[ sBuffer[index] ];++index)
+		for(;index < bufferLength && unprintable.hasOwnProperty(sBuffer[index]);++index)
 		{
 			if(sBuffer[index] == '\n')
 			{

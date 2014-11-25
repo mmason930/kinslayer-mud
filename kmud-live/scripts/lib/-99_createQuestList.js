@@ -5,9 +5,9 @@ function itemCount(vnum) {
 
 // function getQuestName( entryObj ) {
 	// var validateName = function() {
-		// var qName = getQuestByName(entryObj.questName);
+		// var qName = getQuestByName(entryObj.name);
 		// if ( qName == null && entryObj.questID != undefined ) {
-			// qName = getQuestById(entryObj.questID).questName;
+			// qName = getQuestById(entryObj.questID).name;
 		// }
 		
 	// return ( function() { 
@@ -44,30 +44,35 @@ function questDlgHandler( aList )
 /*** Get a quest by its name ***/
 function getQuestByName( qName )
 {
-	var getKey = function( quest ) {
-		return quest.questName;
-	};
+	return Quest.getByName(qName);
+	//if (!qName)
+	//	return null;
+
+	//var getKey = function( quest ) {
+	//	return quest.name;
+	//};
 	
-	var index = binarySearch( global.vQuests, qName, getKey, 0, global.vQuests.length-1 );
-	return ( index == -1 ? null : global.vQuests[index] );
-	// for (var _autoKey in global.vQuests ) { 	var quest = global.vQuests [_autoKey];
-		// if ( !str_cmp(quest.questName,qName) ) {
-			// return quest;
-		// }
-	// }
-	// return null;
+	//var index = binarySearch( global.vQuests, qName, getKey, 0, global.vQuests.length-1 );
+	//return ( index == -1 ? null : global.vQuests[index] );
+	//// for (var _autoKey in global.vQuests ) { 	var quest = global.vQuests [_autoKey];
+	//	// if ( !str_cmp(quest.name,qName) ) {
+	//		// return quest;
+	//	// }
+	//// }
+	//// return null;
 }
 /*** Return an array of quests whose owner vnum is mVnum ***/
 function getQuestsByMob( mVnum ) {
-	var myQuests = [];
-	if ( mVnum != -1 ) {
-		for (var _autoKey in global.vQuests) {
-			var quest = global.vQuests[_autoKey];
-			if( arrContains(quest.ownerVnum,mVnum) == true )
-				myQuests.push( quest );
-		}
-	}
-	return myQuests;
+	return Quest.getByMaster(mVnum);
+	//var myQuests = [];
+	//if ( mVnum != -1 ) {
+	//	for (var _autoKey in global.vQuests) {
+	//		var quest = global.vQuests[_autoKey];
+	//		if( arrContains(quest.ownerVnums,mVnum) == true )
+	//			myQuests.push( quest );
+	//	}
+	//}
+	//return myQuests;
 }
 
 

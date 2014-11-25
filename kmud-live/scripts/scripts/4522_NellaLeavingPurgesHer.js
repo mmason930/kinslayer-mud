@@ -3,7 +3,7 @@ var script4522 = function(self, actor, here, args, extra) {
 	//Nella: Leaving Purges Her
 		
 		var qName = "Where Ends Meet";
-		if ( actor.quest(qName) == -1 && actor.quest("Branching Out") == 0 ) {
+		if ( Quest.getByName(qName).hasCompleted(actor) && !Quest.getByName("Branching Out").hasBegun(actor) ) {
 			var nella = actor.getCharRoomVis("nella");
 			if ( nella != undefined ) {
 				nella.moveToRoom(getRoom(501));

@@ -3,6 +3,7 @@ var script9881 = function(self, actor, here, args, extra) {
 	//May 2010
 	//Jump the Fence: Fence Each Item
 	var qName = "Jump the Fence";
+	var quest = Quest.getByName(qName);
 	if ( actor.quest(qName) != 1 )
 		return;
 	var aFence = 4541;	//Baerlon Thief Shopkeep
@@ -12,12 +13,12 @@ var script9881 = function(self, actor, here, args, extra) {
 	args = getArgList(args);	
 	switch ( vnum ) {
 		case aFence://Fights
-			if ( actor.checkQuestItem("a delicate ceremonial dagger",1,qName) ) {
+			if ( actor.checkQuestItem("a delicate ceremonial dagger",1,quest) ) {
 				_block;
 				waitpulse 7;
 				self.comm("say Excellent. Yet another blade for my collection.");
 				waitpulse 10;
-				actor.remQuestItem("a delicate ceremonial dagger",-1,qName);
+				actor.remQuestItem("a delicate ceremonial dagger",-1,quest);
 				waitpulse 10;
 				actor.updateJournalTask(qName,2);
 				waitpulse 10;
@@ -30,23 +31,23 @@ var script9881 = function(self, actor, here, args, extra) {
 			}
 			break;
 		case bFence:
-			if ( actor.checkQuestItem("a small clay sculpture",1,qName) ) {
+			if ( actor.checkQuestItem("a small clay sculpture",1,quest) ) {
 				_block;
 				waitpulse 7;
 				self.comm("say I've been seeking this piece for quite some time now. And it's even in good condition.");
 				waitpulse 14;
-				actor.remQuestItem("a small clay sculpture",-1,qName);
+				actor.remQuestItem("a small clay sculpture",-1,quest);
 				waitpulse 7;
 				actor.updateJournalTask(qName,3);
 			}
 			break;
 		case cFence:
-			if ( actor.checkQuestItem("a bolt of golden silk",1,qName) ) {
+			if ( actor.checkQuestItem("a bolt of golden silk",1,quest) ) {
 				_block;
 				waitpulse 7;
 				self.comm("say This will go perfectly with my rare Seanchan tapestries. Thank you "+actor.name+".");
 				waitpulse 14;
-				actor.remQuestItem("a bolt of golden silk",-1,qName);
+				actor.remQuestItem("a bolt of golden silk",-1,quest);
 				waitpulse 7;
 				actor.updateJournalTask(qName,4);
 			}
