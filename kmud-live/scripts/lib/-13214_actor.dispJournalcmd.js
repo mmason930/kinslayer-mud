@@ -437,7 +437,6 @@ JSCharacter.prototype.chapterCompile = function(arrayChapters, intTargetChapter,
 			else if (intTargetPage > 0 && intTargetPage <= pageLimit) {
 				if (intTargetChapter < 6) {
 					var quest = entriesArray[intTargetPage];
-					mudLog(constants.BRF, 104, this.name);
 					body = nl + bld + cyn + intTargetPage + nrm + Quest.Util.getJournalEntry(this, quest);
 					var footSelPage2 = "\n[" + grn + "#" + nrm + "] Select Page (" + grn + intTargetPage + "/" + pageLimit + nrm + ")";//Used with specific entries
 				}
