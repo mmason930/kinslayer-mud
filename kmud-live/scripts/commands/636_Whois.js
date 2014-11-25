@@ -10,9 +10,9 @@ var script636 = function(self, actor, here, args, extra) {
 			return;
 		}
 		var disp = "There is no such player.";
-		for (var _autoKey in vArgs.join("")) {
-			var ch = vArgs.join("")[_autoKey];
-			var a = getAscii(ch);
+		var input = vArgs.join("");
+		for (var i = 0; i < input.length; i++) {
+			var a = getAscii(input[i]);
 			if ( a < 65 || a > 122 || ( a > 90 && a < 97 ) ) {
 				actor.send(disp);
 				return;

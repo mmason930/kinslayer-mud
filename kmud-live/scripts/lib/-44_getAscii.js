@@ -1,7 +1,7 @@
 function getAscii(c)
 {
 	// restrict input to a single character
-	c = c . charAt (0);
+	c = c.charAt(0);
 	// loop through all possible ASCII values
 	var i;
 	for (i = 0; i < 256; ++ i)
