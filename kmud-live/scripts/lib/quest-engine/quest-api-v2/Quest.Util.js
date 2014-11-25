@@ -263,7 +263,6 @@
 		 * @returns string A string containing the text for the quest's journal entry.
 		 */
 		getJournalEntry: function(actor, quest) {
-			mudLog(constants.BRF, 100, "getJournalEntry: " + actor.name)
 			getCharCols(actor, constants.CL_OFF);
 			var bright = nrm + bld;
 			var mobName = getMobName(quest.giverVnum(actor));
@@ -288,13 +287,10 @@
 					if (!task.hasUnlocked(actor))
 						continue;
 
-					mudLog(constants.BRF, 100, "getJournalEntry->getStatus: " + actor.name)
 					var status = task.getStatus(actor);
-					mudLog(constants.BRF, 100, "after getJournalEntry->getStatus: " + actor.name)
 					var CURR = status.progress;
 					var REQ = task.completedValue;
 
-					mudLog(constants.BRF, 100, "getJournalEntry->hasCompleted: " + actor.name)
 					if (quest.hasCompleted(actor)) {
 						// Since quest is completed, always show tasks as complete
 						CURR = REQ;
@@ -309,7 +305,6 @@
 
 			/**ENTRY TITLE**/
 			var givenBy = (!mobName ? '' : " -- Given by " + mobName);
-			mudLog(constants.BRF, 100, "getJournalEntry->statusString: " + actor.name)
 			var title = ") " + grn + qName + nrm + "  (" + quest.statusString(actor, true) + ")" + yel + givenBy + nrm;
 
 			/**ENTRY SUMMARY**/
