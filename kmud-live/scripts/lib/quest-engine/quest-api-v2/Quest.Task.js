@@ -43,6 +43,7 @@
 		 *  - any pertinent messages are sent to actor
 		 */
 		update: function(actor) {
+			if (!this.isInProgress(actor)) return;
 			var block = getSval(actor, 100, this.qvalStr);
 			if (block)
 				return;
