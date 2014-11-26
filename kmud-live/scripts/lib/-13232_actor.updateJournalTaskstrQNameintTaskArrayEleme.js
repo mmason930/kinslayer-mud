@@ -6,6 +6,7 @@
  *  DO NOT WAITPULSE IN YOUR SCRIPTS ON TASK-RELATED ITEMS                                *
  ******************************************************************************************/
 JSCharacter.prototype.updateJournalTask = function (strQName, tasksIndex, boolShowMessage) {
+	mudLog(constants.BRF, 100, "Updating Journal Task. Actor: " + this.name + ", Quest Name: " + strQName + ", Task Index: " + tasksIndex);
 	Quest.getByName(strQName).tasks[tasksIndex].update(this);
 	return;
 
