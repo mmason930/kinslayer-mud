@@ -16,7 +16,6 @@ player has done ANY TASK GREATER THAN ZERO TIMES. The value is false otherwise.
 RETURNS: [boolAllTasksCompleted, taskObject, taskObject, ... , boolAnyProgressMade]
 *************************************************************************/
 JSCharacter.prototype.questTaskProgress = function (strQName) {
-	mudLog(constants.BRF, 100, "In questTaskProgress");
 	var actor = this;
 	var quest = Quest.getByName(strQName);
 	var tasks = quest.tasks;
