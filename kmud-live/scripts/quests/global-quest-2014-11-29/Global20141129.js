@@ -2,10 +2,47 @@ function Global2014Util()
 {
 	this.kingTurkeyVnum = 23006;
 	this.followerTurkeyvnum = 23005;
+	this.orbs = {};
+
+	this.orbs[constants.RACE_HUMAN] = {
+
+		vnum: 33001,
+		openWorldRoomVnum: 100,
+		closedWorldRoomVnum: 33904
+	};
+
+	this.orbs[constants.RACE_TROLLOC] = {
+
+		vnum: 33000,
+		openWorldRoomVnum: 8000,
+		closedWorldRoomVnum: 33948
+	};
 }
 
 Global2014Util.prototype.test = function()
 {
+};
+
+global.global2014 = new Global2014Util();
+
+//Script for teleporting players in and out of the zone.
+var script33000 = function(self, actor, here, args, extra) {
+
+	var vArgs = getArgList(args);
+
+	if(vArgs.toLowerCase() == "orb")
+	{
+		var orbInfo = global.global2014.orbs[actor.race];
+
+		var destinationRoomVnum = orbInfo.openWorldRoomVnum;
+
+		if(destinationRoomVnum == actor.room.vnum)
+			destinationRoomVnum = orbInfo.closedWorldRoomVnum;
+
+		actor.moveToRoom(geTRoom(destinationRoomVnum));
+
+		actor.comm("look");
+	}
 };
 
 //Random gobbling / emotes / fight events.
