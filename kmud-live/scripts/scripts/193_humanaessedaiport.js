@@ -136,7 +136,11 @@ var script193 = function(self, actor, here, args, extra) {
 	else if( argArray[0].toLowerCase() == "cost" )
 	{	
 		waitpulse 7;
-		self.comm( "say Your travel cost to that location will be " + cost + " coppers." );
+
+		if(isNaN(cost) || cost == null)
+			self.say("I cannot move you to that location, " + actor.name + ".");
+		else
+			self.comm( "say Your travel cost to that location will be " + cost + " coppers." );
 		return;
 	}
 	if( actor.gold < cost )
