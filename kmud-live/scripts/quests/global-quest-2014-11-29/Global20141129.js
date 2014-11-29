@@ -46,7 +46,7 @@ var script33000 = function(self, actor, here, args, extra) {
 		if(destinationRoomVnum == actor.room.vnum)
 			destinationRoomVnum = orbInfo.closedWorldRoomVnum;
 
-		actor.moveToRoom(geTRoom(destinationRoomVnum));
+		actor.moveToRoom(getRoom(destinationRoomVnum));
 
 		actor.comm("look");
 	}
