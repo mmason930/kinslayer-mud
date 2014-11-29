@@ -130,10 +130,14 @@ var script33002 = function(self, actor, here, args, extra) {
 		if(numberOn == 4)
 		{
 			global.global2014.unlockDoors();
+
+			self.room.zecho("You hear the loud bang of opening doors nearby.");
 		}
 		else if(numberOn == 0)
 		{
 			global.global2014.lockDoors();
+
+			self.room.zecho("You hear the loud bang of closing doors nearby.");
 		}
 	}
 };
