@@ -29,6 +29,7 @@ global.global2014 = new Global2014Util();
 var script33000 = function(self, actor, here, args, extra) {
 
 	var vArgs = getArgList(args);
+	_block;
 
 	if(vArgs.toLowerCase() == "orb")
 	{
