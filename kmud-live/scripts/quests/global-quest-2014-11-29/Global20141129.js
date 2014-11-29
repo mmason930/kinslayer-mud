@@ -57,6 +57,7 @@ Global2014Util.prototype.unlockDoors = function()
 		var dir = doorRoomVnum.dir;
 
 		room.unlockDoor(dir, true);
+		room.openDoor(dir, true);
 	});
 };
 
