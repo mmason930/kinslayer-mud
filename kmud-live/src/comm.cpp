@@ -691,7 +691,7 @@ void onAfterSocketWrite(void *data, kuListener *listener, kuDescriptor *descript
 
 		if(d->snoop_by && d->snoop_by->descriptor && d->snoop_by->character && d->snoop_by->character->hasPermissionToSnoop()) {
 
-			d->snoop_by->descriptor->send((std::string("% ") + output).c_str());
+			d->snoop_by->send((std::string("% ") + output).c_str());
 		}
 	}
 }
