@@ -25,8 +25,7 @@ BINDIR = ../bin
 
 CPPFLAGS = -ggdb3 $(MYFLAGS) $(PROFILE)
 
-#LIBS = -lmysqlclient -lsqlDatabase -lflusspferd -lcrypt -lstdc++ -lboost_regex -lboost_filesystem -lmozjs -lboost_thread
-LIBS = -lmysqlclient -lsqlDatabase -lflusspferd -lcrypt -lstdc++ -lboost_regex -lboost_filesystem -lmozjs -lboost_thread
+LIBS = -lsqlDatabase -lmysqlclient -lflusspferd -lcrypt -lstdc++ -lboost_regex -lboost_filesystem -lmozjs -lboost_thread
 
 OBJDIR = obj
 
@@ -47,10 +46,13 @@ OBJFILES = comm.o act.comm.o act.informative.o act.movement.o act.item.o \
 	ClanQuestPointTransaction.o OLCUtil.o UserClan.o OlcEditType.o UserEmailEditor.o MailUtil.o \
 	GatewayListener.o WebSocketDataFrame.o WebSocketClientHeaderIETF_HYBI17.o WebSocketClientHeader.o \
 	WebSocketClientHeaderHixie76.o sha1.o GatewayDescriptorType.o \
-	jsoncpp/json_reader.o jsoncpp/json_writer.o jsoncpp/json_value.o sqlDatabase.o ObjectMoveLogger.o \
+	jsoncpp/json_reader.o jsoncpp/json_writer.o jsoncpp/json_value.o ObjectMoveLogger.o \
 	PlayerPortalDescriptor.o PlayerPortalDescriptorStatus.o PlayerPortalServer.o Game.o \
 	PlayerPortalCommandProcessor.o commands/immortals/Locate.o EntityType.o rooms/Room.o rooms/RoomSector.o rooms/Exit.o \
-	MobLoadLogger.o SQLUtil.o Script.o utils/ThreadedLogFile.o
+	MobLoadLogger.o SQLUtil.o Script.o guilds/Guild.o guilds/GuildStatus.o guilds/GuildUtil.o guilds/UserGuild.o \
+	dbutils/QueryUtil.o TextTableBuilder.o editor-interface/EditorInterface.o editor-interface/EditorInterfaceInstance.o \
+	editor-interface/EditorInterfaceMenu.o guilds/GuildEditorInterface.o guilds/GuildApplication.o \
+	guilds/GuildApplicationStatus.o guilds/UserGuildStatus.o
 
 
 OBJFILES := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILES))
@@ -69,7 +71,7 @@ $(OBJDIR)/%.d: %.cpp
 	$(SHELL) -ec '$(CC) -MM $(CPPFLAGS) $< | \
 	sed '\''s,\($*\)\.o[ :]*,$(OBJDIR)\/\1.o $@ : ,g'\'' > $@'
 
-default: all
+default: circle
 
 -include $(OBJFILES:.o)
 
@@ -78,6 +80,7 @@ $(OBJDIR)/%.o: %.cpp
 
 all:
 	$(MAKE) $(BINDIR)/circle
+	$(MAKE) $(BINDIR)/gateway
 
 circle:
 	$(MAKE) $(BINDIR)/circle

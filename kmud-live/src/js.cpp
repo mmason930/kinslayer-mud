@@ -51,9 +51,6 @@ using namespace tr1;
 extern Descriptor *descriptor_list;
 extern sql::Connection gameDatabase;
 
-template < >
-std::list<Enum<ScriptImportOperation>*> Enum<ScriptImportOperation>::enums = std::list<Enum<ScriptImportOperation>*>();
-
 ScriptImportOperation *ScriptImportOperation::addition = new ScriptImportOperation(0, "Addition", 'A');
 ScriptImportOperation *ScriptImportOperation::modification = new ScriptImportOperation(1, "Modification", 'U');
 ScriptImportOperation *ScriptImportOperation::deletion = new ScriptImportOperation(2, "Deletion", 'D');
@@ -600,7 +597,10 @@ int JSManager::saveTrigger(JSTrigger* t)
 	{
 		MudLog(BRF, LVL_APPR, TRUE, "Error saving JS Script %d : %s", trig->vnum, e.getErrorMessage().c_str());
 		e.report();
+		return -1;
 	}
+
+	return 1;
 }
 
 void JSManager::addDelayed(std::shared_ptr<JSInstance> instance, int pulses)

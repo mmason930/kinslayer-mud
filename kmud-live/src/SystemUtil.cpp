@@ -97,7 +97,7 @@ FILE *SystemUtil::pipeOpen(const char *command, const char *mode)
 unsigned int SystemUtil::getProcessId()
 {
 #ifdef WIN32
-	return (unsigned int)getCurrentProcessId();
+	return (unsigned int)GetCurrentProcessId();
 #else
 	return (unsigned int)getpid();
 #endif

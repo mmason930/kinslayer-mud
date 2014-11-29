@@ -344,20 +344,6 @@ std::string dtos(double i)
 	return sDouble;
 }
 
-int strlenIgnoreColors( const char* str )
-{
-	int count = 0;
-	while( *str )
-	{
-		if( *str == 27 )
-		{
-			while (*(str++) != 'm' );
-			continue;
-		}
-		++str; ++count;
-	}
-	return count;
-}
 // Serai - returns 1 if word is starWord with the stars resolved, or 0 if not
 int compareWordWithStars(const char *word, const char *starWord)
 {

@@ -16,15 +16,11 @@ Game::Game()
 	this->version = "KinslayerMUD, version 2.0";
 	this->playerLogsDirectory = "plrlogs/";
 	this->defaultDirectory = "lib";
-
-	setupThreadedLogFiles();
 }
 
 Game::~Game()
 {
 	cleanupPlayerPortalServer();
-
-	lagLogFile.shutdown();
 }
 
 void Game::setupPlayerPortalServer(const int port)
@@ -216,13 +212,44 @@ void Game::sendToAll(std::function<std::string(Character *target)> messageFuncti
 	}
 }
 
-void Game::setupThreadedLogFiles()
+Character *Game::getSignedInCharacterByUserId(int userId) const
 {
-	lagLogFile.setFilePath("logs/benchmarks/benchmark.%Y%m%d");
-	lagLogFile.begin();
+	for(Character *target = character_list;target;target = target->next)
+	{
+		if(target->player.idnum == userId)
+			return target;
+	}
+
+	return nullptr;
 }
 
-void Game::logLag(const std::string &message)
+GuildEditorInterface *Game::getGuildEditorInterface() const
 {
-	lagLogFile.addMessage(message);
+	return this->guildEditorInterface.get();
+}
+
+
+sql::Connection Game::getConnection() const
+{
+	return connection;
+}
+
+sql::Context Game::getContext() const
+{
+	return context;
+}
+
+void Game::setConnection(sql::Connection connection)
+{
+	this->connection = connection;
+}
+
+void Game::setContext(sql::Context contect)
+{
+	this->context = context;
+}
+
+void Game::setupEditorInterfaces()
+{
+	this->guildEditorInterface.reset(new GuildEditorInterface());
 }

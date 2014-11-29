@@ -63,7 +63,7 @@ public:
 	
 	static Enum *getEnumByCharCode(const char charCode)
 	{
-		for(Enum *e : enums)
+		for(Enum *e : (*getEnumList()))
 		{
 			ScriptImportOperation *scriptImportOperation = (ScriptImportOperation*)e;
 
@@ -78,9 +78,6 @@ public:
 	{
 		return charCode;
 	}
-
-	//static std::list<ScriptImportOperation*>::iterator getStartIterator() { return enums.begin(); }
-	//static std::list<ScriptImportOperation*>::iterator getEndIterator() { return enums.end(); }
 
 	static ScriptImportOperation *addition;
 	static ScriptImportOperation *modification;

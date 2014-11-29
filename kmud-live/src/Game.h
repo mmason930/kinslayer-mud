@@ -4,9 +4,13 @@
 #include <string>
 #include <map>
 #include <functional>
+#include <memory>
+
+#include <mysql/sqlDatabase.h>
 
 #include "PlayerPortalServer.h"
-#include "utils/ThreadedLogFile.h"
+
+#include "guilds/GuildEditorInterface.h"
 
 //Eventually, we should store all globals in this class.
 class Game
@@ -22,7 +26,11 @@ protected:
 	int bootSubversionRevision; //The revision of the local filesystem at the time of boot.
 	int bootScriptsDirectorySubversionRevision;//The revision of the 'kmud-live/scripts' directory at the time of boot.
 
-	ThreadedLogFile lagLogFile;
+	std::shared_ptr<class GuildEditorInterface> guildEditorInterface;
+
+	sql::Context context;
+	sql::Connection connection;
+
 public:
 
 	Game();
@@ -57,9 +65,17 @@ public:
 	unsigned int getNumberOfPlayerPortalDescriptors();
 	void sendToAll(std::function<std::string(class Character *target)>);
 
-	void setupThreadedLogFiles();
+	GuildEditorInterface *getGuildEditorInterface() const;
 
-	void logLag(const std::string &message);
+	sql::Connection getConnection() const;
+	sql::Context getContext() const;
+
+	void setConnection(sql::Connection connection);
+	void setContext(sql::Context contect);
+
+	void setupEditorInterfaces();
+
+	Character *getSignedInCharacterByUserId(int userId) const;
 };
 
 extern class Game *game;

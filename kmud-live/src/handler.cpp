@@ -35,6 +35,7 @@
 #include "ObjectMoveLogger.h"
 #include "rooms/Room.h"
 #include "rooms/RoomSector.h"
+#include "editor-interface/EditorInterfaceInstance.h"
 
 #include "js.h"
 
@@ -1626,6 +1627,9 @@ void Character::Extract( UserLogoutType *userLogoutType, bool full_delete )
 
 	if (FIGHTING(this))
 		StopFighting();
+
+	if(editorInterfaceInstance)
+		editorInterfaceInstance->terminate();
 
 	if(!IS_NPC(this))
 		this->save();

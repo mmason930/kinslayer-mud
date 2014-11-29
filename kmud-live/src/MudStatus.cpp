@@ -1,8 +1,5 @@
 #include "MudStatus.h"
 
-template < >
-std::list<Enum<MudStatus>*> Enum<MudStatus>::enums = std::list<Enum<MudStatus>*>();
-
 MudStatus *MudStatus::notRunning = new MudStatus(0, "Not Running");
 MudStatus *MudStatus::runningNotConnected = new MudStatus(1, "Running, Not Connected");
 MudStatus *MudStatus::booting = new MudStatus(3, "Booting");

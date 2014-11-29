@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iterator>
 #include <mysql/sqlDatabase.h>
+#include "MiscUtil.h"
 
 class SQLUtil
 {

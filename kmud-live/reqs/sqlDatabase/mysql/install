@@ -2,7 +2,7 @@
 import os
 
 commands = []
-commands.append("g++ -o ./sqlDatabase.o -c ./sqlDatabase.cpp")
+commands.append("g++ -std=c++0x -DXP_UNIX -I/usr/local/include -I/usr/local/lib/pkgconfig/../../include -I/usr/local/include -o ./sqlDatabase.o -c ./sqlDatabase.cpp")
 commands.append("ar rc ./libsqlDatabase.a ./sqlDatabase.o")
 commands.append("mv ./libsqlDatabase.a /usr/local/lib/libsqlDatabase.a")
 commands.append("cp ./sqlDatabase.h /usr/include/mysql/sqlDatabase.h")

@@ -12,6 +12,7 @@
 #include "dg_event.h"
 
 #include "MiscUtil.h"
+#include "StringUtil.h"
 #include "rooms/Room.h"
 
 PokerTable *PokerTableList = NULL;
@@ -566,9 +567,9 @@ void PokerTable::PrintBoard( Character *ch, const int wait_time )
 		sprintf(Line2, "                 %s", Player->ChipStr(true).c_str());
 		sprintf(Line3, "                 %s", Player->BetStr(true).c_str());
 	}
-	while( strlenIgnoreColors( Line1 ) < 38) strcat( Line1, " " );
-	while( strlenIgnoreColors( Line2 ) < 40) strcat( Line2, " " );
-	while( strlenIgnoreColors( Line3 ) < 40) strcat( Line3, " " );
+	while( StringUtil::strlenIgnoreColors( Line1 ) < 38) strcat( Line1, " " );
+	while( StringUtil::strlenIgnoreColors( Line2 ) < 40) strcat( Line2, " " );
+	while( StringUtil::strlenIgnoreColors( Line3 ) < 40) strcat( Line3, " " );
 
 	if( (Player = GetPlayerAtSeat( 2 )) )
 	{
@@ -592,9 +593,9 @@ void PokerTable::PrintBoard( Character *ch, const int wait_time )
 		sprintf( Line3, "  %s", Player->BetStr(true).c_str() );
 	}
 
-	while( strlenIgnoreColors( Line1 ) < 17) strcat( Line1, " " );
-	while( strlenIgnoreColors( Line2 ) < 17) strcat( Line2, " " );
-	while( strlenIgnoreColors( Line3 ) < 17) strcat( Line3, " " );
+	while( StringUtil::strlenIgnoreColors( Line1 ) < 17) strcat( Line1, " " );
+	while( StringUtil::strlenIgnoreColors( Line2 ) < 17) strcat( Line2, " " );
+	while( StringUtil::strlenIgnoreColors( Line3 ) < 17) strcat( Line3, " " );
 
 	PlayerB = GetPlayerAtSeat( 3 );
 	sprintf( Line1 + strlen( Line1 ), "|                                      | %s\r\n", PlayerB?PlayerB->PlayerName(true).c_str():"");
@@ -632,9 +633,9 @@ void PokerTable::PrintBoard( Character *ch, const int wait_time )
 		sprintf( Line3, "  %s", Player->BetStr(true).c_str() );
 	}
 
-	while( strlenIgnoreColors( Line1 ) < 17) strcat( Line1, " " );
-	while( strlenIgnoreColors( Line2 ) < 17) strcat( Line2, " " );
-	while( strlenIgnoreColors( Line3 ) < 17) strcat( Line3, " " );
+	while( StringUtil::strlenIgnoreColors( Line1 ) < 17) strcat( Line1, " " );
+	while( StringUtil::strlenIgnoreColors( Line2 ) < 17) strcat( Line2, " " );
+	while( StringUtil::strlenIgnoreColors( Line3 ) < 17) strcat( Line3, " " );
 
 	PlayerB = GetPlayerAtSeat( 4 );
 	sprintf( Line1 + strlen( Line1 ), "|  |    | |    | |    | |    | |    |  | %s\r\n", PlayerB?PlayerB->PlayerName(true).c_str():"");
@@ -654,7 +655,7 @@ void PokerTable::PrintBoard( Character *ch, const int wait_time )
 
 	//..Pot...
 	sprintf( Line1, "                 |            POT: %d", Pot);
-	while(strlenIgnoreColors(Line1) < 56) strcat(Line1, " ");
+	while(StringUtil::strlenIgnoreColors(Line1) < 56) strcat(Line1, " ");
 	sprintf(Buffer + strlen(Buffer), "%s|\r\n", Line1);
 	*Line1 = 0;
 
@@ -669,9 +670,9 @@ void PokerTable::PrintBoard( Character *ch, const int wait_time )
 		sprintf( Line3, "  %s", Player->BetStr(true).c_str() );
 	}
 
-	while( strlenIgnoreColors( Line1 ) < 17) strcat( Line1, " " );
-	while( strlenIgnoreColors( Line2 ) < 17) strcat( Line2, " " );
-	while( strlenIgnoreColors( Line3 ) < 60) strcat( Line3, " " );
+	while( StringUtil::strlenIgnoreColors( Line1 ) < 17) strcat( Line1, " " );
+	while( StringUtil::strlenIgnoreColors( Line2 ) < 17) strcat( Line2, " " );
+	while( StringUtil::strlenIgnoreColors( Line3 ) < 60) strcat( Line3, " " );
 
 
 	PlayerB = GetPlayerAtSeat( 5 );
@@ -692,9 +693,9 @@ void PokerTable::PrintBoard( Character *ch, const int wait_time )
 		sprintf(Line2, "                 %s", Player->ChipStr(true).c_str());
 		sprintf(Line3, "                 %s", Player->BetStr(true).c_str());
 	}
-	while( strlenIgnoreColors( Line1 ) < 38) strcat( Line1, " " );
-	while( strlenIgnoreColors( Line2 ) < 40) strcat( Line2, " " );
-	while( strlenIgnoreColors( Line3 ) < 40) strcat( Line3, " " );
+	while( StringUtil::strlenIgnoreColors( Line1 ) < 38) strcat( Line1, " " );
+	while( StringUtil::strlenIgnoreColors( Line2 ) < 40) strcat( Line2, " " );
+	while( StringUtil::strlenIgnoreColors( Line3 ) < 40) strcat( Line3, " " );
 
 	if( (Player = GetPlayerAtSeat( 7 )) )
 	{

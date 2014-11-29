@@ -38,7 +38,7 @@ ClanQuestPointTransaction *ClanUtil::getClanQuestPointTransaction(const sql::Row
 	clanQuestPointTransaction->setUserId(row.getInt("user_id"));
 	clanQuestPointTransaction->setAmount(row.getInt("amount"));
 	clanQuestPointTransaction->setCreatedDatetime(row.getTimestamp("created_datetime"));
-	clanQuestPointTransaction->setIssuedByUserType( (UserType*)UserType::getEnumByValue(row.getInt("issued_by_user_type")) );
+	clanQuestPointTransaction->setIssuedByUserType(UserType::getEnumByValue(row.getInt("issued_by_user_type")) );
 	clanQuestPointTransaction->setIssuedByUserId(row.getInt("issued_by_user_id"));
 	clanQuestPointTransaction->setReason(row.getString("reason"));
 

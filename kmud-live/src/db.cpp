@@ -56,6 +56,8 @@
 #include "StringUtil.h"
 #include <boost/filesystem.hpp>
 
+#include "guilds/GuildUtil.h"
+
 boost::uuids::uuid u;
 
 std::list< std::pair< Character*, event_info* > * > BashStandQueue;
@@ -435,6 +437,9 @@ void SetupMySQL( bool crash_on_failure )
 	{
 		dbContext = sql::createContext(hostname, username, password, dbname);
 		gameDatabase = dbContext->createConnection();
+
+		game->setContext(dbContext);
+		game->setConnection(gameDatabase);
 	}
 	catch (sql::ConnectionException e) {
 		e.report();
@@ -493,8 +498,11 @@ void boot_db(void)
 
 	Log("Boot db -- BEGIN.");
 
-	Log("Connecting to game database...");
+	Log("Establishing MySQL Connection.");
 	SetupMySQL( true );
+
+	Log("Setting Up Editor Interfaces.");
+	game->setupEditorInterfaces();
 	
 	Log("Booting the Configuration.");
 	Conf = new Config();
@@ -538,6 +546,10 @@ void boot_db(void)
 
 	Log("Reading screen text.");
 	loadScreenText();
+		
+	Log("Loading guilds.");
+	GuildUtil::get()->loadGuildsFromDatabase(gameDatabase);
+	GuildUtil::get()->loadGuildApplicationsFromDatabase(gameDatabase);
 
 	bootWorld();
 

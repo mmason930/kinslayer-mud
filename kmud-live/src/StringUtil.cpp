@@ -398,3 +398,27 @@ bool StringUtil::startsWith(const std::string &stringBuffer, const std::string &
 
 	return true;
 }
+
+int StringUtil::strlenIgnoreColors( const char* str )
+{
+	int count = 0;
+	while( *str )
+	{
+		if( *str == 27 )
+		{
+			while (*(str++) != 'm' );
+			continue;
+		}
+		++str; ++count;
+	}
+	return count;
+}
+
+std::string StringUtil::repeat(const std::string str, int numberOfTimes)
+{
+	std::string buffer;
+	while(numberOfTimes-- > 0)
+		buffer += str;
+
+	return buffer;
+}

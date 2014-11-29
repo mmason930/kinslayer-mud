@@ -22,6 +22,7 @@ class Zone;
 class Character;
 class Room;
 class Object;
+class EditorInterfaceInstance;
 char	*str_dup(const char *source);
 
 /* preamble *************************************************************/
@@ -1808,6 +1809,7 @@ public:
 	DateTime	restat_time;
 	DateTime	reset_time;
 	std::map<short int, PlayerSkill > skills;
+	std::shared_ptr<EditorInterfaceInstance> editorInterfaceInstance;
 
 	bool purged;					/* Is this character queued for purging? */
 	bool proto;
@@ -2072,6 +2074,7 @@ public:
 	void StopFighting();
 	void SetFighting( Character *vict );
 	void Init();
+	void send( const char *messg, va_list args );
 	void send( const char *messg, ... );
 	void send( const std::string &s );
 	void sendDisorientableMessage( const char *message, ... );

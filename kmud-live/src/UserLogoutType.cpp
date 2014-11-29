@@ -1,8 +1,5 @@
 #include "UserLogoutType.h"
 
-template < >
-std::list<Enum<UserLogoutType>*> Enum<UserLogoutType>::enums = std::list<Enum<UserLogoutType>*>();
-
 UserLogoutType *UserLogoutType::rent = new UserLogoutType(0, "Rent");
 UserLogoutType *UserLogoutType::idle  = new UserLogoutType(1, "Idle");
 UserLogoutType *UserLogoutType::linklessIdle  = new UserLogoutType(2, "Linkless Idle");

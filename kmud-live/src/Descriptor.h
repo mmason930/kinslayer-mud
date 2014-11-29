@@ -14,6 +14,7 @@ protected:
 
 	GatewayDescriptorType *gatewayDescriptorType;
 	std::string emailAddress;
+	std::string outputBuffer; //Output buffer for this pulse.
 
 public:
 	Descriptor();
@@ -59,6 +60,8 @@ public:
 	void writeToOutput(bool swapArguments, const char *format, va_list args);
 	bool hasPermissionToSnoop();
 
+	bool shouldMakePrompt();
+
 	void disconnect();
 	void persistentDisconnect();
 	void closeSocketClean();
@@ -88,6 +91,12 @@ public:
 
 	void completeEnterGame();
 
+	std::string getOutputBuffer() const;
+	void appendToOutputBuffer(const std::string &str);
+	void appendToOutputBuffer(const char *str);
+	void clearOutputBuffer();
+	void flushOutputBuffer();
+		
 	std::string getEmailAddress();
 	void setEmailAddress(const std::string &emailAddress);
 

@@ -1,16 +1,12 @@
 #ifndef ENTITY_TYPE_H
 #define ENTITY_TYPE_H
 
-#include <list>
 #include "Enum.h"
 
 class EntityType : public Enum<EntityType> {
 
 private:
-	EntityType(int value, const std::string &standardName) : Enum(value, standardName)
-	{
-	}
-
+	EntityType(int value, const std::string &standardName) : Enum(value, standardName) {}
 public:
 
 	static EntityType *mob;
@@ -19,6 +15,4 @@ public:
 	static EntityType *room;
 };
 
-
 #endif
-

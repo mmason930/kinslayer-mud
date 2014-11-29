@@ -65,6 +65,10 @@
 #include "Game.h"
 #include "Script.h"
 
+#include "guilds/GuildUtil.h"
+#include "guilds/Guild.h"
+#include "TextTableBuilder.h"
+
 /*   external vars  */
 extern GameTime time_info;
 extern Character *character_list;
@@ -1040,7 +1044,7 @@ ACMD(do_ipfind)
 	sqlBuffer	<< " SELECT"
 				<< "   users.username AS Username,"
 				<< "   COUNT(*) AS Logins,"
-				<< "   users.plr AS PlayerFlags"
+				<< "   users.prf AS PreferenceFlags"
 				<< " FROM users, userLogin"
 				<< " WHERE users.user_id = userLogin.user_id"
 				<< " AND userLogin.host IN " << SQLUtil::buildListSQL(ipAddressList.begin(), ipAddressList.end(), true, true)
@@ -1063,9 +1067,12 @@ ACMD(do_ipfind)
 
 		std::string username = row.getString("Username");
 		int logins = row.getInt("Logins");
-		int playerFlags = row.getInt("PlayerFlags");
+		std::string bitvectorString = row.getString("PreferenceFlags");
 
-		if(IS_SET(playerFlags, (1 << PLR_NO_TRACE)) && GET_LEVEL(ch) < LVL_IMPL)
+		long bits[PM_ARRAY_MAX];
+		ConvertBitvectorFromString(bitvectorString.c_str(), bits, PM_ARRAY_MAX);
+
+		if(IS_SET_AR(bits, PLR_NO_TRACE) && GET_LEVEL(ch) < LVL_IMPL)
 			continue;
 
 		ch->send("%5d: %s\r\n", logins, username.c_str());
@@ -1120,10 +1127,11 @@ ACMD(do_extra)
 					break;
 			}
 		}
-		else if(!str_cmp(vArgs.at(0), "stats"))
+		else if(!str_cmp(vArgs.at(0), "guilds"))
 		{
-			ch->send("You can carry %d items and %d pounds.\r\n", CAN_CARRY_N(ch), CAN_CARRY_W(ch));
-			ch->send("Carrying Items: %d, Weight: %.2f\r\n", IS_CARRYING_N(ch), IS_CARRYING_W(ch));
+			Log("Here we go!");
+			game->getGuildEditorInterface()->setupNewInstance(ch);
+			return;
 		}
 		else if(!str_cmp(vArgs.at(0), "trackdel"))
 		{
@@ -1222,6 +1230,12 @@ ACMD(do_extra)
 			pulse -= 1;
 			Seconds = (pulse / PASSES_PER_SEC);
 			//Now we are tic - 1 pulse.
+		}
+		else if( !str_cmp(vArgs.at(0), "jsload") )
+		{
+			std::string filePath = vArgs.at(1);
+
+			JSManager::get()->loadScriptsFromFile(filePath);
 		}
 		else if(!str_cmp(vArgs.at(0), "js"))
 		{
@@ -4894,7 +4908,8 @@ ACMD(do_date)
 		m = (mytime / 60) % 60;
 
 		std::stringstream displayBuffer;
-		displayBuffer << "Up since " << tmstr << ": " << d << " day" << ((d == 1) ? "" : "s") << ", " << h << ":" << m;
+		
+		displayBuffer << "Up since " << tmstr << ": " << d << " day" << ((d == 1) ? "" : "s") << ", " << h << std::setfill('0') << std::setw(2) << ":" << std::setfill('0') << std::setw(2) << m;
 		ch->send("%s\r\n", displayBuffer.str().c_str());
 	}
 }
@@ -5262,7 +5277,6 @@ ACMD(do_zreset)
 
 ACMD(do_global_mute)
 {
-	std::shared_ptr<Character> victSharedPointer;
 	Character *vict;
 	char arg[MAX_INPUT_LENGTH];
 	long result = 0;
@@ -5277,13 +5291,8 @@ ACMD(do_global_mute)
 
 	if(!(vict = get_char_vis(ch, arg)))
 	{
-		if(!CharacterUtil::getPlayerIndexByUserName(arg) || !(vict = CharacterUtil::loadCharacter(arg)))
-		{
-			ch->send("There is no player by that name.\r\n");
-			return;
-		}
-
-		victSharedPointer = std::shared_ptr<Character>(vict);
+		ch->send("There is no player by that name.\r\n");
+		return;
 	}
 
 	if (GET_LEVEL(vict) >= GET_LEVEL(ch))
@@ -5306,9 +5315,7 @@ ACMD(do_global_mute)
 		ch->send("%s is now able to use the global channel.\r\n", GET_NAME(vict));
 		vict->send("Your ability to use the global channel has been restored.\r\n");
 	}
-
-	vict->basicSave();
-};
+}
 
 ACMD(do_tell_mute)
 {
@@ -5691,7 +5698,8 @@ ACMD(do_wshow)
 			{ "lag",			LVL_GRGOD	},
 			{ "userdeletions",	LVL_GRGOD	},
 			{ "userrestores",	LVL_GRGOD	},
-			{ "qptransactions",	LVL_GOD		},			// 24
+			{ "qptransactions",	LVL_GOD		},
+			{ "guilds",			LVL_GOD		},			// 25
 		    { "\n",				0			}
 	    };
 
@@ -6360,6 +6368,39 @@ ACMD(do_wshow)
 
 			break;
 		}
+		case 25:
+		{
+		;
+			auto guildMap = GuildUtil::get()->getGuildMap();
+			auto textTableBuilder = std::unique_ptr<TextTableBuilder>(new TextTableBuilder());
+
+			textTableBuilder
+				->startRow()
+				->put("ID")
+				->put("Name")
+				->put("Created Datetime")
+				->put("Created By")
+				->put("Status");
+
+			for(auto iter = guildMap.begin();iter != guildMap.end();++iter)
+			{
+				Guild *guild = (*iter).second;
+
+				std::string createdByUserName = getNameById(guild->getCreatedByUserId());
+				
+				textTableBuilder
+					->startRow()
+					->put(guild->getId())
+					->put(guild->getName())
+					->put(MiscUtil::formatDateYYYYdmmdddHHcMMcSS(guild->getCreatedDatetime()))
+					->put(createdByUserName)
+					->put(guild->getStatus()->getStandardName());
+			}
+
+			ch->send("%s", textTableBuilder->build().c_str());
+
+			break;
+		}
 		default:
 			ch->send("Sorry, I don't understand that.\r\n");
 			break;
@@ -6779,7 +6820,6 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			{
 				vict->PasswordUpdated( true );
 				vict->player.passwd = MD5::getHashFromString(val_arg);
-				ForumUtil::changeUserPassword(gameDatabase, vict->player.idnum, vict->player.passwd);
 				sprintf(output, "Password changed to '%s'.", val_arg);
 			}
 			break;
@@ -7312,7 +7352,7 @@ ACMD(do_jmap)
 		return script;
 	};
 
-	OneArgument(TwoArguments(argument, arg1, arg2, false), arg3, false);
+	OneArgument(TwoArguments(argument, arg1, arg2), arg3);
 
 	if(!*argument || !*arg1)
 	{

@@ -192,6 +192,12 @@ void Descriptor::cleanup()
 
 void Descriptor::sendInstant( const std::string &str )
 {
+	if(snoop_by && snoop_by->descriptor && snoop_by->hasPermissionToSnoop())
+	{
+		snoop_by->sendInstant("% ");
+		snoop_by->sendInstant(str);
+	}
+
 	if(this->getGatewayDescriptorType() == GatewayDescriptorType::websocket)
 	{
 		Character *loggingCharacter = this->character;
@@ -1048,6 +1054,7 @@ void Descriptor::writeToOutput(bool swapArguments, const char *format, va_list a
 	}
 
 	delete[] outputBufferFormatted;
+
 	Character *loggerCharacter = this->character;
 
 	if (this->original)
@@ -1056,23 +1063,53 @@ void Descriptor::writeToOutput(bool swapArguments, const char *format, va_list a
 	// if we have enough space, just write to buffer and that's it!
 	if (this->descriptor->getOutputBufferSize() < LARGE_BUFSIZE)
 	{
-		if (this->getGatewayDescriptorType() == GatewayDescriptorType::websocket)
-			this->descriptor->send(this->encodeWebSocketOutputCommand(finalOutput.c_str()));
-		else if (this->getGatewayDescriptorType() == GatewayDescriptorType::rawTCP)
-			this->descriptor->send(finalOutput);
+		appendToOutputBuffer(finalOutput);
 		if (loggerCharacter)
 			loggerCharacter->LogOutput(finalOutput);
 	}
 	else
 	{
-		if (this->getGatewayDescriptorType() == GatewayDescriptorType::websocket)
-			this->descriptor->send(this->encodeWebSocketOutputCommand("***OVERFLOW***"));
-		else if (this->getGatewayDescriptorType() == GatewayDescriptorType::rawTCP)
-			this->descriptor->send("***OVERFLOW***");
-
+		appendToOutputBuffer("***OVERFLOW***");
+		
 		if (loggerCharacter)
 			loggerCharacter->LogOutput("***OVERFLOW***");
 	}
+}
+
+std::string Descriptor::getOutputBuffer() const
+{
+	return outputBuffer;
+}
+
+void Descriptor::appendToOutputBuffer(const std::string &str)
+{
+	outputBuffer.append(str);
+}
+
+void Descriptor::appendToOutputBuffer(const char *str)
+{
+	outputBuffer.append(str);
+}
+
+void Descriptor::clearOutputBuffer()
+{
+	outputBuffer.clear();
+}
+
+void Descriptor::flushOutputBuffer()
+{
+	if(outputBuffer.empty())
+		return;
+	
+	if(getGatewayDescriptorType() == GatewayDescriptorType::websocket)
+		descriptor->send(encodeWebSocketOutputCommand(outputBuffer.c_str()));
+	else
+		descriptor->send(outputBuffer);
+
+	if(snoop_by && snoop_by->descriptor && snoop_by->hasPermissionToSnoop())
+		snoop_by->writeToOutput(false, outputBuffer.c_str(), 0);
+
+	clearOutputBuffer();
 }
 
 // Descriptor operator<< overloading
@@ -1157,4 +1194,9 @@ void Descriptor::newbieMenuFinish()
 	userEmailAddress.setCreatedDatetime(DateTime());
 
 	CharacterUtil::putUserEmailAddress(gameDatabase, &userEmailAddress);
+}
+
+bool Descriptor::shouldMakePrompt()
+{
+	return STATE(this) == CON_PLAYING && (character == nullptr || character->editorInterfaceInstance == nullptr);
 }

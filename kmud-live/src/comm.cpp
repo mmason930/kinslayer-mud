@@ -84,6 +84,7 @@
 
 #include "ObjectMoveLogger.h"
 #include "MobLoadLogger.h"
+#include "editor-interface/EditorInterfaceInstance.h"
 #include <boost/filesystem.hpp>
 
 #ifdef HAVE_ARPA_TELNET_H
@@ -689,10 +690,10 @@ void onAfterSocketWrite(void *data, kuListener *listener, kuDescriptor *descript
 
 		d->hadOutput = true;
 
-		if(d->snoop_by && d->snoop_by->descriptor && d->snoop_by->character && d->snoop_by->character->hasPermissionToSnoop()) {
+		//if(d->snoop_by && d->snoop_by->descriptor && d->snoop_by->character && d->snoop_by->character->hasPermissionToSnoop()) {
 
-			d->snoop_by->send((std::string("% ") + output).c_str());
-		}
+		//	d->snoop_by->send((std::string("% ") + output).c_str());
+		//}
 	}
 }
 
@@ -766,7 +767,16 @@ void initiateGame( int port )
 	//	1) Obtain a list of players to load back into the game.
 	//	2) 
 
-	boot_db();
+	try
+	{
+		boot_db();
+	}
+	catch(sql::QueryException queryException)
+	{
+		MudLog(BRF, 0, TRUE, "Could not boot game. SQL Exception: %s", queryException.getMessage().c_str());
+
+		throw queryException;
+	}
 
 	Log("Reboot set for %s.", rebootTime.toString().c_str());
 
@@ -1073,12 +1083,10 @@ void gameLoop()
 	
 	Clock heartbeatClock;
 	Clock pulseTimer;
-	Clock loopTimer;
 
 	rebootNotified15 = rebootNotified10 = rebootNotified5 = rebootNotified1 = false;
 
 	pulseTimer.reset(false);
-	loopTimer.reset(false);
 
 	bootTime = time( 0 );
 	pulse = 0;
@@ -1086,9 +1094,7 @@ void gameLoop()
 	while ( !circle_shutdown )
 	{
 		std::this_thread::sleep_for( std::chrono::microseconds( OPT_USEC ) );
-		
-		game->logLag("Starting loop...");
-		loopTimer.turnOn();
+
 		//Make sure we're still connected to the database...
 		if( !gameDatabase->isConnected() && (time(0) - last_db_alert_time) > 15 )
 		{
@@ -1105,7 +1111,6 @@ void gameLoop()
 			gatewayConnection->socketWriteInstant("FinishedBooting\n");
 		}
 
-		game->logLag("Beginning processing gateway commands.");
 		while(true) {
 
 			std::string input = gatewayConnection->getCommand();
@@ -1117,8 +1122,7 @@ void gameLoop()
 
 			processGatewayCommand(input);
 		}
-		
-		game->logLag("Beginning processing websocket commands.");
+
 		//Process Web Socket Commands & prepare input
 		for(d = descriptor_list; d; d = next_d)
 		{
@@ -1134,7 +1138,6 @@ void gameLoop()
 			}
 		}
 
-		game->logLag("Beginning processing commands.");
 		// Process commands.
 		for ( d = descriptor_list; d; d = next_d )
 		{
@@ -1241,6 +1244,9 @@ void gameLoop()
 				else if ( STATE( d ) != CON_PLAYING )  /* In menus, etc. */
 					d->nanny( comm );
 
+				else if( d->character && d->character->editorInterfaceInstance )
+					d->character->editorInterfaceInstance->parse(comm);
+
 				else
 				{ /* else: we're playing normally. */
 
@@ -1280,20 +1286,22 @@ void gameLoop()
 			missed_pulses = 2 * PASSES_PER_SEC;
 		}
 
-		game->logLag("Listener pulse.");
+		for(d = descriptor_list;d;d = d->next)
+		{
+			d->flushOutputBuffer();
+		}
+
 		listener->pulse();
 
-		game->logLag("Accepting new hosts.");
 		listener->acceptNewHosts();
 
-		game->logLag("Sending newlines and prompts.");
 		for(d = descriptor_list;d;d = d->next) {
 
 			if(d->hadOutput) {
 
 				d->sendInstant("\r\n");
 			}
-			if(d->hadInput || d->hadOutput) {
+			if( (d->hadInput || d->hadOutput) && d->shouldMakePrompt() ) {
 
 				d->sendInstant(d->makePrompt());
 			}
@@ -1302,7 +1310,7 @@ void gameLoop()
 			d->hadOutput = false;
 		}
 
-		game->logLag("Kicking out CON_CLOSe, CON_DISCONNECT.");
+
 		/* Kick out folks in the CON_CLOSE or CON_DISCONNECT state */
 		for ( d = descriptor_list; d; d = next_d )
 		{
@@ -1311,8 +1319,7 @@ void gameLoop()
 			if ( STATE( d ) == CON_CLOSE || STATE( d ) == CON_DISCONNECT )
 				d->disconnect();
 		}
-		
-		game->logLag("Heartbeating.");
+
 		heartbeatClock.reset(false);
 		heartbeatClock.turnOn();
 		/* Now execute the heartbeat functions */
@@ -1341,9 +1348,6 @@ void gameLoop()
 			pulse = 0;
 
 		pulseTimer.turnOff();
-		loopTimer.turnOff();
-
-		game->logLag( std::string("Ending loop : ") + MiscUtil::toString(loopTimer.getLastClocks()) );
 
 		missed_pulses = pulseTimer.getClocks() / (1000 / PASSES_PER_SEC);
 
@@ -1476,13 +1480,11 @@ void autoSave( void )
 	Object::saveMultipleHolderItems(holderIdAndTypeToContentsMap, true);
 
 	sendToAll("\r\nAutosave complete.\r\n", true);
-        
-	char tmpBuf[MAX_STRING_LENGTH];
+	
 	for( Descriptor *d = descriptor_list;d;d=d->next )
 	{
-		if( STATE( d ) == CON_PLAYING )
+		if( d->shouldMakePrompt() )
 		{
-			strcpy(tmpBuf, d->makePrompt());
 			d->sendInstant(d->makePrompt());
 		}
 	}
@@ -1618,18 +1620,11 @@ void LagMonitor::startClock()
 	timer.reset(false);
 	timer.turnOn();
 }
-unsigned long long LagMonitor::getLastClocks() const
-{
-	return timer.getLastClocks();
-}
-
 void LagMonitor::stopClock( const std::string &sRoutineName )
 {
 	timer.turnOff();
 
 	double runTime = (double)timer.getClocks() / (double)1000;
-
-	game->logLag( std::string("pulse routine `") + sRoutineName + "` : " + MiscUtil::toString(timer.getLastClocks()));
 
 	if( mRoutineTimeCard.count( sRoutineName ) == 0 ) {
 		mRoutineTimeCard[ sRoutineName ].numberOfTimesRun = 1;
@@ -1650,7 +1645,12 @@ void invisiblePing()
 {
 	for(Descriptor *descriptor = descriptor_list;descriptor;descriptor = descriptor->next)
 	{
-		descriptor->sendInstant(std::string("\r\n") + std::string(descriptor->makePrompt()));
+		std::string pingMessage = std::string("\r\n");
+
+		if(descriptor->shouldMakePrompt())
+			pingMessage += descriptor->makePrompt();
+
+		descriptor->sendInstant(pingMessage);
 //		descriptor->sendRaw("\0");
 	}
 }
@@ -1688,7 +1688,6 @@ void heartbeat( int pulse )
 		UpdateBootHigh(NumPlayers(true,false));
 		lagMonitor.stopClock( LAG_MONITOR_UPDATE_BOOT_HIGH );
 	}
-
 	if ( !( pulse % (13 RL_SEC) ) )
     {
 		lagMonitor.startClock();
@@ -1708,7 +1707,6 @@ void heartbeat( int pulse )
 	}
 
 	if ( !( pulse % PULSE_ZONE ) ) {
-		
 		lagMonitor.startClock();
 		zone_update();
 		lagMonitor.stopClock( LAG_MONITOR_ZONE_UPDATE );
@@ -1721,14 +1719,11 @@ void heartbeat( int pulse )
 		lagMonitor.stopClock( LAG_MONITOR_CHECK_FIGHTING );
 	}
 	if ( !( pulse % ( (60 RL_SEC) * (CONFIG_AUTOSAVE_TIME) ) ) ) {
-
 		lagMonitor.startClock();
 		autoSave();
 		lagMonitor.stopClock( LAG_MONITOR_AUTO_SAVE );
 	}
-
 	if ( !( pulse % ( 60 * PASSES_PER_SEC * 5 ) ) ) {
-		
 		lagMonitor.startClock();
 		checkIdlePasswords();
 		lagMonitor.stopClock( LAG_MONITOR_CHECK_IDLE_PASSWORDS );
@@ -2242,16 +2237,19 @@ void Character::LogOutput( const std::string &buffer )
 	fclose( outfile );
 }
 
-void Character::send( const char *messg, ... )
+void Character::send( const char *messg, va_list args )
 {
 	if ( this->desc && messg && *messg )
-	{
-		va_list args;
-
-		va_start( args, messg );
 		this->desc->writeToOutput(true, messg, args );
-		va_end( args );
-	}
+}
+
+void Character::send( const char *messg, ... )
+{
+	va_list args;
+
+	va_start( args, messg );
+	send(messg, args);
+	va_end(args);
 }
 
 void Character::send( const std::string &s)
