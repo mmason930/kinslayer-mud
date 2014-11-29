@@ -85,7 +85,7 @@ var script33001 = function(self, actor, here, args, extra) {
 
 	var numberOfMobs = global.global2014.getNumberOfIssuedMobs(actor.race);
 
-	mudLog(constants.BRF, 100, true, "Mobs: " + numberOfMobs);
+	mudLog(constants.BRF, 100, "Mobs: " + numberOfMobs);
 
 	if(self.race != actor.race)
 		return;
@@ -98,6 +98,8 @@ var script33001 = function(self, actor, here, args, extra) {
 	{
 		var mob = here.loadMob(global.global2014.issueMobVnums[actor.race]);
 		global.global2014.issuedMobs[actor.race].push(mob);
+
+		mob.comm("follow " + actor.name);
 	}
 };
 
