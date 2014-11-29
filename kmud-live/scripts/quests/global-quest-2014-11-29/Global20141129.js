@@ -43,6 +43,8 @@ function Global2014Util()
 	this.switches[33926] = {switchedOn: false, lastSwitched: new Date() } //SW
 	this.switches[33931] = {switchedOn: false, lastSwitched: new Date() } //NW
 	this.switches[33921] = {switchedOn: false, lastSwitched: new Date() } //NE
+
+	this.timeOfLastGlobal = null;
 }
 
 Global2014Util.prototype.test = function()
@@ -201,6 +203,14 @@ var script23005 = function(self, actor, here, args, extra) {
 	var randomNumber = random(1, 100);
 
 	if(self.vnum == 23006) {
+
+		if( global.global2014.timeOfLastGlobal == null || (new Date().getTime() - global.global2014.timeOfLastGlobal.getTime()) >= (1000 * 60 * 60) )
+		{
+			global.global2014.timeOfLastGlobal = new Date();
+
+			self.global("Go pick your dates for the upcoming global event, so you can try and fail at killing me: http://whenisgood.net/mbf8ycg");
+		}
+
 		if (randomNumber < 10) {
 			act("$n gobbles, 'Mang...'", false, self, null, null, constants.TO_ROOM);
 		}
