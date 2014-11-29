@@ -31,7 +31,13 @@ var script33000 = function(self, actor, here, args, extra) {
 	var vArgs = getArgList(args);
 	_block;
 
-	if(vArgs.toLowerCase() == "orb")
+	if(vArgs.length < 2)
+	{
+		actor.send("Touch what?");
+		return;
+	}
+
+	if(vArgs[1].toLowerCase() == "orb")
 	{
 		var orbInfo = global.global2014.orbs[actor.race];
 
