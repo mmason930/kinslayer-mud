@@ -36,6 +36,13 @@ function Global2014Util()
 		openWorldRoomVnum: 8000,
 		closedWorldRoomVnum: 33948
 	};
+
+	var switches = {};
+
+	this.switches[33920] = {switchedOn: false, lastSwitched: new Date() } //SE
+	this.switches[33926] = {switchedOn: false, lastSwitched: new Date() } //SW
+	this.switches[33931] = {switchedOn: false, lastSwitched: new Date() } //NW
+	this.switches[33921] = {switchedOn: false, lastSwitched: new Date() } //NE
 }
 
 Global2014Util.prototype.test = function()
@@ -78,7 +85,56 @@ Global2014Util.prototype.lockDoors = function()
 	});
 };
 
+Global2014Util.prototype.getNumberOfSwitchesOn = function()
+{
+	var counter = 0;
+
+	for(var switchVnum in this.switches)
+	{
+		if(this.switches[switchVnum].switchedOn)
+			++counter;
+	}
+
+	return counter;
+};
+
 global.global2014 = new Global2014Util();
+
+//Flip Switch
+var script33002 = function(self, actor, here, args, extra) {
+
+	var vArgs = getArgList(args);
+
+	if(vArgs.length < 2)
+	{
+		actor.send("Flip what?");
+		return;
+	}
+
+	if(vArgs[0].toLowerCase() == "switch")
+	{
+		var roomVnum = self.room.vnum;
+
+		var switchInfo = global.global2014.switches[roomVnum];
+
+		switchInfo.switchedOn = !switchInfo.switchedOn;
+		switchInfo.lastSwitched = new Date();
+
+		var numberOn = global.global2014.getNumberOfSwitchesOn();
+
+		act("$n flips the switch " + (switchInfo.switchedOn ? "on" : "off") + ".", false, actor, null, null, constants.TO_ROOM);
+		act("You flips the switch " + (switchInfo.switchedOn ? "on" : "off") + ".", false, actor, null, null, constants.TO_CHAR);
+
+		if(numberOn == 4)
+		{
+			global.global2014.unlockDoors();
+		}
+		else if(numberOn == 0)
+		{
+			global.global2014.lockDoors();
+		}
+	}
+};
 
 //Script for issuing mobs.
 var script33001 = function(self, actor, here, args, extra) {
