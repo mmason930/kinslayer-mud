@@ -17,7 +17,7 @@ var script23005 = function(self, actor, here, args, extra) {
 		if (randomNumber < 10) {
 			act("$n gobbles, 'Mang...'", false, self, null, null, constants.TO_ROOM);
 		}
-		else if (randomNumber < 20 && self.fighting) {
+		else if (randomNumber < 30 && self.fighting) {
 			act("$n points at $N and gobbles deeply, 'Die mang!", false, self, null, self.fighting, constants.TO_NOTVICT);
 			act("$n points at you and gobbles deeply, 'Die mang!'", false, self, null, self.fighting, constants.TO_VICT);
 			act("You point at $N and gobble deeply, 'Die mang!'", false, self, null, self.fighting, constants.TO_CHAR);
@@ -40,7 +40,7 @@ var script23005 = function(self, actor, here, args, extra) {
 	{
 		if(randomNumber < 10)
 			act("$n flutters its wings and gobbles, 'Mang!'", false, self, null, null, constants.TO_ROOM);
-		else if(randomNumber < 20 && self.fighting)
+		else if(randomNumber < 30 && self.fighting)
 		{
 			act("$n flutters its wings violently.", false, self, null, null, constants.TO_ROOM);
 
