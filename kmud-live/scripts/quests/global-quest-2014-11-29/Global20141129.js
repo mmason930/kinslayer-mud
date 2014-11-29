@@ -47,6 +47,7 @@ Global2014Util.prototype.lockDoors = function()
 		var room = getRoom(doorRoomVnum.vnum);
 		var dir = doorRoomVnum.dir;
 
+		room.closeDoor(dir, true);
 		room.lockDoor(dir, true);
 	});
 };
