@@ -13,22 +13,42 @@ var script23005 = function(self, actor, here, args, extra) {
 
 	var randomNumber = random(1, 100);
 
-	if(randomNumber < 10)
-	{
-		act("$n gobbles, 'Mang...'", false, self, null, null, constants.TO_ROOM);
+	if(self.vnum == 23006) {
+		if (randomNumber < 10) {
+			act("$n gobbles, 'Mang...'", false, self, null, null, constants.TO_ROOM);
+		}
+		else if (randomNumber < 20 && self.fighting) {
+			act("$n points at $N and gobbles deeply, 'Die mang!", false, self, null, self.fighting, constants.TO_NOTVICT);
+			act("$n points at you and gobbles deeply, 'Die mang!'", false, self, null, self.fighting, constants.TO_VICT);
+			act("You point at $N and gobble deeply, 'Die mang!'", false, self, null, self.fighting, constants.TO_CHAR);
+
+			waitpulse 5;
+
+			act("$n roundhouse kicks $N in the face!", false, self, null, self.fighting, constants.TO_NOTVICT);
+			act("$n roundhouse kicks you right in the face!", false, self, null, self.fighting, constants.TO_VICT);
+			act("You roundhouse kick $N right in the face!", false, self, null, self.fighting, constants.TO_CHAR);
+
+			self.fighting.affect(constants.AFF_DISORIENT, 3, 0);
+			self.fighting.send("You don't feel so great...");
+			act("$n begins wobbling around incoherently.", true, self.fighting, null, null, constants.TO_ROOM);
+
+			self.fighting.damage(random(10, 15), self);
+
+		}
 	}
-	else if(randomNumber < 20 && self.fighting)
+	else
 	{
-		act("$n points at $N and gobbles deeply, 'Die mang!", false, self, null, self.fighting, constants.TO_NOTVICT);
-		act("$n points at you and gobbles deeply, 'Die mang!'", false, self, null, self.fighting, constants.TO_VICT);
-		act("You point at $N and gobble deeply, 'Die mang!'", false, self, null, self.fighting, constants.TO_CHAR);
+		if(randomNumber < 10)
+			act("$n flutters its wings and gobbles, 'Mang!'", false, self, null, null, constants.TO_ROOM);
+		else if(randomNumber < 20 && self.fighting)
+		{
+			act("$n flutters its wings violently.", false, self, null, null, constants.TO_ROOM);
 
-		waitpulse 5;
+			waitpulse 5;
 
-		act("$n roundhouse kicks $N in the face!", false, self, null, self.fighting, constants.TO_NOTVICT);
-		act("$n roundhouse kicks you right in the face!", false, self, null, self.fighting, constants.TO_VICT);
-		act("You roundhouse kick $N right in the face!", false, self, null, self.fighting, constants.TO_CHAR);
-
-		self.fighting.damage(random(10, 15), self);
+			act("$n begins pecking at $N violently!", false, self, null, self.fighting, cosntants.TO_NOTVICT);
+			act("$n begins pecking at you violently!", false, self, null, self.fighting, constants.TO_VICT);
+			act("You begin pecking at $N violently!", false, self, null, self.fighting, constants.TO_CHAR);
+		}
 	}
 };
