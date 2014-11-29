@@ -3,6 +3,19 @@ function Global2014Util()
 	this.kingTurkeyVnum = 23006;
 	this.followerTurkeyvnum = 23005;
 	this.orbs = {};
+
+	this.issueMobVnums = {};
+
+	this.issueMobVnums[constants.RACE_HUMAN] = 1701;
+	this.issueMobVnums[constants.RACE_TROLLOC] = 8006;
+
+	this.issuesMobs = {};
+
+	this.issuedMobs[constants.RACE_HUMAN] = [];
+	this.issuedMobs[constants.RACE_TROLLOC] = [];
+
+	this.maxIssuedMobs = 7;
+
 	this.doorRoomVnums = [
 		{vnum: 33928, dir: constants.EAST},
 		{vnum: 33923, dir: constants.NORTH},
@@ -40,6 +53,19 @@ Global2014Util.prototype.unlockDoors = function()
 	});
 };
 
+Global2014Util.prototype.getNumberOfIssuedMobs = function(race)
+{
+	var counter = 0;
+
+	this.issuedMobs[race].forEach(function(mob) {
+
+		if(mob.isValid)
+			++counter;
+	});
+
+	return counter;
+};
+
 Global2014Util.prototype.lockDoors = function()
 {
 	this.doorRoomVnums.forEach(function(doorRoomVnum) {
@@ -53,6 +79,27 @@ Global2014Util.prototype.lockDoors = function()
 };
 
 global.global2014 = new Global2014Util();
+
+//Script for issuing mobs.
+var script33001 = function(self, actor, here, args, extra) {
+
+	var numberOfMobs = global.global2014.getNumberOfIssuedMobs(actor.race);
+
+	mudLog(constants.BRF, 100, true, "Mobs: " + numberOfMobs);
+
+	if(self.race != actor.race)
+		return;
+
+	if(numberOfMobs >= global.global2014.maxIssuedMobs)
+	{
+		self.say("There are already " + numberOfMobs + " units deployed. I cannot issue any more until some of them have fallen.");
+	}
+	else
+	{
+		var mob = here.loadMob(global.global2014.issueMobVnums[actor.race]);
+		global.global2014.issuedMobs[actor.race].push(mob);
+	}
+};
 
 //Script for teleporting players in and out of the zone.
 var script33000 = function(self, actor, here, args, extra) {
