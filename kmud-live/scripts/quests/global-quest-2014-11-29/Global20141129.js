@@ -119,6 +119,9 @@ var script33000 = function(self, actor, here, args, extra) {
 	{
 		var orbInfo = global.global2014.orbs[actor.race];
 
+		if(orbInfo.vnum != self.vnum)
+			return;
+
 		var destinationRoomVnum = orbInfo.openWorldRoomVnum;
 
 		if(destinationRoomVnum == actor.room.vnum)
