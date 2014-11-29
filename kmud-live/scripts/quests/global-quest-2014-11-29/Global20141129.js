@@ -3,6 +3,12 @@ function Global2014Util()
 	this.kingTurkeyVnum = 23006;
 	this.followerTurkeyvnum = 23005;
 	this.orbs = {};
+	this.doorRoomVnums = [
+		{vnum: 33928, dir: constants.EAST},
+		{vnum: 33923, dir: constants.NORTH},
+		{vnum: 33917, dir: constants.WEST},
+		{vnum: 33913, dir: constants.SOUTH}
+	];
 
 	this.orbs[constants.RACE_HUMAN] = {
 
@@ -21,6 +27,17 @@ function Global2014Util()
 
 Global2014Util.prototype.test = function()
 {
+};
+
+Global2014Util.prototype.unlockDoors = function()
+{
+	this.doorRoomVnums.forEach(function(doorRoomVnum) {
+
+		var room = getRoom(doorRoomVnum.vnum);
+		var dir = doorRoomVnum.dir;
+
+		room.unlockDoor(dir, true);
+	});
 };
 
 global.global2014 = new Global2014Util();
