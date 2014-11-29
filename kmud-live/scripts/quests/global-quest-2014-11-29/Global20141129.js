@@ -208,7 +208,7 @@ var script23005 = function(self, actor, here, args, extra) {
 		{
 			global.global2014.timeOfLastGlobal = new Date();
 
-			self.global("Go pick your dates for the upcoming global event, so you can try and fail at killing me: http://whenisgood.net/mbf8ycg");
+			self.comm("global Go pick your dates for the upcoming global event, so you can try and fail at killing me: http://whenisgood.net/mbf8ycg");
 		}
 
 		if (randomNumber < 10) {
