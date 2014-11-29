@@ -28,10 +28,11 @@ var script23005 = function(self, actor, here, args, extra) {
 			act("$n roundhouse kicks you right in the face!", false, self, null, self.fighting, constants.TO_VICT);
 			act("You roundhouse kick $N right in the face!", false, self, null, self.fighting, constants.TO_CHAR);
 
-			self.fighting.affect(constants.AFF_DISORIENT, 3, 0);
-			self.fighting.send("You don't feel so great...");
-			act("$n begins wobbling around incoherently.", true, self.fighting, null, null, constants.TO_ROOM);
-
+			if(!self.fighting.affectedBy(constants.AFF_DISORIENT)) {
+				self.fighting.affect(constants.AFF_DISORIENT, 3, 0);
+				self.fighting.send("You don't feel so great...");
+				act("$n begins wobbling around incoherently.", true, self.fighting, null, null, constants.TO_ROOM);
+			}
 			self.fighting.damage(random(10, 15), self);
 
 		}
