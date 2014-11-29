@@ -9,7 +9,7 @@ function Global2014Util()
 	this.issueMobVnums[constants.RACE_HUMAN] = 1701;
 	this.issueMobVnums[constants.RACE_TROLLOC] = 8006;
 
-	this.issuesMobs = {};
+	this.issuedMobs = {};
 
 	this.issuedMobs[constants.RACE_HUMAN] = [];
 	this.issuedMobs[constants.RACE_TROLLOC] = [];
