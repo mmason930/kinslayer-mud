@@ -37,7 +37,7 @@ function Global2014Util()
 		closedWorldRoomVnum: 33948
 	};
 
-	var switches = {};
+	this.switches = {};
 
 	this.switches[33920] = {switchedOn: false, lastSwitched: new Date() } //SE
 	this.switches[33926] = {switchedOn: false, lastSwitched: new Date() } //SW
