@@ -37,7 +37,7 @@ function Global2014Util()
 		"An ancient pedestal is here, embedded in the ground. (WEAK)", //25 - 49
 		"An ancient pedestal is here, embedded in the ground. (STABLE)", //50 - 74
 		"An ancient pedestal is here, embedded in the ground. (STRONG)", //75 - 99
-		"An ancient pedestal is here, embedded in the ground. (FULL)", //100
+		"An ancient pedestal is here, embedded in the ground. (FULL)" //100
 	];
 }
 
@@ -109,6 +109,8 @@ Global2014Util.prototype.endEvent = function()
 				}	
 			}
 		}
+
+		/***
 		setTimeout(20, function(){
 			self.dsPlayers.concat(self.lsPlayers).forEach(function(player) {
 				
@@ -120,8 +122,9 @@ Global2014Util.prototype.endEvent = function()
 			});
 			mudLog(2,100,"Koradin has ended the global event.");
 		});
+		 ***/
 	});
-}
+};
 
 Global2014Util.prototype.setupPedestalPointTimeout = function()
 {
