@@ -105,13 +105,14 @@ var script33002 = function(self, actor, here, args, extra) {
 
 	var vArgs = getArgList(args);
 
+	_block;
 	if(vArgs.length < 2)
 	{
 		actor.send("Flip what?");
 		return;
 	}
 
-	if(vArgs[0].toLowerCase() == "switch")
+	if(vArgs[1].toLowerCase() == "switch")
 	{
 		var roomVnum = self.room.vnum;
 
