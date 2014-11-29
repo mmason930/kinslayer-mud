@@ -40,6 +40,17 @@ Global2014Util.prototype.unlockDoors = function()
 	});
 };
 
+Global2014Util.prototype.lockDoors = function()
+{
+	this.doorRoomVnums.forEach(function(doorRoomVnum) {
+
+		var room = getRoom(doorRoomVnum.vnum);
+		var dir = doorRoomVnum.dir;
+
+		room.lockDoor(dir, true);
+	});
+};
+
 global.global2014 = new Global2014Util();
 
 //Script for teleporting players in and out of the zone.
