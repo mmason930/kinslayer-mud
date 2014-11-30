@@ -1,4 +1,4 @@
-function Global2014Util()
+function GlobalNov2014Util()
 {
 	this.kingTurkeyVnum = 23006;
 	this.followerTurkeyvnum = 23005;
@@ -47,11 +47,11 @@ function Global2014Util()
 	this.timeOfLastGlobal = null;
 }
 
-Global2014Util.prototype.test = function()
+GlobalNov2014Util.prototype.test = function()
 {
 };
 
-Global2014Util.prototype.unlockDoors = function()
+GlobalNov2014Util.prototype.unlockDoors = function()
 {
 	this.doorRoomVnums.forEach(function(doorRoomVnum) {
 
@@ -63,7 +63,7 @@ Global2014Util.prototype.unlockDoors = function()
 	});
 };
 
-Global2014Util.prototype.getNumberOfIssuedMobs = function(race)
+GlobalNov2014Util.prototype.getNumberOfIssuedMobs = function(race)
 {
 	var counter = 0;
 
@@ -76,7 +76,7 @@ Global2014Util.prototype.getNumberOfIssuedMobs = function(race)
 	return counter;
 };
 
-Global2014Util.prototype.lockDoors = function()
+GlobalNov2014Util.prototype.lockDoors = function()
 {
 	this.doorRoomVnums.forEach(function(doorRoomVnum) {
 
@@ -88,7 +88,7 @@ Global2014Util.prototype.lockDoors = function()
 	});
 };
 
-Global2014Util.prototype.getNumberOfSwitchesOn = function()
+GlobalNov2014Util.prototype.getNumberOfSwitchesOn = function()
 {
 	var counter = 0;
 
@@ -101,7 +101,7 @@ Global2014Util.prototype.getNumberOfSwitchesOn = function()
 	return counter;
 };
 
-global.global2014 = new Global2014Util();
+global.globalNov2014 = new GlobalNov2014Util();
 
 //Flip Switch
 var script33002 = function(self, actor, here, args, extra) {
@@ -119,25 +119,25 @@ var script33002 = function(self, actor, here, args, extra) {
 	{
 		var roomVnum = self.room.vnum;
 
-		var switchInfo = global.global2014.switches[roomVnum];
+		var switchInfo = global.globalNov2014.switches[roomVnum];
 
 		switchInfo.switchedOn = !switchInfo.switchedOn;
 		switchInfo.lastSwitched = new Date();
 
-		var numberOn = global.global2014.getNumberOfSwitchesOn();
+		var numberOn = global.globalNov2014.getNumberOfSwitchesOn();
 
 		act("$n flips the switch " + (switchInfo.switchedOn ? "on" : "off") + ".", false, actor, null, null, constants.TO_ROOM);
 		act("You flips the switch " + (switchInfo.switchedOn ? "on" : "off") + ".", false, actor, null, null, constants.TO_CHAR);
 
 		if(numberOn == 4)
 		{
-			global.global2014.unlockDoors();
+			global.globalNov2014.unlockDoors();
 
 			self.room.zecho("You hear the loud bang of opening doors nearby.");
 		}
 		else if(numberOn == 0)
 		{
-			global.global2014.lockDoors();
+			global.globalNov2014.lockDoors();
 
 			self.room.zecho("You hear the loud bang of closing doors nearby.");
 		}
@@ -147,21 +147,21 @@ var script33002 = function(self, actor, here, args, extra) {
 //Script for issuing mobs.
 var script33001 = function(self, actor, here, args, extra) {
 
-	var numberOfMobs = global.global2014.getNumberOfIssuedMobs(actor.race);
+	var numberOfMobs = global.globalNov2014.getNumberOfIssuedMobs(actor.race);
 
 	mudLog(constants.BRF, 100, "Mobs: " + numberOfMobs);
 
 	if(self.race != actor.race)
 		return;
 
-	if(numberOfMobs >= global.global2014.maxIssuedMobs)
+	if(numberOfMobs >= global.globalNov2014.maxIssuedMobs)
 	{
 		self.say("There are already " + numberOfMobs + " units deployed. I cannot issue any more until some of them have fallen.");
 	}
 	else
 	{
-		var mob = here.loadMob(global.global2014.issueMobVnums[actor.race]);
-		global.global2014.issuedMobs[actor.race].push(mob);
+		var mob = here.loadMob(global.globalNov2014.issueMobVnums[actor.race]);
+		global.globalNov2014.issuedMobs[actor.race].push(mob);
 
 		mob.comm("follow " + actor.name);
 	}
@@ -181,7 +181,7 @@ var script33000 = function(self, actor, here, args, extra) {
 
 	if(vArgs[1].toLowerCase() == "orb")
 	{
-		var orbInfo = global.global2014.orbs[actor.race];
+		var orbInfo = global.globalNov2014.orbs[actor.race];
 
 		if(orbInfo.vnum != self.vnum)
 			return;
@@ -204,9 +204,9 @@ var script23005 = function(self, actor, here, args, extra) {
 
 	if(self.vnum == 23006) {
 
-		if( global.global2014.timeOfLastGlobal == null || (new Date().getTime() - global.global2014.timeOfLastGlobal.getTime()) >= (1000 * 60 * 60) )
+		if( global.globalNov2014.timeOfLastGlobal == null || (new Date().getTime() - global.globalNov2014.timeOfLastGlobal.getTime()) >= (1000 * 60 * 60) )
 		{
-			global.global2014.timeOfLastGlobal = new Date();
+			global.globalNov2014.timeOfLastGlobal = new Date();
 
 			self.comm("global Go pick your dates for the upcoming global event, so you can try and fail at killing me: http://whenisgood.net/mbf8ycg");
 		}
