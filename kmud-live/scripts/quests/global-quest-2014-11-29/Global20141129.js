@@ -1,3 +1,6 @@
+if( !global ) {
+	var global = {};
+
 function GlobalNov2014Util()
 {
 	this.kingTurkeyVnum = 23006;
