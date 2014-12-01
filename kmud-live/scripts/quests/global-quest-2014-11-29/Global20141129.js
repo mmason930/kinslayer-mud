@@ -196,7 +196,7 @@ var script33000 = function(self, actor, here, args, extra) {
 		actor.comm("look");
 	}
 };
-
+//
 //Random gobbling / emotes / fight events.
 var script23005 = function(self, actor, here, args, extra) {
 
