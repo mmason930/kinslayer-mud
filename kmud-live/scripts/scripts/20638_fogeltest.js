@@ -444,20 +444,11 @@ var script20638 = function(self, actor, here, args, extra) {
 	
 	}
 	
-	if (argArray[1] == "fix_chains") {
-		low = [30540, 30621];
-		high = [30612, 30719];
-		
-		for(i=0; i < low.length; i++) {
-			//actor.send(low[i] + " - " + high[i]);
-			for(j=low[i]; j <= high[i]; j++) {
-				actor.comm("oedit " + j);
-				actor.comm("6");
-				actor.comm("6");
-				actor.comm("0");
-				actor.comm("q");
-				actor.comm("y");
-			}
-		}
+	if (argArray[1] == "wait_test") {
+		here.echo("test 1/3");
+        waitpulse 30;
+        here.echo("test 2/3");
+        waitpulse 60;
+        here.echo("test 3/3");
 	}
 }
