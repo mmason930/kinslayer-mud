@@ -45,15 +45,27 @@ var script20835 = function(self, actor, here, args, extra) {
 	waitpulse 1;
 	for (var _autoKey in room.items) {
 		var item = room.items[_autoKey];
-	if (item == self)
-	trigger = true;
-	}
-	if (trigger == false)
-	return;
+        if (item == self)
+            trigger = true;
+        }
+    }
+	if (trigger == false) {
+        return;
+    }
     room.echo(msg1);
-    setTimeout(30, function(vArgs){vArgs[0].echo(vArgs[1]);}, [room,msg2]));
-    setTimeout(60, function(vArgs){vArgs[0].echo(vArgs[1]);}, [room,msg3]));
-    setTimeout(60, function(vArgs){vArgs[0].echo(vArgs[1]); vArgs[0].loadObj(vArgs[2]);}, [room,msg4,end_obj]));
-    room.echo("timeouts set");
+    setTimeout(30, echoMsg, [room,msg2]));
+    setTimeout(60, echoMsg, [room,msg3]));
+    setTimeout(60, echoAndLoad, [room,msg4,end_obj]));
 	self.extract();
+    
+    function echoMsg(vArgs) {
+        var room = vArgs[0];
+        room.echo(vArgs[1]);
+    }
+    
+    function echoAndLoad(vArgs) {
+        echoMsg(vArgs);
+        var room = vArgs[0];
+        room.loadObj(vArgs[2]);
+    }
 }
