@@ -238,6 +238,13 @@
 		 */
 		get id() {
 			return this.databaseID;
+		},
+    
+    /**
+		 * Alias for name.
+		 */
+		get questName() {
+			return this.name;
 		}
 	};
 
