@@ -3,7 +3,6 @@ var script20835 = function(self, actor, here, args, extra) {
 	//Koradin - April 2010
 	var room = actor.room;
 	var trigger = false;
-    room.echo('starting!');
 	for (var _autoKey in room.items) {
 		var thing = room.items[_autoKey];
 	if (thing.vnum == 9022 && self.vnum == 20836)
