@@ -51,13 +51,9 @@ var script20835 = function(self, actor, here, args, extra) {
 	if (trigger == false)
 	return;
 	self.moveToRoom(getRoom(20899));
-	room.echo(msg1);
-	waitpulse 30;
-	room.echo(msg2);
-	waitpulse 60;
-	room.echo(msg3);
-	waitpulse 60;
-	room.echo(msg4);
-	room.loadObj(end_obj);
+    room.echo(msg1);
+    setTimeout(30, function(vArgs){vArgs[0].echo(vArgs[1]);}, [room,msg2]));
+    setTimeout(60, function(vArgs){vArgs[0].echo(vArgs[1]);}, [room,msg3]));
+    setTimeout(60, function(vArgs){vArgs[0].echo(vArgs[1]); vArgs[0].loadObj(vArgs[2]);}, [room,msg4,end_obj]));
 	self.extract();
 }
