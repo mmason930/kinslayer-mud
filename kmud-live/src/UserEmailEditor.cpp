@@ -112,6 +112,8 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 			userEmailAddressConfirmation = new UserEmailAddressConfirmation();
 			userEmailAddressConfirmation->setUserEmailAddressId(userEmailAddress->getId());
 			userEmailAddressConfirmation->setConfirmationKey(StringUtil::getRandomString(20));
+
+			CharacterUtil::putUserEmailAddressConfirmation(gameDatabase, userEmailAddressConfirmation);
 		}
 
 		CharacterUtil::sendUserEmailAddressConfirmationEmail(gameDatabase, descriptor->character, userEmailAddress, userEmailAddressConfirmation);
