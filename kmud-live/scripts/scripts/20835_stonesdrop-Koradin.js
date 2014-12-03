@@ -45,7 +45,7 @@ var script20835 = function(self, actor, here, args, extra) {
 	waitpulse 1;
 	for (var _autoKey in room.items) {
 		var item = room.items[_autoKey];
-        if (item == self)
+        if (item == self {
             trigger = true;
         }
     }
