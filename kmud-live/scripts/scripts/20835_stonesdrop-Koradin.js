@@ -50,7 +50,7 @@ var script20835 = function(self, actor, here, args, extra) {
         }
     }
 	if (trigger == false) {
-        return false;
+        return;
     }
     room.echo(msg1);
     setTimeout(30, echoMsg, [room,msg2]));
