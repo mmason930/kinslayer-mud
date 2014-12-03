@@ -53,9 +53,9 @@ var script20835 = function(self, actor, here, args, extra) {
         return;
     }
     room.echo(msg1);
-    setTimeout(30, echoMsg, [room,msg2]));
-    setTimeout(60, echoMsg, [room,msg3]));
-    setTimeout(60, echoAndLoad, [room,msg4,end_obj]));
+    setTimeout(30, echoMsg, [room,msg2]);
+    setTimeout(60, echoMsg, [room,msg3]);
+    setTimeout(60, echoAndLoad, [room,msg4,end_obj]);
 	self.extract();
     
     function echoMsg(vArgs) {
