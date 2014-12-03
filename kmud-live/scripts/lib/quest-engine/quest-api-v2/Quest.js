@@ -336,7 +336,7 @@
 			for (var i = 0, quest; quest = _questsById[i++];) {
 				if (quest.hasBegun(actor) || quest.hasCompleted(actor)) {
 					ownQuests[quest.databaseID] = quest;
-					mudLog(constants.BRF, 104, "Caching own quest " + quest.databaseID + " for " + actor.name);
+					//mudLog(constants.BRF, 104, "Caching own quest " + quest.databaseID + " for " + actor.name);
 				}
 			}
 		}
