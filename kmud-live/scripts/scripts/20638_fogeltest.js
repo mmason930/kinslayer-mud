@@ -174,7 +174,7 @@ var script20638 = function(self, actor, here, args, extra) {
             if (argArray[2] == "purge") {
                 var obj = null;
                 obj = loadSingleObjectFromDatabase(row.get('object_id'));
-                actor.send(obj.sdesc);
+                actor.send(obj.name);
             }
 		}
 	}
