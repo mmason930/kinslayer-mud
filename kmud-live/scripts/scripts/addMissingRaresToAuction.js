@@ -1,6 +1,11 @@
 var addMissingRaresToAuction =  function(self, actor, here, args, extra) {
+    var date = new Date();
+    // Run every Thursday
+    if (date.getDay() != 4) {
+        return;
+    }
     // Purge all inactive RARE items
-    /*var query = '';
+    var query = '';
     query = "SELECT u.username, u.last_logon, o.vnum, o.id AS object_id, op.sdesc, o.top_level_holder_type FROM objects o "
                 + "LEFT JOIN users u ON u.user_id = o.top_level_holder_id "
                 + "LEFT JOIN obj_protos op ON o.vnum = op.vnum "
@@ -30,7 +35,7 @@ var addMissingRaresToAuction =  function(self, actor, here, args, extra) {
         var row = result.getRow;
         rareItems.push(row.get("vnum"));
     }
-    */
+    
     var auctionableRareItems = [
         1611,   // a platinum mace with steel spikes
         2406,   // a golden etched obsidian morning star
