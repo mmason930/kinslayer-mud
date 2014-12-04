@@ -161,16 +161,16 @@ var script20638 = function(self, actor, here, args, extra) {
 	}*/
 	if( argArray[1] == "inactive_rares" ) {
         var query = '';
-        query = "SELECT u.username, u.last_logon, o.vnum, o.id AS object_id, op.sdesc FROM users u "
-                    + "LEFT JOIN objects o ON u.user_id = o.holder_id "
+        query = "SELECT u.username, u.last_logon, o.vnum, o.id AS object_id, op.sdesc, o.top_level_holder_type FROM objects o "
+                    + "LEFT JOIN users u ON u.user_id = o.top_level_holder_id "
                     + "LEFT JOIN obj_protos op ON o.vnum = op.vnum "
                     + "WHERE op.extra_flags & ( 1 <<15 ) "
-                    + "AND u.last_logon <= DATE_SUB( CURDATE( ) , INTERVAL 30 DAY ) ";
+                    + "AND (u.last_logon <= DATE_SUB( CURDATE( ) , INTERVAL 30 DAY )  OR o.top_level_holder_type == 'O'";
 		var result = sqlQuery(query);
 		
 		while( result.hasNextRow ) {
 			var row = result.getRow;
-			actor.send(row.get('username') + "    " + row.get('last_logon') + "    " + row.get('vnum')+ "    " + row.get('sdesc') + "    " + row.get('object_id'));
+			actor.send(row.get('username') + "    " + row.get('last_logon') + "    " + row.get('vnum')+ "    " + row.get('sdesc') + "    " + row.get('object_id') + "    " + row.get('top_level_holder_type'));
             if (argArray[2] == "purge") {
                 var obj = null;
                 obj = loadSingleObjectFromDatabase(row.get('object_id'));
