@@ -165,7 +165,7 @@ var script20638 = function(self, actor, here, args, extra) {
                     + "LEFT JOIN users u ON u.user_id = o.top_level_holder_id "
                     + "LEFT JOIN obj_protos op ON o.vnum = op.vnum "
                     + "WHERE op.extra_flags & ( 1 <<15 ) "
-                    + "AND (u.last_logon <= DATE_SUB( CURDATE( ) , INTERVAL 30 DAY )  OR o.top_level_holder_type == 'O')";
+                    + "AND (u.last_logon <= DATE_SUB( CURDATE( ) , INTERVAL 30 DAY )  OR o.top_level_holder_type = 'O')";
 		var result = sqlQuery(query);
 		
 		while( result.hasNextRow ) {
