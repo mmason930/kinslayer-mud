@@ -1,4 +1,4 @@
-﻿var Quest = (function(Q) {
+﻿Quest = (function(Q) {
 	var existingQuests = Q.allQuests || [];
 	var QVAL_PREFIX = "QUEST_";
 	var COMPLETED_STR = "_NR-COMPLETED";
@@ -16,7 +16,10 @@
 		_playerQuests[actor.id][quest.databaseID] = quest;
 	}
 
-	function Quest() {
+  /**
+   * @constructs Quest
+   */
+	function _Quest() {
 		this.name = "";
 		this.summary = "";
 		this.databaseID = 0;
@@ -42,7 +45,7 @@
 		this.extraChecks = [];
 	}
 
-	Quest.prototype = {
+	_Quest.prototype = /** @lends Quest.prototype */{
 		/**********************
 		 * METHODS
 		 **********************/
@@ -271,7 +274,7 @@
 	 * @param {Quest} quest The quest to add.
 	 * @param {bool} commit If true, the quest's data will also be committed to the database.
 	 */
-	Quest.addQuest = function(quest, commit) {
+	_Quest.addQuest = function(quest, commit) {
 		// Do the save first, so we ensure the databaseID is set
 		if (commit)
 			saveQuest(quest);
@@ -290,21 +293,21 @@
 	 * @param {Quest} quest The quest to remove.
 	 * @param {bool} commit If true, the quest will be deleted from teh database.
 	 */
-	Quest.deleteQuest = function(quest, commit) {
+	_Quest.deleteQuest = function(quest, commit) {
 		_.pull(_questsById, quest);
 		_.pull(_questsByName, quest);
 		if (commit)
 			deleteQuestFromDatabase(quest);
 	};
 
-	Quest.clearQuests = function() {
+	_Quest.clearQuests = function() {
 		_questsById = [];
 		_questsByName = [];
 
 		Quest.getById.cache = {};
 	};
 
-	Quest.getById = _.memoize(function(id) {
+	_Quest.getById = _.memoize(function(id) {
 		// Memoize this function to improve performance: id->quest relationship should never change
 		var keyWrap = { databaseID: id };
 		var arr = _questsById;
@@ -314,7 +317,7 @@
 		return (getKey(candidate) == getKey(keyWrap) ? candidate : null);
 	}, _.identity);
 
-	Quest.getByName = function(name) {
+	_Quest.getByName = function(name) {
 		if (!name)
 			return null;
 
@@ -326,7 +329,7 @@
 		return (getKey(candidate) == getKey(keyWrap) ? candidate : null);
 	};
 
-	Quest.getByMaster = function(vnum) {
+	_Quest.getByMaster = function(vnum) {
 		return Quest.allQuests.filter(function(quest) {
 			return _.contains(quest.ownerVnums, vnum);
 		});
@@ -335,7 +338,7 @@
 	/**
 	 * @returns {Quest[]} An array of quests that actor has either completed or at least begun.
 	 */
-	Quest.getQuestsFor = function(actor) {
+	_Quest.getQuestsFor = function(actor) {
 		var ownQuests = _playerQuests[actor.id];
 		// We don't have a cached version of their quests, so build it
 		if (!ownQuests) {
@@ -350,17 +353,17 @@
 		return _.values(ownQuests);
 	};
 
-	Quest.__defineGetter__("allQuests", function() {
+	_Quest.__defineGetter__("allQuests", function() {
 		return _.clone(_questsByName);
 	});
 
 	for (var i = 0, q; q = existingQuests[i++];)
-		Quest.addQuest(q);
+		_Quest.addQuest(q);
 
 	// Mixin existing properties
 	for (var p in Q) {
-		if (Q.hasOwnProperty(p) && !Quest.hasOwnProperty(p))
-			Quest[p] = Q[p];
+		if (Q.hasOwnProperty(p) && !_Quest.hasOwnProperty(p))
+			_Quest[p] = Q[p];
 	}
 
 	return Quest;

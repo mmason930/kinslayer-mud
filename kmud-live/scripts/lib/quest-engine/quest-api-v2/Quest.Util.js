@@ -1,10 +1,17 @@
-﻿var Quest = (function(Quest) {
+﻿if (typeof(Quest) === "undefined")
+  Quest = {};
+
+/**
+ * @namespace Quest.Util
+ */
+Quest.Util = (function() {
 	/**
 	 * This namespace is mainly used to define functionality that involves sending output to the player.
 	 * Consolidating these functions here means less clutter in the core Quest classes, and easier
 	 * maintenance of the cosmetic aspects of the questing system.
+   * @lends Quest.Util
 	 */
-	Quest.Util = {
+	var Util = {
 		/**
 		 * Attempts to begin the quest for actor. Messages are only sent if questMaster parameter
 		 * is present. This method assumes quest.canAccess(actor) is true.
@@ -259,7 +266,7 @@
 		},
 
 		/**
-		 * @returns string A string containing the text for the quest's journal entry.
+		 * @returns {string} - A string containing the text for the quest's journal entry.
 		 */
 		getJournalEntry: function(actor, quest) {
 			getCharCols(actor, constants.CL_OFF);
@@ -322,5 +329,5 @@
 		}
 	};
 
-	return Quest;
-})(typeof Quest == "undefined" ? {} : Quest);
+	return Util;
+})();

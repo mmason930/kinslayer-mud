@@ -1,16 +1,21 @@
-﻿var Quest = (function(Quest) {
+﻿if (typeof(Quest) === "undefined")
+  Quest = {};
+
+Quest.Task = (function() {
 	var TASK_PREFIX = "_TASK_";
 	/**
-	 * Creates a new Quest task.
+   * Creates a new Quest task.
 	 *
-	 * @param {number|Quest.Task} idOrSource Either the id of the task to create, or an existing task object to copy values from.
+	 * @param {number|Task} idOrSource Either the id of the task to create, or an existing task object to copy values from.
 	 * @param {Quest} quest The Quest with which this task is associated.
 	 * @param {string} name The text/description of the task. E.g. fetch some bread.
-	 * @param {string} _dynamicProgress Pass null if task uses a qval to track progress. A string containing JS code that, when evaluated, returns a function which takes 'actor' as an argument, and returns a number indicating the actor's current progress for this task. See itemCount function.
+	 * @param {string} dynamicProgress Pass null if task uses a qval to track progress. A string containing JS code that, when evaluated, returns a function which takes 'actor' as an argument, and returns a number indicating the actor's current progress for this task. See itemCount function.
 	 * @param {any} completedValue The progress value indicating the task is completed. The passed in type can be anything, as long as eval(completedValue) is a number.
 	 * @param {number} unlockerTaskIndex The index of the task which must be completed before this one becomes available. -1 means this task is never locked.
-	 */
-	Quest.Task = function(idOrSource, quest, name, _dynamicProgress, completedValue, unlockerTaskIndex) {
+	 *
+   * @constructs
+   */
+	function Task(idOrSource, quest, name, dynamicProgress, completedValue, unlockerTaskIndex) {
 		// Allow instantiating task from another task object
 		if (arguments.length == 1) {
 			var source = idOrSource;
@@ -25,12 +30,13 @@
 		this.id = idOrSource;
 		this.quest = quest;
 		this.name = name;
-		this._dynamicProgress = _dynamicProgress;
+		this._dynamicProgress = dynamicProgress;
 		this._completedExpr = completedValue;
 		this.unlockerTaskIndex = parseInt(unlockerTaskIndex);
 	};
 
-	Quest.Task.prototype = {
+
+	Task.prototype = /** @lends Quest.Task.prototype */ {
 		/**
 		 * METHODS
 		 */
@@ -76,12 +82,15 @@
 		},
 
 		/**
-		 *  Returns true if actor has not completed this task and it is listed in their journal.
+		 *  @returns {bool} - True if actor has not completed this task and it is listed in their journal.
 		 */
 		isInProgress: function(actor) {
 			return this.quest.hasBegun(actor) && this.hasUnlocked(actor) && !this.getStatus(actor).completed;
 		},
 
+    /**
+     * @returns {bool} - True if actor has completed this task
+     */
 		hasCompleted: function(actor) {
 			return this.getProgress(actor) >= this.completedValue;
 		},
@@ -92,23 +101,39 @@
 		hasUnlocked: function(actor) {
 			return this.unlockerTaskIndex < 0 || this.quest.tasks[this.unlockerTaskIndex].getStatus(actor).completed;
 		},
-
+    
+		/**
+		 * @returns {number} Value indicating the actor's progress for this task.
+		 */
 		getProgress: function(actor) {
 			if (this.isQvalTask) {
 				return actor.quest(this.qvalStr);
 			}
 			return this.progressFunction(actor);
 		},
-
+    
+		/**
+		 * @typedef {Object}  Quest.Task.Status - Various information detailing the actor's progress for this task
+     * @property {bool}   started - True if some progress has been made on this task
+     * @property {number} progress - Value indicating current progress made on this task
+     * @property {bool}   completed - True if this task has been completed
+		 */
+     
+     /**
+      * @returns {Quest.Task.Status} status - An object containing information about the actor's progress for this task.
+      */
 		getStatus: function(actor) {
 			var prog = this.getProgress(actor);
 			return {
-				started: prog > 0,										// Some progress has been made on this task
+				started: prog > 0,										          // Some progress has been made on this task
 				progress: Math.min(prog, this.completedValue),	// The current progress made on this task
-				completed: prog >= this.completedValue				// Value indicating whether the task is complete
+				completed: prog >= this.completedValue				  // Value indicating whether the task is complete
 			};
 		},
 
+    /**
+     * Restores the actor's progress back to zero. Only relevant for qval tasks.
+     */
 		resetProgress: function(actor) {
 			if (this.isQvalTask) {
 				actor.qval(this.qvalStr, 0);
@@ -118,6 +143,7 @@
 		/**
 		 * PROPERTIES
 		 */
+    
 		get dependentTasks() {
 			var _this = this;
 			var index = this.quest.tasks.indexOf(this);
@@ -148,7 +174,7 @@
 	};
 
 	return Quest;
-})(typeof Quest == "undefined" ? {} : Quest);
+})(Quest);
 
 // Reload all Quests to ensure prototypes aren't stale
 loadAllQuests();
