@@ -80,6 +80,11 @@
 			if (this.canRepeat(actor)) {
 				this.resetTasks(actor);
 			}
+      else {
+        // Precautionary check to prevent any weird issues where a quest might be completed
+        // more than the max times, allowing for infinite repeat
+        completedCount = this.maxCompletions;
+      }
 
 			// Make sure this quest is cached in actor's "own quests"
 			cacheQuest(actor, this);
