@@ -174,10 +174,11 @@ var script20638 = function(self, actor, here, args, extra) {
             if (argArray[2] == "purge") {
                 var obj = null;
                 obj = loadSingleObjectFromDatabase(row.get('object_id'));
-                actor.send(obj.name);
+                obj.moveToChar(actor);
             }
 		}
 	}
+    
 	if( argArray[1] == "find_rares" ) {
 		var allQuery = "SELECT obj_protos.sdesc, obj_protos.vnum " +
 						"FROM obj_protos " +
