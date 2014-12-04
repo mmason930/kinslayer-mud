@@ -442,4 +442,54 @@ var script20638 = function(self, actor, here, args, extra) {
         waitpulse 60;
         here.echo("test 3/3");
 	}
+    
+    if (argArray[1] == "rare_auction_load") {
+        var auctionableRareItems = [
+            1611,   // a platinum mace with steel spikes
+            2406,   // a golden etched obsidian morning star
+            1335,   // a giant obsidian-studded bastard sword
+            1334,   // a platinum handled serrated long blade
+            1511,   // a gold headed double-bladed battle axe
+            1121,   // a two-fisted pike with a bronzed steel shaft
+            21792,  // a set of Sharan-marked boots
+            21793,  // a set of Sharan-marked vambraces
+            21794,  // a plumed ebony burgonet with Sharan markings
+            21795,  // a pair of Sharan-marked steel-reinforced ebony gauntlets
+            21796,  // a pair of Sharan-marked ebony greaves
+            21797,  // a Sharan-marked, steel-reinforced ebony leather belt
+            21798,  // Sharan-marked, ebony pauldrons
+            21799,  // a Sharan-emblazoned cuirass
+            1416    // a sharp dagger of obsidian
+        ];
+        
+        // Load items for auction
+        for each (var vnum in auctionableRareItems) {
+            var obj = getObjProto(vnum);
+            if (obj.count < obj.max) {
+                // Roll some dice, can load up to as many of this item as are not in the game
+                for (var i=0; i < (obj.max-obj.count); i++) {
+                    // 50% chance of loading item
+                    if (random(0, 9) < 5) {
+                        self.load_obj(vnum);
+                    }
+                }
+            }
+        }
+        
+        // Load items into auction
+        for each (var item in self.inventory) {
+            // Flip a coin and decide which race gets the auction
+            var auction_id = random(1, 2);
+            var owner_id = null;
+            if (auction_id == 1) {
+                owner_id = 37000;
+            } else {
+                owner_id = 37001;
+            }
+            // Insert item to auction
+            var insertSql = "INSERT INTO auctionItem (auction_id, object_id, owner_id, end_time, starting_price, buyout_price, active, timestamp) "
+                                + "VALUES('"+auction_id+", '"+item.id+"', "+owner_id+", "+(time()+604800)+", "+item.cost+", "+item.cost*2+", 1, "+time()+")";
+            var result = sqlQuery(insertSql);
+        }
+    }
 }
