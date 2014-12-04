@@ -95,11 +95,3 @@ JSObject.prototype.isRetooled = function()
 		return true;
 	}
 };
-
-JSObject.prototype.numExists = function()
-{
-    var sql = "SELECT COUNT(vnum) as total FROM objects WHERE vnum="+this.vnum;
-    var result = sqlQuery(sql);
-    var row = result.getRow;
-    return row.get("total");
-}
