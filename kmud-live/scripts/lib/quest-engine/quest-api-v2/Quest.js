@@ -83,7 +83,9 @@
 
 			// Make sure this quest is cached in actor's "own quests"
 			cacheQuest(actor, this);
-
+      
+      mudLog(constants.BRF, 100, actor.name + " completed quest: " + this.name);
+      
 			return this.maxCompletions - completedCount;
 		},
 
