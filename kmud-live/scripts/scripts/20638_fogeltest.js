@@ -470,7 +470,7 @@ var script20638 = function(self, actor, here, args, extra) {
                 for (var i=0; i < (obj.max-obj.count); i++) {
                     // 50% chance of loading item
                     if (random(0, 9) < 5) {
-                        actor.load_obj(vnum);
+                        actor.loadObj(vnum);
                     }
                 }
             }
