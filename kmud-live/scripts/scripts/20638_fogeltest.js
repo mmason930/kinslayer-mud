@@ -162,8 +162,8 @@ var script20638 = function(self, actor, here, args, extra) {
 	if( argArray[1] == "inactive_rares" ) {
         var query = '';
         if (argArray[2] == "list") {
-            query = "SELECT s.username, s.last_login, s.vnum, s.object_id FROM "
-                            + "(SELECT u.username, MAX(ul.login_datetime) AS last_login, o.vnum, o.id AS object_id FROM users u JOIN userLogin ul ON u.user_id = ul.user_id JOIN objects o ON u.user_id = o.holder_id "
+            query = "SELECT s.username, s.last_login, s.vnum, s.object_id, s.sdesc FROM "
+                            + "(SELECT u.username, MAX(ul.login_datetime) AS last_login, o.vnum, o.id AS object_id, op.sdesc FROM users u JOIN userLogin ul ON u.user_id = ul.user_id JOIN objects o ON u.user_id = o.holder_id JOIN obj_protos op ON o.vnum=op.vnum"
                             + "WHERE (o.vnum='1300' OR o.vnum='10994' OR o.vnum='2405' OR o.vnum='1322' OR o.vnum='2609' OR o.vnum='1911' OR o.vnum='1708' "
                             + " OR o.vnum='1401' OR o.vnum='1400' OR o.vnum='1299' OR o.vnum='1416' OR (o.vnum >= '21792' AND o.vnum <= '21799') OR o.vnum='611' "
                             + " OR o.vnum='1100' OR o.vnum='2501' OR o.vnum='2500' OR o.vnum='21476' OR o.vnum='1016') "
@@ -192,7 +192,7 @@ var script20638 = function(self, actor, here, args, extra) {
 		
 		while( result.hasNextRow ) {
 			var row = result.getRow;
-			actor.send(row.get('username') + " " + row.get('last_login') + " " + row.get('vnum')+ " " + row.get('object_id'));
+			actor.send(row.get('username') + "    " + row.get('last_login') + "    " + row.get('vnum')+ "    " + row.get('sdesc') + "    " + row.get('object_id'));
 		}
 	}
 	if( argArray[1] == "find_rares" ) {
