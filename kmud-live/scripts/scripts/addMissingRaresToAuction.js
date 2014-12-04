@@ -1,4 +1,4 @@
-var purgeInactiveRares =  function(self, actor, here, args, extra) {
+var addMissingRaresToAuction =  function(self, actor, here, args, extra) {
     // Purge all inactive RARE items
     /*var query = '';
     query = "SELECT u.username, u.last_logon, o.vnum, o.id AS object_id, op.sdesc, o.top_level_holder_type FROM objects o "
