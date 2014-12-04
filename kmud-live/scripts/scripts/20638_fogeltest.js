@@ -192,7 +192,7 @@ var script20638 = function(self, actor, here, args, extra) {
 		
 		while( result.hasNextRow ) {
 			var row = result.getRow;
-			actor.send(row.get('username') + " " + row.get('last_logon') + " " + row.get('vnum')+ " " + row.get('id'));
+			actor.send(row.get('username') + " " + row.get('last_login') + " " + row.get('vnum')+ " " + row.get('object_id'));
 		}
 	}
 	if( argArray[1] == "find_rares" ) {
