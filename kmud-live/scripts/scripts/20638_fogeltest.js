@@ -488,9 +488,9 @@ var script20638 = function(self, actor, here, args, extra) {
             }
             // Insert item to auction
             var insertSql = "INSERT INTO auctionItem (auction_id, object_id, owner_id, end_time, starting_price, buyout_price, active, timestamp) "
-                                + "VALUES('"+auction_id+", '"+item.id+"', "+owner_id+", "+(time()+604800)+", "+item.cost+", "+item.cost*2+", 1, "+time()+")";
+                                + "VALUES("+auction_id+", '"+item.id+"', "+owner_id+", "+(time()+604800)+", "+item.cost+", "+item.cost*2+", 1, "+time()+")";
             var result = sqlQuery(insertSql);
-            MudLog(2, 104, "Loaded object with vnum " + item.vnum + " and id " + item.id + " into auction " + auction_id);
+            mudLog(2, 104, "Loaded object with vnum " + item.vnum + " and id " + item.id + " into auction " + auction_id);
         }
     }
 }
