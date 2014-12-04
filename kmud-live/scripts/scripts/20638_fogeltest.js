@@ -161,37 +161,21 @@ var script20638 = function(self, actor, here, args, extra) {
 	}*/
 	if( argArray[1] == "inactive_rares" ) {
         var query = '';
-        if (argArray[2] == "list") {
-            query = "SELECT u.username, u.last_logon, o.vnum, o.id AS object_id, op.sdesc FROM users u "
-                        + "LEFT JOIN objects o ON u.user_id = o.holder_id "
-                        + "LEFT JOIN obj_protos op ON o.vnum = op.vnum "
-                        + "WHERE op.extra_flags & ( 1 <<15 ) "
-                        + "AND u.last_logon <= DATE_SUB( CURDATE( ) , INTERVAL 30 DAY ) ";
-        } else if (argArray[2] == "purge") {
-            query =   " UPDATE"
-                        + "  objects,"
-                        + "  users,"
-                        + "  obj_protos"
-                        + " SET"
-                        + "  objects.holder_id='34246',"
-                        + "  objects.top_level_holder_id='34246',"
-                        + "  objects.holder_type='P',"
-                        + "  objects.top_level_holder_type='P',"
-                        + "  objects.pos = -1"
-                        + " WHERE objects.holder_type='P' "
-                        + " AND objects.holder_id=users.user_id "
-                        + " AND obj_protos.vnum=objects.vnum "
-                        + " AND obj_protos.extra_flags & (1 << 15) "
-                        + " AND users.last_logon <= DATE_SUB(CURDATE(), INTERVAL 30 DAY)";
-        } else {
-            actor.send("Proper syntax: fogeltest inactive_rares list|purge");
-            return;
-        }
+        query = "SELECT u.username, u.last_logon, o.vnum, o.id AS object_id, op.sdesc FROM users u "
+                    + "LEFT JOIN objects o ON u.user_id = o.holder_id "
+                    + "LEFT JOIN obj_protos op ON o.vnum = op.vnum "
+                    + "WHERE op.extra_flags & ( 1 <<15 ) "
+                    + "AND u.last_logon <= DATE_SUB( CURDATE( ) , INTERVAL 30 DAY ) ";
 		var result = sqlQuery(query);
 		
 		while( result.hasNextRow ) {
 			var row = result.getRow;
 			actor.send(row.get('username') + "    " + row.get('last_logon') + "    " + row.get('vnum')+ "    " + row.get('sdesc') + "    " + row.get('object_id'));
+            if (argArray[2] == "purge") {
+                var obj = null;
+                obj = loadSingleObjectFromDatabase(row.get('object_id'));
+                actor.send(obj.sdesc);
+            }
 		}
 	}
 	if( argArray[1] == "find_rares" ) {
