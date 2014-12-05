@@ -366,7 +366,7 @@
 			_Quest[p] = Q[p];
 	}
 
-	return Quest;
+	return _Quest;
 })(typeof Quest == "undefined" ? {} : Quest);
 
 // Reload all Quests to ensure prototypes aren't stale
