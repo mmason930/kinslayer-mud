@@ -56,15 +56,22 @@ var loadSuperSpecialItems = function(self, actor, here, args, extra) {
         4924,   // a bolt of velvet
         4921,   // a bolt of silk
         4918,   // a bolt of wool
+		4567,	// mv sapping artifact
+		4568,	// stunning artifact
+		4584	// damage artifact
     ];
     
-    // Pick a random item from the rare list. If there's already too many of them in the game then too bad!
-    var index = random(0, rareLoadList.length-1);
-    var proto = getObjProto(rareLoadList[index]);
-    if (proto.count < proto.max) {
-        self.loadObj(proto.vnum);
-    }
-    
+    // Pick a random item from the rare list. If there's already too many of them in the game then try again 3 times
+	var counter = 0;
+	for (counter = 0; counter < 3; counter++) {
+		var index = random(0, rareLoadList.length-1);
+		var proto = getObjProto(rareLoadList[index]);
+		if (proto.count < proto.max) {
+			self.loadObj(proto.vnum);
+			break;
+		}
+	}
+	
     // Pick 3 items from the other list and load 
     for (var i=0; i < 3; i++) {
         index = random(0, otherLoadList.length-1);
