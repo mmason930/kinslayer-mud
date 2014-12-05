@@ -2,7 +2,7 @@ var addMissingRaresToAuction =  function(self, actor, here, args, extra) {
     var date = new Date();
     // Run every Thursday
     if (date.getDay() != 4) {
-        // return;
+        return;
     }
     // Purge all inactive RARE items
     var query = '';
