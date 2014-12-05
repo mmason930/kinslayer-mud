@@ -173,8 +173,8 @@ Quest.Task = (function() {
 		}
 	};
 
-	return Quest;
-})(Quest);
+	return Task;
+})();
 
 // Reload all Quests to ensure prototypes aren't stale
 loadAllQuests();
