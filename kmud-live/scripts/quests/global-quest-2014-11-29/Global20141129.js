@@ -1,5 +1,6 @@
 if( !global ) {
 	var global = {};
+}
 
 function GlobalNov2014Util()
 {
