@@ -189,8 +189,8 @@ var script33000 = function(self, actor, here, args, extra) {
 
 		if(orbInfo.vnum != self.vnum) {
 
-			actor.send("A huge jolt of energy throws you back as you try to touch " + self.vnum + "!");
-			act("$n jumps back suddenly as $e tries to touch the orb!", false, actor, self, null, constants.TO_ROOM);
+			actor.send("A huge jolt of energy throws you back as you try to touch " + self.name + "!");
+			act("$n jumps back suddenly as $e tries to touch $p!", false, actor, self, null, constants.TO_ROOM);
 			actor.damage(5);
 			return;
 		}
