@@ -187,8 +187,16 @@ var script33000 = function(self, actor, here, args, extra) {
 	{
 		var orbInfo = global.globalNov2014.orbs[actor.race];
 
-		if(orbInfo.vnum != self.vnum)
+		if(orbInfo.vnum != self.vnum) {
+
+			actor.send("A huge jolt of energy throws you back as you try to touch " + self.vnum + "!");
+			act("$n jumps back suddenly as $e tries to touch %p!", false, actor, self, null, constants.TO_ROOM);
+			actor.damage(5);
 			return;
+		}
+
+		actor.send("A bright white light consumes your vision.");
+		act("$n shimmers into a bright white light and disappears!", false, actor, null, null, constants.TO_ROOM);
 
 		var destinationRoomVnum = orbInfo.openWorldRoomVnum;
 
@@ -198,6 +206,8 @@ var script33000 = function(self, actor, here, args, extra) {
 		actor.moveToRoom(getRoom(destinationRoomVnum));
 
 		actor.comm("look");
+
+		act("A huge flash of white light appears, slowly revealing $n!", false, actor, null, null, constants.TO_ROOM);
 	}
 };
 //
@@ -212,11 +222,11 @@ var script23005 = function(self, actor, here, args, extra) {
 		{
 			global.globalNov2014.timeOfLastGlobal = new Date();
 
-			self.comm("global Show up on Sunday, December 7th at 1:00PM so you can try and fail at killing me.");
+			//self.comm("global Show up on Sunday, December 7th at 1:00PM so you can try and fail at killing me.");
 		}
 
 		if (randomNumber < 10) {
-			act("$n gobbles, 'Mang...'", false, self, null, null, constants.TO_ROOM);
+			act("$n gobbles, 'Come on, mang...'", false, self, null, null, constants.TO_ROOM);
 		}
 		else if (randomNumber < 30 && self.fighting) {
 			act("$n points at $N and gobbles deeply, 'Die mang!", false, self, null, self.fighting, constants.TO_NOTVICT);
@@ -241,7 +251,7 @@ var script23005 = function(self, actor, here, args, extra) {
 	else
 	{
 		if(randomNumber < 10)
-			act("$n flutters its wings and gobbles, 'Mang!'", false, self, null, null, constants.TO_ROOM);
+			act("$n flutters its wings and gobbles, 'Take this, mang!'", false, self, null, null, constants.TO_ROOM);
 		else if(randomNumber < 30 && self.fighting)
 		{
 			act("$n flutters its wings violently.", false, self, null, null, constants.TO_ROOM);
