@@ -226,7 +226,7 @@ var script33000 = function(self, actor, here, args, extra) {
 
 		followers.forEach(function(follower) {
 
-			if(!follower.affectedBy(follower.AFF_NOQUIT))
+			if(!follower.affectedBy(constants.AFF_NOQUIT))
 				performPort(follower);
 		});
 	}
