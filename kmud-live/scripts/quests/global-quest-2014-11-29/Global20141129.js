@@ -219,7 +219,7 @@ var script33000 = function(self, actor, here, args, extra) {
 
 			character.comm("look");
 
-			act("A huge flash of white light appears, slowly revealing $n!", false, actor, null, null, constants.TO_ROOM);
+			act("A huge flash of white light appears, slowly revealing $n!", false, character, null, null, constants.TO_ROOM);
 		};
 
 		performPort(actor);
