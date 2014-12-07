@@ -112,6 +112,7 @@ var script33002 = function(self, actor, here, args, extra) {
 
 	var vArgs = getArgList(args);
 
+	here.echo(vArgs.length);
 	_block;
 	if(vArgs.length < 2)
 	{
