@@ -4,7 +4,6 @@ var script14 = function(self, actor, here, args, extra) {
 		return;
 
 	_block;
-	here.echo("Test");
 
 	var vArgs = getArgList(args);
 
@@ -29,5 +28,16 @@ var script14 = function(self, actor, here, args, extra) {
 		return;
 	}
 
-	here.echo("Vnum: " + vnum);
+	for(var roomIndex = 0;;++roomIndex)
+	{
+		var room = getRoom(roomIndex);
+
+		if(room == null)
+			break;
+
+		if(room.countJS(vnum) > 0)
+		{
+			here.echo("Room #" + room.vnum);
+		}
+	}
 };
