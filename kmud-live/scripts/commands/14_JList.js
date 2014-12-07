@@ -30,7 +30,7 @@ var script14 = function(self, actor, here, args, extra) {
 
 	for(var roomIndex = 0;;++roomIndex)
 	{
-		var room = getRoom(roomIndex);
+		var room = getRoomByRnum(roomIndex);
 
 		if(room == null)
 			break;
