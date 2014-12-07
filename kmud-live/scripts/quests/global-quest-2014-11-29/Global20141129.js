@@ -195,19 +195,40 @@ var script33000 = function(self, actor, here, args, extra) {
 			return;
 		}
 
-		actor.send("A bright white light consumes your vision.");
-		act("$n shimmers into a bright white light and disappears!", false, actor, null, null, constants.TO_ROOM);
+		if(actor.affectedBy(constants.AFF_NOQUIT))
+		{
+			actor.send("You touch " + self.name + ", but it seems to do nothing.");
+			act("$n touches $p, but it appears to do nothing.", false, actor, self, null, constants.TO_ROOM);
+		}
 
-		var destinationRoomVnum = orbInfo.openWorldRoomVnum;
+		var followers = actor.followers.filter(function(follower) {
+			return follower.room.vnum == actor.room.vnum;
+		});
 
-		if(destinationRoomVnum == actor.room.vnum)
-			destinationRoomVnum = orbInfo.closedWorldRoomVnum;
+		var performPort = function(character)
+		{
+			character.send("A bright white light consumes your vision.");
+			act("$n shimmers into a bright white light and disappears!", false, character, null, null, constants.TO_ROOM);
 
-		actor.moveToRoom(getRoom(destinationRoomVnum));
+			var destinationRoomVnum = orbInfo.openWorldRoomVnum;
 
-		actor.comm("look");
+			if(destinationRoomVnum == character.room.vnum)
+				destinationRoomVnum = orbInfo.closedWorldRoomVnum;
 
-		act("A huge flash of white light appears, slowly revealing $n!", false, actor, null, null, constants.TO_ROOM);
+			character.moveToRoom(getRoom(destinationRoomVnum));
+
+			character.comm("look");
+
+			act("A huge flash of white light appears, slowly revealing $n!", false, actor, null, null, constants.TO_ROOM);
+		};
+
+		performPort(actor);
+
+		followers.forEach(function(follower) {
+
+			if(!actor.affectedBy(follower.AFF_NOQUIT))
+				performPort(follower);
+		});
 	}
 };
 //
