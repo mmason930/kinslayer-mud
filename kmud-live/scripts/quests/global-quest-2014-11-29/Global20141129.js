@@ -231,6 +231,21 @@ var script33000 = function(self, actor, here, args, extra) {
 		});
 	}
 };
+
+var script33003 = function(self, actor, here, args, extra) {
+
+	var itemVnum = self.race == constants.RACE_TROLLOC ? 2115 : 2104;
+	var itemsInRoom = 10;
+	var itemCount = here.items.filter(function(item) { return item.vnum == itemVnum }).length;
+	var itemsToLoad = itemsInRoom - itemCount;
+
+	while(itemsToLoad-- > 0)
+	{
+		self.loadObj(itemVnum);
+		self.comm("drop meat");
+	}
+};
+
 //
 //Random gobbling / emotes / fight events.
 var script23005 = function(self, actor, here, args, extra) {
