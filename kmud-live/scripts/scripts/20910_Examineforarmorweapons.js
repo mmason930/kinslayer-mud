@@ -41,7 +41,7 @@ var script20910 = function(self, actor, here, args, extra) {
 		var person = actor.room.people[_autoKey]; //load Mob eq
 		var mobCheck = true;
 		if(listView){ mobCheck = arrContains(person.namelist.split(" "), vArgs[2].toLowerCase()); }
-		//sendKoradin("listView: "+listView+" and mobCheck: "+mobCheck+" for "+person.name);
+		actor.send("listView: "+listView+" and mobCheck: "+mobCheck+" for "+person.name);
 		if (person.vnum > 0 && mobCheck) {
 			for (i=0; i<22; i++) {
 				if (person.eq(i)) {
