@@ -192,9 +192,9 @@ const int PLR_NO_WEAVE = 22; // Player Cannot gain weavepoints
 const int PLR_NO_TRACE = 23; //Can't trace their IP
 const int PLR_WEAVE_EDITOR = 24; //Can edit the weave editor in cedit
 const int PLR_STAT_EDITOR = 25; //Can edit the stat editor
-const int PLR_CHARGE_EDITOR = 26; //Can edit the weave editor in cedit
+const int PLR_CHARGE_EDITOR = 26; //Can edit the weave editor in cedi
+const int PLR_NOGLOBAL = 27; //Player is forbidden from using the global channel.t
 const int PLR_GLOBAL_SCRIPTS = 30; //Player can edit global JS editor
-const int PLR_NOGLOBAL = 31; //Player is forbidden from using the global channel.
 
 /* Mobile flags: used by class Character.player.act							*/
 

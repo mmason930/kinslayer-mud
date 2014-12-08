@@ -175,11 +175,11 @@ const char *player_bits[] = {
 						  "WEAVE_EDITOR",
 						  "STAT_EDITOR",
 						  "CHARGE_EDITOR",
-						  "<UNUSED>",
+						  "NOGLOBAL",
 						  "<UNUSED>",
 						  "<UNUSED>",
 						  "GLOBAL_SCRIPT_EDITOR",
-						  "NOGLOBAL",
+						  "<UNUSED>",
                           "\n"
                       };
 

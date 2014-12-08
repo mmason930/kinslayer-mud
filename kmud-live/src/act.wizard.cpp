@@ -5257,6 +5257,7 @@ ACMD(do_zreset)
 
 ACMD(do_global_mute)
 {
+	std::shared_ptr<Character> victSharedPointer;
 	Character *vict;
 	char arg[MAX_INPUT_LENGTH];
 	long result = 0;
@@ -5271,8 +5272,13 @@ ACMD(do_global_mute)
 
 	if(!(vict = get_char_vis(ch, arg)))
 	{
-		ch->send("There is no player by that name.\r\n");
-		return;
+		if(!CharacterUtil::getPlayerIndexByUserName(arg) || !(vict = CharacterUtil::loadCharacter(arg)))
+		{
+			ch->send("There is no player by that name.\r\n");
+			return;
+		}
+
+		victSharedPointer = std::shared_ptr<Character>(vict);
 	}
 
 	if (GET_LEVEL(vict) >= GET_LEVEL(ch))
@@ -5295,7 +5301,9 @@ ACMD(do_global_mute)
 		ch->send("%s is now able to use the global channel.\r\n", GET_NAME(vict));
 		vict->send("Your ability to use the global channel has been restored.\r\n");
 	}
-}
+
+	vict->basicSave();
+};
 
 ACMD(do_tell_mute)
 {
