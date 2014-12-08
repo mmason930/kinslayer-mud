@@ -37,8 +37,6 @@ var script20910 = function(self, actor, here, args, extra) {
 			}
 		}
 	}
-    var rareOnMob = false;
-    var rareHolder = '';
 	for (var _autoKey in actor.room.people) {
 		var person = actor.room.people[_autoKey]; //load Mob eq
 		var mobCheck = true;
@@ -48,12 +46,7 @@ var script20910 = function(self, actor, here, args, extra) {
 			for (i=0; i<22; i++) {
 				if (person.eq(i)) {
 					if (!person.eq(i).extraFlags(constants.ITEM_INVISIBLE) && !person.eq(i).extraFlags(constants.ITEM_NODROP) && (!person.eq(i).extraFlags(constants.ITEM_NO_SHOW) || person.eq(i).extraFlags(constants.ITEM_TRADES))) {
-                        if (!person.eq(i).extraFlags(constants.ITEM_RARE)) {
-                            rareOnMob = true;
-                            rareHolder = person.name;
-                        } else {
-                            exaArr.push([person.eq(i), "worn by "+person.name]);
-                        }
+                        exaArr.push([person.eq(i), "worn by "+person.name]);
                     }
 				}
 			}
@@ -64,15 +57,6 @@ var script20910 = function(self, actor, here, args, extra) {
 		viewArr.push(exaArr[i][0]);
 	}
 
-    if (rareOnMob) {
-		if(listView){
-			actor.send("You can't examine that while " + rareHolder + " has it!");
-			_block;
-		}else{
-			_noblock;
-		}
-        
-    }
 	var obj = getObjInListVis(actor, vArgs[1], viewArr, false);
 	if (!obj) {
 		if(listView){
