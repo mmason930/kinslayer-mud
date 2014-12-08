@@ -18,7 +18,7 @@ var addMissingRaresToAuction =  function(self, actor, here, args, extra) {
         
         var obj = null;
         obj = loadSingleObjectFromDatabase(row.get('object_id'));
-        obj.extract();
+        obj.moveToChar(actor);
         if (row.get('top_level_holder_type') == 'P') {
             mudLog(2, 104, "Inactive item extracted from user " + row.get('username') + " with last logon time of " + row.get('last_logon') + " : vnum - " + row.get('vnum') + " sdesc - " + row.get('sdesc') + " id - " + row.get('object_id'));
         } else {
