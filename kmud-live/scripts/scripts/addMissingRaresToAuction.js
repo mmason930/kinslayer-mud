@@ -1,4 +1,6 @@
 var addMissingRaresToAuction =  function(self, actor, here, args, extra) {
+    here.echo(actor.name);
+    return;
     var date = new Date();
     // Run every Thursday
     if (date.getDay() != 4) {
