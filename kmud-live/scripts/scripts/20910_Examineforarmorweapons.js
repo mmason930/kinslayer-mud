@@ -45,7 +45,7 @@ var script20910 = function(self, actor, here, args, extra) {
 		if (person.vnum > 0 && mobCheck) {
 			for (i=0; i<22; i++) {
 				if (person.eq(i)) {
-					if (!person.eq(i).extraFlags(constants.ITEM_INVISIBLE) && !person.eq(i).extraFlags(constants.ITEM_NODROP))
+					if (!person.eq(i).extraFlags(constants.ITEM_INVISIBLE) && !person.eq(i).extraFlags(constants.ITEM_NODROP) && (!person.eq(i).extraFlags(constants.ITEM_NO_SHOW) || person.eq(i).extraFlags(constants.ITEM_TRADES)))
 						exaArr.push([person.eq(i), "worn by "+person.name]);
 				}
 			}
