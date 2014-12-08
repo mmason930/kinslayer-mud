@@ -6,6 +6,8 @@ var script13254 = function(self, actor, here, args, extra) {
 	//User is on crate dagging stage. Check to see if there is a crate being dragged by this user.
 	for (var _autoKey in here.items) {
 		var item = here.items[_autoKey];
+    global.alder.send(item.vnum);
+    global.alder.send(getSval(item, 13252, "draggedBy").name);
 		if( item.vnum == 21407 && getSval(item, 13252, "draggedBy") == actor )
 		{//Yes!
 			actor.comm("release crate");//Force user to stop dragging this thing.
