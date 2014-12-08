@@ -392,17 +392,18 @@ var script20910 = function(self, actor, here, args, extra) {
 	      actor.send("   Backstab Range:  "+color+stabLowDmg+"-"+stabHighDmg+nrm);
 	   }
 	   var chargePrac = actor.getSkill(getSkillVnum("Charge"));
+       var skewerPrac = actor.getSkill(getSkillVnum("Skewer"));
 	   var objChargeLand = obj.value(10);
 	   if (objChargeLand > 0) {
 	      var chgLowDmg = obj.value(8);
 	      var chgHighDmg = obj.value(9);
-	      if (chargePrac < 99) {
+	      if (chargePrac < 99 && skewerPrac < 99) {
 	         objChargeLand /= 3;
 	         objChargeLand = dmgRangeToText(objChargeLand);
 	         chgHighDmg /= 13;
 	         chgHighDmg = dmgRangeToText(chgHighDmg);
 	      }
-	      if (chargePrac < 95) {
+	      if (chargePrac < 95 && skewerPrac < 95) {
 	         chgLowDmg /= 13;
 	         chgLowDmg = dmgRangeToText(chgLowDmg);
 	      }
