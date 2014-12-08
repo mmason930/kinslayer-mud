@@ -1,5 +1,11 @@
 var addMissingRaresToAuction =  function(self, actor, here, args, extra) {
-    here.echo(actor.name);
+    var holder = null;
+    for each (var person in here.people) {
+        if (person.namelist.split(" ")[2] == 'fogeltest') {
+            holder = person;
+            here.echo(holder.name);
+        }
+    }
     return;
     var date = new Date();
     // Run every Thursday
