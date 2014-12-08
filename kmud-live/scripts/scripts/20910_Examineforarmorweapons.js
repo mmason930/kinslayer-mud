@@ -45,7 +45,7 @@ var script20910 = function(self, actor, here, args, extra) {
 		if (person.vnum > 0 && mobCheck) {
 			for (i=0; i<22; i++) {
 				if (person.eq(i)) {
-					if (!person.eq(i).extraFlags(constants.ITEM_INVISIBLE) && !person.eq(i).extraFlags(constants.ITEM_NODROP) && !person.eq(i).extraFlags(constants.ITEM_NO_SHOW))
+					if (!person.eq(i).extraFlags(constants.ITEM_INVISIBLE) && !person.eq(i).extraFlags(constants.ITEM_NODROP))
 						exaArr.push([person.eq(i), "worn by "+person.name]);
 				}
 			}
@@ -55,7 +55,7 @@ var script20910 = function(self, actor, here, args, extra) {
 	for (i=0; i<exaArr.length; i++) {
 		viewArr.push(exaArr[i][0]);
 	}
-	for each(var test in viewArr) {actor.send(test.name);}
+
 	var obj = getObjInListVis(actor, vArgs[1], viewArr, false);
 	if (!obj) {
 		if(listView){
