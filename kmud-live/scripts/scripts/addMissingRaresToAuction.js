@@ -84,7 +84,7 @@ var addMissingRaresToAuction =  function(self, actor, here, args, extra) {
         }
         // Insert item to auction
         var insertSql = "INSERT INTO auctionItem (auction_id, object_id, owner_id, end_time, starting_price, buyout_price, active, timestamp) "
-                            + "VALUES("+auction_id+", '"+item.id+"', "+owner_id+", "+(time()+604800)+", "+item.cost+", "+item.cost*2+", 1, "+time()+")";
+                            + "VALUES("+auction_id+", '"+item.id+"', "+owner_id+", "+(time()+601200)+", "+item.cost+", "+item.cost*2+", 1, "+time()+")";
         var result = sqlQuery(insertSql);
 		// Destroy item and insert a copy into the DB with updated holder info
 		var insertSql = "INSERT INTO objects VALUES ('"+item.id+"', "+item.vnum+", -1, 'Item created for auction by script #33245.', 0, 0, 0, 0, 0, 0, 'A', "+auction_id+", 'A', "+auction_id+", NOW(), '', 0, 0)";
