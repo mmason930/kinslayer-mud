@@ -12,7 +12,7 @@ var script193 = function(self, actor, here, args, extra) {
 	{
 		waitpulse 4;
 		self.comm( "tell " + actor.name + " I can send you to the BASIN in Tarwin's Gap, the OBSIDIAN TOWER and BLIGHTED TOWER in Blight, " );
-		self.comm( "tell " + actor.name + " the STEDDING near Tarwin's Gap, FAL DARA, FAL MORAN, TAR VALON, LUGARD, CAEMLYN or BAERLON." );
+		self.comm( "tell " + actor.name + " the STEDDING near Tarwin's Gap, FAL DARA, FAL MORAN, TAR VALON, LUGARD, CAEMLYN, WHITEBRIDGE or BAERLON." );
 		self.comm( "tell " + actor.name + " If you would like to know the cost to travel to a location, say COST [location]." );
 		self.comm( "tell " + actor.name + " To travel to a location, say PORT [location]. For an additional charge, anything following you will also be ported." );
 		return;
@@ -122,8 +122,11 @@ var script193 = function(self, actor, here, args, extra) {
 			cost = getRoom(1726).distanceTo( getRoom(4530) );
 		roomNum = 4530;
 	} else if( argArray[1] == "whitebridge" || (argArray[1] == "white" && argArray[2] == "bridge")) {
-        var roomNum = 22700;
-        cost = here.distanceTo(getRoom(roomNum));
+        if( here.vnum == 166 )
+			cost = getRoom(166).distanceTo( getRoom(22700) );
+		else if( here.vnum == 1726 )
+			cost = getRoom(1726).distanceTo( getRoom(22700) );
+		roomNum = 22700;
     }
 	else if( argArray[0] != "cost" )
 	{
