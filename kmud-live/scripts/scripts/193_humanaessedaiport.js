@@ -121,7 +121,7 @@ var script193 = function(self, actor, here, args, extra) {
 		else if( here.vnum == 1726 )
 			cost = getRoom(1726).distanceTo( getRoom(4530) );
 		roomNum = 4530;
-	} else if( argArray[1] == "whitebridge" || (argArray[1] == "white" && argArray[2] == "bridge")) {
+	} else if( argArray[1].toLowerCase() == "whitebridge" || (argArray[1].toLowerCase() == "white" && argArray[2].toLowerCase() == "bridge")) {
         if( here.vnum == 166 )
 			cost = getRoom(166).distanceTo( getRoom(22700) );
 		else if( here.vnum == 1726 )
