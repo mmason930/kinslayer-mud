@@ -975,7 +975,7 @@ var script18605 = function(self, actor, here, args, extra) {
 	}
 	if(arg1 == "return" && arg2 == "home") {
 		var homeRoom = getSval(self,18600,"homeRoom");
-		var mercObj = getSval(self,18600,"myMercObj");
+		var mercObj = getSval(self,-18600,"myMercObj");
 		var mercArray = getSval(homeRoom,-18600,"mercArray");
 		if (mercArray == "empty")
 			mercArray = [];
