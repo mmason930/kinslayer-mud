@@ -123,11 +123,10 @@ var script193 = function(self, actor, here, args, extra) {
 		roomNum = 4530;
 	} else if( argArray[1].toLowerCase() == "whitebridge" || (argArray[1].toLowerCase() == "white" && argArray[2].toLowerCase() == "bridge")) {
         if( here.vnum == 166 )
-			cost = getRoom(166).distanceTo( getRoom(22700) );
+			cost = getRoom(166).distanceTo( getRoom(18623) );
 		else if( here.vnum == 1726 )
-			cost = getRoom(1726).distanceTo( getRoom(22700) );
-		roomNum = 22700;
-        here.echo(cost);here.echo(roomNum);
+			cost = getRoom(1726).distanceTo( getRoom(18623) );
+		roomNum = 18623;
     }
 	else if( argArray[0] != "cost" )
 	{
