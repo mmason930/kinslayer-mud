@@ -984,7 +984,7 @@ var script18605 = function(self, actor, here, args, extra) {
 		self.say("OK, since you've seen me home alive I'll thank you with this bit of coin back.");
 		owner.gold += parseInt(price*0.2);
 	//	self.comm("mgold " + owner.name + " " + (price*0.2) );
-		owner.send(self.name + " gives you " + owner.numCopperToText(Math.floor(price*0.2), true) + ".");
+		owner.send(self.name + " gives you" + owner.numCopperToText(Math.floor(price*0.2), true) + ".");
 	//	waitpulse 7;
 		self.say("I'll leave your things here for you.");
 		fwrite(owner.id + ".mercEQ." + getSval(self,18600,"mercNum"),"");
