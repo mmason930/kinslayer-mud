@@ -136,7 +136,7 @@ var script193 = function(self, actor, here, args, extra) {
 		var follower = actor.followers[_autoKey];
 		if ( follower.vnum == -1 ) { cost = cost * 2; }
 	}
-		
+    actor.send(argArray[1].toLowerCase());
 	if( cost == -1 )
 		return;
 	else if( argArray[0].toLowerCase() == "cost" )
