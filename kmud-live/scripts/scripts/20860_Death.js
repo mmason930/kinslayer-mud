@@ -1,7 +1,7 @@
 var script20860 = function(self, actor, here, args, extra) {
 	//Global Death script
 	//Alder - November 2010
-	if ( !actor || !self )
+	if (!actor || !self || actor == self)
 		return;
 	self.detach(14225);
 	/**Humanoid mobs loading tailoring supplies**/
