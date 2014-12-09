@@ -975,6 +975,11 @@ var script18605 = function(self, actor, here, args, extra) {
 	}
 	if(arg1 == "return" && arg2 == "home") {
 		var homeRoom = getSval(self,18600,"homeRoom");
+		var mercObj = getSval(self,18600,"myMercObj");
+		var mercArray = getSval(homeRoom,-18600,"mercArray");
+		if (mercArray == "empty")
+			mercArray = [];
+
 		var price = getSval(self,18600,"price");
 		self.say("OK, since you've seen me home alive I'll thank you with this bit of coin back.");
 		owner.gold += parseInt(price*0.2);
@@ -993,6 +998,10 @@ var script18605 = function(self, actor, here, args, extra) {
 		setSval(self,18605,"mercRendezvousRoom","");
 		here.echo(capFirstLetter(self.name) + " sets off to return home.");
 		self.extract();
+
+		// Put the merc back into circulation
+		mercArray.push(mercObj);
+		setSval(homeRoom,-18600,"mercArray",mercArray);
 	}
 	if(strn_cmp(arg1,"inventory",1)) {
 		owner.send(capFirstLetter(self.name) + "'s Inventory:");
