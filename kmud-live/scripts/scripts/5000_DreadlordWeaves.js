@@ -5,7 +5,7 @@ var script5000 = function(self, actor, here, args, extra) {
 	wait 2;
 	self.comm("emote gestures and begins to weave.");
 	wait 2;
-	if( !actor || actor.isValid == false ) {
+	if( !actor || actor.isValid == false || actor.room != self.room ) {
 		return;//They died.
 	}
 	var rand = random(1,5);
