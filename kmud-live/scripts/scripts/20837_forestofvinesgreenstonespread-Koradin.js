@@ -64,7 +64,7 @@ var script20837 = function(self, actor, here, args, extra) {
             }
         }
         var times_run = getSval(room, 20837, 'greenStoneTime');
-        if ((random(1,100) <= 5 || times_run > 15) && times_run > 5) {
+        if (times_run > 0) {
             for (var _autoKey in room.people) {
                 var person = room.people[_autoKey];
                 if (getSval(person, 20838, "vines") == 2)
@@ -72,6 +72,7 @@ var script20837 = function(self, actor, here, args, extra) {
             }
             room.echo("The vines wither away as fast as they grew, leaving dead vegetation everywhere.");
             room.loadObj(9025);
+            setSval(room, 20837, 'greenStoneTime', 0);
             self.extract();
             return;
         }
