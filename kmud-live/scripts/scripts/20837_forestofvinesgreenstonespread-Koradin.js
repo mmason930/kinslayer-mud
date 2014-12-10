@@ -8,10 +8,12 @@ var script20837 = function(self, actor, here, args, extra) {
             return;
         for (var _autoKey in room.items) {
             var item = room.items[_autoKey];
-            if (item.vnum == 9025)
-                item.extract();
-            else if (item.vnum == 9015 && item != self)
-                item.extract();
+            if (item) {
+                if (item.vnum == 9025)
+                    item.extract();
+                else if (item.vnum == 9015 && item != self)
+                    item.extract();
+            }
         }
         var rooms = [];
         if (self.count < 6) {
@@ -61,7 +63,7 @@ var script20837 = function(self, actor, here, args, extra) {
                 }
             }
         }
-        if (random(1,50) == 1) {
+        if (random(1,100) <= 3) {
             for (var _autoKey in room.people) {
                 var person = room.people[_autoKey];
                 if (getSval(person, 20838, "vines") == 2)
