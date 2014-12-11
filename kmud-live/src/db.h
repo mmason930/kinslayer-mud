@@ -51,6 +51,7 @@ int	CountMobsRoom(int mob_no, Room *room);
 int	CountMobsTotal(int mob_no);
 int	CountObjectsInv(int number, Character *target);
 int	CountObjectsRoom(int number, int room);
+void loadScreenText();
 
 extern std::shared_ptr<std::vector<JSTrigger*> > globalJS_Scripts;
 void BootGlobalScripts();

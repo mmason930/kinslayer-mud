@@ -331,9 +331,11 @@ ACMD(do_reboot)
 	}
 	else if (!str_cmp(arg, "bans"))
 		BanManager::GetManager().Reload();
+	else if(!str_cmp(arg, "screentexts"))
+		loadScreenText();
 	else
 	{
-		ch->send("Unknown reload option. Available options: `all`, `mobs`, `playerindex`, `bans`\r\n");
+		ch->send("Unknown reload option. Available options: `all`, `mobs`, `playerindex`, `bans`, `screentexts`\r\n");
 		return;
 	}
 
@@ -454,18 +456,26 @@ void loadScreenText()
 
 		if(screenTextId == 1) {
 
+			if(motd)
+				delete[] motd;
 			motd = str_dup(text.c_str());
 		}
 		else if(screenTextId == 2) {
 
+			if(imotd)
+				delete[] imotd;
 			imotd = str_dup(text.c_str());
 		}
 		else if(screenTextId == 3) {
 
+			if(startup)
+				delete startup;
 			startup = str_dup(text.c_str());
 		}
 		else if(screenTextId == 4) {
 
+			if(credits)
+				delete[] credits;
 			credits = str_dup(text.c_str());
 		}
 	}
