@@ -62,13 +62,8 @@ var addMissingRaresToAuction =  function(self, actor, here, args, extra) {
     for each (var vnum in auctionableRareItems) {
         var obj = getObjProto(vnum);
         if (obj.count < obj.max) {
-            // Roll some dice, can load up to as many of this item as are not in the game
-            for (var i=0; i < (obj.max-obj.count); i++) {
-                // 50% chance of loading item
-                if (random(0, 9) < 5) {
-                    self.loadObj(vnum);
-                }
-            }
+            // Can only load one of each object per cycle.
+            self.loadObj(vnum);
         }
     }
     
