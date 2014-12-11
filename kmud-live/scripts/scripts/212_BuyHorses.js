@@ -18,7 +18,7 @@ var script212 = function(self, actor, here, args, extra) {
 	}
 	else if( argv[1] == "razor" )
 	{
-		price += 1200;
+		price += 2000;
 		mount = 212;
 	}
 	else
