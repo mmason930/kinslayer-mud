@@ -373,11 +373,11 @@ ACMD(do_scan)
 			return;
 		}
 		else if( EXIT(ch,exit)->isFlagged( EX_CLOSED ) )
-		{//If the exit is closed...
-			if((GET_SKILL(ch,SKILL_SEARCH) < EXIT(ch, exit)->getHiddenLevel()) || !EXIT(ch,exit)->getKeywords() )
+		{
+			if(EXIT(ch, exit)->getHiddenLevel() > 0 || !EXIT(ch,exit)->getKeywords())
 				ch->send("There doesn't appear to be anything in that direction.\r\n");
 			else
-				ch->send("You cannot see through the %s.\r\n", fname(EXIT(ch, exit)->getKeywords()));
+				ch->send("You can't see through the %s.\r\n", EXIT(ch, exit)->getKeywords());
 			return;
 		}
 		room = ch->in_room->dir_option[exit]->getToRoom();
@@ -1683,31 +1683,28 @@ void lookInDirection(Character * ch, int dir)
 	int hid;
 
 	if (EXIT(ch, dir))
-
 	{
 		hid = EXIT(ch, dir)->getHiddenLevel();
-
-
-		if (EXIT(ch, dir)->getGeneralDescription())
+		
+		if (EXIT(ch, dir)->getGeneralDescription() && !hid)
+		{
 			ch->send(EXIT(ch, dir)->getGeneralDescription());
-
+			return;
+		}
 		if (EXIT(ch, dir)->isFlagged(EX_CLOSED) && EXIT(ch, dir)->getKeywords() && !hid)
 		{
 			ch->send("The %s is closed.\r\n", fname(EXIT(ch, dir)->getKeywords()));
+			return;
 		}
-
 		else if (EXIT(ch, dir)->isFlagged(EX_ISDOOR) && EXIT(ch, dir)->getKeywords() && !EXIT(ch, dir)->isFlagged(EX_CLOSED))
 		{
 			ch->send("The %s is open.\r\n", fname(EXIT(ch, dir)->getKeywords()));
+			return;
 		}
-
 	}
-
-	else
-		ch->send("Nothing special there...\r\n");
+	
+	ch->send("Nothing special there...\r\n");
 }
-
-
 
 void lookInObject(Character * ch, char *arg, Object *obj)
 {
