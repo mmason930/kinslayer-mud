@@ -7,6 +7,7 @@ var script9855 = function(self, actor, here, args, extra) {
 		actor.send(capFirstLetter(self.name)+" cuts loose a small pouch and disappears over the balcony railing before the clinking of coin is heard as the pouch hits the ground.");
 		self.moveToRoom(getRoom(501));
 		waitpulse 14;
+		setSval(actor,9854,"TOWER CHECK",true);
 		actor.updateJournalTask("Just Think...",0);
 		self.detach(9855);
 		self.extract();
