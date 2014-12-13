@@ -2157,7 +2157,7 @@ function bootQueditOLC() {
 		}
 		else if (fLetter == "A") {
 			OLC.action = 1;//Edit item
-			OLC.index = Math.max(0, OLC.priorQuests.length - 1);//Store index of item to edit
+			OLC.index = OLC.priorQuests.length;// Store index of item to edit
 			OLC.switchToMode("MODE_PRIORQUESTS_EDIT");
 			return;
 		}
