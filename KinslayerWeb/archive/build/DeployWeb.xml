@@ -38,7 +38,7 @@
 		<antcall target="build-sass" />
 
 		<mkdir dir="${checkout-classes}"/>
-		<javac debug="true" destdir="${checkout-classes}" classpathref="classpath">
+		<javac debug="true" destdir="${checkout-classes}" classpathref="classpath" fork="true" deprecation="false" target="1.8" source="1.8">
 			<src path="${checkout-src-web}" />
 			<src path="${checkout-src-core}" />
 		</javac>
