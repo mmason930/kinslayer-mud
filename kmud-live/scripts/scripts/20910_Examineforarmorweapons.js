@@ -57,6 +57,12 @@ var script20910 = function(self, actor, here, args, extra) {
 		viewArr.push(exaArr[i][0]);
 	}
 
+	// Make character aliases take precedence over objects
+	if (getCharInLisVis(actor, vArgs[1], here.people)) {
+		_noblock;
+		return;
+	}
+
 	var obj = getObjInListVis(actor, vArgs[1], viewArr, false);
 	if (!obj) {
 		if(listView){
