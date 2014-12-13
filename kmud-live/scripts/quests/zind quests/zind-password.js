@@ -4,11 +4,13 @@
 
 	return {
 		setNewPassword: function(actor) {
-			actor.setPval(pval, passwords[_.random(0, passwords.length - 1)]);
+			var pwd = passwords[_.random(0, passwords.length - 1)];
+			actor.setPval(pval, pwd);
+			return pwd;
 		},
 
 		getPassword: function(actor) {
-			actor.getPval(pval);
+			return actor.getPval(pval);
 		},
 
 		printPassword: function(actor) {
