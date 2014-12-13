@@ -1,5 +1,5 @@
-﻿if (typeof(Quest) === "undefined")
-  Quest = {};
+﻿if (typeof (Quest) === "undefined")
+	Quest = {};
 
 Quest.Task = (function() {
 	var TASK_PREFIX = "_TASK_";
@@ -69,12 +69,10 @@ Quest.Task = (function() {
 
 				getCharCols(actor, constants.CL_OFF);
 
-				if (_this.getProgress(actor).completed) {
-					// If the quest is ready to complete, and has no master, try to complete
-					if (_this.quest.isMasterless && _this.quest.readyToComplete(actor)) {
-						Quest.Util.tryCompleteQuest(actor, _this.quest);
-						return;
-					}
+				// If the quest is ready to complete, and has no master, try to complete
+				if (_this.quest.isMasterless && _this.quest.readyToComplete(actor)) {
+					Quest.Util.tryCompleteQuest(actor, _this.quest);
+					return;
 				}
 
 				Quest.Util.journalUpdate(actor, _this.quest);
@@ -88,9 +86,9 @@ Quest.Task = (function() {
 			return this.quest.hasBegun(actor) && this.hasUnlocked(actor) && !this.getStatus(actor).completed;
 		},
 
-    /**
-     * @returns {bool} - True if actor has completed this task
-     */
+		/**
+		 * @returns {bool} - True if actor has completed this task
+		 */
 		hasCompleted: function(actor) {
 			return this.getProgress(actor) >= this.completedValue;
 		},
@@ -101,7 +99,7 @@ Quest.Task = (function() {
 		hasUnlocked: function(actor) {
 			return this.unlockerTaskIndex < 0 || this.quest.tasks[this.unlockerTaskIndex].getStatus(actor).completed;
 		},
-    
+
 		/**
 		 * @returns {number} Value indicating the actor's progress for this task.
 		 */
@@ -111,17 +109,17 @@ Quest.Task = (function() {
 			}
 			return this.progressFunction(actor);
 		},
-    
+
 		/**
 		 * @typedef {Object}  Quest.Task.Status - Various information detailing the actor's progress for this task
      * @property {bool}   started - True if some progress has been made on this task
      * @property {number} progress - Value indicating current progress made on this task
      * @property {bool}   completed - True if this task has been completed
 		 */
-     
-     /**
-      * @returns {Quest.Task.Status} status - An object containing information about the actor's progress for this task.
-      */
+
+		/**
+		 * @returns {Quest.Task.Status} status - An object containing information about the actor's progress for this task.
+		 */
 		getStatus: function(actor) {
 			var prog = this.getProgress(actor);
 			return {
@@ -131,9 +129,9 @@ Quest.Task = (function() {
 			};
 		},
 
-    /**
-     * Restores the actor's progress back to zero. Only relevant for qval tasks.
-     */
+		/**
+		 * Restores the actor's progress back to zero. Only relevant for qval tasks.
+		 */
 		resetProgress: function(actor) {
 			if (this.isQvalTask) {
 				actor.qval(this.qvalStr, 0);
@@ -143,7 +141,7 @@ Quest.Task = (function() {
 		/**
 		 * PROPERTIES
 		 */
-    
+
 		get dependentTasks() {
 			var _this = this;
 			var index = this.quest.tasks.indexOf(this);

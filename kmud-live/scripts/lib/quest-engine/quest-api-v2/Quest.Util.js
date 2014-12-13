@@ -1,5 +1,5 @@
-﻿if (typeof(Quest) === "undefined")
-  Quest = {};
+﻿if (typeof (Quest) === "undefined")
+	Quest = {};
 
 /**
  * @namespace Quest.Util
@@ -184,7 +184,7 @@ Quest.Util = (function() {
 			}
 
 			// Notify actor of any unlocked quests
-			Quest.Util.notifyQuestsUnlocked(actor, quest, 7);
+			Quest.Util.notifyQuestsUnlocked(actor, quest);
 		},
 
 		listQuests: function(actor, quests, questMaster) {
@@ -217,36 +217,32 @@ Quest.Util = (function() {
 		 * Unlocked quests with no quest master will begin automatically.
 		 * @param {number} wait Number of pulses to wait before sending messages.
 		 */
-		notifyQuestsUnlocked: function(actor, quest, wait) {
-			function notify() {
-				var dependentQuests = quest.dependentQuests;
-				var unlockedQuests = dependentQuests.filter(function(q) {
-					return q.canAccess(actor);
-				});
+		notifyQuestsUnlocked: function(actor, quest) {
+			var dependentQuests = quest.dependentQuests;
+			var unlockedQuests = dependentQuests.filter(function(q) {
+				return q.canAccess(actor);
+			});
 
-				if (unlockedQuests.length > 0) {
-					var names = [], masterVnums = {};
-					for (var i = 0, q; q = unlockedQuests[i++];) {
-						names.push(q.name);
-						for (var k = 0, vnum; vnum = q.masterVnums[k++];) {
-							masterVnums[vnum] = true;
-						}
-						// Go ahead and begin this quest since the actor has no way to manually start it
-						if (q.isMasterless) {
-							q.begin(actor);
-							Quest.Util.journalUpdate(actor, q, 7);
-						}
+			if (unlockedQuests.length > 0) {
+				var names = [], masterVnums = {};
+				for (var i = 0, q; q = unlockedQuests[i++];) {
+					names.push(q.name);
+					for (var k = 0, vnum; vnum = q.masterVnums[k++];) {
+						masterVnums[vnum] = true;
 					}
-
-					actor.send(bld + "You have unlocked the following quest" + (names.length > 1 ? "s" : "") + ": " +
-								  nrm + grn + names.join(nrm + bld + ", " + nrm + grn) + nrm + bld + ".\n" + nrm);
-
-					for (var vnum in masterVnums) {
-						var mobName = getMobName(vnum);
-						actor.send(bld + cyn + capFirstLetter(mobName) + nrm + bld + " has new quests for you." + nrm);
+					// Go ahead and begin this quest since the actor has no way to manually start it
+					if (q.isMasterless) {
+						Quest.Util.tryBeginQuest(actor, q);
 					}
 				}
 
+				actor.send(bld + "You have unlocked the following quest" + (names.length > 1 ? "s" : "") + ": " +
+							  nrm + grn + names.join(nrm + bld + ", " + nrm + grn) + nrm + bld + ".\n" + nrm);
+
+				for (var vnum in masterVnums) {
+					var mobName = getMobName(vnum);
+					actor.send(bld + cyn + capFirstLetter(mobName) + nrm + bld + " has new quests for you." + nrm);
+				}
 			}
 		},
 
