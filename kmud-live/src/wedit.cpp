@@ -17,7 +17,7 @@
 
 extern Descriptor *descriptor_list;
 
-ACMD(do_wedit)
+CommandHandler do_wedit = DEFINE_COMMAND
 {
 	Descriptor *d;
 	Warrant *w;
@@ -52,7 +52,7 @@ ACMD(do_wedit)
 		d->olc->WarrantList.push_back(w);
 	}
 	WeditDispMenu(d);
-}
+};
 
 void Warrant::Insert(std::list<Warrant *> &List)
 {

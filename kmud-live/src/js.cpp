@@ -475,7 +475,7 @@ ScriptImport *JSManager::getScriptImport(const sql::Row &row) const
 {
 	ScriptImport *scriptImport = new ScriptImport();
 
-	scriptImport->id = MiscUtil::Convert<unsigned long long>(row.getString("id"));
+	scriptImport->id = MiscUtil::convert<unsigned long long>(row.getString("id"));
 	scriptImport->filePath = row.getString("file_path");
 	scriptImport->queuedDatetime = DateTime(row.getTimestamp("queued_datetime"));
 	scriptImport->operation = (ScriptImportOperation*)ScriptImportOperation::getEnumByValue(row.getInt("operation"));

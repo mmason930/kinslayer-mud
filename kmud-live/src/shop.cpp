@@ -33,6 +33,8 @@
 #include "Descriptor.h"
 #include "rooms/Room.h"
 
+#include "commands/infrastructure/CommandUtil.h"
+#include "commands/infrastructure/CommandInfo.h"
 
 // External variables
 extern struct Index *obj_index;
@@ -43,11 +45,6 @@ extern const char *item_types[];
 extern const char *extra_bits[];
 
 // Forward/External function declarations
-ACMD(do_tell);
-ACMD(do_action);
-ACMD(do_echo);
-ACMD(do_say);
-ACMD(do_slist);
 void sort_keeper_objs(Character * keeper, int shop_nr);
 
 // Local variables
@@ -126,7 +123,7 @@ const char *shop_bits[] =
         "\n"
     };
 
-ACMD(do_slist)
+CommandHandler do_slist = DEFINE_COMMAND
 {
 
 	int i = 0;
@@ -141,7 +138,7 @@ ACMD(do_slist)
 	if(ch->desc)
 		page_string(ch->desc, buf, 1);
 
-}
+};
 
 int is_ok_char(Character * keeper, Character * ch, int shop_nr)
 {
@@ -1262,11 +1259,11 @@ void assign_the_shopkeepers(void)
 {
 	int index;
 
-	cmd_say = FindCommand("say");
-	cmd_tell = FindCommand("tell");
-	cmd_emote = FindCommand("emote");
-	cmd_slap = FindCommand("slap");
-	cmd_puke = FindCommand("puke");
+	cmd_say = CommandUtil::get()->getCommandIndex("say");
+	cmd_tell = CommandUtil::get()->getCommandIndex("tell");
+	cmd_emote = CommandUtil::get()->getCommandIndex("emote");
+	cmd_slap = CommandUtil::get()->getCommandIndex("slap");
+	cmd_puke = CommandUtil::get()->getCommandIndex("puke");
 
 	for (index = 0; index < top_shop;++index)
 	{

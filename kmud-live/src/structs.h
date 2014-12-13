@@ -193,8 +193,8 @@ const int PLR_NO_WEAVE = 22; // Player Cannot gain weavepoints
 const int PLR_NO_TRACE = 23; //Can't trace their IP
 const int PLR_WEAVE_EDITOR = 24; //Can edit the weave editor in cedit
 const int PLR_STAT_EDITOR = 25; //Can edit the stat editor
-const int PLR_CHARGE_EDITOR = 26; //Can edit the weave editor in cedi
-const int PLR_NOGLOBAL = 27; //Player is forbidden from using the global channel.t
+const int PLR_CHARGE_EDITOR = 26; //Can edit the weave editor in cedit
+const int PLR_NOGLOBAL = 27; //Player is forbidden from using the global channel.
 const int PLR_GLOBAL_SCRIPTS = 30; //Player can edit global JS editor
 
 /* Mobile flags: used by class Character.player.act							*/
@@ -742,7 +742,6 @@ class Clock
 		unsigned long long start;
 		unsigned long long clocks;
 		unsigned long long tics;
-		unsigned long long lastClocks;
 		bool on;
 	public:
 		Clock()
@@ -755,27 +754,20 @@ class Clock
 			on = onstart;
 			clocks = 0;
 			tics = 0;
-			lastClocks = 0;
 		}
-		unsigned long long getClocks() const
+		unsigned long long getClocks()
 		{
 			return clocks;
 		}
-		float getSeconds() const
+		float getSeconds()
 		{
             return (float) ( (float)this->getClocks() / (float)1000 );
 		}
-		unsigned long long getTics() const
+		unsigned long long getTics()
 		{
 			return tics;
 		}
-
-		unsigned long long getLastClocks() const
-		{
-			return lastClocks;
-		}
-
-		void print() const
+		void print()
 		{
 			float t = getTics();
 			float c = getClocks();
@@ -798,9 +790,7 @@ class Clock
 		{
 			if ( on )
 			{
-				auto duration = ( Clock::getTick() - start );
-				clocks += duration;
-				lastClocks = duration;
+				clocks += ( Clock::getTick() - start );
 				on = false;
 				start = 0;
 			}
@@ -1979,7 +1969,6 @@ public:
 	bool passwordMatches(const std::string &passwordInput);
 	bool hasWolfbrotherBonuses();
 	bool disorientRoll();
-	bool shouldBlockEngagementDueToNumberFighting(Character *victim, bool displayMessage);
 
 
 	bool ShieldOutOfRange( Character* Target );
@@ -2469,51 +2458,6 @@ public:
 	float TimerCost;
 	float ManaCost;
 	float FailureCost;
-};
-
-/* used in the socials */
-class Social
-{
-	public:
-		int act_nr;
-		char *command;					/* holds copy of Activating command */
-		char *sort_as;					/* holds a copy of a similar command or
-													* abbreviation to sort by for the parser */
-		int hide;						/* ? */
-		int min_victim_position;		/* Position of victim */
-		int min_char_position;			/* Position of char */
-		int min_level_char;				/* Minimum level of socialing char */
-
-		/* No argument was supplied */
-		char *char_no_arg;
-		char *others_no_arg;
-
-		/* An argument was there, and a victim was found */
-		char *char_found;
-		char *others_found;
-		char *vict_found;
-
-		/* An argument was there, as well as a body part, and a victim was found */
-		char *char_body_found;
-		char *others_body_found;
-		char *vict_body_found;
-
-		/* An argument was there, but no victim was found */
-		char *not_found;
-
-		/* The victim turned out to be the character */
-		char *char_auto;
-		char *others_auto;
-
-		/* If the char cant be found search the char's inven and do these: */
-		char *char_obj_found;
-		char *others_obj_found;
-
-		void Extract();
-		void Copy( Social* Source );
-		Social();
-		~Social();
-		Social( Social* Source );
 };
 
 struct DefaultRebootTime

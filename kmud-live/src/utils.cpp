@@ -99,7 +99,7 @@ __int64 AvailableSystemMemory()
 		{
 			std::vector<std::string> wordVector = StringUtil::SplitToVector(lineVector[index], ' ');
 			if(wordVector.size() > 0)
-				return MiscUtil::Convert< __int64 >( wordVector[ wordVector.size() - 1 ] );
+				return MiscUtil::convert< __int64 >( wordVector[ wordVector.size() - 1 ] );
 		}
 	}
 
@@ -462,6 +462,15 @@ int strcmp(const std::string &str1, const std::string &str2)
 	return strcmp(str1.c_str(), str2.c_str());
 }
 
+int strcmp(const std::string &str1, const char *str2)
+{
+	return strcmp(str1.c_str(), str2);
+}
+
+int strcmp(const char *str1, const std::string &str2)
+{
+	return strcmp(str1, str2.c_str());
+}
 
 //Rewritten by Galnor on June 27th, 2006.
 int str_cmp(const char *str1, const char *str2)
@@ -615,17 +624,21 @@ void MudLog(int type, int level, int file, const char *str, ...)
 	if (file)
 	{
 		Log("%s", format);
-		
+		auto referenceTimestamp = time(0);
+
 		std::string fileName = STDERR;
 		if(subroutine.empty() == false)
 			fileName = std::string("misc/") + subroutine;
+
+		fileName += std::string(".") + MiscUtil::formatDateYYYYmmdd(DateTime(referenceTimestamp));
+		fileName = StringUtil::allLower(fileName);
 
 		if(!(logger = fopen(fileName.c_str(), "a+")))
 		{
 			Log("ERROR OPENING MudLog FILE!");
 			return;
 		}
-		fprintf(logger, "%s :: %s\n", Time::FormatDate("%m-%d-%Y, %H:%M:%S", time(0)).c_str(), format);
+		fprintf(logger, "%s :: %s\n", Time::FormatDate("%m-%d-%Y, %H:%M:%S", referenceTimestamp).c_str(), format);
 		fclose(logger);
 	}
 

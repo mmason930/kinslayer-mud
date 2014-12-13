@@ -247,7 +247,7 @@ class OLC
 		class Kit *kit;
 		int trigger_position;
 		int item_type;
-		Social *action;
+		class Social *action;
 		char *storage; /* for holding commands etc.. */
 		int * sg_index_ptr;
 

@@ -131,6 +131,8 @@ __int64 AvailableSystemMemory();
 #endif
 
 int strcmp(const std::string &str1, const std::string &str2);
+int strcmp(const std::string &str1, const char *str2);
+int strcmp(const char *str1, const std::string &str2);
 int str_cmp(const char *str1, const char *str2);
 int str_cmp(const std::string &str1, const char *str2);
 int str_cmp(const char *str1, const std::string &str2);
@@ -405,8 +407,8 @@ const int TYPE_OUT = 2;
 #define AFF_FLAGS(ch)					((ch)->player.affected_by)
 #define ROOM_FLAGS(loc)					(loc->room_flags)
 
-#define IS_NPC(ch)						(IS_SET(MOB_FLAGS(ch), Q_BIT(MOB_ISNPC)))
-#define IS_MOB(ch)						(IS_NPC(ch) && ((ch)->nr >-1))
+#define IS_NPC(ch)						(ch->MobData != nullptr)
+#define IS_MOB(ch)						(IS_NPC(ch))
 
 #define MOB_FLAGGED(ch, flag)			(IS_NPC(ch)  && IS_SET(MOB_FLAGS(ch), Q_BIT(flag)))
 #define PLR_FLAGGED(ch, flag)			(!IS_NPC(ch) && IS_SET(PLR_FLAGS(ch), Q_BIT(flag)))

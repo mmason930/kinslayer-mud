@@ -69,6 +69,11 @@
 #include "guilds/Guild.h"
 #include "TextTableBuilder.h"
 
+#include "test/TestUtil.h"
+
+#include "commands/infrastructure/CommandUtil.h"
+#include "commands/infrastructure/CommandInfo.h"
+
 /*   external vars  */
 extern GameTime time_info;
 extern Character *character_list;
@@ -91,8 +96,6 @@ extern void check_autowiz(Character *ch);
 extern char mudname[256];
 extern int mother_desc;
 extern int spell_sort_info[MAX_SKILLS+1];
-extern Social *soc_mess_list;
-extern int top_of_socialt;		
 extern time_t bootTime;
 extern int pulse;
 extern bool rebootNotified15, rebootNotified10, rebootNotified5, rebootNotified1;
@@ -109,7 +112,6 @@ extern const char *pc_race_types[];
 
 /* extern functions */
 void AddRoomToWorld( Room *TheRoom );
-int getCommandIndex(const std::string &commandText);
 extern void show_shops(Character * ch, char *value);
 extern void do_start(Character *ch);
 extern void update_legend(Character *ch);
@@ -121,69 +123,6 @@ extern int parse_race(char arg);
 extern Character *find_char(long n);
 extern unsigned long int bandwidth;
 extern std::tr1::unordered_map<void*, pair<std::string, flusspferd::value> > mapper;
-
-/* local functions */
-ACMD(do_advance);
-ACMD(do_at);
-ACMD(do_award);
-ACMD(do_clan);
-ACMD(do_council);
-ACMD(do_countdown);
-ACMD(do_copy);
-ACMD(do_copyover);
-ACMD(do_date);
-ACMD(do_dc);
-ACMD(do_declan);
-ACMD(do_delete);
-ACMD(do_demote);
-ACMD(do_dig);
-ACMD(do_disable);
-ACMD(do_echo);
-ACMD(do_enable);
-ACMD(do_find);
-ACMD(do_force);
-ACMD(do_gcomm);
-ACMD(do_gecho);
-ACMD(do_goto);
-ACMD(do_invis);
-ACMD(do_ipfind);
-ACMD(do_jmap);
-ACMD(do_lag);
-ACMD(do_last);
-ACMD(do_load);
-ACMD(do_memory);
-ACMD(do_noreply);
-ACMD(do_override);
-ACMD(do_pardon);
-ACMD(do_poofset);
-ACMD(do_purge);
-ACMD(do_qval);
-ACMD(do_rank);
-ACMD(do_reset);
-ACMD(do_restore);
-ACMD(do_retool);
-ACMD(do_return);
-ACMD(do_saveall);
-ACMD(do_send);
-ACMD(do_set);
-ACMD(do_wshow);
-ACMD(do_shutdown);
-ACMD(do_snoop);
-ACMD(do_statfind);
-ACMD(do_switch);
-ACMD(do_syslog);
-ACMD(do_teleport);
-ACMD(do_test_roll);
-ACMD(do_trans);
-ACMD(do_vnum);
-ACMD(do_vstat);
-ACMD(do_warrant);
-ACMD(do_wizlock);
-ACMD(do_wiznet);
-ACMD(do_wizutil);
-ACMD(do_wotmud);
-ACMD(do_zap);
-ACMD(do_zreset);
 
 Room *FindTargetRoom(Character * ch, char *rawroomstr);
 int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int file);
@@ -199,7 +138,7 @@ int topUserId();
 
 void redit_save_to_disk( int lowVnum, int highVnum );
 
-ACMD(do_saveall)
+CommandHandler do_saveall = DEFINE_COMMAND
 {
 	char arg1[MAX_INPUT_LENGTH];
 	unsigned int i = 0;
@@ -278,14 +217,14 @@ ACMD(do_saveall)
 		ch->send("Invalid option. Possible Types: Zones, Mobs, Rooms, Objects, OLC.\r\n");
 		return;
 	}
-}
+};
 
 /***
   * Galnor 10/07/2010 - Remove the reply target of anyone whose last
   *  tell received originated from this player.
   *
   ***/
-ACMD(do_noreply)
+CommandHandler do_noreply = DEFINE_COMMAND
 {
 	for(Character *teller = character_list;teller != NULL;teller = teller->next)
 	{
@@ -293,9 +232,9 @@ ACMD(do_noreply)
 			teller->last_tell = 0;
 	}
 	ch->send("You are no longer set as anyone's reply target.\r\n");
-}
+};
 
-ACMD(do_test_roll)
+CommandHandler do_test_roll = DEFINE_COMMAND
 {
 	char Type[MAX_INPUT_LENGTH], VictName[MAX_INPUT_LENGTH], Number[MAX_INPUT_LENGTH], Show[MAX_INPUT_LENGTH],
 	CharName[MAX_INPUT_LENGTH];
@@ -521,7 +460,7 @@ ACMD(do_test_roll)
 	ch->send("Land %%: %s%.1f%s%%, Total Landed: %s%d%s. Total Missed: %s%d%s\r\n",
 	         COLOR_CYAN(ch, CL_COMPLETE), perc, COLOR_NORMAL(ch, CL_COMPLETE), COLOR_CYAN(ch, CL_COMPLETE),
 	         landed, COLOR_NORMAL(ch, CL_COMPLETE), COLOR_CYAN(ch, CL_COMPLETE), missed, COLOR_NORMAL(ch, CL_COMPLETE));
-}
+};
 
 /*****
 	* Coded by Galnor on 04/21/2009
@@ -530,7 +469,7 @@ ACMD(do_test_roll)
 	*
 ******/
 
-ACMD(do_copy)
+CommandHandler do_copy = DEFINE_COMMAND
 {
 	char type[MAX_INPUT_LENGTH], sVnum1[MAX_INPUT_LENGTH], sVnum2[MAX_INPUT_LENGTH];
 	int vnum1, vnum2, real;
@@ -638,11 +577,11 @@ ACMD(do_copy)
 		olc_add_to_save_list( Destination->getZone()->getVnum(), OLC_SAVE_ROOM );
 	}
 	ch->send("Copy was successful.\r\n");
-}
+};
 
 // Serai - 06/18/04 - Copyover for Kinslayer.
 /***
-ACMD(do_copyover)
+CommandHandler do_copyover = DEFINE_COMMAND
 {
 
 	skip_spaces(&argument);
@@ -784,7 +723,7 @@ void Character::ResetSpells()
 	this->SetSkillDefaults();
 }
 
-ACMD(do_qval)
+CommandHandler do_qval = DEFINE_COMMAND
 {
 	//Variabals
 	char playerName[MAX_INPUT_LENGTH], val1[MAX_INPUT_LENGTH], val2[MAX_INPUT_LENGTH];
@@ -877,22 +816,22 @@ ACMD(do_qval)
 	MySQLSaveQuest(victim->player.name, q, !nquest);
 	return;
 
-}
+};
 
 //Added by Galnor on 08/02/2009 - this command will allow an immortal to submit a command without possibility
 //of interruption by a script.
-ACMD(do_override)
+CommandHandler do_override = DEFINE_COMMAND
 {
 	//What we're doing here is very simple. Grab the appended text and submit it back to the interpreter...
 	ch->ignoreCommandTrigger = (true);
 	skip_spaces(&argument);
 	ch->InterpCommand(argument);
 	ch->ignoreCommandTrigger = (false);
-}
+};
 
 //Coded by Galnor on February 6th, 2004. Calculates variouse memory types in the program.//
 // Minor changes by Serai...
-ACMD(do_memory)
+CommandHandler do_memory = DEFINE_COMMAND
 {
 	int number;
 	size_t total = 0;
@@ -994,9 +933,9 @@ ACMD(do_memory)
 
 	//	ch->send("Other memory:\r\n");
 
-}
+};
 
-ACMD(do_ipfind)
+CommandHandler do_ipfind = DEFINE_COMMAND
 {
 	char nameString[MAX_INPUT_LENGTH];
 	std::stringstream sqlBuffer;
@@ -1077,7 +1016,7 @@ ACMD(do_ipfind)
 
 		ch->send("%5d: %s\r\n", logins, username.c_str());
 	}
-}
+};
 
 extern int top_shop;
 extern class Shop *shop_index;
@@ -1099,7 +1038,7 @@ std::string JS_stringifyJson(flusspferd::object obj);
 void DeleteOldTracks();
 
 /*** Extra immortal command to perform various, usually one-time test/maintanence routines ***/
-ACMD(do_extra)
+CommandHandler do_extra = DEFINE_COMMAND
 {
 	std::vector< std::string > vArgs;
 	if( !ch->in_room )
@@ -1127,10 +1066,9 @@ ACMD(do_extra)
 					break;
 			}
 		}
-		else if(!str_cmp(vArgs.at(0), "guilds"))
+		else if(!str_cmp(vArgs.at(0), "testcases"))
 		{
-			Log("Here we go!");
-			game->getGuildEditorInterface()->setupNewInstance(ch);
+			TestUtil::get()->processTestCases();
 			return;
 		}
 		else if(!str_cmp(vArgs.at(0), "trackdel"))
@@ -1256,10 +1194,10 @@ ACMD(do_extra)
 	ch->send("Memory remaining: %lld\r\n", AvailableSystemMemory());
 #endif
 
-}
+};
 
 
-ACMD(do_lag)
+CommandHandler do_lag = DEFINE_COMMAND
 {
 
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -1285,9 +1223,9 @@ ACMD(do_lag)
 	ch->send("%s lagged for %d seconds.\r\n", GET_NAME(victim), number);
 
 	WAIT_STATE(victim, number * PASSES_PER_SEC);
-}
+};
 
-ACMD(do_disable)
+CommandHandler do_disable = DEFINE_COMMAND
 {
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH], arg4[MAX_INPUT_LENGTH];
 	std::map<int, std::pair<std::string,int> >::iterator Dis;
@@ -1314,7 +1252,7 @@ ACMD(do_disable)
 					{
 						ch->send("%s%3d%s)    %s%-15s%s     %s%s%s%s\r\n",
 						COLOR_YELLOW(ch, CL_COMPLETE), ++count, COLOR_NORMAL(ch, CL_COMPLETE),
-						COLOR_CYAN(ch, CL_COMPLETE), complete_cmd_info[(*Dis).first].command.c_str(), COLOR_NORMAL(ch, CL_COMPLETE),
+						COLOR_CYAN(ch, CL_COMPLETE), CommandUtil::get()->getCommandByIndex((*Dis).first)->command.c_str(), COLOR_NORMAL(ch, CL_COMPLETE),
 						COLOR_GREEN(ch, CL_COMPLETE), COLOR_BOLD(ch, CL_COMPLETE),
 						((*Dis).second.first).c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
 					}
@@ -1322,7 +1260,7 @@ ACMD(do_disable)
 				else
 				{
 					std::string commandText = std::string(arg3);
-					int commandIndex = getCommandIndex(commandText);
+					int commandIndex = CommandUtil::get()->getCommandIndex(commandText);
 				
 					if(commandIndex == -1)
 					{
@@ -1332,7 +1270,7 @@ ACMD(do_disable)
 
 					if( (Dis = DisabledCommands.find(commandIndex)) == DisabledCommands.end() )
 					{
-						ch->send("Command %s is now disabled.\r\n", complete_cmd_info[commandIndex].command.c_str());
+						ch->send("Command %s is now disabled.\r\n", CommandUtil::get()->getCommandByIndex(commandIndex)->command.c_str());
 						DisabledCommands[commandIndex] = std::pair<std::string,int>(ch->player.name,static_cast<int>(ch->player.level));
 					}
 					else
@@ -1417,9 +1355,9 @@ ACMD(do_disable)
 	catch(sql::QueryException e) {
 		MudLog(BRF, LVL_GOD, TRUE, "Failed while processing command `disable` : %s", e.getMessage().c_str());
 	}
-}
+};
 
-ACMD(do_enable)
+CommandHandler do_enable = DEFINE_COMMAND
 {
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH], arg4[MAX_INPUT_LENGTH];
 	std::map<int, std::pair<std::string,int> >::iterator Dis;
@@ -1442,7 +1380,7 @@ ACMD(do_enable)
 			else
 			{
 				std::string commandText = std::string(arg3);
-				int commandIndex = getCommandIndex(commandText);
+				int commandIndex = CommandUtil::get()->getCommandIndex(commandText);
 				
 				if(commandIndex == -1)
 				{
@@ -1456,7 +1394,7 @@ ACMD(do_enable)
 				}
 				else
 				{
-					ch->send("Command %s is now enabled.\r\n", complete_cmd_info[commandIndex].command.c_str());
+					ch->send("Command %s is now enabled.\r\n", CommandUtil::get()->getCommandByIndex(commandIndex)->command.c_str());
 					DisabledCommands.erase(Dis);
 				}
 			}
@@ -1526,49 +1464,9 @@ ACMD(do_enable)
 	{
 		ch->send("You can enable the following: command\r\n");
 	}
+};
 
-/***
-	char com[MAX_INPUT_LENGTH];
-	std::map<int, std::pair<std::string,int> >::iterator Dis;
-
-	skip_spaces(&argument);
-	strcpy(com,argument);
-
-	if( !(*com) )
-	{
-		ch->send("Syntax: Disable <Command>\r\n");
-		return;
-	}
-
-	for(int number = 0;complete_cmd_info[number].command[0] != '\n';++number)
-	{
-		if(!str_cmp(complete_cmd_info[number].command, com))
-		{
-			if((Dis = DisabledCommands.find(number)) != DisabledCommands.end())
-			{
-				if( (*Dis).second.second > GET_LEVEL(ch) )
-				{
-					ch->send("That command was disabled by someone higher level than you.\r\n");
-					return;
-				}
-				else
-				{
-					ch->send("Command %s is now enabled.\r\n", complete_cmd_info[number].command.c_str());
-					DisabledCommands.erase(Dis);
-				}
-			}
-			else
-			{
-				ch->send("That command is already avaliable.\r\n");
-			}
-			return;
-		}
-	}
-	ch->send("%s is not a valid command!\r\n", com);
-***/
-}
-
-ACMD(do_pardon)
+CommandHandler do_pardon = DEFINE_COMMAND
 {
 	char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
 	Character *victim;
@@ -1669,9 +1567,9 @@ ACMD(do_pardon)
 			}
 		}
 	}
-}
+};
 
-ACMD(do_warrant)
+CommandHandler do_warrant = DEFINE_COMMAND
 {
 	char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
 	Character *victim;
@@ -1762,9 +1660,9 @@ ACMD(do_warrant)
 	{
 		victim->save();
 	}
-}
+};
 
-ACMD(do_zap)
+CommandHandler do_zap = DEFINE_COMMAND
 {
 	Character *victim;
 	int amount = 0, i;
@@ -1845,9 +1743,9 @@ ACMD(do_zap)
 	victim->save();
 
 	CLEANUP(victim, load);
-}
+};
 
-ACMD(do_warn)
+CommandHandler do_warn = DEFINE_COMMAND
 {
 	Character *victim;
 	char arg[MAX_INPUT_LENGTH];
@@ -1879,9 +1777,9 @@ ACMD(do_warn)
 
 	MudLog(NRM, MAX(LVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s has warned %s --Warning Number %d--",
 	       GET_NAME(ch), GET_NAME(victim), GET_WARNINGS(victim));
-}
+};
 
-ACMD(do_find)
+CommandHandler do_find = DEFINE_COMMAND
 {
 	std::stringstream QueryBuffer, OutputBuffer;
 	sql::Query MyQuery;
@@ -1966,7 +1864,7 @@ ACMD(do_find)
 		if( MyRow["holder_type"] == "C" )
 			OutputBuffer << "Chest " << cyn << MyRow["holder_id"] << nrm;
 		else if( MyRow["holder_type"] == "P" )
-			OutputBuffer << "Player " << cyn << getNameById(MiscUtil::Convert<int>(MyRow["holder_id"])) << nrm;
+			OutputBuffer << "Player " << cyn << getNameById(MiscUtil::convert<int>(MyRow["holder_id"])) << nrm;
 		else if( MyRow["holder_type"] == "R" )
 			OutputBuffer << "Room " << cyn << MyRow["holder_id"] << nrm;
 		OutputBuffer << std::endl;
@@ -1990,9 +1888,9 @@ ACMD(do_find)
 	}
 	else
 		ch->send("No items found.\r\n");
-}
+};
 
-ACMD(do_countdown)
+CommandHandler do_countdown = DEFINE_COMMAND
 {
 	int count;
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -2042,9 +1940,9 @@ ACMD(do_countdown)
 				);
 		return;
 	}
-}
+};
 
-ACMD(do_rank)
+CommandHandler do_rank = DEFINE_COMMAND
 {
 	Character *victim;
 	UserClan *victimUserClan, *chUserClan;
@@ -2159,9 +2057,9 @@ ACMD(do_rank)
 					 "Type %s%sSHOW SKILLS%s at your clan leader to view the skills available.\r\n",
 					 COLOR_BOLD(victim, CL_NORMAL), COLOR_CYAN(victim, CL_NORMAL), COLOR_NORMAL(victim, CL_NORMAL));
 	}
-}
+};
 
-ACMD(do_demote)
+CommandHandler do_demote = DEFINE_COMMAND
 // demote function, imped by Stark, rewritten by Galnor: 11-25-2004, rewritten again July 3rd 2014.
 {
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -2257,9 +2155,9 @@ ACMD(do_demote)
 	       "%s lowered %s's rank to %d in the %s clan.%s",
 	       GET_NAME(ch), GET_NAME(victim), (int)victimUserClan->getRank(), clan->Name.c_str(), load ? " (Offline)" : "");
 	ch->send("You lowered %s's rank to %d in the %s clan.\r\n", GET_NAME(victim), (int)victimUserClan->getRank(), clan->Name.c_str());
-}
+};
 
-ACMD(do_council)
+CommandHandler do_council = DEFINE_COMMAND
 {
 	Character *victim;
 	UserClan *userClan;
@@ -2353,9 +2251,9 @@ ACMD(do_council)
 
 	if(load)
 		victim->saveClans();
-}
+};
 
-ACMD(do_clan)
+CommandHandler do_clan = DEFINE_COMMAND
 {
 	char playername[MAX_INPUT_LENGTH], clanstr[MAX_INPUT_LENGTH];
 	Character *victim = NULL;
@@ -2468,9 +2366,9 @@ ACMD(do_clan)
 	}
 
 	victim->addToClan(userClan);
-}
+};
 
-ACMD(do_declan)
+CommandHandler do_declan = DEFINE_COMMAND
 {
 	char playername[MAX_INPUT_LENGTH], clanstr[MAX_INPUT_LENGTH];
 	int clanId;
@@ -2628,9 +2526,9 @@ ACMD(do_declan)
 	{
 		MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "Error while clanning %s by %s to clan %s: %s", GET_NAME(victim), GET_NAME(ch), clan->Name.c_str(), e.what());
 	}
-}
+};
 
-ACMD(do_reset)
+CommandHandler do_reset = DEFINE_COMMAND
 {
 	Character *victim;
 	bool load = false;
@@ -2678,9 +2576,9 @@ ACMD(do_reset)
 	if(load)
 		delete victim;
 
-}
+};
 
-ACMD(do_dig)
+CommandHandler do_dig = DEFINE_COMMAND
 {
 	char buf2[MAX_INPUT_LENGTH];
 	char buf3[MAX_INPUT_LENGTH];
@@ -2816,9 +2714,9 @@ ACMD(do_dig)
 		olc_add_to_save_list(room->getZone()->getVnum(), OLC_SAVE_ROOM);
 
 	ch->send("You make an exit %s to room %d.\r\n", buf2, tvnum);
-}
+};
 
-ACMD(do_echo)
+CommandHandler do_echo = DEFINE_COMMAND
 {
 	Character *vict;
 	skip_spaces(&argument);
@@ -2838,9 +2736,9 @@ ACMD(do_echo)
 			}
 		}
 	}
-}
+};
 
-ACMD(do_award)
+CommandHandler do_award = DEFINE_COMMAND
 {
 	PlayerIndex *targetUserPlayerIndex;
 	char targetUserName[MAX_INPUT_LENGTH], clanName[MAX_INPUT_LENGTH], questPointAmountString[MAX_INPUT_LENGTH];
@@ -2938,9 +2836,9 @@ ACMD(do_award)
 
 		delete clanQuestPointTransaction;
 	}
-}
+};
 
-ACMD(do_send)
+CommandHandler do_send = DEFINE_COMMAND
 {
 	Character *vict;
 
@@ -2968,7 +2866,7 @@ ACMD(do_send)
 	{
 		ch->send("You send '%s' to %s.\r\n", buf, GET_NAME(vict));
 	}
-}
+};
 
 /* take a string and return an rnum.. used for goto, at, etc.  -je 4/6/93 */
 Room *FindTargetRoom(Character *ch, char *rawroomstr)
@@ -3039,7 +2937,7 @@ Room *FindTargetRoom(Character *ch, char *rawroomstr)
 	return location;
 }
 
-ACMD(do_at)
+CommandHandler do_at = DEFINE_COMMAND
 {
 	char command[MAX_INPUT_LENGTH];
 	Room *loc, *original_loc;
@@ -3077,7 +2975,7 @@ ACMD(do_at)
 
 	Room *r = ch->in_room;
 
-	CommandInterpreter(ch, command);
+	CommandUtil::get()->interpretCommand(ch, command);
 
 	MudLog(NRM, MAX(GET_INVIS_LEV(ch), LVL_GRGOD),TRUE, "%s used the at command : \"%s\" in room %d.", GET_NAME(ch), command, r->getVnum());
 
@@ -3090,9 +2988,9 @@ ACMD(do_at)
 		ch->RemoveFromRoom();
 		ch->MoveToRoom(original_loc);
 	}
-}
+};
 
-ACMD(do_goto)
+CommandHandler do_goto = DEFINE_COMMAND
 {
 	Room *loc;
 
@@ -3130,9 +3028,9 @@ ACMD(do_goto)
 
 	Act(buf, TRUE, ch, 0, 0, TO_ROOM);
 	look_at_room(ch, 0);
-}
+};
 
-ACMD(do_trans)
+CommandHandler do_trans = DEFINE_COMMAND
 {
 	Descriptor *i;
 	Character *victim;
@@ -3213,9 +3111,9 @@ ACMD(do_trans)
 
 		ch->send(OK);
 	}
-}
+};
 
-ACMD(do_teleport)
+CommandHandler do_teleport = DEFINE_COMMAND
 {
 	Character *victim;
 	Room *target;
@@ -3247,9 +3145,9 @@ ACMD(do_teleport)
 
 		victim->CancelTimer(false);
 	}
-}
+};
 
-ACMD(do_vnum)
+CommandHandler do_vnum = DEFINE_COMMAND
 {
 	TwoArguments(argument, buf, buf2);
 
@@ -3289,7 +3187,7 @@ ACMD(do_vnum)
         else
             ch->send("No JS Trigger by that name.\r\n");
     }
-}
+};
 
 void do_stat_room(Character * ch)
 {
@@ -3926,7 +3824,7 @@ void do_stat_character(Character * ch, Character * k)
 	js_list_scripts( k, ch );
 }
 
-ACMD(do_statfind)
+CommandHandler do_statfind = DEFINE_COMMAND
 {
 	Character *victim = 0;
 	Object *object = 0;
@@ -4048,7 +3946,7 @@ ACMD(do_statfind)
 		else
 			ch->send("Nothing around by that name.\r\n");
 	}
-}
+};
 
 void Character::stopSnooping()
 {
@@ -4080,7 +3978,7 @@ void Character::stopSnooping()
 	}
 }
 
-ACMD(do_shutdown)
+CommandHandler do_shutdown = DEFINE_COMMAND
 {
 	char arg[MAX_INPUT_LENGTH];
 
@@ -4098,9 +3996,9 @@ ACMD(do_shutdown)
 		ch->send("Shutdown by %s.\r\n", GET_NAME(ch));
 		circle_shutdown = 1;
 	}
-}
+};
 
-ACMD(do_deny)
+CommandHandler do_deny = DEFINE_COMMAND
 {
 
 	Character *Snooper;
@@ -4118,10 +4016,10 @@ ACMD(do_deny)
 
 	ch->desc->snoop_by = NULL;
 	Snooper->desc->snooping = NULL;
-}
+};
 
 //Grant snooper permission to snoop.
-ACMD(do_grant)
+CommandHandler do_grant = DEFINE_COMMAND
 {
 	if( !ch->desc || !ch->desc->snoop_by || (ch->desc && ch->desc->snoop_by && ch->desc->snoop_by->character &&
 	ch->desc->snoop_by->character->hasPermissionToSnoop() ) )
@@ -4136,7 +4034,7 @@ ACMD(do_grant)
 
 	MudLog(BRF, MAX(GET_LEVEL(ch), LVL_APPR), TRUE, "%s has granted %s permission to snoop.",
 		GET_NAME(ch), GET_NAME(Snooper));
-}
+};
 
 bool Character::hasPermissionToSnoop()
 {
@@ -4153,7 +4051,7 @@ void Character::ToggleSnoop()
 	this->PermissionToSnoop = !this->PermissionToSnoop;
 }
 
-ACMD(do_snoop)
+CommandHandler do_snoop = DEFINE_COMMAND
 {
 	Character *victim, *tch;
 
@@ -4203,9 +4101,9 @@ ACMD(do_snoop)
 		ch->desc->snooping = victim->desc;
 		victim->desc->snoop_by = ch->desc;
 	}
-}
+};
 
-ACMD(do_switch)
+CommandHandler do_switch = DEFINE_COMMAND
 {
 	Character *victim;
 
@@ -4237,9 +4135,9 @@ ACMD(do_switch)
 		victim->desc = ch->desc;
 		ch->desc = NULL;
 	}
-}
+};
 
-ACMD(do_return)
+CommandHandler do_return = DEFINE_COMMAND
 {
 	if (ch->desc && ch->desc->original)
 	{
@@ -4256,9 +4154,9 @@ ACMD(do_return)
 		ch->desc->character->desc = ch->desc;
 		ch->desc = NULL;
 	}
-}
+};
 
-ACMD(do_mbload)
+CommandHandler do_mbload = DEFINE_COMMAND
 {
 	Character *mob;
 	int number, r_num;
@@ -4297,9 +4195,9 @@ ACMD(do_mbload)
 	if( mob->IsPurged() ) return;
 
 	js_load_triggers(mob);
-}
+};
 
-ACMD(do_oload)
+CommandHandler do_oload = DEFINE_COMMAND
 {
 	Object *obj;
 	int number, r_num;
@@ -4344,9 +4242,9 @@ ACMD(do_oload)
 	if( obj->IsPurged() ) return;
 
 	js_load_triggers(obj);
-}
+};
 
-ACMD(do_vstat)
+CommandHandler do_vstat = DEFINE_COMMAND
 {
 	Character *mob;
 	Object *obj;
@@ -4395,10 +4293,10 @@ ACMD(do_vstat)
 
 	else
 		ch->send("That'll have to be either 'obj' or 'mob'.\r\n");
-}
+};
 
 /* clean a room of all mobiles and objects */
-ACMD(do_purge)
+CommandHandler do_purge = DEFINE_COMMAND
 {
 	Character *vict, *next_v;
 	Object *obj, *next_o;
@@ -4477,7 +4375,7 @@ ACMD(do_purge)
 			obj->Extract(true);
 		}
 	}
-}
+};
 
 const char *logtypes[] =
     {
@@ -4488,7 +4386,7 @@ const char *logtypes[] =
         "\n"
     };
 
-ACMD(do_syslog)
+CommandHandler do_syslog = DEFINE_COMMAND
 {
 	int tp;
 
@@ -4517,11 +4415,11 @@ ACMD(do_syslog)
 		SET_BIT_AR(PRF_FLAGS(ch), PRF_LOG2);
 
 	ch->send("Your syslog is now %s.\r\n", logtypes[tp]);
-}
+};
 
 
 
-ACMD(do_advance)
+CommandHandler do_advance = DEFINE_COMMAND
 {
 	Character *victim;
 	char *name = ::arg, *level = buf2;
@@ -4617,9 +4515,9 @@ ACMD(do_advance)
 	       load ? " (Offline)" : "");
 
 	CLEANUP(victim, load);
-}
+};
 
-ACMD(do_restore)
+CommandHandler do_restore = DEFINE_COMMAND
 {
 	Character *vict;
 	int i;
@@ -4664,7 +4562,7 @@ ACMD(do_restore)
 		       GET_NAME(ch), GET_NAME(vict));
 
 	}
-}
+};
 
 void perform_immort_vis(Character *ch)
 {
@@ -4706,7 +4604,7 @@ void perform_immort_invis(Character *ch, int level)
 	ch->send("Your invisibility level is %d.\r\n", level);
 }
 
-ACMD(do_invis)
+CommandHandler do_invis = DEFINE_COMMAND
 {
 	int level;
 
@@ -4739,9 +4637,9 @@ ACMD(do_invis)
 		else
 			perform_immort_invis(ch, level);
 	}
-}
+};
 
-ACMD(do_gecho)
+CommandHandler do_gecho = DEFINE_COMMAND
 // EDITED BY STARK ON OCT 2003 TO TELL IMMS WHO DID WHAT GECHO
 {
 	Descriptor *pt;
@@ -4768,9 +4666,9 @@ ACMD(do_gecho)
 		else
 			ch->send(buf);
 	}
-}
+};
 
-ACMD(do_poofset)
+CommandHandler do_poofset = DEFINE_COMMAND
 {
 	skip_spaces(&argument);
 
@@ -4782,9 +4680,9 @@ ACMD(do_poofset)
 		return;
 
 	ch->send(OK);
-}
+};
 
-ACMD(do_dc)
+CommandHandler do_dc = DEFINE_COMMAND
 {
 	Descriptor *d;
 	int num_to_dc;
@@ -4837,9 +4735,9 @@ ACMD(do_dc)
 	else
 		MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE,
 		       "%s has closed socket %d.", GET_NAME(ch), d->desc_num);
-}
+};
 
-ACMD(do_wizlock)
+CommandHandler do_wizlock = DEFINE_COMMAND
 {
 	int value;
 	const char *when;
@@ -4880,9 +4778,9 @@ ACMD(do_wizlock)
 			break;
 	}
 	Conf->save();
-}
+};
 
-ACMD(do_date)
+CommandHandler do_date = DEFINE_COMMAND
 {
 	char *tmstr;
 	time_t mytime;
@@ -4912,9 +4810,9 @@ ACMD(do_date)
 		displayBuffer << "Up since " << tmstr << ": " << d << " day" << ((d == 1) ? "" : "s") << ", " << h << std::setfill('0') << std::setw(2) << ":" << std::setfill('0') << std::setw(2) << m;
 		ch->send("%s\r\n", displayBuffer.str().c_str());
 	}
-}
+};
 
-ACMD(do_last)
+CommandHandler do_last = DEFINE_COMMAND
 {
 	Character *vict;
 	std::list<pLogin> Logins;
@@ -4955,9 +4853,9 @@ ACMD(do_last)
 			GET_NAME(ch), GET_NAME(vict));
 	}
 	delete vict;
-}
+};
 
-ACMD(do_force)
+CommandHandler do_force = DEFINE_COMMAND
 {
 	Descriptor *i, *next_desc;
 	Character *vict, *next_force;
@@ -4987,7 +4885,7 @@ ACMD(do_force)
 			MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE,
 			       "(GC) %s forced %s to %s", GET_NAME(ch), GET_NAME(vict), to_force);
 
-			CommandInterpreter(vict, to_force);
+			CommandUtil::get()->interpretCommand(vict, to_force);
 		}
 	}
 
@@ -5008,7 +4906,7 @@ ACMD(do_force)
 				continue;
 
 			Act(buf1, TRUE, ch, NULL, vict, TO_VICT);
-			CommandInterpreter(vict, to_force);
+			CommandUtil::get()->interpretCommand(vict, to_force);
 		}
 	}
 	else if( !str_cmp(::arg, "all") )
@@ -5023,7 +4921,7 @@ ACMD(do_force)
 				continue;
 
 			Act(buf1, TRUE, ch, NULL, vict, TO_VICT);
-			CommandInterpreter(vict, to_force);
+			CommandUtil::get()->interpretCommand(vict, to_force);
 		}
 	}
 	else if( !str_cmp(::arg, "t_all") )
@@ -5034,10 +4932,10 @@ ACMD(do_force)
 		{
 			if( GET_LEVEL(vict) >= GET_LEVEL(ch) ) continue;
 			Act(buf1, TRUE, ch, NULL, vict, TO_VICT);
-			CommandInterpreter(vict, to_force);
+			CommandUtil::get()->interpretCommand(vict, to_force);
 		}
 	}
-}
+};
 
 const char *gcommtypes[] =
     {
@@ -5049,7 +4947,7 @@ const char *gcommtypes[] =
     };
 
 /* Modeled after do_color in act.informative.cpp */
-ACMD(do_gcomm)
+CommandHandler do_gcomm = DEFINE_COMMAND
 {
 	int tp;
 	
@@ -5077,9 +4975,9 @@ ACMD(do_gcomm)
 
 	ch->send("Your gcomm preference is now set to %s%s%s.\r\n", COLOR_RED(ch, CL_SPARSE),
 	         gcommtypes[tp], COLOR_NORMAL(ch, CL_OFF));
-}
+};
 
-ACMD(do_wiznet)
+CommandHandler do_wiznet = DEFINE_COMMAND
 {
 	Descriptor *d;
 	char emote = FALSE;
@@ -5235,9 +5133,9 @@ ACMD(do_wiznet)
 
 	if (PRF_FLAGGED(ch, PRF_NOREPEAT))
 		ch->send(OK);
-}
+};
 
-ACMD(do_zreset)
+CommandHandler do_zreset = DEFINE_COMMAND
 {
 	unsigned int i;
 	Zone *zone;
@@ -5273,10 +5171,11 @@ ACMD(do_zreset)
 	}
 	else
 		ch->send("Invalid zone number.\r\n");
-}
+};
 
-ACMD(do_global_mute)
+CommandHandler do_global_mute = DEFINE_COMMAND
 {
+	std::shared_ptr<Character> victSharedPointer;
 	Character *vict;
 	char arg[MAX_INPUT_LENGTH];
 	long result = 0;
@@ -5291,8 +5190,13 @@ ACMD(do_global_mute)
 
 	if(!(vict = get_char_vis(ch, arg)))
 	{
-		ch->send("There is no player by that name.\r\n");
-		return;
+		if(!CharacterUtil::getPlayerIndexByUserName(arg) || !(vict = CharacterUtil::loadCharacter(arg)))
+		{
+			ch->send("There is no player by that name.\r\n");
+			return;
+		}
+
+		victSharedPointer = std::shared_ptr<Character>(vict);
 	}
 
 	if (GET_LEVEL(vict) >= GET_LEVEL(ch))
@@ -5315,9 +5219,11 @@ ACMD(do_global_mute)
 		ch->send("%s is now able to use the global channel.\r\n", GET_NAME(vict));
 		vict->send("Your ability to use the global channel has been restored.\r\n");
 	}
-}
 
-ACMD(do_tell_mute)
+	vict->basicSave();
+};
+
+CommandHandler do_tell_mute = DEFINE_COMMAND
 {
 	Character *vict;
 	char arg[MAX_INPUT_LENGTH];
@@ -5357,9 +5263,9 @@ ACMD(do_tell_mute)
 		ch->send("%s is now able to use tells.\r\n", GET_NAME(vict));
 		vict->send("Your ability to send and receive tells has been restored.\r\n");
 	}
-}
+};
 
-ACMD(do_reroll)
+CommandHandler do_reroll = DEFINE_COMMAND
 {
 	Character *vict;
 	char name[MAX_INPUT_LENGTH], type[MAX_INPUT_LENGTH];
@@ -5466,9 +5372,9 @@ ACMD(do_reroll)
 		delete vict;
 
 	return;
-}
+};
 
-ACMD(do_wizutil)
+CommandHandler do_wizutil = DEFINE_COMMAND
 {
 	Character *vict;
 	bool load = false;
@@ -5613,7 +5519,7 @@ ACMD(do_wizutil)
 		if(load)
 			delete vict;
 	}
-}
+};
 
 struct BackupFileNameFunctor
 {
@@ -5656,7 +5562,7 @@ struct BackupFileNameFunctor
 	}
 };
 
-ACMD(do_wshow)
+CommandHandler do_wshow = DEFINE_COMMAND
 {
 	int j, k, l, con, i;
 	char self = 0;
@@ -6118,10 +6024,10 @@ ACMD(do_wshow)
 
 				sBuf << std::setw(4) << std::right << i;
 				sBuf << "    ";
-				sBuf << Time::FormatDate("%b %d, %Y %H:%M:%S", MiscUtil::Convert<time_t>(MyRow["timestamp"]));
+				sBuf << Time::FormatDate("%b %d, %Y %H:%M:%S", MiscUtil::convert<time_t>(MyRow["timestamp"]));
 				sBuf << "    ";
 				sBuf << grn << bld << std::setw(16) << std::left
-					<< (ch->player.level >= MiscUtil::Convert<int>(MyRow["invis_level"]) ? MyRow["username"] : "Someone") << nrm;
+					<< (ch->player.level >= MiscUtil::convert<int>(MyRow["invis_level"]) ? MyRow["username"] : "Someone") << nrm;
 				sBuf << "    ";
 				sBuf << cyn << MyRow["message"] << nrm;
 				sBuf << std::endl;
@@ -6405,7 +6311,7 @@ ACMD(do_wshow)
 			ch->send("Sorry, I don't understand that.\r\n");
 			break;
 	}
-}
+};
 
 /***************** The do_set function ***********************************/
 
@@ -7064,7 +6970,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 	return 1;
 }
 
-ACMD(do_set)
+CommandHandler do_set = DEFINE_COMMAND
 {
 	Character *vict = NULL, *cbuf = NULL;
 	char field[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH],
@@ -7166,9 +7072,9 @@ ACMD(do_set)
 	/* free the memory if we allocated it earlier */
 	if (is_file)
 		delete cbuf;
-}
+};
 
-ACMD(do_retool)
+CommandHandler do_retool = DEFINE_COMMAND
 {
 	char field[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH], mode[MAX_INPUT_LENGTH];
 	char **sBufPtr = NULL;
@@ -7225,7 +7131,7 @@ ACMD(do_retool)
 			strcpy((*sBufPtr), buf);
 	}
 	ch->send("You successfully retool( %s ) %s.\r\n", StringUtil::allLower(mode), obj->short_description);
-}
+};
 
 class CheckWotmudStatusJob : public Job
 {
@@ -7296,15 +7202,15 @@ public:
 
 };
 
-ACMD(do_wotmud)
+CommandHandler do_wotmud = DEFINE_COMMAND
 {
 	ch->send("Checking wotmud status...\r\n");
 
 	CheckWotmudStatusJob *job = new CheckWotmudStatusJob(ch->player.idnum);
 	ThreadedJobManager::get().addJob(job);
-}
+};
 
-ACMD(do_jmap)
+CommandHandler do_jmap = DEFINE_COMMAND
 {
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
 	std::string syntax = "Syntax: jmap list\r\n"
@@ -7511,4 +7417,4 @@ ACMD(do_jmap)
 	{
 		ch->send(syntax.c_str());
 	}
-}
+};

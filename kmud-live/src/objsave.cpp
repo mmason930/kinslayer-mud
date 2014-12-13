@@ -29,6 +29,9 @@
 #include "Descriptor.h"
 #include "rooms/Room.h"
 
+#include "commands/infrastructure/CommandUtil.h"
+#include "commands/infrastructure/CommandInfo.h"
+
 extern Index *obj_index;
 extern Descriptor *descriptor_list;
 extern Object *boot_object( Object obj);
@@ -40,9 +43,6 @@ void obj_from_char(struct object_data *object);
 std::set< int > Room::corpseRooms;
 
 /* Extern functions */
-ACMD(do_action);
-ACMD(do_tell);
-ACMD(do_retrieve);
 SPECIAL(receptionist);
 SPECIAL(cryogenicist);
 
@@ -1089,7 +1089,7 @@ int genReceptionist(Character * ch, Character * recep, char *cmd, char *arg, int
 
 	if (!cmd && !MiscUtil::random(0, 5))
 	{
-		do_action(recep, NULL, FindCommand(action_table[MiscUtil::random(0, 8)]), 0);
+		do_action(recep, NULL, CommandUtil::get()->getCommandIndex(action_table[MiscUtil::random(0, 8)]), 0);
 		return FALSE;
 	}
 
@@ -1222,7 +1222,7 @@ SPECIAL(receptionist)
 /*** Galnor 12/24/2009 - Place an item into another item / player's inventory, whether
    or not they are online.
 ***/
-ACMD( do_insert )
+CommandHandler  do_insert  = DEFINE_COMMAND
 {
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
 	*arg1 = *arg2 = *arg3 = '\0';
@@ -1303,8 +1303,8 @@ ACMD( do_insert )
 		obj->RemoveFromAll();
 		obj->Extract();
 	}
-}
-ACMD( do_retrieve )
+};
+CommandHandler  do_retrieve  = DEFINE_COMMAND
 {
 	char type[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
@@ -1348,4 +1348,4 @@ ACMD( do_retrieve )
 	{
 		ch->send("Retrieve what?\r\n");
 	}
-}
+};

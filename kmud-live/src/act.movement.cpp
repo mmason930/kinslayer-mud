@@ -53,21 +53,6 @@ int buildwalk(Character *ch, int dir);
 std::list<Track *> TrackList;
 const char *door_state(int state);
 
-ACMD(do_cover);
-ACMD(do_enter);
-ACMD(do_fade);
-ACMD(do_follow);
-ACMD(do_gen_door);
-ACMD(do_knock);
-ACMD(do_lead);
-ACMD(do_leave);
-ACMD(do_rest);
-ACMD(do_sense);
-ACMD(do_sit);
-ACMD(do_sleep);
-ACMD(do_stand);
-ACMD(do_wake);
-
 #define DOOR_FOUND(ch, door) ((!EXIT(ch, door)->hidden) || (EXIT(ch, door)->hidden && \
 GET_SKILL(ch, SKILL_SEARCH) > EXIT(ch, door)->hidden))
 
@@ -246,7 +231,7 @@ bool Character::CanTrack(Room *room)
 		return false;
 	return true;
 }
-ACMD(do_sense)
+CommandHandler do_sense = DEFINE_COMMAND
 {
 	skip_spaces(&argument);
 	std::list<Object *>::iterator obj;
@@ -290,9 +275,9 @@ ACMD(do_sense)
 			         ch->in_room->fadeCode().c_str(), COLOR_NORMAL(ch, CL_COMPLETE));
 		}
 	}
-}
+};
 
-ACMD(do_fade)
+CommandHandler do_fade = DEFINE_COMMAND
 {
 
 	int distance = 0, cost = 0;
@@ -401,9 +386,9 @@ ACMD(do_fade)
 			}
 		}
 	}
-}
+};
 
-ACMD(do_compel)
+CommandHandler do_compel = DEFINE_COMMAND
 {
 	Character *vict = 0;
 
@@ -462,7 +447,7 @@ ACMD(do_compel)
 			return;
 		}
 	}
-}
+};
 
 int can_move(Character *ch, int dir, int need_specials_check, bool flee)
 {
@@ -789,7 +774,7 @@ int perform_move(Character *ch, int dir, int need_specials_check)
 	return 0;
 }
 
-ACMD(do_lead)
+CommandHandler do_lead = DEFINE_COMMAND
 {
 	int percent;
 	char arg[MAX_INPUT_LENGTH];
@@ -840,12 +825,12 @@ ACMD(do_lead)
 		Act("$N refuses $n's attempt to lead $M.", FALSE, ch, 0, target, TO_ROOM, NULL, true);
 		return;
 	}
-}
+};
 
-ACMD(do_move)
+CommandHandler do_move = DEFINE_COMMAND
 {
 	perform_move(ch, subcmd - 1, 0);
-}
+};
 
 void Character::stopEavesdropping()
 {
@@ -983,7 +968,7 @@ int Object::KeyNum()
 	return (GET_OBJ_VAL(this, 2));
 }
 
-ACMD(do_gen_door)
+CommandHandler do_gen_door = DEFINE_COMMAND
 {
 	int door;
 	char type[MAX_INPUT_LENGTH], dir[MAX_INPUT_LENGTH];
@@ -1312,9 +1297,9 @@ ACMD(do_gen_door)
 		sprintf(buf, "The %s is %s from the other side.\r\n", reverse_exit->getKeywords(), subcmd == SCMD_OPEN ? "opened" : "closed");
 		sendToRoom(buf, EXIT(ch, door)->getToRoom());
 	}
-}
+};
 
-ACMD(do_enter)
+CommandHandler do_enter = DEFINE_COMMAND
 {
 	int door, n = 0;
 	unsigned int i;
@@ -1398,10 +1383,10 @@ ACMD(do_enter)
 	}
 	ch->send("You can't seem to find anything to enter.\r\n");
 
-}
+};
 
 
-ACMD(do_leave)
+CommandHandler do_leave = DEFINE_COMMAND
 {
 	int door;
 
@@ -1426,9 +1411,9 @@ ACMD(do_leave)
 		}
 		ch->send("I see no obvious exits to the outside.\r\n");
 	}
-}
+};
 
-ACMD(do_stand)
+CommandHandler do_stand = DEFINE_COMMAND
 {
 	switch (GET_POS(ch))
 	{
@@ -1462,10 +1447,10 @@ ACMD(do_stand)
 			GET_POS(ch) = POS_STANDING;
 			break;
 	}
-}
+};
 
 
-ACMD(do_sit)
+CommandHandler do_sit = DEFINE_COMMAND
 {
 	Object *target;
 	char arg1[MAX_INPUT_LENGTH];
@@ -1523,9 +1508,9 @@ ACMD(do_sit)
 			GET_POS(ch) = POS_SITTING;
 			break;
 	}
-}
+};
 
-ACMD(do_rest)
+CommandHandler do_rest = DEFINE_COMMAND
 {
 	switch (GET_POS(ch))
 	{
@@ -1560,9 +1545,9 @@ ACMD(do_rest)
 			GET_POS(ch) = POS_RESTING;
 			break;
 	}
-}
+};
 
-ACMD(do_sleep)
+CommandHandler do_sleep = DEFINE_COMMAND
 {
 	switch (GET_POS(ch))
 	{
@@ -1591,9 +1576,9 @@ ACMD(do_sleep)
 			GET_POS(ch) = POS_SLEEPING;
 			break;
 	}
-}
+};
 
-ACMD(do_wake)
+CommandHandler do_wake = DEFINE_COMMAND
 {
 	Character *vict;
 	int self = 0;
@@ -1636,10 +1621,10 @@ ACMD(do_wake)
 		Act("$n awakens.", TRUE, ch, 0, 0, TO_ROOM);
 		GET_POS(ch) = POS_SITTING;
 	}
-}
+};
 
 /* Galnor - 11/05/2009 - Knock on a door. */
-ACMD(do_knock)
+CommandHandler do_knock = DEFINE_COMMAND
 {
 	char doorName[MAX_INPUT_LENGTH];
 	Exit *dir = 0;
@@ -1716,9 +1701,9 @@ ACMD(do_knock)
 			}
 		}
 	}
-}
+};
 
-ACMD(do_follow)
+CommandHandler do_follow = DEFINE_COMMAND
 {
 	Character *leader;
 
@@ -1802,7 +1787,7 @@ ACMD(do_follow)
 			add_follower(ch, leader);
 		}
 	}
-}
+};
 
 bool Character::check_if_pc_in_group()
 {	

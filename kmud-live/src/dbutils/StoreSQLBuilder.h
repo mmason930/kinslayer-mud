@@ -38,28 +38,12 @@ public:
 		sprintf(intString, "%d", value);
 		return putEscapedString(columnName, intString);
 	}
-	
-	StoreSQLBuilder *put(const std::string &columnName, boost::optional<int> value) {
-	
-		if(value.is_initialized())
-			return put(columnName, value.get());
-		else
-			return put(columnName, std::string("NULL"));
-	}
 
 	StoreSQLBuilder *put(const std::string &columnName, long value) {
 		
 		char intString[32];
 		sprintf(intString, "%ld", value);
 		return putEscapedString(columnName, intString);
-	}
-	
-	StoreSQLBuilder *put(const std::string &columnName, boost::optional<long> value) {
-	
-		if(value.is_initialized())
-			return put(columnName, value.get());
-		else
-			return put(columnName, std::string("NULL"));
 	}
 
 	StoreSQLBuilder *put(const std::string &columnName, unsigned long value) {
@@ -69,27 +53,11 @@ public:
 		return putEscapedString(columnName, intString);
 	}
 	
-	StoreSQLBuilder *put(const std::string &columnName, boost::optional<unsigned long> value) {
-	
-		if(value.is_initialized())
-			return put(columnName, value.get());
-		else
-			return put(columnName, "NULL");
-	}
-
 	StoreSQLBuilder *put(const std::string &columnName, unsigned int value) {
 		
 		char intString[32];
 		sprintf(intString, "%u", value);
 		return putEscapedString(columnName, intString);
-	}
-	
-	StoreSQLBuilder *put(const std::string &columnName, boost::optional<unsigned int> value) {
-	
-		if(value.is_initialized())
-			return put(columnName, value.get());
-		else
-			return put(columnName, "NULL");
 	}
 
 	StoreSQLBuilder *put(const std::string &columnName, long long value) {
@@ -98,14 +66,6 @@ public:
 		sprintf(intString, "%lld", value);
 		return putEscapedString(columnName, intString);
 	}
-	
-	StoreSQLBuilder *put(const std::string &columnName, boost::optional<long long> value) {
-	
-		if(value.is_initialized())
-			return put(columnName, value.get());
-		else
-			return put(columnName, "NULL");
-	}
 
 	StoreSQLBuilder *put(const std::string &columnName, unsigned long long value) {
 		
@@ -113,26 +73,10 @@ public:
 		sprintf(intString, "%llu", value);
 		return putEscapedString(columnName, intString);
 	}
-	
-	StoreSQLBuilder *put(const std::string &columnName, boost::optional<unsigned long long> value) {
-	
-		if(value.is_initialized())
-			return put(columnName, value.get());
-		else
-			return put(columnName, std::string("NULL"));
-	}
 
 	StoreSQLBuilder *put(const std::string &columnName, bool value) {
 	
 		return put(columnName, sql::encodeBooleanInt(value));
-	}
-
-	StoreSQLBuilder *put(const std::string &columnName, boost::optional<bool> value) {
-	
-		if(value)
-			return put(columnName, value.get());
-		else
-			return put(columnName, "NULL");
 	}
 
 	StoreSQLBuilder *put(const std::string &columnName, const DateTime &value) {
@@ -140,29 +84,21 @@ public:
 		return putEscapedString(columnName, sql::encodeQuoteDate(value.getTime()));
 	}
 	
-	StoreSQLBuilder *put(const std::string &columnName, const boost::optional<DateTime> &value) {
-	
-		if(value)
-			return putEscapedString(columnName, sql::encodeQuoteDate(value.get().getTime()));
-		else
-			return put(columnName, "NULL");
+	template<typename T>
+	StoreSQLBuilder *put(const std::string &columnName, const boost::optional<T> &value) {
+
+		return value ? put(columnName, value.get()) : putEscapedString(columnName, "NULL");
 	}
 
 	StoreSQLBuilder *put(const std::string &columnName, const char *str) {
 	
-		if(str)
-			return putEscapedString(columnName, sql::escapeQuoteString(std::string(str)));
-		else
-			return putEscapedString(columnName, std::string("NULL"));
+		return str ? putEscapedString(columnName, sql::escapeQuoteString(std::string(str))) : putEscapedString(columnName, std::string("NULL"));
 	}
 	
 	template<typename T>
 	StoreSQLBuilder *put(const std::string &columnName, const Enum<T> *enumerator) {
 	
-		if(enumerator)
-			return put(columnName, enumerator->getValue());
-		else
-			return put(columnName, "NULL");
+		return enumerator ? put(columnName, enumerator->getValue()) : putEscapedString(columnName, "NULL");
 	}
 
 	std::string generateInsert() {

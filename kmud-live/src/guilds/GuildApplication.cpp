@@ -40,6 +40,16 @@ void GuildApplication::setSubmittedByUserId(const int submittedByUserId)
 	this->submittedByUserId = submittedByUserId;
 }
 
+int GuildApplication::getSubmittedByUserRace() const
+{
+	return submittedByUserRace;
+}
+
+void GuildApplication::setSubmittedByUserRace(int submittedByUserRace)
+{
+	this->submittedByUserRace = submittedByUserRace;
+}
+
 GuildApplicationStatus *GuildApplication::getStatus() const
 {
 	return status;

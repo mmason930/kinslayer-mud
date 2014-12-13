@@ -176,7 +176,7 @@ void Account::BootFromSQL( sql::Row MyRow )
 {
 	this->aID		= atoi( MyRow["id"].c_str() );
 	this->aName		= MyRow["account_name"];
-	this->aCreated	= MiscUtil::Convert< time_t >( MyRow["created"] );
+	this->aCreated	= MiscUtil::convert< time_t >( MyRow["created"] );
 	this->SetValidity( true );
 }
 bool SwitchManager::WillBeMultiplaying( const std::string &Host, const std::string &Name )

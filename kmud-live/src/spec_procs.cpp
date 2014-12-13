@@ -30,6 +30,9 @@
 #include "ClanUtil.h"
 #include "rooms/Room.h"
 
+#include "commands/infrastructure/CommandUtil.h"
+#include "commands/infrastructure/CommandInfo.h"
+
 /*   external vars  */
 
 extern Character *character_list;
@@ -44,14 +47,6 @@ extern char *class_types[];
 void fireball(Character * ch);
 void cast_fireball(Character * ch);
 void add_follower(Character * ch, Character * leader);
-ACMD(do_drop);
-ACMD(do_gen_door);
-ACMD(do_say);
-ACMD(do_tell);
-ACMD(do_yell);
-ACMD(do_gen_comm);
-ACMD(do_follow);
-ACMD(do_assist);
 
 int cmd_yell;
 /* local functions */
@@ -306,7 +301,7 @@ SPECIAL(angry)
 			{
 				char sYell[64];
 				strcpy(sYell, "yell Fresh meat! Some with blood, but I'll take care of that!");
-				CommandInterpreter(cook, sYell);
+				CommandUtil::get()->interpretCommand(cook, sYell);
 				break;
 			}
 		}
@@ -361,11 +356,11 @@ bool Character::CanPractice( Weave* weave )
 					sWater = weave->getAttribute("Water");
 
 		//Has the channeler yet to unlock the weave with the required elements?
-		if( getSkill(WeaveManager::GetManager().GetWeaveVnum("Fire")) < MiscUtil::Convert<int>(sFire)    ||
-			getSkill(WeaveManager::GetManager().GetWeaveVnum("Earth")) < MiscUtil::Convert<int>(sEarth)  ||
-			getSkill(WeaveManager::GetManager().GetWeaveVnum("Spirit")) < MiscUtil::Convert<int>(sSpirit)   ||
-			getSkill(WeaveManager::GetManager().GetWeaveVnum("Air")) < MiscUtil::Convert<int>(sAir) ||
-			getSkill(WeaveManager::GetManager().GetWeaveVnum("Water")) < MiscUtil::Convert<int>(sWater)
+		if( getSkill(WeaveManager::GetManager().GetWeaveVnum("Fire")) < MiscUtil::convert<int>(sFire)    ||
+			getSkill(WeaveManager::GetManager().GetWeaveVnum("Earth")) < MiscUtil::convert<int>(sEarth)  ||
+			getSkill(WeaveManager::GetManager().GetWeaveVnum("Spirit")) < MiscUtil::convert<int>(sSpirit)   ||
+			getSkill(WeaveManager::GetManager().GetWeaveVnum("Air")) < MiscUtil::convert<int>(sAir) ||
+			getSkill(WeaveManager::GetManager().GetWeaveVnum("Water")) < MiscUtil::convert<int>(sWater)
 		)
 		{
 			return false;

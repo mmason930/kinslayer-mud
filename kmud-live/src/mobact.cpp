@@ -38,11 +38,6 @@ void perform_assist(Character *ch, Character *helpee);
 int GetSharedClan(Character *p1, Character *p2);
 bool isInArena(Character *ch);
 
-ACMD(do_bash);
-ACMD(do_get);
-ACMD(do_hit);
-ACMD(do_stand);
-
 /* local functions */
 void mobileActivity(void);
 

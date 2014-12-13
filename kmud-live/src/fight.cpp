@@ -58,8 +58,6 @@ int move_damage( Character *ch, Character *vict, int low, int high );
 int mana_damage( Character *ch, Character *vict, int damage );
 
 /* External procedures */
-char *fread_action( FILE * fl, int nr );
-ACMD( do_flee );
 int RandomBodyPart();
 /* local functions */
 void check_fighting( void );
@@ -109,7 +107,7 @@ PKManager::PKManager()
 	if(topKillIdString == "NULL")
 		this->nextKillID = 0;
 	else
-		this->nextKillID = MiscUtil::Convert<int>(topKillIdString);
+		this->nextKillID = MiscUtil::convert<int>(topKillIdString);
 }
 PKManager::~PKManager() {}
 
@@ -255,7 +253,7 @@ void Character::InterruptTimer()
 		int cost = 0;
 		if( WeaveManager::GetManager().GetWeave(s) && WeaveManager::GetManager().GetWeave(s)->hasAttribute("Cost"))
 		{
-			cost = MiscUtil::Convert<int>(WeaveManager::GetManager().GetWeave(s)->getAttribute("Cost"));
+			cost = MiscUtil::convert<int>(WeaveManager::GetManager().GetWeave(s)->getAttribute("Cost"));
 			cost = cost * 2 / 3;
 			if( cost > 0)
 				GET_MANA(this) = MAX(0, GET_MANA(this) - cost);
@@ -1768,7 +1766,7 @@ int hit( Character * ch, Character * victim, int type )
 	{
 		Weave* weave = WeaveManager::GetManager().GetWeave("Dark Plague");
 		if( weave )
-			roll += MiscUtil::Convert<int>(weave->getAttribute("HitRollModifier"));
+			roll += MiscUtil::convert<int>(weave->getAttribute("HitRollModifier"));
 	}
 
 	if ( !(roll <= 1) && ( (roll == 20 && !IS_NPC(ch)) || ch->OffenseMeleeRoll() > victim->DefenseMeleeRoll() ) )

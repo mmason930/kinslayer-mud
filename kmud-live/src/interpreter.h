@@ -15,20 +15,16 @@ class Character;
 class Object;
 class Room;
 
-#define ACMD(name)  \
-   void name(Character *ch, char *argument, int cmd, int subcmd)
+#include <functional>
 
-ACMD( do_move );
+#include "commands/infrastructure/CommandUtil.h"
 
-#define CMD_NAME (cmd)
-#define CMD_IS(ch, cmd_name)	(!strcmp(complete_cmd_info[ch->cmd_no].command, cmd_name))
-#define IS_MOVE(cmdnum) (complete_cmd_info[cmdnum].command_pointer == do_move)
+#define DEFINE_COMMAND	[](Character *ch, char *argument, int cmd, int subcmd)
+#define CMD_IS(ch, cmd_name)	(!strcmp(CommandUtil::get()->getCommandByIndex(ch->cmd_no)->command, cmd_name))
 
-void	CommandInterpreter( Character *ch, char *argument );
 int		search_block( const char *arg, const char **listy, int exact );
 int		reserved_word(const char *argument);
 int		_parse_name(const char *arg, char *name);
-char	lower( char c );
 char	*OneArgument( char *argument, char *first_arg, bool conv_case=true );
 char	*OneWord( char *argument, char *first_arg );
 char	*AnyOneArg( char *argument, char *first_arg );
@@ -37,52 +33,10 @@ int		fill_word( const char *argument );
 void	HalfChop( char *string, char *arg1, char *arg2 );
 int		IsAbbrev( const char *arg1, const char *arg2 );
 int		IsNumber( const char *str );
-int		FindCommand( const char *command );
-std::string	GetCommand( char *argument );
 void	skip_spaces( char **str );
 char	*delete_doubledollar( char *str );
-char *PERS(Character *ch, Character *vict, const char *bgColor=0);
+char	*PERS(Character *ch, Character *vict, const char *bgColor=0);
 
-/* for compatibility with 2.20: */
-#define argument_interpreter(a, b, c) TwoArguments(a, b, c)
-
-class CommandInfo;
-
-class CommandManager
-{
-private:
-	static CommandManager *Self;
-	std::vector< CommandInfo * > MyCommands;
-
-	CommandManager();
-	~CommandManager();
-public:
-	CommandManager &GetManager();
-
-	void AppendCommand( const std::string cmd, const std::string sort, void (*command_pointer)(Character *,char *,int,int),
-						const byte mp, const byte ml, const sh_int subcmd, const float timer, const byte vml);
-	void BootCommands();
-	void SaveCommands();
-};
-
-class CommandInfo
-{
-public:
-	~CommandInfo();
-	//CommandInfo();
-
-	std::string command;
-	std::string sort_as;
-	byte minimum_position;
-	void	( *command_pointer )
-	( Character *ch, char * argument, int cmd, int subcmd );
-	byte minimum_level;
-	sh_int	subcmd;
-	float timer;
-	byte view_minimum_level;
-};
-
-extern std::map<int, std::pair<std::string,int> > DisabledCommands;
 
 class CommManager
 {
@@ -90,27 +44,20 @@ private:
 	static CommManager *Self;
 	CommManager();
 	~CommManager();
-
 public:
 	static CommManager &GetManager();
-
+		
 	void Free();
 	const int SaveComm( const std::string &Type, const std::string &Message, Character *sender,
 		const int room_vnum, Character *recipient=0);
 	const int SaveComm( const std::string &Type, const std::string &Message, Character *sender,
 		const int room_vnum, const int rid, const int invis_level);
 private:
-	const int SaveComm( const std::string &Type, const std::string &Message, const char sType, 
+	const int SaveComm( const std::string &Type, const std::string &Message, const char sType,
 		const int sid, const char rType, const int rid, const int invis_level, const int room_vnum);
 };
 
-/*
- * Necessary for CMD_IS macro.  Borland needs the structure defined first
- * so it has been moved down here.
- */
-#ifndef __INTERPRETER_C__
-extern class CommandInfo *complete_cmd_info;
-#endif
+extern std::map<int, std::pair<std::string,int> > DisabledCommands;
 
 const int ALIAS_SIMPLE = 0;
 const int ALIAS_COMPLEX = 1;
@@ -271,5 +218,221 @@ const int SCMD_SKEWER = 1;
 /* do butcher */
 const int SCMD_BUTCHER = 0;
 const int SCMD_SKIN = 1;
+
+//Command function declarations.
+extern CommandHandler  do_action ;
+extern CommandHandler  do_advance ;
+extern CommandHandler  do_alias ;
+extern CommandHandler  do_assist ;
+extern CommandHandler  do_at ;
+extern CommandHandler  do_auction ;
+extern CommandHandler  do_award ;
+extern CommandHandler  do_backstab ;
+extern CommandHandler  do_ban ;
+extern CommandHandler  do_bash ;
+extern CommandHandler  do_butcher ;
+extern CommandHandler  do_break ;
+extern CommandHandler  do_scalp ;
+extern CommandHandler  do_call ;
+extern CommandHandler  do_cast ;
+extern CommandHandler  do_cedit ;
+extern CommandHandler  do_charge ;
+extern CommandHandler  do_choke ;
+extern CommandHandler  do_clan ;
+extern CommandHandler  do_cledit ;
+extern CommandHandler  do_color ;
+extern CommandHandler  do_commands ;
+extern CommandHandler  do_compel ;
+extern CommandHandler  do_consider ;
+extern CommandHandler  do_copy ;
+extern CommandHandler  do_countdown ;
+extern CommandHandler  do_council ;
+extern CommandHandler  do_credits ;
+extern CommandHandler  do_diceroll ;
+extern CommandHandler  do_dig ;
+extern CommandHandler  do_disable ;
+extern CommandHandler  do_dismount ;
+extern CommandHandler  do_demote ;
+extern CommandHandler  do_drink ;
+extern CommandHandler  do_date ;
+extern CommandHandler  do_dc ;
+extern CommandHandler  do_declan ;
+extern CommandHandler  do_deny ;
+extern CommandHandler  do_diagnose ;
+extern CommandHandler  do_display ;
+extern CommandHandler  do_draw ;
+extern CommandHandler  do_drop ;
+extern CommandHandler  do_eat ;
+extern CommandHandler  do_echo ;
+extern CommandHandler  do_effuse ;
+extern CommandHandler  do_email ;
+extern CommandHandler  do_enable ;
+extern CommandHandler  do_enter ;
+extern CommandHandler  do_equipment ;
+extern CommandHandler  do_examine ;
+extern CommandHandler  do_exit ;
+extern CommandHandler  do_exits ;
+extern CommandHandler  do_extra ;
+extern CommandHandler  do_fade ;
+extern CommandHandler  do_flee ;
+extern CommandHandler  do_find ;
+extern CommandHandler  do_follow ;
+extern CommandHandler  do_force ;
+extern CommandHandler  do_gecho ;
+extern CommandHandler  do_gcomm ;
+extern CommandHandler  do_gen_comm ;
+extern CommandHandler  do_gen_door ;
+extern CommandHandler  do_gen_ps ;
+extern CommandHandler  do_gen_tog ;
+extern CommandHandler  do_get ;
+extern CommandHandler  do_give ;
+extern CommandHandler  do_global_mute ;
+extern CommandHandler  do_gold ;
+extern CommandHandler  do_goto ;
+extern CommandHandler  do_grab ;
+extern CommandHandler  do_grant ;
+extern CommandHandler  do_group ;
+extern CommandHandler  do_gsay ;
+extern CommandHandler  do_hamstring ;
+extern CommandHandler  do_hide ;
+extern CommandHandler  do_hit ;
+extern CommandHandler  do_ignore ;
+extern CommandHandler  do_incognito ;
+extern CommandHandler  do_info ;
+extern CommandHandler  do_insult ;
+extern CommandHandler  do_inventory ;
+extern CommandHandler  do_invert ;
+extern CommandHandler  do_invis ;
+extern CommandHandler  do_ipfind ;
+extern CommandHandler  do_jedit ;
+extern CommandHandler  do_jmap ;
+extern CommandHandler  do_jstat ;
+extern CommandHandler  do_jattach ;
+extern CommandHandler  do_insert ;
+extern CommandHandler  do_kick ;
+extern CommandHandler  do_kill ;
+extern CommandHandler  do_klist ;
+extern CommandHandler  do_knock ;
+extern CommandHandler  do_lag ;
+extern CommandHandler  do_last ;
+extern CommandHandler  do_lead ;
+extern CommandHandler  do_leave ;
+extern CommandHandler  do_levels ;
+extern CommandHandler  do_look ;
+extern CommandHandler  do_locate;
+extern CommandHandler  do_mark ;
+extern CommandHandler  do_mbload ;
+extern CommandHandler  do_memory ;
+extern CommandHandler  do_mlist ;
+extern CommandHandler  do_move ;
+extern CommandHandler  do_myzones ;
+extern CommandHandler  do_not_here ;
+extern CommandHandler  do_notice ;
+extern CommandHandler  do_noreply ;
+extern CommandHandler  do_offer ;
+extern CommandHandler  do_oload ;
+extern CommandHandler  do_olc ;
+extern CommandHandler  do_olist ;
+extern CommandHandler  do_order ;
+extern CommandHandler  do_override ;
+extern CommandHandler  do_pardon ;
+extern CommandHandler  do_page ;
+extern CommandHandler  do_poofset ;
+extern CommandHandler  do_pour ;
+extern CommandHandler  do_practice ;
+extern CommandHandler  do_precisestrike ;
+extern CommandHandler  do_pulverize ;
+extern CommandHandler  do_purge ;
+extern CommandHandler  do_put ;
+extern CommandHandler  do_quit ;
+extern CommandHandler  do_qval ;
+extern CommandHandler  do_rage ;
+extern CommandHandler  do_rank ;
+extern CommandHandler  do_reboot ;
+extern CommandHandler  do_release ;
+extern CommandHandler  do_remove ;
+extern CommandHandler  do_rent ;
+extern CommandHandler  do_reply ;
+extern CommandHandler  do_reroll ;
+extern CommandHandler  do_rescue ;
+extern CommandHandler  do_reset ;
+extern CommandHandler  do_rest ;
+extern CommandHandler  do_restat ;
+extern CommandHandler  do_restore ;
+extern CommandHandler  do_retool ;
+extern CommandHandler  do_return ;
+extern CommandHandler  do_retrieve ;
+extern CommandHandler  do_ride ;
+extern CommandHandler  do_rlist ;
+extern CommandHandler  do_say ;
+extern CommandHandler  do_speak ;
+extern CommandHandler  do_save ;
+extern CommandHandler  do_scan ;
+extern CommandHandler  do_search ;
+extern CommandHandler  do_self_delete ;
+extern CommandHandler  do_send ;
+extern CommandHandler  do_sense ;
+extern CommandHandler  do_set ;
+extern CommandHandler  do_shadowstep ;
+extern CommandHandler  do_sheath ;
+extern CommandHandler  do_shieldblock ;
+extern CommandHandler  do_show ;
+extern CommandHandler  do_shutdown ;
+extern CommandHandler  do_sit ;
+extern CommandHandler  do_skillset ;
+extern CommandHandler  do_sleep ;
+extern CommandHandler  do_slist ;
+extern CommandHandler  do_sneak ;
+extern CommandHandler  do_snoop ;
+extern CommandHandler  do_source ;
+extern CommandHandler  do_spec_comm ;
+extern CommandHandler  do_stand ;
+extern CommandHandler  do_statfind ;
+extern CommandHandler  do_statedit ;
+extern CommandHandler  do_steal ;
+extern CommandHandler  do_switch ;
+extern CommandHandler  do_syslog ;
+extern CommandHandler  do_teleport ;
+extern CommandHandler  do_tell ;
+extern CommandHandler  do_tell_mute ;
+extern CommandHandler  do_test_roll ;
+extern CommandHandler  do_time ;
+extern CommandHandler  do_toggle ;
+extern CommandHandler  do_track ;
+extern CommandHandler  do_trans ;
+extern CommandHandler  do_unban ;
+extern CommandHandler  do_ungroup ;
+extern CommandHandler  do_untie ;
+extern CommandHandler  do_use ;
+extern CommandHandler  do_users ;
+extern CommandHandler  do_visible ;
+extern CommandHandler  do_view ;
+extern CommandHandler  do_vnum ;
+extern CommandHandler  do_vstat ;
+extern CommandHandler  do_wake ;
+extern CommandHandler  do_warn ;
+extern CommandHandler  do_warrant ;
+extern CommandHandler  do_warrants ;
+extern CommandHandler  do_wear ;
+extern CommandHandler  do_weather ;
+extern CommandHandler  do_wedit ;
+extern CommandHandler  do_where ;
+extern CommandHandler  do_whirlwind ;
+extern CommandHandler  do_wield ;
+extern CommandHandler  do_wimpy ;
+extern CommandHandler  do_wizlock ;
+extern CommandHandler  do_wiznet ;
+extern CommandHandler  do_wizutil ;
+extern CommandHandler  do_wotmud ;
+extern CommandHandler  do_write ;
+extern CommandHandler  do_wshow ;
+extern CommandHandler  do_zap ;
+extern CommandHandler  do_zlist ;
+extern CommandHandler  do_zreset ;
+extern CommandHandler  do_saveall ;
+extern CommandHandler  do_saveolc ;
+extern CommandHandler  do_stat ;
+extern CommandHandler  do_change ;
+extern CommandHandler  do_jslist ;
 
 #endif

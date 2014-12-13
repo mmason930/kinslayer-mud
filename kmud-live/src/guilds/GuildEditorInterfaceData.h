@@ -11,7 +11,10 @@ private:
 protected:
 	std::string newGuildName;
 	std::string newGuildDescription;
-	int reviewingGuildApplicationId;
+	std::string applicationDenialReason;
+	int guildApplicationId;
+	int guildId;
+	int guildJoinApplicationId;
 public:
 
 	std::string getNewGuildName() const { return newGuildName; }
@@ -20,8 +23,17 @@ public:
 	std::string getNewGuildDescription() const { return newGuildDescription; }
 	void setNewGuildDescription(const std::string &newGuildDescription) { this->newGuildDescription = newGuildDescription; }
 
-	int getReviewingGuildApplicationId() const { return reviewingGuildApplicationId; }
-	void setReviewingGuildApplicationId(int reviewingGuildApplicationId) { this->reviewingGuildApplicationId = reviewingGuildApplicationId; }
+	int getGuildApplicationId() const { return guildApplicationId; }
+	void setGuildApplicationId(int guildApplicationId) { this->guildApplicationId = guildApplicationId; }
+
+	std::string getApplicationDenialReason() const { return applicationDenialReason; };
+	void setApplicationDenialReason(const std::string &applicationDenialReason) { this->applicationDenialReason = applicationDenialReason; }
+
+	int getGuildId() const { return guildId; }
+	void setGuildId(int guildId) { this->guildId = guildId; }
+
+	int getGuildJoinApplicationId() const { return guildJoinApplicationId; }
+	void setGuildJoinApplicationId(int guildJoinApplicationId) { this->guildJoinApplicationId = guildJoinApplicationId; }
 };
 
 #endif

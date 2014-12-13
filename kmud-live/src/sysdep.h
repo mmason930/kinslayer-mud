@@ -114,6 +114,8 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <functional>
+#include <boost/optional.hpp>
 //#include <mysql.h>
 //#include <errmsg.h>
 /*

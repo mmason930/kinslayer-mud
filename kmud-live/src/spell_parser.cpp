@@ -224,7 +224,7 @@ int PerformWeave( Character* caster, Character* cvict, Object* ovict, char* argu
 	return 1;
 }
 
-ACMD( do_cast )
+CommandHandler  do_cast  = DEFINE_COMMAND
 {
 	char* s;
 	Character* cvict = 0;
@@ -279,7 +279,7 @@ ACMD( do_cast )
 		return;
 	}
 
-	if( ch->points.mana < MiscUtil::Convert<int>(weave->getAttribute("Cost")) )
+	if( ch->points.mana < MiscUtil::convert<int>(weave->getAttribute("Cost")) )
 	{
 		ch->send("You are too drained to complete the weave.\r\n");
 		return;
@@ -377,7 +377,7 @@ ACMD( do_cast )
 		ch->send("You begin channeling the appropriate flows...\r\n");
 		sendElementMessages(ch, weave);
 		ch->command_ready = true;
-		ch->timer = MiscUtil::Convert<float>(weave->getAttribute("Timer"));
+		ch->timer = MiscUtil::convert<float>(weave->getAttribute("Timer"));
 		if(weave->getName() == "Gate")
 			ch->setGateTimer();
 		ch->player.target = cvict;
@@ -398,7 +398,7 @@ ACMD( do_cast )
 		}
 		PerformWeave(ch, cvict, ovict, s, spellnum);
 	}
-}
+};
 
 void sendElementMessages( Character *ch, Weave *weave )
 {

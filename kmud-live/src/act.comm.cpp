@@ -41,20 +41,6 @@ extern Character *character_list;
 int is_tell_ok(Character *ch, Character *vict);
 const char *DARKNESS_CHECK(Character *ch, Character *vict);
 
-ACMD(do_say);
-ACMD(do_tell);
-ACMD(do_reply);
-ACMD(do_spec_comm);
-ACMD(do_write);
-ACMD(do_page);
-ACMD(do_gen_comm);
-ACMD(do_speak);
-ACMD(do_clan);
-ACMD(do_rank);
-ACMD(do_warrant);
-ACMD(do_declan);
-ACMD(do_pardon);
-
 CommManager *CommManager::Self = NULL;
 CommManager::CommManager() {}
 CommManager::~CommManager() {}
@@ -193,7 +179,7 @@ std::string Character::ScrambleSpeech(const std::string &Speech, Character *List
 	return FinalSpeech;
 }
 
-ACMD(do_say)
+CommandHandler do_say = DEFINE_COMMAND
 {
 	Character *vict;
 	std::string SayType;
@@ -261,9 +247,9 @@ ACMD(do_say)
 
 	// trigger check
     js_speech_triggers(ch, argument);
-}
+};
 
-ACMD(do_speak)
+CommandHandler do_speak = DEFINE_COMMAND
 {
 	Descriptor *pt;
 	char arg1[MAX_INPUT_LENGTH], *speech = new char[MAX_INPUT_LENGTH];
@@ -368,7 +354,7 @@ ACMD(do_speak)
 			         speech, COLOR_NORMAL(ch, CL_NORMAL));
 	}
 	delete[] speech;
-}
+};
 
 void Character::NewbieTip(const char *msg, ...)
 {
@@ -467,7 +453,7 @@ int is_tell_ok(Character *ch, Character *vict)
  * Yes, do_tell probably could be combined with whisper and ask, but
  * called frequently, and should IMHO be kept as tight as possible.
  */
-ACMD(do_tell)
+CommandHandler do_tell = DEFINE_COMMAND
 {
 	Character *vict;
 
@@ -480,9 +466,9 @@ ACMD(do_tell)
 		ch->send(NOPERSON);
 	else if (is_tell_ok(ch, vict))
 		ch->SendTell(vict, buf2);
-}
+};
 
-ACMD(do_reply)
+CommandHandler do_reply = DEFINE_COMMAND
 {
 	Character *tch = character_list;
 
@@ -521,9 +507,9 @@ ACMD(do_reply)
 		else if (is_tell_ok(ch, tch))
 			ch->SendTell(tch, argument);
 	}
-}
+};
 
-ACMD(do_spec_comm)
+CommandHandler do_spec_comm = DEFINE_COMMAND
 {
 	Character *vict;
 	const char *action_sing, *action_plur, *action_others;
@@ -572,11 +558,11 @@ ACMD(do_spec_comm)
 		}
 		Act(action_others, FALSE, ch, 0, vict, TO_NOTVICT);
 	}
-}
+};
 
 const int MAX_NOTE_LENGTH = 1000; // arbitrary
 
-ACMD(do_write)
+CommandHandler do_write = DEFINE_COMMAND
 {
 	Object *paper = 0, *pen = 0;
 	char *papername, *penname, msg[MAX_STRING_LENGTH], cur[MAX_STRING_LENGTH], waste[MAX_STRING_LENGTH];
@@ -722,9 +708,9 @@ ACMD(do_write)
 		ch->desc->str = &paper->action_description;
 		ch->desc->max_str = MAX_NOTE_LENGTH;
 	}
-}
+};
 
-ACMD(do_page)
+CommandHandler do_page = DEFINE_COMMAND
 {
 	Descriptor *d;
 	Character *vict;
@@ -767,13 +753,13 @@ ACMD(do_page)
 		else
 			ch->send("There is no such person in the game!\r\n");
 	}
-}
+};
 
 /**********************************************************************
  * generalized communication func, originally by Fred C. Merkel (Torg) *
   *********************************************************************/
 
-ACMD(do_gen_comm)
+CommandHandler do_gen_comm = DEFINE_COMMAND
 {
 	Descriptor *i;
 	char color_on[24];
@@ -1023,4 +1009,4 @@ ACMD(do_gen_comm)
 				i->send(NORMAL);
 		}
 	}
-}
+};

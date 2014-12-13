@@ -74,8 +74,6 @@ void JSCharacter::sendRaw( std::string message )
 	real->send(StringUtil::vaEscape(message));
 }
 
-ACMD(do_say);
-
 struct GameTime *real_time_passed(time_t t2, time_t t1);
 
 extern std::vector<Object*> obj_proto;

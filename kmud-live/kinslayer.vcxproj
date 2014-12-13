@@ -112,6 +112,8 @@
     <ClCompile Include="src\cledit.cpp" />
     <ClCompile Include="src\comm.cpp" />
     <ClCompile Include="src\commands\immortals\Locate.cpp" />
+    <ClCompile Include="src\commands\infrastructure\CommandUtil.cpp" />
+    <ClCompile Include="src\commands\infrastructure\Social.cpp" />
     <ClCompile Include="src\config.cpp" />
     <ClCompile Include="src\constants.cpp" />
     <ClCompile Include="src\DatabaseUtil.cpp" />
@@ -131,8 +133,12 @@
     <ClCompile Include="src\graph.cpp" />
     <ClCompile Include="src\guilds\Guild.cpp" />
     <ClCompile Include="src\guilds\GuildApplication.cpp" />
+    <ClCompile Include="src\guilds\GuildApplicationSignature.cpp" />
+    <ClCompile Include="src\guilds\GuildApplicationSignatureStatus.cpp" />
     <ClCompile Include="src\guilds\GuildApplicationStatus.cpp" />
     <ClCompile Include="src\guilds\GuildEditorInterface.cpp" />
+    <ClCompile Include="src\guilds\GuildJoinApplication.cpp" />
+    <ClCompile Include="src\guilds\GuildJoinApplicationStatus.cpp" />
     <ClCompile Include="src\guilds\GuildStatus.cpp" />
     <ClCompile Include="src\guilds\GuildUtil.cpp" />
     <ClCompile Include="src\guilds\UserGuild.cpp" />
@@ -179,6 +185,8 @@
     <ClCompile Include="src\statedit.cpp" />
     <ClCompile Include="src\stats.cpp" />
     <ClCompile Include="src\SystemUtil.cpp" />
+    <ClCompile Include="src\test\general\GeneralTestCase.cpp" />
+    <ClCompile Include="src\test\TestUtil.cpp" />
     <ClCompile Include="src\TextTableBuilder.cpp" />
     <ClCompile Include="src\threaded_jobs.cpp" />
     <ClCompile Include="src\UserClan.cpp" />
@@ -222,6 +230,9 @@
     <ClInclude Include="src\clans.h" />
     <ClInclude Include="src\ClanUtil.h" />
     <ClInclude Include="src\comm.h" />
+    <ClInclude Include="src\commands\infrastructure\CommandInfo.h" />
+    <ClInclude Include="src\commands\infrastructure\CommandUtil.h" />
+    <ClInclude Include="src\commands\infrastructure\Social.h" />
     <ClInclude Include="src\conf.h" />
     <ClInclude Include="src\constants.h" />
     <ClInclude Include="src\customcmds.h" />
@@ -247,9 +258,13 @@
     <ClInclude Include="src\GatewayDescriptorType.h" />
     <ClInclude Include="src\guilds\Guild.h" />
     <ClInclude Include="src\guilds\GuildApplication.h" />
+    <ClInclude Include="src\guilds\GuildApplicationSignature.h" />
+    <ClInclude Include="src\guilds\GuildApplicationSignatureStatus.h" />
     <ClInclude Include="src\guilds\GuildApplicationStatus.h" />
     <ClInclude Include="src\guilds\GuildEditorInterface.h" />
     <ClInclude Include="src\guilds\GuildEditorInterfaceData.h" />
+    <ClInclude Include="src\guilds\GuildJoinApplication.h" />
+    <ClInclude Include="src\guilds\GuildJoinApplicationStatus.h" />
     <ClInclude Include="src\guilds\GuildStatus.h" />
     <ClInclude Include="src\guilds\GuildUtil.h" />
     <ClInclude Include="src\guilds\UserGuild.h" />
@@ -297,6 +312,9 @@
     <ClInclude Include="src\sysdep.h" />
     <ClInclude Include="src\SystemUtil.h" />
     <ClInclude Include="src\telnet.h" />
+    <ClInclude Include="src\test\general\GeneralTestCase.h" />
+    <ClInclude Include="src\test\TestCase.h" />
+    <ClInclude Include="src\test\TestUtil.h" />
     <ClInclude Include="src\TextTableBuilder.h" />
     <ClInclude Include="src\threaded_jobs.h" />
     <ClInclude Include="src\UserClan.h" />

@@ -348,7 +348,7 @@ void StateditSetup(Descriptor *d)
 	StateditDisplayMainMenu(d);
 }
 
-ACMD(do_statedit)
+CommandHandler do_statedit = DEFINE_COMMAND
 {
 	Descriptor *d;
 	char buf1[MAX_STRING_LENGTH];
@@ -381,4 +381,4 @@ ACMD(do_statedit)
 	SET_BITK(PLR_FLAGS(ch), Q_BIT(PLR_WRITING));
 
 	MudLog(BRF, LVL_IMPL, TRUE,  "OLC: %s starts editing the stat tables.", GET_NAME(ch));
-}
+};

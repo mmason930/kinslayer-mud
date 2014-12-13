@@ -55,7 +55,7 @@ extern GameTime time_info;
 /******************************************************************************/
 /** Routines                                                                 **/
 /******************************************************************************/
-ACMD(do_cedit)
+CommandHandler do_cedit = DEFINE_COMMAND
 {
 	Descriptor *d;
 	char buf1[MAX_STRING_LENGTH];
@@ -100,7 +100,7 @@ ACMD(do_cedit)
 
 		Conf->save();
 	}
-}
+};
 
 /*-------------------------------------------------------------------*/
 
@@ -2035,7 +2035,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				return;
 			} else {
 				d->olc->weave = new Weave();
-				d->olc->weave->setAttribute("Vnum", MiscUtil::Convert<std::string>(MiscUtil::Convert<int>(arg)));
+				d->olc->weave->setAttribute("Vnum", MiscUtil::convert<std::string>(MiscUtil::convert<int>(arg)));
 				d->send("Enter a name for this skill: ");
 				OLC_MODE(d) = CEDIT_ADD_WEAVE_NAME;
 			}

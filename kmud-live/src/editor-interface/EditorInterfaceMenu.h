@@ -25,6 +25,7 @@ public:
 	void print(EditorInterfaceInstance *i);
 	void parse(EditorInterfaceInstance *i);
 	boost::optional<std::string> preReq(EditorInterfaceInstance *i);
+	bool preReqNoPrint(EditorInterfaceInstance *i);
 	void cleanup(EditorInterfaceInstance *i);
 
 	void setPrintOperator(std::function<EditorInterfaceMenu *(EditorInterfaceInstance *)> printOperator);

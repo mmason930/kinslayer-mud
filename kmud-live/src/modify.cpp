@@ -41,7 +41,6 @@ const int PARSE_EDIT		= 7;
 
 /* local functions */
 void string_add(Descriptor *d, char *str);
-ACMD(do_skillset);
 char *next_page(char *str);
 int count_pages(char *str);
 void paginate_string(char *str, Descriptor *d);
@@ -973,7 +972,7 @@ void string_add(Descriptor *d, char *str)
 *  Modification of character skills                                     *
 ********************************************************************** */
 
-ACMD(do_skillset)
+CommandHandler do_skillset = DEFINE_COMMAND
 {
 	Character *vict;
 	char name[MAX_INPUT_LENGTH];
@@ -1062,7 +1061,7 @@ ACMD(do_skillset)
 	SET_SKILL(vict, skill, value);
 
 	ch->send("You change %s's %s to %d.\r\n", GET_NAME(vict), WeaveManager::GetManager().GetWeaveName(skill).c_str(), value);
-}
+};
 
 
 

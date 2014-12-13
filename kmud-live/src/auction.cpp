@@ -74,8 +74,8 @@ void AuctionManager::Free()
 /* Given the sql::Row MyRow, load data into Auction object and return it. */
 Auction *AuctionManager::BootOneAuction( sql::Row MyRow )
 {
-	Auction *a = new Auction( atoi(MyRow["vnum"].c_str()), MyRow["name"], MiscUtil::Convert<unsigned long long>(MyRow["aRaces"]),
-		MiscUtil::Convert<unsigned long long>(MyRow["dClans"]) );
+	Auction *a = new Auction( atoi(MyRow["vnum"].c_str()), MyRow["name"], MiscUtil::convert<unsigned long long>(MyRow["aRaces"]),
+		MiscUtil::convert<unsigned long long>(MyRow["dClans"]) );
 	return (a);
 }
 
@@ -251,7 +251,7 @@ void AuctionManager::RewardOwner( const int ai_id )
 	}
 	MyRow = MyQuery->getRow();
 	owner_id = atoi(MyRow["owner_id"].c_str());
-	bid_amount = MiscUtil::Convert<long long>(MyRow["bid_amount"].c_str());
+	bid_amount = MiscUtil::convert<long long>(MyRow["bid_amount"].c_str());
 
 	QueryBuffer.str("");
 
@@ -306,9 +306,9 @@ void AuctionManager::ReimburseLosers( const int ai_id, const int winnerID )
 			}
 			else
 			{
-				bidder->points.bank_gold += MiscUtil::Convert<long long>(MyRow["bid_amount"].c_str());
+				bidder->points.bank_gold += MiscUtil::convert<long long>(MyRow["bid_amount"].c_str());
 				bidder->send("%s%sYou have been reimbursed %lld coppers from a recently completed auction.%s\r\n",
-					bld, mag, MiscUtil::Convert<long long>(MyRow["bid_amount"].c_str()), nrm);
+					bld, mag, MiscUtil::convert<long long>(MyRow["bid_amount"].c_str()), nrm);
 			}
 		}
 	} catch( sql::QueryException e ) {
@@ -718,13 +718,13 @@ AuctionItem::AuctionItem( const sql::Row &MyRow )
 		return;
 	}
 	this->endTime = atol(MyRow["end_time"].c_str());
-	this->buyout = MiscUtil::Convert<long long>(MyRow["buyout_price"]);
-	this->starting = MiscUtil::Convert<long long>(MyRow["starting_price"]);
+	this->buyout = MiscUtil::convert<long long>(MyRow["buyout_price"]);
+	this->starting = MiscUtil::convert<long long>(MyRow["starting_price"]);
 	this->is_active = StringUtil::parseBoolean(MyRow["active"]);
 	this->objID = boost::uuids::string_generator()((MyRow["objID"]));
-	this->id = MiscUtil::Convert<int>(MyRow["id"]);
+	this->id = MiscUtil::convert<int>(MyRow["id"]);
 	this->is_retrieved = StringUtil::parseBoolean(MyRow["retrieved"]);
-	this->ownerID = MiscUtil::Convert<int>(MyRow["owner_id"]);
+	this->ownerID = MiscUtil::convert<int>(MyRow["owner_id"]);
 	if( MyRow["objShortDesc"].empty() )
 		this->objShortDesc = (MyRow["objShortDesc_SPECIAL"]);
 	else
@@ -740,7 +740,7 @@ const long long AuctionItem::GetNextMinBid()
 const long long AuctionItem::GetTopBid()
 {
 	if( BidQuery && BidQuery->numRows() )
-		return MiscUtil::Convert<long long>(BidQuery->peekRow()["bid_amount"]);
+		return MiscUtil::convert<long long>(BidQuery->peekRow()["bid_amount"]);
 	else
 		return starting;
 }
@@ -971,8 +971,8 @@ void AuctionDispBrowseMenu( Descriptor *d )
 		else
 		{
 			Time t(ad->aiCache[i]->GetEndTime() - time(0));
-			tStr = MiscUtil::Convert<std::string>(t.dDays()) + "D " + MiscUtil::Convert<std::string>(t.dHours()) + "H "
-				+ MiscUtil::Convert<std::string>(t.dMinutes()) + "M";
+			tStr = MiscUtil::convert<std::string>(t.dDays()) + "D " + MiscUtil::convert<std::string>(t.dHours()) + "H "
+				+ MiscUtil::convert<std::string>(t.dMinutes()) + "M";
 		}
 		strncpy(objNameBuf, ad->aiCache[i]->GetObjShortDesc().c_str(), maxNameSize);
 		if( (ad->aiCache[i]->GetObjShortDesc().size()+3) > maxNameSize )
@@ -1016,8 +1016,8 @@ void AuctionDispItemBidMenu( Descriptor *d )
 
 	time_t tmpT = (time(0) > ai->GetEndTime()) ? (0) : (ai->GetEndTime() - time(0));
 	Time t( tmpT );
-	RemTimeStr = MiscUtil::Convert<std::string>(t.dDays()) + "D " + MiscUtil::Convert<std::string>(t.dHours()) + "H " +
-		MiscUtil::Convert<std::string>(t.dMinutes()) + "M";
+	RemTimeStr = MiscUtil::convert<std::string>(t.dDays()) + "D " + MiscUtil::convert<std::string>(t.dHours()) + "H " +
+		MiscUtil::convert<std::string>(t.dMinutes()) + "M";
 	d->send("Selected Item : %s%s%s\r\n", cyn, ai->GetObjShortDesc().c_str(), nrm);
 	d->send("Time remaining: %s%s%s\r\n", cyn, RemTimeStr.c_str(), nrm);
 	d->send("Minimum Bid   : %s%s%s\r\n", cyn, d->character->GoldString(ai->GetNextMinBid(),false).c_str(), nrm);

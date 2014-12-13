@@ -56,6 +56,12 @@ public:
 	static int strlenIgnoreColors( const char* str );
 	static std::string repeat(const std::string str, int numberOfTimes);
 
+	template<typename T>
+	static std::string plural(const T &t)
+	{
+		return t == 1 ? std::string("") : std::string("s");
+	}
+
 	//Galnor: 2006-12-11
 	//Re-wrote the split_to_vector and split_to_list to allow for all std containers
 	//to use this using a template as its representation.

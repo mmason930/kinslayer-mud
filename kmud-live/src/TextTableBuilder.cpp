@@ -7,6 +7,15 @@
 TextTableBuilder::TextTableBuilder()
 {
 	writeRowIndex = -1;
+	tableWidth = 0;
+	this->mysqlFormat = false;
+}
+
+TextTableBuilder::TextTableBuilder(bool mysqlFormat)
+{
+	writeRowIndex = -1;
+	tableWidth = 0;
+	this->mysqlFormat = mysqlFormat;
 }
 
 bool TextTableBuilder::doneWritingHeader() const
@@ -77,16 +86,49 @@ TextTableBuilder *TextTableBuilder::put(const char value)
 	return put(MiscUtil::toString(value));
 }
 
+TextTableBuilder *TextTableBuilder::append(const std::string &value)
+{
+	int cellWidth = cellWidths[writeRowIndex].back() + StringUtil::strlenIgnoreColors(value.c_str());
+	int columnIndex = (int)table[writeRowIndex].size() - 1;
+
+	cellWidths[writeRowIndex][columnIndex] = cellWidth;
+	table[writeRowIndex][columnIndex].append(value);
+
+	return this;
+}
+
+TextTableBuilder *TextTableBuilder::append(const char *value)
+{
+	return append(std::string(value));
+}
+
+TextTableBuilder *TextTableBuilder::append(const int value)
+{
+	return append(MiscUtil::toString(value));
+}
+
+TextTableBuilder *TextTableBuilder::append(const short value)
+{
+	return append(MiscUtil::toString(value));
+}
+
+TextTableBuilder *TextTableBuilder::append(const char value)
+{
+	return append(MiscUtil::toString(value));
+}
+
 std::string TextTableBuilder::buildBorder() const
 {
 	std::string buffer;
 
 	for(int columnWidth : columnWidths)
 	{
-		buffer += '+' + StringUtil::repeat("-", columnWidth + 2);
+		buffer.append(mysqlFormat ? "+" : "-");
+		buffer += StringUtil::repeat("-", columnWidth + 2);
 	}
 
-	buffer += "+\n";
+	buffer.append(mysqlFormat ? "+" : "-");
+	buffer.append("\n");
 
 	return buffer;
 }
@@ -97,10 +139,11 @@ std::string TextTableBuilder::buildRow(int rowNumber) const
 
 	for(std::string::size_type columnIndex = 0;columnIndex < tableWidth;++columnIndex)
 	{
-		buffer += "| " + table[rowNumber][columnIndex] + StringUtil::repeat(" ", (columnWidths[columnIndex] - cellWidths[rowNumber][columnIndex]) + 1);
+		buffer += std::string(mysqlFormat ? "|" : " ") + " " + table[rowNumber][columnIndex] + StringUtil::repeat(" ", (columnWidths[columnIndex] - cellWidths[rowNumber][columnIndex]) + 1);
 	}
 
-	buffer += "|\n";
+	buffer.append(mysqlFormat ? "|" : " ");
+	buffer.append("\n");
 
 	return buffer;
 }
@@ -112,7 +155,9 @@ std::string TextTableBuilder::build() const
 
 	std::string buffer;
 
-	buffer.append(buildBorder());
+	if(mysqlFormat)
+		buffer.append(buildBorder());
+
 	buffer.append(buildRow(0));
 	buffer.append(buildBorder());
 
@@ -121,7 +166,7 @@ std::string TextTableBuilder::build() const
 		buffer.append(buildRow(tableRow));
 	}
 
-	if(table.size() > 0)
+	if(table.size() > 0 && mysqlFormat)
 		buffer.append(buildBorder());
 
 	return buffer;

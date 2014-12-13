@@ -143,6 +143,6 @@ std::string getUniqueName()
     static unsigned long count = 0;
     count++;
     std::string s = "uvar";
-    s = s + MiscUtil::Convert<std::string>(count);
+    s = s + MiscUtil::convert<std::string>(count);
     return s;
 }

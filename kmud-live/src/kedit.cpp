@@ -29,8 +29,6 @@
 #include "MiscUtil.h"
 #include "Descriptor.h"
 
-ACMD(do_klist);
-
 #if 0
 const int KEDIT_DEBUG = 1; 
 #endif
@@ -129,7 +127,7 @@ std::list<Kit *> KitManager::GetRangeOfKits( int lowVnum, int highVnum )
 	return RangeKits;
 }
 
-ACMD(do_klist)
+CommandHandler do_klist = DEFINE_COMMAND
 {
 	int lo = 0, hi = 99, found = 0;
 
@@ -179,7 +177,7 @@ ACMD(do_klist)
 
 	else if (ch->desc)
 		page_string(ch->desc, buf2, 1);
-}
+};
 
 void kedit_disp_inventory_menu( Descriptor *d )
 {

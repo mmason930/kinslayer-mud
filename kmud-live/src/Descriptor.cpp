@@ -11,6 +11,7 @@
 #include "olc.h"
 #include "comm.h"
 #include "kuDescriptor.h"
+#include "editor-interface/EditorInterface.h"
 
 #include "stats.h"
 #include "telnet.h"
@@ -27,6 +28,8 @@ extern kuDescriptor *gatewayConnection;
 extern Descriptor *descriptor_list;
 extern sql::Connection gameDatabase;
 
+void show_string(Descriptor *d, char *input);
+void string_add(Descriptor *d, char *str);
 int performDupeCheck( Descriptor *d );
 extern int circle_restrict;
 extern char *imotd;
@@ -34,7 +37,6 @@ extern char *motd;
 extern Character *character_list;
 extern int boot_high;
 void UpdateBootHigh( const int new_high, bool first=false );
-ACMD( do_follow );
 void js_enter_game_trigger(Character *self, Character *actor);
 
 Descriptor::Descriptor()
@@ -66,11 +68,145 @@ Descriptor::~Descriptor()
 {
 }
 
+void Descriptor::initMock(Character *ch)
+{
+	descriptor = new kuDescriptor(nullptr);
+	strcpy(host, "127.0.0.1");
+	setGatewayDescriptorType(GatewayDescriptorType::unknown);
+	connected = CON_PLAYING;
+	idle_tics = 0;
+	wait = 0;
+	loginTime = DateTime();
+	hadInput = false;
+	hadOutput = false;
+	desc_num = -1;
+	character = ch;
+	next = nullptr;
+}
+
 void Descriptor::closeSocketClean()
 {
 	gatewayConnection->send("Close " + session + "\n");
 
 	this->descriptor->socketClose();
+}
+
+void Descriptor::processInput()
+{
+	if(commandQueue.empty())
+		return;
+	if(character && character->wait > 0)
+		return;
+
+	std::string command = commandQueue.front();
+	commandQueue.pop_front();
+	
+	int aliased = 0;
+	hadInput = true;
+
+	//Process Telnet input.
+
+	for(int pos = 0;pos < (int)command.size();++pos)
+	{
+		char ch = command[pos];
+		if(ch == '\b' || ch == 127) {
+
+			if(pos == 0) {
+
+				command.erase(pos,1);
+				--pos;
+			}
+			else {
+
+				command.erase((pos-1),2);
+				pos -= 2;
+			}
+		}
+		else if(!isascii(ch) || !isprint(ch)) {
+			command.erase(pos, 1);
+			--pos;
+		}
+	}
+
+	Character *loggingCharacter = character;
+	if(original)
+		loggingCharacter = original;
+
+	if(loggingCharacter && STATE(this) != CON_PASSWORD)
+		loggingCharacter->LogOutput(command + "\n");
+
+	if(command.length() > MAX_INPUT_LENGTH) {
+
+		send("Input too long... Truncated.\r\n");
+
+		command.resize(MAX_INPUT_LENGTH);
+	}
+
+	if(STATE(this) != CON_PASSWORD) {
+
+		StringUtil::replace(command, "$", "$$");
+	}
+
+	if(snoop_by && snoop_by->descriptor && snoop_by->character && snoop_by->character->hasPermissionToSnoop()) {
+
+		snoop_by->sendInstant(std::string("% ") + command + std::string("\n"));
+	}
+
+	char comm[MAX_INPUT_LENGTH+1];//Keeping this way for legacy reasons... Will change someday. 2011-04-10
+
+	strcpy(comm, command.c_str());
+			
+	if ( character && character->ShieldBlock )
+	{
+		character->CancelTimer(false);
+		return;
+	}
+	if ( this->character )
+	{
+		// Reset the idle timer & pull char back from void if necessary
+
+		if ( character->player.timer >= CONFIG_IDLE_VOID ) {
+
+			MudLog( CMP, MAX( GET_LEVEL( character ), LVL_GOD ), TRUE, "%s has un-idled.", GET_NAME( character ) );
+		}
+		character->player.timer = 0;
+		if ( STATE( this ) == CON_PLAYING && this->character->was_in_room )
+		{
+			if ( this->character->in_room )
+				character->RemoveFromRoom();
+
+			character->MoveToRoom( character->was_in_room );
+			character->was_in_room = 0;
+			Act( "$n has returned.", TRUE, character, 0, 0, TO_ROOM );
+		}
+		character->wait = 0;
+	}
+
+	if ( showstr_count )  // Reading something w/ pager
+	{
+		show_string( this, comm );
+	}
+	else if ( str )
+	{
+		string_add( this, comm );
+	}
+	else if ( STATE( this ) != CON_PLAYING )  // In menus, etc.
+	{
+		nanny( comm );
+	}
+
+	else if( character && character->editorInterfaceInstance )
+	{
+		character->editorInterfaceInstance->parse(comm);
+	}
+
+	else
+	{// else: we're playing normally.
+		CommandUtil::get()->interpretCommand( character, comm ); /* Send it to interpreter */
+		if ( character && !character->command_ready ) {
+			character->CancelTimer( false );
+		}
+	}
 }
 
 //Calling this should disconnect the player from the game, clean up the descriptor,

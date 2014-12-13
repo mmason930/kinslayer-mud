@@ -30,9 +30,7 @@
 extern Object *object_list;
 extern Character *character_list;
 
-ACMD(do_locate);
-
-ACMD(do_locate)
+CommandHandler do_locate = DEFINE_COMMAND
 {
 	struct ObjectValueEntry
 	{
@@ -91,7 +89,7 @@ ACMD(do_locate)
 			else
 				return false;
 
-			testFunctions.push_back(std::function<bool(const long numberToTest)>(std::bind(wrappingFunction, std::placeholders::_1, MiscUtil::Convert<long>(numericValue))));
+			testFunctions.push_back(std::function<bool(const long numberToTest)>(std::bind(wrappingFunction, std::placeholders::_1, MiscUtil::convert<long>(numericValue))));
 			return true;
 		}
 	};
@@ -399,5 +397,5 @@ ACMD(do_locate)
 	}
 
 	page_string(ch->desc, (char *)outputBuffer.str().c_str(), TRUE);
-}
+};
 

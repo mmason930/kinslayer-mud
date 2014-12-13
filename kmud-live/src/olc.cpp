@@ -30,13 +30,15 @@
 #include "UserEmailAddress.h"
 #include "rooms/Room.h"
 
+#include "commands/infrastructure/CommandUtil.h"
+#include "commands/infrastructure/CommandInfo.h"
+#include "commands/infrastructure/Social.h"
+
 #include <boost/regex.hpp>
 
 //External data structures.
 extern struct Index *obj_index;
 
-extern Social *soc_mess_list;
-extern int top_of_socialt;
 extern const int rev_dir[];
 extern int top_of_objt;
 extern const char *dirs[];
@@ -57,8 +59,6 @@ void oedit_setup_existing( Descriptor *d, int robj_num );
 void sedit_setup_new( Descriptor *d );
 void sedit_setup_existing( Descriptor *d, int robj_num );
 void sedit_save_to_disk();
-void aedit_save_to_disk();
-extern int find_action( int cmd );
 extern int real_shop( int vnum );
 FILE *file;
 
@@ -277,7 +277,7 @@ OLC::OLC()
 
 /*------------------------------------------------------------*/
 
-ACMD( do_myzones )
+CommandHandler  do_myzones  = DEFINE_COMMAND
 {
 	int i = 0;
 	Zone *zone;
@@ -302,16 +302,16 @@ ACMD( do_myzones )
 		ch->send( "You have no zones assigned to you.\r\n" );
 	else
 		ch->send( "You are assigned to the following zones:\r\n%s", buf );
-}
+};
 
 /*
- * Exported ACMD do_olc function.
+ * Exported command do_olc function.
  *
  * This function is the OLC interface.  It deals with all the
  * generic OLC stuff, then passes control to the sub-olc sections.
  */
 
-ACMD( do_olc )
+CommandHandler  do_olc  = DEFINE_COMMAND
 {
 	int num = -1, save = 0, real_num;
 	Descriptor *d;
@@ -546,17 +546,15 @@ ACMD( do_olc )
 		OLC_NUM( d ) = 0;
 		OLC_STORAGE( d ) = str_dup( buf1 );
 
-		for ( OLC_ZNUM( d ) = 0; ( OLC_ZNUM( d ) <= top_of_socialt ); OLC_ZNUM( d ) ++ )
-			if ( IsAbbrev( OLC_STORAGE( d ), soc_mess_list[ OLC_ZNUM( d ) ].command ) )
-				break;
+		Social *social = CommandUtil::get()->getSocialByAbbreviation(OLC_STORAGE(d));
 
-		if ( OLC_ZNUM( d ) > top_of_socialt )
+		if(!social)
 		{
-			if ( FindCommand( OLC_STORAGE( d ) ) > NOTHING )
+			if(CommandUtil::get()->getCommandByName(OLC_STORAGE(d)))
 			{
 				cleanup_olc( d, CLEANUP_ALL );
 				ch->send( "That command already exists.\r\n" );
-				return ;
+				return;
 			}
 
 			sprintf( buf, "Do you wish to add the '%s' action? ", OLC_STORAGE( d ) );
@@ -566,7 +564,7 @@ ACMD( do_olc )
 
 		else
 		{
-			sprintf( buf, "Do you wish to edit the '%s' action? ", soc_mess_list[ OLC_ZNUM( d ) ].command );
+			sprintf( buf, "Do you wish to edit the '%s' action? ", social->command );
 			ch->send( buf, ch );
 			OLC_MODE( d ) = AEDIT_CONFIRM_EDIT;
 		}
@@ -639,7 +637,7 @@ ACMD( do_olc )
 
 	Act( "$n starts using OLC.", TRUE, d->character, 0, 0, TO_ROOM );
 	SET_BITK( PLR_FLAGS( ch ), Q_BIT(PLR_WRITING) );
-}
+};
 
 /*------------------------------------------------------------*\
  Internal utilities
@@ -912,7 +910,7 @@ void cleanup_olc( Descriptor *d, byte cleanup_type )
 #define ZCMD (zone_table[zone].cmd[cmd_no])
 #define W_EXIT(room, num) (World[(room)]->dir_option[(num)])
 
-ACMD( do_rlist )
+CommandHandler  do_rlist  = DEFINE_COMMAND
 {
 	char arg1[ MAX_INPUT_LENGTH ], arg2[ MAX_INPUT_LENGTH ];
 	int r1 = 0, r2 = 0;
@@ -956,7 +954,7 @@ ACMD( do_rlist )
 	if ( !found )
 		ch->send( "No rooms found within that range.\r\n" );
 
-}
+};
 
 /*********************************************************************************
  *                                                                               *
@@ -967,7 +965,7 @@ ACMD( do_rlist )
  * Updated 02/21/2014 - Galnor - Allow keyword search, optimize sorting.         *
  *                                                                               *
  *********************************************************************************/
-ACMD( do_mlist )
+CommandHandler  do_mlist  = DEFINE_COMMAND
 {
 	if( !ch->desc )
 		return;
@@ -1166,7 +1164,7 @@ ACMD( do_mlist )
 		OutBuf << " [ " << cyn << std::right << std::setw(6) << GET_PB(mob) << nrm << "]";
 		OutBuf << " [ " << cyn << std::right << std::setw(6) << GET_DB(mob) << nrm << "]";
 		OutBuf << " [ " << cyn << std::right << std::setw(6)
-				<< ((mob)->MobData->primary_kit ? MiscUtil::Convert<std::string>(mob->MobData->primary_kit->vnum) : "<None>") << nrm << "]";
+				<< ((mob)->MobData->primary_kit ? MiscUtil::convert<std::string>(mob->MobData->primary_kit->vnum) : "<None>") << nrm << "]";
 		OutBuf << " [ " << cyn << std::right << std::setw(7) << mob->points.gold << nrm << "]";
 		OutBuf << " [ " << cyn << std::right << std::setw(4) << zoneCount << nrm << "]";
 		OutBuf << " [ " << cyn << std::right << std::setw(4) << openZoneCount << nrm << "]";
@@ -1177,7 +1175,7 @@ ACMD( do_mlist )
 	page_string(ch->desc, cBuf, TRUE);
 
 	delete[] cBuf;
-}
+};
 
 int OlistCanDisp( Object *obj, char *arg1, char *arg2, char *arg3, bool RangeCheck )
 {
@@ -1290,7 +1288,7 @@ std::string parseParameters(const std::string &input, std::map<std::string, std:
 /* 2006 - Galnor - Added to aide with balancing. 'vnum o' does not allow easy lookup. 
                    This variation will allow items to be filtered and sorted in various ways.
 */
-ACMD( do_olist )
+CommandHandler  do_olist  = DEFINE_COMMAND
 {
 	char arg1[ MAX_INPUT_LENGTH ], arg2[ MAX_INPUT_LENGTH ], arg3[ MAX_INPUT_LENGTH ];
 	int i = 0, ret = 0;
@@ -1532,7 +1530,7 @@ ACMD( do_olist )
 		}
 		page_string(ch->desc, (char *)buffer.c_str(), TRUE);
 	}
-}
+};
 
 void AddOlcLog( Character *ch, const std::string &Type, const int targetId )
 {

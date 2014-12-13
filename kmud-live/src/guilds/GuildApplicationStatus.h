@@ -6,17 +6,24 @@
 class GuildApplicationStatus : public Enum<GuildApplicationStatus> {
 
 private:
-	GuildApplicationStatus(int value, const std::string &standardName, bool requiresReview) : Enum(value, standardName)
+	GuildApplicationStatus(int value, const std::string &standardName, bool requiresReview, bool applicationOver) : Enum(value, standardName)
 	{
 		this->requiresReview = requiresReview;
+		this->applicationClosed = applicationClosed;
 	}
 
 	bool requiresReview;
+	bool applicationClosed;
 public:
 
 	bool getRequiresReview() const
 	{
 		return requiresReview;
+	}
+
+	bool getApplicationClosed() const
+	{
+		return applicationClosed;
 	}
 
 	static GuildApplicationStatus *pending;

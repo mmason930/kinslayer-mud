@@ -19,6 +19,11 @@ boost::optional<std::string> EditorInterfaceMenu::preReq(EditorInterfaceInstance
 	return preReqOperator.is_initialized() ? preReqOperator.get()(i) : boost::optional<std::string>();
 }
 
+bool EditorInterfaceMenu::preReqNoPrint(EditorInterfaceInstance *i)
+{
+	return preReqOperator ? !preReqOperator.get()(i) : true;
+}
+
 void EditorInterfaceMenu::cleanup(EditorInterfaceInstance *i)
 {
 	if(cleanupOperator.is_initialized())

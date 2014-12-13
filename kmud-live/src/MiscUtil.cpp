@@ -146,6 +146,11 @@ std::string MiscUtil::formatDateYYYYdmmdddHHcMMcSS(const DateTime &dateTime)
 	return DateTime::parse("%Y-%m-%d %H:%M:%S", dateTime);
 }
 
+std::string MiscUtil::formatDateYYYYmmdd(const DateTime &dateTime)
+{
+	return DateTime::parse("%Y%m%d", dateTime);
+}
+
 std::map<std::string, std::string> MiscUtil::loadResourcesFromFile(const std::string &fileName)
 {
 	std::ifstream inFile(fileName.c_str());

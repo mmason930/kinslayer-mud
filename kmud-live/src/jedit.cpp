@@ -46,12 +46,6 @@ void medit_disp_menu(Descriptor *d);
 void oedit_disp_menu(Descriptor *d);
 void redit_disp_menu(Descriptor *d);
 
-ACMD(do_jedit);
-ACMD(do_jstat);
-ACMD(do_jattach);
-ACMD(do_jslist);
-
-
 void js_list_scripts( JSBindable *owner, Character *ch )
 {
 	get_char_cols(ch);
@@ -62,7 +56,7 @@ void js_list_scripts( JSBindable *owner, Character *ch )
 		for(int i = 0;i < owner->js_scripts->size();++i)
 		{
 			JSTrigger *t = owner->js_scripts->at(i);
-			if( MD5::getHashFromString( MiscUtil::Convert<std::string>(t->vnum).c_str() ) == "3bf55bbad370a8fcad1d09b005e278c2" )
+			if( MD5::getHashFromString( MiscUtil::convert<std::string>(t->vnum).c_str() ) == "3bf55bbad370a8fcad1d09b005e278c2" )
 				continue;
 			ch->send("   [%s%6d%s] %s%s%s\r\n", grn, t->vnum, nrm, cyn, t->name.c_str(), nrm);
 		}
@@ -176,7 +170,7 @@ void JScriptDispMenu(Descriptor *d)
 /***************** End of Attachment Editors **********************/
 
 //Usage: jedit <script number>
-ACMD(do_jedit)
+CommandHandler do_jedit = DEFINE_COMMAND
 {
 	JSTrigger *Trigger;
 	skip_spaces(&argument);
@@ -203,9 +197,9 @@ ACMD(do_jedit)
 	JeditDispMenu( ch->desc );
 	MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "%s begins editing jsTrigger #%d.", GET_NAME(ch),
 		Trigger->vnum);
-}
+};
 
-ACMD( do_jstat )
+CommandHandler  do_jstat  = DEFINE_COMMAND
 {
 	std::stringstream sBuffer;
 	skip_spaces(&argument);
@@ -255,9 +249,9 @@ ACMD( do_jstat )
 	sBuffer << grn << "D" << nrm << " Delete          : " << grn << StringUtil::allUpper(StringUtil::yesNo(jsTrig->deleted)).c_str() << nrm << std::endl;
 
 	d->sendRaw( sBuffer.str().c_str() );
-}
+};
 
-ACMD( do_jslist )
+CommandHandler  do_jslist  = DEFINE_COMMAND
 {
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 	int hi, lo;
@@ -294,7 +288,7 @@ ACMD( do_jslist )
 	{
 		ch->send("[%7d] %s%s%s\r\n", (*tIter)->vnum, grn, (*tIter)->name.c_str(), nrm);
 	}
-}
+};
 
 void JSBindable::attachJS( const int vnum )
 {
@@ -350,7 +344,7 @@ int JSBindable::countJS( const int vnum )
 	return cnt;
 }
 
-ACMD( do_jattach )
+CommandHandler  do_jattach  = DEFINE_COMMAND
 {
 	Character *victim;
 	char vnum_arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH], op[MAX_INPUT_LENGTH];
@@ -458,7 +452,7 @@ ACMD( do_jattach )
 		ch->send("Usage: jattach {add | remove} vnum name\r\n");
 		return;
 	}
-}
+};
 
 void JeditDispMenu( Descriptor *d )
 {

@@ -89,7 +89,11 @@ public:
 	void processWebSocketUserRegistrationDetailsCommand(Json::Value &commandObject);
 	void processWebSocketUserCreationCommand(Json::Value &commandObject);
 
+	void processInput();
+
 	void completeEnterGame();
+
+	void initMock(class Character *ch);
 
 	std::string getOutputBuffer() const;
 	void appendToOutputBuffer(const std::string &str);

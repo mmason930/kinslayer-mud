@@ -39,3 +39,13 @@ int Guild::getCreatedByUserId() const {
 void Guild::setCreatedByUserId(const int createdByUserId) {
 	this->createdByUserId = createdByUserId;
 }
+
+int Guild::getRace() const
+{
+	return race;
+}
+
+void Guild::setRace(int race)
+{
+	this->race = race;
+}

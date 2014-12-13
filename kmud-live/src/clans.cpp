@@ -309,7 +309,7 @@ Quest *MySQLGrabQuest(const std::string &playername, const std::string &questnam
 	if(index == NULL)
 		return NULL;
 
-	Query =	"SELECT quest_name, value FROM quests WHERE user_id = '" + MiscUtil::Convert<std::string>(index->id) +
+	Query =	"SELECT quest_name, value FROM quests WHERE user_id = '" + MiscUtil::convert<std::string>(index->id) +
 		"' AND quest_name = '" + sql::escapeString(questname) + "'";
 
 	try {

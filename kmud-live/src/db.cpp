@@ -58,6 +58,9 @@
 
 #include "guilds/GuildUtil.h"
 
+#include "commands/infrastructure/CommandUtil.h"
+#include "commands/infrastructure/CommandInfo.h"
+
 boost::uuids::uuid u;
 
 std::list< std::pair< Character*, event_info* > * > BashStandQueue;
@@ -156,11 +159,9 @@ void SetupItemCount();
 void PlayerFileCycle();
 int BootObjects();
 void startGameSession();
-ACMD(do_reboot);
 
 // external functions
 extern void load_messages(void);
-extern void boot_social_messages(void);
 extern int level_exp(int level);
 void boot_the_shops();
 
@@ -308,7 +309,7 @@ public:
 	}
 };
 
-ACMD(do_reboot)
+CommandHandler do_reboot = DEFINE_COMMAND
 {
 	int i;
 	char arg[MAX_INPUT_LENGTH];
@@ -342,7 +343,7 @@ ACMD(do_reboot)
 	}
 
 	ch->send(OK);
-}
+};
 
 /*** Galnor 01/24/2010 - Load all global JavaScripts into the MUD ***/
 void BootGlobalScripts()
@@ -380,7 +381,7 @@ void SaveGlobalScripts()
 		for(unsigned int i = 0;i < globalJS_Scripts->size();++i)
 		{
 			gameDatabase->sendRawQuery("INSERT INTO js_attachments(`type`,`script_vnum`) VALUES('G','"
-				+ MiscUtil::Convert<std::string>(globalJS_Scripts->at(i)->vnum) + "');");
+				+ MiscUtil::convert<std::string>(globalJS_Scripts->at(i)->vnum) + "');");
 		}
 	} catch( sql::QueryException e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Error saving global JavaScripts : %s", e.getMessage().c_str());
@@ -548,8 +549,11 @@ void boot_db(void)
 	loadScreenText();
 		
 	Log("Loading guilds.");
-	GuildUtil::get()->loadGuildsFromDatabase(gameDatabase);
-	GuildUtil::get()->loadGuildApplicationsFromDatabase(gameDatabase);
+	GuildUtil::get()->loadGuildsFromDatabase(game->getConnection());
+	GuildUtil::get()->loadGuildApplicationsFromDatabase(game->getConnection());
+	GuildUtil::get()->loadGuildApplicationSignaturesFromDatabase(game->getConnection());
+	GuildUtil::get()->loadUserGuildsFromDatabase(game->getConnection());
+	GuildUtil::get()->loadGuildJoinApplicationsFromDatabase(game->getConnection());
 
 	bootWorld();
 
@@ -566,8 +570,9 @@ void boot_db(void)
 	load_messages();
 
 	Log("Loading social messages.");
-	boot_social_messages();
-	CreateCommandList(); /* aedit patch -- M. Scott */
+	CommandUtil::get()->bootSocials(game->getConnection());
+	CommandUtil::get()->createCommandList();
+	CommandUtil::get()->sortCommands();
 
 	Log("Assigning function pointers:");
 
@@ -581,7 +586,7 @@ void boot_db(void)
 	assign_rooms();
 
 	Log("Sorting command list and spells.");
-	SortCommands();
+	CommandUtil::get()->sortCommands();
 
 	Log("Reading banned site and invalid name list.");
 	BanManager::GetManager().Boot();
@@ -1641,7 +1646,7 @@ bool Character::save()
 
 bool Character::loadSkills()
 {
-	std::string queryStr = "SELECT percent, skill FROM skills WHERE user_id=" + MiscUtil::Convert<std::string>(this->player.idnum);
+	std::string queryStr = "SELECT percent, skill FROM skills WHERE user_id=" + MiscUtil::convert<std::string>(this->player.idnum);
 	sql::Query query;
 	sql::Row row;
 
@@ -1663,7 +1668,7 @@ bool Character::loadSkills()
 
 bool Character::loadIgnores()
 {
-	std::string query = "SELECT * FROM userIgnore WHERE user_id=" + MiscUtil::Convert<std::string>(this->player.idnum);
+	std::string query = "SELECT * FROM userIgnore WHERE user_id=" + MiscUtil::convert<std::string>(this->player.idnum);
 	sql::Query MyQuery;
 	sql::Row MyRow;
 
@@ -1777,7 +1782,7 @@ bool Character::loadClans()
 }
 bool Character::loadTrophies()
 {
-	std::string query = "SELECT * FROM trophies WHERE user_id=" + MiscUtil::Convert<std::string>(this->player.idnum);
+	std::string query = "SELECT * FROM trophies WHERE user_id=" + MiscUtil::convert<std::string>(this->player.idnum);
 	sql::Query MyQuery;
 	sql::Row MyRow;
 
@@ -1822,7 +1827,7 @@ bool MySQLSaveRolls(const std::string &playername, const std::string &TableName,
 		{
 			sprintf(roll , "%d", Rolls[i]);
 			Query = "UPDATE " + TableName + " SET roll = "
-				+ roll + " WHERE user_id=" + MiscUtil::Convert<std::string>(index->id);
+				+ roll + " WHERE user_id=" + MiscUtil::convert<std::string>(index->id);
 
 			try { MyQuery = gameDatabase->sendQuery( Query ); }
 			catch( sql::QueryException e )
@@ -1843,7 +1848,7 @@ bool MySQLSaveRolls(const std::string &playername, const std::string &TableName,
 			sprintf(level, "%d", (i + 1) );
 			sprintf(roll , "%d", Rolls[i]);
 			Query = "INSERT INTO " + TableName + " (user_id, roll, level) VALUES ("
-				+ MiscUtil::Convert<std::string>(index->id) + "," + roll + "," + level + ")";
+				+ MiscUtil::convert<std::string>(index->id) + "," + roll + "," + level + ")";
 			try {
 				MyQuery = gameDatabase->sendQuery(Query);
 			}
@@ -1857,7 +1862,7 @@ bool MySQLSaveRolls(const std::string &playername, const std::string &TableName,
 	else if(StoredRolls.size() > Rolls.size())
 	{
 		sprintf(level, "%d", (i + 1) );
-		Query = "DELETE FROM " + TableName + " WHERE user_id=" + MiscUtil::Convert<std::string>(index->id) +
+		Query = "DELETE FROM " + TableName + " WHERE user_id=" + MiscUtil::convert<std::string>(index->id) +
 			" AND level >= " + level;
 		try {
 			MyQuery = gameDatabase->sendQuery(Query);
@@ -1879,7 +1884,7 @@ bool MySQLLoadRolls(const std::string &playername, const std::string TableName, 
 	if(index == NULL)
 		return false;
 	std::string query = "SELECT level, roll FROM " + TableName + " WHERE user_id="
-		+ MiscUtil::Convert<std::string>(index->id) + " ORDER BY level DESC";
+		+ MiscUtil::convert<std::string>(index->id) + " ORDER BY level DESC";
 	sql::Query MyQuery;
 	sql::Row MyRow;
 
@@ -1931,7 +1936,7 @@ bool Character::loadManaRolls()
 }
 bool Character::loadQuests()
 {
-	std::string query = "SELECT quest_name, value FROM quests WHERE user_id=" + MiscUtil::Convert<std::string>(this->player.idnum);
+	std::string query = "SELECT quest_name, value FROM quests WHERE user_id=" + MiscUtil::convert<std::string>(this->player.idnum);
 	sql::Query MyQuery;
 	sql::Row MyRow;
 
@@ -3463,21 +3468,21 @@ void MySQLDeleteAll(const std::string &playername)
 	//We need to get rid of some of the rows in the forum databases.
 	try {
 		gameDatabase->sendRawQuery("DELETE FROM forums_banlist WHERE ban_userid='"
-			+ MiscUtil::Convert<std::string>(id) + "';");
+			+ MiscUtil::convert<std::string>(id) + "';");
 		gameDatabase->sendRawQuery("DELETE FROM forums_sessions WHERE session_user_id='"
-			+ MiscUtil::Convert<std::string>(id) + "';");
+			+ MiscUtil::convert<std::string>(id) + "';");
 		gameDatabase->sendRawQuery("DELETE FROM forums_user_group WHERE id='"
-			+ MiscUtil::Convert<std::string>(id) + "';");
+			+ MiscUtil::convert<std::string>(id) + "';");
 		gameDatabase->sendRawQuery("DELETE FROM forums_topics_watch WHERE id='"
-			+ MiscUtil::Convert<std::string>(id) + "';");
+			+ MiscUtil::convert<std::string>(id) + "';");
 		gameDatabase->sendRawQuery("UPDATE forums_vote_voters SET vote_user_id='-1' WHERE vote_user_id='"
-			+ MiscUtil::Convert<std::string>(id) + "';");
+			+ MiscUtil::convert<std::string>(id) + "';");
 		gameDatabase->sendRawQuery("UPDATE forums_privmsgs SET privmsgs_to_userid='-1' WHERE privmsgs_to_userid='"
-			+ MiscUtil::Convert<std::string>(id) + "';");
+			+ MiscUtil::convert<std::string>(id) + "';");
 		gameDatabase->sendRawQuery("UPDATE forums_posts SET poster_id='-1' WHERE poster_id='"
-			+ MiscUtil::Convert<std::string>(id) + "';");
+			+ MiscUtil::convert<std::string>(id) + "';");
 		gameDatabase->sendRawQuery("UPDATE forums_topics SET topic_poster='-1' WHERE topic_poster='"
-			+ MiscUtil::Convert<std::string>(id) + "';");
+			+ MiscUtil::convert<std::string>(id) + "';");
 	} catch( sql::QueryException e ) {
 		e.report();
 	}

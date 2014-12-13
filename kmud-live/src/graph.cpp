@@ -36,7 +36,6 @@
 #include <stack>
 
 /* Externals */
-ACMD( do_say );
 extern Character *character_list;
 extern const char *dirs[];
 
@@ -46,7 +45,6 @@ void bfs_enqueue( Room *room, int dir, int depth = 0 );
 void bfs_dequeue( void );
 void bfs_clear_queue( void );
 int find_first_step( Room *src, Room *target );
-ACMD( do_track );
 
 struct bfs_queue_struct
 {
@@ -386,7 +384,7 @@ int find_first_step( Room *src, Room *target )
 * Functions and Commands which use the above functions. *
 ********************************************************/
 
-ACMD( do_track )
+CommandHandler  do_track  = DEFINE_COMMAND
 {
 	char arg[ MAX_INPUT_LENGTH ];
 
@@ -407,7 +405,7 @@ ACMD( do_track )
 		else
 			ch->PrintTracks( ch->in_room, false);
 	}
-}
+};
 
 void Character::HuntVictim()
 {

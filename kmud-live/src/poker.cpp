@@ -19,8 +19,6 @@ PokerTable *PokerTableList = NULL;
 
 //#define POKER_DEBUG
 
-ACMD(do_tell);
-
 std::vector< Card* > Poker::Deck;
 
 void PokerAutoComplete( void* Data );
@@ -1211,7 +1209,7 @@ std::string PokerPlayer::ChipStr( bool board )
 	}
 
 	Output  += "C:";
-	Output += MiscUtil::Convert<std::string, int>(Chips());
+	Output += MiscUtil::convert<std::string, int>(Chips());
 
 	if(board && Table->NextUp() == this)
 	{
@@ -1231,7 +1229,7 @@ std::string PokerPlayer::BetStr( bool board )
 	}
 
 	Output  += "B:";
-	Output += MiscUtil::Convert<std::string, int>(Bet());
+	Output += MiscUtil::convert<std::string, int>(Bet());
 
 	if(board && Table->NextUp() == this)
 	{

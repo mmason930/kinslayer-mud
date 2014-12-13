@@ -8,7 +8,7 @@ CC = g++
 
 #-std=c++0x
 # Any special flags you want to pass to the compiler
-MYFLAGS =  -O -std=c++0x -DXP_UNIX -I/usr/local/include -Wformat-security -Wformat -Wpointer-arith -Wcast-align -Wredundant-decls \
+MYFLAGS =  -O0 -std=c++0x -DXP_UNIX -I/usr/local/include -Wformat-security -Wformat -Wpointer-arith -Wcast-align -Wredundant-decls \
  		-L/usr/local/lib -DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10 \
               -I/usr/local/lib/pkgconfig/../../include -I/usr/local/include
 
@@ -52,7 +52,9 @@ OBJFILES = comm.o act.comm.o act.informative.o act.movement.o act.item.o \
 	MobLoadLogger.o SQLUtil.o Script.o guilds/Guild.o guilds/GuildStatus.o guilds/GuildUtil.o guilds/UserGuild.o \
 	dbutils/QueryUtil.o TextTableBuilder.o editor-interface/EditorInterface.o editor-interface/EditorInterfaceInstance.o \
 	editor-interface/EditorInterfaceMenu.o guilds/GuildEditorInterface.o guilds/GuildApplication.o \
-	guilds/GuildApplicationStatus.o guilds/UserGuildStatus.o
+	guilds/GuildApplicationStatus.o guilds/UserGuildStatus.o guilds/GuildApplicationSignature.o \
+	guilds/GuildApplicationSignatureStatus.o commands/infrastructure/Social.o commands/infrastructure/CommandUtil.o \
+	test/TestUtil.o test/general/GeneralTestCase.o guilds/GuildJoinApplication.o guilds/GuildJoinApplicationStatus.o
 
 
 OBJFILES := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILES))

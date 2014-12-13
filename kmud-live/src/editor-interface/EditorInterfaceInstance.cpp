@@ -16,7 +16,7 @@ EditorInterfaceMenu *EditorInterfaceInstance::push(EditorInterfaceMenu *menu)
 	boost::optional<std::string> preReqMessage = menu->preReq(this);
 
 	if(preReqMessage.is_initialized())
-		send("%s", preReqMessage.get().c_str());
+		send("%s\r\n\r\n", preReqMessage.get().c_str());
 	else
 		menuStack.push_back(menu);
 	return menu;
@@ -59,10 +59,8 @@ EditorInterfaceMenu *EditorInterfaceInstance::parse(const std::string &input, co
 EditorInterfaceMenu *EditorInterfaceInstance::print()
 {
 	get_char_cols(ch);
-	Log("Size: %d", (int)menuStack.size());
 	EditorInterfaceMenu *menu = menuStack.back();
 
-	Log("Menu: %p", menu);
 	menuStack.back()->print(this);
 	return nullptr;
 }
@@ -143,9 +141,14 @@ EditorInterfaceInstance::~EditorInterfaceInstance()
 		delete data;
 }
 
-bool EditorInterfaceInstance::getIsTerminated()
+bool EditorInterfaceInstance::getIsTerminated() const
 {
 	return isTerminated;
+}
+
+int EditorInterfaceInstance::getUserId() const
+{
+	return ch->player.idnum;
 }
 
 std::list<EditorInterfaceMenu*>::size_type EditorInterfaceInstance::getMenuStackSize() const

@@ -46,8 +46,6 @@ int PerformPeriodicEffects(Character *ch, affected_type *af);
 int mag_savingthrow(Character *ch, int type);
 void affect_update(void);
 
-ACMD(do_untie);
-
 /*
  * Saving throws are now in class.c (bpl13)
  */
@@ -142,16 +140,16 @@ int mag_damage(Character *ch, Character *victim, int spellnum)
 	 */
 	if( weave->hasAttribute("DmgLow") && weave->hasAttribute("DmgHigh") )
 	{
-		int low = MiscUtil::Convert<int>(weave->getAttribute("DmgLow"));
-		int high = MiscUtil::Convert<int>(weave->getAttribute("DmgHigh"));
+		int low = MiscUtil::convert<int>(weave->getAttribute("DmgLow"));
+		int high = MiscUtil::convert<int>(weave->getAttribute("DmgHigh"));
 		dam = MiscUtil::random(low,high);
 	}
 
 	if( weave->hasAttribute("Execute") && weave->hasAttribute("ExecuteBelow") )
 	{
-		if( GET_HIT(victim) <= GET_MAX_HIT(victim) * MiscUtil::Convert<float>(weave->getAttribute("ExecuteBelow")) )
+		if( GET_HIT(victim) <= GET_MAX_HIT(victim) * MiscUtil::convert<float>(weave->getAttribute("ExecuteBelow")) )
 		{
-			dam *= MiscUtil::Convert<float>(weave->getAttribute("Execute"));
+			dam *= MiscUtil::convert<float>(weave->getAttribute("Execute"));
 		}
 	}
 
@@ -179,8 +177,8 @@ int mag_mana_damage(Character *ch, Character *victim, int spellnum)
 
 	if( weave->hasAttribute("ManaDmgLow") && weave->hasAttribute("ManaDmgHigh") )
 	{
-		int low = MiscUtil::Convert<int>(weave->getAttribute("ManaDmgLow"));
-		int high = MiscUtil::Convert<int>(weave->getAttribute("ManaDmgHigh"));
+		int low = MiscUtil::convert<int>(weave->getAttribute("ManaDmgLow"));
+		int high = MiscUtil::convert<int>(weave->getAttribute("ManaDmgHigh"));
 		dam = MiscUtil::random(low,high);
 	}
 
@@ -520,8 +518,8 @@ void mag_points(Character * ch, Character * victim, int spellnum)
 
 	if(	weave->hasAttribute("HpsLow") && weave->hasAttribute("HpsHigh") )
 	{
-		int low = MiscUtil::Convert<int>(weave->getAttribute("HpsLow"));
-		int high = MiscUtil::Convert<int>(weave->getAttribute("HpsHigh"));
+		int low = MiscUtil::convert<int>(weave->getAttribute("HpsLow"));
+		int high = MiscUtil::convert<int>(weave->getAttribute("HpsHigh"));
 		hit = MiscUtil::random(low, high);
 	}
 
@@ -685,7 +683,7 @@ void Character::KillAllGates()
 	GateManager::GetManager().KillAllGates( this );
 }
 
-ACMD(do_untie)
+CommandHandler do_untie = DEFINE_COMMAND
 {
 	int n = 0;
 	char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -752,7 +750,7 @@ ACMD(do_untie)
 	}
 	else
 		ch->send("You can untie the following: Gate");
-}
+};
 
 void DisplayWeaveMessages(Weave *weave, Character *ch, Character *victim)
 {

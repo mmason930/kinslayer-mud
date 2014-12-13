@@ -21,7 +21,7 @@
 extern Descriptor *descriptor_list;
 extern Clan *ClanList, *ClanEnd;
 
-ACMD(do_cledit)
+CommandHandler do_cledit = DEFINE_COMMAND
 {
 	Descriptor *d;
 	char buf1[MAX_STRING_LENGTH];
@@ -66,7 +66,7 @@ ACMD(do_cledit)
 	{
 		d->send("Which clan is it you wish to edit?\r\n");
 	}
-}
+};
 
 /*-------------------------------------------------------------------*/
 

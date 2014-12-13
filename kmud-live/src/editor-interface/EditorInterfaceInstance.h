@@ -43,10 +43,12 @@ public:
 	EditorInterfaceMenu *send(const std::string &message, ...);
 	EditorInterfaceMenu *send(const char *message, ...);
 
-	bool getIsTerminated();
+	bool getIsTerminated() const;
 
 	void parse(const std::string &command);
 	void destroy();
+
+	int getUserId() const;
 
 	std::list<EditorInterfaceMenu*>::size_type getMenuStackSize() const;
 

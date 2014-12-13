@@ -16,6 +16,7 @@ protected:
 	std::string guildDescription;
 	DateTime submittedDatetime;
 	int submittedByUserId;
+	int submittedByUserRace;
 	GuildApplicationStatus *status;
 	int coppersCharged;
 	boost::optional<DateTime> completedDatetime;
@@ -38,6 +39,9 @@ public:
 
 	int getSubmittedByUserId() const;
 	void setSubmittedByUserId(const int submittedByUserId);
+
+	int getSubmittedByUserRace() const;
+	void setSubmittedByUserRace(int submittedByUserRace);
 
 	GuildApplicationStatus *getStatus() const;
 	void setStatus(GuildApplicationStatus *status);

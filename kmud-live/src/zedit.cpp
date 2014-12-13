@@ -67,7 +67,6 @@ void zedit_new_zone(Character *ch, int vzone_num);
 #define MYCMD		(OLC_ZONE(d)->cmd[subcmd])
 #define OLC_CMD(d)	(OLC_ZONE(d)->cmd[OLC_VAL(d)])
 
-ACMD(do_zlist);
 /*-------------------------------------------------------------------*/
 
 /*
@@ -270,7 +269,7 @@ int start_change_command(Descriptor *d, unsigned int pos)
 /**************************************************************************
  Menu functions
  **************************************************************************/
-ACMD(do_zlist)
+CommandHandler do_zlist = DEFINE_COMMAND
 {
 	Zone *z = 0;
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH], arg4[MAX_INPUT_LENGTH],
@@ -487,7 +486,7 @@ ACMD(do_zlist)
 	if(!count)
 		ch->send("%sThere were no commands that met your criteria.\r\n", nrm);
 	ch->send(COLOR_NORMAL(ch, CL_COMPLETE));
-}
+};
 
 /*
  * the main menu

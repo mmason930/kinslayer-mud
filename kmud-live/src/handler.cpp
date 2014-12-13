@@ -68,9 +68,6 @@ bool isInArena(Character *ch);
 int getArenaTeam(Character *ch);
 bool JS_isArenaInFFAMode();
 
-ACMD(do_return);
-
-
 //returns length of a string to display in order to get a visible length of 'sz' size.
 /* Thanks to Seronis for this function - 11/13/2004 */
 int str_display_sz(int sz, char *str)
@@ -1638,7 +1635,7 @@ void Character::Extract( UserLogoutType *userLogoutType, bool full_delete )
 	
 		std::stringstream sqlBuffer;
 
-		std::string roomString = in_room ? MiscUtil::Convert<std::string>(in_room->getVnum()) : "NULL";
+		std::string roomString = in_room ? MiscUtil::convert<std::string>(in_room->getVnum()) : "NULL";
 
 		sqlBuffer	<< "INSERT INTO userLogout("
 					<< " `user_id`,"

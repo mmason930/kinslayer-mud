@@ -36,6 +36,9 @@
 #include "ForumUtil.h"
 #include "CharacterUtil.h"
 
+#include "commands/infrastructure/CommandUtil.h"
+#include "commands/infrastructure/CommandInfo.h"
+
 /* extern variables */
 
 extern Descriptor *descriptor_list;
@@ -48,41 +51,11 @@ extern struct Index *obj_index;
 void list_skills( Character * ch, Character *teacher );
 void perform_immort_vis( Character *ch );
 SPECIAL( shop_keeper );
-ACMD( do_gen_comm );
 
 std::string MoodString( int mood );
 std::string StanceString( int stance );
 int perform_group( Character *ch, Character *vict );
 void print_group( Character *ch );
-
-//Declarations //
-ACMD( do_say );
-
-/* local functions */
-ACMD( do_quit );
-ACMD( do_save );
-ACMD( do_not_here );
-ACMD( do_sneak );
-ACMD( do_hide );
-ACMD( do_steal );
-ACMD( do_effuse );
-ACMD( do_practice );
-ACMD( do_visible );
-ACMD( do_group );
-ACMD( do_ungroup );
-ACMD( do_use );
-ACMD( do_mark );
-ACMD( do_notice );
-ACMD( do_restat );
-ACMD( do_ignore );
-ACMD( do_wimpy );
-ACMD( do_display );
-ACMD( do_gen_tog );
-ACMD( do_scalp );
-ACMD( do_follow );
-ACMD( do_self_delete );
-ACMD( do_rage );
-
 
 void perform_steal( Character *ch, Character *vict, Object *obj, char *obj_name )
 {
@@ -200,7 +173,7 @@ void Character::AddIgnore(const std::string &name)
 
 	this->ignores.push_back(format);
 
-	query =	"INSERT INTO userIgnore (user_id, victim) VALUES (" + MiscUtil::Convert<std::string>(this->player.idnum) + ", '" + format + "')";
+	query =	"INSERT INTO userIgnore (user_id, victim) VALUES (" + MiscUtil::convert<std::string>(this->player.idnum) + ", '" + format + "')";
 
 	sql::Query MyQuery;
 	try {MyQuery = gameDatabase->sendQuery(query);}
@@ -223,7 +196,7 @@ void Character::RemoveIgnore(const std::string &name)
 	MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(this)), TRUE, "%s is no longer ignoring %s.",
 		GET_NAME(this), (*i).c_str());
 
-	std::string query = "DELETE FROM userIgnore WHERE user_id = " + MiscUtil::Convert<std::string>(this->player.idnum) +
+	std::string query = "DELETE FROM userIgnore WHERE user_id = " + MiscUtil::convert<std::string>(this->player.idnum) +
 		" AND victim = '" + sql::escapeString(name) + "'";
 
 	sql::Query MyQuery;
@@ -236,7 +209,7 @@ void Character::RemoveIgnore(const std::string &name)
 	this->ignores.remove((*i));
 }
 
-ACMD( do_restat )
+CommandHandler  do_restat  = DEFINE_COMMAND
 {
 	if( GET_LEVEL(ch) != 5 )
 	{
@@ -247,9 +220,9 @@ ACMD( do_restat )
 	ch->send("A bright flash of light momentarily consumes your vision. When you regain focus, you feel slightly different.\r\n");
 	ch->Init();
 	REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_STATTED);
-}
+};
 
-ACMD( do_ignore )
+CommandHandler  do_ignore  = DEFINE_COMMAND
 {
 	char arg[ MAX_INPUT_LENGTH ];
 	int count = 0;
@@ -278,10 +251,10 @@ ACMD( do_ignore )
 	}
 	else
 		ch->AddIgnore(arg);
-}
+};
 
 
-ACMD( do_self_delete )
+CommandHandler  do_self_delete  = DEFINE_COMMAND
 {
 	if ( !PLR_FLAGGED( ch, PLR_DELETED ) )
 	{
@@ -301,9 +274,9 @@ ACMD( do_self_delete )
 		ch->send( "Your delete flag has been removed.\r\n" );
 		REMOVE_BIT( PLR_FLAGS( ch ), Q_BIT(PLR_DELETED) );
 	}
-}
+};
 
-ACMD( do_mark )
+CommandHandler  do_mark  = DEFINE_COMMAND
 {
 
 	Character * victim;
@@ -334,9 +307,9 @@ ACMD( do_mark )
 
 	ch->send( "You now focus on %s's location.\r\n", GET_NAME( victim ) );
 	GET_MARKED( ch ) = victim;
-}
+};
 
-ACMD( do_effuse )
+CommandHandler  do_effuse  = DEFINE_COMMAND
 {
 
 	struct affected_type af;
@@ -363,10 +336,10 @@ ACMD( do_effuse )
 	af.location = APPLY_NONE;
 	af.bitvector= AFF_EFFUSION;
 	affect_to_char( ch, &af );
-}
+};
 
 /* Added by Galnor in October 2003. Command sets characters "notice" AFFECTION bit. */
-ACMD( do_notice )
+CommandHandler  do_notice  = DEFINE_COMMAND
 {
 
 	struct affected_type af;
@@ -388,7 +361,7 @@ ACMD( do_notice )
 	af.bitvector= AFF_NOTICE;
 	affect_to_char( ch, &af );
 
-}
+};
 
 int butcher_cost( Character *ch )
 {
@@ -400,7 +373,7 @@ int butcher_cost( Character *ch )
 
 
 /* Added by Galnor in September of 2003. Command gives meat from the corpse to selected player. */
-ACMD( do_butcher )
+CommandHandler  do_butcher  = DEFINE_COMMAND
 {
 	Object * corpse, *obj, *wielded = GET_EQ( ch, WEAR_WIELD );
 	int q = 0;
@@ -599,10 +572,10 @@ ACMD( do_butcher )
 			corpse->scalp->Skin->skinned = true;
 		}
 	}
-}
+};
 
 /* Added by Galnor in September of 2003. Command gives a scalp of selected corpse to the character. */
-ACMD( do_scalp )
+CommandHandler  do_scalp  = DEFINE_COMMAND
 {
 	Object * corpse, *scalpo, *wielded = GET_EQ( ch, WEAR_WIELD );
 	const char *type;
@@ -715,10 +688,10 @@ ACMD( do_scalp )
 
 	else
 		ch->send( "It has already been scalped!\r\n" );
-}
+};
 
 /* Added by Galnor in September of 2003. Command mounts a character if successful. */
-ACMD( do_ride )
+CommandHandler  do_ride  = DEFINE_COMMAND
 {
 	Character * victim, *riding;
 	int percent;
@@ -787,10 +760,10 @@ ACMD( do_ride )
 			do_follow( riding, str, 0, 0 );
 		}
 	}
-}
+};
 
 /* Added by Galnor in September of 2003. Command dismounts a player. */
-ACMD( do_dismount )
+CommandHandler  do_dismount  = DEFINE_COMMAND
 {
 	if ( MOUNT( ch ) )
 	{
@@ -805,9 +778,9 @@ ACMD( do_dismount )
 	{
 		ch->send( "You aren't riding anything\r\n" );
 	}
-}
+};
 
-ACMD( do_quit )
+CommandHandler  do_quit  = DEFINE_COMMAND
 {
 	Descriptor * d, *next_d;
 
@@ -868,9 +841,9 @@ ACMD( do_quit )
 			ch->itemSave();
 		}
 	}
-}
+};
 
-ACMD( do_save )
+CommandHandler  do_save  = DEFINE_COMMAND
 {
 	if ( IS_NPC( ch ) || !ch->desc )
 		return ;
@@ -889,17 +862,17 @@ ACMD( do_save )
 	}
 	ch->save();
 	ch->itemSave();
-}
+};
 
 
 /* generic function for commands which are normally overridden by
    special procedures - i.e., shop commands, mail commands, etc. */
-ACMD( do_not_here )
+CommandHandler  do_not_here  = DEFINE_COMMAND
 {
 	ch->send( "Sorry, but you cannot do that here!\r\n" );
-}
+};
 
-ACMD( do_sneak )
+CommandHandler  do_sneak  = DEFINE_COMMAND
 {
 	struct affected_type af;
 
@@ -922,9 +895,9 @@ ACMD( do_sneak )
 		af.bitvector= AFF_SNEAK;
 		affect_to_char( ch, &af );
 	}
-}
+};
 
-ACMD( do_hide )
+CommandHandler  do_hide  = DEFINE_COMMAND
 {
 	char arg[ MAX_INPUT_LENGTH ];
 	Object *obj;
@@ -964,9 +937,9 @@ ACMD( do_hide )
 		else
 			ch->send("You can't find a good place to hide!\r\n");
 	}
-}
+};
 
-ACMD( do_steal )
+CommandHandler  do_steal  = DEFINE_COMMAND
 {
 	Character * vict;
 	Object *obj = NULL;
@@ -998,15 +971,15 @@ ACMD( do_steal )
 	else
 		perform_steal( ch, vict, obj, obj_name );
 
-}
+};
 
-ACMD( do_practice )
+CommandHandler  do_practice  = DEFINE_COMMAND
 {
 	OneArgument( argument, ::arg );
 	list_skills( ch, NULL );
-}
+};
 
-ACMD( do_visible )
+CommandHandler  do_visible  = DEFINE_COMMAND
 {
 	if ( GET_LEVEL( ch ) >= LVL_IMMORT )
 	{
@@ -1022,7 +995,7 @@ ACMD( do_visible )
 
 	else
 		ch->send( "You are already visible.\r\n" );
-}
+};
 
 int perform_group( Character *ch, Character *vict )
 {
@@ -1071,7 +1044,7 @@ void print_group( Character *ch )
 	}
 }
 
-ACMD( do_group )
+CommandHandler  do_group  = DEFINE_COMMAND
 {
 	Character * vict;
 	struct Follower *f;
@@ -1133,9 +1106,9 @@ ACMD( do_group )
 			REMOVE_BIT_AR( AFF_FLAGS( vict ), AFF_GROUP );
 		}
 	}
-}
+};
 
-ACMD( do_ungroup )
+CommandHandler  do_ungroup  = DEFINE_COMMAND
 {
 	struct Follower * f, *next_fol;
 	Character *tch;
@@ -1193,22 +1166,21 @@ ACMD( do_ungroup )
 	Act( "$N is no longer a member of your group.", FALSE, ch, 0, tch, TO_CHAR );
 	Act( "You have been kicked out of $n's group!", FALSE, ch, 0, tch, TO_VICT );
 	Act( "$N has been kicked out of $n's group!", FALSE, ch, 0, tch, TO_NOTVICT );
-}
+};
 
-ACMD( do_use )
+CommandHandler  do_use  = DEFINE_COMMAND
 {
 	HalfChop( argument, ::arg, buf );
 
 	if ( !*::arg )
 	{
+		auto commandInfo = CommandUtil::get()->getCommandByIndex(cmd);
 		ch->send( "What do you want to %s?\r\n",
-		complete_cmd_info[cmd].command.size() ? complete_cmd_info[cmd].command.c_str() : "ERROR!!! REPORT THIS!" );
-		return ;
+		commandInfo ? commandInfo->command.c_str() : "ERROR!!! REPORT THIS!" );
 	}
+};
 
-}
-
-ACMD( do_wimpy )
+CommandHandler  do_wimpy  = DEFINE_COMMAND
 {
 	int wimp_lev;
 
@@ -1260,9 +1232,9 @@ ACMD( do_wimpy )
 	}
 	else
 		ch->send( "Specify at how many hit points you want to wimp out at.  (0 to disable)\r\n" );
-}
+};
 
-ACMD( do_display )
+CommandHandler  do_display  = DEFINE_COMMAND
 {
 	size_t i;
 
@@ -1320,13 +1292,13 @@ ACMD( do_display )
 	}
 
 	ch->send( OK );
-}
+};
 
 const int TOG_OFF = 0;
 const int TOG_ON = 1;
 
 
-ACMD( do_gen_tog )
+CommandHandler  do_gen_tog  = DEFINE_COMMAND
 {
 	long result;
 
@@ -1438,9 +1410,9 @@ ACMD( do_gen_tog )
 	else
 		ch->send( tog_messages[ subcmd ][ TOG_OFF ] );
 	return ;
-}
+};
 
-ACMD( do_change )
+CommandHandler  do_change  = DEFINE_COMMAND
 {
 	char arg1[ MAX_INPUT_LENGTH ];
 	char arg2[ MAX_INPUT_LENGTH ];
@@ -1598,9 +1570,9 @@ ACMD( do_change )
 			ch->send( "You don't have this ability!\r\n" );
 		}
 	}
-}
+};
 
-ACMD( do_rage )
+CommandHandler  do_rage  = DEFINE_COMMAND
 {
 
 	struct affected_type af;
@@ -1640,7 +1612,7 @@ ACMD( do_rage )
 	af.bitvector= AFF_SHADOW_RAGE;
 	affect_to_char( ch, &af );
 	//GET_SHADOW(ch) = MAX( GET_SHADOW(ch) - 40, 0 );
-}
+};
 
 bool Character::disorientRoll()
 {

@@ -533,11 +533,11 @@ Room *Room::boot(const sql::Row &MyRow,
 
 	Room *NewRoom = new Room();
 	Zone *zone;
-	if ((zone = ZoneManager::GetManager().GetZoneByVnum(MiscUtil::Convert<unsigned int>(MyRow["znum"]))) == NULL)
+	if ((zone = ZoneManager::GetManager().GetZoneByVnum(MiscUtil::convert<unsigned int>(MyRow["znum"]))) == NULL)
 	{
 		MudLog(BRF, LVL_APPR, TRUE,
 			"Attempting to load room with invalid zone vnum. Room: %d. Zone: %d.", atoi(MyRow["vnum"].c_str()),
-			MiscUtil::Convert<unsigned int>(MyRow["znum"]));
+			MiscUtil::convert<unsigned int>(MyRow["znum"]));
 		return (NULL);
 	}
 

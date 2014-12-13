@@ -5,6 +5,8 @@
 #include "../DataObjectWithIntId.h"
 #include "../SQLUtil.h"
 
+#include <iostream>
+
 class StoreDataObjectSQLBuilder : public StoreSQLBuilder {
 	
 private:

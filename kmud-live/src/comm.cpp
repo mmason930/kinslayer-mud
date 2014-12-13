@@ -87,6 +87,10 @@
 #include "editor-interface/EditorInterfaceInstance.h"
 #include <boost/filesystem.hpp>
 
+#include "commands/infrastructure/CommandUtil.h"
+#include "commands/infrastructure/CommandInfo.h"
+#include "commands/infrastructure/Social.h"
+
 #ifdef HAVE_ARPA_TELNET_H
 #include <arpa/telnet.h>
 #else
@@ -106,9 +110,7 @@ extern int circle_restrict;
 extern int MAX_PLAYERS;
 extern Object *object_list;
 extern Character *character_list;
-extern int top_of_socialt;
 extern struct Index *obj_index;
-extern Social *soc_mess_list;
 extern class event_info *event_list;
 extern time_t time_of_boot_high;
 extern int top_of_objt;
@@ -193,7 +195,6 @@ void signal_setup( void );
 void gameLoop();
 void performFlee( Character *ch );
 void destroyPlayerIndex();
-void destroySortInfo( void );
 void startGameSession();
 void endGameSession();
 
@@ -204,7 +205,6 @@ sigfunc *my_signal( int signo, sigfunc * func );
 #endif
 
 /* extern fcnts */
-extern void close_mud( void );
 extern void bootWorld( void );
 extern void affect_update( void ); /* In spells.c */
 extern void mobileActivity( void );
@@ -285,7 +285,7 @@ void exportScripts()
 
 		if(triggerVnum >= 0)
 		{
-			scriptBuffer = (std::string("var script") + MiscUtil::Convert<std::string>(triggerVnum) + std::string(" = function(self, actor, here, args, extra)\n{\n\t") + body + "\n};\n\n");
+			scriptBuffer = (std::string("var script") + MiscUtil::convert<std::string>(triggerVnum) + std::string(" = function(self, actor, here, args, extra)\n{\n\t") + body + "\n};\n\n");
 		}
 		else
 			scriptBuffer = body;
@@ -990,9 +990,7 @@ void initiateGame( int port )
 	delete[] ( imotd );
 	delete[] ( background );
 	delete[] ( startup );
-	delete[] ( complete_cmd_info );
-	delete[] ( soc_mess_list );
-	destroySortInfo();
+	CommandUtil::get()->destroy();
 
 	Log( "Freeing zone table..." );
 	ZoneManager::GetManager().Free();
@@ -1142,120 +1140,9 @@ void gameLoop()
 		for ( d = descriptor_list; d; d = next_d )
 		{
 			next_d = d->next;
-			if(d->commandQueue.empty())
-				continue;
-			if(d->character && d->character->wait > 0)
-				continue;
-
-			std::string command = d->commandQueue.front();
-			d->commandQueue.pop_front();
-				
-			aliased = 0;
-			d->hadInput = true;
-
-			//Process Telnet input.
-
-			for(int pos = 0;pos < (int)command.size();++pos)
-			{
-				char ch = command[pos];
-				if(ch == '\b' || ch == 127) {
-
-					if(pos == 0) {
-
-						command.erase(pos,1);
-						--pos;
-					}
-					else {
-
-						command.erase((pos-1),2);
-						pos -= 2;
-					}
-				}
-				else if(!isascii(ch) || !isprint(ch)) {
-					command.erase(pos, 1);
-					--pos;
-				}
-			}
-
-			Character *loggingCharacter = d->character;
-			if(d->original)
-				loggingCharacter = d->original;
-
-			if(loggingCharacter && STATE(d) != CON_PASSWORD)
-				loggingCharacter->LogOutput(command + "\n");
-
-			if(command.length() > MAX_INPUT_LENGTH) {
-
-				d->send("Input too long... Truncated.\r\n");
-
-				command.resize(MAX_INPUT_LENGTH);
-			}
-
-			if(STATE(d) != CON_PASSWORD) {
-
-				StringUtil::replace(command, "$", "$$");
-			}
-
-			if(d->snoop_by && d->snoop_by->descriptor && d->snoop_by->character && d->snoop_by->character->hasPermissionToSnoop()) {
-
-				d->snoop_by->sendInstant(std::string("% ") + command + std::string("\n"));
-			}
-
-			char comm[MAX_INPUT_LENGTH+1];//Keeping this way for legacy reasons... Will change someday. 2011-04-10
-
-			strcpy(comm, command.c_str());
-			
-			if ( d->character && d->character->ShieldBlock )
-			{
-				d->character->CancelTimer(false);
-				continue;
-			}
-			if ( d->character )
-			{
-				/* Reset the idle timer & pull char back from void if necessary */
-
-				if ( d->character->player.timer >= CONFIG_IDLE_VOID ) {
-
-					MudLog( CMP, MAX( GET_LEVEL( d->character ), LVL_GOD ), TRUE, "%s has un-idled.", GET_NAME( d->character ) );
-				}
-				d->character->player.timer = 0;
-				if ( STATE( d ) == CON_PLAYING && d->character->was_in_room )
-				{
-					if ( d->character->in_room )
-						d->character->RemoveFromRoom();
-
-					d->character->MoveToRoom( d->character->was_in_room );
-					d->character->was_in_room = 0;
-					Act( "$n has returned.", TRUE, d->character, 0, 0, TO_ROOM );
-				}
-				d->character->wait = 0;
-			}
 
 			try {
-				/*
-				* I reversed these top 2 if checks so that you can use the
-				*/
-				if ( d->showstr_count )  /* Reading something w/ pager */
-					show_string( d, comm );
-
-				else if ( d->str )
-					string_add( d, comm );
-
-				else if ( STATE( d ) != CON_PLAYING )  /* In menus, etc. */
-					d->nanny( comm );
-
-				else if( d->character && d->character->editorInterfaceInstance )
-					d->character->editorInterfaceInstance->parse(comm);
-
-				else
-				{ /* else: we're playing normally. */
-
-					CommandInterpreter( d->character, comm ); /* Send it to interpreter */
-
-					if ( d->character && !d->character->command_ready ) {
-						d->character->CancelTimer( false );
-					}
-				}
+				d->processInput();
 			}
 			catch( sql::Exception e ) {
 
@@ -1431,7 +1318,7 @@ void autoSave( void )
 				if(GET_EQ(ch, bodyPosition))
 					characterContents.push_back(GET_EQ(ch, bodyPosition));
 			}
-			holderIdAndTypeToContentsMap[ std::pair<char, std::string>('P', MiscUtil::Convert<std::string>(ch->player.idnum)) ] = characterContents;
+			holderIdAndTypeToContentsMap[ std::pair<char, std::string>('P', MiscUtil::convert<std::string>(ch->player.idnum)) ] = characterContents;
 
 			ch->save();
 		}
@@ -1474,7 +1361,7 @@ void autoSave( void )
 			if(IS_CORPSE(object))
 				roomContents.push_back(object);
 		}
-		holderIdAndTypeToContentsMap[std::pair<char, std::string>('R', MiscUtil::Convert<std::string>(corpseRoom->getVnum()))] = roomContents;
+		holderIdAndTypeToContentsMap[std::pair<char, std::string>('R', MiscUtil::convert<std::string>(corpseRoom->getVnum()))] = roomContents;
 	}
 
 	Object::saveMultipleHolderItems(holderIdAndTypeToContentsMap, true);
@@ -2047,7 +1934,7 @@ void checkTimers()
 		{
 			char dCommand[MAX_INPUT_LENGTH];
 			strcpy(dCommand, ch->delayed_command.c_str());
-			CommandInterpreter( ch, dCommand );
+			CommandUtil::get()->interpretCommand( ch, dCommand );
 		}
 		if( !(ch->timer > 0) ) {
 			ch->CancelTimer( false );

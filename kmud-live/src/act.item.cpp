@@ -35,6 +35,9 @@
 #include "js.h"
 #include "js_functions.h"
 
+#include "commands/infrastructure/CommandUtil.h"
+#include "commands/infrastructure/CommandInfo.h"
+
 /* extern variables */
 extern sh_int donation_room_1;
 #if 0
@@ -66,25 +69,6 @@ void perform_get_from_container( Character *ch, Object *obj, Object *cont, int m
 void update_chest_log( Character *ch, Object *chest, Object *obj, int type );
 void lookInObject( Character * ch, char *arg, Object *obj=0);
 Character *give_find_vict( Character *h, char *arg );
-
-ACMD( do_auction );
-ACMD( do_draw );
-ACMD( do_get );
-ACMD( do_grab );
-ACMD( do_give );
-ACMD( do_drink );
-ACMD( do_drop );
-ACMD( do_diceroll );
-ACMD( do_eat );
-ACMD( do_flip );
-ACMD( do_pour );
-ACMD( do_put );
-ACMD( do_remove );
-ACMD( do_sheath );
-ACMD( do_wear );
-ACMD( do_wield );
-ACMD( do_break );
-ACMD( do_show );
 
 unsigned long int Character::Copper()
 {
@@ -253,7 +237,7 @@ bool Character::CanDraw(Object *obj)
 	return true;
 }
 
-ACMD( do_draw )
+CommandHandler  do_draw  = DEFINE_COMMAND
 {
 	int ret_val = 0;
 
@@ -265,7 +249,7 @@ ACMD( do_draw )
 		if ( !ret_val )
 			ch->send( "You don't seem to have anything sheathed.\r\n" );
 	}
-}
+};
 
 int Character::Sheath()
 {
@@ -307,7 +291,7 @@ int Character::Sheath()
 	return 1;
 }
 
-ACMD( do_sheath )
+CommandHandler  do_sheath  = DEFINE_COMMAND
 {
 	int ret_val = 0;
 
@@ -319,7 +303,7 @@ ACMD( do_sheath )
 		if ( !ret_val )
 			ch->send( "You do not have anything to sheath your weapon into.\r\n" );
 	}
-}
+};
 
 void perform_give_extra( Character *giver, Character *receiver, Object *obj )
 {
@@ -353,7 +337,7 @@ void perform_give_extra( Character *giver, Character *receiver, Object *obj )
 			sprintf( buf, "award %s %d 1 %s", GET_NAME( giver ), i, reasonBuffer.str().c_str() );
 		else
 			sprintf( buf, "award %s %d 5 %s", GET_NAME( giver ), i, reasonBuffer.str().c_str() );
-		CommandInterpreter( receiver, buf );
+		CommandUtil::get()->interpretCommand( receiver, buf );
 		obj_from_char( obj );
 		obj ->Extract();
 		return;
@@ -386,7 +370,7 @@ void perform_put( Character * ch, Object * obj, Object * cont )
 	}
 }
 
-ACMD( do_diceroll )
+CommandHandler  do_diceroll  = DEFINE_COMMAND
 {
 
 	int rolla = 0;
@@ -402,7 +386,7 @@ ACMD( do_diceroll )
 	sprintf( buf, "Two dice roll and hit the ground, thrown by $n, revealing a %d and %d on two six sided dice.",
 	         rolla, rollb );
 	Act( buf, TRUE, ch, 0, 0, TO_ROOM );
-}
+};
 
 /* The following put modes are supported by the code below:
 
@@ -414,7 +398,7 @@ ACMD( do_diceroll )
 	all objects to be put into container must be in inventory.
 */
 
-ACMD( do_put )
+CommandHandler  do_put  = DEFINE_COMMAND
 {
 	char arg1[ MAX_INPUT_LENGTH ];
 	char arg2[ MAX_INPUT_LENGTH ];
@@ -503,7 +487,7 @@ ACMD( do_put )
 			}
 		}
 	}
-}
+};
 bool Character::TooHeavyToPickUp( Object *obj )
 {
 	return( this->CarriedWeight() + obj->Weight() > CAN_CARRY_W( this ) && GET_LEVEL(this) < LVL_GRGOD );
@@ -768,7 +752,7 @@ void get_from_room( Character *ch, char *arg )
 		ch->in_room->itemSave();
 }
 
-ACMD( do_get )
+CommandHandler  do_get  = DEFINE_COMMAND
 {
 	char arg1[ MAX_INPUT_LENGTH ];
 	char arg2[ MAX_INPUT_LENGTH ];
@@ -871,7 +855,7 @@ ACMD( do_get )
 			}
 		}
 	}
-}
+};
 
 int perform_drop( Character *ch, Object *obj, bool vaultSave )
 {
@@ -906,7 +890,7 @@ int perform_drop( Character *ch, Object *obj, bool vaultSave )
 	return 0;
 }
 
-ACMD( do_drop )
+CommandHandler  do_drop  = DEFINE_COMMAND
 {
 	Object * obj, *next_obj;
 	int dotmode, amount = 0;
@@ -978,7 +962,7 @@ ACMD( do_drop )
 	}
 	if( ROOM_FLAGGED(ch->in_room, ROOM_VAULT) )
 		ch->in_room->itemSave();
-}
+};
 
 void perform_give( Character *ch, Character *vict, Object *obj )
 {
@@ -1047,7 +1031,7 @@ Character *give_find_vict( Character *ch, char *arg )
 		return vict;
 }
 
-ACMD( do_give )
+CommandHandler  do_give  = DEFINE_COMMAND
 {
 	int amount = 0, dotmode = 0;
 	Character *vict = 0;
@@ -1174,7 +1158,7 @@ ACMD( do_give )
 				}
 		}
 	}
-}
+};
 
 void name_from_drinkcon( Object * obj )
 {
@@ -1209,7 +1193,7 @@ void name_to_drinkcon( Object * obj, int type )
 	obj->name = new_name;
 }
 
-ACMD( do_drink )
+CommandHandler  do_drink  = DEFINE_COMMAND
 {
 	Object * temp;
 	struct affected_type af;
@@ -1345,9 +1329,9 @@ ACMD( do_drink )
 		GET_OBJ_VAL( temp, 3 ) = 0;
 		//	name_from_drinkcon(temp);
 	}
-}
+};
 
-ACMD( do_eat )
+CommandHandler  do_eat  = DEFINE_COMMAND
 {
 	Object * food;
 	struct affected_type af;
@@ -1433,9 +1417,9 @@ ACMD( do_eat )
 			food->Extract(true);
 		}
 	}
-}
+};
 
-ACMD( do_pour )
+CommandHandler  do_pour  = DEFINE_COMMAND
 {
 	char arg1[ MAX_INPUT_LENGTH ];
 	char arg2[ MAX_INPUT_LENGTH ];
@@ -1722,7 +1706,7 @@ ACMD( do_pour )
 	GET_OBJ_VAL( to_obj, 3 ) = ( GET_OBJ_VAL( to_obj, 3 ) || (GET_OBJ_VAL( from_obj, 3 ) && !IS_CORPSE(from_obj)) );
 
 	return ;
-}
+};
 
 void wear_message( Character * ch, Object * obj, int where )
 {
@@ -1993,7 +1977,7 @@ int find_eq_pos( Character * ch, Object * obj, char *arg, bool msg)
 	return where;
 }
 
-ACMD( do_wear )
+CommandHandler  do_wear  = DEFINE_COMMAND
 {
 	char arg1[ MAX_INPUT_LENGTH ];
 	char arg2[ MAX_INPUT_LENGTH ];
@@ -2077,9 +2061,9 @@ ACMD( do_wear )
 				Act( "You can't wear $p.", FALSE, ch, obj, 0, TO_CHAR );
 		}
 	}
-}
+};
 
-ACMD( do_wield )
+CommandHandler  do_wield  = DEFINE_COMMAND
 {
 	Object * obj;
 
@@ -2104,9 +2088,9 @@ ACMD( do_wield )
 			ch->performWear( obj, WEAR_WIELD );
 		}
 	}
-}
+};
 
-ACMD( do_grab )
+CommandHandler  do_grab  = DEFINE_COMMAND
 {
 	Object * obj;
 
@@ -2129,7 +2113,7 @@ ACMD( do_grab )
 		else
 			ch->send( "You can't hold that.\r\n" );
 	}
-}
+};
 
 void Character::performRemove( int wearLocation )
 {
@@ -2154,7 +2138,7 @@ void Character::performRemove( int wearLocation )
 	}
 }
 
-ACMD( do_remove )
+CommandHandler  do_remove  = DEFINE_COMMAND
 {
 	Object * obj;
 	int i, dotmode, found;
@@ -2219,10 +2203,10 @@ ACMD( do_remove )
 		else
 			ch->performRemove( i );
 	}
-}
+};
 
 /* Allows a manual breaking of keys by players -Narg */
-ACMD( do_break )
+CommandHandler  do_break  = DEFINE_COMMAND
 {
 	Object * o;
 	bool keyfound = false;
@@ -2275,10 +2259,10 @@ ACMD( do_break )
 		ch->send( "Your puny fingers are too weak to break anything but a key!\r\n" );
 		return ;
 	}
-}
+};
 
 /* Galnor 10/27/2009 - Show an item to another player */
-ACMD( do_show )
+CommandHandler  do_show  = DEFINE_COMMAND
 {
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 	Object *item;
@@ -2340,7 +2324,7 @@ ACMD( do_show )
 		target->send("There is something sheath inside:\r\n\r\n");
 		target->send("%s\r\n", item->contains->GetSDesc());
 	}
-}
+};
 
 bool Object::IsRemortGear()
 {
@@ -2422,7 +2406,7 @@ struct ExtraDescription *Object::GetExDesc()
 }
 
 /* Galnor - 09/14/2009 - Provides entry to the auction interface */
-ACMD( do_auction )
+CommandHandler  do_auction  = DEFINE_COMMAND
 {
 	Auction *a;
 
@@ -2445,7 +2429,7 @@ ACMD( do_auction )
 
 	AuctionManager::GetManager().SetupAuctionInterface( ch, a );
 	Act( "$n begins browsing the auctions.", TRUE, ch, 0, 0, TO_ROOM );
-}
+};
 
 bool Character::anyEquipmentMeetsCritera(const std::function<bool(Object *obj)> &predicate)
 {

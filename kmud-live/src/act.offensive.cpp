@@ -29,32 +29,14 @@
 #include "rooms/RoomSector.h"
 #include "rooms/Exit.h"
 
+#include "commands/infrastructure/CommandUtil.h"
+#include "commands/infrastructure/CommandInfo.h"
+
 /* extern variables */
 
 extern Descriptor *descriptor_list;
 extern Character *character_list;
 extern std::list< std::pair< Character*, event_info* > * > BashStandQueue;
-
-/* local functions */
-ACMD(do_assist);
-ACMD(do_backstab);
-ACMD(do_bash);
-ACMD(do_choke);
-ACMD(do_flee);
-ACMD(do_hamstring);
-ACMD(do_hit);
-ACMD(do_kick);
-ACMD(do_kill);
-ACMD(do_order);
-ACMD(do_precisestrike);
-ACMD(do_release);
-ACMD(do_rescue);
-ACMD(do_shadowstep);
-ACMD(do_shieldblock);
-ACMD(do_source);
-ACMD(do_whirlwind);
-ACMD(do_pulverize);
-
 
 int too_scared(Character *ch, int skill);
 int room_visibility(Character *ch, Character *vict);
@@ -303,10 +285,10 @@ int Character::BashDefenseRoll()
 }
 void perform_bash(Character *ch, Character *vict)
 {
-	Character *faceoffOpponent = nullptr;
+	Character *p = 0;
 	char dCommand[MAX_INPUT_LENGTH];
 	int i = 0;
-	bool preFighting = FIGHTING(ch) ? true : false;
+	bool PreFighting = FIGHTING(ch) ? true : false;
 
 	if(!vict || vict->IsPurged() || vict->in_room != ch->in_room)
 	{
@@ -319,13 +301,11 @@ void perform_bash(Character *ch, Character *vict)
 	ch->GainNoQuit(vict);
 	vict->GainNoQuit(ch);
 
-	if(!preFighting)//This calculation must occur before the player is engaged, otherwise faceoff results are screwed up.
-		faceoffOpponent = faceoff(ch, vict);
-
+	CommandInfo *commandInfo;
 	strcpy(dCommand, ch->delayed_command.c_str());
-	//Both basher and bashee land bash on the same pulse...
+	//Both the basher and the bash target complete their timer on the same pulse.
 	if( (ch->CanBash(OneArgument(dCommand, arg))) && (GET_TARGET(vict) == ch)
-	        && vict->timer <= ((float)2 / PASSES_PER_SEC) && !str_cmp(GetCommand(dCommand), "bash")
+	        && vict->timer <= ((float)2 / PASSES_PER_SEC) && ( (commandInfo = CommandUtil::get()->getCommandByFullInput(dCommand)) != nullptr && !str_cmp(commandInfo->command, "bash"))
 	        && vict->CanBash(dCommand))
 	{
 		vict->CancelTimer(false);
@@ -377,10 +357,10 @@ void perform_bash(Character *ch, Character *vict)
 			ch->WaitState(PULSE_VIOLENCE / 2);
 		}
 	}
-	if(FIGHTING(ch) && faceoffOpponent && !preFighting)
+	if(FIGHTING(ch) && (p = faceoff(ch, vict)) && !PreFighting)
 	{
 		ch->StopFighting();
-		ch->SetFighting(faceoffOpponent);
+		ch->SetFighting(p);
 	}
 }
 
@@ -453,7 +433,7 @@ Character *Character::CanBash(char *argument)
 	return vict;
 }
 
-ACMD(do_bash)
+CommandHandler do_bash = DEFINE_COMMAND
 {
 	Character *vict, *temp, *multivict = 0;
 
@@ -503,7 +483,7 @@ ACMD(do_bash)
 			}
 		}
 	}
-}
+};
 
 bool Character::BackstabLanded(Character *victim)
 {
@@ -722,7 +702,7 @@ void perform_charge(Character *ch, Character *victim, int type)
 }
 
 
-ACMD(do_charge)
+CommandHandler do_charge = DEFINE_COMMAND
 {
 	Character *victim = 0, *p = 0;
 	char arg[MAX_INPUT_LENGTH];
@@ -889,7 +869,7 @@ ACMD(do_charge)
 		else
 			perform_charge(ch, victim, subcmd);
 	}
-}
+};
 
 
 /*	Galnor: 4-9-2004. Basically here we have two types of bow and arrow shooting.
@@ -924,7 +904,7 @@ EVENT(SendTaintDizzyMessage)
 }
 
 /* Connecting to the True Source in order to channel. */
-ACMD(do_source)
+CommandHandler do_source = DEFINE_COMMAND
 {
 	Character *victim;
 
@@ -996,7 +976,7 @@ ACMD(do_source)
 			victim->send("You feel a strange sensation from somewhere nearby.\r\n");
 		}
 	}
-}
+};
 
 void Character::RemoveSource()
 {
@@ -1024,7 +1004,7 @@ void Character::RemoveSource()
 	}
 }
 
-ACMD(do_release)
+CommandHandler do_release = DEFINE_COMMAND
 {
 	if( !ch->ChannelingAbility() && GET_LEVEL(ch) < LVL_GRGOD)
 	{
@@ -1047,10 +1027,9 @@ ACMD(do_release)
 
 	ch->send("You release the One Power.\r\n");
 	ch->RemoveSource();
+};
 
-}
-
-ACMD(do_assist)
+CommandHandler do_assist = DEFINE_COMMAND
 {
 	Character *helpee;
 
@@ -1076,10 +1055,9 @@ ACMD(do_assist)
 
 	else
 		perform_assist(ch, helpee);
-}
+};
 
-
-ACMD(do_hit)
+CommandHandler do_hit = DEFINE_COMMAND
 {
 	Character *vict;
 
@@ -1117,10 +1095,10 @@ ACMD(do_hit)
 		else
 			ch->send("You do the best you can!\r\n");
 	}
-}
+};
 
 
-ACMD(do_kill)
+CommandHandler do_kill = DEFINE_COMMAND
 {
 	Character *vict;
 	Object *weap = 0;
@@ -1178,9 +1156,9 @@ ACMD(do_kill)
 			vict->Die(ch);
 		}
 	}
-}
+};
 
-ACMD(do_backstab)
+CommandHandler do_backstab = DEFINE_COMMAND
 {
 	Character *vict;
 
@@ -1268,53 +1246,27 @@ ACMD(do_backstab)
 		ch->command_ready = true;
 	else
 		perform_backstab(ch, GET_TARGET(ch));
-}
+};
 
-const char *orders[] =
-    {
-        "follow",
-        "\n",
-    };
-
-int order_command(const char *order)
-{
-	int i = 0;
-
-	for(i = 0;orders[i] != "\n";i++)
-		if(!str_cmp(order, orders[i]))
-			return 1;
-
-	return 0;
-}
-
+std::vector<std::string> orders = {
+	"follow self"
+};
 
 int order_ok(Character *ch, Character *victim, char *order)
 {
-
-	int i = 0;
-
-	if(victim->master != ch)
+	if(victim->master != ch || !IS_NPC(victim))
 		return 0;
 
-	if(!IS_NPC(victim))
-		return 0;
-
-	for(i = 0;complete_cmd_info[i].command[0] != '\n';i++)
+	for(auto orderOption : orders)
 	{
-		if(!strn_cmp(complete_cmd_info[i].command, order, strlen(order)))
-			if(!order_command(complete_cmd_info[i].command.c_str()))
-			{
-				continue;
-			}
-
-			else
-				return 1;
+		if(!str_cmp(orderOption, order))
+			return 1;
 	}
-
+	
 	return 0;
 }
 
-ACMD(do_order)
+CommandHandler do_order = DEFINE_COMMAND
 {
 	char name[MAX_INPUT_LENGTH], message[MAX_INPUT_LENGTH];
 	bool found = FALSE;
@@ -1344,7 +1296,7 @@ ACMD(do_order)
 			else
 			{
 				ch->send(OK);
-				CommandInterpreter(vict, message);
+				CommandUtil::get()->interpretCommand(vict, message);
 			}
 		}
 
@@ -1360,7 +1312,7 @@ ACMD(do_order)
 				if (org_room == k->follower->in_room)
 				{
 					found = TRUE;
-					CommandInterpreter(k->follower, message);
+					CommandUtil::get()->interpretCommand(k->follower, message);
 				}
 			}
 
@@ -1370,7 +1322,7 @@ ACMD(do_order)
 				ch->send("Nobody here is a loyal subject of yours!\r\n");
 		}
 	}
-}
+};
 
 void performFlee(Character *ch)
 {
@@ -1419,7 +1371,7 @@ void performFlee(Character *ch)
 	ch->send("PANIC!  You couldn't escape!\r\n");
 }
 
-ACMD(do_flee)
+CommandHandler do_flee = DEFINE_COMMAND
 {
 	int num_exits = ch->in_room->getNumberOfExits(), i = 0;
 	bool room_found = FALSE;
@@ -1446,42 +1398,6 @@ ACMD(do_flee)
 
 	Act("$n panics, and attempts to flee!", TRUE, ch, 0, 0, TO_ROOM);
 
-	/************ BEGIN OLD FLEE IMPLEMENATATION *******************/
-	//if(!IS_NPC(ch))
-	//{
-	//	if(ch->PlayerData->mood == MOOD_BRAVE)
-	//		chances = 1;
-	//	else if(ch->PlayerData->mood == MOOD_MILD)
-	//		chances = 2;
-	//	else if(ch->PlayerData->mood == MOOD_WIMPY)
-	//		chances = 3;
-	//}
-	//if(FLEE_GO(ch) == false)
-	//{
-	//	for (i = 0; i <= chances; ++i)
-	//	{
-	//		GET_DIRECTION(ch) = NUM_OF_DIRS;
-	//		if( GET_DIRECTION(ch) == NUM_OF_DIRS )
-	//			GET_DIRECTION(ch) = MiscUtil::random(0, NUM_OF_DIRS - 1);	/* Select a random direction */
-
-	//		if (CAN_GO(ch, GET_DIRECTION(ch)) && !ROOM_FLAGGED(EXIT(ch, GET_DIRECTION(ch))->to_room, ROOM_DEATH))
-	//		{
-	//			//We'll check specially to see if they cannot move due to movement points being too low.
-	//			if(GET_MOVE(ch) < ch->NeededToMove(GET_DIRECTION(ch)))
-	//			{
-	//				ch->send("You attempt to flee, but are too exhausted to move.\r\n");
-	//				Act("$n attempts to flee, but is too exhausted to move.", TRUE, ch, 0, 0, TO_ROOM);
-	//				return;
-	//			}
-	//			if(can_move(ch, GET_DIRECTION(ch), FALSE, true))
-	//			{
-	//				room_found = TRUE;
-	//				break;
-	//			}
-	//		}
-	//	}
-	//}
-	/********************* END OLD FLEE IMPLEMENTATION ********************/
 	if( FLEE_GO(ch) == FALSE && num_exits > 0 )
 	{
 		while( room_found == FALSE )
@@ -1547,9 +1463,9 @@ ACMD(do_flee)
 	}
 
 	ch->send("PANIC!  You couldn't escape!\r\n");
-}
+};
 
-ACMD(do_choke)
+CommandHandler do_choke = DEFINE_COMMAND
 {
 	Character* vict = 0;
 	OneArgument( argument, arg );
@@ -1626,10 +1542,9 @@ ACMD(do_choke)
 			WAIT_STATE(ch, PULSE_VIOLENCE/2);
 		}
 	}
+};
 
-}
-
-ACMD(do_rescue)
+CommandHandler do_rescue = DEFINE_COMMAND
 {
 	Character *vict, *tmp_ch;
 	int percent, prob;
@@ -1706,7 +1621,7 @@ ACMD(do_rescue)
 
 		WAIT_STATE(vict, 2 * PULSE_VIOLENCE);
 	}
-}
+};
 
 
 void perform_kick(Character *ch, Character *vict)
@@ -1743,7 +1658,7 @@ void perform_kick(Character *ch, Character *vict)
 	}
 }
 
-ACMD(do_kick)
+CommandHandler do_kick = DEFINE_COMMAND
 {
 	Character *vict = 0, *p = 0;
 	bool PreFighting = FIGHTING(ch) ? true : false;
@@ -1819,7 +1734,7 @@ ACMD(do_kick)
 	else
 		perform_shieldblock(vict, ch, SKILL_KICK, 0);
 	
-} 
+};
 
 /* 6/1/09 by Fogel - Precise Strike, a combat skill for thieves. */
 void perform_precisestrike(Character *ch, Character *vict)
@@ -1907,7 +1822,7 @@ int Character::PrecStrikeDefenseRoll()
 	return def;
 }
 
-ACMD(do_precisestrike)
+CommandHandler do_precisestrike = DEFINE_COMMAND
 {//TODO: Clean it up
 	Character *vict = 0;
 	int q = 0;	
@@ -2032,7 +1947,7 @@ ACMD(do_precisestrike)
 		perform_precisestrike(ch, vict);
 		ch->ps_tgt = -1;
 	}
-}
+};
 
 /* 6/8/09 by Fogel - Shield Block, a defensive skill for those practiced in Shield Parry */
 //	Defense for Shield Block is rolled by the attacker, as he is trying to defend from Shield Block
@@ -2079,7 +1994,7 @@ int Character::ShieldBlockOffenseRoll()
 	if( AFF_FLAGGED(this, AFF_SHIELD_BLOCK) )
 		for(affected_type *aff = this->affected; aff; aff = aff->next)
 			if( aff->bitvector == AFF_SHIELD_BLOCK )
-				off -= 12 * aff->modifier;
+				off -= 10 * aff->modifier;
 
 	return off;
 }
@@ -2128,7 +2043,7 @@ void perform_shieldblock(Character *ch, Character *vict, int attack_type, int su
 	}
 }
 
-ACMD(do_shieldblock)
+CommandHandler do_shieldblock = DEFINE_COMMAND
 {
 	Character *vict = 0;	
 
@@ -2159,9 +2074,9 @@ ACMD(do_shieldblock)
 		ch->ShieldBlock = false;
 		Act("You lower your shield, having failed to anticipate an attack.", FALSE, ch, NULL, vict, TO_CHAR);
 		Act("$n lowers $s shield, becoming vulnerable once more.", FALSE, ch, NULL, vict, TO_NOTVICT);
-		WAIT_STATE(ch, PULSE_VIOLENCE*2 / 3);
+		WAIT_STATE(ch, PULSE_VIOLENCE / 2);
 	}
-}
+};
 
 /* 6/8/09 by Fogel - Applies the "SHIELD BLOCK" status effect, which controls the negative effects accompanying use of Shield Block */
 void apply_shieldblock(Character *ch)
@@ -2197,7 +2112,7 @@ void apply_severewound(Character *ch, Character *vict)
 }
 
 /* 6/28/09 by Fogel - Hamstring, a skill for Blademasters. Decreases the victim's dodge bonus and movement regen. */
-ACMD(do_hamstring)
+CommandHandler do_hamstring = DEFINE_COMMAND
 {
 	Character *vict = 0;
 
@@ -2251,7 +2166,7 @@ ACMD(do_hamstring)
 		ch->command_ready = true;
 	else
 		perform_hamstring(ch, vict);
-}
+};
 
 void perform_hamstring(Character *ch, Character *vict)
 {
@@ -2292,7 +2207,7 @@ void apply_hamstring(Character *ch, Character *vict)
 	affect_to_char( vict, &af );
 }
 
-ACMD(do_whirlwind)
+CommandHandler do_whirlwind = DEFINE_COMMAND
 {
 	if (!GET_SKILL(ch, SKILL_WHIRLWIND) || !IS_BLADEMASTER(ch))
 	{
@@ -2328,7 +2243,7 @@ ACMD(do_whirlwind)
 		ch->command_ready = true;
 	else
 		perform_whirlwind(ch);
-}
+};
 
 void perform_whirlwind(Character *ch)
 {
@@ -2361,7 +2276,7 @@ void perform_whirlwind(Character *ch)
 
 }
 
-ACMD(do_invert)
+CommandHandler do_invert = DEFINE_COMMAND
 {
 	Weave *weave = WeaveManager::GetManager().GetWeave("Invert");
 
@@ -2408,9 +2323,9 @@ ACMD(do_invert)
 		ch->points.mana = MAX(0, ch->points.mana - mag_manacost(ch, WeaveManager::GetManager().GetWeave("Invert")->getVnum()));
 		Act( weave->getAttribute( "ToChar" ).c_str(), TRUE, ch, NULL, ch, TO_CHAR);
 	}
-}
+};
 
-ACMD(do_shadowstep)
+CommandHandler do_shadowstep = DEFINE_COMMAND
 {
 	Character *vict = 0;
 
@@ -2453,7 +2368,7 @@ ACMD(do_shadowstep)
 	}
 	else
 		perform_shadowstep(ch, vict);
-}
+};
 
 void perform_shadowstep(Character *ch, Character *vict)
 {
@@ -2503,7 +2418,7 @@ void perform_shadowstep(Character *ch, Character *vict)
 	//FLEE_LAG(ch) = MIN(FleeData.MaxFleeLag, FLEE_LAG(ch));
 }
 
-ACMD(do_pulverize)
+CommandHandler do_pulverize = DEFINE_COMMAND
 {
 	if (!GET_SKILL(ch, SKILL_PULVERIZE) || !IS_OGIER(ch))
 	{
@@ -2528,7 +2443,7 @@ ACMD(do_pulverize)
 		ch->command_ready = true;
 	else
 		perform_pulverize(ch);
-}
+};
 
 void perform_pulverize(Character *ch)
 {

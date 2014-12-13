@@ -20,35 +20,24 @@
 #include "screen.h"
 #include "shop.h"
 #include "Descriptor.h"
+#include "Game.h"
 
+#include "commands/infrastructure/CommandUtil.h"
+#include "commands/infrastructure/CommandInfo.h"
+#include "commands/infrastructure/Social.h"
 
-extern int top_of_socialt;
-Social *soc_mess_list = 0;
 extern const char	*position_types[];
-
-/* WARNING: if you have added diagonal directions and have them at the
- * beginning of the command list.. change this value to 11 or 15 (depending) */
-/* reserve these commands to come straight from the cmd list then start
- * sorting */
-const int RESERVE_CMDS = 7; 
 
 /* function protos */
 void aedit_disp_menu(Descriptor * d);
 void aedit_parse(Descriptor * d, char *arg);
 void aedit_setup_new(Descriptor *d);
-void aedit_setup_existing(Descriptor *d, int real_num);
-void aedit_save_to_disk();
+void aedit_setup_existing(Descriptor *d, const char *socialAbbreviation);
 void aedit_save_internally(Descriptor *d);
-
-
-
-/*
- * Utils and exported functions.
- */
 
 void aedit_setup_new(Descriptor *d)
 {
-	OLC_ACTION(d) = new Social;
+	OLC_ACTION(d) = new Social();
 	OLC_ACTION(d)->command = str_dup(OLC_STORAGE(d));
 	OLC_ACTION(d)->sort_as = str_dup(OLC_STORAGE(d));
 	OLC_ACTION(d)->hide    = 0;
@@ -57,176 +46,28 @@ void aedit_setup_new(Descriptor *d)
 	OLC_ACTION(d)->min_level_char      = 0;
 	OLC_ACTION(d)->char_no_arg = str_dup("This action is unfinished.");
 	OLC_ACTION(d)->others_no_arg = str_dup("This action is unfinished.");
-	OLC_ACTION(d)->char_found = NULL;
-	OLC_ACTION(d)->others_found = NULL;
-	OLC_ACTION(d)->vict_found = NULL;
-	OLC_ACTION(d)->not_found = NULL;
-	OLC_ACTION(d)->char_auto = NULL;
-	OLC_ACTION(d)->others_auto = NULL;
-	OLC_ACTION(d)->char_body_found = NULL;
-	OLC_ACTION(d)->others_body_found = NULL;
-	OLC_ACTION(d)->vict_body_found = NULL;
-	OLC_ACTION(d)->char_obj_found = NULL;
-	OLC_ACTION(d)->others_obj_found = NULL;
+	OLC_ACTION(d)->act_nr = -1;
 	aedit_disp_menu(d);
 	OLC_VAL(d) = 0;
 }
 
-/*------------------------------------------------------------------------*/
-
-void aedit_setup_existing(Descriptor *d, int real_num)
+void aedit_setup_existing(Descriptor *d, const char *socialAbbreviation)
 {
-	d->olc->action = new Social( &soc_mess_list[real_num] );
+	d->olc->action = CommandUtil::get()->getSocialByAbbreviation(socialAbbreviation)->clone();
 	OLC_VAL(d) = 0;
 	aedit_disp_menu(d);
 }
-
-
 
 void aedit_save_internally(Descriptor *d)
 {
-	Social *new_soc_mess_list = NULL;
-	int i;
-
-	/* add a new social into the list */
-	if (OLC_ZNUM(d) > top_of_socialt)
-	{
-		new_soc_mess_list = new Social[top_of_socialt + 2];
-		for (i = 0; i <= top_of_socialt; ++i)
-			new_soc_mess_list[i].Copy( &soc_mess_list[i] );
-		new_soc_mess_list[++top_of_socialt].Copy( d->olc->action );
-		delete[] (soc_mess_list);
-
-		soc_mess_list = new_soc_mess_list;
-		CreateCommandList();
-		SortCommands();
-	}
-	/* pass the editted action back to the list - no need to add */
-	else
-	{
-		i = FindCommand(OLC_ACTION(d)->command);
-		OLC_ACTION(d)->act_nr = soc_mess_list[OLC_ZNUM(d)].act_nr;
-		/* why did i do this..? hrm */
-		soc_mess_list[d->olc->zone_num].Extract();
-		soc_mess_list[d->olc->zone_num].Copy( d->olc->action );
-
-		if (i > NOTHING)
-		{
-			complete_cmd_info[i].command = soc_mess_list[OLC_ZNUM(d)].command;
-			complete_cmd_info[i].sort_as = soc_mess_list[OLC_ZNUM(d)].sort_as;
-			complete_cmd_info[i].minimum_position = soc_mess_list[OLC_ZNUM(d)].min_char_position;
-			complete_cmd_info[i].minimum_level	   = soc_mess_list[OLC_ZNUM(d)].min_level_char;
-		}
-	}
-//	olc_add_to_save_list(AEDIT_PERMISSION, OLC_SAVE_ACTION);
+	if(OLC_ACTION(d)->act_nr == -1) //New social
+		CommandUtil::get()->addSocial(d->olc->action->clone());
+	else //Existing social
+		CommandUtil::get()->getSocialByCommandIndex(d->olc->action->act_nr)->Copy(d->olc->action);
+	
+	CommandUtil::get()->createCommandList();
+	CommandUtil::get()->sortCommands();
 }
-
-
-/*------------------------------------------------------------------------*/
-
-void aedit_save_to_disk()
-{
-	gameDatabase->sendRawQuery("DROP TABLE IF EXISTS tempSocial");
-
-	gameDatabase->sendRawQuery("CREATE TABLE tempSocial LIKE social");
-
-	sql::BatchInsertStatement batchInsertStatement(gameDatabase, "tempSocial", 100000);
-
-	batchInsertStatement.addField("command");
-
-	batchInsertStatement.addField("sort");
-
-	batchInsertStatement.addField("hide");
-
-	batchInsertStatement.addField("minimum_victim_position");
-
-	batchInsertStatement.addField("minimum_char_position");
-
-	batchInsertStatement.addField("minimum_char_level");
-
-	batchInsertStatement.addField("char_no_arg");
-
-	batchInsertStatement.addField("others_no_arg");
-
-	batchInsertStatement.addField("char_found");
-
-	batchInsertStatement.addField("others_found");
-
-	batchInsertStatement.addField("vict_found");
-
-	batchInsertStatement.addField("char_body_found");
-
-	batchInsertStatement.addField("others_body_found");
-
-	batchInsertStatement.addField("vict_body_found");
-
-	batchInsertStatement.addField("not_found");
-
-	batchInsertStatement.addField("char_auto");
-
-	batchInsertStatement.addField("others_auto");
-
-	batchInsertStatement.addField("char_obj_found");
-
-	batchInsertStatement.addField("others_obj_found");
-
-	batchInsertStatement.start();
-
-	for(int i = 0;i < top_of_socialt;++i)
-	{
-		Social *social = &soc_mess_list[i];
-
-		batchInsertStatement.beginEntry();
-
-		batchInsertStatement.putString(social->command);
-
-		batchInsertStatement.putString(social->sort_as);
-
-		batchInsertStatement.putInt(social->hide);
-
-		batchInsertStatement.putInt(social->min_victim_position);
-
-		batchInsertStatement.putInt(social->min_char_position);
-
-		batchInsertStatement.putInt(social->min_level_char);
-
-		batchInsertStatement.putString(social->char_no_arg);
-
-		batchInsertStatement.putString(social->others_no_arg);
-
-		batchInsertStatement.putString(social->char_found);
-
-		batchInsertStatement.putString(social->others_found);
-
-		batchInsertStatement.putString(social->vict_found);
-
-		batchInsertStatement.putString(social->char_body_found);
-
-		batchInsertStatement.putString(social->others_body_found);
-
-		batchInsertStatement.putString(social->vict_body_found);
-
-		batchInsertStatement.putString(social->not_found);
-
-		batchInsertStatement.putString(social->char_auto);
-
-		batchInsertStatement.putString(social->others_auto);
-
-		batchInsertStatement.putString(social->char_obj_found);
-
-		batchInsertStatement.putString(social->others_obj_found);
-
-		batchInsertStatement.endEntry();
-	}
-
-	batchInsertStatement.finish();
-
-	gameDatabase->sendRawQuery("RENAME TABLE social TO socialOld, tempSocial TO social, socialOld TO tempSocial");
-
-	gameDatabase->sendRawQuery("DROP TABLE tempSocial");
-}
-
-/*------------------------------------------------------------------------*/
 
 /* Menu functions */
 
@@ -321,7 +162,7 @@ void aedit_parse(Descriptor * d, char *arg)
 				case 'y':
 				case 'Y':
 					aedit_save_internally(d);
-					aedit_save_to_disk();
+					CommandUtil::get()->saveSocials(game->getConnection());
 					MudLog(CMP, LVL_IMPL, TRUE, "OLC: %s edits action %s", GET_NAME(d->character), OLC_ACTION(d)->command);
 					/* do not free the strings.. just the structure */
 					cleanup_olc(d, CLEANUP_STRUCTS);
@@ -343,7 +184,7 @@ void aedit_parse(Descriptor * d, char *arg)
 			{
 				case 'y':
 				case 'Y':
-					aedit_setup_existing(d, OLC_ZNUM(d));
+					aedit_setup_existing(d, OLC_STORAGE(d));
 					break;
 				case 'q':
 				case 'Q':
@@ -351,16 +192,15 @@ void aedit_parse(Descriptor * d, char *arg)
 					break;
 				case 'n':
 				case 'N':
-					OLC_ZNUM(d)++;
-					for (;(OLC_ZNUM(d) <= top_of_socialt);++OLC_ZNUM(d))
+				{
+					Social *social = CommandUtil::get()->getSocialByAbbreviation(OLC_STORAGE(d));
+
+					Log("Social found. Command `%s`", social->command);
+					if (social == nullptr)
 					{
-						if (IsAbbrev(OLC_STORAGE(d), soc_mess_list[OLC_ZNUM(d)].command))
-							break;
-					}
-					if (OLC_ZNUM(d) > top_of_socialt)
-					{
-						if (FindCommand(OLC_STORAGE(d)) > NOTHING)
+						if (CommandUtil::get()->getCommandByName(OLC_STORAGE(d)))
 						{
+							d->send("That command already exists.\r\n");
 							cleanup_olc(d, CLEANUP_ALL);
 							break;
 						}
@@ -369,13 +209,17 @@ void aedit_parse(Descriptor * d, char *arg)
 					}
 					else
 					{
-						d->send("Do you wish to edit the '%s' action? ", soc_mess_list[OLC_ZNUM(d)].command);
+						d->send("Do you wish to edit the '%s' action? ", social->command);
 						OLC_MODE(d) = AEDIT_CONFIRM_EDIT;
 					}
 					break;
+				}
 				default:
-					d->send("Invalid choice!\r\nDo you wish to edit the '%s' action? ", soc_mess_list[OLC_ZNUM(d)].command);
+				{
+					Social *social = CommandUtil::get()->getSocialByAbbreviation(OLC_STORAGE(d));
+					d->send("Invalid choice!\r\nDo you wish to edit the '%s' action? ", social->command);
 					break;
+				}
 			}
 			return;
 		case AEDIT_CONFIRM_ADD:

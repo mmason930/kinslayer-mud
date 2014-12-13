@@ -22,8 +22,6 @@
 #include "md5.h"
 
 extern Descriptor *descriptor_list;
-ACMD(do_ban);
-ACMD(do_unban);
 
 BanManager *BanManager::Self = NULL;//Initialize singleton's copy of self.
 
@@ -280,7 +278,7 @@ void BanElement::RemoveFromDatabase()
 	dbID = -1;
 }
 
-ACMD(do_ban)
+CommandHandler do_ban = DEFINE_COMMAND
 {
 	char flag[MAX_INPUT_LENGTH], site[MAX_INPUT_LENGTH];
 
@@ -324,9 +322,9 @@ ACMD(do_ban)
 	}
 	ch->send("Site banned.\r\n");
 	NewElement->AddToDatabase();
-}
+};
 
-ACMD(do_unban)
+CommandHandler do_unban = DEFINE_COMMAND
 {
 	char site[MAX_INPUT_LENGTH];
 
@@ -352,4 +350,4 @@ ACMD(do_unban)
 	BanManager::GetManager().RemoveBan( MyElement );
 	MyElement->RemoveFromDatabase();
 	delete MyElement;
-}
+};

@@ -39,6 +39,9 @@
 #include "rooms/RoomSector.h"
 #include "rooms/Exit.h"
 
+#include "commands/infrastructure/CommandUtil.h"
+#include "commands/infrastructure/CommandInfo.h"
+
 /* extern variables */
 extern Wizard *wizlist;
 extern struct GameTime time_info;
@@ -59,11 +62,9 @@ extern char *motd;
 extern char *imotd;
 extern const char *class_abbrevs[];
 
-int is_viewable_clan(Character *ch, int number);
 const char *DARKNESS_CHECK(Character *ch, Character *vict);
 
 /* extern functions */
-ACMD(do_action);
 long find_class_bitvector(char arg);
 int level_exp(int level);
 bool isInArena(Character *ch);
@@ -73,31 +74,6 @@ struct GameTime *real_time_passed(time_t t2, time_t t1);
 extern const char * weather_patterns[];
 extern const char * weather_storm_names[];
 extern const char * weather_event_names[];
-
-/* local functions */
-ACMD(do_color);
-ACMD(do_commands);
-ACMD(do_consider);
-ACMD(do_diagnose);
-ACMD(do_equipment);
-ACMD(do_examine);
-ACMD(do_exits);
-ACMD(do_gen_ps);
-ACMD(do_gold);
-ACMD(do_incognito);
-ACMD(do_inventory);
-ACMD(do_levels);
-ACMD(do_look);
-ACMD(do_scan);
-ACMD(do_stat);
-ACMD(do_time);
-ACMD(do_toggle);
-ACMD(do_users);
-ACMD(do_view);
-ACMD(do_warrant);
-ACMD(do_warrants);
-ACMD(do_weather);
-ACMD(do_where);
 
 void printObjectLocation(std::stringstream &outputBuffer, int num, Object * obj, Character * ch, int recur);
 void showObjectToCharacter(Object * object, Character * ch, int mode, int ammount);
@@ -311,7 +287,7 @@ std::string Character::GoldString(int amount, bool colors, bool abbrev)
 
 void do_auto_scan(Character *ch, bool typed); // RHOLLOR 05.15.09
 
-ACMD(do_scan)
+CommandHandler do_scan = DEFINE_COMMAND
 {
    int exit=-1;
    Room *room = NULL;
@@ -412,10 +388,10 @@ ACMD(do_scan)
 		}
 	}
 /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^   RHOLLOR 05/02/09   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
-}
+};
 
 /* Imped by Galnor on 10-08-2003. Command is used to view different lists, for example, clans.*/
-ACMD(do_view)
+CommandHandler do_view = DEFINE_COMMAND
 {
 	int count = 0, clan_num = 0;
 	unsigned int i = 0;
@@ -598,7 +574,7 @@ ACMD(do_view)
 		for(unsigned int i = 1;MyQuery->hasNextRow();++i) {
 			sql::Row MyRow = MyQuery->getRow();
 
-			int chclass=MiscUtil::Convert<int>(MyRow["chclass"]), race=MiscUtil::Convert<int>(MyRow["race"]), level=MiscUtil::Convert<int>(MyRow["level"]);
+			int chclass=MiscUtil::convert<int>(MyRow["chclass"]), race=MiscUtil::convert<int>(MyRow["race"]), level=MiscUtil::convert<int>(MyRow["level"]);
 			std::string Slew = MyRow["slew"];
 			std::string NameAndRace= (MyRow["username"]) + (" the ") + (Character::RaceName(chclass,race,level));
 
@@ -617,7 +593,7 @@ ACMD(do_view)
 	{
 		ch->send("Invalid view command.\r\n");
 	}
-}
+};
 
 void perform_search(Character *ch, int direction)
 {
@@ -633,7 +609,7 @@ void perform_search(Character *ch, int direction)
 	ch->send("You found nothing in that direction.\r\n");
 }
 
-ACMD(do_search)
+CommandHandler do_search = DEFINE_COMMAND
 {
 	int direction;
 	char arg[MAX_INPUT_LENGTH];
@@ -705,17 +681,17 @@ ACMD(do_search)
 	}
 	else
 		perform_search(ch, direction);
-}
+};
 
 
-ACMD(do_warrants)
+CommandHandler do_warrants = DEFINE_COMMAND
 {
 	std::list<Warrant *>::iterator iter;
 	for(iter = Warrants.begin();iter != Warrants.end();++iter)
 	{
 		ch->send("%d. %s\r\n", (*iter)->vnum, (*iter)->Name.c_str());
 	}
-}
+};
 
 bool Character::WhoisShowClass()
 {
@@ -727,7 +703,7 @@ bool Character::WhoisShowClass(const int &chclass, const int &race, const int &l
 }
 
 /* Added by Galnor early 2003. Command hides information of a player. */
-ACMD(do_incognito)
+CommandHandler do_incognito = DEFINE_COMMAND
 {
 	if (!PRF_FLAGGED(ch, PRF_INCOG))
 	{
@@ -740,7 +716,7 @@ ACMD(do_incognito)
 		ch->send("Your identity is no longer a secret.\r\n");
 		REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_INCOG);
 	}
-}
+};
 
 
 /*
@@ -1246,7 +1222,7 @@ void performAutoExits(Character * ch)
 	         *buf ? buf : "None! ", COLOR_NORMAL(ch, CL_COMPLETE));
 }
 
-ACMD(do_exits)
+CommandHandler do_exits = DEFINE_COMMAND
 {
 	int door;
 
@@ -1290,7 +1266,7 @@ ACMD(do_exits)
 
 	else
 		ch->send(" None.\r\n");
-}
+};
 
 //Returns the # of tracks a player can see, based on certain conditions.
 //This function will also set full_view to true or false to see if player
@@ -1333,7 +1309,7 @@ int Character::TrackLines(Room *room, bool auto_track, bool &full_view)
 		return MIN(3, (this->GetSkillLevel(SKILL_TRACK) - 2) / (MOUNT(this) ? 2 : 1));
 	}
 	return 0;
-}
+};
 
 void Character::PrintTracks(Room *room, bool auto_track)
 {
@@ -1901,7 +1877,7 @@ void lookAtTarget(Character * ch, char *arg)
 		ch->send("You do not see that here.\r\n");
 }
 
-ACMD(do_look)
+CommandHandler do_look = DEFINE_COMMAND
 {
 	char arg2[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
 	int look_type;
@@ -1946,9 +1922,9 @@ ACMD(do_look)
 		else
 			lookAtTarget(ch, arg);
 	}
-}
+};
 
-ACMD(do_examine)
+CommandHandler do_examine = DEFINE_COMMAND
 {
 	int bits;
 	char arg[MAX_INPUT_LENGTH];
@@ -1980,17 +1956,17 @@ ACMD(do_examine)
 			lookInObject(ch, arg, tmp_object);
 		}
 	}
-}
+};
 
-ACMD(do_gold)
+CommandHandler do_gold = DEFINE_COMMAND
 {
 	ch->send("You have: %d %s%sGold%s, %d %s%sSilver%s, %d %sCopper%s.\r\n", ch->Gold(), COLOR_BOLD(ch, CL_NORMAL),
 	         COLOR_YELLOW(ch, CL_NORMAL), COLOR_NORMAL(ch, CL_NORMAL), ch->Silver(), COLOR_BOLD(ch, CL_NORMAL),
 	         COLOR_CYAN(ch, CL_NORMAL), COLOR_NORMAL(ch, CL_NORMAL), ch->Copper(), COLOR_YELLOW(ch, CL_NORMAL),
 	         COLOR_NORMAL(ch, CL_NORMAL));
-}
+};
 
-ACMD(do_stat)
+CommandHandler do_stat = DEFINE_COMMAND
 {
 	char arg[MAX_INPUT_LENGTH];
 	TwoArguments(argument, arg, buf);
@@ -2065,16 +2041,16 @@ ACMD(do_stat)
 		ch->send("BUILDWALK\r\n");
 	if(ch->dizzy_time)
 		ch->send("DIZZINESS\r\n");
-}
+};
 
-ACMD(do_inventory)
+CommandHandler do_inventory = DEFINE_COMMAND
 {
 	ch->send("You are carrying:\r\n");
 	listObjectToCharacter(ch->carrying, ch, 1, TRUE);
 
-}
+};
 
-ACMD(do_equipment)
+CommandHandler do_equipment = DEFINE_COMMAND
 {
 	int i, found = 0;
 	char msg[MAX_INPUT_LENGTH];
@@ -2102,9 +2078,9 @@ ACMD(do_equipment)
 	if (!found)
 		ch->send(" Nothing.\r\n");
 
-}
+};
 
-ACMD(do_time)
+CommandHandler do_time = DEFINE_COMMAND
 {
 	const char *suf;
 	int weekday, day;
@@ -2143,7 +2119,7 @@ ACMD(do_time)
 		         COLOR_BOLD(ch, CL_COMPLETE), COLOR_GREEN(ch, CL_COMPLETE),
 		         (60 - (Seconds % 60)), COLOR_NORMAL(ch, CL_COMPLETE));
 	}
-}
+};
 
 std::string MakeWeatherAdj(int i)
 {
@@ -2197,7 +2173,7 @@ std::string MakeTemperatureAdj(int i)
 	return s;
 }
 
-ACMD(do_weather)
+CommandHandler do_weather = DEFINE_COMMAND
 {
 	Weather * weather = ch->in_room->getZone()->GetWeather();
 	if (OUTSIDE(ch))
@@ -2264,7 +2240,7 @@ ACMD(do_weather)
 		weather->get_precipitation(), weather->get_temp(), weather->get_sky(),
 		Weather::getSun(), weather->get_visibility());
 	}
-}
+};
 
 /*                                                          *
  * This hardly deserves it's own function, but I see future *
@@ -2290,7 +2266,7 @@ int show_on_who_list(Descriptor *d)
 #define USERS_FORMAT \
 "format: users [-l minlevel[-maxlevel]] [-n name] [-h host] [-c classlist] [-o] [-p]\r\n"
 
-ACMD(do_users)
+CommandHandler do_users = DEFINE_COMMAND
 {
 	Character *tch;
 	Descriptor *d;
@@ -2344,7 +2320,7 @@ ACMD(do_users)
 	}
 
 	ch->send("\r\n\n%d visible sockets connected.\r\n", num_can_see);
-}
+};
 
 void print_wizards(Character *ch, int level, bool all)
 {
@@ -2429,7 +2405,7 @@ void print_wizlist(Character *ch, bool all)
 }
 
 /* Generic page_string function for displaying text */
-ACMD(do_gen_ps)
+CommandHandler do_gen_ps = DEFINE_COMMAND
 {
 	skip_spaces(&argument);
 	switch (subcmd)
@@ -2454,7 +2430,7 @@ ACMD(do_gen_ps)
 		default:
 			return;
 	}
-}
+};
 
 void performMortalWhere(Character * ch, char *arg)
 {
@@ -2707,7 +2683,7 @@ void performImmortalWhere(Character * ch, char *arg)
 	delete[] cStringOutputBuffer;
 }
 
-ACMD(do_where)
+CommandHandler do_where = DEFINE_COMMAND
 {
 	char arg[MAX_INPUT_LENGTH];
 	OneArgument(argument, arg);
@@ -2717,9 +2693,9 @@ ACMD(do_where)
 
 	else
 		performMortalWhere(ch, arg);
-}
+};
 
-ACMD(do_levels)
+CommandHandler do_levels = DEFINE_COMMAND
 {
 	int i;
 
@@ -2742,11 +2718,11 @@ ACMD(do_levels)
 	sprintf(buf + strlen(buf), "[%2d] %8d          : Immortality\r\n",
 	        LVL_IMMORT, level_exp(LVL_IMMORT));
 	page_string(ch->desc, buf, 1);
-}
+};
 
 
 
-ACMD(do_consider)
+CommandHandler do_consider = DEFINE_COMMAND
 {
 	Character *victim;
 	int diff;
@@ -2829,11 +2805,11 @@ ACMD(do_consider)
 	else if (diff <= 100)
 		ch->send("You ARE mad!\r\n");
 *****/
-}
+};
 
 
 
-ACMD(do_diagnose)
+CommandHandler do_diagnose = DEFINE_COMMAND
 {
 	Character *vict;
 
@@ -2856,7 +2832,7 @@ ACMD(do_diagnose)
 		else
 			ch->send("Diagnose who?\r\n");
 	}
-}
+};
 
 
 const char *ctypes[] =
@@ -2868,7 +2844,7 @@ const char *ctypes[] =
         "\n"
     };
 
-ACMD(do_color)
+CommandHandler do_color = DEFINE_COMMAND
 {
 	int tp;
 	char arg[MAX_INPUT_LENGTH];
@@ -2900,10 +2876,10 @@ ACMD(do_color)
 
 	ch->send("Your %scolor%s is now %s.\r\n", COLOR_RED(ch, CL_SPARSE),
 	         COLOR_NORMAL(ch, CL_OFF), ctypes[tp]);
-}
+};
 
 
-ACMD(do_toggle)
+CommandHandler do_toggle = DEFINE_COMMAND
 {
 	if (IS_NPC(ch))
 		return;
@@ -2978,70 +2954,9 @@ ACMD(do_toggle)
 
 	get_char_cols(ch);
 	ch->send("\r\nFor more information, type %s%sHELP TOGGLE%s.\r\n", bld, cyn, nrm);
-}
+};
 
-
-struct sort_struct
-{
-	int sort_pos;
-	byte is_social;
-}
-*cmd_sort_info = NULL;
-
-int num_of_cmds;
-
-
-void SortCommands(void)
-{
-	int a, b, tmp;
-
-	num_of_cmds = 0;
-
-	/*
-	* first, count commands (num_of_commands is Actually one greater than the
-	* number of commands; it inclues the '\n'.
-	*/
-
-	while (complete_cmd_info[num_of_cmds].command[0] != '\n')
-		num_of_cmds++;
-
-	/* check if there was an old sort info.. then free it -- aedit -- M. Scott*/
-	if (cmd_sort_info)
-		delete(cmd_sort_info);
-
-	/* create data array */
-	cmd_sort_info = new sort_struct[num_of_cmds];
-	memset(cmd_sort_info, 0, sizeof(sort_struct) * num_of_cmds);
-
-	/* initialize it */
-
-	for (a = 1; a < num_of_cmds;++a)
-	{
-		cmd_sort_info[a].sort_pos = a;
-		cmd_sort_info[a].is_social = (complete_cmd_info[a].command_pointer == do_action);
-	}
-
-	/* the infernal special case */
-	cmd_sort_info[FindCommand("insult")].is_social = TRUE;
-
-	/* Sort.  'a' starts at 1, not 0, to remove 'RESERVED' */
-	for (a = 1; a < num_of_cmds - 1;++a)
-		for (b = a + 1; b < num_of_cmds;++b)
-			if (strcmp(complete_cmd_info[cmd_sort_info[a].sort_pos].command,
-			           complete_cmd_info[cmd_sort_info[b].sort_pos].command) > 0)
-			{
-
-				tmp = cmd_sort_info[a].sort_pos;
-				cmd_sort_info[a].sort_pos = cmd_sort_info[b].sort_pos;
-				cmd_sort_info[b].sort_pos = tmp;
-			}
-}
-void destroySortInfo( void )
-{
-	delete[] cmd_sort_info;
-}
-
-ACMD(do_commands)
+CommandHandler do_commands = DEFINE_COMMAND
 {
 	int no, i, cmd_num;
 	int wizhelp = 0, socials = 0;
@@ -3080,17 +2995,23 @@ ACMD(do_commands)
 
 	/* cmd_num starts at 1, not 0, to remove 'RESERVED' */
 
-	for (no = 1, cmd_num = 1; cmd_num < num_of_cmds; cmd_num++)
+	auto commandVector = CommandUtil::get()->getCommandVector();
+	for (no = 1, cmd_num = 1; cmd_num < commandVector.size(); cmd_num++)
 	{
-		i = cmd_sort_info[cmd_num].sort_pos;
+		int subCommandTarget = SCMD_COMMANDS;
+		i = cmd_num;
 
-		if (GET_LEVEL(vict) >= complete_cmd_info[i].minimum_level &&
-		    (complete_cmd_info[i].minimum_level >= LVL_IMMORT) == wizhelp &&
-			(wizhelp || socials == cmd_sort_info[i].is_social) &&
-			(GET_LEVEL(vict) >= complete_cmd_info[i].view_minimum_level))
+		if(commandVector[i]->minimum_level >= LVL_IMMORT)
+			subCommandTarget = SCMD_WIZHELP;
+		else if(commandVector[i]->is_social)
+			subCommandTarget = SCMD_SOCIALS;
+
+		if (GET_LEVEL(vict) >= commandVector[i]->minimum_level &&
+			GET_LEVEL(vict) >= commandVector[i]->view_minimum_level &&
+			subcmd == subCommandTarget)
 		{
 
-			sprintf(buf + strlen(buf), "%-15s", complete_cmd_info[i].command.c_str());
+			sprintf(buf + strlen(buf), "%-15s", commandVector[i]->command.c_str());
 			if (!(no % 7))
 				strcat(buf, "\r\n");
 
@@ -3100,7 +3021,7 @@ ACMD(do_commands)
 
 	strcat(buf, "\r\n");
 	ch->send(buf);
-}
+};
 
 bool canSeeCharsgetRoom(Character *ch, Room *room)
 {

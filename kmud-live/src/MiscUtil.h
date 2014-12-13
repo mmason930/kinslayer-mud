@@ -2,6 +2,7 @@
 #define MISC_UTIL_H
 
 #include <list>
+#include <vector>
 #include <map>
 #include <sstream>
 #include "DateTime.h"
@@ -20,10 +21,10 @@ public:
 
 	int i;
 	std::string str = "123";
-	i = Convert<int>(str);
+	i = convert<int>(str);
 
 	*****************/
-	template<class _TT, class _FT> static _TT Convert(_FT Data)
+	template<class _TT, class _FT> static _TT convert(_FT Data)
 	{
 		_TT NewItem;
 		std::stringstream stream;
@@ -36,6 +37,17 @@ public:
 	{
 		return p ? new T(*p) : 0;
 	}
+
+	template<typename T, typename U> static T * min(const T& t, const U& u)
+	{
+		return u < t ? u : t;
+	}
+
+	template<typename T, typename U> static T * max(const T& t, const U& u)
+	{
+		return u > t ? u : t;
+	}
+
 	static bool isNewLine(char c);
 	static bool isNumber(const std::string &str);
 	static bool isNumber(const char *str);
@@ -48,6 +60,7 @@ public:
 	static std::string encodeDateTime(const DateTime &dateTime);
 	static std::map<std::string, std::string> loadResourcesFromFile(const std::string &fileName);
 	static std::string formatDateYYYYdmmdddHHcMMcSS(const DateTime &dateTime);
+	static std::string formatDateYYYYmmdd(const DateTime &dateTime);
 	static bool isValidEmailAddress(const std::string &emailAddress);
 
 	template<typename T>
@@ -65,6 +78,20 @@ public:
 		std::list<T> singleObjectList;
 		singleObjectList.push_back(element);
 		return singleObjectList;
+	}
+
+	template<typename KeyType, typename ValueType>
+	static void pushToVectorMap(std::map<KeyType, std::vector<ValueType> *> &map, const KeyType &key, const ValueType &value)
+	{
+		std::vector<ValueType> *container = map[key];
+
+		if(container == nullptr)
+		{
+			container = new std::vector<ValueType>();
+			map[key] = container;
+		}
+		
+		container->push_back(value);
 	}
 };
 

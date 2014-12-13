@@ -18,6 +18,7 @@ protected:
 	GuildStatus *status;
 	DateTime statusLastModifiedDatetime;
 	int createdByUserId;
+	int race;
 
 public:
 
@@ -35,6 +36,9 @@ public:
 
 	int getCreatedByUserId() const;
 	void setCreatedByUserId(const int createdByUserId);
+
+	int getRace() const;
+	void setRace(int race);
 };
 
 #endif

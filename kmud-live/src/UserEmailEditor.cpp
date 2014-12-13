@@ -20,8 +20,6 @@
 #include "MiscUtil.h"
 #include "StringUtil.h"
 
-ACMD(do_email);
-
 void userEmailAddressEditorDisplayMainMenu(Descriptor *descriptor)
 {
 	get_char_cols( descriptor->character );
@@ -242,7 +240,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 	}
 }
 
-ACMD(do_email)
+CommandHandler do_email = DEFINE_COMMAND
 {
 	char buf1[MAX_STRING_LENGTH];
 
@@ -255,4 +253,4 @@ ACMD(do_email)
 
 	Act("$n begins editing $s account settings.", TRUE, ch, 0, 0, TO_ROOM);
 	SET_BITK(PLR_FLAGS(ch), Q_BIT(PLR_WRITING));
-}
+};
