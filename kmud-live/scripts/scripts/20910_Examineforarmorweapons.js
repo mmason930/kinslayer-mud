@@ -58,7 +58,7 @@ var script20910 = function(self, actor, here, args, extra) {
 	}
 
 	// Make character aliases take precedence over objects
-	if (getCharInLisVis(actor, vArgs[1], here.people)) {
+	if (getCharInListVis(actor, vArgs[1], here.people)) {
 		_noblock;
 		return;
 	}
