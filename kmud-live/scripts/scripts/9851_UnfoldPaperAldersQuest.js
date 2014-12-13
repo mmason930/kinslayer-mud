@@ -12,6 +12,6 @@ var script9851 = function(self, actor, here, args, extra) {
 			waitpulse 14;
 			actor.send("You slide the letter into the pages of your journal for safekeeping.");
 			self.extract();
-			Quest.Util.tryBegin(actor, Quest.getByName("Just Think..."));
+			Quest.Util.tryBeginQuest(actor, Quest.getByName("Just Think..."));
 		}
 }
