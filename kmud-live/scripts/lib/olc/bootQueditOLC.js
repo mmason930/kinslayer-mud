@@ -2157,7 +2157,7 @@ function bootQueditOLC() {
 		}
 		else if (fLetter == "A") {
 			OLC.action = 1;//Edit item
-			OLC.index = OLC.priorQuests.length - 1;//Store index of item to edit
+			OLC.index = Math.max(0, OLC.priorQuests.length - 1);//Store index of item to edit
 			OLC.switchToMode("MODE_PRIORQUESTS_EDIT");
 			return;
 		}
@@ -2218,7 +2218,7 @@ function bootQueditOLC() {
 		}
 			//Editing
 		else {
-			var index = OLC.index;
+			var index = Math.max(0, OLC.index);
 			var input = vArgs.join(" ");
 			var prior = input;
 			if (!isNumber(input)) {
@@ -2229,13 +2229,7 @@ function bootQueditOLC() {
 				}
 				prior = quest.databaseID;
 			}
-
-			prior = _.parseInt(prior)
-			if (index != undefined)
-				OLC.priorQuests[index] = prior;
-			else
-				OLC.priorQuests.push(prior);
-
+			OLC.priorQuests[index] = _.parseInt(prior);
 			OLC.switchToMode("MODE_PRIORQUESTS");
 			return;
 		}
