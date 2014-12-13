@@ -218,7 +218,7 @@ Quest.Util = (function() {
 		 * @param {number} wait Number of pulses to wait before sending messages.
 		 */
 		notifyQuestsUnlocked: function(actor, quest) {
-			var dependentQuests = quest.dependentQuests;
+			var dependentQuests = quest.getDependentQuests();
 			var unlockedQuests = dependentQuests.filter(function(q) {
 				return q.canAccess(actor);
 			});
