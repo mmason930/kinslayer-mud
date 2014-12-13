@@ -53,9 +53,6 @@ public class ViewProfileAction extends StandardAction {
       return USER_NOT_FOUND_FORWARD;
     }
     
-    System.out.println("User Found: " + user.getUserName());
-    
-    
     List<String> clanDisplayList = getClanDisplayList(user);
     List<String> recentKillsDisplayList = getRecentKillsDisplayList(user.getUserId());
     Map<Integer, Achievement> achievementMap = getAchievementMap(user.getUserId());

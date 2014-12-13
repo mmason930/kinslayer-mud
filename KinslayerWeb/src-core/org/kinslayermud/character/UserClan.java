@@ -1,10 +1,14 @@
 package org.kinslayermud.character;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 
+import org.kinslayermud.dbutils.DBObject;
 import org.kinslayermud.misc.DataObjectWithIntId;
+import org.kinslayermud.util.QueryUtil;
 
-public class UserClan extends DataObjectWithIntId {
+public class UserClan extends DataObjectWithIntId implements DBObject {
 
   protected int userId;
   protected int clanId;
@@ -60,5 +64,17 @@ public class UserClan extends DataObjectWithIntId {
   }
   public void setCouncil(boolean isCouncil) {
     this.isCouncil = isCouncil;
+  }
+  
+  public void retrieveFromResultSet(ResultSet resultSet) throws SQLException {
+    
+    setId(resultSet.getInt("userClan.id"));
+    setUserId(resultSet.getInt("userClan.user_id"));
+    setClanId(resultSet.getInt("userClan.clan_id"));
+    setClannedDatetime(resultSet.getTimestamp("userClan.clanned_datetime"));
+    setLastRankedDatetime(resultSet.getTimestamp("userClan.last_ranked_datetime"));
+    setQuestPoints(resultSet.getInt("userClan.quest_points"));
+    setRank(resultSet.getInt("userClan.rank"));
+    setCouncil(QueryUtil.getIntBoolean(resultSet, "userClan.is_council"));
   }
 }

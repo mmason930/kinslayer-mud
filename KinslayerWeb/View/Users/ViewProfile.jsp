@@ -10,7 +10,6 @@ String userClassDisplay = (String)request.getAttribute("UserClassDisplay");
 String userRaceDisplay = (String)request.getAttribute("UserRaceDisplay");
 
 String description = user.getDescription().trim();
-
 if(StringUtil.isNullOrEmptyTrimmedString(description)) {
   
   description = user.getUserName() + " does not have a description.";
@@ -54,8 +53,12 @@ if(avatarUrl != null) {
 			<span class="label">Mob Deaths: </span><%=MiscUtil.formatNumbericValueWithCommas(user.getMobDeaths()) %><br/>
 			<span class="label">Player Deaths: </span><%=MiscUtil.formatNumbericValueWithCommas(user.getPkDeaths()) %><br/>
 			<span class="label">Created: </span><%=MiscUtil.formatDateMMMsDDcsYYYY(user.getCreatedDatetime())%><br/>
+<%
+if(user.getLastLogon() != null) {
+%>
 			<span class="label">Last Sign In: </span><%=MiscUtil.formatDateMMMsDDcsYYYY(user.getLastLogon())%><br/>
 <%
+}
 if(userRaceDisplay != null) {
 %>
 			<span class="label">Race: </span><%=StringUtil.escapeHTMLCharacters(userRaceDisplay)%><br/>

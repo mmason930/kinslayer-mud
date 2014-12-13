@@ -1,9 +1,13 @@
 package org.kinslayermud.character;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 
+import org.kinslayermud.dbutils.DBObject;
 
-public class User {
+
+public class User implements DBObject {
 
   protected int userId;
   protected String userName;
@@ -46,7 +50,7 @@ public class User {
   protected int constitution;
   protected int exp;
   protected int featPoints;
-  protected int played;
+  protected long played;
   protected Date restatDatetime;
   protected int pkDeaths;
   protected int mobDeaths;
@@ -400,11 +404,11 @@ public class User {
     this.featPoints = featPoints;
   }
 
-  public int getPlayed() {
+  public long getPlayed() {
     return played;
   }
 
-  public void setPlayed(int played) {
+  public void setPlayed(long played) {
     this.played = played;
   }
 
@@ -591,5 +595,70 @@ public class User {
     int preferenceInt32 = Integer.valueOf(preferences[userPreference.value() / 32]);
     
     return (preferenceInt32 & (1 << (userPreference.value() % 32))) != 0;
+  }
+  
+  public void retrieveFromResultSet(ResultSet resultSet) throws SQLException {
+    setUserId(resultSet.getInt("user_id"));
+    setUserName(resultSet.getString("username"));
+    setLevel(resultSet.getInt("level"));
+    setLastLogon(resultSet.getTimestamp("last_logon"));
+    setLastLogout(resultSet.getTimestamp("last_logout"));
+    setUserClass(UserClass.getEnum(resultSet.getInt("chclass")));
+    setUserRace(UserRace.getEnum(resultSet.getInt("race")));
+    setUserPassword(resultSet.getString("user_password"));
+    setPoofin(resultSet.getString("poofin"));
+    setPoofout(resultSet.getString("poofout"));
+    setMaxHit(resultSet.getInt("maxhit"));
+    setHit(resultSet.getInt("hit"));
+    setMaxMove(resultSet.getInt("maxmove"));
+    setMove(resultSet.getInt("move"));
+    setShadow(resultSet.getInt("shadow"));
+    setMaxShadow(resultSet.getInt("maxshadow"));
+    setMaxMana(resultSet.getInt("maxmana"));
+    setMana(resultSet.getInt("mana"));
+    setGender(Gender.getEnum(resultSet.getInt("sex")));
+    setWeight(resultSet.getInt("weight"));
+    setHeight(resultSet.getInt("height"));
+    setDeathWait(resultSet.getInt("death_wait"));
+    setWeave(resultSet.getInt("weave"));
+    setInvis(resultSet.getInt("invis"));
+    setTaint(resultSet.getInt("taint"));
+    setWarnings(resultSet.getInt("warnings"));
+    setMasterWeapon(resultSet.getInt("master_weapon"));
+    setStrain(resultSet.getInt("strain"));
+    setSlew(resultSet.getString("slew"));
+    setWhoisExtra(resultSet.getString("whois_extra"));
+    setGold(resultSet.getInt("gold"));
+    setBankGold(resultSet.getInt("bank_gold"));
+    setCreatedDatetime(new Date(resultSet.getLong("birth") * 1000));
+    setStrength(resultSet.getInt("str"));
+    setDexterity(resultSet.getInt("dex"));
+    setIntelligence(resultSet.getInt("intel"));
+    setWisdom(resultSet.getInt("wis"));
+    setConstitution(resultSet.getInt("con"));
+    setExp(resultSet.getInt("exp"));
+    setFeatPoints(resultSet.getInt("feat_points"));
+    setPlayed(resultSet.getLong("played"));
+    setRestatDatetime(new Date(resultSet.getLong("restat") * 1000));
+    setPkDeaths(resultSet.getInt("pk_deaths"));
+    setMobDeaths(resultSet.getInt("mob_deaths"));
+    setPks(resultSet.getInt("pks"));
+    setMount(resultSet.getInt("mount"));
+    setLoadRoom(resultSet.getInt("loadroom"));
+    setPractices(resultSet.getInt("pracs"));
+    setSpellPractices(resultSet.getInt("spell_pracs"));
+    setTradePractices(resultSet.getInt("trade_pracs"));
+    setFreeze(resultSet.getInt("freeze"));
+    setBadPasswords(resultSet.getInt("bad_passwords"));
+    setHunger(resultSet.getInt("hunger"));
+    setThirst(resultSet.getInt("thirst"));
+    setDrunk(resultSet.getInt("drunk"));
+    setResetDatetime(new Date(resultSet.getLong("reset") * 1000));
+    setPrf(resultSet.getString("prf"));
+    setPlr(resultSet.getInt("plr"));
+    setWarrants(resultSet.getString("warrants"));
+    setTitle(resultSet.getString("title"));
+    setDescription(resultSet.getString("description"));
+    setAccountId(resultSet.getInt("account_id"));
   }
 }

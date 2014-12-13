@@ -7,11 +7,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.kinslayermud.dbutils.DBObject;
 import org.kinslayermud.enumerator.VEnum;
 import org.kinslayermud.enumerator.VEnumSet;
+import org.kinslayermud.genericaccessor.GenericAccessor;
 
 /** Utility methods for working with database queries. */
 public abstract class QueryUtil {
@@ -628,6 +631,22 @@ public abstract class QueryUtil {
     return StringUtil.buildStringFromList(list, StringUtil.MYSQL_STORAGE_SEPERATOR_SEQUENCE);
   }
   
+  public static List<Integer> getIntegerList(Statement statement, String sql, String columnName) throws SQLException {
+    
+    List<Integer> list = new ArrayList<Integer>();
+    
+    ResultSet resultSet = statement.executeQuery(sql);
+    
+    while(resultSet.next()) {
+      
+      list.add(resultSet.getInt(columnName));
+    }
+    
+    resultSet.close();
+    
+    return list;
+  }
+  
   public static <T extends DBObject> List<T> retrieveDataObjectList(Statement statement, String tableName, String criteria, Class<T> dbObjectClass) throws SQLException {
     
     return retrieveDataObjectList(statement, tableName, criteria, null, dbObjectClass);
@@ -645,7 +664,7 @@ public abstract class QueryUtil {
     
     while(resultSet.next()) {
       
-      dbObjectList.add(retrieveDataObject(statement, resultSet, dbObjectClass));
+      dbObjectList.add(retrieveDataObject(resultSet, dbObjectClass));
     }
     
     resultSet.close();
@@ -653,13 +672,33 @@ public abstract class QueryUtil {
     return dbObjectList;
   }
   
+  public static <KeyType, PassingType extends DBObject> Map<KeyType, PassingType> retrieveDataObjectMap(Statement statement, String tableName, String criteria, Class<PassingType> passingTypeClass, GenericAccessor<PassingType, KeyType> genericAccessor) throws SQLException {
+    
+    String sql = " SELECT *"
+        + " FROM `" + tableName.replace("`", "") + "`"
+        + " WHERE " + (criteria == null ? "1" : criteria);
+
+    ResultSet resultSet = statement.executeQuery(sql);
+    Map<KeyType, PassingType> map = new HashMap<KeyType, PassingType>(); 
+    
+    while(resultSet.next()) {
+    
+      PassingType passingType = retrieveDataObject(resultSet, passingTypeClass);
+      map.put(genericAccessor.get(passingType), passingType);
+    }
+    
+    resultSet.close();
+  
+    return map;
+  }
+
   public static <T extends DBObject> T retrieveDataObject(Statement statement, String tableName, String criteria, Class<T> dbObjectClass) throws SQLException {
     
     String sql = " SELECT *"
                + " FROM `" + tableName.replace("`", "") + "`"
                + " WHERE " + (criteria == null ? "1" : criteria);
     
-    return retrieveDataObject(statement, sql, criteria, dbObjectClass);
+    return retrieveDataObject(statement, sql, dbObjectClass);
   }
   
   public static <T extends DBObject> T retrieveDataObject(Statement statement, String sql, Class<T> dbObjectClass) throws SQLException {
@@ -668,7 +707,7 @@ public abstract class QueryUtil {
     
     if(resultSet.next()) {
       
-      return retrieveDataObject(statement, resultSet, dbObjectClass);
+      return retrieveDataObject(resultSet, dbObjectClass);
     }
     
     resultSet.close();
@@ -676,7 +715,7 @@ public abstract class QueryUtil {
     return null;
   }
   
-  public static <T extends DBObject> T retrieveDataObject(Statement statement, ResultSet resultSet, Class<T> dbObjectClass) throws SQLException {
+  public static <T extends DBObject> T retrieveDataObject(ResultSet resultSet, Class<T> dbObjectClass) throws SQLException {
     
     try {
       T dbObject = dbObjectClass.newInstance();
