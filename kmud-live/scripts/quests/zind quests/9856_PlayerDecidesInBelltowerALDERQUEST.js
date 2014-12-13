@@ -5,13 +5,11 @@ var script9856 = function(self, actor, here, args, extra) {
 			getCharCols(actor,constants.CL_OFF);
 			function afterWait(arg) {
 				var actor = arg[0];
-				// actor.send("Updating Just Think...");
-				actor.updateJournalTask("Just Think...",0);
-				if ( arg[1] == true )
-					actor.journalEdit("ADD","A Floating Liaison");
+				actor.updateJournalTask("Just Think...", 0);
 				setSval(actor,9854,"TOWER CHECK",undefined);
 			}
 			if ( strn_cmp(cmd,"shake",2) == true ) {
+				actor.qval("ZIND_UNLOCK_SECOND_QUEST", 0);
 				waitpulse 3;
 				self.comm("say Very well then. I shall leave you now.");
 				waitpulse 10;
@@ -22,6 +20,7 @@ var script9856 = function(self, actor, here, args, extra) {
 				self.extract();
 			}
 			else if ( strn_cmp(cmd,"nod",3) == true ) {
+				actor.qval("ZIND_UNLOCK_SECOND_QUEST", 1);
 				waitpulse 3;
 				Zind.setNewPassword(actor);
 				self.comm("say Excellent. Seek Zind in the Amalize. She's docked in Aringill. Knock on the hatch and the word is "+Zind.printPassword(actor)+". Don't bring anyone with you");
