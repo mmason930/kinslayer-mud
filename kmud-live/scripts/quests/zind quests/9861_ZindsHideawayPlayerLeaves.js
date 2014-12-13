@@ -1,5 +1,5 @@
 var script9861 = function(self, actor, here, args, extra) {
-		if ( strn_cmp(getArgList(args)[0],"leave",4) == true ) {
+		if (strn_cmp(getArgList(args)[0],"leave",4) == true || strn_cmp(getArgList(args)[0],"exit",3) == true) {
 			_block;
 			getCharCols(actor,constants.CL_OFF);
 			actor.send("You lift the locking mechanism on the hatch and push it outwards.");
