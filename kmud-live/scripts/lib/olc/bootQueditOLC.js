@@ -2218,11 +2218,10 @@ function bootQueditOLC() {
 		}
 			//Editing
 		else {
-			var index = OLC.index;
+			var index = Math.max(0, OLC.index);
 			var input = vArgs.join(" ");
 			var prior = input;
 			if (!isNumber(input)) {
-				actor.send("DEBUG: '" + input + "'");
 				var quest = Quest.getByName(input);
 				if (!quest) {
 					actor.send("Input must be a valid quest name or ID.\nTry again: ");
@@ -2231,7 +2230,6 @@ function bootQueditOLC() {
 				prior = quest.databaseID;
 			}
 			OLC.priorQuests[index] = _.parseInt(prior);
-			actor.send("DEBUG: " + prior);
 			OLC.switchToMode("MODE_PRIORQUESTS");
 			return;
 		}
