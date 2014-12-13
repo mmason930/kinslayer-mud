@@ -28,7 +28,6 @@ function initGlobals()
 	global.clanCloaks[25] = 8172;
 	global.clanCloaks[27] = 8016;
 	global.clanCloaks[28] = 2087;
-	global.alderQuestPasswords = ["nevermind","marauder","submerged","swift","deuces","highland","cargo","seabreeze","behold","keepsake","horseshoe","waterfall","melon","blade","hilt","pommel","ruby","stone","livid","spirit","power","onyx","goldenrod","mist","stormy","downpour","jade","mahogany","snowfall","sunshine","light","darkness","eternity","herons","wounded","backstab","traitor","imbecile","foolhardy","meatpie","raven","beak","sparrow","flaming","demise","irridescent","firefly","serenity","absolute","envy","green","red","cherry","apple","bloodied","dragon","reborn","creator","Ishamael","Lanfear","Rahvin","forsaken","darkhound","statue","Callandor","eyeless"];
 	global.questMasters = ["Alder","Galnor","Fogel","Ouysa","Koradin"];
 	global.cityLeaderNames = ["King Easar","Hammar, the Master of Arms","Murash","Agelmar, Lord of Fal Dara","Shaidar Haran"];
 	if ( !global.vQuests )				global.vQuests = [];

@@ -23,9 +23,8 @@ var script9856 = function(self, actor, here, args, extra) {
 			}
 			else if ( strn_cmp(cmd,"nod",3) == true ) {
 				waitpulse 3;
-				var word = global.alderQuestPasswords[random(0,global.alderQuestPasswords.length-1)];
-				self.comm("say Excellent. Seek Zind in the Amalize. She's docked in Aringill. Knock on the hatch and the word is "+cyn+word+nrm+". Don't bring anyone with you");
-				actor.setPval("ZIND_PASS",word,true);
+				Zind.setNewPassword(actor);
+				self.comm("say Excellent. Seek Zind in the Amalize. She's docked in Aringill. Knock on the hatch and the word is "+Zind.printPassword(actor)+". Don't bring anyone with you");
 				waitpulse 28;
 				actor.send(capFirstLetter(self.name)+" cuts loose a small pouch and disappears over the balcony railing before the clinking of coin is heard as the pouch hits the ground.");
 				self.moveToRoom(getRoom(501));
