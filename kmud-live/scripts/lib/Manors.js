@@ -323,25 +323,21 @@ function resetManor(manor) {
 	var rooms = getAllRoomsInZone(manor.zoneId);
 	var dumpRoom = getRoom(20899);
 	var outsideGateRoom = getRoom(manor.outsideGateRoomVnum);
-	for (var _autoKey in rooms) {
-		var room = rooms[_autoKey];
+	for (var i, room; room = rooms[i++];) {
 		if (room) {
 			if (room.vnum == manor.storageRoomVnum) {
-				for (var _autoKey in room.items) {
-					var item = room.items[_autoKey];
+				for (var j, item; item = room.items[j++];) {
 					item.moveToRoom(outsideGateRoom);
 
 				}
 			}
 			else {
-				for (var _autoKey in room.items) {
-					var item = room.items[_autoKey];
+				for (var j, item; item = room.items[j++];) {
 					item.moveToRoom(dumpRoom);
 					//item.extract();
 				}
 			}
-			for (var _autoKey in room.people) {
-				var mob = room.people[_autoKey];
+			for (var j, mob; mob = room.people[j++];) {
 				if (mob.vnum > -1 && !mob.riddenBy && !isName("merc",mob.namelist)) {
 					mob.moveToRoom(dumpRoom);
 					//mob.extract();
