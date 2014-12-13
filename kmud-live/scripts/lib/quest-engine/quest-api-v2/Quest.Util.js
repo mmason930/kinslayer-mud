@@ -224,11 +224,12 @@ Quest.Util = (function() {
 			});
 
 			if (unlockedQuests.length > 0) {
-				var names = [], masterVnums = {};
+				var names = [], ownerVnums = {};
 				for (var i = 0, q; q = unlockedQuests[i++];) {
 					names.push(q.name);
-					for (var k = 0, vnum; vnum = q.masterVnums[k++];) {
-						masterVnums[vnum] = true;
+					for (var k = 0, vnum; vnum = q.ownerVnums[k++];) {
+						// Not using an array because we don't want duplicates
+						ownerVnums[vnum] = true;
 					}
 					// Go ahead and begin this quest since the actor has no way to manually start it
 					if (q.isMasterless) {
@@ -239,7 +240,7 @@ Quest.Util = (function() {
 				actor.send(bld + "You have unlocked the following quest" + (names.length > 1 ? "s" : "") + ": " +
 							  nrm + grn + names.join(nrm + bld + ", " + nrm + grn) + nrm + bld + ".\n" + nrm);
 
-				for (var vnum in masterVnums) {
+				for (var vnum in ownerVnums) {
 					var mobName = getMobName(vnum);
 					actor.send(bld + cyn + capFirstLetter(mobName) + nrm + bld + " has new quests for you." + nrm);
 				}
