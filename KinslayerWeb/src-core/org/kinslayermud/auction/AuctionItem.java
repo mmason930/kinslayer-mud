@@ -1,8 +1,13 @@
 package org.kinslayermud.auction;
 
-import org.kinslayermud.misc.DataObjectWithIntId;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public class AuctionItem extends DataObjectWithIntId {
+import org.kinslayermud.dbutils.DBObject;
+import org.kinslayermud.misc.DataObjectWithIntId;
+import org.kinslayermud.util.QueryUtil;
+
+public class AuctionItem extends DataObjectWithIntId implements DBObject {
 
   protected int auctionId;
   protected String objectId;
@@ -84,5 +89,19 @@ public class AuctionItem extends DataObjectWithIntId {
   
   public void setTimestamp(long timestamp) {
     this.timestamp = timestamp;
-  }  
+  }
+  
+  public void retrieveFromResultSet(ResultSet resultSet) throws SQLException {
+    
+    setId(resultSet.getInt("auctionItem.id"));
+    setAuctionId(resultSet.getInt("auctionItem.auction_id"));
+    setObjectId(resultSet.getString("auctionItem.object_id"));
+    setOwnerId(resultSet.getInt("auctionItem.owner_id"));
+    setEndTime(resultSet.getLong("auctionItem.end_time"));
+    setStartingPrice(resultSet.getLong("auctionItem.starting_price"));
+    setBuyoutPrice(resultSet.getLong("auctionItem.buyout_price"));
+    setActive(QueryUtil.getIntBoolean(resultSet, "auctionItem.active"));
+    setRetrieved(QueryUtil.getIntBoolean(resultSet, "auctionItem.retrieved"));
+    setTimestamp(resultSet.getLong("auctionItem.timestamp"));
+  }
 }

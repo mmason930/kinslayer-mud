@@ -31,6 +31,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -47,7 +48,7 @@ import java.util.regex.Pattern;
 
 import javax.xml.bind.DatatypeConverter;
 
-import org.kinslayermud.user.login.UserLogin;
+import org.kinslayermud.genericaccessor.GenericAccessor;
 
 /** Contains miscellaneous utility functions. */
 public abstract class MiscUtil {
@@ -1518,5 +1519,17 @@ public abstract class MiscUtil {
   public static void log(String message) {
     
     System.out.println("[" + new Date() + "] " + message);
+  }
+  
+  public static <ReturnType, PassingType> Map<ReturnType, PassingType> map(Collection<PassingType> collection, GenericAccessor<PassingType, ReturnType> genericAccessor) {
+    
+    Map<ReturnType, PassingType> map = new HashMap<ReturnType, PassingType>();
+    
+    for(PassingType passingType : collection) {
+      
+      map.put(genericAccessor.get(passingType), passingType);
+    }
+    
+    return map;
   }
 }

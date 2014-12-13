@@ -5,9 +5,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.kinslayermud.dbutils.DBObject;
 import org.kinslayermud.enumerator.VEnum;
 import org.kinslayermud.enumerator.VEnumSet;
 
@@ -624,5 +626,73 @@ public abstract class QueryUtil {
   
   public static String buildStringFromList(List<String> list) {
     return StringUtil.buildStringFromList(list, StringUtil.MYSQL_STORAGE_SEPERATOR_SEQUENCE);
+  }
+  
+  public static <T extends DBObject> List<T> retrieveDataObjectList(Statement statement, String tableName, String criteria, Class<T> dbObjectClass) throws SQLException {
+    
+    return retrieveDataObjectList(statement, tableName, criteria, null, dbObjectClass);
+  }
+  
+  public static <T extends DBObject> List<T> retrieveDataObjectList(Statement statement, String tableName, String criteria, String orderBy, Class<T> dbObjectClass) throws SQLException {
+    
+    String sql = " SELECT *"
+               + " FROM `" + tableName.replace("`", "") + "`"
+               + " WHERE " + (criteria == null ? "1" : criteria)
+               + (orderBy == null ? "" : (" ORDER BY " + orderBy));
+    
+    ResultSet resultSet = statement.executeQuery(sql);
+    List<T> dbObjectList = new ArrayList<T>();
+    
+    while(resultSet.next()) {
+      
+      dbObjectList.add(retrieveDataObject(statement, resultSet, dbObjectClass));
+    }
+    
+    resultSet.close();
+    
+    return dbObjectList;
+  }
+  
+  public static <T extends DBObject> T retrieveDataObject(Statement statement, String tableName, String criteria, Class<T> dbObjectClass) throws SQLException {
+    
+    String sql = " SELECT *"
+               + " FROM `" + tableName.replace("`", "") + "`"
+               + " WHERE " + (criteria == null ? "1" : criteria);
+    
+    return retrieveDataObject(statement, sql, criteria, dbObjectClass);
+  }
+  
+  public static <T extends DBObject> T retrieveDataObject(Statement statement, String sql, Class<T> dbObjectClass) throws SQLException {
+    
+    ResultSet resultSet = statement.executeQuery(sql);
+    
+    if(resultSet.next()) {
+      
+      return retrieveDataObject(statement, resultSet, dbObjectClass);
+    }
+    
+    resultSet.close();
+    
+    return null;
+  }
+  
+  public static <T extends DBObject> T retrieveDataObject(Statement statement, ResultSet resultSet, Class<T> dbObjectClass) throws SQLException {
+    
+    try {
+      T dbObject = dbObjectClass.newInstance();
+    
+      dbObject.retrieveFromResultSet(resultSet);
+
+      return dbObject;
+    }
+    catch(Exception exception) {
+      
+      if(exception instanceof SQLException) {
+        
+        throw (SQLException)exception;
+      }
+      
+      throw new SQLException(exception);
+    }
   }
 }

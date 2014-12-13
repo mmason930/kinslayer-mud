@@ -1,8 +1,12 @@
 package org.kinslayermud.clan;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.kinslayermud.dbutils.DBObject;
 import org.kinslayermud.misc.DataObjectWithIntId;
 
-public class ClanRank extends DataObjectWithIntId {
+public class ClanRank extends DataObjectWithIntId implements DBObject {
 
   protected int clanId;
   protected int rankNumber;
@@ -11,6 +15,14 @@ public class ClanRank extends DataObjectWithIntId {
   public ClanRank() {
     
     id = NEW;
+  }
+  
+  public void retrieveFromResultSet(ResultSet resultSet) throws SQLException {
+    
+    setId(resultSet.getInt("clanRank.id"));
+    setClanId(resultSet.getInt("clanRank.clan_id"));
+    setRankNumber(resultSet.getInt("clanRank.rank_number"));
+    setName(resultSet.getString("clanRank.name"));
   }
   
   public int getClanId() {

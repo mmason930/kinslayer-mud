@@ -20,6 +20,8 @@ import org.kinslayermud.character.UserClan;
 import org.kinslayermud.clan.ClanWithRanks;
 import org.kinslayermud.comm.Comm;
 import org.kinslayermud.comm.CommUtil;
+import org.kinslayermud.dbutils.StatementConnectionExecutor;
+import org.kinslayermud.dbutils.StatementExecutor;
 import org.kinslayermud.exception.DataInterfaceException;
 import org.kinslayermud.forum.ForumUser;
 import org.kinslayermud.help.HelpFile;
@@ -132,7 +134,7 @@ public class WebSupport {
     loadHomeResources();
   }
   
-  public User performLogin(String username, String password) throws DataInterfaceException {
+  public<T> T executeConnectionStatement(StatementConnectionExecutor<T> statementConnectionExecutor) throws DataInterfaceException {
     
     Connection connection = null;
     Statement statement = null;
@@ -140,7 +142,7 @@ public class WebSupport {
       connection = provider.getConnection();
       statement = connection.createStatement();
       
-      User user = UserUtil.performLogin(statement, username, password);
+      T t = statementConnectionExecutor.execute(connection, statement);
       
       statement.close();
       statement = null;
@@ -149,7 +151,7 @@ public class WebSupport {
       connection.close();
       connection = null;
       
-      return user;
+      return t;
     }
     catch(Throwable throwable) {
       
@@ -160,183 +162,71 @@ public class WebSupport {
       QueryUtil.closeNoThrow(statement);
       QueryUtil.closeNoThrow(connection);
     }
+  }
+  
+  public<T> T executeStatement(StatementExecutor<T> statementExecutor) throws DataInterfaceException {
+    
+    Connection connection = null;
+    Statement statement = null;
+    try {
+      connection = provider.getConnection();
+      statement = connection.createStatement();
+      
+      T t = statementExecutor.execute(statement);
+      
+      statement.close();
+      statement = null;
+      
+      connection.commit();
+      connection.close();
+      connection = null;
+      
+      return t;
+    }
+    catch(Throwable throwable) {
+      
+      throw new DataInterfaceException(throwable);
+    }
+    finally {
+      
+      QueryUtil.closeNoThrow(statement);
+      QueryUtil.closeNoThrow(connection);
+    }
+  }
+  
+  public User performLogin(String username, String password) throws DataInterfaceException {
+    
+    return executeStatement( statement -> UserUtil.performLogin(statement, username, password) );
   }
   
   public Map<Integer, AuctionBid> getAuctionBidIdToHighestAuctionBidMap(Set<Integer> auctionItemIdSet) throws DataInterfaceException {
     
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      Map<Integer, AuctionBid> auctionItemIdToHighestAuctionBidMap = AuctionUtil.getAuctionItemIdToHighestAuctionBid(statement, auctionItemIdSet);
-      
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return auctionItemIdToHighestAuctionBidMap;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> AuctionUtil.getAuctionItemIdToHighestAuctionBid(statement, auctionItemIdSet));
   }
   
   public void createUserSession(int userId, String sessionId) throws DataInterfaceException {
     
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      UserUtil.createUserSession(statement, userId, sessionId);
-      
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    executeStatement(statement ->  { UserUtil.createUserSession(statement, userId, sessionId); return null; } );
   }
   
   public User getUserFromSession(String sessionId) throws DataInterfaceException {
     
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      User user = UserUtil.getUserFromSession(statement, sessionId);
-      
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return user;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> UserUtil.getUserFromSession(statement, sessionId));
   }
   
   public void performPlayerPortalSignOut(String sessionId, int userId) throws DataInterfaceException {
     
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      UserUtil.performPlayerPortalSignOut(statement, sessionId, userId);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    executeStatement(statement -> {UserUtil.performPlayerPortalSignOut(statement, sessionId, userId); return null;} );
   }
   
-
   public List<UserLogRecord> getUserLogRecords(int userId) throws DataInterfaceException {
     
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      List<UserLogRecord> userLogRecords = UserLogUtil.getUserLogRecords(statement, userId);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return userLogRecords;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> UserLogUtil.getUserLogRecords(statement, userId));
   }
   
   public UserLog getUserLog(int userLogId) throws DataInterfaceException {
     
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      UserLog userLog = UserLogUtil.getUserLog(statement, userLogId, false);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return userLog;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> UserLogUtil.getUserLog(statement, userLogId, false));
   }
   
   public String getInstanceDomain() {
@@ -346,779 +236,132 @@ public class WebSupport {
 
   public MobPrototype getMobPrototype(int mobPrototypeId) throws DataInterfaceException {
     
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      MobPrototype mobPrototype = MobUtil.getMobPrototype(statement, mobPrototypeId, false);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return mobPrototype;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> MobUtil.getMobPrototype(statement, mobPrototypeId, false));
   }
   
   public Map<Integer, MobPrototype> getMobPrototypeMap(Collection<Integer> mobPrototypeIdCollection) throws DataInterfaceException {
     
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      Map<Integer, MobPrototype> mobPrototypeMap = MobUtil.getMobPrototypeMap(statement, mobPrototypeIdCollection);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return mobPrototypeMap;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> MobUtil.getMobPrototypeMap(statement, mobPrototypeIdCollection));
   }
   
   public Zone getZoneLoadingSuperMobPrototype(int mobPrototypeId) throws DataInterfaceException {
     
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      Zone zone = ZoneUtil.getZoneLoadingSuperMobPrototype(statement, mobPrototypeId, false);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return zone;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> ZoneUtil.getZoneLoadingSuperMobPrototype(statement, mobPrototypeId, false));
   }
   
   public KitWithItemsAndObjectPrototypes getKitWithItemsAndObjectPrototypes(int kitId) throws DataInterfaceException {
     
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      KitWithItemsAndObjectPrototypes kitWithItemsAndObjectPrototypes = KitUtil.getKitWithItemsAndObjectPrototypes(statement, kitId, false);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return kitWithItemsAndObjectPrototypes;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> KitUtil.getKitWithItemsAndObjectPrototypes(statement, kitId, false));
   }
   
   public Map<Integer, User> getUserMap(Collection<Integer> userIdCollection) throws DataInterfaceException {
 
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      Map<Integer, User> userMap = UserUtil.getUserMap(statement, userIdCollection);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return userMap;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> UserUtil.getUserMap(statement, userIdCollection));
   }
+  
   public List<PlayerKill> getLastSoManyPlayerKills(int howMany) throws DataInterfaceException {
 
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      List<PlayerKill> playerKills = PKUtil.getLastSoManyPlayerKills(statement, howMany);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return playerKills;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> PKUtil.getLastSoManyPlayerKills(statement, howMany));
   }
   
   public List<SuperMob> getAllOpenSuperMobs() throws DataInterfaceException {
 
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      List<SuperMob> superMobs = MobUtil.getAllOpenSuperMobs(statement);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return superMobs;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> MobUtil.getAllOpenSuperMobs(statement));
   }
   
   public List<ObjectPrototype> getObjectPrototypesByWearType(ObjectWearType objectWearType) throws DataInterfaceException {
 
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      List<ObjectPrototype> superMobs = ObjectUtil.getObjectPrototypesByWearType(statement, objectWearType);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return superMobs;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> ObjectUtil.getObjectPrototypesByWearType(statement, objectWearType));
   }
-
+  
   public List<ObjectPrototype> getObjectPrototypesByWeaponType(ObjectWeaponType objectWeaponType) throws DataInterfaceException {
 
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      List<ObjectPrototype> superMobs = ObjectUtil.getObjectPrototypesByWeaponType(statement, objectWeaponType);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return superMobs;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> ObjectUtil.getObjectPrototypesByWeaponType(statement, objectWeaponType));
   }
   
   public List<PlayerKill> getPlayerKillsByKillerId(int killerUserId, Integer offset, Integer fetchSize, boolean sort) throws DataInterfaceException {
 
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      List<PlayerKill> playerKills = PKUtil.getPlayerKillsByKillerId(statement, killerUserId, offset, fetchSize, sort);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return playerKills;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> PKUtil.getPlayerKillsByKillerId(statement, killerUserId, offset, fetchSize, sort));
   }
   
   public List<UserLogin> getUserLoginsByUserId(int userId) throws DataInterfaceException {
 
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      List<UserLogin> userLogins = UserLoginUtil.getUserLoginsByUserId(statement, userId);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return userLogins;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> UserLoginUtil.getUserLoginsByUserId(statement, userId));
   }
   
   public List<Comm> getTellHistory(int userId, int offset, int fetchSize) throws DataInterfaceException {
 
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      List<Comm> tellHistory = CommUtil.getTellHistory(statement, userId, offset, fetchSize);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return tellHistory;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> CommUtil.getTellHistory(statement, userId, offset, fetchSize));
   }
   
   public void putUserLog(UserLog userLog) throws DataInterfaceException {
 
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      UserLogUtil.putUserLog(statement, userLog);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    executeStatement(statement -> {UserLogUtil.putUserLog(statement, userLog); return null;});
   }
   
   public FeaturedMUDListing getRandomFeaturedMUDListing(Collection<Integer> featuredMUDListingIdCollectionToExclude) throws DataInterfaceException {
 
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      FeaturedMUDListing featuredMUDListing = FeaturedMUDListingUtil.getRandomFeaturedMUDListing(statement, featuredMUDListingIdCollectionToExclude);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return featuredMUDListing;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> FeaturedMUDListingUtil.getRandomFeaturedMUDListing(statement, featuredMUDListingIdCollectionToExclude));
   }
   
   public HelpFile getHelpFile(int helpFileId) throws DataInterfaceException {
 
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      HelpFile helpFile = HelpUtil.getHelpFile(statement, helpFileId, false);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return helpFile;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> HelpUtil.getHelpFile(statement, helpFileId, false));
   }
 
   public HelpFile getHelpFileByModRewrittenName(String modRewrittenName, Integer parentId) throws DataInterfaceException {
 
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      HelpFile helpFile = HelpUtil.getHelpFileByModRewrittenName(statement, modRewrittenName, parentId, false);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return helpFile;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> HelpUtil.getHelpFileByModRewrittenName(statement, modRewrittenName, parentId, false));
   }
 
   public List<HelpFile> getHelpFileChain(int helpFileId) throws DataInterfaceException {
 
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      List<HelpFile> helpFileChain = HelpUtil.getHelpFileChain(statement, helpFileId);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return helpFileChain;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> HelpUtil.getHelpFileChain(statement, helpFileId));
   }
   
   public List<HelpFile> getHelpFilesByParentId(Integer parentId) throws DataInterfaceException {
 
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      List<HelpFile> helpFiles = HelpUtil.getHelpFilesByParentId(statement, parentId);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return helpFiles;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> HelpUtil.getHelpFilesByParentId(statement, parentId));
   }
   
   public List<AuctionItem> getActiveAuctionItems() throws DataInterfaceException {
 
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      List<AuctionItem> auctionItems = AuctionUtil.getActiveAuctionItems(statement);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return auctionItems;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> AuctionUtil.getActiveAuctionItems(statement));
   }
   
   public Map<String, Obj> getObjectMap(Set<String> objectIdSet) throws DataInterfaceException {
 
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      Map<String, Obj> objectMap = ObjectUtil.getObjectMap(statement, objectIdSet);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return objectMap;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> ObjectUtil.getObjectMap(statement, objectIdSet));
   }
   
   public User getUserByUsername(String username) throws DataInterfaceException {
     
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      User user = UserUtil.getUserByUsername(statement, username, false);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return user;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> UserUtil.getUserByUsername(statement, username, false));
   }
   
   public List<UserClan> getUserClansByUserId(int userId) throws DataInterfaceException {
     
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      List<UserClan> userClans = UserUtil.getUserClansByUserId(statement, userId);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return userClans;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> UserUtil.getUserClansByUserId(statement, userId));
   }
   
   public Map<Integer, ClanWithRanks> getClansWithRanksMap(Collection<Integer> clanIdCollection) throws DataInterfaceException {
     
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      Map<Integer, ClanWithRanks> clanWithRanksMap = ClanUtil.getClanIdToClanWithRanksMap(statement, clanIdCollection);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return clanWithRanksMap;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> ClanUtil.getClanIdToClanWithRanksMap(statement, clanIdCollection));
   }
   
   public List<Integer> getAchievementIdsByUser(int userId) throws DataInterfaceException {
-    
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      List<Integer> achievementIds = UserUtil.getAchievementIdSetByUserId(statement, userId);
 
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return achievementIds;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> UserUtil.getAchievementIdSetByUserId(statement, userId));
   }
   
   public Map<Integer, Achievement> getAchievementMap(Collection<Integer> achievementIdCollection) throws DataInterfaceException {
     
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      Map<Integer, Achievement> achievementMap = AchievementUtil.getAchievementMap(statement, achievementIdCollection);
-
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return achievementMap;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> AchievementUtil.getAchievementMap(statement, achievementIdCollection));
   }
   
   public ForumUser getForumUser(int userId) throws DataInterfaceException {
-    
-    Connection connection = null;
-    Statement statement = null;
-    try {
-      connection = provider.getConnection();
-      statement = connection.createStatement();
-      
-      ForumUser forumUser = ForumUtil.getForumUser(statement, userId, false);
 
-      statement.close();
-      statement = null;
-      
-      connection.commit();
-      connection.close();
-      connection = null;
-      
-      return forumUser;
-    }
-    catch(Throwable throwable) {
-      
-      throw new DataInterfaceException(throwable);
-    }
-    finally {
-      
-      QueryUtil.closeNoThrow(statement);
-      QueryUtil.closeNoThrow(connection);
-    }
+    return executeStatement(statement -> ForumUtil.getForumUser(statement, userId, false));
   }
   
   public int getPlayerPortalServerPort() {

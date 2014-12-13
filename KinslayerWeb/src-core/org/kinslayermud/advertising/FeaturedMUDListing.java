@@ -1,8 +1,12 @@
 package org.kinslayermud.advertising;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.kinslayermud.dbutils.DBObject;
 import org.kinslayermud.misc.DataObjectWithIntId;
 
-public class FeaturedMUDListing extends DataObjectWithIntId {
+public class FeaturedMUDListing extends DataObjectWithIntId implements DBObject {
 
   protected String websiteUrl;
   protected String imageUrl;
@@ -35,5 +39,13 @@ public class FeaturedMUDListing extends DataObjectWithIntId {
 
   public void setCaption(String caption) {
     this.caption = caption;
+  }
+  
+  public void retrieveFromResultSet(ResultSet resultSet) throws SQLException {
+    
+    setId(resultSet.getInt("id"));
+    setWebsiteUrl(resultSet.getString("website_url"));
+    setImageUrl(resultSet.getString("image_url"));
+    setCaption(resultSet.getString("caption"));
   }
 }

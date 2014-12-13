@@ -10,43 +10,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.kinslayermud.util.QueryUtil;
 import org.kinslayermud.util.SQLUtil;
 
 public class PKUtil {
-
-  public static UserPlayerKill getUserPlayerKill(ResultSet resultSet) throws SQLException {
-    
-    UserPlayerKill userPlayerKill = new UserPlayerKill();
-
-    userPlayerKill.setId(resultSet.getInt("id"));
-    userPlayerKill.setKillId(resultSet.getInt("kill_id"));
-    userPlayerKill.setKillerId(resultSet.getInt("killer_id"));
-    userPlayerKill.setVictimId(resultSet.getInt("victim_id"));
-    userPlayerKill.setWeavePointTransfer(resultSet.getInt("wp_transfer"));
-    userPlayerKill.setTimeOfDeath(resultSet.getTimestamp("time_of_death"));
-    
-    return userPlayerKill;
-  }
-  
-  public static List<UserPlayerKill> getUserPlayerKillsMeetingCriteria(Statement statement, String criteria, String orderBy) throws SQLException {
-    
-    String sql = " SELECT *"
-               + " FROM userPlayerKill"
-               + " WHERE " + criteria
-               + (orderBy != null ? (" ORDER BY " + orderBy) : "");
-    
-    List<UserPlayerKill> userPlayerKills = new LinkedList<UserPlayerKill>();
-    ResultSet resultSet = statement.executeQuery(sql);
-    
-    while(resultSet.next()) {
-      
-      userPlayerKills.add(getUserPlayerKill(resultSet));
-    }
-    
-    resultSet.close();
-    
-    return userPlayerKills;
-  }
   
   public static Collection<Integer> getLastSoManyKillIds(Statement statement, int howMany) throws SQLException {
     
@@ -73,7 +40,7 @@ public class PKUtil {
     String criteria = "kill_id IN" + SQLUtil.buildListSQL(killIdCollection, false, true);
     String orderBy = "kill_id DESC";
     
-    userPlayerKills = getUserPlayerKillsMeetingCriteria(statement, criteria, orderBy);
+    userPlayerKills = QueryUtil.retrieveDataObjectList(statement, "userPlayerKill", criteria, orderBy, UserPlayerKill.class);
     List<PlayerKill> playerKills = convertToPlayerKills(userPlayerKills);
     
     return playerKills;
@@ -133,7 +100,7 @@ public class PKUtil {
     
     String criteria = "kill_id IN" + SQLUtil.buildListSQL(playerKillIdCollection, false, true);
     
-    List<UserPlayerKill> userPlayerKills = getUserPlayerKillsMeetingCriteria(statement, criteria, null);
+    List<UserPlayerKill> userPlayerKills = QueryUtil.retrieveDataObjectList(statement, "userPlayerKill", criteria, UserPlayerKill.class);
     
     return convertToPlayerKills(userPlayerKills);
   }

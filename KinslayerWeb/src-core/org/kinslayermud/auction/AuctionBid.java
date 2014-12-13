@@ -1,8 +1,12 @@
 package org.kinslayermud.auction;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.kinslayermud.dbutils.DBObject;
 import org.kinslayermud.misc.DataObjectWithIntId;
 
-public class AuctionBid extends DataObjectWithIntId {
+public class AuctionBid extends DataObjectWithIntId implements DBObject {
 
   protected int auctionId;
   protected String objectId;
@@ -46,5 +50,16 @@ public class AuctionBid extends DataObjectWithIntId {
   }
   public void setTimestamp(long timestamp) {
     this.timestamp = timestamp;
+  }
+  
+  public void retrieveFromResultSet(ResultSet resultSet) throws SQLException {
+    
+    setId(resultSet.getInt("auctionBid.id"));
+    setAuctionId(resultSet.getInt("auctionBid.auction_id"));
+    setObjectId(resultSet.getString("auctionBid.object_id"));
+    setBidderId(resultSet.getInt("bidder_id"));
+    setAuctionItemId(resultSet.getInt("auctionBid.ai_id"));
+    setBidAmount(resultSet.getLong("auctionBid.bid_amount"));
+    setTimestamp(resultSet.getLong("auctionBid.timestamp"));
   }
 }

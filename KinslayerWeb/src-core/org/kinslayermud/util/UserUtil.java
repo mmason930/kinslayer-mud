@@ -17,6 +17,8 @@ import org.kinslayermud.character.User;
 import org.kinslayermud.character.UserClan;
 import org.kinslayermud.character.UserClass;
 import org.kinslayermud.character.UserRace;
+import org.kinslayermud.dbutils.StoreDataObjectSQLBuilder;
+import org.kinslayermud.dbutils.StoreSQLBuilder;
 import org.kinslayermud.exception.NonExistentObjectException;
 
 public class UserUtil {
@@ -166,17 +168,13 @@ public class UserUtil {
   
   public static void createUserSession(Statement statement, int userId, String sessionId) throws SQLException {
     
-    String sql = " INSERT INTO websiteSession("
-               + "   `id`,"
-               + "   `user_id`,"
-               + "   `created_datetime`"
-               + " ) VALUES ("
-               + SQLUtil.escapeQuoteString(sessionId) + ","
-               + userId + ","
-               + SQLUtil.encodeQuoteDate(new Date())
-               + ")";
+    StoreSQLBuilder builder = new StoreSQLBuilder("websiteSession");
     
-    statement.executeUpdate(sql);
+    builder.put("id", sessionId)
+           .put("user_id", userId)
+           .put("created_datetime", new Date());
+           
+   statement.executeUpdate(builder.generateInsert());
   }
   
   public static User getUserFromSession(Statement statement, String sessionId) throws SQLException {

@@ -1,10 +1,13 @@
 package org.kinslayermud.playerkilling;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 
+import org.kinslayermud.dbutils.DBObject;
 import org.kinslayermud.misc.DataObjectWithIntId;
 
-public class UserPlayerKill extends DataObjectWithIntId {
+public class UserPlayerKill extends DataObjectWithIntId implements DBObject {
 
   protected int killId;
   protected int killerId;
@@ -43,4 +46,13 @@ public class UserPlayerKill extends DataObjectWithIntId {
     this.timeOfDeath = timeOfDeath;
   }
   
+  public void retrieveFromResultSet(ResultSet resultSet) throws SQLException {
+    
+    setId(resultSet.getInt("id"));
+    setKillId(resultSet.getInt("kill_id"));
+    setKillerId(resultSet.getInt("killer_id"));
+    setVictimId(resultSet.getInt("victim_id"));
+    setWeavePointTransfer(resultSet.getInt("wp_transfer"));
+    setTimeOfDeath(resultSet.getTimestamp("time_of_death"));
+  }
 }

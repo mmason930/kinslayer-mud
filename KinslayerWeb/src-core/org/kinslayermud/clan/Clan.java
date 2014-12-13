@@ -1,8 +1,13 @@
 package org.kinslayermud.clan;
 
-import org.kinslayermud.misc.DataObjectWithIntId;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public class Clan extends DataObjectWithIntId {
+import org.kinslayermud.dbutils.DBObject;
+import org.kinslayermud.misc.DataObjectWithIntId;
+import org.kinslayermud.util.QueryUtil;
+
+public class Clan extends DataObjectWithIntId implements DBObject {
 
   protected String name;
   protected boolean isSecret;
@@ -15,6 +20,18 @@ public class Clan extends DataObjectWithIntId {
   public Clan() {
     
     id = NEW;
+  }
+  
+  public void retrieveFromResultSet(ResultSet resultSet) throws SQLException {
+    
+    setId(resultSet.getInt("clan.id"));
+    setName(resultSet.getString("clan.name"));
+    setSecret(QueryUtil.getIntBoolean(resultSet, "clan.is_secret"));
+    setWarrantId(resultSet.getInt("clan.warrant_id"));
+    setHiddenLevel(resultSet.getInt("clan.hidden_level"));
+    setBonusSkillId(resultSet.getInt("clan.bonus_skill_id"));
+    setBonusSkillModifier(resultSet.getInt("clan.bonus_skill_modifier"));
+    setBonusSkillRank(resultSet.getInt("clan.bonus_skill_rank"));
   }
   
   public String getName() {

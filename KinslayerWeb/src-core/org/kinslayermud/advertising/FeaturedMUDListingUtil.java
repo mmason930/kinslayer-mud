@@ -20,21 +20,10 @@ public class FeaturedMUDListingUtil {
     
     if(resultSet.next()) {
     
-      return getFeaturedMUDListing(resultSet);
+      FeaturedMUDListing listing = new FeaturedMUDListing();
+      listing.retrieveFromResultSet(resultSet);
     }
     
     return null;
-  }
-  
-  public static FeaturedMUDListing getFeaturedMUDListing(ResultSet resultSet) throws SQLException {
-    
-    FeaturedMUDListing featuredMUDListing = new FeaturedMUDListing();
-    
-    featuredMUDListing.setId(resultSet.getInt("id"));
-    featuredMUDListing.setWebsiteUrl(resultSet.getString("website_url"));
-    featuredMUDListing.setImageUrl(resultSet.getString("image_url"));
-    featuredMUDListing.setCaption(resultSet.getString("caption"));
-    
-    return featuredMUDListing;
   }
 }

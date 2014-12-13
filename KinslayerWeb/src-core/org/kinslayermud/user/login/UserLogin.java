@@ -1,10 +1,13 @@
 package org.kinslayermud.user.login;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 
+import org.kinslayermud.dbutils.DBObject;
 import org.kinslayermud.misc.DataObjectWithIntId;
 
-public class UserLogin extends DataObjectWithIntId {
+public class UserLogin extends DataObjectWithIntId implements DBObject {
 
   protected int userId;
   protected String host;
@@ -34,5 +37,14 @@ public class UserLogin extends DataObjectWithIntId {
   }
   public void setGatewayDescriptorType(GatewayDescriptorType gatewayDescriptorType) {
     this.gatewayDescriptorType = gatewayDescriptorType;
+  }
+  
+  public void retrieveFromResultSet(ResultSet resultSet) throws SQLException {
+    
+    setId(resultSet.getInt("id"));
+    setUserId(resultSet.getInt("user_id"));
+    setHost(resultSet.getString("host"));
+    setLoginDatetime(resultSet.getTimestamp("login_datetime"));
+    setGatewayDescriptorType(GatewayDescriptorType.getEnum(resultSet.getInt("gateway_descriptor_type")));
   }
 }
