@@ -2218,7 +2218,7 @@ function bootQueditOLC() {
 		}
 			//Editing
 		else {
-			var index = Math.max(0, OLC.index);
+			var index = OLC.index;
 			var input = vArgs.join(" ");
 			var prior = input;
 			if (!isNumber(input)) {
@@ -2229,7 +2229,13 @@ function bootQueditOLC() {
 				}
 				prior = quest.databaseID;
 			}
-			OLC.priorQuests[index] = _.parseInt(prior);
+
+			prior = _.parseInt(prior)
+			if (index != undefined)
+				OLC.priorQuests[index] = prior;
+			else
+				OLC.priorQuests.push(prior);
+
 			OLC.switchToMode("MODE_PRIORQUESTS");
 			return;
 		}
