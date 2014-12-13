@@ -2199,7 +2199,7 @@ function bootQueditOLC() {
 		//If removing, select integer from list
 		if (OLC.action == -1) {
 			if (isNumber(cmd) && cmd > 0 && cmd <= OLC.priorQuests.length) {
-				OLC.priorQuests = reconArray(OLC.priorQuests, (cmd - 1), "remove");
+				OLC.priorQuests.splice((cmd - 1), 1);
 				OLC.switchToMode("MODE_PRIORQUESTS");
 				return;
 			}
@@ -2230,6 +2230,7 @@ function bootQueditOLC() {
 				prior = quest.databaseID;
 			}
 			OLC.priorQuests[index] = _.parseInt(prior);
+			actor.send("DEBUG: ", prior);
 			OLC.switchToMode("MODE_PRIORQUESTS");
 			return;
 		}
