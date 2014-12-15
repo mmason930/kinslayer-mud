@@ -30,6 +30,7 @@ WebSocketCommandProcessor.prototype.loadCommandProcessors = function()
 	{
 		command = JSON.parse(json);
 
+		global.alder.send(json);
 		if (command.subroutine === "Get Map")
 			return getMapInfo(userId);
 		
