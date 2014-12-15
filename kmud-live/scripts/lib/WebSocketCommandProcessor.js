@@ -1,7 +1,6 @@
-function WebSocketCommandProcessor()
-{
+function WebSocketCommandProcessor() {
 	this.commandProcessors = {};
-	
+
 	setTimeout(3, function() { global.webSocketCommandProcessor.loadCommandProcessors(); });
 }
 
@@ -13,116 +12,110 @@ function getMapInfo(userId) {
 		method: "Load Help File",
 		subroutine: "Get Map",
 		zone: { vnum: room.zoneVnum, name: room.zoneName },
-		rooms: jsrooms.map(MapUtil.packageRoom),
+		// Only get rooms that have exits (otherwise we really can't map it)
+		rooms: jsrooms.filter(function(r) {
+			return !r.neighbors.every(function(n) {
+				return !n;
+			});
+		}).map(MapUtil.packageRoom),
 		exits: MapUtil.getExitsInZone(room.zoneVnum)
 	};
 
 	return JSON.stringify(response);
 }
 
-WebSocketCommandProcessor.prototype.loadCommandProcessors = function()
-{
-	this.commandProcessors["Load Help File"] = function(json, command, userId)
-	{
+WebSocketCommandProcessor.prototype.loadCommandProcessors = function() {
+	this.commandProcessors["Load Help File"] = function(json, command, userId) {
 		command = JSON.parse(json);
 
 		if (command.subroutine === "Get Map")
 			return getMapInfo(userId);
-		
+
 		var helpFile = global.helpManager.getHelpFileById(command.helpFileId);
-		
-		if(!helpFile)
+
+		if (!helpFile)
 			helpFile = global.helpManager.getHelpFileByName(command.helpFileId);
-		
+
 		var parentHelpFile = null;
-		
+
 		var response = {
 			method: "Load Help File"
 		};
-		
-		if(helpFile == null)
+
+		if (helpFile == null)
 			response.error = "Could not find help file.";
-		else
-		{
+		else {
 			global.helpManager.createWebSocketMessageForHelpFile(helpFile, response);
 		}
-		
+
 		return JSON.stringify(response);
 	};
-	
-	this.commandProcessors["Save Help File"] = function(json, command, userId)
-	{
-		if(command.helpFileId == null)
+
+	this.commandProcessors["Save Help File"] = function(json, command, userId) {
+		if (command.helpFileId == null)
 			var helpFile = global.helpManager.createHelpFile(command.parentId);
 		else
 			var helpFile = global.helpManager.getHelpFileById(command.helpFileId);
-		
-		if(helpFile == null)
-		{
+
+		if (helpFile == null) {
 			return this.generateErrorResponse(command.method, ["Could not find help file."]);
 		}
-		
+
 		helpFile.name = command.name;
 		helpFile.syntax = command.syntax;
 		helpFile.description = command.description;
 		helpFile.keywords = command.keywords;
 		helpFile.parentId = command.parentId;
 		var isNew = helpFile.isNew();
-		
-		if(isNew)
-		{
+
+		if (isNew) {
 			helpFile.createdByUserId = userId;
 			helpFile.createdDatetime = new Date();
 		}
-		
+
 		helpFile.lastModifiedByUserId = userId;
 		helpFile.lastModifiedDatetime = new Date();
-		
+
 		global.helpManager.saveHelpFileToDatabase(helpFile);
-		
-		if(isNew)
+
+		if (isNew)
 			global.helpManager.addHelpFileInternally(helpFile);
-		
-		
+
+
 		mudLog(constants.BRF, 100, getUserNameByUserId(userId) + " has saved help file #" + helpFile.id + ": " + helpFile.name);
-		
-		var response = {method: command.method};
+
+		var response = { method: command.method };
 		global.helpManager.createWebSocketMessageForHelpFile(helpFile, response);
 		return JSON.stringify(response);
 	}
 };
 
-WebSocketCommandProcessor.prototype.generateErrorResponse = function(method, errors)
-{
+WebSocketCommandProcessor.prototype.generateErrorResponse = function(method, errors) {
 	return {
 		method: method,
 		errors: errors
 	};
 };
 
-WebSocketCommandProcessor.prototype.processCommand = function(json, userId)
-{
+WebSocketCommandProcessor.prototype.processCommand = function(json, userId) {
 	var command = JSON.parse(json);
-	
-	if(command.method == null)
-	{
+
+	if (command.method == null) {
 		mudLog(constants.BRF, 100, "Could not process JavaScript web socket command. No method set. User ID: " + userId);
 		return null;
 	}
-	
-	var commandProcessor = this.commandProcessors[ command.method ];
-	
-	if(commandProcessor == null)
-	{
+
+	var commandProcessor = this.commandProcessors[command.method];
+
+	if (commandProcessor == null) {
 		mudLog(constants.BRF, 100, "Could not proecss JavaScript web socket command. No processor found for method `" + command.method + "`. User ID: " + userId);
 		return null;
 	}
-	
+
 	return commandProcessor(json, command, userId);
 }
 
-WebSocketCommandProcessor.prototype.reload = function()
-{
+WebSocketCommandProcessor.prototype.reload = function() {
 	delete global.webSocketCommandProcessor;
 	global.webSocketCommandProcessor = new WebSocketCommandProcessor();
 }
