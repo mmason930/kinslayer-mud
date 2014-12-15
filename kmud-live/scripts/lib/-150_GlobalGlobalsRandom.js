@@ -3,6 +3,7 @@ if( !global ) {
 }
 function initGlobals()
 {
+	global.playersByUserId = {};
 	global.trinketCost = 3;
 	global.masterWeaponIssue = 8;
 	global.masterWeaponRetrieve = 4;

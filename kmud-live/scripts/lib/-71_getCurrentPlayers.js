@@ -26,3 +26,10 @@ function getPlayerByName(sName) {
 	return null;
 }
 
+function getPlayerById(userId) {
+	var player = global.playersByUserId[userId];
+	if (!player) {
+		player = getCurrentPlayers().filter(function(p) { p.id == userId; })[0];
+		global.playersByUserId[userId] = player;
+	}
+}

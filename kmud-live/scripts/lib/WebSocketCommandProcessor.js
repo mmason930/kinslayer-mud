@@ -6,12 +6,7 @@ function WebSocketCommandProcessor()
 }
 
 function getMapInfo(userId) {
-	var player = global.playersByUserId[userId];
-	if (!player) {
-		player = getCurrentPlayers().filter(function(p) { p.id == userId; })[0];
-		global.playersByUserId[userId] = player;
-	}
-
+	var player = getPlayerById(userId);
 	var room = player.room;
 	var jsrooms = MapUtil.getRoomsInZone(room.zoneVnum);
 	var response = {
