@@ -13,7 +13,7 @@ function getMapInfo(userId) {
 		method: "Load Help File",
 		subroutine: "Get Map",
 		zone: room.zoneVnum,
-		rooms: jsrooms,
+		rooms: jsrooms.map(MapUtil.packageRoom),
 		exits: MapUtil.getExitsInZone(room.zoneVnum)
 	};
 
@@ -26,7 +26,6 @@ WebSocketCommandProcessor.prototype.loadCommandProcessors = function()
 	{
 		command = JSON.parse(json);
 
-		global.alder.send(json);
 		if (command.subroutine === "Get Map")
 			return getMapInfo(userId);
 		
