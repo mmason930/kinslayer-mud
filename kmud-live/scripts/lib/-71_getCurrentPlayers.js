@@ -29,7 +29,7 @@ function getPlayerByName(sName) {
 function getPlayerById(userId) {
 	var player = global.playersByUserId[userId];
 	if (!player) {
-		player = getCurrentPlayers().filter(function(p) { p.id == userId; })[0];
+		player = getCurrentPlayers().filter(function(p) { return p.id == userId; })[0];
 		global.playersByUserId[userId] = player;
 	}
 	return player;
