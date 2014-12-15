@@ -30,7 +30,7 @@ WebSocketCommandProcessor.prototype.loadCommandProcessors = function()
 	{
 		command = JSON.parse(json);
 
-		if (command.method === "Map Routine")
+		if (command.subroutine === "Get Map")
 			return getMapInfo(userId);
 		
 		var helpFile = global.helpManager.getHelpFileById(command.helpFileId);
