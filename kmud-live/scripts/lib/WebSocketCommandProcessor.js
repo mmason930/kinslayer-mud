@@ -15,10 +15,13 @@ function getMapInfo(userId) {
 	var room = player.room;
 	var jsrooms = MapUtil.getRoomsInZone(room.zoneVnum);
 	var response = {
+		method: "Get Map",
 		zone: room.zoneVnum,
 		rooms: jsrooms,
 		exits: MapUtil.getExitsInZone(room.zoneVnum)
 	};
+
+	return JSON.stringify(response);
 }
 
 WebSocketCommandProcessor.prototype.loadCommandProcessors = function()
