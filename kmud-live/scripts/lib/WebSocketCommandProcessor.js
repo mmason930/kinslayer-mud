@@ -5,11 +5,30 @@ function WebSocketCommandProcessor()
 	setTimeout(3, function() { global.webSocketCommandProcessor.loadCommandProcessors(); });
 }
 
+function getMapInfo(userId) {
+	var player = global.playersByUserId[userId];
+	if (!player) {
+		player = getCurrentPlayers().filter(function(p) { p.id == userId; })[0];
+		global.playersByUserId[userId] = player;
+	}
+
+	var room = player.room;
+	var jsrooms = MapUtil.getRoomsInZone(room.zoneVnum);
+	var response = {
+		zone: room.zoneVnum,
+		rooms: jsrooms,
+		exits: MapUtil.getExitsInZone(room.zoneVnum)
+	};
+}
+
 WebSocketCommandProcessor.prototype.loadCommandProcessors = function()
 {
 	this.commandProcessors["Load Help File"] = function(json, command, userId)
 	{
 		command = JSON.parse(json);
+
+		if (command.method === "Map Routine")
+			return getMapInfo(userId);
 		
 		var helpFile = global.helpManager.getHelpFileById(command.helpFileId);
 		
