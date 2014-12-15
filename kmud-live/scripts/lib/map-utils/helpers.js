@@ -12,16 +12,18 @@
 			var jsrooms = this.getRoomsInZone(zone);
 			var exits = {};
 			jsrooms.forEach(function(jsroom) {
-				jsroom.neighbors.map(function(r) {
-					var exit = {
-						start: jsroom.vnum,
-						dir: jsroom.firstStep(r),
-						destination: r.vnum,
-						destinationZone: r.zoneVnum
-					};
-					var key = [exit.start, exit.destination].sort().join("->");
-					exits[key] = exit;
-				})
+				if (jsroom.neighbors) {
+					jsroom.neighbors.map(function(r) {
+						var exit = {
+							start: jsroom.vnum,
+							dir: jsroom.firstStep(r),
+							destination: r.vnum,
+							destinationZone: r.zoneVnum
+						};
+						var key = [exit.start, exit.destination].sort().join("->");
+						exits[key] = exit;
+					});
+				}
 			});
 			return exits;
 		}, _.identity),
