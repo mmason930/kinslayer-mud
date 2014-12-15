@@ -26,7 +26,7 @@
 					});
 				}
 			});
-			return exits;
+			return _.values(exits);
 		}, _.identity),
 
 		getRoomsInZone: _.memoize(function(zone) {
