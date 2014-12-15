@@ -1937,7 +1937,7 @@ void perform_violence( void )
 		wielded = GET_EQ( ch, WEAR_WIELD );
 
 		hitClock.turnOn();
-		if ( wielded && IS_OBJ_STAT( wielded, ITEM_CHAIN ) )
+		if ( wielded && (IS_OBJ_STAT( wielded, ITEM_CHAIN )  || GET_OBJ_VAL( wielded, 0 ) == WEAPON_CHAIN) )
 			ch->HitAllFighting();
 		else
 		{
