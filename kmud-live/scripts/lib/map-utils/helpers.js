@@ -13,8 +13,8 @@
 			var exits = {};
 			jsrooms.forEach(function(jsroom) {
 				if (jsroom.neighbors) {
-					jsroom.neighbors.map(function(r) {
-						global.alder.send("DEBUG: " + r);
+					jsroom.neighbors.forEach(function(r) {
+						if (!r) return;
 						var exit = {
 							start: jsroom.vnum,
 							dir: jsroom.firstStep(r),
