@@ -12,7 +12,7 @@ function getMapInfo(userId) {
 	var response = {
 		method: "Load Help File",
 		subroutine: "Get Map",
-		zone: room.zoneVnum,
+		zone: { vnum: room.zoneVnum, name: room.zoneName },
 		rooms: jsrooms.map(MapUtil.packageRoom),
 		exits: MapUtil.getExitsInZone(room.zoneVnum)
 	};
