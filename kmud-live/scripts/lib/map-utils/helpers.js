@@ -14,6 +14,7 @@
 			jsrooms.forEach(function(jsroom) {
 				if (jsroom.neighbors) {
 					jsroom.neighbors.map(function(r) {
+						global.alder.send("DEBUG: " + r);
 						var exit = {
 							start: jsroom.vnum,
 							dir: jsroom.firstStep(r),
