@@ -10,7 +10,8 @@ function getMapInfo(userId) {
 	var room = player.room;
 	var jsrooms = MapUtil.getRoomsInZone(room.zoneVnum);
 	var response = {
-		method: "Get Map",
+		method: "Load Help File",
+		subroutine: "Get Map",
 		zone: room.zoneVnum,
 		rooms: jsrooms,
 		exits: MapUtil.getExitsInZone(room.zoneVnum)
