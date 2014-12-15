@@ -32,4 +32,5 @@ function getPlayerById(userId) {
 		player = getCurrentPlayers().filter(function(p) { p.id == userId; })[0];
 		global.playersByUserId[userId] = player;
 	}
+	return player;
 }
