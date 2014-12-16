@@ -5,8 +5,9 @@ JSCharacter.prototype.setSpecTitle = function(objTitle) {
 	getCharCols(this);
 	this.remSpecTitle(false);
 	this.send(cyn+bld+"You've selected the "+objTitle.type+" title, "+objTitle.title+"."+nrm);
-	var query = sqlQuery("UPDATE userTitle SET selected="+sqlEsc(1)+" WHERE user_id="+this.id+" AND title='"+sqlEsc(objTitle.title)+"' && type='"+sqlEsc(objTitle.type)+"' && category='"+sqlEsc(objTitle.category)+"' && achievement_vnum='"+sqlEsc(objTitle.achVnum)+"';");
-	global.alder.send(query);
+	var sql = "UPDATE userTitle SET selected=" + sqlEsc(1) + " WHERE user_id=" + this.id + " AND title='" + sqlEsc(objTitle.title) + "' && type='" + sqlEsc(objTitle.type) + "' && category='" + sqlEsc(objTitle.category) + "' && achievement_vnum='" + sqlEsc(objTitle.achVnum) + "';";
+	global.alder.send(sql);
+	var query = sqlQuery(sql);
 	//Monitoring (Alder)
 	var alder = global.alder;
 	if ( alder ) {
