@@ -64,7 +64,7 @@ var script20837 = function(self, actor, here, args, extra) {
             }
         }
         var times_run = getSval(room, 20837, 'greenStoneTime');
-        times_run = (times_run == 'undefined' || times_run == 'NaN') ? 0 : times_run;
+        times_run = typeof(times_run) != 'number' ? 0 : times_run;
         here.echo(times_run);
         if (times_run > 5 && (times_run >= 10 || random(1, 100) <= 5)) {
             for (var _autoKey in room.people) {
