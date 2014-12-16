@@ -1,4 +1,4 @@
-﻿var MapUtil = (function() {
+﻿MapUtil = (function() {
 	return {
 		packageRoom: function(jsroom) {
 			return {
