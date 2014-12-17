@@ -55,7 +55,7 @@ var script4001 = function(self, actor, here, args, extra) {
 	vict = ch.faceoff(vict);
 	var offense = random(0, skill);
 	var defense = vict.level/3;
-	var damage = 10;
+	var damage = random(7, 13)*vict.absorb/100;
 	if( defense > offense ) {
 		act(ch.green(constants.CL_OFF)+"You miss your kick at $N's groin, much to $S relief..."+ch.normal(constants.CL_OFF), true, ch, null, vict, constants.TO_CHAR);
 		act("$n misses a kick at $N's groin, much to $N's relief...", true, ch, null, vict, constants.TO_NOTVICT);

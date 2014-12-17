@@ -2076,7 +2076,7 @@ int Character::ShieldBlockOffenseRoll()
 	if( AFF_FLAGGED(this, AFF_SHIELD_BLOCK) )
 		for(affected_type *aff = this->affected; aff; aff = aff->next)
 			if( aff->bitvector == AFF_SHIELD_BLOCK )
-				off -= 10 * aff->modifier;
+				off -= 12 * aff->modifier;
 
 	return off;
 }
@@ -2156,7 +2156,7 @@ ACMD(do_shieldblock)
 		ch->ShieldBlock = false;
 		Act("You lower your shield, having failed to anticipate an attack.", FALSE, ch, NULL, vict, TO_CHAR);
 		Act("$n lowers $s shield, becoming vulnerable once more.", FALSE, ch, NULL, vict, TO_NOTVICT);
-		WAIT_STATE(ch, PULSE_VIOLENCE / 2);
+		WAIT_STATE(ch, PULSE_VIOLENCE*2 / 3);
 	}
 }
 
