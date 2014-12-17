@@ -1,4 +1,5 @@
 ﻿MapUtil = (function() {
+	// functions for map tool
 	return {
 		packageRoom: function(jsroom) {
 			return {
