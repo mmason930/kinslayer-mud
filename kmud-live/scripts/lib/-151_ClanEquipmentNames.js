@@ -156,13 +156,13 @@ function initClanEquipment()
 	clanEquipment.baseItems[14][constants.CLAN_GHOBHLIN] = "a pair of scaled steel leggings|pair scaled steel leggings|A pair of scaled steel leggings lies here.";
 	clanEquipment.baseItems[35][constants.CLAN_GHOBHLIN] = "a pair of boots studded in steel|pair boots studded steel|A pair of steel studded leather boots lies on the ground.";
 	//abs
-	clanEquipment.baseItems[16][constants.CLAN_GHOBHLIN] = "a fearsome silver warmask with horns of jet|fearsome silver war mask warmask horns jet|A black horned silver mask lies here, flecked with dried blood.";
-	clanEquipment.baseItems[17][constants.CLAN_GHOBHLIN] = "a sinuous black steel cuirass with silver clasps|sinuous black steel cuirass silver clasps|A sinuous cuirass of blackened steel lies here face up.";
-	clanEquipment.baseItems[18][constants.CLAN_GHOBHLIN] = "a black pair of wickedly spiked pauldrons|black pair wickedly spiked pauldrons|A pair of spiked pauldrons lies off to the side.";
-	clanEquipment.baseItems[19][constants.CLAN_GHOBHLIN] = "a pair of black bracers of overlapping steel plates|pair black bracers overlapping steel plates|A pair of sleeves covered with a series of overlapping steel plates lies here.";
-	clanEquipment.baseItems[20][constants.CLAN_GHOBHLIN] = "a length of tainted black chain|length tainted black chain belt|A length of tainted black chain lies in a coil.";
-	clanEquipment.baseItems[21][constants.CLAN_GHOBHLIN] = "a black pair of clawed war gauntlets|black pair wickedly clawed war gauntlets|A pair of wickedly clawed gauntlets lies on the ground.";
-	clanEquipment.baseItems[22][constants.CLAN_GHOBHLIN] = "a black pair of wickedly spiked greaves|black pair wickedly spiked greaves|A pair of blackened steel greaves lies on the ground, spikes protruding towards the sky.";
+	clanEquipment.baseItems[36][constants.CLAN_GHOBHLIN] = "a fearsome silver warmask with horns of jet|fearsome silver war mask warmask horns jet|A black horned silver mask lies here, flecked with dried blood.";
+	clanEquipment.baseItems[37][constants.CLAN_GHOBHLIN] = "a sinuous black steel cuirass with silver clasps|sinuous black steel cuirass silver clasps|A sinuous cuirass of blackened steel lies here face up.";
+	clanEquipment.baseItems[38][constants.CLAN_GHOBHLIN] = "a black pair of wickedly spiked pauldrons|black pair wickedly spiked pauldrons|A pair of spiked pauldrons lies off to the side.";
+	clanEquipment.baseItems[42][constants.CLAN_GHOBHLIN] = "a pair of black bracers of overlapping steel plates|pair black bracers overlapping steel plates|A pair of sleeves covered with a series of overlapping steel plates lies here.";
+	clanEquipment.baseItems[39][constants.CLAN_GHOBHLIN] = "a length of tainted black chain|length tainted black chain belt|A length of tainted black chain lies in a coil.";
+	clanEquipment.baseItems[40][constants.CLAN_GHOBHLIN] = "a black pair of clawed war gauntlets|black pair wickedly clawed war gauntlets|A pair of wickedly clawed gauntlets lies on the ground.";
+	clanEquipment.baseItems[41][constants.CLAN_GHOBHLIN] = "a black pair of wickedly spiked greaves|black pair wickedly spiked greaves|A pair of blackened steel greaves lies on the ground, spikes protruding towards the sky.";
 	clanEquipment.baseItems[23][constants.CLAN_GHOBHLIN] = "a pair of gleaming black war boots|pair gleaming black war boots|A pair of boots of the blackest steal lies here, gleaming in the light.";
 	
 	//Blademasters
