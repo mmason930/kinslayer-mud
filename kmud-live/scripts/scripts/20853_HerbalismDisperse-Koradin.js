@@ -33,7 +33,9 @@ var script20853 = function(self, actor, here, args, extra) {
 	for (i = 0; i < 150; i++)
 	{
 		cur_room = getRandomRoom();
-		if (cur_room.countJS(20951) < 1)
+        if (!isZoneOpen(cur_room.vnum)) {
+            i--;
+        } else if (cur_room.countJS(20951) < 1)
 		{
 			if (cur_room.sector == road || cur_room.sector == field || cur_room.sector == forest || cur_room.sector == hills || cur_room.sector == mount)
 			{
