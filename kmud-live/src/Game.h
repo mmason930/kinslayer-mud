@@ -6,6 +6,7 @@
 #include <functional>
 
 #include "PlayerPortalServer.h"
+#include "utils/ThreadedLogFile.h"
 
 //Eventually, we should store all globals in this class.
 class Game
@@ -21,6 +22,7 @@ protected:
 	int bootSubversionRevision; //The revision of the local filesystem at the time of boot.
 	int bootScriptsDirectorySubversionRevision;//The revision of the 'kmud-live/scripts' directory at the time of boot.
 
+	ThreadedLogFile lagLogFile;
 public:
 
 	Game();
@@ -54,6 +56,10 @@ public:
 	int getPlayerPortalPort();
 	unsigned int getNumberOfPlayerPortalDescriptors();
 	void sendToAll(std::function<std::string(class Character *target)>);
+
+	void setupThreadedLogFiles();
+
+	void logLag(const std::string &message);
 };
 
 extern class Game *game;

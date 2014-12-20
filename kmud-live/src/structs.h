@@ -741,6 +741,7 @@ class Clock
 		unsigned long long start;
 		unsigned long long clocks;
 		unsigned long long tics;
+		unsigned long long lastClocks;
 		bool on;
 	public:
 		Clock()
@@ -753,20 +754,27 @@ class Clock
 			on = onstart;
 			clocks = 0;
 			tics = 0;
+			lastClocks = 0;
 		}
-		unsigned long long getClocks()
+		unsigned long long getClocks() const
 		{
 			return clocks;
 		}
-		float getSeconds()
+		float getSeconds() const
 		{
             return (float) ( (float)this->getClocks() / (float)1000 );
 		}
-		unsigned long long getTics()
+		unsigned long long getTics() const
 		{
 			return tics;
 		}
-		void print()
+
+		unsigned long long getLastClocks() const
+		{
+			return lastClocks;
+		}
+
+		void print() const
 		{
 			float t = getTics();
 			float c = getClocks();
@@ -789,7 +797,9 @@ class Clock
 		{
 			if ( on )
 			{
-				clocks += ( Clock::getTick() - start );
+				auto duration = ( Clock::getTick() - start );
+				clocks += duration;
+				lastClocks = duration;
 				on = false;
 				start = 0;
 			}

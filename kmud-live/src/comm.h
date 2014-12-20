@@ -92,7 +92,7 @@ public:
 	void startClock();
 	void stopClock( const std::string &sRoutineName );
 	LagRoutineEntry getRoutineEntry( const std::string &sRoutineName );
-
+	unsigned long long getLastClocks() const;
 
 };
 

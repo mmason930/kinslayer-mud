@@ -561,6 +561,10 @@ time_t time(time_t *tloc);
 int unlink(const char *path);
 #endif
 
+#ifdef NEED_GETTIMEOFDAY_PROTO
+
+int gettimeofday(struct timeval *tp, void * );
+#endif
 
 /* Function prototypes that are only used in comm.c and some of the utils */
 
@@ -614,11 +618,6 @@ int getrlimit(int resource, struct rlimit *rlp);
 #ifdef NEED_GETSOCKNAME_PROTO
 
 int getsockname(socket_t s, struct sockaddr *name, int *namelen);
-#endif
-
-#ifdef NEED_GETTIMEOFDAY_PROTO
-
-int gettimeofday(struct timeval *tp, void * );
 #endif
 
 #ifdef NEED_HTONL_PROTO

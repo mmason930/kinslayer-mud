@@ -16,11 +16,15 @@ Game::Game()
 	this->version = "KinslayerMUD, version 2.0";
 	this->playerLogsDirectory = "plrlogs/";
 	this->defaultDirectory = "lib";
+
+	setupThreadedLogFiles();
 }
 
 Game::~Game()
 {
 	cleanupPlayerPortalServer();
+
+	lagLogFile.shutdown();
 }
 
 void Game::setupPlayerPortalServer(const int port)
@@ -210,4 +214,15 @@ void Game::sendToAll(std::function<std::string(Character *target)> messageFuncti
 			target->send(messageFunction(target).c_str());
 		}
 	}
+}
+
+void Game::setupThreadedLogFiles()
+{
+	lagLogFile.setFilePath("logs/benchmarks/benchmark.%Y%m%d");
+	lagLogFile.begin();
+}
+
+void Game::logLag(const std::string &message)
+{
+	lagLogFile.addMessage(message);
 }

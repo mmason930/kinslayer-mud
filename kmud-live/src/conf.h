@@ -235,7 +235,9 @@
 #undef NEED_GETSOCKNAME_PROTO
 
 /* Check for a prototype to gettimeofday. */
-#undef NEED_GETTIMEOFDAY_PROTO
+#if (defined WIN32 || defined CIRCLE_MACINTOSH)
+#define NEED_GETTIMEOFDAY_PROTO
+#endif
 
 /* Check for a prototype to htonl. */
 #undef NEED_HTONL_PROTO

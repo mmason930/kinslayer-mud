@@ -172,6 +172,7 @@
     <ClCompile Include="src\UserEmailEditor.cpp" />
     <ClCompile Include="src\UserLogoutType.cpp" />
     <ClCompile Include="src\UserType.cpp" />
+    <ClCompile Include="src\utils\ThreadedLogFile.cpp" />
     <ClCompile Include="src\weather.cpp" />
     <ClCompile Include="src\weave.cpp" />
     <ClCompile Include="src\WebSocketClientHeader.cpp" />
@@ -275,6 +276,8 @@
     <ClInclude Include="src\UserLogoutType.h" />
     <ClInclude Include="src\UserMacro.h" />
     <ClInclude Include="src\UserType.h" />
+    <ClInclude Include="src\utils\ThreadedLogFile.h" />
+    <ClInclude Include="src\utils\ThreadedLogFileEntry.h" />
     <ClInclude Include="src\weather.h" />
     <ClInclude Include="src\weaves.h" />
     <ClInclude Include="src\WebSocketClientHeader.h" />

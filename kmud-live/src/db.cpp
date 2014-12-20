@@ -401,7 +401,7 @@ void bootWorld(void)
 
 	objectMoveLoggerThread = new std::thread(&ObjectMoveLogger::threadHandler, &objectMoveLogger);
 	mobLoadLoggerThread = new std::thread(&MobLoadLogger::threadHandler, &mobLoadLogger);
-
+	
 	Log("Renumbering rooms.");
 	renum_world();
 
