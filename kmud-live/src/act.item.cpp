@@ -762,11 +762,7 @@ CommandHandler  do_get  = DEFINE_COMMAND
 	Object *cont;
 	Character *tmp_char;
 
-	Log("Argument `%s`", argument);
-
 	TwoArguments( argument, arg1, arg2 );
-
-	Log("Arg1 `%s`, arg2 `%s`", arg1, arg2);
 
 	if ( IS_CARRYING_N( ch ) >= CAN_CARRY_N( ch ) )
 		ch->send( "Your arms are already full!\r\n" );
@@ -778,8 +774,6 @@ CommandHandler  do_get  = DEFINE_COMMAND
 	{
 		originalArg1 = arg1;
 		cont_dotmode = find_all_dots( arg2 );
-
-		Log("Dot Mode: %d Arg2 `%s`", cont_dotmode, arg2);
 
 		if ( cont_dotmode == FIND_INDIV )
 		{
@@ -797,14 +791,12 @@ CommandHandler  do_get  = DEFINE_COMMAND
 
 		else
 		{
-			Log("Processing All Dot.");
 			if ( cont_dotmode == FIND_ALLDOT && !*arg2 )
 			{
 				ch->send( "Get from all of what?\r\n" );
 				return ;
 			}
 
-			Log("About to go through inventory. arg1 `%s`", arg1);
 			for ( cont = ch->carrying; cont; cont = cont->next_content )
 				if ( CAN_SEE_OBJ( ch, cont ) && ( cont_dotmode == FIND_ALL || isname( arg2, cont->getName() ) ) )
 				{
@@ -821,12 +813,10 @@ CommandHandler  do_get  = DEFINE_COMMAND
 					}
 				}
 
-				Log("About to go through room contents. Arg1 `%s`");
 			for ( cont = ch->in_room->contents; cont; cont = cont->next_content )
 			{
 				if ( ( cont_dotmode == FIND_ALL || isname( arg2, cont->getName() ) ) )
 				{
-					Log("Passed test with item on ground: %s", cont->short_description);
 					if (  cont ->getType() == ITEM_CONTAINER )
 					{
 						get_from_container( ch, cont, arg1, FIND_OBJ_ROOM );
@@ -840,8 +830,6 @@ CommandHandler  do_get  = DEFINE_COMMAND
 						found = 1;
 					}
 				}
-				else
-					Log("Failed test with item on ground. Item: %s", cont->short_description);
 			}
 
 			if ( !found )

@@ -269,7 +269,7 @@ flusspferd::object makeConstants()
 	o.set_property("ITEM_NODROP", flusspferd::value(ITEM_NODROP)); // Item is cursed: can't drop
 	o.set_property("ITEM_WARD", flusspferd::value(ITEM_WARD)); // Item is weapon warded
 	o.set_property("ITEM_NOSELL", flusspferd::value(ITEM_NOSELL)); // Shopkeepers won't touch it
-	o.set_property("ITEM_CHAIN", flusspferd::value(ITEM_CHAIN)); // Item hits anyone fighting you
+	//o.set_property("ITEM_CHAIN", flusspferd::value(ITEM_CHAIN)); // Removed 2014-12-20 by Galnor. See https://app.asana.com/0/14751274030189/14855742503356
 	o.set_property("ITEM_POISON", flusspferd::value(ITEM_POISON)); // Item randomly poisons
 	o.set_property("ITEM_CHEST", flusspferd::value(ITEM_CHEST)); // Item randomly poisons
 	o.set_property("ITEM_TWO_HANDED", flusspferd::value(ITEM_TWO_HANDED)); // Item can be worn with two hands

@@ -122,7 +122,7 @@
     <ClCompile Include="src\dbutils\QueryUtil.cpp" />
     <ClCompile Include="src\Descriptor.cpp" />
     <ClCompile Include="src\dg_event.cpp" />
-    <ClCompile Include="src\editor-interface\EditorInterface.cpp" />
+    <ClCompile Include="src\editor-interface\EditorInterfaceBase.cpp" />
     <ClCompile Include="src\editor-interface\EditorInterfaceInstance.cpp" />
     <ClCompile Include="src\editor-interface\EditorInterfaceMenu.cpp" />
     <ClCompile Include="src\EntityType.cpp" />
@@ -139,6 +139,10 @@
     <ClCompile Include="src\guilds\GuildEditorInterface.cpp" />
     <ClCompile Include="src\guilds\GuildJoinApplication.cpp" />
     <ClCompile Include="src\guilds\GuildJoinApplicationStatus.cpp" />
+    <ClCompile Include="src\guilds\GuildPrivilege.cpp" />
+    <ClCompile Include="src\guilds\GuildRank.cpp" />
+    <ClCompile Include="src\guilds\GuildRankRole.cpp" />
+    <ClCompile Include="src\guilds\GuildRankStatus.cpp" />
     <ClCompile Include="src\guilds\GuildStatus.cpp" />
     <ClCompile Include="src\guilds\GuildUtil.cpp" />
     <ClCompile Include="src\guilds\UserGuild.cpp" />
@@ -245,6 +249,7 @@
     <ClInclude Include="src\dbutils\StoreSQLBuilder.h" />
     <ClInclude Include="src\Descriptor.h" />
     <ClInclude Include="src\dg_event.h" />
+    <ClInclude Include="src\editor-interface\EditorInterfaceBase.h" />
     <ClInclude Include="src\editor-interface\EditorInterface.h" />
     <ClInclude Include="src\editor-interface\EditorInterfaceData.h" />
     <ClInclude Include="src\editor-interface\EditorInterfaceInstance.h" />
@@ -265,6 +270,10 @@
     <ClInclude Include="src\guilds\GuildEditorInterfaceData.h" />
     <ClInclude Include="src\guilds\GuildJoinApplication.h" />
     <ClInclude Include="src\guilds\GuildJoinApplicationStatus.h" />
+    <ClInclude Include="src\guilds\GuildPrivilege.h" />
+    <ClInclude Include="src\guilds\GuildRank.h" />
+    <ClInclude Include="src\guilds\GuildRankRole.h" />
+    <ClInclude Include="src\guilds\GuildRankStatus.h" />
     <ClInclude Include="src\guilds\GuildStatus.h" />
     <ClInclude Include="src\guilds\GuildUtil.h" />
     <ClInclude Include="src\guilds\UserGuild.h" />

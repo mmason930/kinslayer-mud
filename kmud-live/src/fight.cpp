@@ -1681,21 +1681,6 @@ void Character::GainNoQuit( Character *victim )
 		affect_to_char( this, &af );
 }
 
-bool Character::shouldBlockEngagementDueToNumberFighting(Character *victim, bool displayMessage)
-{
-	if ( (	( victim->NumFighting() >= 4 && !IS_NPC( this ) ) ||
-			( ROOM_FLAGGED( this->in_room, ROOM_TUNNEL ) && victim->NumFighting() >= CONFIG_TUNNEL_SIZE )
-		)
-		&& FIGHTING( this ) != victim && FIGHTING( victim ) != this )
-	{
-		if(displayMessage)
-			send( "You'd probably get killed before you got there, it is so crowded!\r\n" );
-		return true;
-	}
-
-	return false;
-}
-
 int hit( Character * ch, Character * victim, int type )
 {//TODO: Rewrite
 	Object * wielded = GET_EQ( ch, WEAR_WIELD );
@@ -1706,8 +1691,13 @@ int hit( Character * ch, Character * victim, int type )
 	if ( !ch || !victim )
 		return 0;
 
-	if(ch->shouldBlockEngagementDueToNumberFighting(victim, true))
+	if ( ( ( victim->NumFighting() >= 4 && !IS_NPC( ch ) ) ||
+	        ( ROOM_FLAGGED( ch->in_room, ROOM_TUNNEL ) && victim->NumFighting() >= CONFIG_TUNNEL_SIZE ) )
+	        && FIGHTING( ch ) != victim && FIGHTING( victim ) != ch )
+	{
+		ch->send( "You'd probably get killed before you got there, it is so crowded!\r\n" );
 		return 0;
+	}
 
 	if ( IS_NPC( victim ) && GET_RACE( victim ) == GET_RACE( ch ) )
 	{
@@ -1945,7 +1935,7 @@ void perform_violence( void )
 		wielded = GET_EQ( ch, WEAR_WIELD );
 
 		hitClock.turnOn();
-		if ( wielded && (IS_OBJ_STAT( wielded, ITEM_CHAIN )  || GET_OBJ_VAL( wielded, 0 ) == WEAPON_CHAIN) )
+		if ( wielded && IS_CHAIN(wielded) )
 			ch->HitAllFighting();
 		else
 		{

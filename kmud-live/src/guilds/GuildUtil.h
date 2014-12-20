@@ -15,6 +15,10 @@ class UserGuild;
 class UserGuildStatus;
 class GuildJoinApplication;
 class GuildJoinApplicationStatus;
+class GuildRank;
+class GuildRankRole;
+class GuildRankStatus;
+class GuildPrivilege;
 
 typedef void *(commandFunction)(Character *, char *, int, int);
 
@@ -24,16 +28,26 @@ private:
 	static GuildUtil *self;
 
 	std::map<int, Guild *> guildMap;
+
 	std::map<int, GuildApplication *> guildApplicationMap;
+
 	std::map<int, UserGuild *> userGuildMap;
 	std::map<int, std::vector<UserGuild *> * > userIdToUserGuildsMap;
 	std::map<int, std::vector<UserGuild *> * > guildIdToUserGuildsMap;
+
 	std::map<int, GuildApplicationSignature *> guildApplicationSignatureMap;
 	std::map<int, std::vector<GuildApplicationSignature *> * > userIdToGuildApplicationSignaturesMap;
 	std::map<int, std::vector<GuildApplicationSignature *> * > guildApplicationIdToGuildApplicationSignaturesMap;
+
 	std::map<int, GuildJoinApplication*> guildJoinApplicationMap;
 	std::map<int, std::vector<GuildJoinApplication*> *> userIdToGuildJoinApplicationsMap;
 	std::map<int, std::vector<GuildJoinApplication *> *> guildIdToGuildJoinApplicationsMap;
+
+	std::map<int, GuildRank*> guildRankMap;
+	std::map<int, std::vector<GuildRank*> *> guildIdToGuildRanksMap;
+
+	std::map<int, GuildRankRole*> guildRankRoleMap;
+	std::map<int, std::vector<GuildRankRole*> *> guildRankIdToGuildRankRolesMap;
 
 	GuildUtil();
 	~GuildUtil();
@@ -75,6 +89,7 @@ public:
 
 	std::vector<UserGuild *> getUserGuildsByUserId(int userId, const std::vector<UserGuildStatus*> userGuildStatuses = std::vector<UserGuildStatus*>()) const;
 	std::vector<UserGuild *> getActiveUserGuildsByUserId(int userId) const;
+	std::vector<UserGuild *> getActiveUserGuildsByGuildId(int guildId) const;
 	void addCharacterToGuild(sql::Connection connection, int guildId, int userId, bool announceToPlayer);
 
 	GuildApplicationSignature *getGuildApplicationSignature(const sql::Row row) const;
@@ -99,6 +114,25 @@ public:
 	std::vector<GuildJoinApplication *> getGuildJoinApplications(const boost::optional<int> &userId, const boost::optional<int> &guildId, const std::vector<GuildJoinApplicationStatus *> &statuses = std::vector<GuildJoinApplicationStatus *>());
 	GuildJoinApplication *submitGuildJoinApplication(sql::Connection connection, int userId, int guildId, const std::string &messageToGuild);
 	void removeGuildJoinApplication(sql::Connection connection, int removedByUserId, int guildJoinApplicationId);
+
+	//Guild Ranks
+	void loadGuildRanksFromDatabase(sql::Connection connection);
+	GuildRank *getGuildRank(const sql::Row row) const;
+	void putGuildRank(sql::Connection connection, GuildRank *guildRank) const;
+	GuildRank *getGuildRank(int guildRankId) const;
+	std::vector<GuildRank *> getGuildRanks(const boost::optional<int> guildId, const std::vector<GuildRankStatus*> &statuses = std::vector<GuildRankStatus*>()) const;
+	void removeGuildRank(sql::Connection connection, int userId, int guildRankId);
+	void applyChangesToGuildRank(sql::Connection connection, GuildRank *guildRank, const std::map<int, GuildRankRole*> &guildPrivilegeIdToGuildRankRoleMap);
+	void addGuildRank(sql::Connection connection, GuildRank *guildRank);
+
+	//Guild Rank Roles
+	void loadGuildRankRolesFromDatabase(sql::Connection connection);
+	GuildRankRole *getGuildRankRole(const sql::Row row) const;
+	void putGuildRankRole(sql::Connection connection, GuildRankRole *guildRankRole) const;
+	std::vector<GuildRankRole *> getGuildRankRoles(boost::optional<int> guildRankId) const;
+	std::map<int, GuildRankRole*> getGuildPrivilegeIdToGuildRankRoleMap(int guildRankId) const;
+
+	bool hasPrivilege(int guildId, int userId, GuildPrivilege *guildPrivilege) const;
 
 	std::vector<GuildApplication *> getGuildApplicationsRequiringReview() const;
 	std::vector<GuildApplication *> getGuildApplications(const boost::optional<int> &userId = boost::optional<int>(), const std::vector<GuildApplicationStatus *> statuses = std::vector<GuildApplicationStatus*>()) const;

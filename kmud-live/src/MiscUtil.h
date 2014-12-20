@@ -93,6 +93,25 @@ public:
 		
 		container->push_back(value);
 	}
+
+	template<typename KeyType, typename ValueType>
+	static void freeMapValues(std::map<KeyType, ValueType> &map)
+	{
+		for(auto iter : map)
+			delete iter.second;
+		map.clear();
+	}
+
+	template<typename KeyType, typename ValueType>
+	static std::vector<ValueType> mapValuesToVector(const std::map<KeyType, ValueType> &map)
+	{
+		std::vector<ValueType> v;
+
+		for(auto iter : map)
+			v.push_back(iter.second);
+
+		return v;
+	}
 };
 
 #endif

@@ -12,6 +12,11 @@ class EditorInterfaceInstance;
 
 typedef std::function<boost::optional<std::string>(const std::string &)> ValidationFunction;
 
+#define DEFINE_EI_PRINT_OPERATOR	[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+#define DEFINE_EI_PARSE_OPERATOR	[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+#define DEFINE_EI_PRE_REQ_OPERATOR	[=](EditorInterfaceInstance *i) -> boost::optional<std::string>
+#define DEFINE_EI_CLEANUP_OPERATOR	[=](EditorInterfaceInstance *i) -> void
+
 class EditorInterfaceMenu
 {
 private:

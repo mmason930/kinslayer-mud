@@ -1,3 +1,6 @@
+#ifndef SCREEN_H
+#define SCREEN_H
+
 /* ************************************************************************
 *   File: screen.h                                      Part of CircleMUD *
 *  Usage: header file with ANSI color codes for online color              *
@@ -51,18 +54,4 @@ const int CL_COMPLETE = 3;
 #define QCYN CCCYN(ch,C_SPR)
 #define QWHT CCWHT(ch,C_SPR)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif

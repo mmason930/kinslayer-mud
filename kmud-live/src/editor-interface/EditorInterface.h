@@ -8,40 +8,35 @@
 
 typedef std::function<boost::optional<std::string>(const std::string &)> ValidationFunction;
 
-#include "EditorInterfaceMenu.h"
+#include "../conf.h"
+#include "../sysdep.h"
+#include "../structs.h"
+#include "../screen.h"
+#include "../utils.h"
 #include "EditorInterfaceInstance.h"
+#include "EditorInterfaceMenu.h"
 #include "EditorInterfaceData.h"
 
-class EditorInterface
+#include "EditorInterfaceBase.h"
+
+template <typename DataType>
+class EditorInterface : public EditorInterfaceBase
 {
 private:
 protected:
-	std::list< EditorInterfaceMenu * > editorInterfaceMenues;
-	EditorInterfaceMenu *mainMenu;
 public:
 
-	EditorInterface();
+	DataType *getData(EditorInterfaceInstance *i)
+	{
+		return (DataType*)i->getData();
+	}
 
-	void setMainMenu(EditorInterfaceMenu *editorInterfaceMenu);
-	EditorInterfaceMenu *getMainMenu();
+	EditorInterfaceData *createData() const
+	{
+		return new DataType();
+	}
 
-	EditorInterfaceMenu *addMenu(EditorInterfaceMenu *menu);
-	EditorInterfaceMenu *addNewMenu();
-
-	void setupNewInstance(Character *ch) const;
-
-	virtual EditorInterfaceData *createData() const = 0;
-
-	EditorInterfaceMenu *createValueInputMenu(
-		const std::string &message,
-		const std::function<boost::optional<std::string>(const std::string &)> &validationOperation,
-		const std::function<void(EditorInterfaceInstance *i)> &dataSetOperation
-	);
-	
-	ValidationFunction validationChain(const std::initializer_list<ValidationFunction> &validationList);
-	ValidationFunction inputLengthValidator(const int minimumLength, const int maximumLength, const std::string &errorMessage);
-	ValidationFunction integerValidator();
-	ValidationFunction integerValidator(const std::string &errorMessage);
+	EditorInterface() : EditorInterfaceBase() {}
 };
 
 #endif

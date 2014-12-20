@@ -1,36 +1,45 @@
-#include "EditorInterface.h"
+#include "../conf.h"
+#include "../sysdep.h"
 
+#include "../structs.h"
+#include "../screen.h"
 #include "../utils.h"
 
-EditorInterface::EditorInterface()
+#include "EditorInterfaceBase.h"
+#include "EditorInterfaceMenu.h"
+#include "EditorInterfaceData.h"
+#include "EditorInterfaceInstance.h"
+#include "EditorInterface.h"
+
+EditorInterfaceBase::EditorInterfaceBase()
 {
 	mainMenu = nullptr;
 }
 
-void EditorInterface::setMainMenu(EditorInterfaceMenu *editorInterfaceMenu)
+void EditorInterfaceBase::setMainMenu(EditorInterfaceMenu *editorInterfaceMenu)
 {
 	this->mainMenu = editorInterfaceMenu;
 }
 
-EditorInterfaceMenu *EditorInterface::getMainMenu()
+EditorInterfaceMenu *EditorInterfaceBase::getMainMenu()
 {
 	return mainMenu;
 }
 
-EditorInterfaceMenu *EditorInterface::addMenu(EditorInterfaceMenu *menu)
+EditorInterfaceMenu *EditorInterfaceBase::addMenu(EditorInterfaceMenu *menu)
 {
 	editorInterfaceMenues.push_back(menu);
 	return menu;
 }
 
-EditorInterfaceMenu *EditorInterface::addNewMenu()
+EditorInterfaceMenu *EditorInterfaceBase::addNewMenu()
 {
 	EditorInterfaceMenu *menu = new EditorInterfaceMenu();
 	addMenu(menu);
 	return menu;
 }
 
-void EditorInterface::setupNewInstance(Character *ch) const
+void EditorInterfaceBase::setupNewInstance(Character *ch) const
 {
 	if(!mainMenu)
 	{
@@ -47,8 +56,7 @@ void EditorInterface::setupNewInstance(Character *ch) const
 		editorInterfaceInstance->destroy();
 }
 
-
-EditorInterfaceMenu *EditorInterface::createValueInputMenu(
+EditorInterfaceMenu *EditorInterfaceBase::createValueInputMenu(
 		const std::string &message,
 		const std::function<boost::optional<std::string>(const std::string &)> &validationOperation,
 		const std::function<void(EditorInterfaceInstance *i)> &dataSetOperation
@@ -80,7 +88,7 @@ EditorInterfaceMenu *EditorInterface::createValueInputMenu(
 	return menu;
 }
 
-ValidationFunction EditorInterface::validationChain(const std::initializer_list<ValidationFunction> &validationList)
+ValidationFunction EditorInterfaceBase::validationChain(const std::initializer_list<ValidationFunction> &validationList)
 {
 	return [=](const std::string &input) -> boost::optional<std::string>
 	{
@@ -96,7 +104,7 @@ ValidationFunction EditorInterface::validationChain(const std::initializer_list<
 	};
 }
 
-ValidationFunction EditorInterface::inputLengthValidator(const int minimumLength, const int maximumLength, const std::string &errorMessage)
+ValidationFunction EditorInterfaceBase::inputLengthValidator(const int minimumLength, const int maximumLength, const std::string &errorMessage)
 {
 	return [=](const std::string &input)
 	{
@@ -104,12 +112,13 @@ ValidationFunction EditorInterface::inputLengthValidator(const int minimumLength
 		return length < minimumLength || length > maximumLength ? errorMessage : boost::optional<std::string>();
 	};
 }
-ValidationFunction EditorInterface::integerValidator()
+
+ValidationFunction EditorInterfaceBase::integerValidator()
 {
 	return integerValidator(std::string("Invalid input.\r\nPlease enter a valid integer: "));
 }
 
-ValidationFunction EditorInterface::integerValidator(const std::string &errorMessage)
+ValidationFunction EditorInterfaceBase::integerValidator(const std::string &errorMessage)
 {
 	return [=](const std::string &input) { return MiscUtil::isInt(input) ? boost::optional<std::string>() : errorMessage; };
 }

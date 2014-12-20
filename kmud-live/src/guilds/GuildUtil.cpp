@@ -19,6 +19,9 @@
 #include "UserGuild.h"
 #include "GuildJoinApplication.h"
 #include "GuildJoinApplicationStatus.h"
+#include "GuildRank.h"
+#include "GuildRankRole.h"
+#include "GuildRankStatus.h"
 
 GuildUtil *GuildUtil::self = nullptr;
 
@@ -35,22 +38,21 @@ GuildUtil::GuildUtil()
 
 GuildUtil::~GuildUtil()
 {
-	for(auto iter : guildMap)
-		delete iter.second;
-	for(auto iter : guildApplicationMap)
-		delete iter.second;
-	for(auto iter : userGuildMap)
-		delete iter.second;
-	for(auto userGuilds : userIdToUserGuildsMap)
-		delete userGuilds.second;
-	for(auto guildApplicationSignature : guildApplicationSignatureMap)
-		delete guildApplicationSignature.second;
-	for(auto guildApplicationSignatures : userIdToGuildApplicationSignaturesMap)
-		delete guildApplicationSignatures.second;
-	for(auto guildApplicationSignatures : guildApplicationIdToGuildApplicationSignaturesMap)
-		delete guildApplicationSignatures.second;
-	for(auto userGuilds : guildIdToUserGuildsMap)
-		delete userGuilds.second;
+	MiscUtil::freeMapValues(guildMap);
+	MiscUtil::freeMapValues(guildApplicationMap);
+	MiscUtil::freeMapValues(userGuildMap);
+	MiscUtil::freeMapValues(userIdToUserGuildsMap);
+	MiscUtil::freeMapValues(guildIdToUserGuildsMap);
+	MiscUtil::freeMapValues(guildApplicationSignatureMap);
+	MiscUtil::freeMapValues(userIdToGuildApplicationSignaturesMap);
+	MiscUtil::freeMapValues(guildApplicationIdToGuildApplicationSignaturesMap);
+	MiscUtil::freeMapValues(guildJoinApplicationMap);
+	MiscUtil::freeMapValues(userIdToGuildJoinApplicationsMap);
+	MiscUtil::freeMapValues(guildIdToGuildJoinApplicationsMap);
+	MiscUtil::freeMapValues(guildRankMap);
+	MiscUtil::freeMapValues(guildIdToGuildRanksMap);
+	MiscUtil::freeMapValues(guildRankRoleMap);
+	MiscUtil::freeMapValues(guildRankIdToGuildRankRolesMap);
 }
 
 GuildUtil *GuildUtil::get()
@@ -276,6 +278,7 @@ UserGuild *GuildUtil::getUserGuild(const sql::Row row) const
 	userGuild->setJoinedDatetime(DateTime(row.getTimestamp("joined_datetime")));
 	userGuild->setStatus(UserGuildStatus::getEnumByValue(row.getInt("status")));
 	userGuild->setStatusLastModifiedDatetime(DateTime(row.getTimestamp("status_last_modified_datetime")));
+	userGuild->setGuildRankId(row.getNullableInt("guild_rank_id"));
 
 	return userGuild;
 }
@@ -289,9 +292,10 @@ void GuildUtil::putUserGuild(sql::Connection connection, UserGuild *userGuild) c
 		->put("guild_id", userGuild->getGuildId())
 		->put("joined_datetime", userGuild->getJoinedDatetime())
 		->put("status", userGuild->getStatus())
-		->put("status_last_modified_datetime", userGuild->getStatusLastModifiedDatetime());
+		->put("status_last_modified_datetime", userGuild->getStatusLastModifiedDatetime())
+		->put("guild_rank_id", userGuild->getGuildRankId());
 
-	builder->execute(*userGuild);
+	builder->execute(userGuild);
 }
 
 void GuildUtil::loadUserGuildsFromDatabase(sql::Connection connection)
@@ -359,6 +363,27 @@ std::vector<UserGuild *> GuildUtil::getActiveUserGuildsByUserId(int userId) cons
 	}
 
 	return userGuilds;
+}
+
+std::vector<UserGuild *> GuildUtil::getActiveUserGuildsByGuildId(int guildId) const
+{
+	auto iter = userIdToUserGuildsMap.find(guildId);
+
+	if(iter == userIdToUserGuildsMap.end())
+		return {};
+
+	std::vector<UserGuild*> userGuildList = *(iter->second);
+	std::vector<UserGuild*> userGuildListFinal;
+
+	for(std::vector<UserGuild*>::const_iterator iter = userGuildList.begin();iter != userGuildList.end();++iter)
+	{
+		auto userGuild = (*iter);
+
+		if(userGuild->getStatus()->getIsActive())
+			userGuildListFinal.push_back(userGuild);
+	}
+
+	return userGuildListFinal;
 }
 
 void GuildUtil::removeUserFromGuild(sql::Connection connection, int userGuildId)
@@ -739,6 +764,219 @@ int GuildUtil::getNumberOfActiveGuildMembers(int guildId) const
 void GuildUtil::guildsCommandHandler(Character *ch, char *argument, int cmd, int subcmd)
 {
 	game->getGuildEditorInterface()->setupNewInstance(ch);
+}
+
+//Guild Ranks
+void GuildUtil::loadGuildRanksFromDatabase(sql::Connection connection)
+{
+	guildRankMap = QueryUtil::get()->loadDataObjectMapFromDatabase<GuildRank*, int>(
+		connection,
+		"guildRank",
+		[=](const sql::Row row) -> GuildRank* { return this->getGuildRank(row); },
+		[](GuildRank *guildRank) -> int { return guildRank->getId(); }
+	);
+
+	for(auto guildRankIter : guildRankMap)
+	{
+		auto guildRank = guildRankIter.second;
+
+		MiscUtil::pushToVectorMap(guildIdToGuildRanksMap, guildRank->getId(), guildRank);
+	}
+}
+
+GuildRank *GuildUtil::getGuildRank(const sql::Row row) const
+{
+	GuildRank *guildRank = new GuildRank();
+
+	guildRank->setId(row.getInt("id"));
+	guildRank->setGuildId(row.getInt("guild_id"));
+	guildRank->setName(row.getString("name"));
+	guildRank->setCreatedDatetime(DateTime(row.getTimestamp("created_datetime")));
+	guildRank->setStatus(GuildRankStatus::getEnumByValue(row.getInt("status")));
+	guildRank->setStatusLastModifiedDatetime(DateTime(row.getTimestamp("status_last_modified_datetime")));
+	guildRank->setStatusLastModifiedByUserId(row.getInt("status_last_modified_by_user_id"));
+
+	return guildRank;
+}
+
+void GuildUtil::putGuildRank(sql::Connection connection, GuildRank *guildRank) const
+{
+	StoreDataObjectSQLBuilder builder(connection, "guildRank");
+
+	builder.  put("guild_id", guildRank->getGuildId())
+			->put("name", guildRank->getName())
+			->put("created_datetime", guildRank->getCreatedDatetime())
+			->put("status", guildRank->getStatus())
+			->put("status_last_modified_datetime", guildRank->getStatusLastModifiedDatetime())
+			->put("status_last_modified_by_user_id", guildRank->getStatusLastModifiedByUserId());
+
+	builder.execute(guildRank);
+}
+
+GuildRank *GuildUtil::getGuildRank(int guildRankId) const
+{
+	auto iter = guildRankMap.find(guildRankId);
+
+	return iter == guildRankMap.end() ? nullptr : iter->second;
+}
+
+std::vector<GuildRank *> GuildUtil::getGuildRanks(const boost::optional<int> guildId, const std::vector<GuildRankStatus*> &statuses) const
+{
+	
+	std::vector<GuildRank*> guildRanksCopy;
+	std::vector<GuildRank*> guildRanksFinal;
+
+	if(guildId)
+	{
+		auto guildRanksIter = guildIdToGuildRanksMap.find(guildId.get());
+		
+		if(guildRanksIter == guildIdToGuildRanksMap.end())
+			return {};
+
+		guildRanksCopy = *(guildRanksIter->second);
+	}
+	else
+	{
+		guildRanksCopy = MiscUtil::mapValuesToVector(guildRankMap);
+	}
+
+	if(statuses.empty())
+		return guildRanksCopy;
+
+	for(auto guildRank : guildRanksCopy)
+	{
+		if(std::find(statuses.begin(), statuses.end(), guildRank->getStatus()) != statuses.end())
+			guildRanksFinal.push_back(guildRank);
+	}
+
+	return guildRanksFinal;
+}
+
+void GuildUtil::removeGuildRank(sql::Connection connection, int userId, int guildRankId)
+{
+	auto guildRank = guildRankMap[guildRankId];
+
+	guildRank->setStatus(GuildRankStatus::removed);
+	guildRank->setStatusLastModifiedByUserId(userId);
+	guildRank->setStatusLastModifiedDatetime(DateTime());
+
+	putGuildRank(connection, guildRank);
+}
+
+void GuildUtil::addGuildRank(sql::Connection connection, GuildRank *guildRank)
+{
+	putGuildRank(connection, guildRank);
+
+	guildRankMap[guildRank->getId()] = guildRank;
+	MiscUtil::pushToVectorMap(guildIdToGuildRanksMap, guildRank->getId(), guildRank);
+}
+
+void GuildUtil::applyChangesToGuildRank(sql::Connection connection, GuildRank *guildRank, const std::map<int, GuildRankRole*> &guildPrivilegeIdToGuildRankRoleMap)
+{
+	//Store the guild rank.
+	if(guildRank->isNew())
+		addGuildRank(connection, guildRank);
+	else
+	{//If it's existing, we need to copy the changes over.
+		auto existingGuildRank = getGuildRank(guildRank->getId());
+		(*existingGuildRank) = guildRank;//Copy changes.
+		putGuildRank(connection, existingGuildRank);//Store in database.
+	}
+
+	//NOTE: From here on out, we have a valid guildRank->getId()
+
+	//Now apply any changes to rank roles.
+	std::vector<GuildRankRole*> *guildRankRolesVector;
+	auto rankRolesIter = this->guildRankIdToGuildRankRolesMap.find(guildRank->getId());
+
+//	guildRankRolesVector = 
+
+}
+
+//Guild Rank Roles
+void GuildUtil::loadGuildRankRolesFromDatabase(sql::Connection connection)
+{
+	guildRankRoleMap = QueryUtil::get()->loadDataObjectMapFromDatabase<GuildRankRole*, int>(
+		connection,
+		"guildRankRole",
+		[=](const sql::Row row) -> GuildRankRole* { return this->getGuildRankRole(row); },
+		[](GuildRankRole *guildRankRole) -> int { return guildRankRole->getId(); }
+	);
+
+	for(auto iter : guildRankRoleMap)
+	{
+		auto guildRankRole = iter.second;
+		MiscUtil::pushToVectorMap(guildRankIdToGuildRankRolesMap, guildRankRole->getId(), guildRankRole);
+	}
+}
+
+GuildRankRole *GuildUtil::getGuildRankRole(const sql::Row row) const
+{
+	auto guildRankRole = new GuildRankRole();
+
+	guildRankRole->setId(row.getInt("id"));
+	guildRankRole->setGuildRankId(row.getInt("guild_rank_id"));
+	guildRankRole->setGuildPrivilege(GuildPrivilege::getEnumByValue(row.getInt("guild_privilege")));
+
+	return guildRankRole;
+}
+
+void GuildUtil::putGuildRankRole(sql::Connection connection, GuildRankRole *guildRankRole) const
+{
+	StoreDataObjectSQLBuilder builder(connection, "guildRankRole");
+
+	builder  .put("guild_rank_id", guildRankRole->getGuildRankId())
+			->put("guild_privilege", guildRankRole->getGuildPrivilege());
+
+	builder.execute(guildRankRole);
+}
+
+std::vector<GuildRankRole *> GuildUtil::getGuildRankRoles(boost::optional<int> guildRankId) const
+{
+	if(!guildRankId)
+		return MiscUtil::mapValuesToVector(guildRankRoleMap);
+
+	auto guildRankRolesIter = guildRankIdToGuildRankRolesMap.find(guildRankId.get());
+
+	if(guildRankRolesIter == guildRankIdToGuildRankRolesMap.end())
+		return {};
+	return *(guildRankRolesIter->second);
+}
+
+std::map<int, GuildRankRole*> GuildUtil::getGuildPrivilegeIdToGuildRankRoleMap(int guildRankId) const
+{
+	std::map<int, GuildRankRole*> guildPrivilegeIdToGuildRankRoleMap;
+	
+	for(auto guildRankRole : this->getGuildRankRoles(guildRankId))
+	{
+		guildPrivilegeIdToGuildRankRoleMap[guildRankRole->getGuildPrivilege()->getValue()] = guildRankRole;
+	}
+
+	return guildPrivilegeIdToGuildRankRoleMap;
+}
+
+bool GuildUtil::hasPrivilege(int guildId, int userId, GuildPrivilege *guildPrivilege) const
+{
+	auto userGuilds = this->getActiveUserGuildsByUserId(userId);
+
+	auto userGuildIter = std::find_if(userGuilds.begin(), userGuilds.end(), [=](UserGuild *userGuild) -> bool { return userGuild->getGuildId() == guildId; });
+	if(userGuildIter == userGuilds.end())
+		return false;
+
+	auto userGuild = *userGuildIter;
+
+	//Do they even have a rank? If not, we don't have the privilege.
+	if(!userGuild->getGuildRankId())
+		return false;
+
+	//Okay, now grab all roles, checking for the one we are interested in.
+	for(auto guildRankRole : getGuildRankRoles(userGuild->getGuildRankId().get()))
+	{
+		if(guildRankRole->getGuildPrivilege() == guildPrivilege)
+			return true;
+	}
+
+	return false;
 }
 
 int GuildUtil::getCoppersToCreateNewGuild() const

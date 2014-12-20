@@ -2,8 +2,12 @@
 #define GUILD_EDITOR_INTERFACE_DATA_H
 
 #include <string>
+#include <map>
 
 #include "../editor-interface/EditorInterfaceData.h"
+
+class GuildRank;
+class GuildRankRole;
 
 class GuildEditorInterfaceData : public EditorInterfaceData
 {
@@ -15,7 +19,10 @@ protected:
 	int guildApplicationId;
 	int guildId;
 	int guildJoinApplicationId;
+	GuildRank *guildRank;
 public:
+	
+	std::map<int, GuildRankRole*> guildPrivilegeIdToGuildRankRoleMap;
 
 	std::string getNewGuildName() const { return newGuildName; }
 	void setNewGuildName(const std::string &newGuildName) { this->newGuildName = newGuildName; }
@@ -34,6 +41,9 @@ public:
 
 	int getGuildJoinApplicationId() const { return guildJoinApplicationId; }
 	void setGuildJoinApplicationId(int guildJoinApplicationId) { this->guildJoinApplicationId = guildJoinApplicationId; }
+
+	GuildRank *getGuildRank() const { return guildRank; };
+	void setGuildRank(GuildRank *guildRank) { this->guildRank = guildRank; }
 };
 
 #endif

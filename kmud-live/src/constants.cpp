@@ -620,7 +620,7 @@ const char *extra_bits[] = {
                          "!DROP",
                          "WARD",
                          "!SELL",
-                         "CHAIN",
+                         "UNUSED1",
                          "POISON",
                          "CHEST",
                          "TWO_HANDED",

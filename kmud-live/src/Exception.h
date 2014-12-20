@@ -4,24 +4,15 @@
 #include <iostream>
 #include <typeinfo>
 #include <string>
+#include <stdexcept>
 
-class Exception : public std::exception
+class Exception : public std::runtime_error
 {
 public:
 
-   explicit Exception(const std::string& msg)
-      : msg_(msg)
-   {}
-
-   virtual ~Exception() throw() {}
-
-   virtual const char* what() const throw()
-   {
-      return msg_.c_str();
-   }
-
+	Exception(const std::string &errorMessage) : std::runtime_error(errorMessage) {}
+	Exception(const char *errorMessage) : std::runtime_error(errorMessage) {}
 private:
-   std::string msg_;
 };
 
 

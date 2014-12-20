@@ -3,10 +3,10 @@
 
 #include <list>
 #include <vector>
+#include <string>
 
-#include "EditorInterface.h"
-#include "EditorInterfaceMenu.h"
-#include "EditorInterfaceData.h"
+class EditorInterfaceMenu;
+class EditorInterfaceData;
 
 class Character;
 
@@ -17,6 +17,7 @@ protected:
 	std::list< EditorInterfaceMenu * > menuStack;
 	bool isTerminated;
 	EditorInterfaceData *data;
+	std::string invalidOptionMessage;
 public:
 
 	EditorInterfaceInstance(Character *ch, EditorInterfaceData *data);
@@ -35,8 +36,11 @@ public:
 	EditorInterfaceMenu *popAndDisplay();
 
 	EditorInterfaceMenu *terminate();
+	EditorInterfaceMenu *terminateWithError();
 
 	EditorInterfaceMenu *invalidOption();
+
+	std::string getInvalidOptionMessage() const;
 
 	EditorInterfaceMenu *parse(const std::string &input, const char firstCharacter, const std::vector<std::string> inputVector);
 	EditorInterfaceMenu *print();

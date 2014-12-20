@@ -3,6 +3,7 @@
 #include "StringUtil.h"
 #include "MiscUtil.h"
 #include "Exception.h"
+#include "utils.h"
 
 TextTableBuilder::TextTableBuilder()
 {
@@ -135,6 +136,13 @@ std::string TextTableBuilder::buildBorder() const
 
 std::string TextTableBuilder::buildRow(int rowNumber) const
 {
+	if(this->table[rowNumber].size() != this->tableWidth)
+	{
+		std::stringstream errorBuffer;
+
+		errorBuffer << "TextTableBuilder : Row #" << rowNumber << " has invalid width of " << this->table[rowNumber].size() << " while table width is " << tableWidth;
+		throw Exception(errorBuffer.str());
+	}
 	std::string buffer;
 
 	for(std::string::size_type columnIndex = 0;columnIndex < tableWidth;++columnIndex)

@@ -19,6 +19,9 @@ public:
 		this->connection = connection;
 	}
 
+	int execute(DataObjectWithIntId *dataObjectWithIntId) {
+		return execute(*dataObjectWithIntId);
+	}
 	int execute(DataObjectWithIntId &dataObjectWithIntId) {
 
 		if(dataObjectWithIntId.isNew())

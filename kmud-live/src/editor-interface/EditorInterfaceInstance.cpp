@@ -10,6 +10,8 @@
 #include <cstdarg>
 
 #include "EditorInterfaceInstance.h"
+#include "EditorInterfaceMenu.h"
+#include "EditorInterfaceData.h"
 
 EditorInterfaceMenu *EditorInterfaceInstance::push(EditorInterfaceMenu *menu)
 {
@@ -36,6 +38,12 @@ EditorInterfaceMenu *EditorInterfaceInstance::terminate()
 	return nullptr;
 }
 
+EditorInterfaceMenu *EditorInterfaceInstance::terminateWithError()
+{
+	send("An error has occurred. You will be removed from the interface and placed back into normal gameplay mode.\r\n\r\n");
+	return terminate();
+}
+
 void EditorInterfaceInstance::destroy()
 {
 	ch->editorInterfaceInstance = nullptr;
@@ -43,25 +51,40 @@ void EditorInterfaceInstance::destroy()
 
 EditorInterfaceMenu *EditorInterfaceInstance::parse(const std::string &input, const char firstCharacter, const std::vector<std::string> inputVector)
 {
-	this->input = input;
-	this->firstLetter = firstCharacter;
-	this->inputVector = inputVector;
+	try
+	{
+		this->input = input;
+		this->firstLetter = firstCharacter;
+		this->inputVector = inputVector;
 
-	menuStack.back()->parse(this);
+		menuStack.back()->parse(this);
 
-	this->input.clear();
-	this->firstLetter = '\0';
-	this->inputVector.clear();
-
+		this->input.clear();
+		this->firstLetter = '\0';
+		this->inputVector.clear();
+	}
+	catch(const std::runtime_error &e)
+	{
+		terminateWithError();
+		MudLog(BRF, MAX(GET_INVIS_LEV(ch), LVL_APPR), TRUE, "Exception caught(std::exception) while parsing editor interface for %s : %s", GET_NAME(ch), e.what());
+	}
 	return nullptr;
 }
 
 EditorInterfaceMenu *EditorInterfaceInstance::print()
 {
-	get_char_cols(ch);
-	EditorInterfaceMenu *menu = menuStack.back();
+	try
+	{
+		get_char_cols(ch);
+		EditorInterfaceMenu *menu = menuStack.back();
 
-	menuStack.back()->print(this);
+		menuStack.back()->print(this);
+	}
+	catch(std::exception e)
+	{
+		terminateWithError();
+		MudLog(BRF, MAX(GET_INVIS_LEV(ch), LVL_APPR), TRUE, "Exception caught(std::exception) while printing editor interface for %s : %s", GET_NAME(ch), e.what());
+	}
 	return nullptr;
 }
 
@@ -85,7 +108,7 @@ EditorInterfaceMenu *EditorInterfaceInstance::popAndDisplay()
 
 EditorInterfaceMenu *EditorInterfaceInstance::invalidOption()
 {
-	return send("Invalid option.\r\nTry again:");
+	return send(getInvalidOptionMessage().c_str());
 }
 
 EditorInterfaceMenu *EditorInterfaceInstance::send(const std::string &message, ...)
@@ -133,6 +156,7 @@ EditorInterfaceInstance::EditorInterfaceInstance(Character *ch, EditorInterfaceD
 	firstLetter = '\0';
 	ch->editorInterfaceInstance.reset(this);
 	isTerminated = false;
+	invalidOptionMessage = std::string("Invalid option.\r\nTry again:");
 }
 
 EditorInterfaceInstance::~EditorInterfaceInstance()
@@ -159,4 +183,9 @@ std::list<EditorInterfaceMenu*>::size_type EditorInterfaceInstance::getMenuStack
 EditorInterfaceData *EditorInterfaceInstance::getData() const
 {
 	return data;
+}
+
+std::string EditorInterfaceInstance::getInvalidOptionMessage() const
+{
+	return invalidOptionMessage;
 }

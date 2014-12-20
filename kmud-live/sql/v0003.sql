@@ -34,6 +34,7 @@ CREATE TABLE `userGuild`(
   `joined_datetime` datetime not null,
   `status` tinyint(3) unsigned not null,
   `status_last_modified_datetime` datetime not null,
+  `guild_rank_id` int(11) unsigned null default null,
   PRIMARY KEY(`id`),
   KEY `user_id`(`user_id`),
   KEY `guild_id`(`guild_id`),
@@ -74,4 +75,23 @@ CREATE TABLE `guildJoinApplication`(
   KEY `user_id`(`user_id`),
   KEY `guild_id`(`guild_id`)
 ) ENGINE=MyISAM charset=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE guildRank(
+  `id` int(11) unsigned not null auto_increment,
+  `guild_id` int(11) unsigned not null,
+  `name` varchar(20) not null,
+  `created_datetime` datetime not null,
+  `status` tinyint(3) unsigned not null,
+  `status_last_modified_datetime` datetime not null,
+  `status_last_modified_by_user_id` int(11) unsigned not null,
+  PRIMARY KEY(`id`),
+  KEY `guild_id`(`guild_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE guildRankRole(
+  `id` int(11) unsigned not null auto_increment,
+  `guild_rank_id` int(11) unsigned not null,
+  `guild_privilege` tinyint(3) unsigned not null,
+  PRIMARY KEY(`id`)
+) ENGINE=MyISAM CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

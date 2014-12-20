@@ -1,3 +1,6 @@
+#include "../conf.h"
+#include "../sysdep.h"
+
 #include "UserGuild.h"
 
 
@@ -49,4 +52,14 @@ DateTime UserGuild::getStatusLastModifiedDatetime() const
 void UserGuild::setStatusLastModifiedDatetime(const DateTime &statusLastModifiedDatetime)
 {
 	this->statusLastModifiedDatetime = statusLastModifiedDatetime;
+}
+
+boost::optional<int> UserGuild::getGuildRankId() const
+{
+	return guildRankId;
+}
+
+void UserGuild::setGuildRankId(const boost::optional<int> &guildRankId)
+{
+	this->guildRankId = guildRankId;
 }
