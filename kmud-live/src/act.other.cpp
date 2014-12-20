@@ -1531,9 +1531,9 @@ ACMD( do_change )
 			return ;
 		}
 		std::string sNewPassword = vArgs[ 1 ];
-		if( sNewPassword.size() > (MAX_PWD_LENGTH-1) )
+		if( sNewPassword.size() > MAX_PWD_LENGTH )
 		{
-			ch->send("Your password must be shorter than %d characters.\r\n");
+			ch->send("Your password must be no longer than %d characters.\r\n",  MAX_PWD_LENGTH);
 			return;
 		}
 		ch->player.passwd = MD5::getHashFromString( sNewPassword.c_str() );

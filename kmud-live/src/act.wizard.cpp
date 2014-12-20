@@ -6774,6 +6774,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			{
 				vict->PasswordUpdated( true );
 				vict->player.passwd = MD5::getHashFromString(val_arg);
+				ForumUtil::changeUserPassword(gameDatabase, vict->player.idnum, vict->player.passwd);
 				sprintf(output, "Password changed to '%s'.", val_arg);
 			}
 			break;
