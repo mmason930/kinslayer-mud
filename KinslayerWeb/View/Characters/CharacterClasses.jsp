@@ -32,13 +32,13 @@
 #raceSelection div a:hover,
 .classSelection div a:hover
 {
-	color: #880015;
+	color: #D10020;
 }
 
 #raceSelection div a.selected,
 .classSelection div a.selected
 {
-	color: #880015 !important;
+	color: #D10020 !important;
 	text-decoration: underline !important;
 }
 
