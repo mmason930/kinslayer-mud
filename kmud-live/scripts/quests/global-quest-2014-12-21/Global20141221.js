@@ -48,13 +48,40 @@ var script23009 = function(self, actor, here, args, extra) {
 		return;
 	}
 
-	if(vArgs[1].toLowerCase() != "santa")
+	var nameArgument = vArgs[1];
+	var santa = getCharInListVis(actor, nameArgument, here.people);
+
+	if(santa == null)
 	{
-		actor.send("You can only capture Santa!");
+		actor.send("You don't see them here!");
 		return;
 	}
 
-	actor.send("Done deal.");
+	if(santa.vnum != actor.vnum)
+	{
+		actor.send("You can't capture " + santa.name + "!");
+		return;
+	}
+
+	if(santa.followers.length != 0)
+	{
+		actor.send("Santa has followers. Do something evil.");
+		return;
+	}
+
+	actor.startTimer(10);
+	var success = runTimer(actor);
+
+	if(success)
+	{
+		actor.send("Timer succeeded.");
+		return;
+	}
+	else
+	{
+		actor.send("Timer failed.");
+		return;
+	}
 };
 
 global.globalDec2014Util = new GlobalDec2014Util();
