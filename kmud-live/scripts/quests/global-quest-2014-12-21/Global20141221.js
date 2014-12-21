@@ -5,7 +5,7 @@ if( !global ) {
 function GlobalDec2014Util()
 {
 	this.spawnRoomVnums = [18120];
-	this.leaderMobVunms = [23009];
+	this.leaderMobVnums = [23009];
 	this.followerMobVnum = 23008;
 
 	this.santaMobs = [];
