@@ -59,6 +59,8 @@ var script23011 = function(self, actor, here, args, extra) {
 
 				act("$n leads $N away.", false, self, null, followers[0], constants.TO_ROOM);
 				followers[0].extract();
+
+				gecho("\n\n" + " *** " + actor.name + " has scored a point! ***\n\n");
 			}
 		}
 	}
