@@ -333,6 +333,11 @@ var script635 = function(self, actor, here, args, extra) {
 					disp += cyn+bld+"\n\nThe Kinslayer global event is active! Type JOIN EVENT to enter.\nLight Points: "+global.global2014Util.pointMap[constants.RACE_HUMAN]+"  Dark Points: "+global.global2014Util.pointMap[constants.RACE_TROLLOC]+nrm;
 				}
 			}
+
+			if(global.globalDec2014Util && actor.level > 105)
+			{
+				disp += cyn + bld + "The Kinslayer global event is active! Current score: " + global.globalDec2014Util.points[constants.RACE_HUMAN] + " LS, " + global.globalDec2014Util.points[constants.RACE_TROLLOC] + " DS." + nrm;
+			}
 		}
 		else {
 			disp += "\n---------------------------------------";
