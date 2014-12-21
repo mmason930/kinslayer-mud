@@ -105,7 +105,7 @@ GlobalNov2014Util.prototype.getNumberOfSwitchesOn = function()
 	return counter;
 };
 
-global.globalNov2014 = new GlobalNov2014Util();
+//global.globalNov2014 = new GlobalNov2014Util();
 
 //Flip Switch
 var script33002 = function(self, actor, here, args, extra) {
@@ -199,6 +199,7 @@ var script33000 = function(self, actor, here, args, extra) {
 		{
 			actor.send("You touch " + self.name + ", but it seems to do nothing.");
 			act("$n touches $p, but it appears to do nothing.", false, actor, self, null, constants.TO_ROOM);
+			return;
 		}
 
 		var followers = actor.followers.filter(function(follower) {
