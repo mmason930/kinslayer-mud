@@ -18,6 +18,7 @@ function GlobalDec2014Util()
 
 GlobalDec2014Util.prototype.setup = function()
 {
+	return;
 	var self = this;
 	this.spawnRoomVnums.forEach(function(roomVnum, index) {
 
@@ -53,7 +54,8 @@ var script23011 = function(self, actor, here, args, extra) {
 			{
 				global.globalDec2014Util[actor.race]++;
 
-				actor.send("You score a point!");
+				getCharCols(actor);
+				actor.send(bld + grn + "You have scored a point for your team!\r\n" + nrm);
 
 				act("$n leads $N away.", false, self, null, followers[0], constants.TO_ROOM);
 				followers[0].extract();
