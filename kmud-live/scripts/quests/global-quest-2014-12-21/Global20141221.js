@@ -11,6 +11,7 @@ function GlobalDec2014Util()
 	this.points = {};
 	this.points[constants.RACE_TROLLOC] = 0;
 	this.points[constants.RACE_HUMAN] = 0;
+	this.pointsToWin = Math.ceil(this.spawnRoomVnums.length / 2);
 
 	this.santaMobs = [];
 	this.setup();
@@ -55,13 +56,17 @@ var script23011 = function(self, actor, here, args, extra) {
 			{
 				global.globalDec2014Util.points[actor.race]++;
 
+				var pointsNow = global.globalDec2014Util.points[actor.race];
+
 				getCharCols(actor);
 				actor.send(bld + grn + "You have scored a point for your team!\r\n" + nrm);
 
 				act("$n leads $N away.", false, self, null, followers[0], constants.TO_ROOM);
 				followers[0].extract();
 
-				var displayFunction = function(player)
+				var displayFunction null;
+
+				displayFunction = function(player)
 				{
 					getCharCols(player);
 
@@ -72,6 +77,51 @@ var script23011 = function(self, actor, here, args, extra) {
 					return bld + color + "\n" + " *** " + actor.name + " has scored a point! ***\n" + nrm;
 				};
 				gecho(displayFunction);
+
+				if(pointsNow == pointsToWin)
+				{
+					displayFunction = function(player)
+					{
+						getCharCols(player);
+
+						var side = actor.race == constants.RACE_TROLLOC ? "Shadow" : "Light";
+						var color = actor.race == constants.RACE_TROLLOC ? red : grn;
+
+						return bld + color + "The " + side + " has won!" + nrm;
+					};
+
+					gecho(displayFunction);
+
+					var playerToGiveTo = actor;
+
+					var goodies = [];
+
+					goodies.push(playerToGiveTo.loadObj(10994));
+
+					var bag = playerToGiveTo.loadObj(2061);
+
+					bag.setRetoolSDesc("a decorated stocking");
+					bag.setRetoolLDesc("A decorated stocking has been left behind.");
+					bag.setRetoolName("decorated stocking");
+					bag.setRetoolExDesc("This decorated stocking is covered with a colorful ornate design. It appears to be the perfect container for a bunch of gifts!");
+
+					bag.loadObj(2715);
+					bag.loadObj(2706);
+					bag.loadObj(2793);
+					bag.loadObj(2795);
+					bag.loadObj(2721);
+					bag.loadObj(590);
+					bag.loadObj(590);
+					bag.loadObj(590);
+
+					goodies.push(bag);
+
+					goodies.forEach(function(item) {
+
+						act("$n has received $p!", true, playerToGiveTo, item, null, constants.TO_ROOM);
+						act("You have received $p!", true, playerToGiveTo, item, null, constants.TO_CHAR);
+					});
+				}
 			}
 		}
 	}
