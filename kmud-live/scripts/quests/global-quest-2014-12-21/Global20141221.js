@@ -36,6 +36,24 @@ GlobalDec2014Util.prototype.setup = function()
 	});
 };
 
+var script23010 = function(self, actor, here, args, extra) {
+
+	var followers = actor.followers;
+
+	if(followers.length > 0)
+	{
+		var hasSanta = false;
+		for(var index = 0;index < followers.length;++index)
+		{
+			if(arrContains(global.globalDec2014Util.leaderMobVnums, actor.vnum))
+			{
+				here.echo("Has Santa.");
+				hasSanta = true;
+			}
+		}
+	}
+};
+
 //Santa aggro.
 var script23010 = function(self, actor, here, args, extra) {
 
@@ -43,10 +61,9 @@ var script23010 = function(self, actor, here, args, extra) {
 		return;
 
 	var players = here.getMobs(-1);
-here.echo("Players: " + players.length);
+
 	if(players.length != 0)
 	{
-		here.echo("Setting fighting to " + players[0].name);
 		self.setFighting(players[0]);
 	}
 };
