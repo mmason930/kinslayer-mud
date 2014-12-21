@@ -23,7 +23,7 @@ GlobalDec2014Util.prototype.setup = function()
 	this.spawnRoomVnums.forEach(function(roomVnum, index) {
 
 		var room = getRoom(roomVnum);
-		var mobVnum = self.spawnRoomVnums;
+		var mobVnum = self.leaderMobVnum;
 
 		var santa = room.loadMob(mobVnum);
 		room.loadMob(self.followerMobVnum).comm("follow santa");
