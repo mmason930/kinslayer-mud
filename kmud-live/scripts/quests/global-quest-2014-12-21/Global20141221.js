@@ -65,7 +65,7 @@ var script23009 = function(self, actor, here, args, extra) {
 
 	if(santa.followers.length != 0)
 	{
-		var elf = actor.followers[0];
+		var elf = santa.followers[0];
 
 		act("$n kicks $N in the face with the point of $s boot!", false, elf, null, actor, constants.TO_ROOM);
 		act("$n kicks you in the face with the point of $s boot!", false, elf, null, actor, constants.TO_VICT);
