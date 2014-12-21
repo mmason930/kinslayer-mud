@@ -25,6 +25,8 @@ GlobalDec2014Util.prototype.setup = function()
 		var room = getRoom(roomVnum);
 		var mobVnum = self.leaderMobVnum;
 
+		mudLog(constants.BRF, 100, "Room #" + roomVnum + ", Mob Vnum: " + mobVnum);
+
 		var santa = room.loadMob(mobVnum);
 		room.loadMob(self.followerMobVnum).comm("follow santa");
 		room.loadMob(self.followerMobVnum).comm("follow santa");
