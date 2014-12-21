@@ -69,6 +69,8 @@ var script23010 = function(self, actor, here, args, extra) {
 
 	if(self.leader)
 		return;
+	if(self.fighting)
+		return;
 
 	var players = here.getMobs(-1);
 
