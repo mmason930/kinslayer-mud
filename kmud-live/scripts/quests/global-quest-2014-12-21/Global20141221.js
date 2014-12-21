@@ -36,4 +36,25 @@ GlobalDec2014Util.prototype.setup = function()
 	});
 };
 
+var script23009 = function(self, actor, here, args, extra) {
+
+	var vArgs = getArgList(args);
+
+	_block;
+
+	if(vArgs.length < 2)
+	{
+		actor.send("Capture who?");
+		return;
+	}
+
+	if(vArgs[1].toLowerCase() != "santa")
+	{
+		actor.send("You can only capture Santa!");
+		return;
+	}
+
+	actor.send("Done deal.");
+};
+
 global.globalDec2014Util = new GlobalDec2014Util();
