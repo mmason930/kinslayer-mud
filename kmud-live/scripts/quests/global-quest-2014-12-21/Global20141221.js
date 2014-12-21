@@ -10,7 +10,7 @@ function GlobalDec2014Util()
 
 	this.points = {};
 	this.points[constants.RACE_TROLLOC] = 1;
-	this.points[constants.RACE_HUMAN] = 0;
+	this.points[constants.RACE_HUMAN] = 1;
 
 	this.santaMobs = [];
 	this.setup();
@@ -68,7 +68,7 @@ var script23011 = function(self, actor, here, args, extra) {
 
 					if(player.race == constants.RACE_TROLLOC)
 						color = red;
-					return bld + color + "\n\n" + " *** " + actor.name + " has scored a point! ***\n\n" + nrm;
+					return bld + color + "\n" + " *** " + actor.name + " has scored a point! ***\n" + nrm;
 				};
 				gecho(displayFunction);
 			}
