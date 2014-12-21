@@ -57,7 +57,7 @@ var script23009 = function(self, actor, here, args, extra) {
 		return;
 	}
 
-	if(santa.vnum != actor.vnum)
+	if(santa.vnum != self.vnum)
 	{
 		actor.send("You can't capture " + santa.name + "!");
 		return;
