@@ -66,7 +66,7 @@ var script23011 = function(self, actor, here, args, extra) {
 
 					var color = grn;
 
-					if(player.race == constants.RACE_TROLLOC)
+					if(actor.race == constants.RACE_TROLLOC)
 						color = red;
 					return bld + color + "\n" + " *** " + actor.name + " has scored a point! ***\n" + nrm;
 				};
@@ -168,4 +168,4 @@ var script23009 = function(self, actor, here, args, extra) {
 	}
 };
 
-global.globalDec2014Util = new GlobalDec2014Util();
+//global.globalDec2014Util = new GlobalDec2014Util();
