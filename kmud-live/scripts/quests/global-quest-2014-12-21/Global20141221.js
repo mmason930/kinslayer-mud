@@ -8,6 +8,10 @@ function GlobalDec2014Util()
 	this.leaderMobVnums = [23009];
 	this.followerMobVnum = 23008;
 
+	this.points = {};
+	this.points[constants.RACE_TROLLOC] = 0;
+	this.points[constants.RACE_HUMAN] = 0;
+
 	this.santaMobs = [];
 	this.setup();
 }
@@ -40,17 +44,19 @@ var script23011 = function(self, actor, here, args, extra) {
 
 	var followers = actor.followers;
 
-	actor.send("Test");
+	waitpulse 1;
 	if(followers.length > 0)
 	{
-		actor.send("Followers.");
-		var hasSanta = false;
 		for(var index = 0;index < followers.length;++index)
 		{
 			if(followers[index].vnum == 23009)
 			{
-				here.echo("Has Santa.");
-				hasSanta = true;
+				global.globalDec2014Util[actor.race]++;
+
+				actor.send("You score a point!");
+
+				act("$n leads $N away.", false, self, null, followers[0], constants.TO_ROOM);
+				followers[0].extract();
 			}
 		}
 	}
