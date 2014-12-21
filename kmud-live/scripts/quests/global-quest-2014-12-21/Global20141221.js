@@ -67,7 +67,7 @@ var script23009 = function(self, actor, here, args, extra) {
 	{
 		var elf = santa.followers[0];
 
-		act("$n kicks $N in the face with the point of $s boot!", false, elf, null, actor, constants.TO_ROOM);
+		act("$n kicks $N in the face with the point of $s boot!", false, elf, null, actor, constants.TO_NOTVICT);
 		act("$n kicks you in the face with the point of $s boot!", false, elf, null, actor, constants.TO_VICT);
 		act("You kick $N in the face with the point of your boot!", false, elf, null, actor, constants.TO_CHAR);
 
@@ -76,8 +76,6 @@ var script23009 = function(self, actor, here, args, extra) {
 			actor.send("You don't feel so great...");
 			act("$n begins wobbling around incoherently.", true, actor, null, null, constants.TO_ROOM);
 		}
-
-		actor.send("Santa has followers. Do something evil.");
 		return;
 	}
 
@@ -87,7 +85,7 @@ var script23009 = function(self, actor, here, args, extra) {
 	if(success)
 	{
 		act("You tackle $N to the ground and force $m into submission!", false, actor, null, santa, constants.TO_CHAR);
-		act("$n tackles $N to the ground and forces $m into submission!", false, actor, null, santa, constants.TO_ROOM);
+		act("$n tackles $N to the ground and forces $m into submission!", false, actor, null, santa, constants.TO_NOTVICT);
 		act("$n tackles you to the ground and forces you into submission!", false, actor, null, santa, constants.TO_VICT);
 
 		santa.act("follow " + actor.name);
@@ -95,7 +93,7 @@ var script23009 = function(self, actor, here, args, extra) {
 	else if(santa.isValid)
 	{
 		act("You give up your attempt to capture $N.", true, actor, null, santa, constants.TO_CHAR);
-		act("$n gives up $s attempt to capture $N.", true, actor, null, santa, constants.TO_ROOM);
+		act("$n gives up $s attempt to capture $N.", true, actor, null, santa, constants.TO_NOTVICT);
 		act("$n gives up $s attempt to capture you.", true, actor, null, santa, constants.TO_VICT);
 		return;
 	}
