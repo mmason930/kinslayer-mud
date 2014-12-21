@@ -4,13 +4,13 @@ if( !global ) {
 
 function GlobalDec2014Util()
 {
-	this.spawnRoomVnums = [18120];
-	this.leaderMobVnums = [23009];
+	this.spawnRoomVnums = [5605, 18175, 1932, 6445, 4343, 924, 21445];
+	this.leaderMobVnum = 23009;
 	this.followerMobVnum = 23008;
 
 	this.points = {};
-	this.points[constants.RACE_TROLLOC] = 1;
-	this.points[constants.RACE_HUMAN] = 1;
+	this.points[constants.RACE_TROLLOC] = 0;
+	this.points[constants.RACE_HUMAN] = 0;
 
 	this.santaMobs = [];
 	this.setup();
@@ -23,7 +23,7 @@ GlobalDec2014Util.prototype.setup = function()
 	this.spawnRoomVnums.forEach(function(roomVnum, index) {
 
 		var room = getRoom(roomVnum);
-		var mobVnum = self.leaderMobVnums[index];
+		var mobVnum = self.spawnRoomVnums;
 
 		var santa = room.loadMob(mobVnum);
 		room.loadMob(self.followerMobVnum).comm("follow santa");
@@ -168,4 +168,4 @@ var script23009 = function(self, actor, here, args, extra) {
 	}
 };
 
-//global.globalDec2014Util = new GlobalDec2014Util();
+global.globalDec2014Util = new GlobalDec2014Util();
