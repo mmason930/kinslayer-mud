@@ -36,7 +36,7 @@ GlobalDec2014Util.prototype.setup = function()
 	});
 };
 
-var script23010 = function(self, actor, here, args, extra) {
+var script23011 = function(self, actor, here, args, extra) {
 
 	var followers = actor.followers;
 
