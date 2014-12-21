@@ -9,7 +9,7 @@ function GlobalDec2014Util()
 	this.followerMobVnum = 23008;
 
 	this.points = {};
-	this.points[constants.RACE_TROLLOC] = 0;
+	this.points[constants.RACE_TROLLOC] = 1;
 	this.points[constants.RACE_HUMAN] = 0;
 
 	this.santaMobs = [];
@@ -52,7 +52,7 @@ var script23011 = function(self, actor, here, args, extra) {
 		{
 			if(followers[index].vnum == 23009)
 			{
-				global.globalDec2014Util[actor.race]++;
+				global.globalDec2014Util.points[actor.race]++;
 
 				getCharCols(actor);
 				actor.send(bld + grn + "You have scored a point for your team!\r\n" + nrm);
