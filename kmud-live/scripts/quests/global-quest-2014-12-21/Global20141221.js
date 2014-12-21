@@ -18,7 +18,6 @@ function GlobalDec2014Util()
 
 GlobalDec2014Util.prototype.setup = function()
 {
-	return;
 	var self = this;
 	this.spawnRoomVnums.forEach(function(roomVnum, index) {
 
