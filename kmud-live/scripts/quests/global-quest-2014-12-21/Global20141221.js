@@ -40,6 +40,7 @@ var script23011 = function(self, actor, here, args, extra) {
 
 	var followers = actor.followers;
 
+	actor.send("Test");
 	if(followers.length > 0)
 	{
 		var hasSanta = false;
