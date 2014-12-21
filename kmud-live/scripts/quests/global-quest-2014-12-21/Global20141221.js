@@ -36,11 +36,39 @@ GlobalDec2014Util.prototype.setup = function()
 	});
 };
 
+//Santa aggro.
+var script23010 = function(self, actor, here, args, extra) {
+
+	if(self.leader)
+		return;
+
+	var players = here.getMobs(-1);
+here.echo("Players: " + players.length);
+	if(players.length != 0)
+	{
+		here.echo("Setting fighting to " + players[0].name);
+		self.setFighting(players[0]);
+	}
+};
+
+//Santa capture.
 var script23009 = function(self, actor, here, args, extra) {
 
 	var vArgs = getArgList(args);
 
 	_block;
+
+	if(actor.fighting)
+	{
+		actor.send("You cannot do that while fighting!");
+		return;
+	}
+
+	if(actor.position < constants.POS_FIGHTING)
+	{
+		actor.send("You must be standing in order to do that.");
+		return;
+	}
 
 	if(vArgs.length < 2)
 	{
@@ -88,7 +116,7 @@ var script23009 = function(self, actor, here, args, extra) {
 		act("$n tackles $N to the ground and forces $m into submission!", false, actor, null, santa, constants.TO_NOTVICT);
 		act("$n tackles you to the ground and forces you into submission!", false, actor, null, santa, constants.TO_VICT);
 
-		santa.act("follow " + actor.name);
+		santa.comm("follow " + actor.name);
 	}
 	else if(santa.isValid)
 	{
