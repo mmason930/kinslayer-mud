@@ -47,7 +47,7 @@ var script23011 = function(self, actor, here, args, extra) {
 		var hasSanta = false;
 		for(var index = 0;index < followers.length;++index)
 		{
-			actor.send("follow vnum: " + follower[0].vnum);
+			actor.send("follow vnum: " + followers[0].vnum);
 			if(arrContains(global.globalDec2014Util.leaderMobVnums, followers[0].vnum))
 			{
 				here.echo("Has Santa.");
