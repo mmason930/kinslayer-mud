@@ -334,9 +334,9 @@ var script635 = function(self, actor, here, args, extra) {
 				}
 			}
 
-			if(global.globalDec2014Util && actor.level > 100)
+			if(global.globalDec2014Util)
 			{
-				disp += cyn + bld + "The Kinslayer global event is active! Current score: " + global.globalDec2014Util.points[constants.RACE_HUMAN] + " LS, " + global.globalDec2014Util.points[constants.RACE_TROLLOC] + " DS." + nrm;
+				disp += cyn + bld + "\n\nThe Kinslayer global event is active! Current score: " + global.globalDec2014Util.points[constants.RACE_HUMAN] + " LS, " + global.globalDec2014Util.points[constants.RACE_TROLLOC] + " DS." + nrm + "\n";
 			}
 		}
 		else {
