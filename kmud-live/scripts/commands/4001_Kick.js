@@ -13,6 +13,7 @@ var script4001 = function(self, actor, here, args, extra) {
     var secondsSinceLastKick = now - lastKickUnixTimestamp;
     var secondsToWaitPerKick = 12;
     var secondsRemainingToWait = Math.max(0, secondsToWaitPerKick - secondsSinceLastKick);
+	var MAX_ENGAGED = 4;
 
 	if( skill == 0 ) {
 		ch.send("You have no idea how.");
@@ -52,7 +53,13 @@ var script4001 = function(self, actor, here, args, extra) {
 		ch.send("You can't kick someone you aren't fighting!");
 		return;
 	}
+
 	vict = ch.faceoff(vict);
+
+	//Perform max engagement check.
+	if(ch.shouldBlockEngagementDueToNumberFighting && ch.shouldBlockEngagementDueToNumberFighting(vict, true))
+		return;
+
 	var offense = random(0, skill);
 	var defense = vict.level/3;
 	var damage = random(7, 13)*vict.absorb/100;
