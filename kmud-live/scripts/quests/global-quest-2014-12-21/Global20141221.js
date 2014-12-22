@@ -131,41 +131,18 @@ var script23011 = function(self, actor, here, args, extra) {
 					var bag = playerToGiveTo.loadObj(2061);
 
 					bag.setRetoolSDesc("a decorated stocking");
-					bag.setRetoolLDesc("A decorated stocking has been left behind.");
+					bag.setRetoolDesc("A decorated stocking has been left behind.");
 					bag.setRetoolName("decorated stocking");
 					bag.setRetoolExDesc("This decorated stocking is covered with a colorful ornate design. It appears to be the perfect container for a bunch of gifts!");
 
-					bag.loadObj(1013);
-					bag.loadObj(1013);
-					bag.loadObj(917);
-					bag.loadObj(917);
+					bag.loadObj(713);
+					bag.loadObj(713);
+					bag.loadObj(2717);
+					bag.loadObj(2718);
 					bag.loadObj(2719);
+					bag.loadObj(2717);
+					bag.loadObj(2718);
 					bag.loadObj(2719);
-					bag.loadObj(2719);
-					bag.loadObj(2709);
-					bag.loadObj(2709);
-					bag.loadObj(2709);
-					bag.loadObj(22898);
-					bag.loadObj(2720);
-					bag.loadObj(2720);
-					bag.loadObj(2721);
-					bag.loadObj(2721);
-					bag.loadObj(2722);
-					bag.loadObj(2722);
-					bag.loadObj(2723);
-					bag.loadObj(2723);
-					bag.loadObj(2724);
-					bag.loadObj(2724);
-					bag.loadObj(2725);
-					bag.loadObj(2725);
-					bag.loadObj(2726);
-					bag.loadObj(2726);
-					bag.loadObj(2727);
-					bag.loadObj(2727);
-					bag.loadObj(2728);
-					bag.loadObj(2728);
-					bag.loadObj(2729);
-					bag.loadObj(2729);
 
 					goodies.push(bag);
 
