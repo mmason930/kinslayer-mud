@@ -106,7 +106,7 @@ var script23011 = function(self, actor, here, args, extra) {
 
 					if(actor.race == constants.RACE_TROLLOC)
 						color = red;
-					return bld + color + "\n" + " *** " + actor.name + " has scored a point! ***\n" + nrm;
+					return bld + color + "\n" + " *** " + actor.name + " has scored a point! ***" + nrm;
 				};
 				gecho(displayFunction);
 
@@ -135,14 +135,18 @@ var script23011 = function(self, actor, here, args, extra) {
 					bag.setRetoolName("decorated stocking");
 					bag.setRetoolExDesc("This decorated stocking is covered with a colorful ornate design. It appears to be the perfect container for a bunch of gifts!");
 
+					bag.loadObj(917);
 					bag.loadObj(713);
-					bag.loadObj(713);
+					bag.loadObj(1013);
+					bag.loadObj(2716);
 					bag.loadObj(2717);
 					bag.loadObj(2718);
 					bag.loadObj(2719);
-					bag.loadObj(2717);
-					bag.loadObj(2718);
-					bag.loadObj(2719);
+					bag.loadObj(2720);
+					bag.loadObj(2721);
+					bag.loadObj(2722);
+					bag.loadObj(2723);
+					bag.loadObj(2724);
 
 					goodies.push(bag);
 
