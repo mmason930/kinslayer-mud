@@ -303,10 +303,10 @@ int Character::BashDefenseRoll()
 }
 void perform_bash(Character *ch, Character *vict)
 {
-	Character *p = 0;
+	Character *faceoffOpponent = nullptr;
 	char dCommand[MAX_INPUT_LENGTH];
 	int i = 0;
-	bool PreFighting = FIGHTING(ch) ? true : false;
+	bool preFighting = FIGHTING(ch) ? true : false;
 
 	if(!vict || vict->IsPurged() || vict->in_room != ch->in_room)
 	{
@@ -318,6 +318,9 @@ void perform_bash(Character *ch, Character *vict)
 
 	ch->GainNoQuit(vict);
 	vict->GainNoQuit(ch);
+
+	if(!preFighting)//This calculation must occur before the player is engaged, otherwise faceoff results are screwed up.
+		faceoffOpponent = faceoff(ch, vict);
 
 	strcpy(dCommand, ch->delayed_command.c_str());
 	//Both basher and bashee land bash on the same pulse...
@@ -374,10 +377,10 @@ void perform_bash(Character *ch, Character *vict)
 			ch->WaitState(PULSE_VIOLENCE / 2);
 		}
 	}
-	if(FIGHTING(ch) && (p = faceoff(ch, vict)) && !PreFighting)
+	if(FIGHTING(ch) && faceoffOpponent && !preFighting)
 	{
 		ch->StopFighting();
-		ch->SetFighting(p);
+		ch->SetFighting(faceoffOpponent);
 	}
 }
 
