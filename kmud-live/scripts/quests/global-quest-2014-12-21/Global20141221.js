@@ -13,9 +13,32 @@ function GlobalDec2014Util()
 	this.points[constants.RACE_HUMAN] = 0;
 	this.pointsToWin = Math.ceil(this.spawnRoomVnums.length / 2);
 
+	this.santaLoadFunction = function(santa)
+	{
+		santa.loadObj(2717);
+		santa.loadObj(2718);
+		santa.loadObj(2719);
+	};
+
 	this.santaMobs = [];
 	this.setup();
 }
+
+GlobalDec2014Util.prototype.cleanup = function()
+{
+	var self = this;
+
+	this.santaMobs.forEach(function(santa) {
+
+		santa.followers.forEach(function(elf) {
+
+			if(elf.vnum == self.followerMobVnum)
+				elf.extract();
+		});
+
+		santa.extract();
+	});
+};
 
 GlobalDec2014Util.prototype.setup = function()
 {
@@ -28,6 +51,7 @@ GlobalDec2014Util.prototype.setup = function()
 		mudLog(constants.BRF, 100, "Room #" + roomVnum + ", Mob Vnum: " + mobVnum);
 
 		var santa = room.loadMob(mobVnum);
+		self.santaLoadFunction(santa);
 		room.loadMob(self.followerMobVnum).comm("follow santa");
 		room.loadMob(self.followerMobVnum).comm("follow santa");
 		room.loadMob(self.followerMobVnum).comm("follow santa");
@@ -54,6 +78,14 @@ var script23011 = function(self, actor, here, args, extra) {
 		{
 			if(followers[index].vnum == 23009)
 			{
+				if(followers[index].inventory.length > 0) {
+					followers[index].say("Well, I guess I won't be needing this anymore, so you can have it.");
+					followers[index].comm("drop all")
+					followers[index].comm("emote belches, 'HOOOO! HOOOO! HOOOO!'");
+				}
+
+				wait 2
+
 				global.globalDec2014Util.points[actor.race]++;
 
 				var pointsNow = global.globalDec2014Util.points[actor.race];
@@ -78,7 +110,7 @@ var script23011 = function(self, actor, here, args, extra) {
 				};
 				gecho(displayFunction);
 
-				if(pointsNow == pointsToWin)
+				if(pointsNow == global.globalDec2014Util.pointsToWin)
 				{
 					displayFunction = function(player)
 					{
@@ -96,8 +128,6 @@ var script23011 = function(self, actor, here, args, extra) {
 
 					var goodies = [];
 
-					goodies.push(playerToGiveTo.loadObj(10994));
-
 					var bag = playerToGiveTo.loadObj(2061);
 
 					bag.setRetoolSDesc("a decorated stocking");
@@ -105,14 +135,37 @@ var script23011 = function(self, actor, here, args, extra) {
 					bag.setRetoolName("decorated stocking");
 					bag.setRetoolExDesc("This decorated stocking is covered with a colorful ornate design. It appears to be the perfect container for a bunch of gifts!");
 
-					bag.loadObj(2715);
-					bag.loadObj(2706);
-					bag.loadObj(2793);
-					bag.loadObj(2795);
+					bag.loadObj(1013);
+					bag.loadObj(1013);
+					bag.loadObj(917);
+					bag.loadObj(917);
+					bag.loadObj(2719);
+					bag.loadObj(2719);
+					bag.loadObj(2719);
+					bag.loadObj(2709);
+					bag.loadObj(2709);
+					bag.loadObj(2709);
+					bag.loadObj(22898);
+					bag.loadObj(2720);
+					bag.loadObj(2720);
 					bag.loadObj(2721);
-					bag.loadObj(590);
-					bag.loadObj(590);
-					bag.loadObj(590);
+					bag.loadObj(2721);
+					bag.loadObj(2722);
+					bag.loadObj(2722);
+					bag.loadObj(2723);
+					bag.loadObj(2723);
+					bag.loadObj(2724);
+					bag.loadObj(2724);
+					bag.loadObj(2725);
+					bag.loadObj(2725);
+					bag.loadObj(2726);
+					bag.loadObj(2726);
+					bag.loadObj(2727);
+					bag.loadObj(2727);
+					bag.loadObj(2728);
+					bag.loadObj(2728);
+					bag.loadObj(2729);
+					bag.loadObj(2729);
 
 					goodies.push(bag);
 
@@ -219,4 +272,8 @@ var script23009 = function(self, actor, here, args, extra) {
 	}
 };
 
-global.globalDec2014Util = new GlobalDec2014Util();
+if(global.globalDec2014Util)
+{
+	global.globalDec2014Util.cleanup();
+	global.globalDec2014Util = new GlobalDec2014Util();
+}
