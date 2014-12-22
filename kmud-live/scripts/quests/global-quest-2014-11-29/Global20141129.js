@@ -251,6 +251,7 @@ var script33003 = function(self, actor, here, args, extra) {
 //Random gobbling / emotes / fight events.
 var script23005 = function(self, actor, here, args, extra) {
 
+	return;
 	var randomNumber = random(1, 100);
 
 	if(self.vnum == 23006) {
