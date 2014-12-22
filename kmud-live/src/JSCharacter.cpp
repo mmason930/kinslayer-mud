@@ -285,6 +285,14 @@ void JSCharacter::removeSource()
 	}
 }
 
+bool JSCharacter::shouldBlockEngagementDueToNumberFighting(JSCharacter *victim, bool displayMessage)
+{
+	if(real && !real->IsPurged() && !real->IsProto() && victim && !victim->real->IsPurged() && !victim->real->IsProto())
+		return real->shouldBlockEngagementDueToNumberFighting(victim->real, displayMessage);
+
+	return false;
+}
+
 flusspferd::array JSCharacter::getAliases()
 {
 	if( !real || IS_NPC(real) ) return flusspferd::create_array();

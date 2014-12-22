@@ -1512,14 +1512,12 @@ bool Character::basicSave()
 
 	int save_room;
 
-	if (in_room && in_room->getVnum() == 20)
-		save_room = this->StartRoom()->getVnum();
-	else if(this->in_room)
-		save_room = this->in_room->getVnum();
-	else if( this->StartRoom() )
-		save_room = this->StartRoom()->getVnum();
+	if(!in_room)//Player has no room. Most likely they were loaded and altered while offline.
+		save_room = PlayerData->load_room;
+	else if (player.timer >= CONFIG_IDLE_VOID)//In the void.
+		save_room = was_in_room ? was_in_room->getVnum() : StartRoom()->getVnum();
 	else
-		save_room = -1;
+		save_room = this->in_room->getVnum();
 
 	int mount = (MOUNT(this) ? MOUNT(this)->getVnum() : -1);
 

@@ -1977,6 +1977,7 @@ public:
 	bool passwordMatches(const std::string &passwordInput);
 	bool hasWolfbrotherBonuses();
 	bool disorientRoll();
+	bool shouldBlockEngagementDueToNumberFighting(Character *victim, bool displayMessage);
 
 
 	bool ShieldOutOfRange( Character* Target );
