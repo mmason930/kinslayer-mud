@@ -5,6 +5,9 @@ var script1701 = function(self, actor, here, args, extra) {
 
 	waitpulse 2;
 
+	if(actor.room != self.room || !self.canSee(actor) || self.position <= constants.POS_FIGHTING)
+		return;
+
 	switch(random(1, 5))
 	{
 		case 1:
