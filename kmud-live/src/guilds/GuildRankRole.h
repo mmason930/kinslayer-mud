@@ -12,6 +12,9 @@ protected:
 	GuildPrivilege *guildPrivilege;
 public:
 
+	GuildRankRole();
+	GuildRankRole(const GuildRankRole &guildRankRole);
+
 	int getGuildRankId() const;
 	void setGuildRankId(int guildRankId);
 

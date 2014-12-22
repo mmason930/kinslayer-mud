@@ -130,7 +130,10 @@ public:
 	GuildRankRole *getGuildRankRole(const sql::Row row) const;
 	void putGuildRankRole(sql::Connection connection, GuildRankRole *guildRankRole) const;
 	std::vector<GuildRankRole *> getGuildRankRoles(boost::optional<int> guildRankId) const;
+	void addGuildRankRole(sql::Connection connection, GuildRankRole *guildRankRole);
+	void removeGuildRankRole(sql::Connection connection, int guildRankRoleId);
 	std::map<int, GuildRankRole*> getGuildPrivilegeIdToGuildRankRoleMap(int guildRankId) const;
+
 
 	bool hasPrivilege(int guildId, int userId, GuildPrivilege *guildPrivilege) const;
 

@@ -886,11 +886,40 @@ void GuildUtil::applyChangesToGuildRank(sql::Connection connection, GuildRank *g
 	//NOTE: From here on out, we have a valid guildRank->getId()
 
 	//Now apply any changes to rank roles.
-	std::vector<GuildRankRole*> *guildRankRolesVector;
-	auto rankRolesIter = this->guildRankIdToGuildRankRolesMap.find(guildRank->getId());
+	std::vector<GuildRankRole*> existingGuildRankRolesVector = getGuildRankRoles(guildRank->getId());
 
-//	guildRankRolesVector = 
+	for(auto guildPrivilegeIter = GuildPrivilege::getStartIterator();guildPrivilegeIter != GuildPrivilege::getEndIterator();++guildPrivilegeIter)
+	{
+		auto privilege = (*guildPrivilegeIter);
+		GuildRankRole *existingRole = nullptr;
+		const GuildRankRole *newRole = nullptr;
 
+		//Get the existing role, if there is any.
+		auto existingRoleIter = std::find_if(existingGuildRankRolesVector.begin(), existingGuildRankRolesVector.end(), [=](GuildRankRole *role) {
+			return role->getGuildPrivilege()->getValue() == privilege->getValue();
+		});
+
+		if(existingRoleIter != existingGuildRankRolesVector.end())
+			existingRole = *existingRoleIter;
+
+		//Get the new role, if there is any.
+		auto newRoleIter = guildPrivilegeIdToGuildRankRoleMap.find(privilege->getValue());
+
+		if(newRoleIter != guildPrivilegeIdToGuildRankRoleMap.end())
+			newRole = newRoleIter->second;
+
+		//We only need to make a change if one exists and the other does not.
+
+		if(existingRole == nullptr && newRole != nullptr)
+		{//A role was added.
+			
+			addGuildRankRole(connection, new GuildRankRole(*newRole));
+		}
+		else if(newRole == nullptr && existingRole != nullptr)
+		{//A role was removed.
+			removeGuildRankRole(connection, existingRole->getId());
+		}
+	}
 }
 
 //Guild Rank Roles
@@ -941,6 +970,28 @@ std::vector<GuildRankRole *> GuildUtil::getGuildRankRoles(boost::optional<int> g
 	if(guildRankRolesIter == guildRankIdToGuildRankRolesMap.end())
 		return {};
 	return *(guildRankRolesIter->second);
+}
+
+void GuildUtil::addGuildRankRole(sql::Connection connection, GuildRankRole *guildRankRole)
+{
+	putGuildRankRole(connection, guildRankRole);
+
+	guildRankRoleMap[guildRankRole->getId()] = guildRankRole;
+	MiscUtil::pushToVectorMap(guildRankIdToGuildRankRolesMap, guildRankRole->getId(), guildRankRole);
+}
+
+void GuildUtil::removeGuildRankRole(sql::Connection connection, int guildRankRoleId)
+{
+	auto iter = guildRankRoleMap.find(guildRankRoleId);
+
+	if(iter != guildRankRoleMap.end())
+	{
+		auto guildRankRole = (*iter).second;
+
+		MiscUtil::popFromVectorMap(guildRankIdToGuildRankRolesMap, guildRankRole->getId());
+
+		delete guildRankRole;
+	}
 }
 
 std::map<int, GuildRankRole*> GuildUtil::getGuildPrivilegeIdToGuildRankRoleMap(int guildRankId) const

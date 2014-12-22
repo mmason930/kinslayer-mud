@@ -24,6 +24,8 @@
 #include "../../guilds/Guild.h"
 #include "../../guilds/GuildApplication.h"
 #include "../../guilds/GuildApplicationSignature.h"
+#include "../../guilds/GuildJoinApplication.h"
+#include "../../guilds/GuildJoinApplicationStatus.h"
 #include "../../guilds/UserGuild.h"
 #include "../../Exception.h"
 #include "../../Game.h"
@@ -40,20 +42,65 @@ void GeneralTestCase::setup()
 void GeneralTestCase::process()
 {
 
-	typedef std::function<void(Descriptor *d, class CommandTest *ct)> CommandTestBefore;
-	typedef std::function<void(Descriptor *d, class CommandTest *ct)> CommandTestAfter;
+	class TestDescriptor : public Descriptor
+	{
+	protected:
+		std::string outputSeen;
+	public:
+
+		TestDescriptor() : Descriptor() {}
+
+		virtual void appendToOutputBuffer(const std::string &str)
+		{
+			outputSeen.append(str);
+		}
+
+		virtual void appendToOutputBuffer(const char *str)
+		{
+			outputSeen.append(str);
+		}
+
+		bool saw(const std::string pattern)
+		{
+			return outputSeen.find(pattern) != std::string::npos;
+		}
+
+		void clearOutputSeen()
+		{
+			outputSeen.clear();
+		}
+
+		void initMock(class Character *ch)
+		{
+			descriptor = new kuDescriptor(nullptr);
+			strcpy(host, "127.0.0.1");
+			setGatewayDescriptorType(GatewayDescriptorType::unknown);
+			connected = CON_PLAYING;
+			idle_tics = 0;
+			wait = 0;
+			loginTime = DateTime();
+			hadInput = false;
+			hadOutput = false;
+			desc_num = -1;
+			character = ch;
+			next = nullptr;
+		}
+	};
+
+	typedef std::function<void(TestDescriptor *d, class CommandTest *ct)> CommandTestBefore;
+	typedef std::function<void(TestDescriptor *d, class CommandTest *ct)> CommandTestAfter;
 
 	class CommandTest
 	{
 	protected:
 	public:
 
-		CommandTest(Descriptor *d, const std::string &command)
+		CommandTest(TestDescriptor *d, const std::string &command)
 		{
 			this->d = d;
 			commands.push_back(command);
 		}
-		CommandTest(Descriptor *d, const std::string &command, const CommandTestBefore &beforeHandle, const CommandTestAfter &afterHandle)
+		CommandTest(TestDescriptor *d, const std::string &command, const CommandTestBefore &beforeHandle, const CommandTestAfter &afterHandle)
 			: beforeHandle(beforeHandle),
 			  afterHandle(afterHandle)
 		{
@@ -61,13 +108,13 @@ void GeneralTestCase::process()
 			this->d = d;
 		}
 
-		CommandTest(Descriptor *d, const std::vector<std::string> &commands, const CommandTestBefore &beforeHandle, const CommandTestAfter &afterHandle)
+		CommandTest(TestDescriptor *d, const std::vector<std::string> &commands, const CommandTestBefore &beforeHandle, const CommandTestAfter &afterHandle)
 			: commands(commands),
 			  beforeHandle(beforeHandle),
 			  afterHandle(afterHandle),
 			  d(d) {}
 
-		CommandTest(Descriptor *d, const std::vector<std::string> &commands, const CommandTestAfter &afterHandle)
+		CommandTest(TestDescriptor *d, const std::vector<std::string> &commands, const CommandTestAfter &afterHandle)
 			: commands(commands),
 			  afterHandle(afterHandle),
 			  d(d) {}
@@ -84,7 +131,7 @@ void GeneralTestCase::process()
 		boost::optional<CommandTestBefore> beforeHandle;
 		boost::optional<CommandTestAfter> afterHandle;
 		std::vector<std::string> commands;
-		Descriptor *d;
+		TestDescriptor *d;
 		int nr;
 	};
 
@@ -97,56 +144,68 @@ void GeneralTestCase::process()
 	auto roran = std::shared_ptr<Character>(CharacterUtil::loadCharacter("Roran"));
 	auto qmoney = std::shared_ptr<Character>(CharacterUtil::loadCharacter("Qmoney"));
 	auto galnor = std::shared_ptr<Character>(CharacterUtil::loadCharacter("Galnor"));
+	auto crunch = std::shared_ptr<Character>(CharacterUtil::loadCharacter("Crunch"));
+	auto lamb = std::shared_ptr<Character>(CharacterUtil::loadCharacter("Lamb"));
+	auto shepard = std::shared_ptr<Character>(CharacterUtil::loadCharacter("Shepard"));
 
-	auto jackDesc = std::shared_ptr<Descriptor>(new Descriptor());
-	auto lamgwinDesc = std::shared_ptr<Descriptor>(new Descriptor());
-	auto roranDesc = std::shared_ptr<Descriptor>(new Descriptor());
-	auto qmoneyDesc = std::shared_ptr<Descriptor>(new Descriptor());
-	auto galnorDesc = std::shared_ptr<Descriptor>(new Descriptor());
+	auto characters = {jack, lamgwin, roran, qmoney, galnor, crunch, lamb, shepard};
+
+	auto jackDesc = std::shared_ptr<TestDescriptor>(new TestDescriptor());
+	auto lamgwinDesc = std::shared_ptr<TestDescriptor>(new TestDescriptor());
+	auto roranDesc = std::shared_ptr<TestDescriptor>(new TestDescriptor());
+	auto qmoneyDesc = std::shared_ptr<TestDescriptor>(new TestDescriptor());
+	auto galnorDesc = std::shared_ptr<TestDescriptor>(new TestDescriptor());
+	auto crunchDesc = std::shared_ptr<TestDescriptor>(new TestDescriptor());
+	auto lambDesc = std::shared_ptr<TestDescriptor>(new TestDescriptor());
+	auto shepardDesc = std::shared_ptr<TestDescriptor>(new TestDescriptor());
 
 	jack->desc = jackDesc.get();
-	jack->desc->initMock(jack.get());
-	jack->MoveToRoom(FindRoomByVnum(201));
-
 	lamgwin->desc = lamgwinDesc.get();
-	lamgwin->desc->initMock(lamgwin.get());
-	lamgwin->MoveToRoom(FindRoomByVnum(201));
-
 	roran->desc = roranDesc.get();
-	roran->desc->initMock(roran.get());
-	roran->MoveToRoom(FindRoomByVnum(201));
-
 	qmoney->desc = qmoneyDesc.get();
-	qmoney->desc->initMock(qmoney.get());
-	qmoney->MoveToRoom(FindRoomByVnum(201));
-
 	galnor->desc = galnorDesc.get();
-	galnor->desc->initMock(galnor.get());
-	galnor->MoveToRoom(FindRoomByVnum(201));
+	crunch->desc = crunchDesc.get();
+	lamb->desc = lambDesc.get();
+	shepard->desc = shepardDesc.get();
+	
+	for(auto character : characters)
+	{
+		((TestDescriptor*)character->desc)->initMock(character.get());
+		character->MoveToRoom(201);
+		
+		for(auto application : GuildUtil::get()->getGuildApplications(character->player.idnum, GuildApplicationStatus::allExceptDenied()))
+		{
+			application->setStatus(GuildApplicationStatus::denied);
+			GuildUtil::get()->putGuildApplication(game->getConnection(), application);
+		}
+	}
 
-	commandTestQueue.push_back(CommandTest(lamgwin->desc, "call",
-		[](Descriptor *d, CommandTest *ct) -> void {
+	//Test gate calling.
+	commandTestQueue.push_back(CommandTest(lamgwinDesc.get(), "call",
+		[](TestDescriptor *d, CommandTest *ct) -> void {
 			d->character->MoveToRoom(FindRoomByVnum(112));
 			GET_RACE(d->character) = RACE_HUMAN;
 			d->character->in_room->setDoorBit(EAST, EX_CLOSED);
 			d->character->in_room->setDoorBit(EAST, EX_LOCKED);
 		},
-		[](Descriptor *d, CommandTest *ct) -> void {
+		[](TestDescriptor *d, CommandTest *ct) -> void {
 			ct->performAssert(d->character->in_room->dir_option[EAST]->isOpen());
+			ct->performAssert(d->saw("opens the gate."));
 		}
 		));
 
-
-	commandTestQueue.push_back(CommandTest(galnor->desc,
+	//Test action editing.
+	commandTestQueue.push_back(CommandTest(galnorDesc.get(),
 		{"aedit snicker", "y", "a", "You snicker loudly.", "q", "y"},
-		[](Descriptor *d, CommandTest *ct) -> void {
+		[](TestDescriptor *d, CommandTest *ct) -> void {
 			ct->performAssert(!strcmp(CommandUtil::get()->getSocialByAbbreviation("snicker")->char_no_arg, "You snicker loudly."));
 		}
 	));
 
-	commandTestQueue.push_back(CommandTest(jack->desc,
+	//Test Guild Creation Application submission.
+	commandTestQueue.push_back(CommandTest(jackDesc.get(),
 		{"guilds", "c", "c", "n", "The Jackuits", "d", "IT DOTH BE IMMACULATELY CONCEIVED", "s", "q", "q"},
-		[=](Descriptor *d, CommandTest *ct) -> void {
+		[=](TestDescriptor *d, CommandTest *ct) -> void {
 			d->character->points.gold = GuildUtil::get()->getCoppersToCreateNewGuild();
 			ct->nr = GuildUtil::get()->getGuildApplications().size();
 
@@ -174,7 +233,7 @@ void GeneralTestCase::process()
 				GuildUtil::get()->putGuild(game->getConnection(), guild);
 			}
 		},
-		[](Descriptor *d, CommandTest *ct) -> void {
+		[](TestDescriptor *d, CommandTest *ct) -> void {
 			ct->performAssert(GuildUtil::get()->getGuildApplications().size() > ct->nr);
 
 			auto application = GuildUtil::get()->getGuildApplications().back();
@@ -193,15 +252,16 @@ void GeneralTestCase::process()
 		}
 	));
 	
-
-	CommandTest guildSignatureTesting( lamgwin->desc,
+	//Test signing guild join application.
+	CommandTest guildSignatureTesting( lamgwinDesc.get(),
 		{"guilds", "c", "GUILD_ID", "s", "q", "q", "q"},
-		[](Descriptor *d, CommandTest *ct) -> void
+		[](TestDescriptor *d, CommandTest *ct) -> void
 		{
+			MudLog(BRF, LVL_APPR, TRUE, "%s is about to sign the guild application.", GET_NAME(d->character));
 			ct->nr = GuildUtil::get()->getGuildApplicationSignaturesByUserId(d->character->getUserId()).size();
 			ct->commands[2] = MiscUtil::toString(GuildUtil::get()->getGuildApplicationsSorted().back()->getId());
 		},
-		[](Descriptor *d, CommandTest *ct) -> void
+		[](TestDescriptor *d, CommandTest *ct) -> void
 		{
 			ct->performAssert(GuildUtil::get()->getGuildApplicationSignaturesByUserId(d->character->getUserId()).size() > ct->nr);
 		}
@@ -209,15 +269,16 @@ void GeneralTestCase::process()
 
 	commandTestQueue.push_back(guildSignatureTesting);
 
-	guildSignatureTesting.d = roran->desc;
+	guildSignatureTesting.d = roranDesc.get();
 	commandTestQueue.push_back(guildSignatureTesting);
 
-	guildSignatureTesting.d = qmoney->desc;
+	guildSignatureTesting.d = qmoneyDesc.get();
 	commandTestQueue.push_back(guildSignatureTesting);
 
-	commandTestQueue.push_back(CommandTest(jack->desc,
+	//Test approving guild signatures.
+	commandTestQueue.push_back(CommandTest(jackDesc.get(),
 		{ "guilds", "c", "GUILD_ID", "p", "ID", "p", "ID", "p", "ID", "q", "q", "q"},
-		[](Descriptor *d, CommandTest *ct) -> void
+		[](TestDescriptor *d, CommandTest *ct) -> void
 		{
 			ct->nr = GuildUtil::get()->getGuildApplicationsSorted().back()->getId();
 			ct->commands[2] = MiscUtil::toString(ct->nr);
@@ -228,7 +289,7 @@ void GeneralTestCase::process()
 			ct->commands[6] = MiscUtil::toString(signatures[1]->getId());
 			ct->commands[8] = MiscUtil::toString(signatures[2]->getId());
 		},
-		[](Descriptor *d, CommandTest *ct) -> void
+		[](TestDescriptor *d, CommandTest *ct) -> void
 		{
 			//Test the status of the Guild, mainly. It should now be Reviewing after the signatures are accepted.
 			auto application = GuildUtil::get()->getGuildApplication(ct->nr);
@@ -236,14 +297,14 @@ void GeneralTestCase::process()
 		}
 	));
 
-	commandTestQueue.push_back(CommandTest(galnor->desc,
+	commandTestQueue.push_back(CommandTest(galnorDesc.get(),
 		{"guilds", "c", "GUILD_ID", "a", "y", "q", "q", "q"},
-		[](Descriptor *d, CommandTest *ct) -> void
+		[](TestDescriptor *d, CommandTest *ct) -> void
 		{
 			ct->nr = GuildUtil::get()->getGuildApplicationsSorted().back()->getId();
 			ct->commands[2] = MiscUtil::toString(ct->nr);
 		},
-		[=](Descriptor *d, CommandTest *ct) -> void
+		[=](TestDescriptor *d, CommandTest *ct) -> void
 		{
 			auto userGuild = GuildUtil::get()->getUserGuildsByUserId(jack->getUserId(), {UserGuildStatus::active})[0];
 			auto guild = GuildUtil::get()->getGuild(userGuild->getGuildId());
@@ -262,6 +323,113 @@ void GeneralTestCase::process()
 			ct->performAssert(!GuildUtil::get()->getUserGuildsByUserId(qmoney->getUserId(), {UserGuildStatus::active}).empty());
 		}
 	));
+
+	//Test Lamb submitting a Guild join application for the newly created Guild.
+	//First test him with a level that is too low.
+	commandTestQueue.push_back(CommandTest(lambDesc.get(),
+		{"guilds", "j", "<GUILD_OPTION>", "a", "q", "q", "q"},
+		[=](TestDescriptor *d, CommandTest *ct) -> void
+		{
+			GET_LEVEL(d->character) = GuildUtil::get()->getMinimumLevelToJoinGuild() - 1;
+			ct->commands[2] = std::string("G") + MiscUtil::toString(GuildUtil::get()->getActiveUserGuildsByUserId(jack->player.idnum).back()->getGuildId());
+		},
+		[=](TestDescriptor *d, CommandTest *ct) -> void
+		{
+			std::string expectedMessage = std::string("You must be at least level ")
+				+ MiscUtil::toString(GuildUtil::get()->getMinimumLevelToJoinGuild())
+				+ " to join a Guild.";
+
+			ct->performAssert(d->saw(expectedMessage));
+			ct->performAssert(GuildUtil::get()->getActiveUserGuildsByUserId(lamb->player.idnum).empty());
+		}
+	));
+
+	//Test Lamb joining Guild with a pending Guild Create Application.
+	commandTestQueue.push_back(CommandTest(lambDesc.get(),
+	{"guilds", "j", "<GUILD_OPTION>", "a", "q", "q", "q"},
+	[=](TestDescriptor *d, CommandTest *ct) -> void
+	{
+		GET_LEVEL(d->character) = GuildUtil::get()->getMinimumLevelToJoinGuild();
+		ct->nr = GuildUtil::get()->submitGuildApplication(game->getConnection(), d->character->player.idnum, GET_RACE(lamb), "Lamb Wannabe Guild", "Desc", GuildUtil::get()->getCoppersToCreateNewGuild())->getId();
+		ct->commands[2] = std::string("G") + MiscUtil::toString(GuildUtil::get()->getActiveUserGuildsByUserId(jack->player.idnum).back()->getGuildId());
+	},
+	[=](TestDescriptor *d, CommandTest *ct) -> void
+	{
+		ct->performAssert(GuildUtil::get()->getActiveUserGuildsByUserId(d->character->player.idnum).empty());
+		ct->performAssert(d->saw("You have another Guild Creation Application that is pending/reviewing."));
+	}));
+
+	//Test Shepard joining Guild with a signature.
+	commandTestQueue.push_back(CommandTest(shepardDesc.get(),
+	{"guilds", "j", "<GUILD_OPTION>", "a", "q", "q", "q"},
+	[=](TestDescriptor *d, CommandTest *ct) -> void
+	{
+		GET_LEVEL(d->character) = GuildUtil::get()->getMinimumLevelToJoinGuild();
+		ct->nr = GuildUtil::get()->getGuildApplications(lamb->player.idnum, {GuildApplicationStatus::pending}).back()->getId();
+		GuildUtil::get()->submitGuildApplicationSignature(game->getConnection(), shepard->player.idnum, ct->nr)->getId();
+		ct->commands[2] = std::string("G") + MiscUtil::toString(GuildUtil::get()->getActiveUserGuildsByUserId(jack->player.idnum).back()->getGuildId());
+	},
+	[=](TestDescriptor *d, CommandTest *ct) -> void
+	{
+		//We're done with the creation application now.
+		GuildUtil::get()->denyGuildApplication(game->getConnection(), ct->nr, galnor->player.idnum, "Denied.");
+		ct->performAssert(GuildUtil::get()->getActiveUserGuildsByUserId(d->character->player.idnum).empty());
+		ct->performAssert(d->saw("You have a signature on a Guild Creation Application that is still open."));
+	}));
+
+	//Test Lamgwin trying to join the Guild. He is in another Guild already and should not be allowed to join.
+	commandTestQueue.push_back(CommandTest(lamgwinDesc.get(),
+	{"guilds", "j", "<GUILD_OPTION>", "a", "q", "q", "q"},
+	[=](TestDescriptor *d, CommandTest *ct) -> void
+	{
+		ct->nr = GuildUtil::get()->getActiveUserGuildsByUserId(d->character->player.idnum).size();
+		ct->commands[2] = std::string("G") + MiscUtil::toString(GuildUtil::get()->getActiveUserGuildsByUserId(jack->player.idnum).back()->getGuildId());
+	},
+	[=](TestDescriptor *d, CommandTest *ct) -> void
+	{
+		ct->performAssert(ct->nr == GuildUtil::get()->getActiveUserGuildsByUserId(d->character->player.idnum).size());
+		ct->performAssert(d->saw("You are already in another Guild."));
+	}));
+
+	//Test Shepard trying to join a Guild despite having another application out there.
+	commandTestQueue.push_back(CommandTest(shepardDesc.get(),
+	{"guilds", "j", "<GUILD_OPTION>", "a", "q", "q", "q"},
+	[=](TestDescriptor *d, CommandTest *ct) -> void
+	{
+		GuildUtil::get()->submitGuildJoinApplication(game->getConnection(), d->character->player.idnum, GuildUtil::get()->getActiveUserGuildsByUserId(jack->player.idnum).back()->getGuildId(), "Ohai");
+		ct->nr = GuildUtil::get()->getActiveUserGuildsByUserId(d->character->player.idnum).size();
+		ct->commands[2] = std::string("G") + MiscUtil::toString(GuildUtil::get()->getActiveUserGuildsByUserId(jack->player.idnum).back()->getGuildId());
+	},
+	[=](TestDescriptor *d, CommandTest *ct) -> void
+	{
+		for(auto application : GuildUtil::get()->getGuildJoinApplications(d->character->player.idnum, boost::optional<int>()))
+		{
+			if(application->getStatus() != GuildJoinApplicationStatus::denied)
+			{
+				application->setStatus(GuildJoinApplicationStatus::denied);
+				GuildUtil::get()->putGuildJoinApplication(game->getConnection(), application);
+			}
+		}
+		ct->performAssert(ct->nr == GuildUtil::get()->getActiveUserGuildsByUserId(d->character->player.idnum).size());
+		ct->performAssert(d->saw("You have another pending application to join a Guild."));
+	}));
+
+	//Test Shepard successfully joining a Guild.
+	commandTestQueue.push_back(CommandTest(shepardDesc.get(),
+	{"guilds", "j", "<GUILD_OPTION>", "a", "q", "q", "q"},
+	[=](TestDescriptor *d, CommandTest *ct) -> void
+	{
+		//Applying should still work in this scenario. The application is denied!
+		auto application = GuildUtil::get()->submitGuildApplication(game->getConnection(), lamb->player.idnum, GET_RACE(d->character), "Some Guild Name", "Some Desc.", 10000);
+		GuildUtil::get()->submitGuildApplicationSignature(game->getConnection(), shepard->player.idnum, application->getId());
+		GuildUtil::get()->denyGuildApplication(game->getConnection(), application->getId(), galnor->player.idnum, "Denied!");
+
+		ct->commands[2] = std::string("G") + MiscUtil::toString(GuildUtil::get()->getActiveUserGuildsByUserId(jack->player.idnum).back()->getGuildId());
+	},
+	[=](TestDescriptor *d, CommandTest *ct) -> void
+	{
+		ct->performAssert(GuildUtil::get()->getActiveUserGuildsByUserId(d->character->player.idnum).size() == 1);
+	}));
 
 	while(!commandTestQueue.empty())
 	{
@@ -288,6 +456,11 @@ void GeneralTestCase::process()
 				MudLog(BRF, TRUE, LVL_APPR, "General Test Case failed. Command entered `%s` by `%s`.", StringUtil::implode(commandTest.commands, ", ").c_str(), GET_NAME(commandTest.d->character));
 				break;
 			}
+		}
+
+		for(auto character : characters)
+		{
+			((TestDescriptor*)character->desc)->clearOutputSeen();
 		}
 	}
 }

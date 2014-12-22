@@ -68,22 +68,6 @@ Descriptor::~Descriptor()
 {
 }
 
-void Descriptor::initMock(Character *ch)
-{
-	descriptor = new kuDescriptor(nullptr);
-	strcpy(host, "127.0.0.1");
-	setGatewayDescriptorType(GatewayDescriptorType::unknown);
-	connected = CON_PLAYING;
-	idle_tics = 0;
-	wait = 0;
-	loginTime = DateTime();
-	hadInput = false;
-	hadOutput = false;
-	desc_num = -1;
-	character = ch;
-	next = nullptr;
-}
-
 void Descriptor::closeSocketClean()
 {
 	gatewayConnection->send("Close " + session + "\n");

@@ -93,6 +93,31 @@ public:
 		
 		container->push_back(value);
 	}
+	template<typename KeyType, typename ValueType>
+	static void popFromVectorMap(std::map<KeyType, std::vector<ValueType> *> map, const KeyType &key)
+	{
+		auto vectorIter = map.find(key);
+
+		if(vectorIter != map.end())
+		{
+			std::vector<ValueType> *vectorPointer = vectorIter->second;
+			
+			//typename std::vector<ValueType>::iterator objectIter = std::find_if(vectorPointer->begin(), vectorPointer->end(), keyRetrievalFunction);
+
+			typename std::vector<ValueType>::iterator objectIter;
+
+			if(objectIter != vectorPointer->end())
+			{
+				vectorPointer->erase(objectIter);
+			}
+
+			if(vectorPointer->empty())
+			{
+				delete vectorPointer;
+				map.erase(vectorIter);
+			}
+		}
+	}
 
 	template<typename KeyType, typename ValueType>
 	static void freeMapValues(std::map<KeyType, ValueType> &map)

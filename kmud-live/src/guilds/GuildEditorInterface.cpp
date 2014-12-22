@@ -480,22 +480,30 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 			{
 			case 'A':
 			{
+				//NEEDS TEST
 				if(guild->getStatus() != GuildStatus::active)
 					return i->send("You cannot join this Guild because its status is not active.\r\n");
+				//NEEDS TEST
 				if(guild->getRace() != guild->getRace())
 					return i->send("You cannot join this Guild because it is for a race other than your own.\r\n");
+				//Tested
 				if(!GuildUtil::get()->getUserGuildsByUserId(i->ch->getUserId(), {UserGuildStatus::active}).empty())
 					return i->send("You are already in another Guild.\r\n");
+				//NEEDS TEST
 				if(!GuildUtil::get()->getGuildJoinApplications(i->getUserId(), boost::optional<int>(), {GuildJoinApplicationStatus::reviewing}).empty())
 					return i->send("You have another pending application to join a Guild.\r\n");
+				//Tested
 				if(!GuildUtil::get()->getGuildApplications(i->getUserId(), {GuildApplicationStatus::pending, GuildApplicationStatus::reviewing}).empty())
-					return i->send("You have another Guild Creation Application that is pending/reviewing.\r\n");
+					return i->send("You have another Guild Creation Application that is pending/reviewing.\r\n");//
+				//Tested
 				if(GET_LEVEL(i->ch) < GuildUtil::get()->getMinimumLevelToJoinGuild())
-					return i->send("You must be at least level %d to join a Guild.\r\n");
+					return i->send("You must be at least level %d to join a Guild.\r\n", GuildUtil::get()->getMinimumLevelToJoinGuild());
 				for(auto signature : GuildUtil::get()->getGuildApplicationSignaturesByUserId(i->getUserId(), {GuildApplicationSignatureStatus::pending, GuildApplicationSignatureStatus::approved}))
 				{
 					auto guildApplication = GuildUtil::get()->getGuildApplication(signature->getGuildApplicationId());
 
+					//Tested
+					Log("Application ID: %d, Status: %s, Application Closed: %s", guildApplication->getId(), guildApplication->getStatus()->getStandardName().c_str(), StringUtil::yesNo(guildApplication->getStatus()->getApplicationClosed()).c_str());
 					if(!guildApplication->getStatus()->getApplicationClosed())
 						return i->send("You have a signature on a Guild Creation Application that is still open.\r\n");
 				}

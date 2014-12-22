@@ -93,11 +93,9 @@ public:
 
 	void completeEnterGame();
 
-	void initMock(class Character *ch);
-
 	std::string getOutputBuffer() const;
-	void appendToOutputBuffer(const std::string &str);
-	void appendToOutputBuffer(const char *str);
+	virtual void appendToOutputBuffer(const std::string &str);
+	virtual void appendToOutputBuffer(const char *str);
 	void clearOutputBuffer();
 	void flushOutputBuffer();
 		
