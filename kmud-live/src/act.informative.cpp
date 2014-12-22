@@ -33,6 +33,8 @@
 #include "Descriptor.h"
 #include "rooms/Room.h"
 #include "zones.h"
+#include "Game.h"
+#include "TextTableBuilder.h"
 
 #include "js.h"
 #include "js_utils.h"
@@ -492,6 +494,49 @@ CommandHandler do_view = DEFINE_COMMAND
 				ch->send("#%d %s\r\n", GET_LEVEL(ch) < LVL_GRGOD ? i : clan->vnum, clan->Name.c_str());
 			}
 		}
+	}
+	else if( !str_cmp(buf1, "warrants"))
+	{
+		if(!ch->desc)
+			return;
+
+		TextTableBuilder builder;
+
+		builder.startRow()
+			->put("Name")
+			->put("Warrant Name");
+
+		std::vector<int> warrantIdSet;
+
+		for(UserClan *userClan : ch->userClans)
+		{
+			Clan *clan = ClanUtil::getClan(userClan->getClanId());
+				
+			if(clan && clan->GetWarrant())
+				warrantIdSet.push_back(clan->GetWarrant()->vnum);
+		}
+
+		for(auto userIdAndWarrant : CharacterUtil::getUserIdSetWithWarrant(game->getConnection(), warrantIdSet))
+		{
+			//Log("User ID: %d, Warrant ID: %d", userIdAndWarrant.first, userIdAndWarrant.second);
+			auto playerIndex = CharacterUtil::getPlayerIndexByUserId(userIdAndWarrant.first);
+			auto warrant = WarrantByVnum(userIdAndWarrant.second);
+
+			if(playerIndex && warrant)
+			{
+				builder.startRow()
+						->put(playerIndex->name)
+						->put(warrant->Name);
+			}
+		}
+
+		std::string tableString = builder.build();
+		char *tableCString = new char[tableString.size() + 1];
+		strcpy(tableCString, tableString.c_str());
+
+		page_string(ch->desc, tableCString, TRUE);
+
+		delete[] tableCString;
 	}
 	else if( !str_cmp(buf1, "trophy") )
 	{

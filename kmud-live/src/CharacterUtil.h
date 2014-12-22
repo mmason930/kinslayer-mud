@@ -3,6 +3,7 @@
 
 #include <mysql/sqlDatabase.h>
 #include <list>
+#include <vector>
 
 class PlayerIndex;
 class Character;
@@ -41,6 +42,7 @@ public:
 	static void freeUserMacros(std::list<class UserMacro *> &userMacros);
 	static bool isValidUserName(const std::string username);
 	static bool authenticateUserWebSession(const int userId, const std::string &sessionId);
+	static std::vector<std::pair<int, int>> getUserIdSetWithWarrant(sql::Connection connection, const std::vector<int> &warrantIdSet = std::vector<int>());
 };
 
 #endif

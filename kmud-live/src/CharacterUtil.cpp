@@ -596,3 +596,48 @@ bool CharacterUtil::authenticateUserWebSession(const int userId, const std::stri
 
 	return (query->numRows() > 0);
 }
+
+std::vector<std::pair<int, int>> CharacterUtil::getUserIdSetWithWarrant(sql::Connection connection, const std::vector<int> &warrantIdSet)
+{
+	if(warrantIdSet.empty())
+		return {};
+
+	std::vector<std::pair<int, int>> userIdAndWarrantSet;
+	std::stringstream sqlBuffer;
+
+	sqlBuffer	<< " SELECT user_id, warrants"
+				<< " FROM users";
+
+	sql::Query query = connection->sendQuery(sqlBuffer.str());
+	
+	int warrants[4];
+	char f1[128], f2[128], f3[128], f4[128];
+
+	while(query->hasNextRow())
+	{
+		sql::Row row = query->getRow();
+		int userId = row.getInt("user_id");
+		std::string warrantString = row.getString("warrants");
+
+		memset(warrants, sizeof(warrants), 0);
+
+		if(sscanf(warrantString.c_str(), "%s %s %s %s", f1, f2, f3, f4) == 4)
+		{
+			warrants[0] = asciiflag_conv(f1);
+			warrants[1] = asciiflag_conv(f2);
+			warrants[2] = asciiflag_conv(f3);
+			warrants[3] = asciiflag_conv(f4);
+		}
+
+		for(int warrantId : warrantIdSet)
+		{
+			if(IS_SET_AR(warrants, warrantId))
+			{
+				userIdAndWarrantSet.push_back(std::make_pair(userId, warrantId));
+				break;
+			}
+		}
+	}
+
+	return userIdAndWarrantSet;
+}
