@@ -866,11 +866,11 @@ int perform_drop( Character *ch, Object *obj, bool vaultSave )
 		return 0;
 	}
     if(!IS_OBJ_STAT((obj), ITEM_INVISIBLE) || GET_LEVEL(ch) >= LVL_IMMORT) {//RHOLLOR 05.03.09 remove message when item INVIS
-        sprintf( buf, "You drop $p." );
-        Act( buf, FALSE, ch, obj, 0, TO_CHAR );
+        sprintf(buf, "You drop $p.");
+        Act(buf, FALSE, ch, obj, 0, TO_CHAR );
 
-        sprintf( buf, "$n drops $p.", NULL, true);
-        Act( buf, TRUE, ch, obj, 0, TO_ROOM );
+        sprintf(buf, "$n drops $p.");
+        Act(buf, TRUE, ch, obj, 0, TO_ROOM);
     }
 
 	obj_from_char( obj );

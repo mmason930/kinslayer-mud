@@ -49,14 +49,13 @@ OBJFILES = comm.o act.comm.o act.informative.o act.movement.o act.item.o \
 	jsoncpp/json_reader.o jsoncpp/json_writer.o jsoncpp/json_value.o ObjectMoveLogger.o \
 	PlayerPortalDescriptor.o PlayerPortalDescriptorStatus.o PlayerPortalServer.o Game.o \
 	PlayerPortalCommandProcessor.o commands/immortals/Locate.o EntityType.o rooms/Room.o rooms/RoomSector.o rooms/Exit.o \
-	MobLoadLogger.o SQLUtil.o Script.o guilds/Guild.o guilds/GuildStatus.o guilds/GuildUtil.o guilds/UserGuild.o \
-	dbutils/QueryUtil.o TextTableBuilder.o editor-interface/EditorInterfaceBase.o editor-interface/EditorInterfaceInstance.o \
-	editor-interface/EditorInterfaceMenu.o guilds/GuildEditorInterface.o guilds/GuildApplication.o \
-	guilds/GuildApplicationStatus.o guilds/UserGuildStatus.o guilds/GuildApplicationSignature.o \
+	MobLoadLogger.o SQLUtil.o Script.o utils/ThreadedLogFile.o guilds/Guild.o guilds/GuildStatus.o guilds/GuildUtil.o \
+	guilds/UserGuild.o dbutils/QueryUtil.o TextTableBuilder.o editor-interface/EditorInterfaceBase.o \
+	editor-interface/EditorInterfaceInstance.o editor-interface/EditorInterfaceMenu.o guilds/GuildEditorInterface.o \
+	guilds/GuildApplication.o guilds/GuildApplicationStatus.o guilds/UserGuildStatus.o guilds/GuildApplicationSignature.o \
 	guilds/GuildApplicationSignatureStatus.o commands/infrastructure/Social.o commands/infrastructure/CommandUtil.o \
 	test/TestUtil.o test/general/GeneralTestCase.o guilds/GuildJoinApplication.o guilds/GuildJoinApplicationStatus.o \
 	guilds/GuildRank.o guilds/GuildRankRole.o guilds/GuildRankStatus.o guilds/GuildPrivilege.o
-
 
 OBJFILES := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILES))
 
