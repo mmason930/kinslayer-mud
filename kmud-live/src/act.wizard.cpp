@@ -1120,6 +1120,11 @@ ACMD(do_extra)
 					break;
 			}
 		}
+		else if(!str_cmp(vArgs.at(0), "stats"))
+		{
+			ch->send("You can carry %d items and %d pounds.\r\n", CAN_CARRY_N(ch), CAN_CARRY_W(ch));
+			ch->send("Carrying Items: %d, Weight: %.2f\r\n", IS_CARRYING_N(ch), IS_CARRYING_W(ch));
+		}
 		else if(!str_cmp(vArgs.at(0), "trackdel"))
 		{
 			Clock MyClock;

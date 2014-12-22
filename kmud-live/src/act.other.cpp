@@ -516,17 +516,27 @@ ACMD( do_butcher )
 				MudLog( BRF, LVL_APPR, TRUE, "%s attempted butchering %s, result was attempt to load item %d.",
 						GET_NAME( ch ), corpse->GetSDesc(), corpse->scalp->Food->vnum );
 			}
+			
+			ch->send("You lean over and butcher %s from %s.\r\n", OBJS(obj, ch), OBJS(corpse, ch));
+			sprintf(buf, "$n leans over and butchers %s from %s.", OBJS(obj, ch), OBJS(corpse, ch));
+			Act(buf, false, ch, nullptr, nullptr, TO_ROOM, nullptr, true);
 
-			obj_to_char( obj, ch );
+			if( ch->TooHeavyToPickUp( obj ) )
+			{
+				ch->send("You can't carry that much weight!\r\n");
+				obj->MoveToRoom(ch->in_room, false);
+			}
+			else if(IS_CARRYING_N(ch) >= CAN_CARRY_N(ch))
+			{
+				ch->send("You can't carry any more items!\r\n");
+				obj->MoveToRoom(ch->in_room, false);
+			}
+			else
+				obj_to_char( obj, ch );
 
 			if( !obj->IsPurged() ) {
 				js_load_triggers(obj);
 			}
-			ch->send( "You lean over and butcher %s from the corpse of %s.\r\n",
-					  obj->GetSDesc(), corpse->scalp->name.c_str() );
-			sprintf( buf, "%s leans over and butchers %s from the corpse of %s.", GET_NAME( ch ),
-					 obj->GetSDesc(), corpse->scalp->name.c_str() );
-			Act( buf, TRUE, ch, NULL, NULL, TO_ROOM, NULL, true );
 		}
 
 		if( subcmd == SCMD_SKIN )
@@ -565,21 +575,29 @@ ACMD( do_butcher )
 						GET_NAME( ch ), corpse->GetSDesc(), corpse->scalp->Skin->vnum );
 			}
 
-			obj_to_char( obj, ch );
+			ch->send("You lean over and carve %s from %s.\r\n", OBJS(obj, ch), OBJS(corpse, ch));
+			sprintf(buf, "$n leans over and carves %s from %s.", OBJS(obj, ch), OBJS(corpse, ch));
+			Act(buf, false, ch, nullptr, nullptr, TO_ROOM, nullptr, true);
+
+			if( ch->TooHeavyToPickUp( obj ) )
+			{
+				ch->send("You can't carry that much weight!\r\n");
+				obj->MoveToRoom(ch->in_room, false);
+			}
+			else if(IS_CARRYING_N(ch) >= CAN_CARRY_N(ch))
+			{
+				ch->send("You can't carry any more items!\r\n");
+				obj->MoveToRoom(ch->in_room, false);
+			}
+			else
+				obj_to_char( obj, ch );
 
 			if( !obj->IsPurged() ) {
 				js_load_triggers(obj);
 			}
 
 			corpse->scalp->Skin->skinned = true;
-
-			ch->send( "You lean over and carve %s from the corpse of %s.\r\n",
-					  obj->GetSDesc(), corpse->scalp->name.c_str() );
-			sprintf( buf, "%s leans over and carves %s from the corpse of %s.", GET_NAME( ch ),
-					 obj->GetSDesc(), corpse->scalp->name.c_str() );
-			Act( buf, TRUE, ch, NULL, NULL, TO_ROOM, NULL, true );
 		}
-
 	}
 }
 
@@ -670,14 +688,18 @@ ACMD( do_scalp )
 		SET_BITK( scalpo->obj_flags.wear_flags, ITEM_WEAR_TAKE );
 		GET_OBJ_WEIGHT( scalpo ) = 2;
 
-		ch->send( "You sever a bloody %s from the corpse of %s.\r\n", type, corpse->scalp->name.c_str() );
-		sprintf( buf, "%s leans over and severs the bloody %s from the corpse of %s.", GET_NAME( ch ), type,
-		         corpse->scalp->name.c_str() );
-		Act( buf, TRUE, ch, 0, 0, TO_ROOM, NULL, true );
+		ch->send("You sever a bloody %s from %s.\r\n", type, OBJS(corpse, ch));
+		sprintf(buf, "$n leans over and severs the bloody %s from %s.", type, OBJS(corpse, ch));
+		Act(buf, false, ch, nullptr, nullptr, TO_ROOM, nullptr, true );
 
 		if( ch->TooHeavyToPickUp( scalpo ) )
 		{
 			ch->send("You can't carry that much weight!\r\n");
+			scalpo->MoveToRoom(ch->in_room, true);
+		}
+		else if(IS_CARRYING_N(ch) >= CAN_CARRY_N(ch))
+		{
+			ch->send("You can't carry any more items!\r\n");
 			scalpo->MoveToRoom(ch->in_room, true);
 		}
 		else
