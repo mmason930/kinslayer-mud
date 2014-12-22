@@ -3,7 +3,7 @@
 
 #include "../utils.h"
 
-#include <boost/filesystem.hpp>"
+#include <boost/filesystem.hpp>
 #include "ThreadedLogFile.h"
 
 ThreadedLogFile::ThreadedLogFile(const std::string &filePath)
