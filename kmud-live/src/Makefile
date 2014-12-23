@@ -29,33 +29,154 @@ LIBS = -lsqlDatabase -lmysqlclient -lflusspferd -lcrypt -lstdc++ -lboost_regex -
 
 OBJDIR = obj
 
-OBJFILES = comm.o act.comm.o act.informative.o act.movement.o act.item.o \
-	act.offensive.o act.other.o act.social.o act.wizard.o ban.o \
-	clans.o class.o config.o constants.o db.o fight.o graph.o handler.o \
-	interpreter.o limits.o magic.o mobact.o modify.o objsave.o \
-	olc.o poker.o shop.o spec_assign.o spec_procs.o zones.o \
-	spell_parser.o spells.o utils.o weather.o redit.o oedit.o zedit.o \
-	medit.o sedit.o cedit.o md5.o accounts.o dg_event.o aedit.o kedit.o \
-	cledit.o wedit.o stats.o statedit.o weave.o \
-	mobs.o js.o js_interpreter.o js_functions.o jedit.o js_constants.o \
-	JSRoom.o JSObject.o JSQuery.o JSRow.o JSCharacter.o js_utils.o \
-	auction.o kuSockets.o kuListener.o kuDescriptor.o kuClient.o threaded_jobs.o \
-	MiscUtil.o StringUtil.o TimeUtil.o DateTime.o UserLogoutType.o \
-	GatewayClient.o GatewayDescriptor.o GatewayDescriptorStatus.o GatewayServer.o Descriptor.o \
-	MudStatus.o SystemUtil.o CharacterUtil.o ForumUtil.o DatabaseUtil.o UserType.o ClanUtil.o \
-	ClanQuestPointTransaction.o OLCUtil.o UserClan.o OlcEditType.o UserEmailEditor.o MailUtil.o \
-	GatewayListener.o WebSocketDataFrame.o WebSocketClientHeaderIETF_HYBI17.o WebSocketClientHeader.o \
-	WebSocketClientHeaderHixie76.o sha1.o GatewayDescriptorType.o \
-	jsoncpp/json_reader.o jsoncpp/json_writer.o jsoncpp/json_value.o ObjectMoveLogger.o \
-	PlayerPortalDescriptor.o PlayerPortalDescriptorStatus.o PlayerPortalServer.o Game.o \
-	PlayerPortalCommandProcessor.o commands/immortals/Locate.o EntityType.o rooms/Room.o rooms/RoomSector.o rooms/Exit.o \
-	MobLoadLogger.o SQLUtil.o Script.o utils/ThreadedLogFile.o guilds/Guild.o guilds/GuildStatus.o guilds/GuildUtil.o \
-	guilds/UserGuild.o dbutils/QueryUtil.o TextTableBuilder.o editor-interface/EditorInterfaceBase.o \
-	editor-interface/EditorInterfaceInstance.o editor-interface/EditorInterfaceMenu.o guilds/GuildEditorInterface.o \
-	guilds/GuildApplication.o guilds/GuildApplicationStatus.o guilds/UserGuildStatus.o guilds/GuildApplicationSignature.o \
-	guilds/GuildApplicationSignatureStatus.o commands/infrastructure/Social.o commands/infrastructure/CommandUtil.o \
-	test/TestUtil.o test/general/GeneralTestCase.o guilds/GuildJoinApplication.o guilds/GuildJoinApplicationStatus.o \
-	guilds/GuildRank.o guilds/GuildRankRole.o guilds/GuildRankStatus.o guilds/GuildPrivilege.o
+OBJFILES =	accounts.o \
+			act.comm.o \
+			act.informative.o \
+			act.item.o \
+			act.movement.o \
+			act.offensive.o \
+			act.other.o \
+			act.social.o \
+			act.wizard.o \
+			aedit.o \
+			auction.o \
+			ban.o \
+			cedit.o \
+			CharacterUtil.o \
+			ClanQuestPointTransaction.o \
+			clans.o \
+			ClanUtil.o \
+			class.o \
+			cledit.o \
+			comm.o \
+			commands/immortals/Locate.o \
+			commands/items/Get.o \
+			commands/infrastructure/CommandUtil.o \
+			commands/infrastructure/Social.o \
+			config.o \
+			constants.o \
+			DatabaseUtil.o \
+			DateTime.o \
+			db.o \
+			dbutils/QueryUtil.o \
+			Descriptor.o \
+			dg_event.o \
+			dotmode/DotMode.o \
+			dotmode/DotModeArea.o \
+			dotmode/DotModeTarget.o \
+			dotmode/DotModeTargetType.o \
+			dotmode/DotModeUtil.o \
+			editor-interface/EditorInterfaceBase.o \
+			editor-interface/EditorInterfaceInstance.o \
+			editor-interface/EditorInterfaceMenu.o \
+			EntityType.o \
+			fight.o \
+			ForumUtil.o \
+			Game.o \
+			GatewayClient.o \
+			GatewayDescriptor.o \
+			GatewayDescriptorStatus.o \
+			GatewayDescriptorType.o \
+			GatewayListener.o \
+			GatewayServer.o \
+			graph.o \
+			guilds/Guild.o \
+			guilds/GuildApplication.o \
+			guilds/GuildApplicationSignature.o \
+			guilds/GuildApplicationSignatureStatus.o \
+			guilds/GuildApplicationStatus.o \
+			guilds/GuildEditorInterface.o \
+			guilds/GuildJoinApplication.o \
+			guilds/GuildJoinApplicationStatus.o \
+			guilds/GuildPrivilege.o \
+			guilds/GuildRank.o \
+			guilds/GuildRankRole.o \
+			guilds/GuildRankStatus.o \
+			guilds/GuildStatus.o \
+			guilds/GuildUtil.o \
+			guilds/UserGuild.o \
+			guilds/UserGuildStatus.o \
+			handler.o \
+			interpreter.o \
+			items/ItemUtil.o \
+			jedit.o \
+			js.o \
+			js_constants.o \
+			js_functions.o \
+			js_interpreter.o \
+			js_utils.o \
+			JSCharacter.o \
+			JSObject.o \
+			jsoncpp/json_reader.o \
+			jsoncpp/json_value.o \
+			jsoncpp/json_writer.o \
+			JSQuery.o \
+			JSRoom.o \
+			JSRow.o \
+			kedit.o \
+			kuClient.o \
+			kuDescriptor.o \
+			kuListener.o \
+			kuSockets.o \
+			limits.o \
+			magic.o \
+			MailUtil.o \
+			md5.o \
+			medit.o \
+			MiscUtil.o \
+			mobact.o \
+			MobLoadLogger.o \
+			mobs.o \
+			modify.o \
+			MudStatus.o \
+			ObjectMoveLogger.o \
+			objsave.o \
+			oedit.o \
+			olc.o \
+			OlcEditType.o \
+			OLCUtil.o \
+			PlayerPortalCommandProcessor.o \
+			PlayerPortalDescriptor.o \
+			PlayerPortalDescriptorStatus.o \
+			PlayerPortalServer.o \
+			poker.o \
+			redit.o \
+			rooms/Exit.o \
+			rooms/Room.o \
+			rooms/RoomSector.o \
+			Script.o \
+			sedit.o \
+			sha1.o \
+			shop.o \
+			spec_assign.o \
+			spec_procs.o \
+			spell_parser.o \
+			spells.o \
+			SQLUtil.o \
+			statedit.o \
+			stats.o \
+			StringUtil.o \
+			SystemUtil.o \
+			test/general/GeneralTestCase.o \
+			test/TestUtil.o \
+			TextTableBuilder.o \
+			threaded_jobs.o \
+			TimeUtil.o \
+			UserClan.o \
+			UserEmailEditor.o \
+			UserLogoutType.o \
+			UserType.o \
+			utils.o \
+			utils/ThreadedLogFile.o \
+			weather.o \
+			weave.o \
+			WebSocketClientHeader.o \
+			WebSocketClientHeaderHixie76.o \
+			WebSocketClientHeaderIETF_HYBI17.o \
+			WebSocketDataFrame.o \
+			wedit.o \
+			zedit.o \
+			zones.o \
 
 OBJFILES := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILES))
 

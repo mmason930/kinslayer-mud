@@ -977,7 +977,7 @@ CommandHandler  do_mlist  = DEFINE_COMMAND
 	std::map<int,int> zoneLoads, openZoneLoads; // Mob Rnum to Mob Zone Load
 
 	std::string strSortTypes = "exp lvl level hp ob pb db vnum kit gold zloads open";
-	SortTypes = StringUtil::SplitToContainer< std::list< std::string >, std::string >(strSortTypes, ' ');
+	SortTypes = StringUtil::splitToContainer< std::list< std::string > >(strSortTypes, ' ');
 
 	*arg1 = *arg2 = *arg3 = *sortType = '\0';
 

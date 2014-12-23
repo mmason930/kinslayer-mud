@@ -219,6 +219,7 @@ JSEnvironment::JSEnvironment()
 	flusspferd::create_native_function(g, "saveSingleObjectToDatabase", JS_saveSingleObjectToDatabase);
 	flusspferd::create_native_function(g, "loadSingleObjectFromDatabase", JS_loadSingleObjectFromDatabase);
 	flusspferd::create_native_function(g, "loadObjectsByHolderFromDatabase", JS_loadObjectsByHolderFromDatabase);
+	flusspferd::create_native_function(g, "saveTopLevelHolderItems", JS_saveTopLevelHolderItems);
 	flusspferd::create_native_function(g, "getUserNameByUserId", JS_getUserNameByUserId);
 	flusspferd::create_native_function(g, "getUserIdByUserName", JS_getUserIdByUserName);
 	flusspferd::create_native_function(g, "sendToZone", JS_sendToZone);

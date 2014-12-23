@@ -28,6 +28,8 @@
 
 #include "ClanUtil.h"
 
+#include "items/ItemUtil.h"
+
 /* local functions */
 int mag_manacost( Character * ch, int spellnum );
 //int mag_damage(int level, Character *ch, Character *victim, int spellnum, int savetype);
@@ -324,13 +326,13 @@ CommandHandler  do_cast  = DEFINE_COMMAND
 		if( weave->targetSet("CharWorld") && !target )
 			target = (cvict = get_char_vis(ch, TName));
 		if( weave->targetSet("ObjInv") && !target )
-			target = (ovict = get_obj_in_list_vis(ch, TName, ch->carrying));
+			target = (ovict = ItemUtil::get()->getObjectInListVis(ch, TName, ch->carrying));
 		if( weave->targetSet("ObjEquip") && !target )
-			target = (ovict = get_obj_in_eq_list(ch, TName));
+			target = (ovict = ItemUtil::get()->getObjectInEquipmentList(ch, TName));
 		if( weave->targetSet("ObjRoom") && !target && ch->in_room )
-			target = (ovict = get_obj_in_list_vis(ch, TName, ch->in_room->contents));
+			target = (ovict = ItemUtil::get()->getObjectInListVis(ch, TName, ch->in_room->contents));
 		if( weave->targetSet("ObjWorld") && !target)
-			target = (ovict = get_obj_vis(ch, TName));
+			target = (ovict = ItemUtil::get()->getObjectVis(ch, TName));
 	}
 	else //Weave needs a target, but no specification was given.
 	{

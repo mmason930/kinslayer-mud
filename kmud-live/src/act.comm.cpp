@@ -30,6 +30,8 @@
 #include "Descriptor.h"
 #include "rooms/Room.h"
 
+#include "items/ItemUtil.h"
+
 class Descriptor;
 
 /* extern variables */
@@ -591,13 +593,13 @@ CommandHandler do_write = DEFINE_COMMAND
 
 	if (*penname)
 	{		/* there were two arguments */
-		if (!(paper = get_obj_in_list_vis(ch, papername, ch->carrying)))
+		if (!(paper = ItemUtil::get()->getObjectInListVis(ch, papername, ch->carrying)))
 		{
 			ch->send("You have no %s.\r\n", papername);
 			return;
 		}
 
-		if (!(pen = get_obj_in_list_vis(ch, penname, ch->carrying)))
+		if (!(pen = ItemUtil::get()->getObjectInListVis(ch, penname, ch->carrying)))
 		{
 			ch->send("You have no %s.\r\n", penname);
 			return;
@@ -606,7 +608,7 @@ CommandHandler do_write = DEFINE_COMMAND
 
 	else
 	{		/* there was one arg.. let's see what we can find */
-		if (!(paper = get_obj_in_list_vis(ch, papername, ch->carrying)))
+		if (!(paper = ItemUtil::get()->getObjectInListVis(ch, papername, ch->carrying)))
 		{
 			ch->send("There is no %s in your inventory.\r\n", papername);
 			return;

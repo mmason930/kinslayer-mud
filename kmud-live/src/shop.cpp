@@ -36,6 +36,8 @@
 #include "commands/infrastructure/CommandUtil.h"
 #include "commands/infrastructure/CommandInfo.h"
 
+#include "items/ItemUtil.h"
+
 // External variables
 extern struct Index *obj_index;
 
@@ -687,7 +689,7 @@ Object *get_selling_obj(Character *ch, char *name, Character *keeper, int shop_n
 	Object *obj;
 	int result;
 
-	if (!(obj = get_obj_in_list_vis(ch, name, ch->carrying)))
+	if (!(obj = ItemUtil::get()->getObjectInListVis(ch, name, ch->carrying)))
 	{
 		if (msg)
 		{
@@ -788,8 +790,7 @@ void sort_keeper_objs(Character *keeper, int shop_nr)
 		temp = list;
 		list = list->next_content;
 
-		if ((shop_producing(temp, shop_nr)) &&
-		        !(get_obj_in_list_num(GET_OBJ_RNUM(temp), keeper->carrying)))
+		if ((shop_producing(temp, shop_nr)) && !(ItemUtil::get()->getObjectInListByRealNumber(GET_OBJ_RNUM(temp), keeper->carrying)))
 		{
 
 			obj_to_char(temp, keeper);

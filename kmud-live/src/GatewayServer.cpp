@@ -157,7 +157,7 @@ bool GatewayServer::loadConfiguration()
 
 	if(resources.find("Websocket Ports") != resources.end())
 	{
-		std::list<std::string> websocketPortsStringList = StringUtil::SplitToList<std::string>(resources["Websocket Ports"], ',');
+		std::list<std::string> websocketPortsStringList = StringUtil::splitToList(resources["Websocket Ports"], ',');
 		for(auto iter = websocketPortsStringList.begin();iter != websocketPortsStringList.end();++iter)
 		{
 			std::string portString = (*iter);

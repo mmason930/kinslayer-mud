@@ -32,6 +32,8 @@
 #include "commands/infrastructure/CommandUtil.h"
 #include "commands/infrastructure/CommandInfo.h"
 
+#include "items/ItemUtil.h"
+
 extern Index *obj_index;
 extern Descriptor *descriptor_list;
 extern Object *boot_object( Object obj);
@@ -1242,7 +1244,7 @@ CommandHandler  do_insert  = DEFINE_COMMAND
 		return;
 	}
 
-	if( !(obj = get_obj_in_list_vis(ch, arg1, ch->carrying)) )
+	if( !(obj = ItemUtil::get()->getObjectInListVis(ch, arg1, ch->carrying)) )
 	{
 		ch->send("You don't seem to be carrying that item.\r\n");
 		return;
@@ -1272,7 +1274,7 @@ CommandHandler  do_insert  = DEFINE_COMMAND
 			ch->send("Invalid object id supplied.\r\n");
 			return;
 		}
-		if( (oHolder = get_obj_by_id( tID )) )
+		if( (oHolder = ItemUtil::get()->getObjectById( tID )) )
 		{//Found
 			obj_from_char(obj);
 			obj_to_obj(obj, oHolder);
@@ -1330,7 +1332,7 @@ CommandHandler  do_retrieve  = DEFINE_COMMAND
 
 		if( exception ||
 			(
-				(obj = get_obj_by_id(objID)) == 0 && 
+				(obj = ItemUtil::get()->getObjectById(objID)) == 0 && 
 				(obj = Object::loadSingleItem(objID, true)) == 0
 			))
 		{

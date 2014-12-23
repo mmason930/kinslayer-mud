@@ -99,7 +99,7 @@ std::string Weave::listAttributes(Descriptor* d=0, std::string omit="")
 	std::stringstream Buffer;
 	Buffer.str("");//clear the stream.
 	std::list< std::string > OmitList;
-	OmitList = StringUtil::SplitToList< std::string >(omit, ',');
+	OmitList = StringUtil::splitToList(omit, ',');
 
 	//Cycle through the attributes and number them in the display...
 	int i = 0;
@@ -195,7 +195,7 @@ bool Weave::levels()
 bool Weave::targetSet( const std::string &target )
 {
 	std::string sTargets = this->getAttribute("Targeting");
-	std::list<std::string> lTargets = StringUtil::SplitToContainer< std::list<std::string> >( sTargets, ',' );
+	std::list<std::string> lTargets = StringUtil::splitToContainer< std::list<std::string> >( sTargets, ',' );
 	for( std::list< std::string >::iterator sChunk = lTargets.begin();sChunk != lTargets.end();++sChunk )
 	{
 		if( eatwhite((*sChunk)) == target ) return true;
@@ -206,7 +206,7 @@ bool Weave::targetSet( const std::string &target )
 bool Weave::routineSet( const std::string &routine )
 {
 	std::string sRoutines = this->getAttribute("Routines");
-	std::list<std::string> lRoutines = StringUtil::SplitToContainer< std::list<std::string> >( sRoutines, ',' );
+	std::list<std::string> lRoutines = StringUtil::splitToContainer< std::list<std::string> >( sRoutines, ',' );
 	for( std::list< std::string >::iterator sChunk = lRoutines.begin();sChunk != lRoutines.end();++sChunk )
 	{
 		if( (*sChunk) == routine ) return true;
@@ -217,7 +217,7 @@ bool Weave::routineSet( const std::string &routine )
 bool Weave::classSet( const std::string &className )
 {
 	std::string sClasses = this->getAttribute("Class");
-	std::list<std::string> lClasses = StringUtil::SplitToContainer< std::list<std::string> >( sClasses, ' ' );
+	std::list<std::string> lClasses = StringUtil::splitToContainer< std::list<std::string> >( sClasses, ' ' );
 	for( std::list< std::string >::iterator sChunk = lClasses.begin();sChunk != lClasses.end();++sChunk )
 	{
 		if( (*sChunk) == className ) return true;
@@ -234,7 +234,7 @@ bool Weave::classSet( const int iClass )
 int Weave::getPrimaryClass()
 {
 	std::string sClasses = this->getAttribute("Class");
-	std::list<std::string> lClasses = StringUtil::SplitToContainer< std::list<std::string> >( sClasses, ' ' );
+	std::list<std::string> lClasses = StringUtil::splitToContainer< std::list<std::string> >( sClasses, ' ' );
 	for( std::list< std::string >::iterator sChunk = lClasses.begin();sChunk != lClasses.end();++sChunk )
 	{
 		for(int i = 0;i < NUM_CLASSES;++i)

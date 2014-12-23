@@ -31,6 +31,8 @@
 #include "rooms/RoomSector.h"
 #include "rooms/Exit.h"
 
+#include "items/ItemUtil.h"
+
 extern Character *character_list;
 extern Descriptor *descriptor_list;
 extern struct Index *obj_index;
@@ -1461,7 +1463,7 @@ CommandHandler do_sit = DEFINE_COMMAND
 		case POS_STANDING:
 			if( *arg1 != '\0' )
 			{
-				if( (target = get_obj_in_list_vis(ch, arg1, ch->in_room->contents)) == NULL )
+				if( (target = ItemUtil::get()->getObjectInListVis(ch, arg1, ch->in_room->contents)) == NULL )
 				{
 					ch->send("You don't see that here.\r\n");
 					return;

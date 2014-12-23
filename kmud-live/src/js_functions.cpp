@@ -400,7 +400,7 @@ bool js_command_test(Character * actor, const char* cmd, const char* args, bool 
 			JSTrigger* trig = js_scripts->at(i);
 
 			//...Split the commands into a list, and check to see if the actor's command matches any of them.
-			lArgList = StringUtil::SplitToContainer< std::list<std::string>, std::string >(trig->args, ' ');
+			lArgList = StringUtil::splitToContainer< std::list<std::string> >(trig->args, ' ');
 			for(std::list<std::string>::iterator sIter = lArgList.begin();sIter != lArgList.end();++sIter)
 			{
 				if( !str_cmp( (*sIter), cmd ) || (*sIter) == "*" )
@@ -1559,4 +1559,27 @@ flusspferd::object JS_createDatetime(const DateTime &dateTime)
 	std::stringstream buffer;
 	buffer << "new Date(" << (dateTime.getTime() * 1000) << ");";
 	return flusspferd::evaluate(buffer.str()).to_object();
+}
+
+void JS_saveTopLevelHolderItems(const std::string &holderType, const std::string &holderId, const flusspferd::array &objects)
+{
+	if(holderType.empty())
+		return;
+
+	std::list<Object *> objectsToSave;
+	auto arraySize = objects.size();
+	
+	for(size_t index = 0;index < arraySize;++index)
+	{
+		flusspferd::object flusspferdObject = objects.get_element(index).get_object();
+		Object *obj = nullptr;
+
+		if( is_native<JSObject>(flusspferdObject) )
+			obj = flusspferd::get_native<JSObject>(flusspferdObject).toReal();
+
+		if(obj && !obj->IsPurged())
+			objectsToSave.push_back(obj);
+	}
+
+	Object::saveTopLevelHolderItems(holderType[0], holderId, objectsToSave);
 }

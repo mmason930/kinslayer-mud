@@ -675,10 +675,6 @@ void Character::MakeCorpse()
 	for ( o = corpse->contains; o != NULL; o = o->next_content )
 		o->in_obj = corpse;
 
-	corpseClock2.turnOn();
-	object_list_new_owner( corpse, NULL );
-	corpseClock2.turnOff();
-
 	corpseClock4.turnOn();
 	/* transfer character's equipment to the corpse */
 	for ( i = 0; i < NUM_WEARS;++i )

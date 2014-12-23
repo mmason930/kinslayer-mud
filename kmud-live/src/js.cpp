@@ -391,7 +391,7 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 
 					int numberOfFiles = 0;
 
-					std::vector<std::string> outputLines = StringUtil::SplitToVector(svnUpdateOutput, '\n');
+					std::vector<std::string> outputLines = StringUtil::splitToVector(svnUpdateOutput, '\n');
 
 					for(std::string line : outputLines)
 					{

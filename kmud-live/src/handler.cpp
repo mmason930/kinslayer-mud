@@ -37,6 +37,8 @@
 #include "rooms/RoomSector.h"
 #include "editor-interface/EditorInterfaceInstance.h"
 
+#include "items/ItemUtil.h"
+
 #include "js.h"
 
 /* external vars */
@@ -421,7 +423,7 @@ bool isname(const char *str, const std::string &namelist)
 
 bool isname(const std::string &str, const std::string &namelist)
 {
-	std::list< std::string > NameList = StringUtil::SplitToList< std::string >(namelist,' ');
+	std::list< std::string > NameList = StringUtil::splitToList(namelist,' ');
 	for(std::list<std::string>::iterator nIter=NameList.begin();nIter != NameList.end();++nIter)
 	{
 		if( !(*nIter).empty() && !str_cmp(str, (*nIter)) )
@@ -669,15 +671,12 @@ void remove_affection_list(Character *ch, struct affect_type_not_saved *al, int 
 
 	return;
 	struct affect_type_not_saved *temp;
-	struct weave_data *weave;
 
 	if(!ch || !al)
 		return;
 
 	REMOVE_FROM_LIST(al, ch->affection_list, next);
 	affect_remove(ch, al->affect);
-
-	weave = NULL;
 
 	delete al;
 }
@@ -1218,46 +1217,6 @@ const int GetNumber(std::string &name)
 
 	return 1;
 }
-Object *get_obj_in_list(char *name, Object *listy)
-{
-	Object *i;
-
-	for (i = listy; i; i = i->next_content)
-		if (isname(name, i->getName()))
-			return i;
-	return NULL;
-}
-/* Search a given list for an object number, and return a ptr to that obj */
-Object *get_obj_in_list_num(int num, Object *listy)
-{
-	Object *i;
-
-	for (i = listy; i; i = i->next_content)
-		if (GET_OBJ_RNUM(i) == num)
-			return i;
-
-	return NULL;
-}
-
-/* search the entire world for an object number, and return a pointer  */
-Object *get_obj_num(obj_rnum nr)
-{
-	Object *i;
-
-	for (i = object_list; i; i = i->next)
-		if (GET_OBJ_RNUM(i) == nr && !i->IsPurged())
-			return i;
-
-	return NULL;
-}
-
-Object *get_obj_by_id(const boost::uuids::uuid &targetID)
-{
-	for(Object *obj = object_list;obj;obj = obj->next)
-		if(obj->objID == targetID && !obj->IsPurged())
-			return obj;
-	return NULL;
-}
 
 int room_visibility(Character *ch, Character *vict)
 {
@@ -1426,18 +1385,6 @@ void obj_from_obj(Object * obj)
 
 	obj->in_obj = NULL;
 	obj->next_content = NULL;
-}
-
-
-/* Set all carried_by to point to new owner */
-void object_list_new_owner(Object * listy, Character * ch)
-{
-	if (listy)
-	{
-		object_list_new_owner(listy->contains, ch);
-		object_list_new_owner(listy->next_content, ch);
-		listy->carried_by = ch;
-	}
 }
 
 // Extract an object from the world. If lowerItemCount is set to true, then
@@ -1802,88 +1749,6 @@ Character *get_char_vis(Character * ch, const char *name)
 	}
 	return NULL;
 }
-Object *get_obj_in_list_vis(Character * ch, char *name, Object * listy)
-{
-	Object *i;
-	int j = 0, num = 0;
-	char tmpname[MAX_INPUT_LENGTH];
-	char *tmp = tmpname;
-
-	if( ch->IsPurged() ) return (0);
-
-	strcpy(tmp, name);
-
-	if (!(num = GetNumber(&tmp)))
-		return NULL;
-
-	for (i = listy; i && (j <= num); i = i->next_content)
-	{
-		if(!i->getName())
-			continue;
-
-		if (isname(tmp, i->getName()) && !i->hidden)		// Fogel 8/18/09: Fixed a bug with taking items when another of the same type is hidden
-			if (++j == num)
-				return i;
-	}
-
-	return NULL;
-}
-
-Object *get_obj_in_eq_list(Character* Wearer, char* name)
-{
-	if( Wearer->IsPurged() ) return (0);
-	for(int i = 0;i < NUM_WEARS;++i)
-	{
-		if( isname(GET_EQ(Wearer, i)->getName(), name) )
-			return GET_EQ(Wearer, i);
-	}
-	return 0;
-}
-
-/* search the entire world for an object, and return a pointer  */
-Object *get_obj_vis(Character * ch, char *name)
-{
-	if( ch->IsPurged() ) return (0);
-
-	Object *i;
-	int j = 0, num = 0;
-	char tmpname[MAX_INPUT_LENGTH];
-	char *tmp = tmpname;
-
-	/* scan items carried */
-	if ((i = get_obj_in_list_vis(ch, name, ch->carrying)))
-		return i;
-
-	/* scan room */
-	if ((i = get_obj_in_list_vis(ch, name, ch->in_room->contents)))
-		return i;
-
-	strcpy(tmp, name);
-	if (!(num = GetNumber(&tmp)))
-		return NULL;
-
-	/* ok.. no luck yet. scan the entire obj list   */
-	for (i = object_list; i && (j <= num); i = i->next)
-		if ( !i->IsPurged() && ((i->getName() && isname(tmp, i->getName()))) )
-			if (CAN_SEE_OBJ(ch, i))
-				if (++j == num)
-					return i;
-
-	return NULL;
-}
-Object *get_object_in_equip_vis(Character * ch,
-                                char *arg, Object * equipment[], int *j)
-{
-	for ((*j) = 0; (*j) < NUM_WEARS; (*j)++)
-	{
-		if (equipment[(*j)])
-		{
-			if (isname(arg, equipment[(*j)]->getName()))
-				return (equipment[(*j)]);
-		}
-	}
-	return NULL;
-}
 
 /* Generic Find, designed to find any object/character                    */
 /* Calling :                                                              */
@@ -1946,7 +1811,7 @@ int generic_find(char *arg, int bitvector, Character * ch,
 
 	if (IS_SET(bitvector, FIND_OBJ_INV))
 	{
-		if ((*tar_obj = get_obj_in_list_vis(ch, name, ch->carrying)))
+		if ((*tar_obj = ItemUtil::get()->getObjectInListVis(ch, name, ch->carrying)))
 		{
 			return (FIND_OBJ_INV);
 		}
@@ -1954,7 +1819,7 @@ int generic_find(char *arg, int bitvector, Character * ch,
 
 	if (IS_SET(bitvector, FIND_OBJ_ROOM))
 	{
-		if ((*tar_obj = get_obj_in_list_vis(ch, name, ch->in_room->contents)))
+		if ((*tar_obj = ItemUtil::get()->getObjectInListVis(ch, name, ch->in_room->contents)))
 		{
 			return (FIND_OBJ_ROOM);
 		}
@@ -1962,7 +1827,7 @@ int generic_find(char *arg, int bitvector, Character * ch,
 
 	if (IS_SET(bitvector, FIND_OBJ_WORLD))
 	{
-		if ((*tar_obj = get_obj_vis(ch, name)))
+		if ((*tar_obj = ItemUtil::get()->getObjectVis(ch, name)))
 		{
 			return (FIND_OBJ_WORLD);
 		}

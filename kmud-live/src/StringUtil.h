@@ -65,49 +65,49 @@ public:
 	//Galnor: 2006-12-11
 	//Re-wrote the split_to_vector and split_to_list to allow for all std containers
 	//to use this using a template as its representation.
-	template< class _Container, class StringType >
-	static _Container SplitToContainer( const StringType s, const char delim)
+	template< class _Container >
+	static _Container splitToContainer( const char *s, const char delim)
 	{
 		_Container v;
-		std::string token = "";
-		std::string letter;
+		std::string currentWord;
 
-		for (int i = 0; i < (signed) s.size(); ++i)
+		for(const char *currentToken = s;*currentToken;++currentToken)
 		{
-			letter = s[i];
-			if (letter.at(0) == delim)
+			if((*currentToken) == delim)
 			{
-				if (!token.empty())
+				if (!currentWord.empty())
 				{
-					v.push_back(token);
-					token.clear();
+					v.push_back(currentWord);
+					currentWord.clear();
 				}
 			}
 			else
-			{
-				token.append(letter);
-				letter.clear();
-			}
+				currentWord.append(currentToken, 1);
 		}
-		if (!token.empty())
-		{
-			v.push_back(token);
-			token.clear();
-		}
+		
+		if (!currentWord.empty())
+			v.push_back(currentWord);
+
 		return v;
 	}
+	
+	template< class _Container >
+	static _Container splitToContainer( const std::string &s, const char delim)
+	{
+		return splitToContainer<_Container>(s.c_str(), delim);
+	}
+
 	//Galnor: 2010-06-01
 	//Pass a string and a delimiter and have a vector returned with the string split by that delim.
 	//Each splicing point is entered into the vector as individual nodes.
-	template< typename StringType >
-	static std::vector< StringType > SplitToVector( const StringType s, const char delim)
+	static std::vector< std::string > splitToVector( const std::string &s, const char delim = ',')
 	{
-		return SplitToContainer< std::vector< StringType >, StringType >( s, delim );
+		return splitToContainer< std::vector< std::string > >( s, delim );
 	}
-	template< typename StringType >
-	static std::list< StringType > SplitToList( std::string Values, char delim=',' )
+
+	static std::list< std::string > splitToList( const std::string &s, const char delim = ',' )
 	{
-		return SplitToContainer< std::list< StringType >, StringType >( Values, delim );
+		return splitToContainer< std::list< std::string > >( s, delim );
 	}
 
 	static std::vector< std::string > getArgVector( const std::string &s )

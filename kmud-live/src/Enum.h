@@ -56,6 +56,23 @@ public:
 		return iter == map->end() ? nullptr : (*iter).second;
 	}
 
+	/***
+	static Type *getEnumByStandardName(const std::string &standardNameToFind, bool ignoreCase = true)
+	{
+		auto list = getEnumList();
+		for(Enum *e : (*list))
+		{
+			if(ignoreCase)
+			{
+				if(!str_cmp(e->getStandardName(), standardNameToFind))
+					return (Type*)e;
+			}
+			else if(!strcmp(e->getStandardName().c_str(), standardNameToFind.c_str()))
+				return (Type*)e;
+		}
+	}
+	***/
+
 	static void cleanup()
 	{
 		auto map = getEnumMap();

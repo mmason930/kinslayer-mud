@@ -13,6 +13,7 @@
 #include "js.h"
 #include "rooms/Room.h"
 #include "MobLoadLogger.h"
+#include "items/ItemUtil.h"
 
 std::recursive_mutex ZoneManager::SingletonMutex;
 extern Index *obj_index;
@@ -375,7 +376,7 @@ void Zone::Reset()
 				break;
 
 			case 'R': /* rem obj from room */
-				if ((obj = get_obj_in_list_num(cmd[cmd_no]->arg2, World[cmd[cmd_no]->arg1]->contents)) != NULL)
+				if ((obj = ItemUtil::get()->getObjectInListByRealNumber(cmd[cmd_no]->arg2, World[cmd[cmd_no]->arg1]->contents)) != NULL)
 				{
 					obj->RemoveFromRoom();
 					obj->Extract(true);

@@ -181,7 +181,7 @@ void miscBootMaintenance() {
 
 	if(sql.empty() == false) {
 
-		std::vector<std::string> queries = StringUtil::SplitToVector(sql, ';');
+		std::vector<std::string> queries = StringUtil::splitToVector(sql, ';');
 
 		for(std::string::size_type index = 0;index < queries.size();++index) {
 
@@ -2472,7 +2472,7 @@ void Object::ProtoBoot( sql::Row &MyRow, const int rnum, const std::list<int> &j
 /* Return a list of ExtraDescription, parsed from the string that is passed */
 ExtraDescription *ExtraDescription::Parse( const std::string &eDescStr )
 {
-	std::vector< std::string > vExDescParts = StringUtil::SplitToVector< std::string >(eDescStr,'~');
+	std::vector< std::string > vExDescParts = StringUtil::splitToVector(eDescStr, '~');
 	ExtraDescription *eDescList = (NULL);
 
 	while( !vExDescParts.empty() )

@@ -74,6 +74,8 @@
 #include "commands/infrastructure/CommandUtil.h"
 #include "commands/infrastructure/CommandInfo.h"
 
+#include "items/ItemUtil.h"
+
 /*   external vars  */
 extern GameTime time_info;
 extern Character *character_list;
@@ -1044,7 +1046,7 @@ CommandHandler do_extra = DEFINE_COMMAND
 	if( !ch->in_room )
 		return;
 	bool bCorrectArgument=true;
-	vArgs = StringUtil::SplitToVector<std::string>( argument, ' ' );
+	vArgs = StringUtil::splitToVector( argument, ' ' );
 
 	try {
 		if(false);
@@ -1083,7 +1085,7 @@ CommandHandler do_extra = DEFINE_COMMAND
 		}
 		else if( !str_cmp(vArgs.at(0), "eval") )
 		{
-			std::vector<std::string> vArgs = StringUtil::SplitToVector<std::string>(argument, ' ');
+			std::vector<std::string> vArgs = StringUtil::splitToVector(argument, ' ');
 			vArgs.erase(vArgs.begin(),vArgs.begin()+1);
 			std::string expression = StringUtil::implode(vArgs, " ");
 			flusspferd::value val = JSManager::get()->executeExpression(expression);
@@ -2897,7 +2899,7 @@ Room *FindTargetRoom(Character *ch, char *rawroomstr)
 	}
 	else if ((target_mob = get_char_vis(ch, roomstr)))
 		location = target_mob->in_room;
-	else if ((target_obj = get_obj_vis(ch, roomstr)))
+	else if ((target_obj = ItemUtil::get()->getObjectVis(ch, roomstr)))
 	{
 		if (target_obj->in_room)
 			location = target_obj->in_room;
@@ -3898,7 +3900,7 @@ CommandHandler do_statfind = DEFINE_COMMAND
 		else
 		{
 			try {
-				if((object = get_obj_vis(ch, buf2)))
+				if((object = ItemUtil::get()->getObjectVis(ch, buf2)))
 					do_stat_object(ch, object);
 				else if(boost::regex_match(buf2, boost::regex("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")))
 				{//User entered an object id.
@@ -3931,17 +3933,17 @@ CommandHandler do_statfind = DEFINE_COMMAND
 	}
 	else
 	{
-		if ((object = get_object_in_equip_vis(ch, buf1, ch->equipment, &tmp)))
+		if ((object = ItemUtil::get()->getObjectInEquipVis(ch, buf1, ch->equipment, &tmp)))
 			do_stat_object(ch, object);
-		else if ((object = get_obj_in_list_vis(ch, buf1, ch->carrying)))
+		else if ((object = ItemUtil::get()->getObjectInListVis(ch, buf1, ch->carrying)))
 			do_stat_object(ch, object);
 		else if ((victim = get_char_room_vis(ch, buf1)))
 			do_stat_character(ch, victim);
-		else if ((object = get_obj_in_list_vis(ch, buf1, ch->in_room->contents)))
+		else if ((object = ItemUtil::get()->getObjectInListVis(ch, buf1, ch->in_room->contents)))
 			do_stat_object(ch, object);
 		else if ((victim = get_char_vis(ch, buf1)))
 			do_stat_character(ch, victim);
-		else if ((object = get_obj_vis(ch, buf1)))
+		else if ((object = ItemUtil::get()->getObjectVis(ch, buf1)))
 			do_stat_object(ch, object);
 		else
 			ch->send("Nothing around by that name.\r\n");
@@ -4335,7 +4337,7 @@ CommandHandler do_purge = DEFINE_COMMAND
 			vict->Extract(UserLogoutType::purge);
 		}
 
-		else if ((obj = get_obj_in_list_vis(ch, buf, ch->in_room->contents)))
+		else if ((obj = ItemUtil::get()->getObjectInListVis(ch, buf, ch->in_room->contents)))
 		{
 			Act("$n destroys $p.", FALSE, ch, obj, 0, TO_ROOM);
 			obj->Extract(true);
@@ -5528,18 +5530,18 @@ struct BackupFileNameFunctor
 		try {
 			int iMonthA, iYearA, iDayA, iMonthB, iYearB, iDayB;
 			std::string sDateA, sDateB;
-			std::vector< std::string > vChunksA = StringUtil::SplitToContainer< std::vector< std::string >, std::string >(sFileNameA, '.');
+			std::vector< std::string > vChunksA = StringUtil::splitToContainer< std::vector< std::string > >(sFileNameA, '.');
 			sDateA = vChunksA[ 1 ];
 
-			vChunksA = StringUtil::SplitToContainer< std::vector< std::string >, std::string >(sDateA, '-');
+			vChunksA = StringUtil::splitToContainer< std::vector< std::string > >(sDateA, '-');
 			iYearA  = atoi( vChunksA[ 0 ].c_str() );
 			iMonthA = atoi( vChunksA[ 1 ].c_str() );
 			iDayA   = atoi( vChunksA[ 2 ].c_str() );
 
-			std::vector< std::string > vChunksB = StringUtil::SplitToContainer< std::vector< std::string >, std::string >(sFileNameB, '.');
+			std::vector< std::string > vChunksB = StringUtil::splitToContainer< std::vector< std::string > >(sFileNameB, '.');
 			sDateB = vChunksB[ 1 ];
 
-			vChunksB = StringUtil::SplitToContainer< std::vector< std::string >, std::string >(sDateB, '-');
+			vChunksB = StringUtil::splitToContainer< std::vector< std::string > >(sDateB, '-');
 			iYearB  = atoi( vChunksB[ 0 ].c_str() );
 			iMonthB = atoi( vChunksB[ 1 ].c_str() );
 			iDayB   = atoi( vChunksB[ 2 ].c_str() );
@@ -7084,7 +7086,7 @@ CommandHandler do_retool = DEFINE_COMMAND
 	HalfChop( argument, mode, buf );
 	HalfChop( buf, name, buf );
 
-	if( (obj = get_obj_in_list_vis( ch, name, ch->carrying )) == NULL ) {
+	if( (obj = ItemUtil::get()->getObjectInListVis( ch, name, ch->carrying )) == NULL ) {
 		ch->send("Retool what? You don't see %s %s anywhere.\r\n", AN(name), name);
 		return;
 	}

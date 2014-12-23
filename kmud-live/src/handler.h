@@ -13,20 +13,14 @@
 
 /* handling the affected-structures */
 void	affect_total(Character *ch);
-void	affect_modify(Character *ch, byte loc, sbyte mod, long bitv, bool add
-	                  );
+void	affect_modify(Character *ch, byte loc, sbyte mod, long bitv, bool add);
 void	affect_to_char(Character *ch, struct affected_type *af);
 void	affect_remove(Character *ch, struct affected_type *af);
 void	affect_from_char(Character *ch, int type, int bit);
 bool	affected_by_spell(Character *ch, int type);
-void	affect_join(Character *ch, struct affected_type *af,
-                 bool add_dur, bool avg_dur, bool add_mod, bool avg_mod);
-
-void	attach_weave(Character *ch, Character *victim, struct affected_type *af);
-void	remove_weave(Character *ch, struct weave_data *weave, int loop);
+void	affect_join(Character *ch, struct affected_type *af, bool add_dur, bool avg_dur, bool add_mod, bool avg_mod);
 void	add_affection_to_list(Character *ch, struct affect_type_not_saved *al);
 void	remove_affection_list(Character *ch, struct affect_type_not_saved *al, int loop);
-
 void	UpdateBootHigh( const int new_high, bool first=false );
 
 // Races
@@ -38,8 +32,6 @@ int CAN_CARRY_OBJ(Character *ch, Object *obj);
 
 /* utility */
 
-char *money_desc(int amount);
-Object *create_money(int amount);
 bool isname(const std::string &str, const std::string &namelist);
 bool isname(const std::string &str, const char *namelist);
 bool isname(const char *str, const std::string &namelist);
@@ -56,17 +48,8 @@ void	obj_from_char(Object *object);
 void	equip_char(Character *ch, Object *obj, int pos);
 Object *unequip_char(Character *ch, int pos);
 
-Object *get_obj_in_list(char *name, Object *listy);
-Object *get_obj_in_list_num(int num, Object *listy);
-Object *get_obj_in_eq_list(Character* Wearer, char* name);
-Object *get_obj(char *name);
-Object *get_obj_num(obj_rnum nr);
-Object *get_obj_by_id(const boost::uuids::uuid &targetID);
-
 void	obj_to_obj(Object *obj, Object *obj_to);
 void	obj_from_obj(Object *obj);
-void	object_list_new_owner(Object *listy, Character *ch);
-void	move_obj_random(Object *obj, int bottom, int top, int inside_allowed);
 
 /* ******* characters ********* */
 
@@ -75,18 +58,10 @@ Character *get_char_num(mob_rnum nr);
 Character *get_char(const char *name);
 Character *get_char_by_name(const char *name, int npc);
 
-void	move_char_circle(Character *ch);
-void	move_char_random(Character *ch, int bottom, int top, int inside_allowed);
-
 /* find if character can see */
 Character *get_char_room_vis(Character *ch, const char *name);
 Character *get_player_vis(Character *ch, char *name, int inroom);
 Character *get_char_vis(Character *ch, const char *name);
-Object *get_obj_in_list_vis(Character *ch, char *name,
-                            Object *listy);
-Object *get_obj_vis(Character *ch, char *name);
-Object *get_object_in_equip_vis(Character *ch,
-                                char *arg, Object *equipment[], int *j);
 
 int inches(int centimeters);
 int feet(int centimeters);
@@ -119,8 +94,6 @@ void	crashListRent(Character * ch, char *name);
 void	crashsaveAll();
 
 /* prototypes from fight.c */
-void	set_fighting(Character *ch, Character *victim);
-void	stop_fighting(Character *ch);
 int		hit(Character *ch, Character *victim, int type);
 int		damage(Character *ch, Character *victim, int dam, int attacktype, int BodyPart);
 int		skill_message(int dam, Character *ch, Character *vict, int attacktype, int BodyPart);

@@ -141,7 +141,7 @@ void EditorInterfaceInstance::parse(const std::string &command)
 
 	char firstCharacter = inputMutable.empty() ? '\0' : (char)toupper(inputMutable[0]);
 
-	std::vector<std::string> inputVector = StringUtil::SplitToVector(inputMutable, ' ');
+	std::vector<std::string> inputVector = StringUtil::splitToVector(inputMutable, ' ');
 
 	parse(inputMutable, firstCharacter, inputVector);
 

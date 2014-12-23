@@ -1,4 +1,3 @@
-
 /* ************************************************************************
 *   File: Act.item.c                                    Part of CircleMUD *
 *  Usage: object handling routines -- get/drop and container handling     *
@@ -38,6 +37,8 @@
 #include "commands/infrastructure/CommandUtil.h"
 #include "commands/infrastructure/CommandInfo.h"
 
+#include "items/ItemUtil.h"
+
 /* extern variables */
 extern sh_int donation_room_1;
 #if 0
@@ -54,8 +55,6 @@ FILE *logger;
 
 /* local functions */
 int find_eq_pos(Character *ch, Object *obj, char *arg, bool msg);
-int can_take_obj( Character *ch, Object *obj );
-int perform_get_from_room( Character *ch, Object *obj, bool vaultSave=true );
 int perform_drop( Character *ch, Object *obj, bool vaultSave=true );
 bool remort_gear_message( Character *ch, Object *obj );
 void get_from_room( Character *ch, char *arg );
@@ -440,7 +439,7 @@ CommandHandler  do_put  = DEFINE_COMMAND
 		{
 			if ( obj_dotmode == FIND_INDIV )
 			{	/* put <obj> <container> */
-				if ( !( obj = get_obj_in_list_vis( ch, arg1, ch->carrying ) ) )
+				if ( !( obj = ItemUtil::get()->getObjectInListVis( ch, arg1, ch->carrying ) ) )
 				{
 					ch->send( "You aren't carrying %s %s.\r\n", AN( arg1 ), arg1 );
 				}
@@ -493,32 +492,9 @@ bool Character::TooHeavyToPickUp( Object *obj )
 	return( this->CarriedWeight() + obj->Weight() > CAN_CARRY_W( this ) && GET_LEVEL(this) < LVL_GRGOD );
 }
 
-int can_take_obj( Character * ch, Object * obj )
-{
-	if ( IS_CARRYING_N( ch ) >= CAN_CARRY_N( ch ) )
-	{
-		Act( "$p: you can't carry that many items.", FALSE, ch, obj, 0, TO_CHAR );
-		return 0;
-	}
-
-	else if ( ch->TooHeavyToPickUp( obj ) )
-	{
-		Act( "$p: you can't carry that much weight.", FALSE, ch, obj, 0, TO_CHAR );
-		return 0;
-	}
-
-	else if ( !( CAN_WEAR( obj, ITEM_WEAR_TAKE ) ) )
-	{
-		Act( "$p: you can't take that!", FALSE, ch, obj, 0, TO_CHAR );
-		return 0;
-	}
-
-	return 1;
-}
-
 void perform_get_from_container( Character * ch, Object * obj, Object * cont, int mode )
 {
-	if ( mode == FIND_OBJ_INV || can_take_obj( ch, obj ) )
+	if ( mode == FIND_OBJ_INV || ItemUtil::get()->canTakeObject( ch, obj ) )
 	{
 		if ( IS_CARRYING_N( ch ) >= CAN_CARRY_N( ch ) )
 			Act( "$p: you can't hold any more items.", FALSE, ch, obj, 0, TO_CHAR );
@@ -622,7 +598,7 @@ void get_from_container( Character * ch, Object * cont, char *arg, int mode )
 	}
 	else if ( obj_dotmode == FIND_INDIV )
 	{
-		if ( !( obj = get_obj_in_list_vis( ch, arg, cont->contains ) ) )
+		if ( !( obj = ItemUtil::get()->getObjectInListVis( ch, arg, cont->contains ) ) )
 		{
 			sprintf( buf, "There doesn't seem to be %s %s in $p.", AN( arg ), arg );
 			Act( buf, FALSE, ch, cont, 0, TO_CHAR );
@@ -684,25 +660,6 @@ void get_from_container( Character * ch, Object * cont, char *arg, int mode )
 	}
 }
 
-int perform_get_from_room( Character * ch, Object * obj, bool vaultSave )
-{
-	if ( can_take_obj( ch, obj ) &&  !obj->IsPurged() && !ch->IsPurged()
-		&& js_object_get(ch, obj) && !obj->IsPurged() && !ch->IsPurged()
-		)
-	{
-		obj->RemoveFromRoom();
-		obj_to_char( obj, ch );
-		if(!IS_OBJ_STAT((obj), ITEM_INVISIBLE) || GET_LEVEL(ch) >= LVL_IMMORT)
-		{//RHOLLOR 05.03.09 remove messg when invis
-			Act( "You get $p.", FALSE, ch, obj, 0, TO_CHAR );
-			Act( "$n gets $p.", TRUE, ch, obj, 0, TO_ROOM, NULL, true);
-		}
-		return 1;
-	}
-
-	return 0;
-}
-
 void get_from_room( Character *ch, char *arg )
 {
 	Object * obj, *next_obj;
@@ -712,12 +669,12 @@ void get_from_room( Character *ch, char *arg )
 
 	if ( dotmode == FIND_INDIV )
 	{
-		if ( !( obj = get_obj_in_list_vis( ch, arg, ch->in_room->contents ) ) || obj->hidden )
+		if ( !( obj = ItemUtil::get()->getObjectInListVis( ch, arg, ch->in_room->contents ) ) || obj->hidden )
 		{
 			ch->send( "You don't see %s %s here.\r\n", AN( arg ), arg );
 		}
 		else
-			perform_get_from_room( ch, obj, false );
+			ItemUtil::get()->performGetFromRoom( ch, obj, false );
 	}
 	else
 	{
@@ -734,7 +691,7 @@ void get_from_room( Character *ch, char *arg )
 			if ( !obj->hidden && CAN_SEE_OBJ( ch, obj ) && ( dotmode == FIND_ALL || isname( arg, obj->getName() ) ) )
 			{
 				found = 1;
-				perform_get_from_room( ch, obj, false );
+				ItemUtil::get()->performGetFromRoom( ch, obj, false );
 			}
 		}
 
@@ -751,99 +708,6 @@ void get_from_room( Character *ch, char *arg )
 	if( ROOM_FLAGGED(ch->in_room, ROOM_VAULT) )
 		ch->in_room->itemSave();
 }
-
-CommandHandler  do_get  = DEFINE_COMMAND
-{
-	char arg1[ MAX_INPUT_LENGTH ];
-	char arg2[ MAX_INPUT_LENGTH ];
-	std::string originalArg1;
-
-	int cont_dotmode, found = 0, mode;
-	Object *cont;
-	Character *tmp_char;
-
-	TwoArguments( argument, arg1, arg2 );
-
-	if ( IS_CARRYING_N( ch ) >= CAN_CARRY_N( ch ) )
-		ch->send( "Your arms are already full!\r\n" );
-	else if ( !*arg1 )
-		ch->send( "Get what?\r\n" );
-	else if ( !*arg2 )
-		get_from_room( ch, arg1 );
-	else
-	{
-		originalArg1 = arg1;
-		cont_dotmode = find_all_dots( arg2 );
-
-		if ( cont_dotmode == FIND_INDIV )
-		{
-			mode = generic_find( arg2, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP, ch, &tmp_char, &cont );
-
-			if ( !cont )
-			{
-				ch->send( "You don't have %s %s.\r\n", AN( arg2 ), arg2 );
-			}
-			else if (  cont ->getType() != ITEM_CONTAINER )
-				Act( "$p is not a container.", FALSE, ch, cont, 0, TO_CHAR );
-			else
-				get_from_container( ch, cont, arg1, mode );
-		}
-
-		else
-		{
-			if ( cont_dotmode == FIND_ALLDOT && !*arg2 )
-			{
-				ch->send( "Get from all of what?\r\n" );
-				return ;
-			}
-
-			for ( cont = ch->carrying; cont; cont = cont->next_content )
-				if ( CAN_SEE_OBJ( ch, cont ) && ( cont_dotmode == FIND_ALL || isname( arg2, cont->getName() ) ) )
-				{
-					if (  cont ->getType() == ITEM_CONTAINER )
-					{
-						found = 1;
-						get_from_container( ch, cont, arg1, FIND_OBJ_INV );
-						snprintf(arg1, sizeof(arg1), "%s", originalArg1.c_str());
-					}
-					else if ( cont_dotmode == FIND_ALLDOT )
-					{
-						found = 1;
-						Act( "$p is not a container.", FALSE, ch, cont, 0, TO_CHAR );
-					}
-				}
-
-			for ( cont = ch->in_room->contents; cont; cont = cont->next_content )
-			{
-				if ( ( cont_dotmode == FIND_ALL || isname( arg2, cont->getName() ) ) )
-				{
-					if (  cont ->getType() == ITEM_CONTAINER )
-					{
-						get_from_container( ch, cont, arg1, FIND_OBJ_ROOM );
-						snprintf(arg1, sizeof(arg1), "%s", originalArg1.c_str());
-						found = 1;
-					}
-
-					else if ( cont_dotmode == FIND_ALLDOT )
-					{
-						Act( "$p is not a container.", FALSE, ch, cont, 0, TO_CHAR );
-						found = 1;
-					}
-				}
-			}
-
-			if ( !found )
-			{
-				if ( cont_dotmode == FIND_ALL )
-					ch->send( "You can't seem to find any containers.\r\n" );
-				else
-				{
-					ch->send( "You can't seem to find any %ss here.\r\n", arg2 );
-				}
-			}
-		}
-	}
-};
 
 int perform_drop( Character *ch, Object *obj, bool vaultSave )
 {
@@ -927,14 +791,14 @@ CommandHandler  do_drop  = DEFINE_COMMAND
 				return ;
 			}
 
-			if ( !( obj = get_obj_in_list_vis( ch, ::arg, ch->carrying ) ) )
+			if ( !( obj = ItemUtil::get()->getObjectInListVis( ch, ::arg, ch->carrying ) ) )
 			{
 				ch->send( "You don't seem to have any %ss.\r\n", ::arg );
 			}
 
 			while ( obj )
 			{
-				next_obj = get_obj_in_list_vis( ch, ::arg, obj->next_content );
+				next_obj = ItemUtil::get()->getObjectInListVis( ch, ::arg, obj->next_content );
 				amount += perform_drop( ch, obj, false );
 				obj = next_obj;
 			}
@@ -942,7 +806,7 @@ CommandHandler  do_drop  = DEFINE_COMMAND
 
 		else
 		{
-			if ( !( obj = get_obj_in_list_vis( ch, ::arg, ch->carrying ) ) )
+			if ( !( obj = ItemUtil::get()->getObjectInListVis( ch, ::arg, ch->carrying ) ) )
 				ch->send( "You don't seem to have %s %s.\r\n", AN( ::arg ), ::arg );
 			else
 				amount += perform_drop( ch, obj, false );
@@ -1116,7 +980,7 @@ CommandHandler  do_give  = DEFINE_COMMAND
 
 		if ( dotmode == FIND_INDIV )
 		{
-			if ( !( obj = get_obj_in_list_vis( ch, ::arg, ch->carrying ) ) )
+			if ( !( obj = ItemUtil::get()->getObjectInListVis( ch, ::arg, ch->carrying ) ) )
 			{
 				ch->send( "You don't seem to have %s %s.\r\n", AN( ::arg ), ::arg );
 			}
@@ -1205,9 +1069,9 @@ CommandHandler  do_drink  = DEFINE_COMMAND
 		}
 	}
 
-	else if ( !( temp = get_obj_in_list_vis( ch, arg, ch->carrying ) ) )
+	else if ( !( temp = ItemUtil::get()->getObjectInListVis( ch, arg, ch->carrying ) ) )
 	{
-		if ( !( temp = get_obj_in_list_vis( ch, arg, ch->in_room->contents ) ) )
+		if ( !( temp = ItemUtil::get()->getObjectInListVis( ch, arg, ch->in_room->contents ) ) )
 		{
 			Act( "You can't find it!", FALSE, ch, 0, 0, TO_CHAR );
 			return ;
@@ -1337,7 +1201,7 @@ CommandHandler  do_eat  = DEFINE_COMMAND
 		return ;
 	}
 
-	if ( !( food = get_obj_in_list_vis( ch, arg, ch->carrying ) ) )
+	if ( !( food = ItemUtil::get()->getObjectInListVis( ch, arg, ch->carrying ) ) )
 	{
 		ch->send( "You don't seem to have %s %s.\r\n", AN( arg ), arg );
 		return ;
@@ -1424,7 +1288,7 @@ CommandHandler  do_pour  = DEFINE_COMMAND
 			return ;
 		}
 
-		if ( !( from_obj = get_obj_in_list_vis( ch, arg1, ch->carrying ) ) )
+		if ( !( from_obj = ItemUtil::get()->getObjectInListVis( ch, arg1, ch->carrying ) ) )
 		{
 			Act( "You can't find it!", FALSE, ch, 0, 0, TO_CHAR );
 			return ;
@@ -1440,12 +1304,12 @@ CommandHandler  do_pour  = DEFINE_COMMAND
 		// Refilling lanterns. Requires special code, so we need to do most of the checks ourselves.
 		// -Narg
 
-		if ( ( to_obj = get_obj_in_list_vis( ch, arg2, ch->carrying ) ) )
+		if ( ( to_obj = ItemUtil::get()->getObjectInListVis( ch, arg2, ch->carrying ) ) )
 		{
 
 			if (  to_obj ->getType() == ITEM_LIGHT )
 			{
-				if ( !( to_obj = get_obj_in_list_vis( ch, arg2, ch->carrying ) ) )
+				if ( !( to_obj = ItemUtil::get()->getObjectInListVis( ch, arg2, ch->carrying ) ) )
 				{
 					Act( "Pour into what?", FALSE, ch, 0, 0, TO_CHAR );
 					return ;
@@ -1530,7 +1394,7 @@ CommandHandler  do_pour  = DEFINE_COMMAND
 			return ;
 		}
 
-		if ( !( to_obj = get_obj_in_list_vis( ch, arg1, ch->carrying ) ) )
+		if ( !( to_obj = ItemUtil::get()->getObjectInListVis( ch, arg1, ch->carrying ) ) )
 		{
 			ch->send( "You can't find it!" );
 			return ;
@@ -1554,7 +1418,7 @@ CommandHandler  do_pour  = DEFINE_COMMAND
 			return ;
 		}
 
-		if ( !( from_obj = get_obj_in_list_vis( ch, arg2, ch->in_room->contents ) ) )
+		if ( !( from_obj = ItemUtil::get()->getObjectInListVis( ch, arg2, ch->in_room->contents ) ) )
 		{
 			ch->send( "There doesn't seem to be %s %s here.\r\n", AN( arg2 ), arg2 );
 			return;
@@ -1605,7 +1469,7 @@ CommandHandler  do_pour  = DEFINE_COMMAND
 			return ;
 		}
 
-		if ( !( to_obj = get_obj_in_list_vis( ch, arg2, ch->carrying ) ) )
+		if ( !( to_obj = ItemUtil::get()->getObjectInListVis( ch, arg2, ch->carrying ) ) )
 		{
 			Act( "You can't find it!", FALSE, ch, 0, 0, TO_CHAR );
 			return ;
@@ -2013,7 +1877,7 @@ CommandHandler  do_wear  = DEFINE_COMMAND
 			return ;
 		}
 
-		if ( !( obj = get_obj_in_list( arg1, ch->carrying ) ) )
+		if ( !( obj = ItemUtil::get()->getObjectInList( arg1, ch->carrying ) ) )
 		{
 			ch->send( "You don't seem to have any %ss.\r\n", arg1 );
 		}
@@ -2022,7 +1886,7 @@ CommandHandler  do_wear  = DEFINE_COMMAND
 		{
 			while ( obj )
 			{
-				next_obj = get_obj_in_list_vis( ch, arg1, obj->next_content );
+				next_obj = ItemUtil::get()->getObjectInListVis( ch, arg1, obj->next_content );
 
 				if ( ( where = find_eq_pos( ch, obj, 0, true ) ) >= 0 )
 					ch->performWear( obj, where );
@@ -2036,7 +1900,7 @@ CommandHandler  do_wear  = DEFINE_COMMAND
 
 	else
 	{
-		if ( !( obj = get_obj_in_list_vis( ch, arg1, ch->carrying ) ) )
+		if ( !( obj = ItemUtil::get()->getObjectInListVis( ch, arg1, ch->carrying ) ) )
 		{
 			ch->send( "You don't seem to have %s %s.\r\n", AN( arg1 ), arg1 );
 		}
@@ -2060,7 +1924,7 @@ CommandHandler  do_wield  = DEFINE_COMMAND
 	if ( !*::arg )
 		ch->send( "Wield what?\r\n" );
 
-	else if ( !( obj = get_obj_in_list_vis( ch, ::arg, ch->carrying ) ) )
+	else if ( !( obj = ItemUtil::get()->getObjectInListVis( ch, ::arg, ch->carrying ) ) )
 	{
 		ch->send( "You don't seem to have %s %s.\r\n", AN( ::arg ), ::arg );
 	}
@@ -2087,7 +1951,7 @@ CommandHandler  do_grab  = DEFINE_COMMAND
 	if ( !*::arg )
 		ch->send( "Hold what?\r\n" );
 
-	else if /*( !( obj = get_obj_in_list_vis( ch, arg, ch->carrying ) ) )*/ ( !( obj = get_obj_in_list(::arg, ch->carrying)))
+	else if /*( !( obj = ItemUtil::get()->getObjectInListVis( ch, arg, ch->carrying ) ) )*/ ( !( obj = ItemUtil::get()->getObjectInList(::arg, ch->carrying)))
 	{
 		ch->send( "You don't seem to have %s %s.\r\n", AN( ::arg ), ::arg );
 	}
@@ -2183,7 +2047,7 @@ CommandHandler  do_remove  = DEFINE_COMMAND
 
 	else
 	{
-		if ( !( obj = get_object_in_equip_vis( ch, ::arg, ch->equipment, &i ) ) )
+		if ( !( obj = ItemUtil::get()->getObjectInEquipVis( ch, ::arg, ch->equipment, &i ) ) )
 		{
 			ch->send( "You don't seem to be using %s %s.\r\n", AN( ::arg ), ::arg );
 		}
@@ -2207,13 +2071,13 @@ CommandHandler  do_break  = DEFINE_COMMAND
 		return ;
 	}
 
-	else if ( !( o = get_obj_in_list_vis( ch, ::arg, ch->carrying ) ) && ( !( o = get_obj_in_list_vis( ch, ::arg, ( GET_EQ( ch, WEAR_HOLD ) ) ) ) ) )
+	else if ( !( o = ItemUtil::get()->getObjectInListVis( ch, ::arg, ch->carrying ) ) && ( !( o = ItemUtil::get()->getObjectInListVis( ch, ::arg, ( GET_EQ( ch, WEAR_HOLD ) ) ) ) ) )
 	{
 		ch->send( "You don't seem to have %s %s.\r\n", AN( ::arg ), ::arg );
 		return ;
 	}
 
-	else if ( ( o = get_obj_in_list_vis( ch, ::arg, ch->carrying ) ) )
+	else if ( ( o = ItemUtil::get()->getObjectInListVis( ch, ::arg, ch->carrying ) ) )
 	{
 		if (  o ->getType() != ITEM_KEY )
 		{
@@ -2230,7 +2094,7 @@ CommandHandler  do_break  = DEFINE_COMMAND
 	}
 	else if ( keyfound == false )
 	{
-		if ( ( o = get_obj_in_list_vis( ch, ::arg, ( GET_EQ( ch, WEAR_HOLD ) ) ) ) )
+		if ( ( o = ItemUtil::get()->getObjectInListVis( ch, ::arg, ( GET_EQ( ch, WEAR_HOLD ) ) ) ) )
 		{
 			keyfound = true;
 			if (  o ->getType() == ITEM_KEY )
@@ -2267,8 +2131,8 @@ CommandHandler  do_show  = DEFINE_COMMAND
 		return;
 	}
 	int posTrash;
-	if( !(item = get_object_in_equip_vis(ch, arg1, ch->equipment, &posTrash))
-		&& !(item = get_obj_in_list_vis(ch, arg1, ch->carrying)) )
+	if( !(item = ItemUtil::get()->getObjectInEquipVis(ch, arg1, ch->equipment, &posTrash))
+		&& !(item = ItemUtil::get()->getObjectInListVis(ch, arg1, ch->carrying)) )
 	{
 		ch->send("You don't seem to have a '%s'.\r\n", arg1);
 		return;

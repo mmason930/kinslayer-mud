@@ -83,6 +83,9 @@ bool JS_isClanSecret( int iClanVnum );
 flusspferd::object JS_getGlobalObject();
 flusspferd::string JS_getUserNameByUserId(int userId);
 flusspferd::value JS_getUserIdByUserName(flusspferd::string userName);
+void JS_saveTopLevelHolderItems(const std::string &holderType, const std::string &holderId, const flusspferd::array &objects);
+
+//const char holderType, const std::string &holderId, const std::list<Object *> &contents)
 
 int JS_getRankRequirement(int rankTo);
 

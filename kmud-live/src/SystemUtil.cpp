@@ -137,7 +137,7 @@ std::map<std::string, std::string> SystemUtil::getSubversionInfoMap(const std::s
 	StringUtil::replace(escapedUrl, "'", "\\'");
 
 	std::string subversionInfo = processCommand(std::string("svn info '") + escapedUrl + "'");
-	std::vector<std::string> outputLines = StringUtil::SplitToVector(subversionInfo, '\n');
+	std::vector<std::string> outputLines = StringUtil::splitToVector(subversionInfo, '\n');
 
 	for(std::string outputLine : outputLines)
 	{

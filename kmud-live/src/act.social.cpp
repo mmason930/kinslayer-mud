@@ -26,6 +26,8 @@
 #include "commands/infrastructure/CommandUtil.h"
 #include "commands/infrastructure/Social.h"
 
+#include "items/ItemUtil.h"
+
 CommandHandler do_action = DEFINE_COMMAND
 {
 	int act_nr;
@@ -67,8 +69,8 @@ CommandHandler do_action = DEFINE_COMMAND
 	if (!(vict = get_char_room_vis(ch, buf)))
 	{
 		if ((action->char_obj_found) &&
-		        ((targ = get_obj_in_list_vis(ch, buf, ch->carrying)) ||
-		         (targ = get_obj_in_list_vis(ch, buf, ch->in_room->contents))))
+		        ((targ = ItemUtil::get()->getObjectInListVis(ch, buf, ch->carrying)) ||
+		         (targ = ItemUtil::get()->getObjectInListVis(ch, buf, ch->in_room->contents))))
 		{
 			Act(action->char_obj_found, action->hide, ch, targ, 0, TO_CHAR);
 			Act(action->others_obj_found, action->hide, ch, targ, 0, TO_ROOM);

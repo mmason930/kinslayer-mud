@@ -91,13 +91,13 @@ __int64 AvailableSystemMemory()
 
 	fclose(processPipe);
 
-	std::vector<std::string> lineVector = StringUtil::SplitToVector(str, '\n');
+	std::vector<std::string> lineVector = StringUtil::splitToVector(str, '\n');
 	for(int index = 0;index < lineVector.size();++index)
 	{
 		std::cout << "Line: " << lineVector[index] << std::endl;
 		if(StringUtil::startsWith(lineVector[index], "-/+"))
 		{
-			std::vector<std::string> wordVector = StringUtil::SplitToVector(lineVector[index], ' ');
+			std::vector<std::string> wordVector = StringUtil::splitToVector(lineVector[index], ' ');
 			if(wordVector.size() > 0)
 				return MiscUtil::convert< __int64 >( wordVector[ wordVector.size() - 1 ] );
 		}

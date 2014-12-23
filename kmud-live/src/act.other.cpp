@@ -39,6 +39,8 @@
 #include "commands/infrastructure/CommandUtil.h"
 #include "commands/infrastructure/CommandInfo.h"
 
+#include "items/ItemUtil.h"
+
 /* extern variables */
 
 extern Descriptor *descriptor_list;
@@ -87,7 +89,7 @@ void perform_steal( Character *ch, Character *vict, Object *obj, char *obj_name 
 	GET_MOB_SPEC( vict ) == shop_keeper )
 		percent = 101;		/* Failure */
 
-	if ( !( obj = get_obj_in_list_vis( vict, obj_name, vict->carrying ) ) )
+	if ( !( obj = ItemUtil::get()->getObjectInListVis( vict, obj_name, vict->carrying ) ) )
 	{
 		for ( eq_pos = 0; eq_pos < NUM_WEARS; eq_pos++ )
 
@@ -389,7 +391,7 @@ CommandHandler  do_butcher  = DEFINE_COMMAND
 
 	else
 	{
-		corpse = get_obj_in_list_vis( ch, ::arg, ch->in_room->contents );
+		corpse = ItemUtil::get()->getObjectInListVis( ch, ::arg, ch->in_room->contents );
 	}
 
 	if ( !corpse )
@@ -596,7 +598,7 @@ CommandHandler  do_scalp  = DEFINE_COMMAND
 
 	else
 	{
-		corpse = get_obj_in_list_vis( ch, arg, ch->in_room->contents );
+		corpse = ItemUtil::get()->getObjectInListVis( ch, arg, ch->in_room->contents );
 	}
 
 	//No object matched their argument
@@ -907,7 +909,7 @@ CommandHandler  do_hide  = DEFINE_COMMAND
 
 	if ( *arg )
 	{
-		if ( !( obj = get_obj_in_list_vis( ch, arg, ch->carrying ) ) )
+		if ( !( obj = ItemUtil::get()->getObjectInListVis( ch, arg, ch->carrying ) ) )
 		{
 			ch->send( "You are not carrying that item.\r\n" );
 			return ;
@@ -1509,7 +1511,7 @@ CommandHandler  do_change  = DEFINE_COMMAND
 	else if ( !strn_cmp( arg1, "password", strlen( arg1 ) ) )
 	{
 		//Split the argument string into a vector. Can't use TwoArguments since it kills the upper case chars.
-		std::vector< std::string > vArgs = StringUtil::SplitToContainer< std::vector<std::string>, std::string >( argument, ' ' );
+		std::vector< std::string > vArgs = StringUtil::splitToContainer< std::vector<std::string> >( argument, ' ' );
 
 		//Filter out all of the empty arguments.
 		for(std::vector<std::string>::iterator iter = vArgs.begin();iter != vArgs.end();) {
