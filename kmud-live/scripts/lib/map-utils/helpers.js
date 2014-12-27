@@ -1,4 +1,5 @@
-﻿_ && MapUtil = (function() {
+﻿if (_)
+MapUtil = (function() {
 	// functions for map tool
 	return {
 		packageRoom: function(jsroom) {
