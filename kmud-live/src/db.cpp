@@ -520,6 +520,7 @@ void boot_db(void)
     // get() forces the ctoring
     JSManager* temp = JSManager::get();
 
+	temp->loadScriptsFromFile(std::string("scripts/lib/util/LoDash-2.4.1.js"));
 	temp->loadScriptsFromFilesystem("scripts");
 	temp->loadTriggers();
 	temp->loadScriptMap();

@@ -943,7 +943,7 @@ SPECIAL(bank)
 		ch->points.gold -= amount;
 		GET_BANK_GOLD(ch) += amount;
 		ch->send("You deposit %d coins.\r\n", amount);
-		Act("$n makes a bank transaction.", TRUE, ch, 0, FALSE, TO_ROOM);
+		Act("$n makes a bank transaction.", TRUE, ch, 0, nullptr, TO_ROOM);
 		return 1;
 	}
 
@@ -965,7 +965,7 @@ SPECIAL(bank)
 		GET_BANK_GOLD(ch) -= amount;
 		ch->points.gold += amount;
 		ch->send("You withdraw %d coins.\r\n", amount);
-		Act("$n makes a bank transaction.", TRUE, ch, 0, FALSE, TO_ROOM);
+		Act("$n makes a bank transaction.", TRUE, ch, 0, nullptr, TO_ROOM);
 		return 1;
 	}
 	else

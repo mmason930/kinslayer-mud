@@ -8,7 +8,7 @@ CC = g++
 
 #-std=c++0x
 # Any special flags you want to pass to the compiler
-MYFLAGS =  -O0 -std=c++0x -DXP_UNIX -I/usr/local/include -Wformat-security -Wformat -Wpointer-arith -Wcast-align -Wredundant-decls \
+MYFLAGS = -O0 -std=c++0x -DXP_UNIX -I/usr/local/include -Wformat-security -Wformat -Wpointer-arith -Wcast-align -Wredundant-decls \
  		-L/usr/local/lib -DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10 \
               -I/usr/local/lib/pkgconfig/../../include -I/usr/local/include
 
@@ -25,7 +25,7 @@ BINDIR = ../bin
 
 CPPFLAGS = -ggdb3 $(MYFLAGS) $(PROFILE)
 
-LIBS = -lsqlDatabase -lmysqlclient -lflusspferd -lcrypt -lstdc++ -lboost_regex -lboost_filesystem -lmozjs -lboost_thread
+LIBS = -lsqlDatabase -lflusspferd -lcrypt -lstdc++ -lboost_regex -lmozjs -lmysqlclient -lboost_thread -lboost_filesystem -lboost_system -ldl
 
 OBJDIR = obj
 

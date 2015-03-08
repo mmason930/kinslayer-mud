@@ -77,6 +77,16 @@ EVENT(BashStand);
 //TODO: Turn into method.
 bool JS_isArenaZone(int zoneVnum);
 
+void object_list_new_owner(Object * listy, Character * ch)
+{
+        if (listy)
+        {
+                object_list_new_owner(listy->contains, ch);
+                object_list_new_owner(listy->next_content, ch);
+                listy->carried_by = ch;
+        }
+}
+
 bool isInArena(Character *ch)
 {
 	if(ch && ch->in_room && JS_isArenaZone(ch->in_room->getZone()->getVnum()))
@@ -674,6 +684,10 @@ void Character::MakeCorpse()
 
 	for ( o = corpse->contains; o != NULL; o = o->next_content )
 		o->in_obj = corpse;
+
+	corpseClock2.turnOn();
+	object_list_new_owner( corpse, NULL );
+	corpseClock2.turnOff();
 
 	corpseClock4.turnOn();
 	/* transfer character's equipment to the corpse */

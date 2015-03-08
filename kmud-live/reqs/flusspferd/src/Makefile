@@ -2,7 +2,7 @@ CC = g++
 
 FLUSSPFERD_INCLUDES = ../include
 # Any special flags you want to pass to the compiler
-MYFLAGS =  -O -std=c++0x -DXP_UNIX -I/usr/local/include -DICONV_ACCEPTS_NONCONST_INPUT=1 -Wformat-security -Wformat -Wpointer-arith -Wcast-align -Wredundant-decls \
+MYFLAGS =  -ldl -O -std=c++0x -DXP_UNIX -I/usr/local/include -DICONV_ACCEPTS_NONCONST_INPUT=1 -Wformat-security -Wformat -Wpointer-arith -Wcast-align -Wredundant-decls \
  		-L/usr/local/lib -DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10 \
               -I/usr/local/lib/pkgconfig/../../include -I$(FLUSSPFERD_INCLUDES) -I/usr/local/include
 
