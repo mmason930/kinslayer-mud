@@ -42,6 +42,7 @@ class Room;
 class JSTrigger;
 class string;
 class JSTrigger;
+class JSScript;
 
 struct JSInstance
 {

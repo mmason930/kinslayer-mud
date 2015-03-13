@@ -92,10 +92,13 @@ value flusspferd::execute(char const *filename, object const &scope_) {
 
   int oldopts = JS_GetOptions(cx);
   JS_SetOptions(cx, oldopts | JSOPTION_COMPILE_N_GO );
-  JSScript *script = JS_CompileUCScript(
-    cx, scope,
-    (jschar*)module_text.data(), module_text.length(),
-    filename, 1ul
+  JSObject *script = JS_CompileUCScript(
+    cx,
+    scope,
+    (jschar*)module_text.data(),
+    module_text.length(),
+    filename,
+    1ul
   );
 
   if (!script) {
@@ -113,12 +116,12 @@ value flusspferd::execute(char const *filename, object const &scope_) {
   if (!ok) {
     exception e("Script execution failed");
     if (!e.empty()) {
-      JS_DestroyScript(cx, script);
+//    JS_DestroyScript(cx, script);
       throw e;
     }
   }
 
-  JS_DestroyScript(cx, script);
+//  JS_DestroyScript(cx, script);
 
   return result;
 }

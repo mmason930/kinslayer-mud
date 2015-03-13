@@ -45,7 +45,7 @@ public:
   {}
 
   static JSBool call_helper(
-    JSContext *ctx, JSObject *obj, uintN argc, jsval *argv, jsval *rval);
+    JSContext *ctx, uintN argc, jsval *rval);
   static void finalize(JSContext *, JSObject *);
 
 #if JS_VERSION >= 180
@@ -87,7 +87,7 @@ JSClass native_function_base::impl::function_priv_class = {
   | JSCLASS_MARK_IS_TRACE
 #endif
   ,
-  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
+  JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
   JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub,
   &native_function_base::impl::finalize,
   0,
@@ -136,12 +136,12 @@ function native_function_base::create_function() {
 }
 
 JSBool native_function_base::impl::call_helper(
-    JSContext *ctx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+    JSContext *ctx, uintN argc, jsval *vp)
 {
   FLUSSPFERD_CALLBACK_BEGIN {
     current_context_scope scope(Impl::wrap_context(ctx));
 
-    JSObject *function = JSVAL_TO_OBJECT(argv[-2]);
+    JSObject *function = JSVAL_TO_OBJECT(JS_CALLEE(ctx, vp));
 
     jsval self_val;
 
@@ -156,9 +156,9 @@ JSBool native_function_base::impl::call_helper(
 
     call_context x;
 
-    x.self = Impl::wrap_object(obj);
-    x.arg = Impl::arguments_impl(argc, argv);
-    x.result.bind(Impl::wrap_jsvalp(rval));
+    x.self = Impl::wrap_object(JS_THIS_OBJECT(ctx, vp));
+    x.arg = Impl::arguments_impl(argc, JS_ARGV(ctx, vp));
+    x.result.bind(Impl::wrap_jsval(JS_RVAL(ctx, vp)));
     x.function = Impl::wrap_object(function);
 
     self->call(x);

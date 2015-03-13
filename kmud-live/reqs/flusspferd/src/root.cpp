@@ -41,6 +41,56 @@ namespace flusspferd { namespace detail {
 
 template<typename T>
 root<T>::root(T const &o)
+  : T(o)
+{
+  JSBool status = JS_AddGCThingRoot(
+    Impl::current_context(),
+    T::get_gcptr());
+
+  if (status == JS_FALSE) {
+    throw exception("Cannot root Javascript value");
+  }
+}
+
+template<typename T>
+root<T>::~root() {
+  JS_RemoveGCThingRoot(
+    Impl::current_context(),
+    T::get_gcptr());
+}
+
+// value
+template<>
+root<value>::root(value const &o)
+  : value(o)
+{
+  JSBool status = JS_AddValueRoot(
+    Impl::current_context(),
+    Impl::value_impl::getp());
+
+  if (status == JS_FALSE) {
+    throw exception("Cannot root Javascript value");
+  }
+}
+
+template<>
+root<value>::~root() {
+  JS_RemoveValueRoot(
+    Impl::current_context(),
+    Impl::value_impl::getp());
+}
+
+template class root<value>;
+template class root<object>;
+template class root<string>;
+template class root<array>;
+}}
+
+/***
+namespace flusspferd { namespace detail {
+
+template<typename T>
+root<T>::root(T const &o)
 : T(o)
 {
   JSBool status;
@@ -68,3 +118,4 @@ template class root<function>;
 template class root<array>;
 
 }}
+***/

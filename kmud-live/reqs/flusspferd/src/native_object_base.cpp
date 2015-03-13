@@ -42,7 +42,8 @@ using namespace flusspferd;
 class native_object_base::impl {
 public:
   static void finalize(JSContext *ctx, JSObject *obj);
-  static JSBool call_helper(JSContext *, JSObject *, uintN, jsval *, jsval *);
+
+  static JSBool call_helper(JSContext *, uintN, jsval *);
 
 #if JS_VERSION >= 180
   static void trace_op(JSTracer *trc, JSObject *obj);
@@ -51,7 +52,10 @@ public:
 #endif
 
   template<property_mode>
-  static JSBool property_op(JSContext *, JSObject *, jsval, jsval *);
+  static JSBool property_op(JSContext *, JSObject *, jsid, jsval *);
+
+  template<property_mode>
+  static JSBool strict_property_op(JSContext *, JSObject *, jsid, JSBool, jsval *);
 
   static JSBool new_resolve(JSContext *, JSObject *, jsval, uintN, JSObject **);
 
@@ -83,7 +87,7 @@ JSClass native_object_base::impl::native_object_class = {
   &native_object_base::impl::property_op<native_object_base::property_add>,
   &native_object_base::impl::property_op<native_object_base::property_delete>,
   &native_object_base::impl::property_op<native_object_base::property_get>,
-  &native_object_base::impl::property_op<native_object_base::property_set>,
+  &native_object_base::impl::strict_property_op<native_object_base::property_set>,
   JS_EnumerateStub,
   (JSResolveOp) &native_object_base::impl::new_resolve,
   JS_ConvertStub,
@@ -104,7 +108,7 @@ JSClass native_object_base::impl::native_enumerable_object_class = {
   &native_object_base::impl::property_op<native_object_base::property_add>,
   &native_object_base::impl::property_op<native_object_base::property_delete>,
   &native_object_base::impl::property_op<native_object_base::property_get>,
-  &native_object_base::impl::property_op<native_object_base::property_set>,
+  &native_object_base::impl::strict_property_op<native_object_base::property_set>,
   (JSEnumerateOp) &native_object_base::impl::new_enumerate,
   (JSResolveOp) &native_object_base::impl::new_resolve,
   JS_ConvertStub,
@@ -225,27 +229,29 @@ void native_object_base::impl::finalize(JSContext *ctx, JSObject *obj) {
 }
 
 JSBool native_object_base::impl::call_helper(
-    JSContext *ctx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+  JSContext *ctx, uintN argc, jsval *vp)
+//  JSContext *ctx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
 {
   FLUSSPFERD_CALLBACK_BEGIN {
     current_context_scope scope(Impl::wrap_context(ctx));
 
-    JSObject *function = JSVAL_TO_OBJECT(argv[-2]);
+    JSObject *function = JSVAL_TO_OBJECT(JS_CALLEE(ctx, vp));
+    JSObject *self_object = JS_THIS_OBJECT(ctx, vp);
 
     native_object_base *self = 0;
     
     try {
-      self = &native_object_base::get_native(Impl::wrap_object(obj));
+      self = &native_object_base::get_native(Impl::wrap_object(self_object));
     } catch (exception &) {
       self = &native_object_base::get_native(Impl::wrap_object(function));
     }
 
     call_context x;
 
-    x.self = Impl::wrap_object(obj);
+    x.self = Impl::wrap_object(self_object);
     x.self_native = self;
-    x.arg = Impl::arguments_impl(argc, argv);
-    x.result.bind(Impl::wrap_jsvalp(rval));
+    x.arg = Impl::arguments_impl(argc, JS_ARGV(ctx, vp));
+    x.result.bind(Impl::wrap_jsval(JS_RVAL(ctx, vp)));
     x.function = Impl::wrap_object(function);
 
     self->self_call(x);
@@ -254,7 +260,7 @@ JSBool native_object_base::impl::call_helper(
 
 template<native_object_base::property_mode mode>
 JSBool native_object_base::impl::property_op(
-    JSContext *ctx, JSObject *obj, jsval id, jsval *vp)
+    JSContext *ctx, JSObject *obj, jsid id, jsval *vp)
 {
   FLUSSPFERD_CALLBACK_BEGIN {
     current_context_scope scope(Impl::wrap_context(ctx));
@@ -263,7 +269,22 @@ JSBool native_object_base::impl::property_op(
       native_object_base::get_native(Impl::wrap_object(obj));
 
     value data(Impl::wrap_jsvalp(vp));
-    self.property_op(mode, Impl::wrap_jsval(id), data);
+    self.property_op(mode, Impl::wrap_jsval(id), data);//TODO: Safe? ID is jsid, not jsval
+  } FLUSSPFERD_CALLBACK_END;
+}
+
+template<native_object_base::property_mode mode>
+JSBool native_object_base::impl::strict_property_op(
+    JSContext *ctx, JSObject *obj, jsid id, JSBool strict, jsval *vp)
+{
+  FLUSSPFERD_CALLBACK_BEGIN {
+    current_context_scope scope(Impl::wrap_context(ctx));
+
+    native_object_base &self =
+      native_object_base::get_native(Impl::wrap_object(obj));
+
+    value data(Impl::wrap_jsvalp(vp));
+    self.property_op(mode, Impl::wrap_jsval(id), data);//TODO: Safe? ID is jsid, not jsval
   } FLUSSPFERD_CALLBACK_END;
 }
 

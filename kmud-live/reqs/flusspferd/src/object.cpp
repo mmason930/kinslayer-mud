@@ -51,8 +51,11 @@ object::~object() { }
 void object::seal(bool deep) {
   if (is_null())
     throw exception("Could not seal object (object is null)");
-  if (!JS_SealObject(Impl::current_context(), get(), deep))
-    throw exception("Could not seal object");
+  if (deep)
+    if(!JS_DeepFreezeObject(Impl::current_context(), get()))
+      throw exception("Could not seal object");
+  else if(!JS_FreezeObject(Impl::current_context(), get()))
+      throw exception("Could not seal object");
 }
 
 object object::parent() {
@@ -270,7 +273,7 @@ void object::define_property(
                            (jschar*)name.data(), name.length(),
                            Impl::get_jsval(v),
                            *(JSPropertyOp*) &getter_o,
-                           *(JSPropertyOp*) &setter_o,
+                           *(JSStrictPropertyOp*) &setter_o,
                            sm_flags))
     throw exception("Could not define property");
 }
@@ -390,7 +393,7 @@ bool object::get_property_attributes(
   JSBool success = JS_GetUCPropertyAttrsGetterAndSetter(
           Impl::current_context(), get_const(), (jschar*)name.data(), name.length(),
           &sm_flags, &found,
-          (JSPropertyOp*)&getter_op, (JSPropertyOp*)&setter_op);
+          (JSPropertyOp*)&getter_op, (JSStrictPropertyOp*)&setter_op);
 
   if (!success)
     throw exception("Could not query property attributes");
