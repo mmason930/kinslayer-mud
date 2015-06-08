@@ -9,7 +9,6 @@ var script20941 = function(self, actor, here, args, extra) {
 			return true;
 		return false;
 	}
-	//Test
 	if (strn_cmp(cmd,"alias",1) || strn_cmp(cmd,"x",1))
 	{
 		actor.detach(20941);
