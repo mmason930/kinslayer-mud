@@ -1,4 +1,5 @@
 var script107 = function(self, actor, here, args, extra) {
+	getRoom(1).echo("Test");
 	if( actor.level < 103 ) {
 		return;
 	}
