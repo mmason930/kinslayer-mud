@@ -109,7 +109,8 @@ function mercObj(className, race) {
 		/* Calculate the merc's price based on multiple stats and bonsuses
 		 * and number of historically purchased mercs of that class */
 		var base = 0; //ADJUST TO AFFECT BASE PRICE OF ALL MERCS
-		var price = base + 2*this.str + this.intel + this.wis + 2*this.dex + 3*this.con + 3*parseInt(fread("purchHistClass" + this.className))/50;
+		var purchHistory = parseInt(fread("purchHistClass" + this.className)) || 0;
+		var price = base + 2*this.str + this.intel + this.wis + 2*this.dex + 3*this.con + 3*/50;
 		if(this.chan) {
 			/**** CHANGE THIS TO AFFECT PRICE OF CHANNELER MERCS ****/
 			price *= 5.25;
