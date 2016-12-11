@@ -41,7 +41,7 @@ void GeneralTestCase::setup()
 
 void GeneralTestCase::process()
 {
-
+	/***
 	class TestDescriptor : public Descriptor
 	{
 	protected:
@@ -463,6 +463,7 @@ void GeneralTestCase::process()
 			((TestDescriptor*)character->desc)->clearOutputSeen();
 		}
 	}
+	***/
 }
 
 void GeneralTestCase::cleanup()

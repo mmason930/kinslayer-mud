@@ -565,7 +565,7 @@ int unlink(const char *path);
 
 #ifdef NEED_GETTIMEOFDAY_PROTO
 
-int gettimeofday(struct timeval *tp, void * );
+void gettimeofday(struct timeval *tp, struct timezone *dummy);
 #endif
 
 /* Function prototypes that are only used in comm.c and some of the utils */

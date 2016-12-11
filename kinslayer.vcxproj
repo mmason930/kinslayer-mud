@@ -114,6 +114,7 @@
     <ClCompile Include="src\commands\immortals\Locate.cpp" />
     <ClCompile Include="src\commands\infrastructure\CommandUtil.cpp" />
     <ClCompile Include="src\commands\infrastructure\Social.cpp" />
+    <ClCompile Include="src\commands\items\Get.cpp" />
     <ClCompile Include="src\config.cpp" />
     <ClCompile Include="src\constants.cpp" />
     <ClCompile Include="src\DatabaseUtil.cpp" />
@@ -149,6 +150,7 @@
     <ClCompile Include="src\guilds\UserGuildStatus.cpp" />
     <ClCompile Include="src\handler.cpp" />
     <ClCompile Include="src\interpreter.cpp" />
+    <ClCompile Include="src\items\ItemUtil.cpp" />
     <ClCompile Include="src\jedit.cpp" />
     <ClCompile Include="src\jsoncpp\json_reader.cpp" />
     <ClCompile Include="src\jsoncpp\json_value.cpp" />
@@ -178,6 +180,7 @@
     <ClCompile Include="src\rooms\Exit.cpp" />
     <ClCompile Include="src\rooms\Room.cpp" />
     <ClCompile Include="src\rooms\RoomSector.cpp" />
+    <ClCompile Include="src\Script.cpp" />
     <ClCompile Include="src\sedit.cpp" />
     <ClCompile Include="src\sha1.cpp" />
     <ClCompile Include="src\shop.cpp" />
@@ -280,6 +283,7 @@
     <ClInclude Include="src\guilds\UserGuildStatus.h" />
     <ClInclude Include="src\handler.h" />
     <ClInclude Include="src\interpreter.h" />
+    <ClInclude Include="src\items\ItemUtil.h" />
     <ClInclude Include="src\jsoncpp\autolink.h" />
     <ClInclude Include="src\jsoncpp\config.h" />
     <ClInclude Include="src\jsoncpp\features.h" />
@@ -312,6 +316,7 @@
     <ClInclude Include="src\rooms\Room.h" />
     <ClInclude Include="src\rooms\RoomSector.h" />
     <ClInclude Include="src\screen.h" />
+    <ClInclude Include="src\Script.h" />
     <ClInclude Include="src\sha1.h" />
     <ClInclude Include="src\shop.h" />
     <ClInclude Include="src\spells.h" />

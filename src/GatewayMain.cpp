@@ -14,7 +14,8 @@ int main( void )
 {
 	GatewayServer gatewayServer;
 
-	srand((unsigned int) (time(0)+clock()/2) );
+	time_t currentTime = time(0);
+	srand((unsigned int) (currentTime + clock()/2) );
 
 	if(!gatewayServer.loadConfiguration())
 		exit(1);

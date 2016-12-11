@@ -2107,3 +2107,18 @@ int FindBodyPart(const char *bp)
 	else
 		return -1;
 }
+
+bool Character::shouldBlockEngagementDueToNumberFighting(Character *victim, bool displayMessage)
+{
+	if (((victim->NumFighting() >= 4 && !IS_NPC(this)) ||
+		(ROOM_FLAGGED(this->in_room, ROOM_TUNNEL) && victim->NumFighting() >= CONFIG_TUNNEL_SIZE)
+		)
+		&& FIGHTING(this) != victim && FIGHTING(victim) != this)
+	{
+		if (displayMessage)
+			send("You'd probably get killed before you got there, it is so crowded!\r\n");
+		return true;
+	}
+
+	return false;
+}

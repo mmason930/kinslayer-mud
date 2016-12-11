@@ -38,16 +38,6 @@ public:
 		return p ? new T(*p) : 0;
 	}
 
-	template<typename T, typename U> static T * min(const T& t, const U& u)
-	{
-		return u < t ? u : t;
-	}
-
-	template<typename T, typename U> static T * max(const T& t, const U& u)
-	{
-		return u > t ? u : t;
-	}
-
 	static bool isNewLine(char c);
 	static bool isNumber(const std::string &str);
 	static bool isNumber(const char *str);

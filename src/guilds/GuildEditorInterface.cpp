@@ -54,7 +54,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 
 	manageMyGuildsSaveRankConfirmationMenu->setPrintOperator(DEFINE_EI_PRINT_OPERATOR
 	{
-		i->send("Do you wish to save the changes you made to this rank? (Y/N): ");
+		return i->send("Do you wish to save the changes you made to this rank? (Y/N): ");
 	});
 
 	manageMyGuildsSaveRankConfirmationMenu->setParseOperator(DEFINE_EI_PARSE_OPERATOR
@@ -462,7 +462,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 			if(!GuildUtil::get()->getGuildJoinApplications(i->getUserId(), data->getGuildId(), GuildJoinApplicationStatus::getStatusesSubmitterCanRemove()).empty())
 				i->send("%sR%s) Remove Application\r\n", cyn, nrm);
 
-			i->send("%sQ%s) Quit\r\n\r\n"
+			return i->send("%sQ%s) Quit\r\n\r\n"
 
 					"Choose an Option: ",
 					cyn, nrm
@@ -597,7 +597,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 				i->send("%s\r\n\r\n", applicationBuilder.build().c_str());
 			}
 
-			i->send("%sQ%s) Quit\r\n", cyn, nrm);
+			return i->send("%sQ%s) Quit\r\n", cyn, nrm);
 		}
 	);
 
@@ -680,7 +680,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 			i->send("%sS%s) Submit Denial\r\n", cyn, nrm);
 			i->send("%sQ%s) Quit (Application Will Not Be Denied)\r\n", cyn, nrm);
 
-			i->send("\r\nEnter Choice: ");
+			return i->send("\r\nEnter Choice: ");
 		}
 	);
 
