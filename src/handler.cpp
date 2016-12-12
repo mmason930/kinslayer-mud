@@ -38,6 +38,7 @@
 #include "editor-interface/EditorInterfaceInstance.h"
 
 #include "items/ItemUtil.h"
+#include "Game.h"
 
 #include "js.h"
 
@@ -970,6 +971,7 @@ void obj_to_char(Object *object, Character *ch)
 	{
 
 		objectMoveLogger.logObjectMove(object->objID, std::string("Moved to ") + ch->getUserType()->getStandardName() + std::string(" ") + ToString(ch->getUserId()));
+		game->logExtraction("Moved %s (%p) to %s %s (%p)", MiscUtil::toString(object->objID).c_str(), object, ch->getUserType()->getStandardName().c_str(), ToString(ch->getUserId()).c_str(), ch);
 
 		object->next_content = ch->carrying;
 		ch->carrying = object;
@@ -1001,6 +1003,7 @@ void obj_from_char(Object *object)
 		return;
 
 	objectMoveLogger.logObjectMove(object->objID, std::string("Removed from ") + object->carried_by->getUserType()->getStandardName() + std::string(" ") + ToString(object->carried_by->getUserId()));
+	game->logExtraction("Removed %s (%p) from %s %s (%p)", MiscUtil::toString(object->objID).c_str(), object, object->carried_by->getUserType()->getStandardName().c_str(), ToString(object->carried_by->getUserId()).c_str(), object->carried_by);
 
 	REMOVE_FROM_LIST(object, object->carried_by->carrying, next_content);
 
@@ -1104,6 +1107,8 @@ void equip_char(Character * ch, Object * obj, int pos)
 	}
 
 	objectMoveLogger.logObjectMove(obj->objID, std::string("Equipped to ") + ch->getUserType()->getStandardName() + std::string(" ") + ToString(ch->getUserId()));
+	game->logExtraction("Equipped %s (%p) to %s %s (%p)", MiscUtil::toString(obj->objID).c_str(), obj, ch->getUserType()->getStandardName().c_str(), ToString(ch->getUserId()).c_str(), ch);
+
 
 	GET_EQ(ch, pos) = obj;
 	obj->worn_by = ch;
@@ -1147,7 +1152,8 @@ Object *unequip_char(Character * ch, int pos)
 	obj->worn_on = -1;
 
 	objectMoveLogger.logObjectMove(obj->objID, std::string("Removed equip from ") + ch->getUserType()->getStandardName() + std::string(" ") + ToString(ch->getUserId()));
-
+	game->logExtraction("Removed equip %s (%p) from %s %s (%p)", MiscUtil::toString(obj->objID).c_str(), obj, ch->getUserType()->getStandardName().c_str(), ToString(ch->getUserId()).c_str(), ch);
+	
 	if (ch->in_room)
 	{
 		if (pos == WEAR_LIGHT && obj->getType() == ITEM_LIGHT && GET_OBJ_VAL(obj, 2))
@@ -1288,6 +1294,7 @@ void Object::MoveToRoom(Room *room, bool vaultSave)
 	else
 	{
 		objectMoveLogger.logObjectMove(this->objID, std::string("Moved to room #") + ToString(room->getVnum()));
+		game->logExtraction("Moved %s (%p) to Room %s (%p)", MiscUtil::toString(this->objID).c_str(), this, ToString(room->getVnum()).c_str(), room);
 
 		this->next_content = room->contents;
 		room->contents = this;
@@ -1344,6 +1351,7 @@ void Object::RemoveFromRoom(bool vaultSave)
 	}
 
 	objectMoveLogger.logObjectMove(this->objID, std::string("Removed from room #") + ToString(this->item_number));
+	game->logExtraction("Removed %s (%p) from Room %s (%p)", MiscUtil::toString(this->objID).c_str(), this, ToString(r->getVnum()).c_str(), r);
 
 	this->in_room = 0;
 	this->next_content = NULL;
@@ -1360,6 +1368,7 @@ void obj_to_obj(Object * obj, Object * obj_to)
 	}
 
 	objectMoveLogger.logObjectMove(obj->objID, std::string("Moved to obj ") + ToString(obj->objID));
+	game->logExtraction("Moved %s (%p) to Obj %s (%p)", MiscUtil::toString(obj->objID).c_str(), obj, ToString(obj_to->getVnum()).c_str(), obj_to);
 
 	obj->next_content = obj_to->contains;
 	obj_to->contains = obj;
@@ -1379,6 +1388,7 @@ void obj_from_obj(Object * obj)
 	}
 
 	objectMoveLogger.logObjectMove(obj->objID, std::string("Removed from obj ") + ToString(obj->in_obj->objID));
+	game->logExtraction("Removed %s (%p) from Obj %s (%p)", MiscUtil::toString(obj->objID).c_str(), obj, ToString(obj_from->getVnum()).c_str(), obj_from);
 
 	obj_from = obj->in_obj;
 	REMOVE_FROM_LIST(obj, obj_from->contains, next_content);
@@ -1401,6 +1411,8 @@ void Object::Extract( bool lowerItemCount )
 
 	if( this->IsPurged() )
 		return;//Don't need to purge this again...
+
+	game->logExtraction("Extracting Object %p", this);
 
 	/* Get rid of the contents of the object, as well. */
 	while (this->contains)
@@ -1486,6 +1498,9 @@ void Character::Extract( UserLogoutType *userLogoutType, bool full_delete )
 
 	if( purged == true )
 		return;
+
+	game->logExtraction("Extracting Character %p in room #%s, logout type %s",
+		this, in_room ? MiscUtil::toString(in_room->getVnum()).c_str() : "<NONE>", userLogoutType->getStandardName().c_str());
 
 	js_extraction_scripts( this );
 

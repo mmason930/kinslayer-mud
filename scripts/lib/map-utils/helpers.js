@@ -1,6 +1,5 @@
-﻿if (_)
-MapUtil = (function() {
-	/// functions for map tool
+﻿MapUtil = (function() {
+	// functions for map toola
 	return {
 		packageRoom: function(jsroom) {
 			return {

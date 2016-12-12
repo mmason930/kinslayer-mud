@@ -3,4 +3,4 @@ var script18607 = function(self, actor, here, args, extra) {
 	_block;
 	var cmd = getArgList(args);
 	actor.viewMercList(cmd);
-}
+};

@@ -13,3 +13,15 @@ function dirFromText( dText ) {
         return constants.DOWN;
     return -1;
 }
+
+function dirFromTextAbbreviated(dText)
+{
+	var letter = dText[0].toLowerCase();
+	if(letter == "n")   return constants.NORTH;
+	if(letter == "e")   return constants.EAST;
+	if(letter == "s")   return constants.SOUTH;
+	if(letter == "w")   return constants.WEST;
+	if(letter == "u")   return constants.UP;
+	if(letter == "d")   return constants.DOWN;
+	return -1;
+}

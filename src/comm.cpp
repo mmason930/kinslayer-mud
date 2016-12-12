@@ -1081,10 +1081,12 @@ void gameLoop()
 	
 	Clock heartbeatClock;
 	Clock pulseTimer;
+	Clock loopTimer;
 
 	rebootNotified15 = rebootNotified10 = rebootNotified5 = rebootNotified1 = false;
 
 	pulseTimer.reset(false);
+	loopTimer.reset(false);
 
 	bootTime = time( 0 );
 	pulse = 0;
@@ -1092,7 +1094,9 @@ void gameLoop()
 	while ( !circle_shutdown )
 	{
 		std::this_thread::sleep_for( std::chrono::microseconds( OPT_USEC ) );
-
+		
+		game->logLag("Starting loop...");
+		loopTimer.turnOn();
 		//Make sure we're still connected to the database...
 		if( !gameDatabase->isConnected() && (time(0) - last_db_alert_time) > 15 )
 		{
@@ -1109,6 +1113,7 @@ void gameLoop()
 			gatewayConnection->socketWriteInstant("FinishedBooting\n");
 		}
 
+		game->logLag("Beginning processing gateway commands.");
 		while(true) {
 
 			std::string input = gatewayConnection->getCommand();
@@ -1120,7 +1125,8 @@ void gameLoop()
 
 			processGatewayCommand(input);
 		}
-
+		
+		game->logLag("Beginning processing websocket commands.");
 		//Process Web Socket Commands & prepare input
 		for(d = descriptor_list; d; d = next_d)
 		{
@@ -1136,6 +1142,7 @@ void gameLoop()
 			}
 		}
 
+		game->logLag("Beginning processing commands.");
 		// Process commands.
 		for ( d = descriptor_list; d; d = next_d )
 		{
@@ -1172,16 +1179,19 @@ void gameLoop()
 			Log( "SYSERR: Missed %d seconds worth of pulses. Heartbeat ran for %.3f seconds.", missed_pulses / PASSES_PER_SEC, heartbeatClock.getSeconds() );
 			missed_pulses = 2 * PASSES_PER_SEC;
 		}
-
+		
 		for(d = descriptor_list;d;d = d->next)
 		{
 			d->flushOutputBuffer();
 		}
-
+		
+		game->logLag("Listener pulse.");		
 		listener->pulse();
 
+		game->logLag("Accepting new hosts.");
 		listener->acceptNewHosts();
 
+		game->logLag("Sending newlines and prompts.");
 		for(d = descriptor_list;d;d = d->next) {
 
 			if(d->hadOutput) {
@@ -1197,7 +1207,7 @@ void gameLoop()
 			d->hadOutput = false;
 		}
 
-
+		game->logLag("Kicking out CON_CLOSe, CON_DISCONNECT.");
 		/* Kick out folks in the CON_CLOSE or CON_DISCONNECT state */
 		for ( d = descriptor_list; d; d = next_d )
 		{
@@ -1206,7 +1216,8 @@ void gameLoop()
 			if ( STATE( d ) == CON_CLOSE || STATE( d ) == CON_DISCONNECT )
 				d->disconnect();
 		}
-
+		
+		game->logLag("Heartbeating.");
 		heartbeatClock.reset(false);
 		heartbeatClock.turnOn();
 		/* Now execute the heartbeat functions */
@@ -1235,6 +1246,9 @@ void gameLoop()
 			pulse = 0;
 
 		pulseTimer.turnOff();
+		loopTimer.turnOff();
+
+		game->logLag("Ending loop : %s", MiscUtil::toString(loopTimer.getLastClocks()).c_str());
 
 		missed_pulses = pulseTimer.getClocks() / (1000 / PASSES_PER_SEC);
 
@@ -1473,12 +1487,14 @@ void PurgeQueue()
 	for( std::list< Character* >::iterator cIter = CharPurgeList.begin();cIter != CharPurgeList.end();++cIter )
 	{
 		Character *temp;
+		game->logExtraction("Purging character %p from list.", (*cIter));
 		REMOVE_FROM_LIST( (*cIter), character_list, next);
 		delete (*cIter);
 	}
 	for( std::list< Object* >::iterator oIter = ObjPurgeList.begin();oIter != ObjPurgeList.end();++oIter )
 	{
 		Object *temp;
+		game->logExtraction("Purging object %p from list.", (*oIter));
 		REMOVE_FROM_LIST( (*oIter), object_list, next);
 		delete (*oIter);
 	}
@@ -1507,11 +1523,18 @@ void LagMonitor::startClock()
 	timer.reset(false);
 	timer.turnOn();
 }
+unsigned long long LagMonitor::getLastClocks() const
+{
+	return timer.getLastClocks();
+}
+
 void LagMonitor::stopClock( const std::string &sRoutineName )
 {
 	timer.turnOff();
 
 	double runTime = (double)timer.getClocks() / (double)1000;
+
+	game->logLag("Pulse routine `%s` : %s", sRoutineName.c_str(), MiscUtil::toString(timer.getLastClocks()).c_str());
 
 	if( mRoutineTimeCard.count( sRoutineName ) == 0 ) {
 		mRoutineTimeCard[ sRoutineName ].numberOfTimesRun = 1;
@@ -1575,6 +1598,7 @@ void heartbeat( int pulse )
 		UpdateBootHigh(NumPlayers(true,false));
 		lagMonitor.stopClock( LAG_MONITOR_UPDATE_BOOT_HIGH );
 	}
+
 	if ( !( pulse % (13 RL_SEC) ) )
     {
 		lagMonitor.startClock();
@@ -1594,6 +1618,7 @@ void heartbeat( int pulse )
 	}
 
 	if ( !( pulse % PULSE_ZONE ) ) {
+		
 		lagMonitor.startClock();
 		zone_update();
 		lagMonitor.stopClock( LAG_MONITOR_ZONE_UPDATE );
@@ -1606,11 +1631,14 @@ void heartbeat( int pulse )
 		lagMonitor.stopClock( LAG_MONITOR_CHECK_FIGHTING );
 	}
 	if ( !( pulse % ( (60 RL_SEC) * (CONFIG_AUTOSAVE_TIME) ) ) ) {
+
 		lagMonitor.startClock();
 		autoSave();
 		lagMonitor.stopClock( LAG_MONITOR_AUTO_SAVE );
 	}
+
 	if ( !( pulse % ( 60 * PASSES_PER_SEC * 5 ) ) ) {
+		
 		lagMonitor.startClock();
 		checkIdlePasswords();
 		lagMonitor.stopClock( LAG_MONITOR_CHECK_IDLE_PASSWORDS );

@@ -273,6 +273,7 @@ struct attack_hit_type
 	const char *plural;
 };
 
+class Weave;
 
 #define ASPELL(spellname) \
 void	spellname(Character *ch, Character *victim, Object *obj, char *argument, Weave* weave)

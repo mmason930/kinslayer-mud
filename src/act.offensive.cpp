@@ -285,10 +285,10 @@ int Character::BashDefenseRoll()
 }
 void perform_bash(Character *ch, Character *vict)
 {
-	Character *p = 0;
+	Character *faceoffOpponent = nullptr;
 	char dCommand[MAX_INPUT_LENGTH];
 	int i = 0;
-	bool PreFighting = FIGHTING(ch) ? true : false;
+	bool preFighting = FIGHTING(ch) ? true : false;
 
 	if(!vict || vict->IsPurged() || vict->in_room != ch->in_room)
 	{
@@ -301,7 +301,11 @@ void perform_bash(Character *ch, Character *vict)
 	ch->GainNoQuit(vict);
 	vict->GainNoQuit(ch);
 
+	if(!preFighting)//This calculation must occur before the player is engaged, otherwise faceoff results are screwed up.
+		faceoffOpponent = faceoff(ch, vict);
+
 	CommandInfo *commandInfo;
+
 	strcpy(dCommand, ch->delayed_command.c_str());
 	//Both the basher and the bash target complete their timer on the same pulse.
 	if( (ch->CanBash(OneArgument(dCommand, arg))) && (GET_TARGET(vict) == ch)
@@ -357,10 +361,10 @@ void perform_bash(Character *ch, Character *vict)
 			ch->WaitState(PULSE_VIOLENCE / 2);
 		}
 	}
-	if(FIGHTING(ch) && (p = faceoff(ch, vict)) && !PreFighting)
+	if(FIGHTING(ch) && faceoffOpponent && !preFighting)
 	{
 		ch->StopFighting();
-		ch->SetFighting(p);
+		ch->SetFighting(faceoffOpponent);
 	}
 }
 
@@ -1246,82 +1250,6 @@ CommandHandler do_backstab = DEFINE_COMMAND
 		ch->command_ready = true;
 	else
 		perform_backstab(ch, GET_TARGET(ch));
-};
-
-std::vector<std::string> orders = {
-	"follow self"
-};
-
-int order_ok(Character *ch, Character *victim, char *order)
-{
-	if(victim->master != ch || !IS_NPC(victim))
-		return 0;
-
-	for(auto orderOption : orders)
-	{
-		if(!str_cmp(orderOption, order))
-			return 1;
-	}
-	
-	return 0;
-}
-
-CommandHandler do_order = DEFINE_COMMAND
-{
-	char name[MAX_INPUT_LENGTH], message[MAX_INPUT_LENGTH];
-	bool found = FALSE;
-	Room *org_room;
-	Character *vict;
-	struct Follower *k;
-
-	HalfChop(argument, name, message);
-
-	if (!*name || !*message)
-		ch->send("Order who to do what?\r\n");
-	else if (!(vict = get_char_room_vis(ch, name)))
-		ch->send("That person isn't here.\r\n");
-	else if (ch == vict)
-		ch->send("You obviously suffer from skitzofrenia.\r\n");
-	else
-	{
-		if (vict)
-		{
-			strcpy(message, ch->ScrambleSpeech(message, vict).c_str());
-			vict->send("%s orders you to '%s'", GET_NAME(ch), message);
-			Act("$n gives $N an order.", FALSE, ch, 0, vict, TO_ROOM);
-
-			if (!order_ok(ch, vict, message))
-				Act("$n has an indifferent look.", FALSE, vict, 0, 0, TO_ROOM);
-
-			else
-			{
-				ch->send(OK);
-				CommandUtil::get()->interpretCommand(vict, message);
-			}
-		}
-
-		else
-		{			/* This is order "followers" */
-			sprintf(buf, "$n issues the order '%s'.", message);
-			Act(buf, FALSE, ch, 0, vict, TO_ROOM);
-
-			org_room = ch->in_room;
-
-			for (k = ch->followers; k; k = k->next)
-			{
-				if (org_room == k->follower->in_room)
-				{
-					found = TRUE;
-					CommandUtil::get()->interpretCommand(k->follower, message);
-				}
-			}
-
-			if (found)
-				ch->send(OK);
-			else
-				ch->send("Nobody here is a loyal subject of yours!\r\n");
-		}
-	}
 };
 
 void performFlee(Character *ch)

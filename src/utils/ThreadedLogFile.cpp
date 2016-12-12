@@ -62,7 +62,7 @@ void ThreadedLogFile::processMessages()
 		
 	//Write to file.
 
-	std::ofstream currentOutputStream;
+	auto currentOutputStream = std::shared_ptr<std::ofstream>(nullptr);
 	for(auto entry : *flushQueue)
 	{
 		time_t submittedTime = (time_t)entry.submittedTimeval.tv_sec;
@@ -73,8 +73,11 @@ void ThreadedLogFile::processMessages()
 		if(strcmp(currentFileName, nextFileName))
 		{//Date changed. Close current file and open next.
 
-			if(currentOutputStream.is_open())
-				currentOutputStream.close();
+			if(currentOutputStream.get() != nullptr && currentOutputStream->is_open())
+			{
+				currentOutputStream->close();
+				currentOutputStream.reset();
+			}
 			
 			boost::filesystem::path logFileDirectoryPath = boost::filesystem::path(nextFileName).parent_path();
 			
@@ -84,24 +87,28 @@ void ThreadedLogFile::processMessages()
 				boost::filesystem::create_directories(logFileDirectoryPath);
 			}
 
-			currentOutputStream.open(nextFileName, std::ios::app);
+			currentOutputStream.reset(new std::ofstream(nextFileName, std::ios::app));
 
-			if(!currentOutputStream.is_open())
+			if(!currentOutputStream->is_open())
 			{
 				Log("ERROR : ThreadedLogFile : Failed to open log file `%s` : ", nextFileName);
+				currentOutputStream.reset();
 				continue;//Try again next time?
 			}
 		}
 
 		//Write to file.
 		
-		currentOutputStream << MiscUtil::formatDateYYYYdmmdddHHcMMcSS(DateTime(submittedTime))
+		(*currentOutputStream) << MiscUtil::formatDateYYYYdmmdddHHcMMcSS(DateTime(submittedTime))
 			<< "." << std::setfill('0') << std::setw(3) << (entry.submittedTimeval.tv_usec / 1000)
 			<< " : " << entry.message << std::endl;
 	}
 
-	if(currentOutputStream.is_open())
-		currentOutputStream.close();
+	if(currentOutputStream.get() != nullptr && currentOutputStream->is_open())
+	{
+		currentOutputStream->close();
+		currentOutputStream.reset();
+	}
 
 	flushQueue->clear();
 }

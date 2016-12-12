@@ -186,7 +186,6 @@ CommandUtil::CommandUtil()
 	addCommand(new CommandInfo("notitle", "noti", POS_DEAD, do_wizutil, LVL_GOD, SCMD_NOTITLE, 0.0, 0));
 	addCommand(new CommandInfo("nowiz", "now", POS_DEAD, do_gen_tog, LVL_IMMORT, SCMD_NOWIZ, 0.0, 0));
 	
-	addCommand(new CommandInfo("order", "o", POS_RESTING, do_order, 1, 0, 0.0, 0));
 	addCommand(new CommandInfo("offer", "off", POS_STANDING, do_not_here, 1, 0, 0.0, 0));
 	addCommand(new CommandInfo("open", "op", POS_SITTING, do_gen_door, 0, SCMD_OPEN, 0.0, 0));
 	addCommand(new CommandInfo("oload", "oloa", POS_DEAD, do_oload, LVL_GOD, 0, 0.0, 0));

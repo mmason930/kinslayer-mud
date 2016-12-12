@@ -2,19 +2,25 @@ var script18615 = function(self, actor, here, args, extra) {
 	//This script allows a player to retrieve their saved eq from their mercs
 	//Rhollor - December 2009
 	//The number of files to check for data
+
 	var maxMercs = 30;
 	var fileName = (actor.id + ".mercEQ.");
 	var vnums;
 	var j, empty = 0;
-	if(getSval(actor,18601,"numMerc")) {
+
+	//TODO: This check valid?
+	if(MercUtil.getMercenaryNumberArray(actor).length > 0) {
 		//Still has mercs -> no possible way it crashed etc...
-		actor.send("You cannot retreive any belongings at this time.");
+		actor.send("You cannot retrieve any belongings at this time.");
 		return 0;
 	}
+
+	//TODO: We need a better way to determine which mercenaries the player had items for.
 	var totalNotLoaded = 0;
 	for(var i = 1; i <= maxMercs; i++) {
-		vnums = fread(fileName + i);
-		fwrite(fileName + i, "");
+
+		var items =MercUtil.get
+
 		//Check for non empty file
 		if(vnums != "") {
 			vnums = vnums.split(" ");

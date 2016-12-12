@@ -333,7 +333,6 @@ extern CommandHandler  do_offer ;
 extern CommandHandler  do_oload ;
 extern CommandHandler  do_olc ;
 extern CommandHandler  do_olist ;
-extern CommandHandler  do_order ;
 extern CommandHandler  do_override ;
 extern CommandHandler  do_pardon ;
 extern CommandHandler  do_page ;

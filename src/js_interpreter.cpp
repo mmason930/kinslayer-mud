@@ -176,6 +176,8 @@ JSEnvironment::JSEnvironment()
 	object g = global();
     g.set_property("constants", makeConstants());
 	flusspferd::create_native_function(g, "getRoom", JS_getRoom);
+	flusspferd::create_native_function(g, "random", JS_random);
+	flusspferd::create_native_function(g, "str_cmp", JS_strCmp);
 	flusspferd::create_native_function(g, "getRoomByRnum", JS_getRoomByRnum);
 	flusspferd::create_native_function(g, "mudLog", JS_mudLog);
 	flusspferd::create_native_function(g, "_act", JS_act);

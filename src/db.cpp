@@ -2195,6 +2195,8 @@ Object::~Object()
 //Galnor - Object constructor
 Object::Object()
 {
+	game->logExtraction("Allocating object %p.", this);
+
 	++Object::nr_alloc;
 	memset(&this->obj_flags,	0, sizeof(this->obj_flags));
 	memset(&this->affected,		0, sizeof(this->affected));
@@ -2837,6 +2839,8 @@ void CharPointData::operator =(CharPointData &source)
 
 Character::Character(const int nr, const int type, bool full_copy)
 {
+	game->logExtraction("Allocating character %p.", this);
+	
 	++Character::nr_alloc;
 	int i, p, ovnum = -1;
 	Character *source;
@@ -3002,6 +3006,9 @@ Character::Character(const int nr, const int type, bool full_copy)
 
 Character::Character(eCharType MyType)
 {
+	game->logExtraction("Allocating character %p.", this);
+
+
 	++Character::nr_alloc;
 	this->zero();
 	switch(MyType)
@@ -3027,6 +3034,8 @@ Character::Character(eCharType MyType)
 
 Character::Character()
 {
+	game->logExtraction("Allocating character %p.", this);
+
 	++Character::nr_alloc;
 	this->zero();
 }

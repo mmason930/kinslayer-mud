@@ -405,7 +405,7 @@ CommandHandler do_view = DEFINE_COMMAND
 
 	if(!*buf1)
 	{
-		ch->send("View list: Clan, Clans, Trophy, Legends <Weekly|Monthly|Yearly>\r\n");
+		ch->send("View list: Clan, Clans, Trophy, Warrants, Legends <Weekly|Monthly|Yearly>\r\n");
 		return;
 	}
 

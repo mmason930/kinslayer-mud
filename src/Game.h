@@ -9,6 +9,7 @@
 #include <mysql/sqlDatabase.h>
 
 #include "PlayerPortalServer.h"
+#include "utils/ThreadedLogFile.h"
 
 #include "guilds/GuildEditorInterface.h"
 
@@ -26,6 +27,8 @@ protected:
 	int bootSubversionRevision; //The revision of the local filesystem at the time of boot.
 	int bootScriptsDirectorySubversionRevision;//The revision of the 'kmud-live/scripts' directory at the time of boot.
 
+	ThreadedLogFile lagLogFile;
+	ThreadedLogFile extractionLogFile;
 	std::shared_ptr<class GuildEditorInterface> guildEditorInterface;
 
 	sql::Context context;
@@ -65,8 +68,11 @@ public:
 	unsigned int getNumberOfPlayerPortalDescriptors();
 	void sendToAll(std::function<std::string(class Character *target)>);
 
+	void setupThreadedLogFiles();
 	GuildEditorInterface *getGuildEditorInterface() const;
 
+	void logLag(const char *message, ...);
+	void logExtraction(const char *message, ...);
 	sql::Connection getConnection() const;
 	sql::Context getContext() const;
 

@@ -1,5 +1,4 @@
 var script107 = function(self, actor, here, args, extra) {
-
 	if( actor.level < 103 ) {
 		return;
 	}

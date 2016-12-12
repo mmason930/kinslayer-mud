@@ -985,7 +985,7 @@ CommandHandler do_ipfind = DEFINE_COMMAND
 	sqlBuffer	<< " SELECT"
 				<< "   users.username AS Username,"
 				<< "   COUNT(*) AS Logins,"
-				<< "   users.prf AS PreferenceFlags"
+				<< "   users.plr AS PlayerFlags"
 				<< " FROM users, userLogin"
 				<< " WHERE users.user_id = userLogin.user_id"
 				<< " AND userLogin.host IN " << SQLUtil::buildListSQL(ipAddressList.begin(), ipAddressList.end(), true, true)
@@ -1008,12 +1008,9 @@ CommandHandler do_ipfind = DEFINE_COMMAND
 
 		std::string username = row.getString("Username");
 		int logins = row.getInt("Logins");
-		std::string bitvectorString = row.getString("PreferenceFlags");
+		int playerFlags = row.getInt("PlayerFlags");
 
-		long bits[PM_ARRAY_MAX];
-		ConvertBitvectorFromString(bitvectorString.c_str(), bits, PM_ARRAY_MAX);
-
-		if(IS_SET_AR(bits, PLR_NO_TRACE) && GET_LEVEL(ch) < LVL_IMPL)
+		if(IS_SET(playerFlags, (1 << PLR_NO_TRACE)) && GET_LEVEL(ch) < LVL_IMPL)
 			continue;
 
 		ch->send("%5d: %s\r\n", logins, username.c_str());
@@ -1068,9 +1065,14 @@ CommandHandler do_extra = DEFINE_COMMAND
 					break;
 			}
 		}
+		else if(!str_cmp(vArgs.at(0), "stats"))
+		{
+			ch->send("You can carry %d items and %d pounds.\r\n", CAN_CARRY_N(ch), CAN_CARRY_W(ch));
+			ch->send("Carrying Items: %d, Weight: %.2f\r\n", IS_CARRYING_N(ch), IS_CARRYING_W(ch));
+		}
 		else if(!str_cmp(vArgs.at(0), "testcases"))
 		{
-			TestUtil::get()->processTestCases();
+//			TestUtil::get()->processTestCases();
 			return;
 		}
 		else if(!str_cmp(vArgs.at(0), "trackdel"))
@@ -6728,6 +6730,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			{
 				vict->PasswordUpdated( true );
 				vict->player.passwd = MD5::getHashFromString(val_arg);
+				ForumUtil::changeUserPassword(gameDatabase, vict->player.idnum, vict->player.passwd);
 				sprintf(output, "Password changed to '%s'.", val_arg);
 			}
 			break;
@@ -7260,7 +7263,7 @@ CommandHandler do_jmap = DEFINE_COMMAND
 		return script;
 	};
 
-	OneArgument(TwoArguments(argument, arg1, arg2), arg3);
+	OneArgument(TwoArguments(argument, arg1, arg2, false), arg3, false);
 
 	if(!*argument || !*arg1)
 	{

@@ -35,6 +35,8 @@
 #include "Descriptor.h"
 #include "CharacterUtil.h"
 #include "rooms/Room.h"
+#include "rooms/Exit.h"
+#include "Game.h"
 
 
 extern const int rev_dir[];
@@ -807,7 +809,12 @@ bool js_enter_test(Room *room, Character *actor, int dir, JSBindable *self=0)
 
 			if ( (!self || is_allowed(self, actor, trig)) && randomly_triggered(trig->narg))
 			{
-				int ret_val = JSManager::get()->execute(trig, self, actor, "", make_extra("direction", rev_dir[dir]));
+				auto endRoom = actor->in_room ? actor->in_room->getNeighbor(dir) : nullptr;
+				flusspferd::object extraObject = flusspferd::create_object();
+				extraObject.set_property("direction", rev_dir[dir]);
+				extraObject.set_property("startRoom", actor->in_room ? lookupValue(actor->in_room) : flusspferd::value());
+				extraObject.set_property("endRoom", endRoom ? lookupValue(endRoom) : flusspferd::value());
+				int ret_val = JSManager::get()->execute(trig, self, actor, "", extraObject);
 				if (!ret_val) // ret_val == 0 means we block them.
 					return false;
 			}
@@ -953,7 +960,9 @@ void js_death_test(Character *actor, Character *self, std::shared_ptr< std::vect
 		{
 			JSTrigger* trig = js_scripts->at(i);
 			if( (!self || is_allowed( self, actor, trig )) ) {
+				game->logExtraction("JS death trigger #%d called for actor %p, self %p.", trig->vnum, actor, self);
 				JSManager::get()->execute(trig, self, actor);
+				game->logExtraction("JS death trigger #%d ended for actor %p, self %p.", trig->vnum, actor, self);
 			}
 		}
 	}
@@ -1280,7 +1289,7 @@ flusspferd::array getConnectedPlayers()
 	flusspferd::array vA = flusspferd::create_array();
 	for(Descriptor *d = descriptor_list;d;d = d->next) {
 		if( d->character && d->character->in_room ) {
-			vA.call("push", lookupValue(d->character));
+			vA.push(lookupValue(d->character));
 		}
 	}
 	return vA;
@@ -1289,7 +1298,7 @@ flusspferd::array JS_getCharacterList()
 {
 	flusspferd::array vA = flusspferd::create_array();
 	for(Character *ch = character_list;ch;ch = ch->next) {
-		vA.call("push", lookupValue(ch));
+		vA.push(lookupValue(ch));
 	}
 	return vA;
 }
@@ -1349,7 +1358,7 @@ flusspferd::array JS_getObjectList()
 {
 	flusspferd::array vA = flusspferd::create_array();
 	for(Object *obj = object_list;obj;obj = obj->next) {
-		vA.call("push", lookupValue(obj));
+		vA.push(lookupValue(obj));
 	}
 	return vA;
 }
@@ -1388,9 +1397,7 @@ flusspferd::array JS_loadObjectsByHolderFromDatabase(flusspferd::string holderTy
 	std::list< Object* > objectList = Object::loadItemList(true, holderType.c_str()[0], holderId.to_string());
 
 	while(objectList.empty() == false) {
-		objects.call("push", lookupValue(objectList.front()));
-//		objects.push(lookupValue(objectList.front()));
-
+		objects.push(lookupValue(objectList.front()));
 		objectList.pop_front();
 	}
 
@@ -1582,4 +1589,14 @@ void JS_saveTopLevelHolderItems(const std::string &holderType, const std::string
 	}
 
 	Object::saveTopLevelHolderItems(holderType[0], holderId, objectsToSave);
+}
+
+int JS_random(int low, int high)
+{
+	return MiscUtil::random(low, high);
+}
+
+bool JS_strCmp(const flusspferd::string &s1, const flusspferd::string &s2)
+{
+	return str_cmp(s1.c_str(), s2.c_str()) != 0; 
 }

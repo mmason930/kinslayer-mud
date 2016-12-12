@@ -148,13 +148,13 @@ bool GatewayServer::loadConfiguration()
 		std::cout << "No `MUD Executable Path` specified in confuration file." << std::endl;
 		return false;
 	}
-/***
+
 	this->secondaryPort = 0;
 	if(resources.find("Secondary Gateway Port") != resources.end())
 	{
 		this->secondaryPort = atoi(resources["Secondary Gateway Port"].c_str());
 	}
-***/
+
 	if(resources.find("Websocket Ports") != resources.end())
 	{
 		std::list<std::string> websocketPortsStringList = StringUtil::splitToList(resources["Websocket Ports"], ',');
@@ -272,8 +272,8 @@ void GatewayServer::bindListener()
 	//Setup the listening server for incoming connections.
 	std::list<int> portsToListenTo;
 	portsToListenTo.push_back(listeningPort);
-//	if(secondaryPort)
-//		portsToListenTo.push_back(secondaryPort);
+	if(secondaryPort)
+		portsToListenTo.push_back(secondaryPort);
 
 	for(auto iter = portsToListenTo.begin();iter != portsToListenTo.end();++iter)
 	{
@@ -479,8 +479,6 @@ void GatewayServer::disconnectDescriptorFromGameAndGateway(GatewayDescriptor *ga
 	delete gatewayDescriptor->getServerConnection();
 
 	debugBoolean = true;
-
-std::cout << "Test" << std::endl;
 
 	gatewayDescriptor->getClientConnection()->socketClose();
 	gatewayDescriptor->setServerConnection(NULL);

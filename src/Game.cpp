@@ -16,11 +16,15 @@ Game::Game()
 	this->version = "KinslayerMUD, version 2.0";
 	this->playerLogsDirectory = "plrlogs/";
 	this->defaultDirectory = "lib";
+
+	setupThreadedLogFiles();
 }
 
 Game::~Game()
 {
 	cleanupPlayerPortalServer();
+
+	lagLogFile.shutdown();
 }
 
 void Game::setupPlayerPortalServer(const int port)
@@ -43,7 +47,8 @@ void Game::processPlayerPortalServer()
 
 void Game::loadSubversionInfo()
 {
-	std::map<std::string, std::string> subversionInfoMap = SystemUtil::getSubversionInfoMap("../");
+	std::string subversionUrl = "../";
+	std::map<std::string, std::string> subversionInfoMap = SystemUtil::getSubversionInfoMap(subversionUrl);
 
 	auto subversionInfoMapIterator = subversionInfoMap.find("URL");
 
@@ -77,7 +82,7 @@ void Game::loadSubversionInfo()
 
 	if(subversionInfoMapIterator == subversionInfoMap.end())
 	{
-		Log("Could not determine subversion revision for script directory. Aborting.");
+		Log("Could not determine subversion revision for script directory `%s`. Aborting.", subversionUrl.c_str());
 		exit(1);
 	}
 
@@ -210,6 +215,43 @@ void Game::sendToAll(std::function<std::string(Character *target)> messageFuncti
 			target->send(messageFunction(target).c_str());
 		}
 	}
+}
+
+void Game::setupThreadedLogFiles()
+{
+	lagLogFile.setFilePath("logs/benchmarks/benchmark.%Y%m%d");
+	lagLogFile.begin();
+
+	extractionLogFile.setFilePath("logs/extraction/extraction.%Y%m%d");
+	extractionLogFile.begin();
+}
+
+void Game::logLag(const char *message, ...)
+{
+	char buffer[1024];
+	va_list args;
+
+	va_start(args, message);
+	vsnprintf(buffer, sizeof(buffer), message, args);
+	va_end(args);
+
+	buffer[sizeof(buffer) - 1] = '\0';
+
+	lagLogFile.addMessage(buffer);
+}
+
+void Game::logExtraction(const char *message, ...)
+{
+	char buffer[1024];
+	va_list args;
+
+	va_start(args, message);
+	vsnprintf(buffer, sizeof(buffer), message, args);
+	va_end(args);
+
+	buffer[sizeof(buffer) - 1] = '\0';
+
+	extractionLogFile.addMessage(buffer);
 }
 
 Character *Game::getSignedInCharacterByUserId(int userId) const
