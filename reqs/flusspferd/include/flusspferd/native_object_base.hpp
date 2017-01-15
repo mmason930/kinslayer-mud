@@ -58,6 +58,7 @@ namespace detail {
  */
 class native_object_base : public object, private boost::noncopyable {
 public:
+
   /// Destructor.
   virtual ~native_object_base() = 0;
 
@@ -105,6 +106,7 @@ protected:
    * @param o The object to associate with.
    */
   native_object_base(object const &o);
+  native_object_base(){}
 
 protected:
   /**
@@ -272,7 +274,7 @@ private:
 
 private:
   class impl;
-  boost::scoped_ptr<impl> p;
+  boost::scoped_ptr<impl> *p;
 
   friend class impl;
 #endif

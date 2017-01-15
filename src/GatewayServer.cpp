@@ -480,8 +480,6 @@ void GatewayServer::disconnectDescriptorFromGameAndGateway(GatewayDescriptor *ga
 
 	debugBoolean = true;
 
-std::cout << "Test" << std::endl;
-
 	gatewayDescriptor->getClientConnection()->socketClose();
 	gatewayDescriptor->setServerConnection(NULL);
 	gatewayDescriptor->setClientConnection(NULL);
@@ -706,7 +704,7 @@ void GatewayServer::run()
 					{
 						dataFromWebSocketClient = descriptor->getCurrentInputBuffer();
 
-						std::auto_ptr<WebSocketClientHeader> webSocketClientHeader(WebSocketClientHeader::allocateByInitialClientPacket(dataFromWebSocketClient));
+						std::unique_ptr<WebSocketClientHeader> webSocketClientHeader(WebSocketClientHeader::allocateByInitialClientPacket(dataFromWebSocketClient));
 						webSocketClientHeader->read(dataFromWebSocketClient);
 						std::string response = webSocketClientHeader->generateResponse(descriptor->getGatewayListener()->getListener()->getPort(), "mud-protocol");
 

@@ -25,7 +25,7 @@ BINDIR = ../bin
 
 CPPFLAGS = -ggdb3 $(MYFLAGS) $(PROFILE)
 
-LIBS = -lsqlDatabase -lflusspferd -lstdc++ -lcrypt -lboost_regex -lmozjs -lmysqlclient -lboost_thread -lboost_filesystem -lboost_system -ldl
+LIBS = -lsqlDatabase -lflusspferd -lstdc++ -lboost_regex -lmozjs -lmysqlclient -lboost_thread -lboost_filesystem -lcrypt -lboost_system -ldl
 
 OBJDIR = obj
 

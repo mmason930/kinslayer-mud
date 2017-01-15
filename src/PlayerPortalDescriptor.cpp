@@ -69,7 +69,7 @@ void PlayerPortalDescriptor::processInput()
 			std::string inputBuffer = descriptor->getInputBuffer();
 			if (WebSocketClientHeader::isComplete(inputBuffer))
 			{
-				std::auto_ptr<WebSocketClientHeader> webSocketClientHeader(WebSocketClientHeader::allocateByInitialClientPacket(inputBuffer));
+				std::unique_ptr<WebSocketClientHeader> webSocketClientHeader(WebSocketClientHeader::allocateByInitialClientPacket(inputBuffer));
 				webSocketClientHeader->read(inputBuffer);
 				std::string response = webSocketClientHeader->generateResponse(this->server->getPort(), "player-portal-protocol");
 

@@ -401,7 +401,9 @@ int main( int argc, char **argv )
 	game->setupFilesystem();
 	game->loadBasicConfig();
 	game->setupPlayerPortalServer(atoi(game->getBasicConfigValue("Player Portal Server Port").c_str()));
-	game->loadSubversionInfo();
+
+	if(game->monitorRepo())
+		game->loadSubversionInfo();
 
 	if(!port && game->hasBasicConfiguration("MUD Port"))
 		port = atoi(game->getBasicConfigValue("MUD Port").c_str());

@@ -2,7 +2,7 @@ CC = g++
 
 FLUSSPFERD_INCLUDES = ../include
 # Any special flags you want to pass to the compiler
-MYFLAGS =  -ldl -O -std=c++0x -DXP_UNIX -I/usr/local/include -DICONV_ACCEPTS_NONCONST_INPUT=1 -Wformat-security -Wformat -Wpointer-arith -Wcast-align -Wredundant-decls \
+MYFLAGS = -ldl -O -std=c++0x -DXP_UNIX -I/usr/local/include -DICONV_ACCEPTS_NONCONST_INPUT=1 -Wformat-security -Wformat -Wpointer-arith -Wcast-align -Wredundant-decls \
  		-L/usr/local/lib -DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10 \
               -I/usr/local/lib/pkgconfig/../../include -I$(FLUSSPFERD_INCLUDES) -I/usr/local/include
 
@@ -20,7 +20,7 @@ LIBS =
 OBJDIR = obj
 LIBDIR = ../lib
 
-OBJFILES = arguments.o array.o binary.o binary_stream.o class.o context.o convert.o create.o encodings.o evaluate.o \
+OBJFILES = arguments.o array.o binary_stream.o binary.o class.o context.o convert.o create.o encodings.o evaluate.o \
 exception.o file.o filesystem-base.o flusspferd_module.o function.o function_adapter.o getopt.o init.o \
 io.o json2.o load_core.o local_root_scope.o modules.o native_function_base.o native_object_base.o object.o \
 properties_functions.o property_attributes.o property_iterator.o root.o security.o stream.o string.o system.o \

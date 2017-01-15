@@ -3576,7 +3576,7 @@ void do_stat_character(Character * ch, Character * k)
 			break;
 	}
 
-	sprintf(buf2, " %s '%s%s%s'  IDNum [%s%5ld%s], In room [%s%5d%s], Start Room [%s%5d%s], Wait State[%s%3d%s]\r\n",
+	sprintf(buf2, " %s '%s%s%s'  IDNum [%s%5d%s], In room [%s%5d%s], Start Room [%s%5d%s], Wait State[%s%3d%s]\r\n",
 			(!IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB")),
 			grn, GET_NAME(k), nrm,
 			yel, (k->player.idnum), nrm,
@@ -4185,7 +4185,7 @@ CommandHandler do_mbload = DEFINE_COMMAND
 	}
 
 	mob = new Character(r_num, REAL);
-	snprintf(logBuffer, sizeof(logBuffer), "mbload by %s(UID %ld)", GET_NAME(ch), ch->player.idnum);
+	snprintf(logBuffer, sizeof(logBuffer), "mbload by %s(UID %d)", GET_NAME(ch), ch->player.idnum);
 	mobLoadLogger.logMobLoad(mob->getVnum(), logBuffer);
 	mob->MoveToRoom(ch->in_room);
 

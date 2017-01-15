@@ -82,7 +82,7 @@ Guild *GuildUtil::getGuild(const sql::Row row) const
 
 void GuildUtil::putGuild(sql::Connection connection, Guild *guild) const
 {
-	auto builder = std::auto_ptr<StoreDataObjectSQLBuilder>(new StoreDataObjectSQLBuilder(connection, "guild"));
+	auto builder = std::unique_ptr<StoreDataObjectSQLBuilder>(new StoreDataObjectSQLBuilder(connection, "guild"));
 
 	builder
 		->put("id", guild->getId())
@@ -118,7 +118,7 @@ GuildApplication *GuildUtil::getGuildApplication(const sql::Row row) const
 
 void GuildUtil::putGuildApplication(sql::Connection connection, GuildApplication *guildApplication) const
 {
-	auto builder = std::auto_ptr<StoreDataObjectSQLBuilder>(new StoreDataObjectSQLBuilder(connection, "guildApplication"));
+	auto builder = std::unique_ptr<StoreDataObjectSQLBuilder>(new StoreDataObjectSQLBuilder(connection, "guildApplication"));
 
 	builder
 		->put("guild_name", guildApplication->getGuildName())
@@ -285,7 +285,7 @@ UserGuild *GuildUtil::getUserGuild(const sql::Row row) const
 
 void GuildUtil::putUserGuild(sql::Connection connection, UserGuild *userGuild) const
 {
-	auto builder = std::auto_ptr<StoreDataObjectSQLBuilder>(new StoreDataObjectSQLBuilder(connection, "userGuild"));
+	auto builder = std::unique_ptr<StoreDataObjectSQLBuilder>(new StoreDataObjectSQLBuilder(connection, "userGuild"));
 
 	builder
 		->put("user_id", userGuild->getUserId())
@@ -491,7 +491,7 @@ GuildApplicationSignature *GuildUtil::getGuildApplicationSignature(int guildAppl
 }
 void GuildUtil::putGuildApplicationSignature(sql::Connection connection, GuildApplicationSignature *guildApplicationSignature) const
 {
-	auto builder = std::auto_ptr<StoreDataObjectSQLBuilder>(new StoreDataObjectSQLBuilder(connection, "guildApplicationSignature"));
+	auto builder = std::unique_ptr<StoreDataObjectSQLBuilder>(new StoreDataObjectSQLBuilder(connection, "guildApplicationSignature"));
 
 	builder
 		->put("user_id", guildApplicationSignature->getUserId())

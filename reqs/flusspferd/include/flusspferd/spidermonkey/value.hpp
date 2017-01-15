@@ -105,12 +105,12 @@ inline value_impl wrap_jsvalp(jsval *p) {
 
 template<typename T>
 value_impl value_impl::from_integer(T const &num) {
-//  if (INT_FITS_IN_JSVAL(num)) {
+  if (INT_FITS_IN_JSVAL(num)) {
     return wrap_jsval(INT_TO_JSVAL(num));
-//  } else {
+  } else {
     //TODO: check range?
-//    return from_double(num);
-//  }
+    return from_double(num);
+  }
 }
 
 }

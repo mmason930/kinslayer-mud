@@ -134,29 +134,14 @@ void JSManager::loadTriggers()
 
 void JSManager::loadScriptsFromFilesystem(const std::string &directoryPath)
 {
-	boost::filesystem::path scriptDirectoryPath(directoryPath);
-	boost::filesystem::directory_iterator end;
-	for( boost::filesystem::directory_iterator iter(scriptDirectoryPath) ; iter != end ; ++iter )
+	MudLog(BRF, LVL_APPR, TRUE, "Loading scripts - waiting for filesystem scan to complete.");
+	while(true)
 	{
-		boost::filesystem::path iterPath = (*iter).path();
+		std::lock_guard<std::mutex> lock(monitorFilesystemRunOnceMutex);
 
-		if(boost::filesystem::is_directory(iterPath))
+		if(monitorFilesystemRunOnce)
 		{
-			if(iterPath.string() == ".svn")
-				Log("Skipping directory `.svn`...");
-			else
-				loadScriptsFromFilesystem(iterPath.string());
-			continue;
-		}
-
-		if( !(*iter).path().has_extension() || str_cmp((*iter).path().extension().string(), ".js") )
-		{
-			continue;
-		}
-
-		if(!loadScriptsFromFile(iterPath.string()))
-		{
-			Log("Error while loading script file `%s`.", iterPath.string().c_str());
+			monitorScriptImportTable(gameDatabase);
 		}
 	}
 }
@@ -174,11 +159,11 @@ bool JSManager::loadScriptsFromFile(const std::string &filePath)
 		return false;
 	}
 
-	MudLog(BRF, LVL_APPR, TRUE, "Processing Script File `%s`...", filePath.c_str());
+	//MudLog(BRF, LVL_APPR, TRUE, "Processing Script File `%s`...", filePath.c_str());
 
 	if(!fileHandle)
 	{
-		MudLog(BRF, LVL_APPR, TRUE, "Failed to open file handle.");
+		MudLog(BRF, LVL_APPR, TRUE, "JSManager::loadScriptsFromFile() : Failed to open file handle. Errno: %d", errno);
 		return false;
 	}
 
@@ -227,14 +212,24 @@ JSManager::JSManager()
 		server = 0;
 		nextScriptEventId = 0;
 
+		monitorFilesystemRunOnce = false;
+
 		scriptImportReadQueue = new std::list<ScriptImport *>();
 		scriptImportWriteQueue = new std::list<ScriptImport *>();
 
 		this->scriptImportThreadRunning = true;
 		monitorScriptImportTableThread = new std::thread(&JSManager::monitorScriptImportTable, this, dbContext->createConnection());
 
-		this->monitorSubversionThreadRunning = true;
-		monitorSubversionThread = new std::thread(&JSManager::monitorSubversion, this, dbContext->createConnection(), game->getSubversionRepositoryUrl());
+		this->monitorRepository = game->monitorRepo();
+
+		if(monitorRepository)
+		{
+			this->monitorSubversionThreadRunning = true;
+			monitorSubversionThread = new std::thread(&JSManager::monitorSubversion, this, dbContext->createConnection(), game->getSubversionRepositoryUrl());
+		}
+
+		this->monitorFileModificationsThreadRunning = true;
+		monitorFileModificationsThread = new std::thread(&JSManager::monitorFileModifications, this, dbContext->createConnection());
 
 		lastUpdatedRevision = game->getBootScriptsDirectorySubversionRevision();
 	}
@@ -279,10 +274,16 @@ void JSManager::monitorScriptImportTable(sql::Connection connection)
 			std::vector<unsigned long long> idDeleteQueue;
 
 			query = connection->sendQuery(queryString);
-
+			
 			while(query->hasNextRow())
 			{
 				ScriptImport *scriptImport = getScriptImport(query->getRow());
+
+				if(scriptImport->operation == nullptr)
+				{
+					delete scriptImport;
+					continue;
+				}
 
 				Log("Found Script Import. ID: %llu, File Path `%s`, Queued: %s, Operation: %s", scriptImport->id, scriptImport->filePath.c_str(), scriptImport->queuedDatetime.toString().c_str(), scriptImport->operation->getStandardName().c_str());
 
@@ -663,6 +664,89 @@ void JSManager::heartbeat()
 	processScriptImports();
 }
 
+void JSManager::monitorFileModifications(sql::Connection connection)
+{
+	while(monitorFileModificationsThreadRunning)
+	{
+		sql::BatchInsertStatement batchInsertStatement(connection, "scriptImportQueue", 1000);
+			
+		batchInsertStatement.addField("file_path");
+		batchInsertStatement.addField("queued_datetime");
+		batchInsertStatement.addField("operation");
+
+		batchInsertStatement.start();
+
+		int numberOfImports = checkFileModifications("scripts/", "scripts/", batchInsertStatement);
+
+		if(numberOfImports > 0)
+		{
+			batchInsertStatement.finish();
+		}
+
+		{
+			std::lock_guard<std::mutex> lock(monitorFilesystemRunOnceMutex);
+			monitorFilesystemRunOnce = true;
+		}
+
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+	}
+}
+
+int JSManager::checkFileModifications(const std::string scriptsDirectory, const std::string &directoryPath, sql::BatchInsertStatement &batchInsertStatement)
+{
+	boost::filesystem::path scriptDirectoryPath(directoryPath);
+	boost::filesystem::directory_iterator end;
+
+	int numberOfImports = 0;
+
+	for( boost::filesystem::directory_iterator iter(scriptDirectoryPath) ; iter != end ; ++iter )
+	{
+		boost::filesystem::path iterPath = (*iter).path();
+		std::string iterPathString = iterPath.string();
+		
+		if(boost::filesystem::is_directory(iterPath))
+		{
+			numberOfImports += checkFileModifications(scriptsDirectory, iterPathString, batchInsertStatement);
+		}
+
+		if( !(*iter).path().has_extension() || str_cmp((*iter).path().extension().string(), ".js") )
+		{
+			continue;
+		}
+
+		std::time_t lastModifiedTime = boost::filesystem::last_write_time((*iter));
+		ScriptImportOperation *importOperation = nullptr;
+
+		if(filePathToLastModifiedMap.count(iterPathString) == 0)
+			importOperation = ScriptImportOperation::addition;
+		else if(filePathToLastModifiedMap[iterPathString] < lastModifiedTime)
+			importOperation = ScriptImportOperation::modification;
+
+		if(importOperation != nullptr)
+		{
+			Log("File `%s` modification detected: %c", iterPathString.c_str(), importOperation->getCharCode());
+
+			std::string relativeFilePath = iterPathString;
+			if(StringUtil::startsWith(relativeFilePath, scriptsDirectory))
+				relativeFilePath.erase(0, scriptsDirectory.size());
+
+			batchInsertStatement.beginEntry();
+			
+			batchInsertStatement.putString(relativeFilePath);
+			batchInsertStatement.putString(sql::encodeDate(time(0)));
+			batchInsertStatement.putInt(importOperation->getValue());
+
+			batchInsertStatement.endEntry();
+
+			filePathToLastModifiedMap[iterPathString] = lastModifiedTime;
+
+			++numberOfImports;
+		}
+	}
+	
+	return numberOfImports;
+}
+
 void JSManager::processScriptImports()
 {
 	std::list<ScriptImport *> scriptImportsToProcess;
@@ -683,7 +767,7 @@ void JSManager::processScriptImports()
 	//Process everything.
 	for(ScriptImport *scriptImport : scriptImportsToProcess)
 	{
-		MudLog(BRF, LVL_BUILDER, TRUE, "Script import (%s), queued at %s, path `%s`", scriptImport->operation->getStandardName().c_str(), scriptImport->queuedDatetime.toString().c_str(), scriptImport->filePath.c_str());
+		//MudLog(BRF, LVL_BUILDER, TRUE, "Script import (%s), queued at %s, path `%s`", scriptImport->operation->getStandardName().c_str(), scriptImport->queuedDatetime.toString().c_str(), scriptImport->filePath.c_str());
 
 		if(scriptImport->operation->getValue() == ScriptImportOperation::deletion->getValue())
 		{
@@ -797,9 +881,16 @@ JSManager::~JSManager()
 	delete this->scriptImportWriteQueue;
 
 	//Clean up the subversion monitoring thread.
-	this->monitorSubversionThreadRunning = false;
-	this->monitorSubversionThread->join();
-	delete this->monitorSubversionThread;
+	if(monitorRepository)
+	{
+		this->monitorSubversionThreadRunning = false;
+		this->monitorSubversionThread->join();
+		delete this->monitorSubversionThread;
+	}
+
+	this->monitorFileModificationsThreadRunning = false;
+	this->monitorFileModificationsThread->join();
+	delete this->monitorFileModificationsThread;
 
 	for(auto iter = scriptMap.begin();iter != scriptMap.end();++iter)
 	{

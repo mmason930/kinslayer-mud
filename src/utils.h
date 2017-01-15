@@ -95,9 +95,12 @@ void ConvertBitvectorFromString(const char *str, _T *bitvector, const int &size)
 	}
 }
 
-
+#ifndef MAX
 #define MAX(a, b)		(a > b ? a : b)
+#endif
+#ifndef MIN
 #define MIN(a, b)		(a < b ? a : b)
+#endif
 
 std::string	&sprintf(std::string &str, const char *format, ...);
 std::string	&strcat(std::string &str, const char *format, ...);

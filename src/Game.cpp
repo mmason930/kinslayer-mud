@@ -124,6 +124,11 @@ void Game::setSubversionRepositoryUrl(const std::string &subversionRepositoryUrl
 	this->subversionRepositoryUrl = subversionRepositoryUrl;
 }
 
+bool Game::monitorRepo()
+{
+	return hasBasicConfiguration("Monitor Repository") && getBasicConfigValue("Monitor Repository") == "1";
+}
+
 void Game::loadBasicConfig()
 {
 	Log("Loading Basic Configuration...");

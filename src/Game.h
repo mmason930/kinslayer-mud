@@ -75,6 +75,8 @@ public:
 
 	void setupEditorInterfaces();
 
+	bool monitorRepo();
+
 	Character *getSignedInCharacterByUserId(int userId) const;
 };
 

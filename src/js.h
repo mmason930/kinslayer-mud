@@ -101,7 +101,10 @@ class JSManager
 		std::list<ScriptEvent *> scriptEvents;
 		unsigned int nextScriptEventId;
 
+		std::map<std::string, std::time_t> filePathToLastModifiedMap;
+
 		bool scriptImportThreadRunning;
+		bool monitorRepository;
 
 		std::list<ScriptImport *> *scriptImportReadQueue;
 		std::list<ScriptImport *> *scriptImportWriteQueue;
@@ -109,12 +112,20 @@ class JSManager
 		std::mutex scriptImportMutex;
 
 		std::thread *monitorScriptImportTableThread;
-		void monitorScriptImportTable(sql::Connection context);
+		void monitorScriptImportTable(sql::Connection connection);
 		
 		int lastUpdatedRevision;
 		bool monitorSubversionThreadRunning;
 		std::thread *monitorSubversionThread;
+		
 		void monitorSubversion(sql::Connection context, const std::string &repositoryUrl);
+		void monitorFileModifications(sql::Connection connection);
+		int checkFileModifications(const std::string scriptsDirectory, const std::string &directoryPath, sql::BatchInsertStatement &batchInsertStatement);
+
+		std::mutex monitorFilesystemRunOnceMutex;
+		bool monitorFilesystemRunOnce;
+		bool monitorFileModificationsThreadRunning;
+		std::thread *monitorFileModificationsThread;
 
     public:
 		

@@ -35,7 +35,7 @@ THE SOFTWARE.
 #include <cassert>
 
 #ifndef FLUSSPFERD_MAX_BYTES
-#define FLUSSPFERD_MAX_BYTES 1024L * 1024L * 1024L // 8 MB TODO: too much?
+#define FLUSSPFERD_MAX_BYTES 8L * 1024L * 1024L // 8 MB TODO: too much?
 #endif
 
 using namespace flusspferd;

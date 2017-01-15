@@ -97,7 +97,7 @@ CommandHandler do_locate = DEFINE_COMMAND
 	int position = -1;
 	int typeObj = -1, typeMob = -1, typePlayer = -1, typeRoom = -1;
 	NumericRange vnum, zone, roomNumber, cost, gold, db, pb, ob, abs;
-	std::auto_ptr<std::list<ObjectValueEntry>> wearing;
+	std::unique_ptr<std::list<ObjectValueEntry>> wearing;
 	ObjectValueEntry *currentObjectValueEntry;
 
 	std::string name, lastOption;

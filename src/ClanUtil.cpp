@@ -91,7 +91,7 @@ void ClanUtil::putClanQuestPointTransaction(sql::Connection connection, ClanQues
 
 ClanQuestPointTransaction *ClanUtil::performQuestPointTransaction(sql::Connection connection, const int userId, const int clanId, const int amount, UserType *issuedByUserType, const int issuedByUserId, const std::string reason)
 {
-	std::auto_ptr<ClanQuestPointTransaction> clanQuestPointTransaction(new ClanQuestPointTransaction());
+	std::unique_ptr<ClanQuestPointTransaction> clanQuestPointTransaction(new ClanQuestPointTransaction());
 
 	//Attempt to perform the transaction to a user who is online.
 	Character *character = CharacterUtil::getOnlineCharacterById(userId);

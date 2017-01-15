@@ -196,7 +196,7 @@ typedef long long __int64;
 #endif
 
 #ifdef HAVE_UNISTD_H
-# include <unistd.h>
+#include <unistd.h>
 #endif
 
 /* Now, we #define POSIX if we have a POSIX system. */
@@ -243,6 +243,9 @@ typedef long long __int64;
 #endif
 
 #ifdef HAVE_CRYPT_H
+#ifdef __APPLE__
+#include <unistd.h>
+#else
 #include <crypt.h>
 #endif
 

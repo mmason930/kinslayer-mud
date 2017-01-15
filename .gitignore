@@ -2,3 +2,4 @@
 *.opensdf
 Debug/
 DebugGateway/
+.idea

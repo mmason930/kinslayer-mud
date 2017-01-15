@@ -66,9 +66,9 @@ int value::get_int() const {
 }
 double value::get_double() const {
   assert(is_double());
-  jsdouble d = JSVAL_TO_DOUBLE(get());
+  jsdouble *d = JSVAL_TO_DOUBLE(get());
   assert(d);
-  return d;
+  return *d;
 }
 object value::get_object() const {
   assert(is_object());

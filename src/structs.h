@@ -1324,7 +1324,7 @@ struct CharPlayerData
 	byte direction;						/* For flee direction						*/
 	byte carry_items;					/* Number of items carried					*/
 	struct TimeData time;				/*	PC's AGE in days						*/
-	long idnum;							/* player's idnum; -1 for mobiles			*/
+	int idnum;							/* player's idnum; -1 for mobiles			*/
 	int act;							/* Act flag for NPC's; player flag for PC's */
 	int	 pref[ PR_ARRAY_MAX ];	/* preference flags for PC's.		*/
 	int	affected_by[AF_ARRAY_MAX];		/* Bitvector for spells/skills affected by	*/
