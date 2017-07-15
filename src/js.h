@@ -112,14 +112,13 @@ class JSManager
 		std::mutex scriptImportMutex;
 
 		std::thread *monitorScriptImportTableThread;
-		void monitorScriptImportTable(sql::Connection connection);
+		void monitorScriptImportTable(sql::Connection connection, bool continuous);
 		
 		int lastUpdatedRevision;
 		bool monitorSubversionThreadRunning;
 		std::thread *monitorSubversionThread;
 		
 		void monitorSubversion(sql::Connection context, const std::string &repositoryUrl);
-		void monitorFileModifications(sql::Connection connection);
 		int checkFileModifications(const std::string scriptsDirectory, const std::string &directoryPath, sql::BatchInsertStatement &batchInsertStatement);
 
 		std::mutex monitorFilesystemRunOnceMutex;
@@ -196,10 +195,13 @@ class JSManager
 
 		void loadScriptMap();
 		void loadTriggers();
-		void loadScriptsFromFilesystem(const std::string &directoryPath);
+		void loadScriptsFromFilesystem(const std::string &directoryPath, const bool continuously);
 		bool loadScriptsFromFile(const std::string &filePath);
 
 		std::list< JSTrigger* > triggersInRange( const int lo, const int hi );
+
+		void setupMonitoringThreads();
+		void monitorFileModifications(sql::Connection connection, bool continuous);
     private:
 		unordered_map<int, JSTrigger*> mapper;
 		std::map<int, Script*> scriptMap;

@@ -132,18 +132,19 @@ void JSManager::loadTriggers()
 	}
 }
 
-void JSManager::loadScriptsFromFilesystem(const std::string &directoryPath)
+void JSManager::loadScriptsFromFilesystem(const std::string &directoryPath, const bool continuously)
 {
 	MudLog(BRF, LVL_APPR, TRUE, "Loading scripts - waiting for filesystem scan to complete.");
-	while(true)
+	do
 	{
 		std::lock_guard<std::mutex> lock(monitorFilesystemRunOnceMutex);
 
-		if(monitorFilesystemRunOnce)
-		{
-			monitorScriptImportTable(gameDatabase);
-		}
+		//if(monitorFilesystemRunOnce)
+		//{
+			monitorScriptImportTable(gameDatabase, continuously);
+		//}
 	}
+	while(continuously);
 }
 
 bool JSManager::loadScriptsFromFile(const std::string &filePath)
@@ -198,6 +199,8 @@ bool JSManager::loadScriptsFromFile(const std::string &filePath)
 
 	delete[] fileBuffer;
 
+	MudLog(BRF, LVL_APPR, TRUE, "Compiling script `%s`", filePath.c_str());
+
 	return env->compile(filePath, scriptContent);
 }
 
@@ -217,9 +220,6 @@ JSManager::JSManager()
 		scriptImportReadQueue = new std::list<ScriptImport *>();
 		scriptImportWriteQueue = new std::list<ScriptImport *>();
 
-		this->scriptImportThreadRunning = true;
-		monitorScriptImportTableThread = new std::thread(&JSManager::monitorScriptImportTable, this, dbContext->createConnection());
-
 		this->monitorRepository = game->monitorRepo();
 
 		if(monitorRepository)
@@ -228,9 +228,6 @@ JSManager::JSManager()
 			monitorSubversionThread = new std::thread(&JSManager::monitorSubversion, this, dbContext->createConnection(), game->getSubversionRepositoryUrl());
 		}
 
-		this->monitorFileModificationsThreadRunning = true;
-		monitorFileModificationsThread = new std::thread(&JSManager::monitorFileModifications, this, dbContext->createConnection());
-
 		lastUpdatedRevision = game->getBootScriptsDirectorySubversionRevision();
 	}
 	catch(sql::QueryException queryException)
@@ -238,6 +235,15 @@ JSManager::JSManager()
 		MudLog(BRF, LVL_BUILDER, TRUE, "Error loading scripts: %s", queryException.getMessage().c_str());
 		exit(1);
 	}
+}
+
+void JSManager::setupMonitoringThreads()
+{
+	this->scriptImportThreadRunning = true;
+	monitorScriptImportTableThread = new std::thread(&JSManager::monitorScriptImportTable, this, dbContext->createConnection(), true);
+
+	this->monitorFileModificationsThreadRunning = true;
+	monitorFileModificationsThread = new std::thread(&JSManager::monitorFileModifications, this, dbContext->createConnection(), true);
 }
 
 JSManager* JSManager::get()
@@ -252,7 +258,7 @@ JSManager* JSManager::get()
 	return _self;
 }
 
-void JSManager::monitorScriptImportTable(sql::Connection connection)
+void JSManager::monitorScriptImportTable(sql::Connection connection, bool continuous)
 {
 	std::string queryString;
 	
@@ -265,7 +271,7 @@ void JSManager::monitorScriptImportTable(sql::Connection connection)
 		queryString = queryBuffer.str();
 	}
 
-	while(this->scriptImportThreadRunning)
+	while(this->scriptImportThreadRunning || !continuous)
 	{
 		try
 		{
@@ -327,6 +333,9 @@ void JSManager::monitorScriptImportTable(sql::Connection connection)
 		{
 			MudLog(BRF, LVL_APPR, TRUE, "Error while fetching from scriptImportQueue: Unknown");
 		}
+
+		if(!continuous)
+			break;
 		
 		std::this_thread::sleep_for(std::chrono::seconds(5));
 	}
@@ -664,9 +673,9 @@ void JSManager::heartbeat()
 	processScriptImports();
 }
 
-void JSManager::monitorFileModifications(sql::Connection connection)
+void JSManager::monitorFileModifications(sql::Connection connection, bool continuous)
 {
-	while(monitorFileModificationsThreadRunning)
+	while(monitorFileModificationsThreadRunning || !continuous)
 	{
 		sql::BatchInsertStatement batchInsertStatement(connection, "scriptImportQueue", 1000);
 			
@@ -687,6 +696,9 @@ void JSManager::monitorFileModifications(sql::Connection connection)
 			std::lock_guard<std::mutex> lock(monitorFilesystemRunOnceMutex);
 			monitorFilesystemRunOnce = true;
 		}
+
+		if(!continuous)
+			break;
 
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}

@@ -521,8 +521,23 @@ void boot_db(void)
     JSManager* temp = JSManager::get();
 
 	temp->loadScriptsFromFile(std::string("scripts/lib/util/LoDash-2.4.1.js"));
-	temp->loadScriptsFromFilesystem("scripts");
+
+	Log("Monitoring file modifications...");
+	temp->monitorFileModifications(gameDatabase, false);
+
+	Log("Loading scripts from filesystem...");
+	temp->loadScriptsFromFilesystem("scripts", false);
+	
+	Log("Processing Script imports...");
+	temp->processScriptImports();
+	
+	Log("Setting up monitoring threads...");
+	temp->setupMonitoringThreads();
+
+	Log("Loading triggers...");
 	temp->loadTriggers();
+
+	Log("Loading script map...");
 	temp->loadScriptMap();
 
 	JSManager::get()->executeExpression("initGlobals();");
