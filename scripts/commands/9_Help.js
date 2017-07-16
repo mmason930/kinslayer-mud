@@ -7,6 +7,9 @@ var script9 = function(self, actor, here, args, extra) {
 	var searchTerm = vArgs.join(" ");
 	var hideFooter = false;
 
+	if(actor.level > 100)
+		actor.send("This is a test!");
+
 	if (searchTerm.length > 0) {
 		var file = global.helpManager.getSearchedFile(searchTerm);
 		if (!file)
