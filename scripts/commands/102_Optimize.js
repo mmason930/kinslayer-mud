@@ -8,7 +8,6 @@ var script102 = function(self, actor, here, args, extra) {
 	 *                                           *
 	 *********************************************/
 	_block;
-	console.log("Testing 123.");
 	if( actor.level < 103 ) {
 		actor.send("You can't use that!");
 		return;
