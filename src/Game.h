@@ -55,8 +55,7 @@ public:
 	std::string getVersion();
 	std::string getDefaultDirectory();
 	std::string getPlayerLogsDirectory();
-
-	void loadSubversionInfo();
+	std::string getScriptPullCommand();
 
 	bool hasBasicConfiguration(const std::string &basicConfigurationName);
 	void setupFilesystem();

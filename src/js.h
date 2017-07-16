@@ -118,7 +118,7 @@ class JSManager
 		bool monitorSubversionThreadRunning;
 		std::thread *monitorSubversionThread;
 		
-		void monitorSubversion(sql::Connection context, const std::string &repositoryUrl);
+		void monitorSubversion(sql::Connection context, const std::string &scriptPullCommand);
 		int checkFileModifications(const std::string scriptsDirectory, const std::string &directoryPath, sql::BatchInsertStatement &batchInsertStatement);
 
 		std::mutex monitorFilesystemRunOnceMutex;

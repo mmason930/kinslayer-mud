@@ -41,59 +41,6 @@ void Game::processPlayerPortalServer()
 	playerPortalServer->process();
 }
 
-void Game::loadSubversionInfo()
-{
-	std::map<std::string, std::string> subversionInfoMap = SystemUtil::getSubversionInfoMap("../");
-
-	auto subversionInfoMapIterator = subversionInfoMap.find("URL");
-
-	if(subversionInfoMapIterator == subversionInfoMap.end())
-	{
-		Log("Could not determine subversion URL. Aborting.");
-		exit(1);
-	}
-
-	this->setSubversionRepositoryUrl((*subversionInfoMapIterator).second);
-	
-	subversionInfoMapIterator = subversionInfoMap.find("Revision");
-
-	if(subversionInfoMapIterator == subversionInfoMap.end())
-	{
-		Log("Could not determine subversion revision. Aborting.");
-		exit(1);
-	}
-
-	if(!MiscUtil::isInt((*subversionInfoMapIterator).second))
-	{
-		Log("Revision `%s` is not a valid integer. Aborting.", (*subversionInfoMapIterator).second.c_str());
-		exit(1);
-	}
-
-	this->bootSubversionRevision = atoi((*subversionInfoMapIterator).second.c_str());
-
-	subversionInfoMap = SystemUtil::getSubversionInfoMap("./scripts/");
-
-	subversionInfoMapIterator = subversionInfoMap.find("Revision");
-
-	if(subversionInfoMapIterator == subversionInfoMap.end())
-	{
-		Log("Could not determine subversion revision for script directory. Aborting.");
-		exit(1);
-	}
-
-	if(!MiscUtil::isInt((*subversionInfoMapIterator).second))
-	{
-		Log("Revision `%s` is not a valid integer. Aborting.", (*subversionInfoMapIterator).second.c_str());
-		exit(1);
-	}
-
-	this->bootScriptsDirectorySubversionRevision = atoi( (*subversionInfoMapIterator).second.c_str() );
-
-	Log("Subversion Revision For Script Directory: %d", bootScriptsDirectorySubversionRevision);
-	Log("Subversion URL: %s", getSubversionRepositoryUrl().c_str());
-	Log("Subversion Revision: %d", getBootSubversionRevision());
-}
-
 int Game::getBootSubversionRevision() const
 {
 	return bootSubversionRevision;
@@ -127,6 +74,11 @@ void Game::setSubversionRepositoryUrl(const std::string &subversionRepositoryUrl
 bool Game::monitorRepo()
 {
 	return hasBasicConfiguration("Monitor Repository") && getBasicConfigValue("Monitor Repository") == "1";
+}
+
+std::string Game::getScriptPullCommand()
+{
+	return getBasicConfigValue("Script Pull Command");
 }
 
 void Game::loadBasicConfig()
