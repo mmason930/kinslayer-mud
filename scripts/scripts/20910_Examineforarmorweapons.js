@@ -334,7 +334,7 @@ var script20910 = function(self, actor, here, args, extra) {
 	   }
 	   else if (obj.value(0) == 7) {
 	      var objType = "bow";
-	      var viewPrac = actor.getSkill(getSkillVnum("Bows"));
+	      var viewPrac = actor.getSkill(getSkillVnum("Bow"));
 	      lowDmg += obj.weight;
 	      highDmg += obj.weight;
 	      lowDmg = Math.floor(lowDmg);
