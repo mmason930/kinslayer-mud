@@ -101,7 +101,7 @@ var loadSuperSpecialItems = function(self, actor, here, args, extra) {
 	var canLoad = false;
 	if (proto.count >= proto.max) {
 		var counter = 0;
-		for (counter; counter < rareLoadList.length, counter++) {
+		for (counter; counter < rareLoadList.length; counter++) {
 			proto = getObjProto(rareLoadList[counter]);
 			if (proto.count < proto.max) {
 				canLoad = true;
