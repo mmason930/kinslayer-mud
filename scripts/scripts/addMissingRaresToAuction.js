@@ -12,14 +12,6 @@ var addMissingRaresToAuction =  function(self, actor, here, args, extra) {
         1334,   // a platinum handled serrated long blade
         1511,   // a gold headed double-bladed battle axe
         1121,   // a two-fisted pike with a bronzed steel shaft
-        21792,  // a set of Sharan-marked boots
-        21793,  // a set of Sharan-marked vambraces
-        21794,  // a plumed ebony burgonet with Sharan markings
-        21795,  // a pair of Sharan-marked steel-reinforced ebony gauntlets
-        21796,  // a pair of Sharan-marked ebony greaves
-        21797,  // a Sharan-marked, steel-reinforced ebony leather belt
-        21798,  // Sharan-marked, ebony pauldrons
-        21799,  // a Sharan-emblazoned cuirass
         1416    // a sharp dagger of obsidian
     ];
     
