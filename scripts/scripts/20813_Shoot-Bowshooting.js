@@ -97,7 +97,7 @@ var script20813 = function(self, actor, here, args, extra) {
 			}
 		}
 	}
-	var shotStageTimers = [ 1.5, 1.5, 1.5, 1.5 ];
+	var shotStageTimers = [ 0.3, 0.3, 0.4, 0.5 ]; // edited by Koradin 7/11/17 to lower stage timers to make bows a viable main weapon class
 	var shotStageCharMsgs = [ "You nock " + arrow + " and begin to study the area.",
 							  "\nYou start to draw " + arrow + " back.",
 							  "\nYou draw " + arrow + " back further, further increasing your shot's power.",
@@ -182,6 +182,7 @@ var script20813 = function(self, actor, here, args, extra) {
 	while( shotStage < shotStageTimers.length ) {
 		// The timer and messages for each shotStage are set in arrays that are initialized at the top of the script.
 		var timer = shotStageTimers[shotStage];
+		/** begin edit out by Koradin 7/11/17: timer was too long to make bows viable as a main weapon class and messages were spammy 
 		if( here != room && arrow != "a streamlined arrow") {
 			timer *= 2.0;
 		}
@@ -191,6 +192,7 @@ var script20813 = function(self, actor, here, args, extra) {
 		if( here == room && here == vict.room) {
 			act( shotStageVictMsgs[shotStage], true, ch, weapon, vict, constants.TO_VICT );
 		}
+		end Koradin edit 7/11/17 **/
 		// Start the timer.
 		ch.startTimer(timer);
 		var success = runTimer(ch);
