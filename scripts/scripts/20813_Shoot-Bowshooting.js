@@ -130,7 +130,14 @@ var script20813 = function(self, actor, here, args, extra) {
 	}
 	else if( argArray.length == 3 ) {
 		// Trying to shoot to an adjacent room.
-		dir = dirFromText(argArray[2]);
+		var arg3 = argArray[2].toLowerCase();
+		switch(arg3){
+			case "w" || "we" || "wes": arg3 = "west"; break;
+			case "n" || "no" || "nor" || "nort": arg3 = "north"; break;
+			case "e" || "ea" || "eas": arg3 = "east"; break;
+			case "s" || "so" || "sou" || "sout": arg3 = "south"; break;
+		}
+		dir = dirFromText(arg3);
 		room = here.direction(dir);
 		if( !room ) {
 			ch.send("You can't shoot " + argArray[2] + ".");
