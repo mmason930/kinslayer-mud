@@ -97,7 +97,7 @@ var script20813 = function(self, actor, here, args, extra) {
 			}
 		}
 	}
-	var shotStageTimers = [ 1.0, 0.3, 0.3, 0.3 ]; // edited by Koradin 7/11/17 to lower stage timers to make bows a viable main weapon class
+	var shotStageTimers = [ 0.8, 0.3, 0.3, 0.3 ]; // edited by Koradin 7/11/17 to lower stage timers to make bows a viable main weapon class
 	var shotStageCharMsgs = [ "You nock " + arrow + " and begin to study the area.",
 							  "\nYou start to draw " + arrow + " back.",
 							  "\nYou draw " + arrow + " back further, further increasing your shot's power.",
