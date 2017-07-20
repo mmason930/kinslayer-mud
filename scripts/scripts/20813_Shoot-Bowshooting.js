@@ -302,10 +302,10 @@ var script20813 = function(self, actor, here, args, extra) {
 			hitdam += weapon.weight;
 		}
 		if (stage > 2 ) {
-			hitdam *= random(1,1.7);
+			hitdam *= 1.3;
 		}
 		if( stage > 3 ) {
-			hitdam *= random(1,1.7);
+			hitdam *= 1.3;
 		}
 		if (arrow == "a diamond-tipped arrow")
 			hitdam *= 1.1;
