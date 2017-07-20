@@ -97,7 +97,7 @@ var script20813 = function(self, actor, here, args, extra) {
 			}
 		}
 	}
-	var shotStageTimers = [ 0.3, 0.3, 0.4, 0.5 ]; // edited by Koradin 7/11/17 to lower stage timers to make bows a viable main weapon class
+	var shotStageTimers = [ 0.5, 0.4, 0.3, 0.3 ]; // edited by Koradin 7/11/17 to lower stage timers to make bows a viable main weapon class
 	var shotStageCharMsgs = [ "You nock " + arrow + " and begin to study the area.",
 							  "\nYou start to draw " + arrow + " back.",
 							  "\nYou draw " + arrow + " back further, further increasing your shot's power.",
@@ -226,13 +226,13 @@ var script20813 = function(self, actor, here, args, extra) {
 	}
 	// Prevent people from instantly shooting arrows.
 	if( shotStage < 1 ) {
-		act( "$n lowers $p.", true, ch, weapon, vict, constants.TO_ROOM );
+		//act( "$n lowers $p.", true, ch, weapon, vict, constants.TO_ROOM );
 		return;
 	}
 	if( vict.room != room ) {
 		// Victim moved, stop aiming.
 		act( "Your victim seems to have moved.", true, ch, weapon, vict, constants.TO_CHAR );
-		act( "$n lowers $p, $s target no longer in $s sights.", true, ch, weapon, vict, constants.TO_ROOM );
+		//act( "$n lowers $p, $s target no longer in $s sights.", true, ch, weapon, vict, constants.TO_ROOM );
 		waitpulse 1;
 		return;
 	}
@@ -353,7 +353,7 @@ var script20813 = function(self, actor, here, args, extra) {
 		var dex = ch.dexterity * 2.0;
 		var str = ch.strength;
 		var roll = random(-50, 50);
-		var off = bowSkill * (ob + dex + str + roll + (shotStage + 2) * 10);
+		var off = bowSkill * (ob + dex + str + roll + (shotStage) * 10);
 		if (arrow == "a streamlined arrow")	
 			off += 20;
 		else if (arrow == "a decaying arrow")
