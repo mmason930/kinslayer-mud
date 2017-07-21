@@ -290,6 +290,10 @@ var script20813 = function(self, actor, here, args, extra) {
 			act(capFirstLetter(arrow) + " glances off $n's raised shield, ricocheting to the ground.", true, vict, weapon, ch, constants.TO_ROOM);
 		}
 		else {
+			if(vict.dodge < 100 || random(1,3) === 1){
+				act("You pivot to the side and deflect " + arrow + " deftly.", true, vict, weapon, ch, constants.TO_CHAR);
+				act("$n pivots to the side and deflects " + arrow + " deftly.", true, vict, weapon, ch, constants.TO_ROOM);
+			}
 			act("You dodge to the side, letting " + arrow + " fly past.", true, vict, weapon, ch, constants.TO_CHAR);
 			act("$n suddenly dodges to the side, letting " + arrow + " fly past.", true, vict, weapon, ch, constants.TO_ROOM);
 		}
@@ -353,8 +357,8 @@ var script20813 = function(self, actor, here, args, extra) {
 		var ob = ch.offense / 3.0;
 		var dex = ch.dexterity * 2.0;
 		var str = ch.strength;
-		var roll = random(-50, 50);
-		var off = bowSkill * (ob + dex + str + roll + (shotStage) * 10);
+		var roll = random(-20, 20);
+		var off = bowSkill * (ob + dex + str + roll + (shotStage * 8));
 		if (arrow == "a streamlined arrow")	
 			off += 20;
 		else if (arrow == "a decaying arrow")
@@ -364,8 +368,8 @@ var script20813 = function(self, actor, here, args, extra) {
 	// Calculate the defensive roll for the arrow.
 	function arrowDefenseRoll(vict, arrow) {
 		var dodge = vict.dodge;
-		var abs = vict.absorb * 1.5;
-		var pb = vict.pb * 2 / 3;
+		var abs = vict.absorb * 1.8;
+		var pb = vict.pb * 0.7;
 		var def = Math.ceil(dodge, Math.ceil(abs, pb));
 		if (vict.shieldBlock)
 			def += 20;
