@@ -613,7 +613,9 @@ bool JSEnvironment::compile(const std::string &fileName, std::string &scriptBuff
 	macro(formattedScriptBuffer, "_noblock", "yield '__SPECIAL__NOBLOCK'");
 	
 	try {
+		setupTimeout();
 		flusspferd::evaluate(formattedScriptBuffer, fileName.c_str(), 1);
+		removeTimeout();
 	}
 	catch(flusspferd::exception e)
 	{
