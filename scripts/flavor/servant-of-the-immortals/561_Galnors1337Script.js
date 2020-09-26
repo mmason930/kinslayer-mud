@@ -131,7 +131,8 @@ let script561 = function(self, actor, here, args, extra) {
 			"our",
 			"the demise of our",
 			"our grandchildren's",
-			"all hope for"
+			"all hope for",
+			"the next dimension's"
 		];
 
 		let wA6 = [
