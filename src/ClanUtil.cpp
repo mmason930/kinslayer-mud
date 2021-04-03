@@ -270,13 +270,13 @@ void ClanUtil::putUserClan(sql::Connection connection, UserClan *userClan)
 	else
 	{
 		sql << " UPDATE userClan SET"
-			<< "   user_id = " << userClan->getUserId() << ","
-			<< "   clan_id = " << userClan->getClanId() << ","
-			<< "   rank = " << ((int)userClan->getRank()) << ","
-			<< "   clanned_datetime = " << sql::encodeQuoteDate(userClan->getClannedDatetime().getTime()) << ","
-			<< "   last_ranked_datetime = " << sql::encodeQuoteDate(userClan->getLastRankedDatetime().getTime()) << ","
-			<< "   quest_points = " << userClan->getQuestPoints() << ","
-			<< "   is_council = " << (userClan->getIsCouncil() ? 1 : 0)
+			<< "   `user_id` = " << userClan->getUserId() << ","
+			<< "   `clan_id` = " << userClan->getClanId() << ","
+			<< "   `rank` = " << ((int)userClan->getRank()) << ","
+			<< "   `clanned_datetime` = " << sql::encodeQuoteDate(userClan->getClannedDatetime().getTime()) << ","
+			<< "   `last_ranked_datetime` = " << sql::encodeQuoteDate(userClan->getLastRankedDatetime().getTime()) << ","
+			<< "   `quest_points` = " << userClan->getQuestPoints() << ","
+			<< "   `is_council` = " << (userClan->getIsCouncil() ? 1 : 0)
 			<< " WHERE id = " << userClan->getId();
 
 		connection->sendRawQuery(sql.str());

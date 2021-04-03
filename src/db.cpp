@@ -1552,7 +1552,7 @@ bool Character::basicSave()
 	else
 		save_room = this->in_room->getVnum();
 
-	int mount = (MOUNT(this) ? MOUNT(this)->getVnum() : -1);
+	int mount = (MOUNT(this) ? MOUNT(this)->getVnum() : 0);
 
 	LAST_LOGOUT(this) = time(0);
 	this->player.time.logout = DateTime();

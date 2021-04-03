@@ -3,10 +3,8 @@
 #
 
 # C compiler to use
-#CC = /usr/local/bin/i686-pc-linux-gnu-g++
 CC = g++
 
-#-std=c++0x
 # Any special flags you want to pass to the compiler
 MYFLAGS = -O0 -std=c++0x -DXP_UNIX -I/usr/local/include -Wformat-security -Wformat -Wpointer-arith -Wcast-align -Wredundant-decls \
  		-L/usr/local/lib -DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10 \
@@ -25,7 +23,7 @@ BINDIR = ../bin
 
 CPPFLAGS = -ggdb3 $(MYFLAGS) $(PROFILE)
 
-LIBS = -lsqlDatabase -lflusspferd -lstdc++ -lboost_regex -lmozjs -lmysqlclient -lboost_thread -lboost_filesystem -lcrypt -lboost_system -ldl
+LIBS = -lsqlDatabase -lflusspferd -lstdc++ -lboost_regex -lmozjs -lmysqlclient -lboost_thread -lboost_filesystem -lcrypt -lboost_system -lpthread -ldl
 
 OBJDIR = obj
 

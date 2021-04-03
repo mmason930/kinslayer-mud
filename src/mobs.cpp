@@ -393,11 +393,11 @@ std::list<std::string> MobManager::GrabSaveQuery( const unsigned int mob_rnum )
 
 	if( MyMobIndex[mob_rnum]->in_db == false )
 	{
-		QueryBuffer << "INSERT INTO mob_protos(vnum,alias,sdesc,ldesc,ddesc,arrive_message,leave_message,mob_flags,"
-			"aff_flags0,aff_flags1,aff_flags2,aff_flags3,mob_level,maxhit,maxmove,"
-			"maxmana,numdamdice,damsizedice,numhpdice,sizehpdice,hpbonus,damroll,exp,position,default_position,sex,"
-			"race,ob,db,pb,clan,rank,class,primary_kit,food_vnum,food_quantity,skin_vnum,skin_required,skin_skinned,warrants0,warrants1,warrants2,warrants3,"
-			"gold,aggro,nsects,attack,str,dex,intel,wis,con,assists,moves_per_tic)"
+		QueryBuffer << "INSERT INTO mob_protos(`vnum`,`alias`,`sdesc`,`ldesc`,`ddesc`,`arrive_message`,`leave_message`,`mob_flags`,"
+			"`aff_flags0`,`aff_flags1`,`aff_flags2`,`aff_flags3`,`mob_level`,`maxhit`,`maxmove`,"
+			"`maxmana`,`numdamdice`,`damsizedice`,`numhpdice`,`sizehpdice`,`hpbonus`,`damroll`,`exp`,`position`,`default_position`,`sex`,"
+			"`race`,`ob`,`db`,`pb`,`clan`,`rank`,`class`,`primary_kit`,`food_vnum`,`food_quantity`,`skin_vnum`,`skin_required`,`skin_skinned`,`warrants0`,`warrants1`,`warrants2`,`warrants3`,"
+			"`gold`,`aggro`,`nsects`,`attack`,`str`,`dex`,`intel`,`wis`,`con`,`assists`,`moves_per_tic`)"
 			"VALUES(";
 			QueryBuffer << SQLVal(MyMobIndex[m->nr]->vnum);
 			QueryBuffer << SQLVal(sql::escapeString(m->player.name));
@@ -456,61 +456,61 @@ std::list<std::string> MobManager::GrabSaveQuery( const unsigned int mob_rnum )
 	}
 	else
 	{//Ugh... Produce the same monstrosity as above, but in the UPDATE form...
-		QueryBuffer << "UPDATE mob_protos SET ";
-		QueryBuffer <<	"alias='"			<< (sql::escapeString(m->player.name))								<< "',";
-		QueryBuffer <<	"sdesc='"			<< (m->player.short_descr?sql::escapeString(m->player.short_descr):"")		<< "',";
-		QueryBuffer <<	"ldesc='"			<< (m->player.long_descr?sql::escapeString(m->player.long_descr):"")			<< "',";
-		QueryBuffer <<	"ddesc='"			<< (m->player.description?sql::escapeString(m->player.description):"")		<< "',";
-		QueryBuffer <<	"arrive_message='"	<< (m->player.ArriveMessage?sql::escapeString(m->player.ArriveMessage):"")	<< "',";
-		QueryBuffer <<	"leave_message='"	<< (m->player.LeaveMessage?sql::escapeString(m->player.LeaveMessage):"")		<< "',";
-		QueryBuffer <<	"mob_flags='"		<< (int)m->player.act												<< "',";
-		QueryBuffer <<	"aff_flags0='"		<< m->player.affected_by[0]										<< "',";
-		QueryBuffer <<	"aff_flags1='"		<< m->player.affected_by[1]										<< "',";
-		QueryBuffer <<	"aff_flags2='"		<< m->player.affected_by[2]										<< "',";
-		QueryBuffer <<	"aff_flags3='"		<< m->player.affected_by[3]										<< "',";
-		QueryBuffer <<	"mob_level='"		<< (int)m->player.level											<< "',";
-		QueryBuffer <<	"maxhit='"			<< m->points.max_hit											<< "',";
-		QueryBuffer <<	"maxmove='"			<< m->points.max_move											<< "',";
-		QueryBuffer <<	"maxmana='"			<< m->points.max_mana											<< "',";
-		QueryBuffer <<	"numdamdice='"		<< (int)GET_NDD(m)												<< "',";
-		QueryBuffer <<	"damsizedice='"		<< (int)GET_SDD(m)												<< "',";
-		QueryBuffer <<	"numhpdice='"		<< (int)GET_HIT(m)												<< "',";
-		QueryBuffer <<	"sizehpdice='"		<< (int)GET_MANA(m)												<< "',";
-		QueryBuffer <<	"hpbonus='"			<< (int)GET_MOVE(m)												<< "',";
-		QueryBuffer <<	"damroll='"			<< (int)GET_DAMROLL(m)											<< "',";
-		QueryBuffer <<	"exp='"				<< (int)GET_EXP(m)												<< "',";
-		QueryBuffer <<	"position='"		<< (int)m->player.position										<< "',";
-		QueryBuffer <<	"default_position='"<< (int)m->MobData->default_pos									<< "',";
-		QueryBuffer <<	"sex='"				<< (int)m->player.sex											<< "',";
-		QueryBuffer <<	"race='"			<< (int)m->player.race											<< "',";
-		QueryBuffer <<	"ob='"				<< GET_OB(m)													<< "',";
-		QueryBuffer <<	"db='"				<< GET_DB(m)													<< "',";
-		QueryBuffer <<	"pb='"				<< GET_PB(m)													<< "',";
-		QueryBuffer <<	"clan='"			<< (userClan ? userClan->getClanId() : -1)						<< "',";
-		QueryBuffer <<	"rank='"			<< (userClan ? ((int)userClan->getRank()) : -1)					<< "',";
-		QueryBuffer <<	"class='"			<< (int)m->player.chclass										<< "',";
-		QueryBuffer <<	"primary_kit='"		<< (m->MobData->primary_kit?m->MobData->primary_kit->vnum:-1)	<< "',";
-		QueryBuffer <<	"food_vnum='"		<< (m->MobData->Food?m->MobData->Food->vnum:-1)					<< "',";
-		QueryBuffer <<	"food_quantity='"	<< (m->MobData->Food?m->MobData->Food->quantity:-1)				<< "',";
-		QueryBuffer <<  "skin_vnum='"       << (m->MobData->Skin?m->MobData->Skin->vnum:-1)                 << "',";
-		QueryBuffer <<  "skin_required='"   << (m->MobData->Skin?m->MobData->Skin->required:-1)             << "',";
-		QueryBuffer <<  "skin_skinned='"    << (m->MobData->Skin?m->MobData->Skin->skinned:-1)              << "',";
-		QueryBuffer <<	"warrants0='"		<< m->points.warrants[0]										<< "',";
-		QueryBuffer <<	"warrants1='"		<< m->points.warrants[1]										<< "',";
-		QueryBuffer <<	"warrants2='"		<< m->points.warrants[2]										<< "',";
-		QueryBuffer <<	"warrants3='"		<< m->points.warrants[3]										<< "',";
-		QueryBuffer <<	"gold='"			<< m->points.gold												<< "',";
-		QueryBuffer <<	"aggro='"			<< m->MobData->aggro											<< "',";
-		QueryBuffer <<	"nsects='"			<< m->MobData->nsects											<< "',";
-		QueryBuffer <<	"attack='"			<< GET_ATTACK(m)												<< "',";
-		QueryBuffer <<	"str='"				<< m->GetStr()													<< "',";
-		QueryBuffer <<	"dex='"				<< m->GetDex()													<< "',";
-		QueryBuffer <<	"intel='"			<< m->GetInt()													<< "',";
-		QueryBuffer <<	"wis='"				<< m->GetWis()													<< "',";
-		QueryBuffer <<	"con='"				<< m->GetCon()													<< "',";
-		QueryBuffer <<	"assists='"			<< AssistsBuffer.str()											<< "',";
-		QueryBuffer <<	"moves_per_tic="	<< m->MobData->moves_per_tic;
-		QueryBuffer <<	" WHERE vnum='"		<< VirtualMobile((u_int)m->nr)									<< "';";
+		QueryBuffer << "UPDATE `mob_protos` SET ";
+		QueryBuffer <<	"`alias`='"			<< (sql::escapeString(m->player.name))								<< "',";
+		QueryBuffer <<	"`sdesc`='"			<< (m->player.short_descr?sql::escapeString(m->player.short_descr):"")		<< "',";
+		QueryBuffer <<	"`ldesc`='"			<< (m->player.long_descr?sql::escapeString(m->player.long_descr):"")			<< "',";
+		QueryBuffer <<	"`ddesc`='"			<< (m->player.description?sql::escapeString(m->player.description):"")		<< "',";
+		QueryBuffer <<	"`arrive_message`='"	<< (m->player.ArriveMessage?sql::escapeString(m->player.ArriveMessage):"")	<< "',";
+		QueryBuffer <<	"`leave_message`='"	<< (m->player.LeaveMessage?sql::escapeString(m->player.LeaveMessage):"")		<< "',";
+		QueryBuffer <<	"`mob_flags`='"		<< (int)m->player.act												<< "',";
+		QueryBuffer <<	"`aff_flags0`='"		<< m->player.affected_by[0]										<< "',";
+		QueryBuffer <<	"`aff_flags1`='"		<< m->player.affected_by[1]										<< "',";
+		QueryBuffer <<	"`aff_flags2`='"		<< m->player.affected_by[2]										<< "',";
+		QueryBuffer <<	"`aff_flags3`='"		<< m->player.affected_by[3]										<< "',";
+		QueryBuffer <<	"`mob_level`='"		<< (int)m->player.level											<< "',";
+		QueryBuffer <<	"`maxhit`='"			<< m->points.max_hit											<< "',";
+		QueryBuffer <<	"`maxmove`='"			<< m->points.max_move											<< "',";
+		QueryBuffer <<	"`maxmana`='"			<< m->points.max_mana											<< "',";
+		QueryBuffer <<	"`numdamdice`='"		<< (int)GET_NDD(m)												<< "',";
+		QueryBuffer <<	"`damsizedice`='"		<< (int)GET_SDD(m)												<< "',";
+		QueryBuffer <<	"`numhpdice`='"		<< (int)GET_HIT(m)												<< "',";
+		QueryBuffer <<	"`sizehpdice`='"		<< (int)GET_MANA(m)												<< "',";
+		QueryBuffer <<	"`hpbonus`='"			<< (int)GET_MOVE(m)												<< "',";
+		QueryBuffer <<	"`damroll`='"			<< (int)GET_DAMROLL(m)											<< "',";
+		QueryBuffer <<	"`exp`='"				<< (int)GET_EXP(m)												<< "',";
+		QueryBuffer <<	"`position`='"		<< (int)m->player.position										<< "',";
+		QueryBuffer <<	"`default_position`='"<< (int)m->MobData->default_pos									<< "',";
+		QueryBuffer <<	"`sex`='"				<< (int)m->player.sex											<< "',";
+		QueryBuffer <<	"`race`='"			<< (int)m->player.race											<< "',";
+		QueryBuffer <<	"`ob`='"				<< GET_OB(m)													<< "',";
+		QueryBuffer <<	"`db`='"				<< GET_DB(m)													<< "',";
+		QueryBuffer <<	"`pb`='"				<< GET_PB(m)													<< "',";
+		QueryBuffer <<	"`clan`='"			<< (userClan ? userClan->getClanId() : -1)						<< "',";
+		QueryBuffer <<	"`rank`='"			<< (userClan ? ((int)userClan->getRank()) : -1)					<< "',";
+		QueryBuffer <<	"`class`='"			<< (int)m->player.chclass										<< "',";
+		QueryBuffer <<	"`primary_kit`='"		<< (m->MobData->primary_kit?m->MobData->primary_kit->vnum:-1)	<< "',";
+		QueryBuffer <<	"`food_vnum`='"		<< (m->MobData->Food?m->MobData->Food->vnum:-1)					<< "',";
+		QueryBuffer <<	"`food_quantity`='"	<< (m->MobData->Food?m->MobData->Food->quantity:-1)				<< "',";
+		QueryBuffer <<  "`skin_vnum`='"       << (m->MobData->Skin?m->MobData->Skin->vnum:-1)                 << "',";
+		QueryBuffer <<  "`skin_required`='"   << (m->MobData->Skin?m->MobData->Skin->required:-1)             << "',";
+		QueryBuffer <<  "`skin_skinned`='"    << (m->MobData->Skin?m->MobData->Skin->skinned:-1)              << "',";
+		QueryBuffer <<	"`warrants0`='"		<< m->points.warrants[0]										<< "',";
+		QueryBuffer <<	"`warrants1`='"		<< m->points.warrants[1]										<< "',";
+		QueryBuffer <<	"`warrants2`='"		<< m->points.warrants[2]										<< "',";
+		QueryBuffer <<	"`warrants3`='"		<< m->points.warrants[3]										<< "',";
+		QueryBuffer <<	"`gold`='"			<< m->points.gold												<< "',";
+		QueryBuffer <<	"`aggro`='"			<< m->MobData->aggro											<< "',";
+		QueryBuffer <<	"`nsects`='"			<< m->MobData->nsects											<< "',";
+		QueryBuffer <<	"`attack`='"			<< GET_ATTACK(m)												<< "',";
+		QueryBuffer <<	"`str`='"				<< m->GetStr()													<< "',";
+		QueryBuffer <<	"`dex`='"				<< m->GetDex()													<< "',";
+		QueryBuffer <<	"`intel`='"			<< m->GetInt()													<< "',";
+		QueryBuffer <<	"`wis`='"				<< m->GetWis()													<< "',";
+		QueryBuffer <<	"`con`='"				<< m->GetCon()													<< "',";
+		QueryBuffer <<	"`assists`='"			<< AssistsBuffer.str()											<< "',";
+		QueryBuffer <<	"`moves_per_tic`="	<< m->MobData->moves_per_tic;
+		QueryBuffer <<	" WHERE `vnum`='"		<< VirtualMobile((u_int)m->nr)									<< "';";
 		QueryBuffer <<	std::endl;
 		
 		//Now produce a query to clear the script from the database.
