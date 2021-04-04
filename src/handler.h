@@ -13,7 +13,7 @@
 
 /* handling the affected-structures */
 void	affect_total(Character *ch);
-void	affect_modify(Character *ch, byte loc, sbyte mod, long bitv, bool add);
+void	affect_modify(Character *ch, sbyte loc, sbyte mod, long bitv, bool add);
 void	affect_to_char(Character *ch, struct affected_type *af);
 void	affect_remove(Character *ch, struct affected_type *af);
 void	affect_from_char(Character *ch, int type, int bit);
@@ -98,9 +98,9 @@ int		hit(Character *ch, Character *victim, int type);
 int		damage(Character *ch, Character *victim, int dam, int attacktype, int BodyPart);
 int		skill_message(int dam, Character *ch, Character *vict, int attacktype, int BodyPart);
 
-byte     RaceByString( const std::string &str);
-byte     ClassByString( const std::string &str);
-byte     SexByString( const std::string &str);
+sbyte     RaceByString( const std::string &str);
+sbyte     ClassByString( const std::string &str);
+sbyte     SexByString( const std::string &str);
 
 unsigned long int CalcGold(unsigned long int total);
 unsigned long int CalcSilver(unsigned long int total);

@@ -152,7 +152,7 @@ bool Character::CanAggro(Character *victim)
 
 void mobileActivity(void)
 {
-	register Character *ch, *next_ch, *vict, *prev = 0;
+	Character *ch, *next_ch, *vict, *prev = 0;
 	Object *obj, *best_obj;
 	int door, found, max;
 	std::list<long>::iterator mem;

@@ -364,7 +364,7 @@ char *fname(const char *namelist)
 {
 	const int space = 30;
 	static char holder[space];
-	register char *point;
+	char *point;
 	int i = 0;
 
 	for (point = holder; isalpha(*namelist) && i < (space - 1); ++namelist, ++point, ++i)
@@ -472,7 +472,7 @@ bool is_name(const char *str, const char *namelist)
 	}
 }
 
-void aff_apply_modify(Character * ch, byte loc, int mod, char* msg)
+void aff_apply_modify(Character * ch, sbyte loc, int mod, char* msg)
 {
 	int maxabil;
 
@@ -550,7 +550,7 @@ void aff_apply_modify(Character * ch, byte loc, int mod, char* msg)
 	} /* switch */
 }
 
-void affect_modify(Character *ch, byte loc, sbyte mod, long bitv, bool add
+void affect_modify(Character *ch, sbyte loc, sbyte mod, long bitv, bool add
 	                  )
 {
 
@@ -571,7 +571,7 @@ void affect_modify(Character *ch, byte loc, sbyte mod, long bitv, bool add
 	aff_apply_modify(ch, loc, mod, str);
 }
 
-void affect_modify_ar(Character *ch, byte loc, sbyte mod, int bitv[], bool add
+void affect_modify_ar(Character *ch, sbyte loc, sbyte mod, int bitv[], bool add
 	                     )
 {
 	int i , j;

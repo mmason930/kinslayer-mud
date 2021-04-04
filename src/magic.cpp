@@ -34,7 +34,7 @@ extern struct default_mobile_stats *mob_defaults;
 extern struct apply_mod_defaults *apmd;
 extern const char *spell_wear_off_msg[];
 
-byte saving_throws(int class_num, int type, int level); /* class.c */
+sbyte saving_throws(int class_num, int type, int level); /* class.c */
 void weight_change_object(Object *obj, int weight);
 void add_follower(Character * ch, Character * leader);
 int mana_damage( Character *ch, Character *vict, int damage );
@@ -634,7 +634,7 @@ void mag_alter_objs(Character * ch, Object * obj, int spellnum)
 
 void mag_creations(Character * ch, int spellnum)
 {
-	byte level = ch->player.level;
+	sbyte level = ch->player.level;
 	Object *tobj;
 	int z;
 	Weave* weave = WeaveManager::GetManager().GetWeave(spellnum);

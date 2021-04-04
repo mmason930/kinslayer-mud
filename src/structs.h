@@ -611,12 +611,6 @@ typedef unsigned short int	ush_int;
 typedef signed long	sh_long;
 typedef unsigned long	ush_long;
 
-#ifndef CIRCLE_WINDOWS
-typedef char	byte;
-#endif
-
-
-
 typedef int	room_vnum;	/* A room's vnum type */
 typedef int	obj_vnum;	/* An object's vnum type */
 typedef int	mob_vnum;	/* A mob's vnum type */
@@ -637,15 +631,15 @@ typedef int	mob_rnum;	/* A mobile's real (internal) num type */
  * mortal levels will always be LVL_IMMORT - 1.
  */
 
-const byte LVL_IMPL = 105;
-const byte LVL_GRGOD = 104;
-const byte LVL_GOD = 103;
-const byte LVL_APPR = 102;
-const byte LVL_BLDER = 101;
-const byte LVL_IMMORT = 100;
+const sbyte LVL_IMPL = 105;
+const sbyte LVL_GRGOD = 104;
+const sbyte LVL_GOD = 103;
+const sbyte LVL_APPR = 102;
+const sbyte LVL_BLDER = 101;
+const sbyte LVL_IMMORT = 100;
 
 /* Level of the 'freeze' command */
-const byte LVL_FREEZE = LVL_GRGOD;
+const sbyte LVL_FREEZE = LVL_GRGOD;
 
 /* Different moods				*/
 const int MOOD_WIMPY = 0;
@@ -687,6 +681,7 @@ const int SMALL_BUFSIZE = 4096; // Static output buffer size
  * compatibility for those unaffected.
  */
 
+const size_t MAX_PRIMARY_BUFFER_LENGTH = 20480;
 const size_t MAX_STRING_LENGTH = 15360;
 const size_t MAX_INPUT_LENGTH = 512; // Max length per *line* of input
 const size_t MAX_MESSAGE_LENGTH = 2048;
@@ -913,7 +908,7 @@ struct obj_flag_data
 		mModifiers=0;
 	}
 	sh_int	value[ 11 ];							/* Values of the item (see list)					*/
-	byte type_flag;									/* Type of item										*/
+	sbyte type_flag;									/* Type of item										*/
 	int	wear_flags;									/* Where you can wear it							*/
 	int	extra_flags;				/* If it hums, glows, etc.							*/
 	float weight;									/* Weight, what else								*/
@@ -936,7 +931,7 @@ struct obj_flag_data
 	sh_int clan_dmg1;								/* Damage bonus to low range for clan object		*/
 	sh_int clan_dmg2;								/* Damage bonus to high range for clan object		*/
 
-	std::map< byte,long double > *mModifiers;		/* Object modifiers (eModType => modifier value)	*/
+	std::map< sbyte,long double > *mModifiers;		/* Object modifiers (eModType => modifier value)	*/
 };
 
 struct FoodUnit
@@ -1008,7 +1003,7 @@ struct obj_affected_type
 		location = 0;
 		modifier = 0;
 	}
-	byte location;      /* Which ability to change (APPLY_XXX) */
+	sbyte location;      /* Which ability to change (APPLY_XXX) */
 	sbyte modifier;     /* How much it changes by              */
 };
 
@@ -1057,8 +1052,8 @@ class Object : public JSBindable, public Entity
 		bool hidden;
 		sh_int Max;
 
-		byte decayType;										/* The type of material this object is made from */
-		byte decayTimerType;								/* Type of decay timer (ie minutes, hours, etc) */
+		sbyte decayType;										/* The type of material this object is made from */
+		sbyte decayTimerType;								/* Type of decay timer (ie minutes, hours, etc) */
 		sh_int decayTimer;									/* Timer for decay scripts */
 		
 		bool purged;										/* Is this Object queued for purging? */
@@ -1139,8 +1134,8 @@ class Object : public JSBindable, public Entity
 		int PickReq();
 		int KeyNum();
 		int getVnum();
-		byte getType() const { return obj_flags.type_flag; };
-		void setType(const byte type) { obj_flags.type_flag = type;  }
+		sbyte getType() const { return obj_flags.type_flag; };
+		void setType(const sbyte type) { obj_flags.type_flag = type;  }
 
 		enum eObjectModifier {
 			OBJECT_MOD_DODGE=0,
@@ -1316,13 +1311,13 @@ struct CharPlayerData
 	char	*ArriveMessage;				/*	Message for mobs arriving				*/
 	char	*LeaveMessage;				/*	Message for mobs leaving				*/
 	std::string title;						/*	PC / NPC's title						*/
-	byte sex;							/*	PC / NPC's sex							*/
-	byte chclass;						/*	PC / NPC's class						*/
-	byte race;							/*	PC / NPC's race							*/
-	byte level;							/*	PC / NPC's level						*/
-	byte position;						/* Standing, fighting, sleeping, etc.		*/
-	byte direction;						/* For flee direction						*/
-	byte carry_items;					/* Number of items carried					*/
+	sbyte sex;							/*	PC / NPC's sex							*/
+	sbyte chclass;						/*	PC / NPC's class						*/
+	sbyte race;							/*	PC / NPC's race							*/
+	sbyte level;							/*	PC / NPC's level						*/
+	sbyte position;						/* Standing, fighting, sleeping, etc.		*/
+	sbyte direction;						/* For flee direction						*/
+	sbyte carry_items;					/* Number of items carried					*/
 	struct TimeData time;				/*	PC's AGE in days						*/
 	int idnum;							/* player's idnum; -1 for mobiles			*/
 	int act;							/* Act flag for NPC's; player flag for PC's */
@@ -1368,11 +1363,11 @@ struct CharAbilityData
 		dex = source.dex;
 		con = source.con;
 	}
-	byte str;
-    byte intel;
-    byte wis;
-    byte dex;
-    byte con;
+	sbyte str;
+	sbyte intel;
+	sbyte wis;
+	sbyte dex;
+	sbyte con;
 };
 
 
@@ -1413,9 +1408,9 @@ struct CharPointData
 
     int master_weapon;
     bool is_bashed;
-    byte death_wait;
-    byte warning;
-    byte invis;
+    sbyte death_wait;
+    sbyte warning;
+    sbyte invis;
     std::vector<int> HitRolls;
     std::vector<int> ManaRolls;
 
@@ -1507,9 +1502,9 @@ struct PlayerOnlyData
 	long newb[ NB_ARRAY_MAX ];	/* Newbie Tip Flags */
 	room_vnum load_room;		/* Which room to place char in		*/
 
-	byte mood;
-	byte invis_level;			/* level of invisibility		*/
-	byte freeze_level;			/* Level of god who froze char, if any	*/
+	sbyte mood;
+	sbyte invis_level;			/* level of invisibility		*/
+	sbyte freeze_level;			/* Level of god who froze char, if any	*/
 	ubyte bad_pws;				/* number of bad password attemps	*/
 	sbyte conditions[ 3 ];		/* Drunk, full, thirsty			*/
 
@@ -1533,9 +1528,9 @@ struct MobOnlyData
 	std::list<long> memory;			// List of attacker's ids to remember.
 	std::list<long> ForgetList;		// List of attackers who the mob should forget.
 	int	attack_type;				// The Attack Type Bit Vector for NPCs.
-	byte default_pos;				// Default position for NPC.
-	byte damnodice;					// The number of damage dices.
-	byte damsizedice;				// The size of the damage dices.
+	sbyte default_pos;				// Default position for NPC.
+	sbyte damnodice;					// The number of damage dices.
+	sbyte damsizedice;				// The size of the damage dices.
 	sh_int wait_state;				// Wait state for bashed mobs.
 	sh_int moves_per_tic;			// Moves regenerated per tic. Assume -1 means it is calculated dynamically.
 	int aggro;
@@ -1626,7 +1621,7 @@ struct affected_type
 	sh_int	type;          /* The type of spell that caused this      */
 	sh_int	duration;      /* For how long its effects will last      */
 	sbyte	modifier;       /* This is added to apropriate ability     */
-	byte	location;        /* Tells which ability to change(APPLY_XXX)*/
+	sbyte	location;        /* Tells which ability to change(APPLY_XXX)*/
 	long	bitvector;       /* Tells which bits to set (AFF_XXX)       */
 
 	bool remove_affect;
@@ -1704,13 +1699,13 @@ enum eCharType
 class PlayerSkill
 {
 private:
-	byte percent;
+	sbyte percent;
 	short int skillId;
 public:
 
 	void setPercent(const int percent)
 	{
-		this->percent = (byte)percent;
+		this->percent = (sbyte)percent;
 	}
 	const int getPercent()
 	{
@@ -1804,7 +1799,7 @@ public:
 	sh_int		cmd_no;
 	sh_int		ps_tgt;				/* Stores the body part targetted by the next Precise Strike. */
 	sh_int		stance;				/* Stores a Blademaster's current stance. */
-	byte		body_structure;
+	sbyte		body_structure;
 	long	last_tell;				/* idnum of last tell from		*/
 	DateTime	restat_time;
 	DateTime	reset_time;
@@ -1826,11 +1821,11 @@ public:
 	sh_int GetDex()  {  return aff_abils.dex;   }
 	sh_int GetCon()  {  return aff_abils.con;   }
 
-	void SetStr( byte _val ) { aff_abils.str   = _val; }
-	void SetInt( byte _val ) { aff_abils.intel = _val; }
-	void SetWis( byte _val ) { aff_abils.wis   = _val; }
-	void SetDex( byte _val ) { aff_abils.dex   = _val; }
-	void SetCon( byte _val ) { aff_abils.con   = _val; }
+	void SetStr( sbyte _val ) { aff_abils.str   = _val; }
+	void SetInt( sbyte _val ) { aff_abils.intel = _val; }
+	void SetWis( sbyte _val ) { aff_abils.wis   = _val; }
+	void SetDex( sbyte _val ) { aff_abils.dex   = _val; }
+	void SetCon( sbyte _val ) { aff_abils.con   = _val; }
 
 	bool TooHeavyToPickUp( Object *obj );
 
@@ -1912,7 +1907,7 @@ public:
 	sh_int GetWeaveLoss();
 	sh_int GetTotalTaint();
 
-	byte GetStat( int stat );
+    sbyte GetStat( int stat );
 
 	float TotalWeight();
 	float CarriedWeight();
@@ -2275,9 +2270,9 @@ class Track
 		std::string name;		//The display name of the layer.
 		std::string alias;		//Alias of the track layer.
 		time_t laytime;		//When was the track laid?
-		byte direction;			//What direction?
-		byte race;				//What race was the track layer?
-		byte ch_class;			//Needed for fades and such.
+		sbyte direction;			//What direction?
+		sbyte race;				//What race was the track layer?
+		sbyte ch_class;			//Needed for fades and such.
 		Room *room;
 		bool bloody;
 		bool npc;				//Laid by an NPC?

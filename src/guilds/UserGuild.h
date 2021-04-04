@@ -15,7 +15,7 @@ protected:
 	DateTime joinedDatetime;
 	UserGuildStatus *status;
 	DateTime statusLastModifiedDatetime;
-	boost::optional<int> guildRankId;
+	std::optional<int> guildRankId;
 public:
 
 	UserGuild() : DataObjectWithIntId() {};
@@ -36,8 +36,8 @@ public:
 	DateTime getStatusLastModifiedDatetime() const;
 	void setStatusLastModifiedDatetime(const DateTime &statusLastModifiedDatetime);
 
-	boost::optional<int> getGuildRankId() const;
-	void setGuildRankId(const boost::optional<int> &guildRankId);
+	std::optional<int> getGuildRankId() const;
+	void setGuildRankId(const std::optional<int> &guildRankId);
 };
 
 #endif

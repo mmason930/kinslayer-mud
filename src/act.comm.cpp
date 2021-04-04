@@ -360,7 +360,7 @@ CommandHandler do_speak = DEFINE_COMMAND
 
 void Character::NewbieTip(const char *msg, ...)
 {
-	char TempMessage[MAX_STRING_LENGTH], FinalMessage[MAX_STRING_LENGTH];
+	char TempMessage[MAX_STRING_LENGTH];
 
 	if(!msg)
 		return;
@@ -368,12 +368,10 @@ void Character::NewbieTip(const char *msg, ...)
 	va_list args;
 	va_start(args, msg);
 
-	//	vsnprintf(TempMessage, sizeof(FinalMessage), msg, args);
 	vsprintf(TempMessage, msg, args);
 
-	sprintf(FinalMessage, "%s%sTip: %s%s\r\n", COLOR_BOLD(this, CL_NORMAL), COLOR_CYAN(this, CL_NORMAL),
+	this->send("%s%sTip: %s%s\r\n", COLOR_BOLD(this, CL_NORMAL), COLOR_CYAN(this, CL_NORMAL),
 	        TempMessage, COLOR_NORMAL(this, CL_NORMAL));
-	this->send(FinalMessage);
 	va_end(args);
 }
 
@@ -567,7 +565,7 @@ const int MAX_NOTE_LENGTH = 1000; // arbitrary
 CommandHandler do_write = DEFINE_COMMAND
 {
 	Object *paper = 0, *pen = 0;
-	char *papername, *penname, msg[MAX_STRING_LENGTH], cur[MAX_STRING_LENGTH], waste[MAX_STRING_LENGTH];
+	char *papername, *penname, msg[MAX_STRING_LENGTH], cur[MAX_PRIMARY_BUFFER_LENGTH], waste[MAX_STRING_LENGTH];
 	int i = 0, amount = 0;
 
 	if( ch->IsPurged() ) return;

@@ -139,7 +139,7 @@ void Weave::addAttribute( std::string AttributeName )
 	Attributes[AttributeName] = "<None>";
 }
 
-byte Weave::minPosition()
+sbyte Weave::minPosition()
 {
 	std::string sPos =  this->getAttribute("Min Position");
 		 if( sPos == "Flying"   )		return POS_FLYING;

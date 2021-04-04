@@ -612,7 +612,7 @@ int Touch(const std::string &Path)
 void MudLog(int type, int level, int file, const char *str, ...)
 {
 	FILE *logger;
-	char buf[MAX_STRING_LENGTH], format[MAX_STRING_LENGTH], tp;
+	char buf[MAX_PRIMARY_BUFFER_LENGTH], format[MAX_STRING_LENGTH], tp;
 	Descriptor *i;
 	va_list args;
 

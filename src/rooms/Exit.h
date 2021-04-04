@@ -17,8 +17,8 @@ protected:
 	sh_int exitInfo;
 	obj_vnum key;
 	Room *toRoom;
-	byte hiddenLevel;
-	byte pickRequirement;
+	sbyte hiddenLevel;
+	sbyte pickRequirement;
 
 public:
 	Exit();
@@ -42,11 +42,11 @@ public:
 	Room *getToRoom() const;
 	void setToRoom(Room *toRoom);
 
-	byte getHiddenLevel() const;
-	void setHiddenLevel(const byte hiddenLevel);
+	sbyte getHiddenLevel() const;
+	void setHiddenLevel(const sbyte hiddenLevel);
 
-	byte getPickRequirement() const;
-	void setPickRequirement(const byte pickRequirement);
+	sbyte getPickRequirement() const;
+	void setPickRequirement(const sbyte pickRequirement);
 
 	bool isFlagged(const int flag) const;
 

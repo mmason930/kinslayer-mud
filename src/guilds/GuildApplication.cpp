@@ -70,42 +70,42 @@ void GuildApplication::setCoppersCharged(const int coppersCharged)
 	this->coppersCharged = coppersCharged;
 }
 
-boost::optional<DateTime> GuildApplication::getCompletedDatetime() const
+std::optional<DateTime> GuildApplication::getCompletedDatetime() const
 {
 	return completedDatetime;
 }
 
-void GuildApplication::setCompletedDatetime(const boost::optional<DateTime> &completedDatetime)
+void GuildApplication::setCompletedDatetime(const std::optional<DateTime> &completedDatetime)
 {
 	this->completedDatetime = completedDatetime;
 }
-	
-boost::optional<int> GuildApplication::getReviewerUserId() const
+
+std::optional<int> GuildApplication::getReviewerUserId() const
 {
 	return reviewerUserId;
 }
 
-void GuildApplication::setReviewerUserId(const boost::optional<int> reviewerUserId)
+void GuildApplication::setReviewerUserId(const std::optional<int> reviewerUserId)
 {
 	this->reviewerUserId = reviewerUserId;
 }
 
-boost::optional<std::string> GuildApplication::getDeniedReason() const
+std::optional<std::string> GuildApplication::getDeniedReason() const
 {
 	return deniedReason;
 }
 
-void GuildApplication::setDeniedReason(const boost::optional<std::string> deniedReason)
+void GuildApplication::setDeniedReason(const std::optional<std::string> deniedReason)
 {
 	this->deniedReason = deniedReason;
 }
 
-boost::optional<int> GuildApplication::getGuildId() const
+std::optional<int> GuildApplication::getGuildId() const
 {
 	return guildId;
 }
 
-void GuildApplication::setGuildId(const boost::optional<int> &guildId)
+void GuildApplication::setGuildId(const std::optional<int> &guildId)
 {
 	this->guildId = guildId;
 }

@@ -203,7 +203,7 @@ class JSManager
 		void setupMonitoringThreads();
 		void monitorFileModifications(sql::Connection connection, bool continuous);
     private:
-		unordered_map<int, JSTrigger*> mapper;
+		std::unordered_map<int, JSTrigger*> mapper;
 		std::map<int, Script*> scriptMap;
 		std::list<std::pair<int, std::shared_ptr<JSInstance> > > scripts;
 		JSEnvironment* env;

@@ -9,7 +9,7 @@ DotModeTarget::DotModeTarget()
 	setType(nullptr);
 }
 
-DotModeTarget::DotModeTarget(DotModeTargetType *type, const boost::optional<int> &targetNumber)
+DotModeTarget::DotModeTarget(DotModeTargetType *type, const std::optional<int> &targetNumber)
 {
 	setType(type);
 	setTargetNumber(targetNumber);
@@ -30,12 +30,12 @@ void DotModeTarget::setType(DotModeTargetType *type)
 	this->type = type;
 }
 
-boost::optional<int> DotModeTarget::getTargetNumber() const
+std::optional<int> DotModeTarget::getTargetNumber() const
 {
 	return targetNumber;
 }
 
-void DotModeTarget::setTargetNumber(const boost::optional<int> &targetNumber)
+void DotModeTarget::setTargetNumber(const std::optional<int> &targetNumber)
 {
 	this->targetNumber = targetNumber;
 }

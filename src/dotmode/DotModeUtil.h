@@ -1,7 +1,7 @@
 #ifndef DOT_MODE_UTIL_H
 #define DOT_MODE_UTIL_H
 
-#include <boost/optional.hpp>
+#include <optional>
 
 #include "DotMode.h"
 #include "DotModeArea.h"
@@ -18,8 +18,8 @@ private:
 protected:
 public:
 
-	boost::optional<DotMode> parseDotMode(const std::string &argument) const;
-	boost::optional<DotModeTarget> parseDotModeTarget(const std::string &argument) const;
+	std::optional<DotMode> parseDotMode(const std::string &argument) const;
+	std::optional<DotModeTarget> parseDotModeTarget(const std::string &argument) const;
 	DotModeArea *parseDotModeArea(const std::string argument) const;
 
 	static DotModeUtil *get();

@@ -74,12 +74,12 @@ void GuildJoinApplication::setMessageToGuild(const std::string &messageToGuild)
 	this->messageToGuild = messageToGuild;
 }
 
-boost::optional<std::string> GuildJoinApplication::getMessageFromGuild() const
+std::optional<std::string> GuildJoinApplication::getMessageFromGuild() const
 {
 	return messageFromGuild;
 }
 
-void GuildJoinApplication::setMessageFromGuild(const boost::optional<std::string> &messageFromGuild)
+void GuildJoinApplication::setMessageFromGuild(const std::optional<std::string> &messageFromGuild)
 {
 	this->messageFromGuild = messageFromGuild;
 }

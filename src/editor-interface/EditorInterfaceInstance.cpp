@@ -15,10 +15,10 @@
 
 EditorInterfaceMenu *EditorInterfaceInstance::push(EditorInterfaceMenu *menu)
 {
-	boost::optional<std::string> preReqMessage = menu->preReq(this);
+	std::optional<std::string> preReqMessage = menu->preReq(this);
 
-	if(preReqMessage.is_initialized())
-		send("%s\r\n\r\n", preReqMessage.get().c_str());
+	if(preReqMessage.has_value())
+		send("%s\r\n\r\n", preReqMessage.value().c_str());
 	else
 		menuStack.push_back(menu);
 	return menu;

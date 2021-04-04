@@ -78,7 +78,7 @@ int length[] =
 void parse_action(int command, char *str, Descriptor *d)
 {
 	int indent = 0, rep_all = 0, flags = 0, total_len, replaced;
-	register int j = 0;
+	int j = 0;
 	int i, line_low, line_high;
 	char *s, *t, temp;
 
@@ -712,7 +712,7 @@ void string_add(Descriptor *d, char *str)
 {
 	FILE *fl;
 	int terminator = 0, action = 0;
-	register int i = 2, j = 0;
+	int i = 2, j = 0;
 	char actions[MAX_INPUT_LENGTH];
 
 

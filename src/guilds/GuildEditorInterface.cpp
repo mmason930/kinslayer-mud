@@ -131,7 +131,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 //		if(!GuildUtil::get()->hasPrivilege(guild->getId(), i->getUserId(), GuildPrivilege::manageRanks))
 //			return i->getInvalidOptionMessage();
 
-		return boost::optional<std::string>();
+		return std::optional<std::string>();
 	});
 
 	manageMyGuildsAddRankMenu->setPrintOperator(DEFINE_EI_PRINT_OPERATOR
@@ -243,7 +243,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 			GuildRank *guildRank = nullptr;
 
 			if(userListUserGuild->getGuildRankId())
-				guildRank = GuildUtil::get()->getGuildRank(userListUserGuild->getGuildRankId().get());
+				guildRank = GuildUtil::get()->getGuildRank(userListUserGuild->getGuildRankId().value());
 
 			userListBuilder.startRow()
 				->put(cyn)->append("U")->append(userListUserGuild->getId())->append(nrm)
@@ -264,7 +264,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 			->put("Submitted")
 			->put("Message");
 
-		for(auto application : GuildUtil::get()->getGuildJoinApplications(boost::optional<int>(), userGuild->getGuildId(), {GuildJoinApplicationStatus::reviewing}))
+		for(auto application : GuildUtil::get()->getGuildJoinApplications(std::optional<int>(), userGuild->getGuildId(), {GuildJoinApplicationStatus::reviewing}))
 		{
 			auto playerIndex = CharacterUtil::getPlayerIndexByUserId(application->getUserId());
 
@@ -315,11 +315,11 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 
 	manageMyGuildsViewGuildMenu->setPreReqOperator(DEFINE_EI_PRE_REQ_OPERATOR
 	{
-		return GuildUtil::get()->getActiveUserGuildsByUserId(i->getUserId()).empty() ? std::string("You must first join a Guild!") : boost::optional<std::string>();
+		return GuildUtil::get()->getActiveUserGuildsByUserId(i->getUserId()).empty() ? std::string("You must first join a Guild!") : std::optional<std::string>();
 	});
 
 	manageMyGuildsViewGuildMenu ->setParseOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 			auto userGuilds = GuildUtil::get()->getActiveUserGuildsByUserId(i->ch->getUserId());
 			auto data = getData(i);
@@ -356,7 +356,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 
 	guildJoinViewJoinApplicationMenu->setPrintOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 			auto data = getData(i);
 			auto application = GuildUtil::get()->getGuildJoinApplication(data->getGuildJoinApplicationId());
@@ -378,7 +378,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 					yel, MiscUtil::formatDateYYYYdmmdddHHcMMcSS(application->getStatusLastModifiedDatetime()).c_str(), nrm,
 					yel, (playerIndex == nullptr ? "<Deleted>" : playerIndex->name.c_str()), nrm,
 					yel, application->getMessageToGuild().c_str(), nrm,
-					yel, application->getMessageFromGuild() ? application->getMessageFromGuild().get().c_str() : "", nrm
+					yel, application->getMessageFromGuild() ? application->getMessageFromGuild().value().c_str() : "", nrm
 			);
 
 			i->send("\r\n");
@@ -391,7 +391,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 
 	guildJoinViewJoinApplicationMenu->setParseOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 			auto data = getData(i);
 			auto application = GuildUtil::get()->getGuildJoinApplication(data->getGuildJoinApplicationId());
@@ -417,14 +417,14 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 
 	guildJoinApplicationCreateApplicationMenu->setPrintOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 			return i->send("Enter a message that you would like to be sent to the Guild you are applying for: ");
 		}
 	);
 
 	guildJoinApplicationCreateApplicationMenu->setParseOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 			auto data = getData(i);
 			auto application = GuildUtil::get()->submitGuildJoinApplication(game->getConnection(), i->ch->getUserId(), data->getGuildId(), i->input);
@@ -437,7 +437,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 
 	guildJoinApplicationViewGuildMenu->setPrintOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 			auto data = getData(i);
 			auto guild = GuildUtil::get()->getGuild(data->getGuildId());
@@ -471,7 +471,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 
 	guildJoinApplicationViewGuildMenu->setParseOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 			auto data = getData(i);
 			auto guild = GuildUtil::get()->getGuild(data->getGuildId());
@@ -490,7 +490,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 				if(!GuildUtil::get()->getUserGuildsByUserId(i->ch->getUserId(), {UserGuildStatus::active}).empty())
 					return i->send("You are already in another Guild.\r\n");
 				//NEEDS TEST
-				if(!GuildUtil::get()->getGuildJoinApplications(i->getUserId(), boost::optional<int>(), {GuildJoinApplicationStatus::reviewing}).empty())
+				if(!GuildUtil::get()->getGuildJoinApplications(i->getUserId(), std::optional<int>(), {GuildJoinApplicationStatus::reviewing}).empty())
 					return i->send("You have another pending application to join a Guild.\r\n");
 				//Tested
 				if(!GuildUtil::get()->getGuildApplications(i->getUserId(), {GuildApplicationStatus::pending, GuildApplicationStatus::reviewing}).empty())
@@ -532,7 +532,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 
 	guildJoinApplicationsMenu->setPrintOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 
 			i->send(" ~~ Join a Guild ~~\r\n\r\n");
@@ -564,7 +564,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 
 			i->send("%s\r\n\r\n", builder.build().c_str());
 
-			auto applications = GuildUtil::get()->getGuildJoinApplications(i->getUserId(), boost::optional<int>());
+			auto applications = GuildUtil::get()->getGuildJoinApplications(i->getUserId(), std::optional<int>());
 
 			if(applications.empty())
 				i->send("You have not submitted any applications to join a Guild.\r\n\r\n");
@@ -602,7 +602,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 
 	guildJoinApplicationsMenu->setParseOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 			switch(i->firstLetter)
 			{
@@ -653,23 +653,23 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	auto denyApplicationReasonMenu = addMenu(createValueInputMenu(
 		"Enter your reason for denying this application: ",
 		inputLengthValidator(1, 255, "The reason you enter must be between 1 and 255 characters."),
-		[=](EditorInterfaceInstance *i) { getData(i)->setApplicationDenialReason(i->input); }
+		[=, this](EditorInterfaceInstance *i) { getData(i)->setApplicationDenialReason(i->input); }
 	));
 
 	auto newGuildNameMenu = addMenu(createValueInputMenu(
 		"Enter the name of the new Guild: ",
 		inputLengthValidator(1, 40, "The guild name must be between 1 and 40 characters."),
-		[=](EditorInterfaceInstance *i) { getData(i)->setNewGuildName(i->input); }
+		[=, this](EditorInterfaceInstance *i) { getData(i)->setNewGuildName(i->input); }
 	));
 
 	auto newGuildDescriptionMenu = addMenu(createValueInputMenu(
 		"Enter the description of the new Guild: ",
 		inputLengthValidator(1, 255, "The guild description must be between 1 and 255 characters."),
-		[=](EditorInterfaceInstance *i) { getData(i)->setNewGuildDescription(i->input); }
+		[=, this](EditorInterfaceInstance *i) { getData(i)->setNewGuildDescription(i->input); }
 	));
 	
 	denyApplicationMenu->setPrintOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 			auto data = getData(i);
 			auto application = GuildUtil::get()->getGuildApplication(data->getGuildApplicationId());
@@ -685,7 +685,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 
 	denyApplicationMenu->setPreReqOperator(
-		[=](EditorInterfaceInstance *i) -> boost::optional<std::string>
+		[=, this](EditorInterfaceInstance *i) -> std::optional<std::string>
 		{
 			auto data = getData(i);
 			auto application = GuildUtil::get()->getGuildApplication(data->getGuildApplicationId());
@@ -699,12 +699,12 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 				return std::string("This application is not in a status that can be approved. Its status is `") + application->getStatus()->getStandardName() + "`";
 			if(signatures < signaturesRequired)
 				return std::string("This application only has ") + MiscUtil::toString(signatures) + " signature" + StringUtil::plural(signatures) + " out of " + MiscUtil::toString(signaturesRequired) + ".";
-			return boost::optional<std::string>();
+			return std::optional<std::string>();
 		}
 	);
 
 	denyApplicationMenu->setParseOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 			auto data = getData(i);
 			switch(i->firstLetter)
@@ -730,7 +730,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 
 	denyApplicationMenu->setCleanupOperator(
-		[=](EditorInterfaceInstance *i) -> void
+		[=, this](EditorInterfaceInstance *i) -> void
 		{
 			getData(i)->setApplicationDenialReason("");
 		}
@@ -745,7 +745,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 
 	guildApplicationDenySignatureMenu->setParseOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 			if(i->firstLetter == 'Q') return i->popAndDisplay();
 
@@ -769,7 +769,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	});
 
 	guildApplicationDenySignatureMenu->setPreReqOperator(
-		[=](EditorInterfaceInstance *i) -> boost::optional<std::string>
+		[=, this](EditorInterfaceInstance *i) -> std::optional<std::string>
 		{
 			auto data = getData(i);
 			auto application = GuildUtil::get()->getGuildApplication(data->getGuildApplicationId());
@@ -777,7 +777,8 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 			if(i->getUserId() != application->getSubmittedByUserId())
 				return std::string("You are not authorized to perform that operation.\r\n");
 			if(application->getStatus() != GuildApplicationStatus::pending)
-				return std::string("You cannot do this because your Guild is in the `") + application->getStatus()->getStandardName() + "` status.\r\n"; 
+				return std::string("You cannot do this because your Guild is in the `") + application->getStatus()->getStandardName() + "` status.\r\n";
+			return std::string("Done.");
 		}
 	);
 
@@ -790,7 +791,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 
 	guildApplicationApproveSignatureMenu->setParseOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 			if(i->firstLetter == 'Q') return i->popAndDisplay();
 
@@ -830,7 +831,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 
 	guildApplicationApproveSignatureMenu->setPreReqOperator(
-		[=](EditorInterfaceInstance *i) -> boost::optional<std::string>
+		[=, this](EditorInterfaceInstance *i) -> std::optional<std::string>
 		{
 			auto data = getData(i);
 			auto application = GuildUtil::get()->getGuildApplication(data->getGuildApplicationId());
@@ -839,13 +840,13 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 				return std::string("You are not authorized to perform that operation.\r\n");
 			if(application->getStatus() != GuildApplicationStatus::pending)
 				return std::string("You cannot do this because your Guild is in the `") + application->getStatus()->getStandardName() + "` status.\r\n";
-			return boost::optional<std::string>();
+			return std::optional<std::string>();
 		}
 	);
 
 	//Guild Creation Application Approval
 	guildApplicationApproveMenu->setParseOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 			auto data = getData(i);
 			switch(i->firstLetter)
@@ -868,7 +869,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 
 	guildApplicationApproveMenu->setPrintOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 			auto data = getData(i);
 			auto application = GuildUtil::get()->getGuildApplication(data->getGuildApplicationId());
@@ -877,7 +878,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 
 	guildApplicationApproveMenu ->setPreReqOperator(
-		[=](EditorInterfaceInstance *i) -> boost::optional<std::string>
+		[=, this](EditorInterfaceInstance *i) -> std::optional<std::string>
 		{
 			auto data = getData(i);
 			auto application = GuildUtil::get()->getGuildApplication(data->getGuildApplicationId());
@@ -891,12 +892,12 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 				return std::string("This application is not in a status that can be approved. Its status is `") + application->getStatus()->getStandardName() + "`";
 			if(signatures < signaturesRequired)
 				return std::string("This application only has ") + MiscUtil::toString(signatures) + " signature" + StringUtil::plural(signatures) + " out of " + MiscUtil::toString(signaturesRequired) + ".";
-			return boost::optional<std::string>();
+			return std::optional<std::string>();
 		}
 	);
 
 	guildApplicationViewMenu->setParseOperator(
-		[=](EditorInterfaceInstance *i)
+		[=, this](EditorInterfaceInstance *i)
 		{
 			auto data = getData(i);
 			auto application = GuildUtil::get()->getGuildApplication(data->getGuildApplicationId());
@@ -917,7 +918,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 					return i->send("You are not of the same race as the creator of this application.\r\n\r\n");
 				std::vector<GuildApplicationSignature*> userSignatures = GuildUtil::get()->getGuildApplicationSignaturesByUserId(i->getUserId());
 				
-				if(std::find_if(userSignatures.begin(), userSignatures.end(), [=](GuildApplicationSignature *signature) -> bool
+				if(std::find_if(userSignatures.begin(), userSignatures.end(), [=, this](GuildApplicationSignature *signature) -> bool
 				{
 					return signature->getGuildApplicationId() == application->getId() && signature->getStatus() != GuildApplicationSignatureStatus::removed;
 				}) != userSignatures.end())
@@ -962,7 +963,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 
 	guildApplicationViewMenu->setPrintOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 		
 			auto data = getData(i);
@@ -975,7 +976,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 			}
 			
 			auto playerIndex = CharacterUtil::getPlayerIndexByUserId(application->getSubmittedByUserId());
-			auto reviewerPlayerIndex = application->getReviewerUserId() ? CharacterUtil::getPlayerIndexByUserId(application->getReviewerUserId().get()) : nullptr;
+			auto reviewerPlayerIndex = application->getReviewerUserId() ? CharacterUtil::getPlayerIndexByUserId(application->getReviewerUserId().value()) : nullptr;
 
 			i->send(" ~~ View Guild Application ~~\r\n\r\n"
 
@@ -992,7 +993,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 					"Reviewed By  : %s%s%s\r\n"
 					"Denied Reason: %s%s%s\r\n",
 					yel, application->getId(), nrm,
-					yel, (!application->getGuildId() ? "<Not Created>" : MiscUtil::toString(application->getGuildId().get())).c_str(), nrm,
+					yel, (!application->getGuildId() ? "<Not Created>" : MiscUtil::toString(application->getGuildId().value())).c_str(), nrm,
 					yel, application->getGuildName().c_str(), nrm,
 					yel, application->getGuildDescription().c_str(), nrm,
 					yel, MiscUtil::formatDateYYYYdmmdddHHcMMcSS(application->getSubmittedDatetime()).c_str(), nrm,
@@ -1000,9 +1001,9 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 					yel, application->getStatus()->getStandardName().c_str(), nrm,
 					yel, MiscUtil::toString(application->getCoppersCharged()).c_str(), nrm,
 					yel, GuildUtil::get()->getNumberOfValidGuildApplicationSignatures(application->getId()), nrm,
-					yel, (application->getCompletedDatetime() ? MiscUtil::formatDateYYYYdmmdddHHcMMcSS(application->getCompletedDatetime().get()).c_str() : ""), nrm,
+					yel, (application->getCompletedDatetime() ? MiscUtil::formatDateYYYYdmmdddHHcMMcSS(application->getCompletedDatetime().value()).c_str() : ""), nrm,
 					yel, (application->getReviewerUserId() ? (reviewerPlayerIndex ? reviewerPlayerIndex->name.c_str() : "<Deleted>") : ""), nrm,
-					yel, application->getDeniedReason() ? application->getDeniedReason().get_ptr()->c_str() : "", nrm
+					yel, application->getDeniedReason() ? application->getDeniedReason().value().c_str() : "", nrm
 				);
 
 			i->send("\r\n");
@@ -1066,7 +1067,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 	
 	guildCreationApplicationsMenu->setParseOperator(
-		[=](EditorInterfaceInstance *i)
+		[=, this](EditorInterfaceInstance *i)
 		{
 			auto data = getData(i);
 
@@ -1090,7 +1091,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 		}
 	);
 	guildCreationApplicationsMenu->setPrintOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 			i->send(" ~~ Guild Create Applications ~~\r\n\r\n");
 
@@ -1104,7 +1105,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 				->put("Signatures")
 				->put("Status");
 
-			for(auto application : GuildUtil::get()->getGuildApplications(boost::optional<int>(), {GuildApplicationStatus::pending, GuildApplicationStatus::reviewing}))
+			for(auto application : GuildUtil::get()->getGuildApplications(std::optional<int>(), {GuildApplicationStatus::pending, GuildApplicationStatus::reviewing}))
 			{
 				auto playerIndex = CharacterUtil::getPlayerIndexByUserId(application->getSubmittedByUserId());
 				int signatures = GuildUtil::get()->getNumberOfValidGuildApplicationSignatures(application->getId());
@@ -1132,7 +1133,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 
 	//Main Menu.
 	mainMenu->setParseOperator(
-		[=](EditorInterfaceInstance *i)
+		[=, this](EditorInterfaceInstance *i)
 		{
 			switch(i->firstLetter)
 			{
@@ -1146,7 +1147,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 
 	mainMenu->setPrintOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 			i->ch->send(" ~~ Guild Manager ~~\r\n\r\n");
 
@@ -1168,7 +1169,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 
 	//New Guild Menu.
 	guildApplicationCreateMenu->setPreReqOperator(
-		[=](EditorInterfaceInstance *i) -> boost::optional<std::string>
+		[=, this](EditorInterfaceInstance *i) -> std::optional<std::string>
 		{
 			if(GET_LEVEL(i->ch) < GuildUtil::get()->getMinimumLevelToSubmitGuildApplication())
 				return std::string("You must be at least level ") + MiscUtil::toString(GuildUtil::get()->getMinimumLevelToSubmitGuildApplication()) + " to submit a guild application.";
@@ -1176,7 +1177,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 				return std::string("Creating a new Guild costs ") + MiscUtil::toString(GuildUtil::get()->getCoppersToCreateNewGuild()) + std::string(" coppers.");
 			if(!GuildUtil::get()->getActiveUserGuildsByUserId(i->getUserId()).empty())
 				return std::string("You are already in a guild!");
-			if(GuildUtil::get()->findGuildApplication([=](GuildApplication *a) -> bool {
+			if(GuildUtil::get()->findGuildApplication([=, this](GuildApplication *a) -> bool {
 				return (a->getStatus() == GuildApplicationStatus::pending || a->getStatus() == GuildApplicationStatus::reviewing) && a->getSubmittedByUserId() == i->ch->getUserId();
 			}) != nullptr)
 				return std::string("You have another guild application that is currently pending.");
@@ -1192,12 +1193,12 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 
 			//TODO: Check to see if they have an application to join a guild.
 
-			return boost::optional<std::string>();
+			return std::optional<std::string>();
 		}
 	);
 
 	guildApplicationCreateMenu->setCleanupOperator(
-		[=](EditorInterfaceInstance *i) -> void
+		[=, this](EditorInterfaceInstance *i) -> void
 		{
 			auto data = getData(i);
 			data->setNewGuildName("");
@@ -1206,7 +1207,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 
 	guildApplicationCreateMenu->setPrintOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 			auto data = getData(i);
 
@@ -1226,7 +1227,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 	);
 
 	guildApplicationCreateMenu->setParseOperator(
-		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
+		[=, this](EditorInterfaceInstance *i) -> EditorInterfaceMenu*
 		{
 			auto data = getData(i);
 			switch(i->firstLetter)

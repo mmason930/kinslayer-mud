@@ -626,7 +626,7 @@ int Character::SimpleMove(int dir, int need_specials_check, bool flee)
 {
 	Room *was_in;
 	Character* MovePenalizer = this->MovePenalizer();
-	char mount_message[MAX_STRING_LENGTH];
+	std::string mount_message;
 
 	was_in = this->in_room;
 	if(this->IsPurged() || !js_leave_triggers(this->in_room, this, dir) || this->IsPurged())
@@ -642,15 +642,15 @@ int Character::SimpleMove(int dir, int need_specials_check, bool flee)
 	if(!can_move(this, dir, need_specials_check, flee))
 		return 0;
 
-	if(MOUNT(this))	sprintf(mount_message, ", riding %s", GET_NAME(MOUNT(this)));
-	else			*mount_message = '\0';
+	if(MOUNT(this))
+		mount_message = std::string(", riding ") + GET_NAME(MOUNT(this));
 
 	if( !this->SnuckOut() || flee )
 	{
 		if(!this->player.LeaveMessage)
-			sprintf(buf2, "$n leaves %s%s.", dirs[dir], mount_message);
+			sprintf(buf2, "$n leaves %s%s.", dirs[dir], mount_message.c_str());
 		else
-			sprintf(buf2, "$n %s %s%s.", this->player.LeaveMessage, dirs[dir], mount_message);
+			sprintf(buf2, "$n %s %s%s.", this->player.LeaveMessage, dirs[dir], mount_message.c_str());
 		Act(buf2, TRUE, this, 0, 0, TO_ROOM, NULL, true);
 	}
 
@@ -679,11 +679,11 @@ int Character::SimpleMove(int dir, int need_specials_check, bool flee)
 		if(!this->player.ArriveMessage)
 			sprintf(buf2, "$n has arrived from %s%s%s.",
 			        ((dir == UP || dir == DOWN) ? "" : "the "),
-			        (dir == UP ? "below": dir == DOWN ? "above" : dirs[rev_dir[dir]]), mount_message);
+			        (dir == UP ? "below": dir == DOWN ? "above" : dirs[rev_dir[dir]]), mount_message.c_str());
 		else
 			sprintf(buf2, "$n %s from %s%s%s.", this->player.ArriveMessage,
 			        ((dir == UP || dir == DOWN) ? "" : "the "),
-			        (dir == UP ? "below": dir == DOWN ? "above" : dirs[rev_dir[dir]]), mount_message);
+			        (dir == UP ? "below": dir == DOWN ? "above" : dirs[rev_dir[dir]]), mount_message.c_str());
 
 		Act(buf2, TRUE, this, 0, 0, TO_ROOM, NULL, true);
 	}

@@ -111,7 +111,7 @@ public:
 	GuildJoinApplication *getGuildJoinApplication(const sql::Row row) const;
 	void putGuildJoinApplication(sql::Connection connection, GuildJoinApplication *guildJoinApplication) const;
 	GuildJoinApplication *getGuildJoinApplication(int guildJoinApplicationId) const;
-	std::vector<GuildJoinApplication *> getGuildJoinApplications(const boost::optional<int> &userId, const boost::optional<int> &guildId, const std::vector<GuildJoinApplicationStatus *> &statuses = std::vector<GuildJoinApplicationStatus *>());
+	std::vector<GuildJoinApplication *> getGuildJoinApplications(const std::optional<int> &userId, const std::optional<int> &guildId, const std::vector<GuildJoinApplicationStatus *> &statuses = std::vector<GuildJoinApplicationStatus *>());
 	GuildJoinApplication *submitGuildJoinApplication(sql::Connection connection, int userId, int guildId, const std::string &messageToGuild);
 	void removeGuildJoinApplication(sql::Connection connection, int removedByUserId, int guildJoinApplicationId);
 
@@ -120,7 +120,7 @@ public:
 	GuildRank *getGuildRank(const sql::Row row) const;
 	void putGuildRank(sql::Connection connection, GuildRank *guildRank) const;
 	GuildRank *getGuildRank(int guildRankId) const;
-	std::vector<GuildRank *> getGuildRanks(const boost::optional<int> guildId, const std::vector<GuildRankStatus*> &statuses = std::vector<GuildRankStatus*>()) const;
+	std::vector<GuildRank *> getGuildRanks(const std::optional<int> guildId, const std::vector<GuildRankStatus*> &statuses = std::vector<GuildRankStatus*>()) const;
 	void removeGuildRank(sql::Connection connection, int userId, int guildRankId);
 	void applyChangesToGuildRank(sql::Connection connection, GuildRank *guildRank, const std::map<int, GuildRankRole*> &guildPrivilegeIdToGuildRankRoleMap);
 	void addGuildRank(sql::Connection connection, GuildRank *guildRank);
@@ -129,7 +129,7 @@ public:
 	void loadGuildRankRolesFromDatabase(sql::Connection connection);
 	GuildRankRole *getGuildRankRole(const sql::Row row) const;
 	void putGuildRankRole(sql::Connection connection, GuildRankRole *guildRankRole) const;
-	std::vector<GuildRankRole *> getGuildRankRoles(boost::optional<int> guildRankId) const;
+	std::vector<GuildRankRole *> getGuildRankRoles(std::optional<int> guildRankId) const;
 	void addGuildRankRole(sql::Connection connection, GuildRankRole *guildRankRole);
 	void removeGuildRankRole(sql::Connection connection, int guildRankRoleId);
 	std::map<int, GuildRankRole*> getGuildPrivilegeIdToGuildRankRoleMap(int guildRankId) const;
@@ -138,7 +138,7 @@ public:
 	bool hasPrivilege(int guildId, int userId, GuildPrivilege *guildPrivilege) const;
 
 	std::vector<GuildApplication *> getGuildApplicationsRequiringReview() const;
-	std::vector<GuildApplication *> getGuildApplications(const boost::optional<int> &userId = boost::optional<int>(), const std::vector<GuildApplicationStatus *> statuses = std::vector<GuildApplicationStatus*>()) const;
+	std::vector<GuildApplication *> getGuildApplications(const std::optional<int> &userId = std::optional<int>(), const std::vector<GuildApplicationStatus *> statuses = std::vector<GuildApplicationStatus*>()) const;
 	std::vector<GuildApplication *> getGuildApplicationsSorted() const;
 	GuildApplication *getGuildApplication(int guildApplicationId) const;
 

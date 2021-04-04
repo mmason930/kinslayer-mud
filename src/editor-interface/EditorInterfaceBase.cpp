@@ -58,7 +58,7 @@ void EditorInterfaceBase::setupNewInstance(Character *ch) const
 
 EditorInterfaceMenu *EditorInterfaceBase::createValueInputMenu(
 		const std::string &message,
-		const std::function<boost::optional<std::string>(const std::string &)> &validationOperation,
+		const std::function<std::optional<std::string>(const std::string &)> &validationOperation,
 		const std::function<void(EditorInterfaceInstance *i)> &dataSetOperation
 )
 {
@@ -74,10 +74,10 @@ EditorInterfaceMenu *EditorInterfaceBase::createValueInputMenu(
 	menu->setParseOperator(
 		[=](EditorInterfaceInstance *i) -> EditorInterfaceMenu *
 		{
-			boost::optional<std::string> errorMessage = validationOperation(i->input);
+			std::optional<std::string> errorMessage = validationOperation(i->input);
 
-			if(errorMessage.is_initialized())
-				i->send("%s\r\n", errorMessage.get().c_str());
+			if(errorMessage.has_value())
+				i->send("%s\r\n", errorMessage.value().c_str());
 			
 			dataSetOperation(i);
 
@@ -90,17 +90,17 @@ EditorInterfaceMenu *EditorInterfaceBase::createValueInputMenu(
 
 ValidationFunction EditorInterfaceBase::validationChain(const std::initializer_list<ValidationFunction> &validationList)
 {
-	return [=](const std::string &input) -> boost::optional<std::string>
+	return [=](const std::string &input) -> std::optional<std::string>
 	{
 		for(ValidationFunction validationFunction : validationList)
 		{
 			auto errorMessage = validationFunction(input);
 
-			if(errorMessage.is_initialized())
-				return errorMessage.get();
+			if(errorMessage.has_value())
+				return errorMessage.value();
 		}
 
-		return boost::optional<std::string>();
+		return std::optional<std::string>();
 	};
 }
 
@@ -109,7 +109,7 @@ ValidationFunction EditorInterfaceBase::inputLengthValidator(const int minimumLe
 	return [=](const std::string &input)
 	{
 		auto length = input.size();
-		return length < minimumLength || length > maximumLength ? errorMessage : boost::optional<std::string>();
+		return length < minimumLength || length > maximumLength ? errorMessage : std::optional<std::string>();
 	};
 }
 
@@ -120,5 +120,5 @@ ValidationFunction EditorInterfaceBase::integerValidator()
 
 ValidationFunction EditorInterfaceBase::integerValidator(const std::string &errorMessage)
 {
-	return [=](const std::string &input) { return MiscUtil::isInt(input) ? boost::optional<std::string>() : errorMessage; };
+	return [=](const std::string &input) { return MiscUtil::isInt(input) ? std::optional<std::string>() : errorMessage; };
 }

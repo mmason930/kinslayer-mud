@@ -42,7 +42,7 @@ StatGroup::StatGroup()
     for( std::list< Stat >::iterator S = StatManager::GetManager().StatList.begin();
     S != StatManager::GetManager().StatList.end();++S)
     {
-        std::vector< byte> Rolls(26);
+        std::vector< sbyte> Rolls(26);
         ( this->StatRolls[ (*S).GetID() ] ) = Rolls;
     }
 }
@@ -58,7 +58,7 @@ StatGroup::StatGroup( StatGroup *source )
     this->StatRolls.insert( source->StatRolls.begin(), source->StatRolls.end() );
 }
 
-StatGroup::StatGroup(const byte _class, const byte _race, const byte _sex)
+StatGroup::StatGroup(const sbyte _class, const sbyte _race, const sbyte _sex)
 {
     this->chclass   = _class;
     this->race      = _race;
@@ -100,7 +100,7 @@ bool StatManager::RollStats(Character *ch) //Roll ch's stats.
     }
     else
     {
-        for(std::map<int, std::vector<byte> >::iterator Batch = Group->StatRolls.begin();Batch != Group->StatRolls.end();++Batch)
+        for(std::map<int, std::vector<sbyte> >::iterator Batch = Group->StatRolls.begin();Batch != Group->StatRolls.end();++Batch)
         {
             int nr, roll;
 
@@ -121,7 +121,7 @@ bool StatManager::RollStats(Character *ch) //Roll ch's stats.
                 return false;
             }
 
-            byte* statToAlter;
+			sbyte* statToAlter;
             switch( (*Batch).first )
             {
             case STAT_STR:
@@ -156,7 +156,7 @@ bool StatManager::RollStats(Character *ch) //Roll ch's stats.
 	}
 }
 //Find statgroup which corresponds with class, race, and sex.
-StatGroup *StatManager::FindStatGroup(const byte chclass, const byte race, const byte sex)
+StatGroup *StatManager::FindStatGroup(const sbyte chclass, const sbyte race, const sbyte sex)
 {
 	for(std::list<StatGroup>::iterator SG = this->StatGroups.begin();
 	SG != this->StatGroups.end();++SG)
@@ -232,7 +232,7 @@ void StatManager::save()
 
 		int stat_group_id = gameDatabase->lastInsertID();
 
-		std::map< int, std::vector<byte> >::iterator statGroupStatIter = statGroup->StatRolls.begin();
+		std::map< int, std::vector<sbyte> >::iterator statGroupStatIter = statGroup->StatRolls.begin();
 
 		while(statGroupStatIter != statGroup->StatRolls.end()) {
 

@@ -145,22 +145,22 @@ void Exit::setToRoom(Room *toRoom)
 	this->toRoom = toRoom;
 }
 
-byte Exit::getHiddenLevel() const
+sbyte Exit::getHiddenLevel() const
 {
 	return hiddenLevel;
 }
 
-void Exit::setHiddenLevel(const byte hiddenLevel)
+void Exit::setHiddenLevel(const sbyte hiddenLevel)
 {
 	this->hiddenLevel = hiddenLevel;
 }
 
-byte Exit::getPickRequirement() const
+sbyte Exit::getPickRequirement() const
 {
 	return pickRequirement;
 }
 
-void Exit::setPickRequirement(const byte pickRequirement)
+void Exit::setPickRequirement(const sbyte pickRequirement)
 {
 	this->pickRequirement = pickRequirement;
 }

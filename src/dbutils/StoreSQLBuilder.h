@@ -4,7 +4,7 @@
 #include <list>
 #include <tuple>
 #include <mysql/sqlDatabase.h>
-#include <boost/optional.hpp>
+#include <optional>
 
 #include "../DateTime.h"
 #include "../Enum.h"
@@ -85,9 +85,9 @@ public:
 	}
 	
 	template<typename T>
-	StoreSQLBuilder *put(const std::string &columnName, const boost::optional<T> &value) {
+	StoreSQLBuilder *put(const std::string &columnName, const std::optional<T> &value) {
 
-		return value ? put(columnName, value.get()) : putEscapedString(columnName, "NULL");
+		return value ? put(columnName, value.value()) : putEscapedString(columnName, "NULL");
 	}
 
 	StoreSQLBuilder *put(const std::string &columnName, const char *str) {

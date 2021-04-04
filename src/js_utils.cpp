@@ -20,7 +20,7 @@
 
 using namespace std;
 
-unordered_map<void*, pair<std::string, flusspferd::value> > mapper;
+std::unordered_map<void*, pair<std::string, flusspferd::value> > mapper;
 
 /* Galnor - 11/13/2009 - Perform necessary maintenance for removal of a Javascript object. */
 void deleteValue( JSBindable *addr )

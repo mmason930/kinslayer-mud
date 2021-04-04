@@ -141,7 +141,7 @@ std::map<int, Guild *> GuildUtil::getGuildMap(sql::Connection connection)
 	return QueryUtil::get()->loadDataObjectMapFromDatabase<Guild *, int>(
 		connection,
 		"guild",
-		[=](const sql::Row row) -> Guild* { return this->getGuild(row); },
+		[=, this](const sql::Row row) -> Guild* { return this->getGuild(row); },
 		[](Guild *guild) -> int { return guild->getId(); }
 	);
 }
@@ -235,10 +235,10 @@ Guild *GuildUtil::createGuild(sql::Connection connection, int guildApplicationId
 	Guild *guild = new Guild();
 
 	guild->setCreatedByUserId(guildApplication->getSubmittedByUserId());
-	guild->setCreatedDatetime(guildApplication->getCompletedDatetime().get());
+	guild->setCreatedDatetime(guildApplication->getCompletedDatetime().value());
 	guild->setName(guildApplication->getGuildName());
 	guild->setStatus(GuildStatus::active);
-	guild->setStatusLastModifiedDatetime(guildApplication->getCompletedDatetime().get());
+	guild->setStatusLastModifiedDatetime(guildApplication->getCompletedDatetime().value());
 	guild->setRace(guildApplication->getSubmittedByUserRace());
 
 	putGuild(connection, guild);
@@ -445,7 +445,7 @@ std::vector<GuildApplication *> GuildUtil::getGuildApplicationsRequiringReview()
 	return guildApplications;
 }
 
-std::vector<GuildApplication *> GuildUtil::getGuildApplications(const boost::optional<int> &userId, const std::vector<GuildApplicationStatus *> statuses) const
+std::vector<GuildApplication *> GuildUtil::getGuildApplications(const std::optional<int> &userId, const std::vector<GuildApplicationStatus *> statuses) const
 {
 	std::vector<GuildApplication *> guildApplications;
 	for(auto iter : guildApplicationMap)
@@ -453,7 +453,7 @@ std::vector<GuildApplication *> GuildUtil::getGuildApplications(const boost::opt
 		auto application = iter.second;
 		if(statuses.empty() || std::find(statuses.begin(), statuses.end(), application->getStatus()) != statuses.end())
 		{
-			if(!userId || userId.get() == application->getSubmittedByUserId())
+			if(!userId || userId.value() == application->getSubmittedByUserId())
 				guildApplications.push_back(application);
 		}
 	}
@@ -509,7 +509,7 @@ void GuildUtil::loadGuildApplicationSignaturesFromDatabase(sql::Connection conne
 	this->guildApplicationSignatureMap = QueryUtil::get()->loadDataObjectMapFromDatabase<GuildApplicationSignature*, int>(
 		connection,
 		"guildApplicationSignature",
-		[=](const sql::Row row) { return this->getGuildApplicationSignature(row); },
+		[=, this](const sql::Row row) { return this->getGuildApplicationSignature(row); },
 		[](GuildApplicationSignature* signature) { return signature->getId(); }
 	);
 
@@ -643,7 +643,7 @@ void GuildUtil::loadGuildJoinApplicationsFromDatabase(sql::Connection connection
 	this->guildJoinApplicationMap = QueryUtil::get()->loadDataObjectMapFromDatabase<GuildJoinApplication*,int>(
 		connection,
 		"guildJoinApplication",
-		[=](const sql::Row row) -> GuildJoinApplication* { return this->getGuildJoinApplication(row); },
+		[=, this](const sql::Row row) -> GuildJoinApplication* { return this->getGuildJoinApplication(row); },
 		[](GuildJoinApplication *guildJoinApplication) -> int { return guildJoinApplication->getId(); }
 	);
 
@@ -696,14 +696,14 @@ GuildJoinApplication *GuildUtil::getGuildJoinApplication(int guildJoinApplicatio
 	return iter == guildJoinApplicationMap.end() ? nullptr : iter->second;
 }
 
-std::vector<GuildJoinApplication *> GuildUtil::getGuildJoinApplications(const boost::optional<int> &userId, const boost::optional<int> &guildId, const std::vector<GuildJoinApplicationStatus *> &statuses)
+std::vector<GuildJoinApplication *> GuildUtil::getGuildJoinApplications(const std::optional<int> &userId, const std::optional<int> &guildId, const std::vector<GuildJoinApplicationStatus *> &statuses)
 {
 	std::vector<GuildJoinApplication *> guildJoinApplications;
 
-	if(userId && userIdToGuildJoinApplicationsMap[userId.get()] != nullptr)
-		guildJoinApplications =  *(userIdToGuildJoinApplicationsMap[userId.get()]);
-	else if(guildId && guildJoinApplications.empty() && guildIdToGuildJoinApplicationsMap[guildId.get()] != nullptr)
-		guildJoinApplications = *(guildIdToGuildJoinApplicationsMap[guildId.get()]);
+	if(userId && userIdToGuildJoinApplicationsMap[userId.value()] != nullptr)
+		guildJoinApplications =  *(userIdToGuildJoinApplicationsMap[userId.value()]);
+	else if(guildId && guildJoinApplications.empty() && guildIdToGuildJoinApplicationsMap[guildId.value()] != nullptr)
+		guildJoinApplications = *(guildIdToGuildJoinApplicationsMap[guildId.value()]);
 
 	if(!statuses.empty())
 	{
@@ -772,7 +772,7 @@ void GuildUtil::loadGuildRanksFromDatabase(sql::Connection connection)
 	guildRankMap = QueryUtil::get()->loadDataObjectMapFromDatabase<GuildRank*, int>(
 		connection,
 		"guildRank",
-		[=](const sql::Row row) -> GuildRank* { return this->getGuildRank(row); },
+		[=, this](const sql::Row row) -> GuildRank* { return this->getGuildRank(row); },
 		[](GuildRank *guildRank) -> int { return guildRank->getId(); }
 	);
 
@@ -820,7 +820,7 @@ GuildRank *GuildUtil::getGuildRank(int guildRankId) const
 	return iter == guildRankMap.end() ? nullptr : iter->second;
 }
 
-std::vector<GuildRank *> GuildUtil::getGuildRanks(const boost::optional<int> guildId, const std::vector<GuildRankStatus*> &statuses) const
+std::vector<GuildRank *> GuildUtil::getGuildRanks(const std::optional<int> guildId, const std::vector<GuildRankStatus*> &statuses) const
 {
 	
 	std::vector<GuildRank*> guildRanksCopy;
@@ -828,7 +828,7 @@ std::vector<GuildRank *> GuildUtil::getGuildRanks(const boost::optional<int> gui
 
 	if(guildId)
 	{
-		auto guildRanksIter = guildIdToGuildRanksMap.find(guildId.get());
+		auto guildRanksIter = guildIdToGuildRanksMap.find(guildId.value());
 		
 		if(guildRanksIter == guildIdToGuildRanksMap.end())
 			return {};
@@ -928,7 +928,7 @@ void GuildUtil::loadGuildRankRolesFromDatabase(sql::Connection connection)
 	guildRankRoleMap = QueryUtil::get()->loadDataObjectMapFromDatabase<GuildRankRole*, int>(
 		connection,
 		"guildRankRole",
-		[=](const sql::Row row) -> GuildRankRole* { return this->getGuildRankRole(row); },
+		[=, this](const sql::Row row) -> GuildRankRole* { return this->getGuildRankRole(row); },
 		[](GuildRankRole *guildRankRole) -> int { return guildRankRole->getId(); }
 	);
 
@@ -960,12 +960,12 @@ void GuildUtil::putGuildRankRole(sql::Connection connection, GuildRankRole *guil
 	builder.execute(guildRankRole);
 }
 
-std::vector<GuildRankRole *> GuildUtil::getGuildRankRoles(boost::optional<int> guildRankId) const
+std::vector<GuildRankRole *> GuildUtil::getGuildRankRoles(std::optional<int> guildRankId) const
 {
 	if(!guildRankId)
 		return MiscUtil::mapValuesToVector(guildRankRoleMap);
 
-	auto guildRankRolesIter = guildRankIdToGuildRankRolesMap.find(guildRankId.get());
+	auto guildRankRolesIter = guildRankIdToGuildRankRolesMap.find(guildRankId.value());
 
 	if(guildRankRolesIter == guildRankIdToGuildRankRolesMap.end())
 		return {};
@@ -1021,7 +1021,7 @@ bool GuildUtil::hasPrivilege(int guildId, int userId, GuildPrivilege *guildPrivi
 		return false;
 
 	//Okay, now grab all roles, checking for the one we are interested in.
-	for(auto guildRankRole : getGuildRankRoles(userGuild->getGuildRankId().get()))
+	for(auto guildRankRole : getGuildRankRoles(userGuild->getGuildRankId().value()))
 	{
 		if(guildRankRole->getGuildPrivilege() == guildPrivilege)
 			return true;

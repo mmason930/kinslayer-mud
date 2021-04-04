@@ -115,7 +115,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <functional>
-#include <boost/optional.hpp>
+#include <optional>
 //#include <mysql.h>
 //#include <errmsg.h>
 /*
@@ -138,7 +138,6 @@
 #include <unordered_map>
 #include <memory>
 #endif
-using std::tr1::unordered_map;
 
 
 #ifdef CIRCLE_UNIX

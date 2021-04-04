@@ -1,7 +1,7 @@
 #ifndef GUILD_JOIN_APPLICATION_H
 #define GUILD_JOIN_APPLICATION_H
 
-#include <boost/optional.hpp>
+#include <optional>
 
 #include "../DataObjectWithIntId.h"
 #include "../DateTime.h"
@@ -20,7 +20,7 @@ protected:
 	DateTime statusLastModifiedDatetime;
 	int statusLastModifiedByUserId;
 	std::string messageToGuild;
-	boost::optional<std::string> messageFromGuild;
+	std::optional<std::string> messageFromGuild;
 public:
 
 	int getUserId() const;
@@ -44,8 +44,8 @@ public:
 	std::string getMessageToGuild() const;
 	void setMessageToGuild(const std::string &messageToGuild);
 
-	boost::optional<std::string> getMessageFromGuild() const;
-	void setMessageFromGuild(const boost::optional<std::string> &messageFromGuild);
+	std::optional<std::string> getMessageFromGuild() const;
+	void setMessageFromGuild(const std::optional<std::string> &messageFromGuild);
 };
 
 #endif

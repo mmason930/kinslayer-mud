@@ -303,7 +303,7 @@ int performAlias( Descriptor *d, char *orig )
  */
 int search_block( const char *arg, const char **listy, int exact )
 {
-	register int i, l;
+	int i, l;
 	char buffer[MAX_INPUT_LENGTH];
 	strcpy(buffer,arg);
 
@@ -546,8 +546,8 @@ bool Character::IsIgnoring( const std::string &person )
 
 int special( Character *ch, char *cmd, char *arg )
 {
-	register Object * i;
-	register Character *k;
+	Object * i;
+	Character *k;
 	int j;
 
 	/* special in room? */
@@ -1345,7 +1345,7 @@ void Descriptor::nanny( char* arg )
 			return;
 		}
 
-		byte* stat;
+		sbyte* stat;
 		int which = 0;
 		switch ( toupper( *arg ) )
 		{

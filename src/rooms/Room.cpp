@@ -574,8 +574,8 @@ Room *Room::boot(const sql::Row &MyRow,
 			NewRoom->dir_option[dir]->setGeneralDescription((*eRow)[EXIT_GENERAL_DESCRIPTION_INDEX].c_str());
 			NewRoom->dir_option[dir]->setKeywords((*eRow)[EXIT_KEYWORD_INDEX].c_str());
 			NewRoom->dir_option[dir]->setExitInfo(atoi((*eRow)[EXIT_EXIT_INFO_INDEX].c_str()));
-			NewRoom->dir_option[dir]->setPickRequirement((byte)(atoi((*eRow)[EXIT_PICK_REQ_INDEX].c_str())));
-			NewRoom->dir_option[dir]->setHiddenLevel((byte)(atoi((*eRow)[EXIT_HIDDEN_LEVEL_INDEX].c_str())));
+			NewRoom->dir_option[dir]->setPickRequirement((sbyte)(atoi((*eRow)[EXIT_PICK_REQ_INDEX].c_str())));
+			NewRoom->dir_option[dir]->setHiddenLevel((sbyte)(atoi((*eRow)[EXIT_HIDDEN_LEVEL_INDEX].c_str())));
 			NewRoom->dir_option[dir]->setKey(atoi((*eRow)[EXIT_KEY_VNUM_INDEX].c_str()));
 			NewRoom->dir_option[dir]->setToRoom((Room*)(atoi((*eRow)[EXIT_TO_ROOM_INDEX].c_str())));
 			//This last line is a HACK!
@@ -718,12 +718,12 @@ void Room::setDeleted(bool deleted)
 	this->deleted = deleted;
 }
 
-byte Room::getLight() const
+sbyte Room::getLight() const
 {
 	return light;
 }
 
-void Room::setLight(byte light)
+void Room::setLight(sbyte light)
 {
 	this->light = light;
 }

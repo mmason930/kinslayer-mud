@@ -590,9 +590,9 @@ int Character::SkillAdd( int skill )
 	return perc - GET_SKILL( this, skill );
 }
 
-byte Character::GetStat( int stat )
+sbyte Character::GetStat( int stat )
 {
-	static byte no_stat = 0;
+	static sbyte no_stat = 0;
 
 	switch ( stat )
 	{
@@ -1304,7 +1304,7 @@ void Character::ShowZones( Character *ch )
 		ch->send( "%s is not currently assigned to any zones.\r\n", GET_NAME( this ) );
 }
 
-byte RaceByString( const std::string &str)
+sbyte RaceByString( const std::string &str)
 {
     for(int i = 0;*pc_race_types[i] != '\n';++i)
     {
@@ -1314,7 +1314,7 @@ byte RaceByString( const std::string &str)
     return RACE_UNDEFINED;
 }
 
-byte ClassByString( const std::string &str)
+sbyte ClassByString( const std::string &str)
 {
     for(int i = 0;*pc_class_types[i] != '\n';++i)
     {
@@ -1324,7 +1324,7 @@ byte ClassByString( const std::string &str)
     return CLASS_UNDEFINED;
 }
 
-byte SexByString( const std::string &str)
+sbyte SexByString( const std::string &str)
 {
     for(int i = 0;i < NUM_GENDERS;++i)
     {

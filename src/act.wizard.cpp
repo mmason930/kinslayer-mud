@@ -124,7 +124,7 @@ extern int parse_class(char arg);
 extern int parse_race(char arg);
 extern Character *find_char(long n);
 extern unsigned long int bandwidth;
-extern std::tr1::unordered_map<void*, pair<std::string, flusspferd::value> > mapper;
+extern std::unordered_map<void*, pair<std::string, flusspferd::value> > mapper;
 
 Room *FindTargetRoom(Character * ch, char *rawroomstr);
 int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int file);
@@ -910,7 +910,7 @@ CommandHandler do_memory = DEFINE_COMMAND
 
 	total += sizeof(Exit) * number;
 
-	std::tr1::unordered_map<void*, pair<std::string, flusspferd::value> >::iterator iter;
+	std::unordered_map<void*, pair<std::string, flusspferd::value> >::iterator iter;
 	int jsValues = mapper.size();
 	int jsCharacters = 0, jsObjects = 0, jsRooms = 0;
 	for(iter = mapper.begin();iter != mapper.end();++iter) {
@@ -6675,7 +6675,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			}
 
 			RANGE(0, LVL_IMPL);
-			vict->player.level = (byte) value;
+			vict->player.level = (sbyte) value;
 			check_autowiz(vict);
 			break;
 		case 29:

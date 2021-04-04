@@ -23,8 +23,8 @@ public:
 	bool loggedIn;					//Has this descriptor successfully logged in during this session?
 	class kuDescriptor *descriptor;
 	char	host[ 31 ];				// Hostname
-	byte	bad_pws;				// Number of bad pw attemps this login
-	byte	idle_tics;				// Tics idle at password prompt
+	sbyte	bad_pws;				// Number of bad pw attemps this login
+	sbyte	idle_tics;				// Tics idle at password prompt
 	int	connected;					// Mode of 'connectedness'
 	sh_int	wait;					// Wait for how many loops
 	int	desc_num;					// Unique num assigned to desc

@@ -904,7 +904,7 @@ void shopping_value(char *arg, Character *ch, Character *keeper, int shop_nr)
 
 char *list_object(Character *ch, Object * obj, int cnt, int index, int shop_nr)
 {
-	static char buf[256];
+	static char buf[512];
 	char buf2[300], buf3[200];
 
 	if (shop_producing(obj, shop_nr))
@@ -1454,7 +1454,7 @@ void list_detailed_shop(Character * ch, int shop_nr)
 	ch->send(buf);
 
 	sprintbit((long) SHOP_BITVECTOR(shop_nr), shop_bits, buf1);
-	sprintf(buf, "Bits:       %s\r\n", buf1);
+	ch->send("Bits:       %s\r\n", buf1);
 	ch->send(buf);
 }
 

@@ -1259,7 +1259,7 @@ flusspferd::value JS_getAllRoomsInZone( int zoneId )
 	unsigned int bottomRoomVnum = zone->GetBottom();
 	unsigned int topRoomVnum = zone->GetTop();
 
-	
+	return flusspferd::object();//Not implemented?
 }
 flusspferd::value getObjProtoByRnum( int rnum )
 {

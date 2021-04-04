@@ -253,7 +253,7 @@ void StateditDisplayRollMenu(Descriptor *d)
     for(int i = 0;i < (int)d->olc->sgRolls.size();++i)
     {
         d->send("%s%2d%s) %d%%\r\n", grn, i, nrm,
-            (int)(d->olc->sgRolls[ (byte) i ]) );
+            (int)(d->olc->sgRolls[ (sbyte) i ]) );
     }
     d->send("\r\n%sQ%s) Quit\r\n", grn, nrm);
     d->send("Choose a roll or option:");

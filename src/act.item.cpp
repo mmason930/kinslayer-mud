@@ -164,12 +164,12 @@ float Object::GetTotalWeight()
 void Object::SetModifier( eObjectModifier modType, const long double ldNewValue )
 {
 	if( !obj_flags.mModifiers ) return;
-	(*obj_flags.mModifiers)[ static_cast< byte >( modType ) ] = ldNewValue;
+	(*obj_flags.mModifiers)[ static_cast< sbyte >( modType ) ] = ldNewValue;
 }
 int Object::GetModifierInt( eObjectModifier modType )
 {
 	if( !obj_flags.mModifiers ) return 0;
-	byte bModType = static_cast< byte >( modType );
+	sbyte bModType = static_cast< sbyte >( modType );
 	if( (*obj_flags.mModifiers).count( bModType ) != 0 )
 		return static_cast< int >( (*obj_flags.mModifiers)[ bModType ] );
 	return 0;
@@ -177,7 +177,7 @@ int Object::GetModifierInt( eObjectModifier modType )
 float Object::GetModifierFloat( eObjectModifier modType )
 {
 	if( !obj_flags.mModifiers ) return 0.0f;
-	byte bModType = static_cast< byte >( modType );
+	sbyte bModType = static_cast< sbyte >( modType );
 	if( (*obj_flags.mModifiers).count( bModType ) != 0 )
 		return static_cast< float >( (*obj_flags.mModifiers)[ bModType ] );
 	return 0.0f;

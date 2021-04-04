@@ -5,7 +5,7 @@
 #include "DotModeTarget.h"
 #include "DotModeArea.h"
 
-DotMode::DotMode(const boost::optional<DotModeTarget> &target, DotModeArea *area, const boost::optional<std::string> &targetName)
+DotMode::DotMode(const std::optional<DotModeTarget> &target, DotModeArea *area, const std::optional<std::string> &targetName)
 {
 	setTarget(target);
 	setArea(area);
@@ -17,12 +17,12 @@ DotMode::DotMode()
 	setArea(nullptr);
 }
 
-boost::optional<DotModeTarget> DotMode::getTarget() const
+std::optional<DotModeTarget> DotMode::getTarget() const
 {
 	return target;
 }
 
-void DotMode::setTarget(const boost::optional<DotModeTarget> &target)
+void DotMode::setTarget(const std::optional<DotModeTarget> &target)
 {
 	this->target = target;
 }
@@ -37,17 +37,17 @@ void DotMode::setArea(DotModeArea *area)
 	this->area = area;
 }
 
-boost::optional<std::string> DotMode::getTargetName() const
+std::optional<std::string> DotMode::getTargetName() const
 {
 	return targetName;
 }
 
-void DotMode::setTargetName(const boost::optional<std::string> &targetName)
+void DotMode::setTargetName(const std::optional<std::string> &targetName)
 {
 	this->targetName = targetName;
 }
 
 DotModeTargetType *DotMode::getTargetType()
 {
-	return target ? target.get().getType() : nullptr;
+	return target ? target.value().getType() : nullptr;
 }

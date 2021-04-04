@@ -226,8 +226,8 @@ const int TAR_OBJ_EQUIP = 1024;
 class Spell
 {
 	public:
-		byte	min_position;		/* Position for caster								*/
-		byte	violent;
+		sbyte	min_position;		/* Position for caster								*/
+		sbyte	violent;
 		int	mana;
 		int	class_type;
 		int	targets;			/* See below for use with TAR_XXX					*/

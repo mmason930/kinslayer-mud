@@ -54,12 +54,12 @@ void UserGuild::setStatusLastModifiedDatetime(const DateTime &statusLastModified
 	this->statusLastModifiedDatetime = statusLastModifiedDatetime;
 }
 
-boost::optional<int> UserGuild::getGuildRankId() const
+std::optional<int> UserGuild::getGuildRankId() const
 {
 	return guildRankId;
 }
 
-void UserGuild::setGuildRankId(const boost::optional<int> &guildRankId)
+void UserGuild::setGuildRankId(const std::optional<int> &guildRankId)
 {
 	this->guildRankId = guildRankId;
 }

@@ -18,7 +18,7 @@ protected:
 	Character *eavesdroppingWarder;							// The person who is warding the room against listeners
 	int auctionVnum;										// Vnum of the room's associated auction
 	bool deleted;											// Whether or not the room should be deleted on next zone save.
-	byte light;												// Number of lightsources in room
+	sbyte light;												// Number of lightsources in room
 public:
 	static int nr_alloc;
 	static int nr_dealloc;
@@ -57,8 +57,8 @@ public:
 	bool isDeleted() const;
 	void setDeleted(bool deleted);
 
-	byte getLight() const;
-	void setLight(byte light);
+	sbyte getLight() const;
+	void setLight(sbyte light);
 
 
 	//Miscellaneous Methods

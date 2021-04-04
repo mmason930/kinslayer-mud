@@ -2,7 +2,7 @@
 #define GUILD_APPLICATION_H
 
 #include <string>
-#include <boost/optional.hpp>
+#include <optional>
 
 #include "../DateTime.h"
 #include "../DataObjectWithIntId.h"
@@ -19,10 +19,10 @@ protected:
 	int submittedByUserRace;
 	GuildApplicationStatus *status;
 	int coppersCharged;
-	boost::optional<DateTime> completedDatetime;
-	boost::optional<int> reviewerUserId;
-	boost::optional<std::string> deniedReason;
-	boost::optional<int> guildId;
+	std::optional<DateTime> completedDatetime;
+	std::optional<int> reviewerUserId;
+	std::optional<std::string> deniedReason;
+	std::optional<int> guildId;
 public:
 
 	GuildApplication() : DataObjectWithIntId() {};
@@ -49,17 +49,17 @@ public:
 	int getCoppersCharged() const;
 	void setCoppersCharged(const int coppersCharged);
 
-	boost::optional<DateTime> getCompletedDatetime() const;
-	void setCompletedDatetime(const boost::optional<DateTime> &completedDatetime);
-	
-	boost::optional<int> getReviewerUserId() const;
-	void setReviewerUserId(const boost::optional<int> reviewerUserId);
+	std::optional<DateTime> getCompletedDatetime() const;
+	void setCompletedDatetime(const std::optional<DateTime> &completedDatetime);
 
-	boost::optional<std::string> getDeniedReason() const;
-	void setDeniedReason(const boost::optional<std::string> deniedReason);
+	std::optional<int> getReviewerUserId() const;
+	void setReviewerUserId(const std::optional<int> reviewerUserId);
 
-	boost::optional<int> getGuildId() const;
-	void setGuildId(const boost::optional<int> &guildId);
+	std::optional<std::string> getDeniedReason() const;
+	void setDeniedReason(const std::optional<std::string> deniedReason);
+
+	std::optional<int> getGuildId() const;
+	void setGuildId(const std::optional<int> &guildId);
 };
 
 #endif

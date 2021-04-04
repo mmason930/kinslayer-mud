@@ -677,7 +677,7 @@ void olc_saveinfo( Character *ch )
  * Add an entry to the 'to be saved' list.
  */
 
-void olc_add_to_save_list( int zone, byte type )
+void olc_add_to_save_list( int zone, sbyte type )
 {
 	struct olc_save_info * newt;
 
@@ -701,7 +701,7 @@ void olc_add_to_save_list( int zone, byte type )
  * Remove an entry from the 'to be saved' list.
  */
 
-void olc_remove_from_save_list( int zone, byte type )
+void olc_remove_from_save_list( int zone, sbyte type )
 {
 	struct olc_save_info **entry;
 	struct olc_save_info *temp;
@@ -743,7 +743,7 @@ void get_char_cols( Character *ch )
  */
 void strip_string( char *buffer )
 {
-	register char * ptr, *str;
+	char * ptr, *str;
 
 	ptr = buffer;
 	str = ptr;
@@ -764,7 +764,7 @@ void strip_string( char *buffer )
  * should be.
  */
 
-void cleanup_olc( Descriptor *d, byte cleanup_type )
+void cleanup_olc( Descriptor *d, sbyte cleanup_type )
 {
 	if ( d->olc )
 	{

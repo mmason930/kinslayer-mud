@@ -128,8 +128,8 @@ void GeneralTestCase::process()
 			}
 		}
 
-		boost::optional<CommandTestBefore> beforeHandle;
-		boost::optional<CommandTestAfter> afterHandle;
+		std::optional<CommandTestBefore> beforeHandle;
+		std::optional<CommandTestAfter> afterHandle;
 		std::vector<std::string> commands;
 		TestDescriptor *d;
 		int nr;
@@ -210,7 +210,7 @@ void GeneralTestCase::process()
 			ct->nr = GuildUtil::get()->getGuildApplications().size();
 
 			//Deny any application that Jack currently has up.
-			for(auto application : GuildUtil::get()->getGuildApplications(boost::optional<int>(), {GuildApplicationStatus::pending, GuildApplicationStatus::reviewing}))
+			for(auto application : GuildUtil::get()->getGuildApplications(std::optional<int>(), {GuildApplicationStatus::pending, GuildApplicationStatus::reviewing}))
 			{
 				if(application->getSubmittedByUserId() == d->character->getUserId())
 					GuildUtil::get()->denyGuildApplication(game->getConnection(), application->getId(), application->getSubmittedByUserId(), "Testing.");
@@ -242,11 +242,11 @@ void GeneralTestCase::process()
 			ct->performAssert(!strcmp(application->getGuildName(), "The Jackuits"));
 			ct->performAssert(application->getStatus() == GuildApplicationStatus::pending);
 			ct->performAssert(application->getCoppersCharged() == GuildUtil::get()->getCoppersToCreateNewGuild());
-			ct->performAssert(!application->getDeniedReason().is_initialized());
+			ct->performAssert(!application->getDeniedReason().has_value());
 			ct->performAssert(!application->isNew());
 			ct->performAssert(application->getSubmittedByUserId() == d->character->getUserId());
-			ct->performAssert(!application->getCompletedDatetime().is_initialized());
-			ct->performAssert(!application->getReviewerUserId().is_initialized());
+			ct->performAssert(!application->getCompletedDatetime().has_value());
+			ct->performAssert(!application->getReviewerUserId().has_value());
 			ct->performAssert(application->getSubmittedByUserRace() == GET_RACE(d->character));
 			ct->performAssert(d->character->points.gold == 0);
 		}
@@ -402,7 +402,7 @@ void GeneralTestCase::process()
 	},
 	[=](TestDescriptor *d, CommandTest *ct) -> void
 	{
-		for(auto application : GuildUtil::get()->getGuildJoinApplications(d->character->player.idnum, boost::optional<int>()))
+		for(auto application : GuildUtil::get()->getGuildJoinApplications(d->character->player.idnum, std::optional<int>()))
 		{
 			if(application->getStatus() != GuildJoinApplicationStatus::denied)
 			{

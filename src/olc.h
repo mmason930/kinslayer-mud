@@ -66,17 +66,17 @@ const int NUM_PROGS = 12;
  */
 const int AEDIT_PERMISSION = 999;
 
-const byte LVL_BUILDER = LVL_IMMORT;
+const sbyte LVL_BUILDER = LVL_IMMORT;
 
 /*
  * Utilities exported from olc.c.
  */
 std::string	GetTip(int n);
 void	strip_string(char *);
-void	cleanup_olc(Descriptor *d, byte cleanup_type);
+void	cleanup_olc(Descriptor *d, sbyte cleanup_type);
 void	get_char_cols(Character *ch);
-void	olc_add_to_save_list(int zone, byte type);
-void	olc_remove_from_save_list(int zone, byte type);
+void	olc_add_to_save_list(int zone, sbyte type);
+void	olc_remove_from_save_list(int zone, sbyte type);
 
 void	redit_save_to_disk(int zone_num);
 void	oedit_save_to_disk(int zone_num);
@@ -257,7 +257,7 @@ class OLC
 		int aff_num;
 		int obj_num;
 
-		std::vector< byte> sgRolls;
+		std::vector< sbyte> sgRolls;
 		int sg_race;
 		int sg_class;
 		int sg_sex;
@@ -346,22 +346,22 @@ extern struct olc_save_info *olc_save_list;
 /*
  * Cleanup types.
  */
-const byte CLEANUP_ALL = (byte)	1; //	 Free the whole lot.
-const byte CLEANUP_STRUCTS = (byte)	2; //	 Don't free strings.
-const byte	CLEANUP_CONFIG = (byte)	3; //	 Cleanup Config
+const sbyte CLEANUP_ALL = (sbyte)	1; //	 Free the whole lot.
+const sbyte CLEANUP_STRUCTS = (sbyte)	2; //	 Don't free strings.
+const sbyte	CLEANUP_CONFIG = (sbyte)	3; //	 Cleanup Config
 /*
  * Add/Remove save list types.
  */
-const byte OLC_SAVE_ROOM   = 	0;
-const byte OLC_SAVE_OBJ    = 	1;
-const byte OLC_SAVE_ZONE   = 	2;
-const byte OLC_SAVE_MOB	   = 	3;
-const byte OLC_SAVE_SHOP   = 	4;
-const byte OLC_SAVE_HELP   = 	5;
-const byte OLC_SAVE_ACTION = 	6;
-const byte OLC_SAVE_KIT	   = 	7;
-const byte OLC_SAVE_SG     =	8;
-const byte OLC_SAVE_WV     =	9;
+const sbyte OLC_SAVE_ROOM   = 	0;
+const sbyte OLC_SAVE_OBJ    = 	1;
+const sbyte OLC_SAVE_ZONE   = 	2;
+const sbyte OLC_SAVE_MOB	   = 	3;
+const sbyte OLC_SAVE_SHOP   = 	4;
+const sbyte OLC_SAVE_HELP   = 	5;
+const sbyte OLC_SAVE_ACTION = 	6;
+const sbyte OLC_SAVE_KIT	   = 	7;
+const sbyte OLC_SAVE_SG     =	8;
+const sbyte OLC_SAVE_WV     =	9;
 
 /*
  * Submodes of KEDIT connectedness.

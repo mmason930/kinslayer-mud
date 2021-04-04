@@ -749,7 +749,7 @@ long asciiflag_conv(char *flag)
 {
 	long flags = 0;
 	int IsNumber = 1;
-	register char *p;
+	char *p;
 
 	for (p = flag; *p; ++p)
 	{
@@ -785,7 +785,7 @@ char fread_letter(FILE *fp)
 /* resolve all vnums into rnums in the world */
 void renum_world(void)
 {
-	register int door;
+	int door;
 	unsigned int room;
 	for (room = 0; room < World.size(); ++room)
 	{
@@ -1135,7 +1135,7 @@ Object *read_object(int nr, int type, bool new_instance, bool increment_top_id)
 	*obj = *obj_proto[i];
 	obj->proto = false;
 	obj->createdDatetime = createdDatetime;
-	obj->obj_flags.mModifiers = new std::map< byte,long double >();
+	obj->obj_flags.mModifiers = new std::map< sbyte,long double >();
 	if( !obj_proto[i]->action_description || strlen(obj_proto[i]->action_description) == 0 )
 		obj->action_description = NULL;
 

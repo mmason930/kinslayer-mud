@@ -960,7 +960,7 @@ void redit_parse(Descriptor *d, char *arg)
 			}
 			else
 			{
-				OLC_EXIT(d)->setHiddenLevel((byte)number);
+				OLC_EXIT(d)->setHiddenLevel((sbyte)number);
 				redit_disp_exit_menu(d);
 			}
 			return;

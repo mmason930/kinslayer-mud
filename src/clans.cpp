@@ -28,7 +28,7 @@
 
 Clan *ClanList = NULL, *ClanEnd = NULL;
 
-void affect_modify_ar(Character *ch, byte loc, sbyte mod, int bitv[], bool add);
+void affect_modify_ar(Character *ch, sbyte loc, sbyte mod, int bitv[], bool add);
 
 /* Search out a clan by a givin name or vnum, using strn_cmp() */
 int GetClanByString(std::string name)

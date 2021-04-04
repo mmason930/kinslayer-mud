@@ -871,8 +871,8 @@ void showObjectToCharacter(Object *object, Character *ch, int mode, int amount)
 	if(disorientRoll)
 	{//page_string will wipe out our buffer, so we need to copy it if we are calling it twice.
 
-		char objectDisplayBuffer[MAX_STRING_LENGTH];
-		snprintf(objectDisplayBuffer, sizeof(objectDisplayBuffer), "%s", buf);
+		char objectDisplayBuffer[MAX_PRIMARY_BUFFER_LENGTH];
+		strcpy(objectDisplayBuffer, buf);
 
 		page_string(ch->desc, buf, TRUE);
 		page_string(ch->desc, objectDisplayBuffer, TRUE);
@@ -2479,8 +2479,8 @@ CommandHandler do_gen_ps = DEFINE_COMMAND
 
 void performMortalWhere(Character * ch, char *arg)
 {
-	register Character *i;
-	register Descriptor *d;
+	Character *i;
+	Descriptor *d;
 	bool horse = false;
 	bool channeler = false;
 	int num_trolls = 0, num_horses = 0, counter;
@@ -2658,8 +2658,8 @@ void printObjectLocation(std::stringstream &outputBuffer, int num, Object *obj, 
 
 void performImmortalWhere(Character * ch, char *arg)
 {
-	register Character *i;
-	register Object *k;
+	Character *i;
+	Object *k;
 	Descriptor *d;
 	int num, found = 0;
 	char color[300];

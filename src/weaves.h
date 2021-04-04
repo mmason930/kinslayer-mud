@@ -35,7 +35,7 @@ public:
 	std::string getName();
 	std::string listAttributes(class Descriptor* d, std::string omit);
 	int getVnum();
-	byte minPosition();
+	sbyte minPosition();
 	float getTimer();
 	bool isViolent();
 	bool levels();

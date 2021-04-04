@@ -209,7 +209,7 @@ JSManager::JSManager()
 	try
 	{
 		env = new JSEnvironment();
-		mapper = unordered_map<int, JSTrigger*>();
+		mapper = std::unordered_map<int, JSTrigger*>();
 
 		triggerDepth = 0;
 		server = 0;
@@ -403,7 +403,7 @@ JSTrigger* JSManager::getTrigger(int vnum)
 std::vector<JSTrigger*> JSManager::searchTrigger(std::string name)
 {
 	std::vector<JSTrigger*> results;
-	unordered_map<int, JSTrigger*>::const_iterator iter = mapper.begin();
+	std::unordered_map<int, JSTrigger*>::const_iterator iter = mapper.begin();
 	for(; iter != mapper.end(); ++iter)
 	{
 		if (isname(name, iter->second->name.c_str()))
@@ -688,7 +688,7 @@ void JSManager::processScriptImports()
 std::list< JSTrigger* > JSManager::triggersInRange( const int lo, const int hi )
 {
 	std::list< JSTrigger * > myList;
-	for( unordered_map<int, JSTrigger*>::iterator tIter = mapper.begin();tIter != mapper.end();++tIter )
+	for( std::unordered_map<int, JSTrigger*>::iterator tIter = mapper.begin();tIter != mapper.end();++tIter )
 	{
 		if( (*tIter).second->vnum >= lo && (*tIter).second->vnum <= hi )
 		{//Insert in the right spot...
@@ -756,7 +756,7 @@ JSManager::~JSManager()
 	}
 	triggerOperationalCallbackThread.join();
 
-	unordered_map<int, JSTrigger*>::iterator iter = mapper.begin();
+	std::unordered_map<int, JSTrigger*>::iterator iter = mapper.begin();
 	for( ; iter != mapper.end(); ++iter)
 	{
 		delete iter->second;

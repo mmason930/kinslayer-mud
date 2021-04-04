@@ -14,20 +14,20 @@ void EditorInterfaceMenu::parse(EditorInterfaceInstance *i)
 	inputOperator(i);
 }
 
-boost::optional<std::string> EditorInterfaceMenu::preReq(EditorInterfaceInstance *i)
+std::optional<std::string> EditorInterfaceMenu::preReq(EditorInterfaceInstance *i)
 {
-	return preReqOperator.is_initialized() ? preReqOperator.get()(i) : boost::optional<std::string>();
+	return preReqOperator.has_value() ? preReqOperator.value()(i) : std::optional<std::string>();
 }
 
 bool EditorInterfaceMenu::preReqNoPrint(EditorInterfaceInstance *i)
 {
-	return preReqOperator ? !preReqOperator.get()(i) : true;
+	return preReqOperator ? !preReqOperator.value()(i) : true;
 }
 
 void EditorInterfaceMenu::cleanup(EditorInterfaceInstance *i)
 {
-	if(cleanupOperator.is_initialized())
-		cleanupOperator.get()(i);
+	if(cleanupOperator.has_value())
+		cleanupOperator.value()(i);
 }
 
 void EditorInterfaceMenu::setPrintOperator(std::function<EditorInterfaceMenu *(EditorInterfaceInstance *)> printOperator)
@@ -45,9 +45,9 @@ void EditorInterfaceMenu::setParseOperator(ValidationFunction validationFunction
 	setParseOperator([=](EditorInterfaceInstance *i) {
 		auto errorMessage = validationFunction(i->input);
 
-		if(errorMessage.is_initialized())
+		if(errorMessage.has_value())
 		{
-			i->send("%s", errorMessage.get().c_str());
+			i->send("%s", errorMessage.value().c_str());
 			return nullptr;
 		}
 
@@ -56,7 +56,7 @@ void EditorInterfaceMenu::setParseOperator(ValidationFunction validationFunction
 	});
 }
 
-void EditorInterfaceMenu::setPreReqOperator(std::function<boost::optional<std::string>(EditorInterfaceInstance *)> preReqOperator)
+void EditorInterfaceMenu::setPreReqOperator(std::function<std::optional<std::string>(EditorInterfaceInstance *)> preReqOperator)
 {
 	this->preReqOperator = preReqOperator;
 }

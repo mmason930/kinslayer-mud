@@ -15,10 +15,10 @@
 
 #include <list>
 #include <initializer_list>
-#include <boost/optional.hpp>
+#include <optional>
 #include <functional>
 
-typedef std::function<boost::optional<std::string>(const std::string &)> ValidationFunction;
+typedef std::function<std::optional<std::string>(const std::string &)> ValidationFunction;
 
 class EditorInterfaceInstance;
 class EditorInterfaceData;
@@ -44,7 +44,7 @@ public:
 	void setupNewInstance(Character *ch) const;
 	EditorInterfaceMenu *createValueInputMenu(
 		const std::string &message,
-		const std::function<boost::optional<std::string>(const std::string &)> &validationOperation,
+		const std::function<std::optional<std::string>(const std::string &)> &validationOperation,
 		const std::function<void(EditorInterfaceInstance *i)> &dataSetOperation
 	);
 	

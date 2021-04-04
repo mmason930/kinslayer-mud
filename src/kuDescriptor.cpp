@@ -143,6 +143,7 @@ int kuDescriptor::socketWrite()
 	server->handleAfterSocketWriteCallback(this, std::string(outputBuffer, bytesWritten));
 
 	this->output.erase(0, bytesWritten);
+	return bytesWritten;
 }
 
 void kuDescriptor::clearInput()

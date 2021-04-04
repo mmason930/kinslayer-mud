@@ -29,12 +29,12 @@ public:
 class StatGroup
 {
 public:
-    byte chclass, race, sex;    //Identifiers...
-    std::map< int, std::vector<byte> > StatRolls;  //List of stat rolls.
+    sbyte chclass, race, sex;    //Identifiers...
+    std::map< int, std::vector<sbyte> > StatRolls;  //List of stat rolls.
 
     StatGroup();
     StatGroup( StatGroup *source );
-    StatGroup(const byte _class, const byte _race, const byte _sex);
+    StatGroup(const sbyte _class, const sbyte _race, const sbyte _sex);
 };
 class StatManager
 {
@@ -44,7 +44,7 @@ public:
 
     static StatManager& GetManager( void );
 
-    StatGroup* FindStatGroup(const byte chclass, const byte race, const byte sex);
+    StatGroup* FindStatGroup(const sbyte chclass, const sbyte race, const sbyte sex);
     Stat* StatByID( const int ID );
 
     bool RollStats(Character *ch);

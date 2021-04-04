@@ -3,7 +3,7 @@
 
 #include <mysql/sqlDatabase.h>
 #include <functional>
-#include <boost/optional.hpp>
+#include <optional>
 #include "../DateTime.h"
 
 class QueryUtil
@@ -22,7 +22,7 @@ public:
 	}
 
 	static void destroy() {}
-	boost::optional<DateTime> getNullableDateTime(const sql::Row &row, const std::string &columnName) const;
+	std::optional<DateTime> getNullableDateTime(const sql::Row &row, const std::string &columnName) const;
 
 	template <typename ReturnType, typename MapKeyType>
 	std::map<MapKeyType, ReturnType> loadDataObjectMapFromDatabase(sql::Connection connection, const std::string &tableName, const std::string &whereCriteria, const std::function<ReturnType(const sql::Row row)> &rowConverter, const std::function<MapKeyType(const ReturnType returnType)> &keyRetrievalFunction)
