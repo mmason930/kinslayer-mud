@@ -1,8 +1,8 @@
 
-# CircleMUD 3.0 Makefile.in - Makefile template used by 'configure'
+# KinslayerMUD Makefile
 #
 
-# C compiler to use
+# C/C++ compiler to use
 CC = g++
 
 # Any special flags you want to pass to the compiler
@@ -192,27 +192,28 @@ $(OBJDIR)/%.d: %.cpp
 	$(SHELL) -ec '$(CC) -MM $(CPPFLAGS) $< | \
 	sed '\''s,\($*\)\.o[ :]*,$(OBJDIR)\/\1.o $@ : ,g'\'' > $@'
 
-default: circle
+default: kinslayer
 
 -include $(OBJFILES:.o)
 
 $(OBJDIR)/%.o: %.cpp
+	@mkdir -p $(@D)
 	$(CC) $(CPPFLAGS) -c	$<	-o $@
 
 all:
-	mkdir -p ../bin
-	$(MAKE) $(BINDIR)/circle
+	@mkdir -p ../bin
+	$(MAKE) $(BINDIR)/kinslayer
 	$(MAKE) $(BINDIR)/gateway
 
-circle:
-	mkdir -p ../bin
-	$(MAKE) $(BINDIR)/circle
+kinslayer:
+	@mkdir -p ../bin
+	$(MAKE) $(BINDIR)/kinslayer
 
-$(BINDIR)/circle : $(OBJFILES)
-	$(CC) -o $(BINDIR)/circle $(PROFILE) $(OBJFILES) $(LIBS)
+$(BINDIR)/kinslayer : $(OBJFILES)
+	$(CC) -o $(BINDIR)/kinslayer $(PROFILE) $(OBJFILES) $(LIBS)
 
 gateway:
-	mkdir -p ../bin
+	@mkdir -p ../bin
 	$(MAKE) $(BINDIR)/gateway
 
 $(BINDIR)/gateway : $(OBJFILESGATEWAY)

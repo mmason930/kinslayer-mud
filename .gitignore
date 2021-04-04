@@ -4,3 +4,6 @@ Debug/
 DebugGateway/
 .idea
 .vscode
+bin/
+src/obj
+lib/

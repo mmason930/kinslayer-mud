@@ -8,12 +8,12 @@ chmod ug+x /kinslayer/CleanUpBenchmarks.sh /kinslayer/ImportPlayerLogs /kinslaye
 ln -s /kinslayer/scripts /kinslayer/lib/scripts
 make clean -C /kinslayer/src
 
-if [[ "$TARGET" == "circle" ]]; then
+if [[ "$TARGET" == "kinslayer" ]]; then
 	echo "Building MUD..."
 	make -C /kinslayer/src -j12
 	echo "Starting MUD..."
 	ldconfig
-	./bin/circle
+	./bin/kinslayer
 elif [[ "$TARGET" == "gateway" ]]; then
 	echo "Building gateway..."
 	make -C /kinslayer/src -j12
