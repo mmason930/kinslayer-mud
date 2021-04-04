@@ -4,6 +4,9 @@ TARGET=$1
 echo "TARGET: $TARGET"
 
 cd /kinslayer
+chmod ug+x /kinslayer/CleanUpBenchmarks.sh /kinslayer/ImportPlayerLogs /kinslayer/PullScripts.sh
+ln -s /kinslayer/scripts /kinslayer/lib/scripts
+make clean -C /kinslayer/src
 
 if [[ "$TARGET" == "circle" ]]; then
 	echo "Building MUD..."

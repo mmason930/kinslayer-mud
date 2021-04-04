@@ -200,16 +200,19 @@ $(OBJDIR)/%.o: %.cpp
 	$(CC) $(CPPFLAGS) -c	$<	-o $@
 
 all:
+	mkdir -p ../bin
 	$(MAKE) $(BINDIR)/circle
 	$(MAKE) $(BINDIR)/gateway
 
 circle:
+	mkdir -p ../bin
 	$(MAKE) $(BINDIR)/circle
 
 $(BINDIR)/circle : $(OBJFILES)
 	$(CC) -o $(BINDIR)/circle $(PROFILE) $(OBJFILES) $(LIBS)
 
 gateway:
+	mkdir -p ../bin
 	$(MAKE) $(BINDIR)/gateway
 
 $(BINDIR)/gateway : $(OBJFILESGATEWAY)
