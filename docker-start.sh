@@ -4,9 +4,18 @@ TARGET=$1
 echo "TARGET: $TARGET"
 
 cd /kinslayer
+mkdir -p lib/misc
+
 chmod ug+x /kinslayer/CleanUpBenchmarks.sh /kinslayer/ImportPlayerLogs /kinslayer/PullScripts.sh
-ln -s /kinslayer/scripts /kinslayer/lib/scripts
+rm -f /kinslayer/lib/scripts && ln -s /kinslayer/scripts /kinslayer/lib/scripts
 make clean -C /kinslayer/src
+
+cp BasicConfig.template lib/misc/BasicConfig
+
+sed -i 's|${DB_USERNAME}|'"$DB_USERNAME"'|' lib/misc/BasicConfig
+sed -i 's|${DB_PASSWORD}|'"$DB_PASSWORD"'|' lib/misc/BasicConfig
+sed -i 's|${DB_SCHEMA}|'"$DB_SCHEMA"'|' lib/misc/BasicConfig
+sed -i 's|${DB_HOSTNAME}|'"$DB_HOSTNAME"'|' lib/misc/BasicConfig
 
 if [[ "$TARGET" == "kinslayer" ]]; then
 	echo "Building MUD..."
