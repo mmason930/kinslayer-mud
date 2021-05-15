@@ -35,14 +35,14 @@ sed -i 's|${DB_HOSTNAME}|'"$DB_HOSTNAME"'|' lib/misc/BasicConfig
 
 if [[ "$TARGET" == "kinslayer" ]]; then
 	echo "Building MUD..."
-	make -C /kinslayer/src -j12
+	make -C /kinslayer/src -j1
 	echo "Starting MUD..."
 	ldconfig
 	./bin/kinslayer
 elif [[ "$TARGET" == "gateway" ]]; then
 	echo "Building gateway..."
-	make -C /kinslayer/src -j12
-	make gateway -C /kinslayer/src -j12
+	make -C /kinslayer/src -j1
+	make gateway -C /kinslayer/src -j1
 	echo "Starting gateway..."
 	ldconfig
 	./bin/gateway
