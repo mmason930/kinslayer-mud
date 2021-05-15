@@ -18,7 +18,7 @@ WORKDIR /
 RUN git clone https://github.com/kinslayermud/kinslayer-spidermonkey
 WORKDIR kinslayer-spidermonkey/src
 RUN ./configure
-RUN make -j1
+RUN make -j${GCC_THREADS}
 RUN make install
 
 # Boost
@@ -27,7 +27,7 @@ RUN wget http://sourceforge.net/projects/boost/files/boost/1.52.0/boost_1_52_0.t
 RUN tar -xvzf boost_1_52_0.tar.gz
 WORKDIR /boost_1_52_0
 RUN ./bootstrap.sh
-RUN ./b2 install -j 1 ; exit 0
+RUN ./b2 install -j ${GCC_THREADS} ; exit 0
 
 # Flusspferd
 WORKDIR /
@@ -35,7 +35,7 @@ RUN git clone https://github.com/kinslayermud/kinslayer-flusspferd
 WORKDIR /kinslayer-flusspferd/src
 RUN mkdir obj
 RUN mkdir ../lib
-RUN make -j1
+RUN make -j${GCC_THREADS}
 RUN make install
 
 WORKDIR /

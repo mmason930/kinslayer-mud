@@ -3,7 +3,7 @@
 
 mkdir -p /root/.ssh
 
-GIT_HOSTNAME=`git -C /kinslayer/kinslayer-mud/ remote -v | head -1 | awk -F'@' '{print $2}' | awk -F':' '{print $1}'`
+GIT_HOSTNAME=`git -C /kinslayer/ remote -v | head -1 | awk -F'@' '{print $2}' | awk -F':' '{print $1}'`
 
 echo "Host $GIT_HOSTNAME" >> /root/.ssh/config
 echo "Hostname github.com" >> /root/.ssh/config
@@ -35,14 +35,14 @@ sed -i 's|${DB_HOSTNAME}|'"$DB_HOSTNAME"'|' lib/misc/BasicConfig
 
 if [[ "$TARGET" == "kinslayer" ]]; then
 	echo "Building MUD..."
-	make -C /kinslayer/src -j1
+	make -C /kinslayer/src -j"$GCC_THREADS"
 	echo "Starting MUD..."
 	ldconfig
 	./bin/kinslayer
 elif [[ "$TARGET" == "gateway" ]]; then
 	echo "Building gateway..."
-	make -C /kinslayer/src -j1
-	make gateway -C /kinslayer/src -j1
+	make -C /kinslayer/src -j"$GCC_THREADS"
+	make gateway -C /kinslayer/src -j"$GCC_THREADS"
 	echo "Starting gateway..."
 	ldconfig
 	./bin/gateway
