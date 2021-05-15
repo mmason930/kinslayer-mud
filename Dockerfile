@@ -1,6 +1,7 @@
 FROM ubuntu:20.04
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG GCC_THREADS
 
 # Install pre-requisites
 RUN apt update
