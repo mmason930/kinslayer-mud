@@ -7,9 +7,9 @@ MUD Host: localhost
 Gateway Port: 2222
 Secondary Gateway Port: 666
 Gateway HOST: localhost
-MUD Root Directory: /kinslayer
+MUD Root Directory: /kinslayer/
 Restart On Shutdown: 1
-MUD Executable Path: bin/circle
+MUD Executable Path: bin/kinslayer
 BackupDirectory: /kinslayer/backups/
 Wiki Dataabase Name: kmud_wiki
 Websocket Ports: 4001
