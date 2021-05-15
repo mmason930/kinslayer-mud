@@ -9,7 +9,7 @@ echo "Host $GIT_HOSTNAME" >> /root/.ssh/config
 echo "Hostname github.com" >> /root/.ssh/config
 echo "IdentityFile=/root/.ssh/id_rsa_kinslayer_mud" >> /root/.ssh/config
 
-echo "ssh-rsa $GIT_SSH_KEY root@container" > /root/.ssh/id_rsa.pub
+echo "ssh-rsa $GIT_SSH_KEY root@container" > /root/.ssh/id_rsa_kinslayer_mud
 
 chmod 700 /root/.ssh
 chmod 600 /root/.ssh/config
