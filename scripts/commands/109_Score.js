@@ -1,4 +1,4 @@
-var script109 = function(self, actor, here, args, extra) {
+let script109 = function(self, actor, here, args, extra) {
 	/**************************************************************************
 	 *                                                                        *
 	 * Command - SCORE                                                        *
@@ -9,11 +9,11 @@ var script109 = function(self, actor, here, args, extra) {
 	 **************************************************************************/
 	_block;
 	getCharCols(actor, constants.CL_COMPLETE);
-	var sBuffer = "";
+	let sBuffer = "";
 	sBuffer += "You have " + cyn + actor.hps + nrm + "(" + cyn + actor.maxHit + nrm + ") hit";
 	if( channelingAbility(actor ) )
 		sBuffer += ", " + cyn + actor.sps + nrm + "(" + cyn + actor.maxSpell + nrm + ") spell,";
-	if( actor.class == constants.CLASS_FADE )
+	if( actor.class === constants.CLASS_FADE )
 		sBuffer += ", " + cyn + actor.shadowPoints  + nrm + "(" + cyn + actor.maxShadow + nrm + ") shadow points,";
 	sBuffer += " and " + cyn + actor.mvs + nrm + "(" + cyn + actor.maxMove + nrm + ") movement points.\n";
 	sBuffer += "You have scored " + cyn + actor.experience + nrm + " experience and " + cyn + actor.totalQuestPoints + nrm + " total quest points.\n";
@@ -30,11 +30,11 @@ var script109 = function(self, actor, here, args, extra) {
 	sBuffer += "This ranks you as " + cyn + actor.name + (actor.title?(" " + actor.title):"") + nrm + " (level " + cyn + actor.level + nrm + ")\n";
 	//sBuffer += "You are not a member of any clans.";
 	function channelingAbility( actor ) {
-		return (actor.class == constants.CLASS_DREADLORD || actor.class == constants.CLASS_DREADGUARD || actor.class == constants.CLASS_CHANNELER);
+		return (actor.class === constants.CLASS_DREADLORD || actor.class === constants.CLASS_DREADGUARD || actor.class === constants.CLASS_CHANNELER);
 	}
 	function qpNeededToRank( iCurrentRank ) {
-		
-		var vRankRequirements =
+
+		let vRankRequirements =
 		[
 			0, 15, 30, 65, 150, 300, 550, 1000, 1500, 2100, 2700, 3600, 4600, 5600
 		];
@@ -47,31 +47,31 @@ var script109 = function(self, actor, here, args, extra) {
 			return 1000000000;
 		return vRankRequirements[ iCurrentRank ];
 	}
-	var vClans = actor.findClans();
+	let vClans = actor.findClans();
 	if(typeof vClans == "number" && vClans != -1)
 		vClans = [vClans];
 	if( vClans.length ) {
 		sBuffer += "You are in the following clans:\n";
 	}
-	for(var clanIndex = 0;clanIndex < vClans.length;++clanIndex)
+	for(let clanIndex = 0;clanIndex < vClans.length;++clanIndex)
 	{//Display each clan.
-		var sLine = "";
+		let sLine = "";
 		sLine += clanNumToText( vClans[ clanIndex ] );
 		sLine += " : " + cyn + actor.qp( vClans[ clanIndex ] ) + nrm + " Quest Points, rank " + cyn + actor.getRank( vClans[ clanIndex ] ) + nrm + ", ";
 		sLine += (qpNeededToRank( actor.getRank( vClans[ clanIndex ] ) ) - actor.qp(vClans[ clanIndex ])) + " Quest Points to rank.";
 		sBuffer += sLine + "\n";
 	}
-	var killStreak = actor.quest(actor.name+"_KILL_STREAK");
+	let killStreak = actor.quest(actor.name+"_KILL_STREAK");
 	if ( killStreak > 1 ) {
 		sBuffer += ("You are currently on a "+cyn+killStreak+nrm+" kill streak.\n");
 	}
-	var featPoints = actor.featPoints;
+	let featPoints = actor.featPoints;
 	if ( featPoints ) {
 		sBuffer += "You have acquired "+cyn+featPoints+nrm+" feat points.\n";
 	}
 	sBuffer += "Your current Arena ranking is " + cyn + getArenaRank(actor) + nrm + ".\n";
 	if( actor.mount ) {
-		var mount = actor.mount;
+		let mount = actor.mount;
 		sBuffer += "You are riding " + cyn + mount.name + nrm + ".\n";
 		if( mount.mvs > mount.maxMove * 0.75 )
 			sBuffer += "Your mount is full of energy.\n";
@@ -82,11 +82,11 @@ var script109 = function(self, actor, here, args, extra) {
 		else
 			sBuffer += "Your mount looks haggard and beaten.\n";
 	}
-	if (getSval(actor,20850,"mining") == 1)
+	if (getSval(actor,20850,"mining") === 1)
 		sBuffer += "You are mining.";
-	else if( actor.position == constants.POS_STANDING )
+	else if( actor.position === constants.POS_STANDING )
 		sBuffer += "You are standing.";
-	else if( actor.position == constants.POS_FIGHTING ) {
+	else if( actor.position === constants.POS_FIGHTING ) {
 		sBuffer += "You are fighting ";
 		sBuffer += cyn;
 		if( actor.fighting )
@@ -94,26 +94,26 @@ var script109 = function(self, actor, here, args, extra) {
 		else
 			sBuffer += " an invisible force" + nrm + "!";
 	}
-	else if( actor.position == constants.POS_SITTING )
+	else if( actor.position === constants.POS_SITTING )
 		sBuffer += "You are sitting.";
-	else if( actor.position == constants.POS_RESTING )
+	else if( actor.position === constants.POS_RESTING )
 		sBuffer += "You are resting.";
-	else if( actor.position == constants.POS_SLEEPING )
+	else if( actor.position === constants.POS_SLEEPING )
 		sBuffer += "You are sleeping.";
-	else if( actor.position == constants.POS_STUNNED )
+	else if( actor.position === constants.POS_STUNNED )
 		sBuffer += "You are stunned.";
-	else if( actor.position == constants.POS_INCAP )
+	else if( actor.position === constants.POS_INCAP )
 		sBuffer += "You are incapacitated.";
-	else if( actor.position == constants.POS_MORTALLYW )
+	else if( actor.position === constants.POS_MORTALLYW )
 		sBuffer += "You are mortally wounded.";
-	else if( actor.position == constants.POS_FLYING )
+	else if( actor.position === constants.POS_FLYING )
 		sBuffer += "You are flying.";
 	else
 		sBuffer += "You are dead.";
 		
-	if( actor.hunger == 0 )
+	if( actor.hunger === 0 )
 		sBuffer += "\nYou are hungry.";
-	if( actor.thirst == 0 )
+	if( actor.thirst === 0 )
 		sBuffer += "\nYou are thirsty.";
 	if( actor.drunk >= 10 )
 		sBuffer += "\nYou are intoxicated.";
