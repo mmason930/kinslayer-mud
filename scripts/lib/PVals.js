@@ -1,4 +1,5 @@
-var PVALS_TABLE = "pvals";
+let PVALS_TABLE = "pvals";
+let MAX_VALUE_LENGTH = 64;
 /****
   *
   * Pvals is stored in global.pvals, which is an associative array.
@@ -55,7 +56,7 @@ function savePval( sFullKey, pvalObject ) {
 	var sQuery = "REPLACE DELAYED INTO " + PVALS_TABLE + " SET "
 			+ "owner_type='" + sqlEsc(sType) + "', "
 			+ "owner_id='" + sqlEsc(sID) + "', "
-			+ "sKey='" + sqlEsc(sKey) + "', "
+			+ "sKey='" + sqlEsc(sKey == null ? null : sKey.substring(0, MAX_VALUE_LENGTH)) + "', "
 			+ "value='" + sqlEsc(sValue) + "';";
 			
 	sqlQuery( sQuery );
