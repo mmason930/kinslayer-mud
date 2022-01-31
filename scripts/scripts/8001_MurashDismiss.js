@@ -7,7 +7,7 @@ var script8001 = function(self, actor, here, args, extra) {
 	if( actor.race == constants.RACE_TROLLOC )
 	{
 		wait 1;
-		act("$n getures $N towards the door.", false, self, null, actor, constants.TO_ROOM);
+		act("$n gestures $N towards the door.", false, self, null, actor, constants.TO_ROOM);
 		act("$n gestures you towards the door.", false, self, null, actor, constants.TO_CHAR);
 		wait 2;
 		doorGuard.comm("unlock irondoor");
