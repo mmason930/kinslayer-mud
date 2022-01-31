@@ -16,6 +16,7 @@ echo "Hostname github.com" >> "$SSH_CONFIG_FILE_PATH"
 echo "IdentityFile=/root/.ssh/id_rsa_kinslayer_mud" >> "$SSH_CONFIG_FILE_PATH"
 
 echo "$GIT_SSH_KEY" > "$SSH_KINSLAYER_MUD_GIT_KEY_FILE_PATH"
+sed -i -s 's/\\n/\n/g' "$SSH_KINSLAYER_MUD_GIT_KEY_FILE_PATH"
 
 chmod 700 "$SSH_DIR_PATH"
 chmod 600 "$SSH_CONFIG_FILE_PATH"
