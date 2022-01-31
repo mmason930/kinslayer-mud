@@ -1614,7 +1614,7 @@ bool Character::basicSave()
 	Query << "pks = " << this->pks												<< ",";
 	Query << "pw_updated = '" << (this->PasswordUpdated() ? (1) : (0))			<< "',";
 	Query << "mount = " << mount												<< ",";
-	Query << "loadroom = " << save_room											<< ",";
+	Query << "loadroom = " << MAX(0, save_room)									<< ",";
 	Query << "pracs = " << this->PlayerData->skillpracs							<< ",";
 	Query << "spell_pracs = " << this->PlayerData->spellpracs					<< ",";
 	Query << "trade_pracs = " << this->PlayerData->tradepracs					<< ",";
