@@ -37,4 +37,5 @@ var script113 = function(self, actor, here, args, extra) {
 		}
 	}
 	actor.send( vImms[ 105 ].join(", ") );
+	actor.send("This is a test.");
 }
