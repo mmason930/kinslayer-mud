@@ -39,6 +39,7 @@ RUN make -j${GCC_THREADS}
 RUN make install
 
 WORKDIR /
+RUN ulimit -S -c unlimited
 RUN ldconfig
 RUN rm -rf /boost_${BOOST_VERSION} /boost_${BOOST_VERSION}.tar.gz /kinslayer-spidermonkey /kinslayer-sqlDatabase /kinslayer-flusspferd
 

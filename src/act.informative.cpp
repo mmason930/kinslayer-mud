@@ -602,10 +602,10 @@ CommandHandler do_view = DEFINE_COMMAND
 
 		std::stringstream QueryText;
 		sql::Query MyQuery;
-		QueryText << "SELECT pk.*,u.username,u.race,u.chclass,u.level,u.slew,COUNT(pk.killer_id) AS kill_count, "
+		QueryText << "SELECT u.username,u.race,u.chclass,u.level,u.slew,COUNT(pk.killer_id) AS kill_count, "
 			<< "SUM(pk.wp_transfer) AS wp_total FROM userPlayerKill pk, users u WHERE pk.time_of_death >= "
 			<< "FROM_UNIXTIME(" << mktime( &Low ) << ")" << " AND pk.time_of_death <= FROM_UNIXTIME(" << mktime( &High ) << ") AND u.user_id=pk.killer_id "
-			<< "GROUP BY pk.killer_id ORDER BY wp_total DESC LIMIT 8;";
+			<< "GROUP BY u.username, u.race, u.chclass, u.level, u.slew ORDER BY wp_total DESC LIMIT 8;";
 
 		try {
 			MyQuery = gameDatabase->sendQuery(QueryText.str());
