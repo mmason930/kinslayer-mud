@@ -1618,7 +1618,7 @@ bool Character::basicSave()
 	Query << "pracs = " << this->PlayerData->skillpracs							<< ",";
 	Query << "spell_pracs = " << this->PlayerData->spellpracs					<< ",";
 	Query << "trade_pracs = " << this->PlayerData->tradepracs					<< ",";
-	Query << "freeze = " << (int)this->PlayerData->freeze_level					<< ",";
+	Query << "freeze = " << MAX(0,(int)this->PlayerData->freeze_level)			<< ",";
 	Query << "bad_passwords = " << (int)this->PlayerData->bad_pws				<< ",";
 	Query << "hunger = " << (int)this->PlayerData->conditions[ FULL ]			<< ",";
 	Query << "thirst = " << (int)this->PlayerData->conditions[ THIRST ]			<< ",";
