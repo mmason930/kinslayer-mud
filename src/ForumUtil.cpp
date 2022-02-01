@@ -113,7 +113,7 @@ void ForumUtil::addForumUser(Character *character)
 		<< sql::escapeQuoteString(userJabber) << ","
 		<< sql::escapeQuoteString(userActKey) << ","
 		<< sql::escapeQuoteString(userNewPassword) << ","
-		<< sql::escapeQuoteString(userFormSalt) << ","
+		<< sql::escapeQuoteString(userFormSalt)
 		<< ")";
 
 	try {
