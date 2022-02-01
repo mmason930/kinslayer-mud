@@ -35,7 +35,7 @@ void ForumUtil::addForumUser(Character *character)
 	std::string userPassword = character->player.passwd;
 	int passwordChanged = 0;
 	std::string userEmail = "";
-	std::string userEmailHash = "";
+	int userEmailHash = 0;
 	std::string userBirthday = "";
 	int userLastVisit = 0;
 	int userLastMark = 0;
@@ -97,7 +97,7 @@ void ForumUtil::addForumUser(Character *character)
 		<< sql::escapeQuoteString(userPassword) << ","
 		<< passwordChanged << ","
 		<< sql::escapeQuoteString(userEmail) << ","
-		<< sql::escapeQuoteString(userEmailHash) << ","
+		<< userEmailHash << ","
 		<< sql::escapeQuoteString(userBirthday) << ","
 		<< userLastVisit << ","
 		<< userLastMark << ","
@@ -113,7 +113,7 @@ void ForumUtil::addForumUser(Character *character)
 		<< sql::escapeQuoteString(userJabber) << ","
 		<< sql::escapeQuoteString(userActKey) << ","
 		<< sql::escapeQuoteString(userNewPassword) << ","
-		<< sql::escapeQuoteString(userFormSalt)
+		<< sql::escapeQuoteString(userFormSalt) << ","
 		<< ")";
 
 	try {
