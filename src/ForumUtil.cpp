@@ -34,13 +34,24 @@ void ForumUtil::addForumUser(Character *character)
 	std::string usernameClean = StringUtil::allLower(username.c_str());
 	std::string userPassword = character->player.passwd;
 	int passwordChanged = 0;
-	int userPasswordConvert = 0;
 	std::string userEmail = "";
 	std::string userEmailHash = "";
 	std::string userBirthday = "";
 	int userLastVisit = 0;
 	int userLastMark = 0;
 	int userLastPostTime = 0;
+	std::string userLastPage = "";
+	std::string userLastConfirmKey = "";
+	std::string userLang = "en";
+	std::string userTimeZone = "UTC";
+	std::string userColor = "";
+	std::string userAvatar = "";
+	std::string userAvatarType = "0";
+	std::string userSigBbcodeUid = "";
+	std::string userJabber = "";
+	std::string userActKey = "0";
+	std::string userNewPassword = "0";
+	std::string userFormSalt = "";
 
 	queryBuffer
 		<< "INSERT INTO phpbb_users(" 	
@@ -55,13 +66,24 @@ void ForumUtil::addForumUser(Character *character)
 		<< " `username_clean`,"
 		<< " `user_password`,"
 		<< " `user_passchg`,"
-		<< " `user_pass_convert`,"
 		<< " `user_email`,"
 		<< " `user_email_hash`,"
 		<< " `user_birthday`,"
 		<< " `user_lastvisit`,"
 		<< " `user_lastmark`,"
-		<< " `user_lastpost_time`"
+		<< " `user_lastpost_time`,"
+		<< " `user_lastpage`,"
+		<< " `user_last_confirm_key`,"
+		<< " `user_lang`,"
+		<< " `user_timezone`,"
+		<< " `user_colour`,"
+		<< " `user_avatar`,"
+		<< " `user_avatar_type`,"
+		<< " `user_sig_bbcode_uid`,"
+		<< " `user_jabber`,"
+		<< " `user_actkey`,"
+		<< " `user_newpasswd`,"
+		<< " `user_form_salt`"
 		<< ") VALUES ("
 		<< character->player.idnum << ","
 		<< userType << ","
@@ -74,13 +96,24 @@ void ForumUtil::addForumUser(Character *character)
 		<< sql::escapeQuoteString(usernameClean) << ","
 		<< sql::escapeQuoteString(userPassword) << ","
 		<< passwordChanged << ","
-		<< userPasswordConvert << ","
 		<< sql::escapeQuoteString(userEmail) << ","
 		<< sql::escapeQuoteString(userEmailHash) << ","
 		<< sql::escapeQuoteString(userBirthday) << ","
 		<< userLastVisit << ","
 		<< userLastMark << ","
-		<< userLastPostTime
+		<< userLastPostTime << ","
+		<< sql::escapeQuoteString(userLastPage) << ","
+		<< sql::escapeQuoteString(userLastConfirmKey) << ","
+		<< sql::escapeQuoteString(userLang) << ","
+		<< sql::escapeQuoteString(userTimeZone) << ","
+		<< sql::escapeQuoteString(userColor) << ","
+		<< sql::escapeQuoteString(userAvatar) << ","
+		<< sql::escapeQuoteString(userAvatarType) << ","
+		<< sql::escapeQuoteString(userSigBbcodeUid) << ","
+		<< sql::escapeQuoteString(userJabber) << ","
+		<< sql::escapeQuoteString(userActKey) << ","
+		<< sql::escapeQuoteString(userNewPassword) << ","
+		<< sql::escapeQuoteString(userFormSalt)
 		<< ")";
 
 	try {
