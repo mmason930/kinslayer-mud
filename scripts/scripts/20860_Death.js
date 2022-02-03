@@ -65,8 +65,9 @@ var script20860 = function(self, actor, here, args, extra) {
 				eq.extract();
 			}
 		}
-		for (var _autoKey in self.inventory) {
-			var item = self.inventory[_autoKey];
+		var selfInventory = self.inventory;
+		for (var _autoKey in selfInventory) {
+			var item = selfInventory[_autoKey];
 			item.moveToRoom(getRoom(20899));
 			item.extract();
 		}
