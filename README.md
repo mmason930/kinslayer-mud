@@ -16,7 +16,7 @@ By default, the container will perform a clean build of the game, resulting in a
 Becuase this is time consuming, you can alternatively run the container and perform a partial build:
 
 ```
-./docker-compose run game gateway partial
+./docker-compose run --service-ports game gateway partial
 ```
 
 Note that running docker-compose run may change the name of the running container(from game.kinslayermud.org below). You can run docker container ls to get the actual name of the container if you need it for subsequent commands.
