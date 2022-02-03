@@ -127,38 +127,3 @@ std::string SystemUtil::processCommand(const std::string &command)
 
 	return buffer;
 }
-
-std::map<std::string, std::string> SystemUtil::getSubversionInfoMap(const std::string &url)
-{
-	std::map<std::string, std::string> map;
-
-	std::string escapedUrl = url;
-	StringUtil::replace(escapedUrl, "\\", "\\\\");
-	StringUtil::replace(escapedUrl, "'", "\\'");
-
-	std::string subversionInfo = processCommand(std::string("svn info '") + escapedUrl + "'");
-	std::vector<std::string> outputLines = StringUtil::splitToVector(subversionInfo, '\n');
-
-	for(std::string outputLine : outputLines)
-	{
-		std::string::size_type colonPosition = outputLine.find(':');
-
-		if(colonPosition == std::string::npos)
-			continue;
-
-		std::string key = outputLine.substr(0, colonPosition);
-		std::string value = outputLine.substr(colonPosition + 1);
-
-		StringUtil::trim(value);
-
-		map[key] = value;
-	}
-
-	return map;
-}
-/***
-void SystemUtil::printStackTrace()
-{
-
-}
-***/

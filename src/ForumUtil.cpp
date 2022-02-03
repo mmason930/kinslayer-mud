@@ -52,6 +52,7 @@ void ForumUtil::addForumUser(Character *character)
 	std::string userActKey = "0";
 	std::string userNewPassword = "0";
 	std::string userFormSalt = "";
+	std::string userSig = "";
 
 	queryBuffer
 		<< "INSERT INTO phpbb_users(" 	
@@ -83,7 +84,8 @@ void ForumUtil::addForumUser(Character *character)
 		<< " `user_jabber`,"
 		<< " `user_actkey`,"
 		<< " `user_newpasswd`,"
-		<< " `user_form_salt`"
+		<< " `user_form_salt`,"
+		<< " `user_sig`"
 		<< ") VALUES ("
 		<< character->player.idnum << ","
 		<< userType << ","
@@ -113,7 +115,8 @@ void ForumUtil::addForumUser(Character *character)
 		<< sql::escapeQuoteString(userJabber) << ","
 		<< sql::escapeQuoteString(userActKey) << ","
 		<< sql::escapeQuoteString(userNewPassword) << ","
-		<< sql::escapeQuoteString(userFormSalt)
+		<< sql::escapeQuoteString(userFormSalt) << ","
+		<< sql::escapeQuoteString(userSig)
 		<< ")";
 
 	try {

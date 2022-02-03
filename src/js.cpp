@@ -355,8 +355,6 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 	{
 		try
 		{
-			std::map<std::string, std::string> map;
-
 			std::string output = SystemUtil::processCommand(scriptPullCommand);
 			
 			std::this_thread::sleep_for(std::chrono::seconds(1));
