@@ -3,6 +3,8 @@ This repository hosts the core game code for KinslayerMUD(http://www.kinslayermu
 
 Note that in order to use Docker Compose, you'll need to clone the following repository: https://github.com/kinslayermud/kinslayer-loader
 
+All commands in this document should be executed from the kinslayer-loader directory.
+
 ## Start game container
 The simplest way to star the container is to run the following:
 ```
