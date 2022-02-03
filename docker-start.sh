@@ -25,14 +25,19 @@ ssh-keyscan github.com > "$SSH_KNOWN_HOSTS_FILE_PATH"
 
 
 TARGET="$1"
+FULL_PARTIAL="$2"
 echo "TARGET: $TARGET"
+echo "FULL OR PARTIAL: $FULL_PARTIAL"
 
 cd /kinslayer
 mkdir -p lib/misc
 
 chmod ug+x /kinslayer/CleanUpBenchmarks.sh /kinslayer/ImportPlayerLogs /kinslayer/PullScripts.sh
 rm -f /kinslayer/lib/scripts && ln -s /kinslayer/scripts /kinslayer/lib/scripts
-make clean -C /kinslayer/src
+
+if [[ "$FULL_PARTIAL" == "full" ]]; then
+	make clean -C /kinslayer/src
+fi
 
 cp BasicConfig.template lib/misc/BasicConfig
 
@@ -40,6 +45,8 @@ sed -i 's|${DB_USERNAME}|'"$DB_USERNAME"'|' lib/misc/BasicConfig
 sed -i 's|${DB_PASSWORD}|'"$DB_PASSWORD"'|' lib/misc/BasicConfig
 sed -i 's|${DB_SCHEMA}|'"$DB_SCHEMA"'|' lib/misc/BasicConfig
 sed -i 's|${DB_HOSTNAME}|'"$DB_HOSTNAME"'|' lib/misc/BasicConfig
+
+ulimit -S -c unlimited
 
 if [[ "$TARGET" == "kinslayer" ]]; then
 	echo "Building MUD..."
