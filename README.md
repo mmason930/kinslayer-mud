@@ -41,3 +41,8 @@ To stop the container, run:
 ```
 ./docker-compose down game
 ```
+
+## After starting the container
+You will be able to connect to the MUD using telnet or a MUD client by connecting to 127.0.0.1 on port 2222
+
+Alternatively, if you clone the [kinslayer-mud-client](https://github.com/mmason930/kinslayer-mud-client) repository, you can connect to the game by running the client locally on your machine. Each user account's password is set to `iwontsay`.
