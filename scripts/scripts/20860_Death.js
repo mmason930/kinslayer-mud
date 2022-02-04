@@ -65,6 +65,7 @@ var script20860 = function(self, actor, here, args, extra) {
 				eq.extract();
 			}
 		}
+//This is a test
 		var selfInventory = self.inventory;
 		for (var _autoKey in selfInventory) {
 			var item = selfInventory[_autoKey];
