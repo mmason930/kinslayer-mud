@@ -42,6 +42,7 @@ WORKDIR /
 RUN ulimit -S -c unlimited
 RUN ldconfig
 RUN rm -rf /boost_${BOOST_VERSION} /boost_${BOOST_VERSION}.tar.gz /kinslayer-spidermonkey /kinslayer-sqlDatabase /kinslayer-flusspferd
+COPY core_pattern /proc/sys/kernel/core_pattern
 
 EXPOSE 2230
 EXPOSE 2222

@@ -46,8 +46,6 @@ sed -i 's|${DB_PASSWORD}|'"$DB_PASSWORD"'|' lib/misc/BasicConfig
 sed -i 's|${DB_SCHEMA}|'"$DB_SCHEMA"'|' lib/misc/BasicConfig
 sed -i 's|${DB_HOSTNAME}|'"$DB_HOSTNAME"'|' lib/misc/BasicConfig
 
-ulimit -S -c unlimited
-
 if [[ "$TARGET" == "kinslayer" ]]; then
 	echo "Building MUD..."
 	make -C /kinslayer/src -j"$GCC_THREADS"
