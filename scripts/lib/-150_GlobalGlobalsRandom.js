@@ -117,10 +117,20 @@ function initGlobals()
 	constants.ARENA_YELLOW = 3;
 	constants.ARENA_GREEN = 4;
 	if (!global.arenaStage) {
-		if (new Date().getDay() != 4)
-			global.arenaStage = constants.ARENA_OFF;
-		else
-			global.arenaStage = constants.ARENA_ON;
+		var dayOfWeek = new Date().getDay();
+		var openDays = [
+			0, 		// Sunday
+			4, 		// Wednesday
+			6  		// Saturday
+		];	
+		var arenaStatus = constants.ARENA_OFF;
+		for (var i=0; i< openDays.length; i++) {
+			if (dayOfWeek == openDays[i]) {
+				arenaStatus = constants.ARENA_ON;
+				break;
+			}
+		}
+		global.arenaStage = arenaStatus;
 	}
 	if (!global.arenaMixedBets)
 		global.arenaMixedBets = false;
