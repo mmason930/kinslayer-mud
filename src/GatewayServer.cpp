@@ -684,8 +684,14 @@ void GatewayServer::run()
 				kuClient *gameClient = getMotherConnectionToServer();
 
 				std::stringstream buffer;
+				std::string clientIpAddress = descriptor->getClientConnection()->getIp();
 
-				buffer << "Host " << descriptor->getRandomId() << " " << descriptor->getClientConnection()->getIp()
+				if(descriptor->getProxyForwardedIpAddress().has_value())
+				{
+					clientIpAddress = *(descriptor->getProxyForwardedIpAddress());
+				}
+
+				buffer << "Host " << descriptor->getRandomId() << " " << clientIpAddress
 					   << " " << descriptor->getType()->getValue() << "\r\n";
 
 				gameClient->send(buffer.str());
@@ -707,6 +713,17 @@ void GatewayServer::run()
 						std::unique_ptr<WebSocketClientHeader> webSocketClientHeader(WebSocketClientHeader::allocateByInitialClientPacket(dataFromWebSocketClient));
 						webSocketClientHeader->read(dataFromWebSocketClient);
 						std::string response = webSocketClientHeader->generateResponse(descriptor->getGatewayListener()->getListener()->getPort(), "mud-protocol");
+
+						// Get the X-Forwarded-For header value, if it exists, and set the client IP address to that.
+						// Note that this is insecure unless we also check to see if we trust the client IP address,
+						// such as validating that it's being forwarded from an internal IP. Otherwise, clients could
+						// easily spoof their IP address. However, since we intend to shut off direct websocket access
+						// once we begin forwarding, this shouldn't matter.
+						std::optional<std::string> xForwardedFor = webSocketClientHeader->getFieldByName("X-Forwarded-For");
+						if(xForwardedFor.has_value())
+						{
+							descriptor->setProxyForwardedIpAddress(xForwardedFor);
+						}
 
 						descriptor->sendToClient(response);
 						descriptor->setStatus(GatewayDescriptorStatus::awaitingConnection);

@@ -219,3 +219,13 @@ void GatewayDescriptor::setType(GatewayDescriptorType *type)
 {
 	this->type = type;
 }
+
+std::optional<std::string> GatewayDescriptor::getProxyForwardedIpAddress() const
+{
+	return proxyForwardedIpAddress;
+}
+
+void GatewayDescriptor::setProxyForwardedIpAddress(const std::optional<std::string> &proxyForwardedIpAddress)
+{
+	this->proxyForwardedIpAddress = proxyForwardedIpAddress;
+}

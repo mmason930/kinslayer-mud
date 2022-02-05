@@ -1,5 +1,12 @@
 #!/bin/bash
 
+### Parse arguments to this script
+TARGET="$1"
+FULL_PARTIAL="$2"
+echo "TARGET: $TARGET"
+echo "FULL OR PARTIAL: $FULL_PARTIAL"
+
+### Install the Github SSH key
 SSH_DIR_PATH="/root/.ssh";
 SSH_CONFIG_FILE_PATH="$SSH_DIR_PATH/config";
 SSH_KINSLAYER_MUD_GIT_KEY_FILE_PATH="$SSH_DIR_PATH/id_rsa_kinslayer_mud";
@@ -23,30 +30,30 @@ chmod 600 "$SSH_CONFIG_FILE_PATH"
 chmod 600 "$SSH_KINSLAYER_MUD_GIT_KEY_FILE_PATH"
 ssh-keyscan github.com > "$SSH_KNOWN_HOSTS_FILE_PATH"
 
-
-TARGET="$1"
-FULL_PARTIAL="$2"
-echo "TARGET: $TARGET"
-echo "FULL OR PARTIAL: $FULL_PARTIAL"
-
+### Set up game directories & executable permissions
 cd /kinslayer
 mkdir -p lib/misc
 
 chmod ug+x /kinslayer/CleanUpBenchmarks.sh /kinslayer/ImportPlayerLogs /kinslayer/PullScripts.sh
 rm -f /kinslayer/lib/scripts && ln -s /kinslayer/scripts /kinslayer/lib/scripts
-
-if [[ "$FULL_PARTIAL" == "full" ]]; then
-	make clean -C /kinslayer/src
-fi
-
 cp BasicConfig.template lib/misc/BasicConfig
-
 sed -i 's|${DB_USERNAME}|'"$DB_USERNAME"'|' lib/misc/BasicConfig
 sed -i 's|${DB_PASSWORD}|'"$DB_PASSWORD"'|' lib/misc/BasicConfig
 sed -i 's|${DB_SCHEMA}|'"$DB_SCHEMA"'|' lib/misc/BasicConfig
 sed -i 's|${DB_HOSTNAME}|'"$DB_HOSTNAME"'|' lib/misc/BasicConfig
+
+### Set up core dump filename pattern - the defaults on some systems (ex: Ubuntu)
+### don't work for us, so we'll need to set it explicitly. Note that this operation
+### does require privileged access when running the container, otherwise attepting
+### to modify this file will fail.
 echo "core.%p.%t" > /proc/sys/kernel/core_pattern
 
+### Perform clean build if specified.
+if [[ "$FULL_PARTIAL" == "full" ]]; then
+	make clean -C /kinslayer/src
+fi
+
+### Perform the build and run the target process
 if [[ "$TARGET" == "kinslayer" ]]; then
 	echo "Building MUD..."
 	make -C /kinslayer/src -j"$GCC_THREADS"

@@ -41,16 +41,6 @@ void Game::processPlayerPortalServer()
 	playerPortalServer->process();
 }
 
-int Game::getBootSubversionRevision() const
-{
-	return bootSubversionRevision;
-}
-
-int Game::getBootScriptsDirectorySubversionRevision() const
-{
-	return bootScriptsDirectorySubversionRevision;
-}
-
 std::string Game::getName() const
 {
 	return this->name;
@@ -59,16 +49,6 @@ std::string Game::getName() const
 void Game::setName(const std::string &name)
 {
 	this->name = name;
-}
-
-std::string Game::getSubversionRepositoryUrl() const
-{
-	return subversionRepositoryUrl;
-}
-
-void Game::setSubversionRepositoryUrl(const std::string &subversionRepositoryUrl)
-{
-	this->subversionRepositoryUrl = subversionRepositoryUrl;
 }
 
 bool Game::monitorRepo()

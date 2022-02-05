@@ -8,6 +8,8 @@
 #include "GatewayDescriptorStatus.h"
 #include "GatewayDescriptorType.h"
 
+#include <optional>
+
 class GatewayDescriptor
 {
 private:
@@ -20,6 +22,7 @@ private:
 	GatewayDescriptorType *type;
 	std::string randomId;
 	std::string currentInputBuffer;
+	std::optional<std::string> proxyForwardedIpAddress;
 
 public:
 
@@ -60,6 +63,9 @@ public:
 
 	GatewayDescriptorType *getType() const;
 	void setType(GatewayDescriptorType *type);
+
+	std::optional<std::string> getProxyForwardedIpAddress() const;
+	void setProxyForwardedIpAddress(const std::optional<std::string> &proxyForwardedIpAddress);
 };
 
 #endif

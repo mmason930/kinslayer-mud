@@ -21,10 +21,7 @@ protected:
 	std::string version;
 	std::string defaultDirectory;
 	std::string playerLogsDirectory;
-	std::string subversionRepositoryUrl;
 	std::map<std::string, std::string> basicConfig; //The configuration loaded from the BasicConfig file on the server.
-	int bootSubversionRevision; //The revision of the local filesystem at the time of boot.
-	int bootScriptsDirectorySubversionRevision;//The revision of the 'kmud-live/scripts' directory at the time of boot.
 
 	std::shared_ptr<class GuildEditorInterface> guildEditorInterface;
 
@@ -42,12 +39,6 @@ public:
 
 	std::string getName() const;
 	void setName(const std::string &name);
-
-	std::string getSubversionRepositoryUrl() const;
-	void setSubversionRepositoryUrl(const std::string &subversionRepositoryUrl);
-
-	int getBootSubversionRevision() const;
-	int getBootScriptsDirectorySubversionRevision() const;
 
 	void loadBasicConfig();
 	std::string getBasicConfigValue(const std::string &configName);

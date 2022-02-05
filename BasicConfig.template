@@ -17,3 +17,4 @@ Dev Mode: 0
 Player Portal Server Port: 4002
 Monitor Repository: 1
 Script Pull Command: /kinslayer/PullScripts.sh
+Database Migration Directory: /kinslayer/migrations/

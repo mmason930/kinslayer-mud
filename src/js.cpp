@@ -227,8 +227,6 @@ JSManager::JSManager()
 			this->monitorSubversionThreadRunning = true;
 			monitorSubversionThread = new std::thread(&JSManager::monitorSubversion, this, dbContext->createConnection(), game->getScriptPullCommand());
 		}
-
-		lastUpdatedRevision = game->getBootScriptsDirectorySubversionRevision();
 	}
 	catch(sql::QueryException queryException)
 	{

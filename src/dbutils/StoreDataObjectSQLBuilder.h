@@ -3,6 +3,7 @@
 
 #include "StoreSQLBuilder.h"
 #include "../DataObjectWithIntId.h"
+#include "../DataObjectWithLongId.h"
 #include "../SQLUtil.h"
 
 #include <iostream>
@@ -35,6 +36,23 @@ public:
 		}
 
 		return dataObjectWithIntId.getId();
+	}
+	int execute(DataObjectWithLongId *dataObjectWithLongId) {
+		return execute(*dataObjectWithLongId);
+	}
+	int execute(DataObjectWithLongId &dataObjectWithLongId) {
+
+		if(dataObjectWithLongId.isNew())
+		{
+			connection->sendQuery(generateInsert());
+			dataObjectWithLongId.setId(connection->lastInsertID());
+		}
+		else
+		{
+			connection->sendQuery(generateUpdate(dataObjectWithLongId.getId()));
+		}
+
+		return dataObjectWithLongId.getId();
 	}
 };
 

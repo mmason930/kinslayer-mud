@@ -138,6 +138,11 @@ public:
 		
 		return generateUpdate("id", id);
 	}
+
+	std::string generateUpdate(long long id) {
+		
+		return generateUpdate("id", id);
+	}
 	
 	std::string generateUpdate(const std::string &idColumnName, int id) {
 		
@@ -147,6 +152,13 @@ public:
 	}
   
 	std::string generateUpdate(const std::string &idColumnName, long id) {
+		
+		std::stringstream stream;
+		stream << idColumnName << "=" << id;
+		return generateUpdate(stream.str());
+	}
+
+	std::string generateUpdate(const std::string &idColumnName, long long id) {
 		
 		std::stringstream stream;
 		stream << idColumnName << "=" << id;

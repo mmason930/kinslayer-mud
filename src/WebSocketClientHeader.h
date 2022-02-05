@@ -15,6 +15,7 @@
 
 #include <string>
 #include <map>
+#include <optional>
 
 class WebSocketClientHeader
 {
@@ -35,7 +36,7 @@ public:
 
 	void readLine(const std::string &line);
 	virtual std::string generateResponse(unsigned short port, const char *webSocketServerProtocolName) = 0;
-	std::string getFieldByName(const std::string &fieldName);
+	std::optional<std::string> getFieldByName(const std::string &fieldName) const;
 	void readFieldLine(const std::string &line);
 	static WebSocketClientHeader *allocateByInitialClientPacket(const std::string &packet);
 	virtual void read(std::string &packet) = 0;

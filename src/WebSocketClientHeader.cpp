@@ -11,7 +11,6 @@
 #include "WebSocketClientHeader.h"
 #include "WebSocketException.h"
 
-#include "WebSocketClientHeaderHixie76.h"
 #include "WebSocketClientHeaderIETF_HYBI17.h"
 
 #include <sstream>
@@ -253,7 +252,7 @@ void WebSocketClientHeader::readFieldLine(const std::string &line)
 
 	try {
 		
-		//The field name ends with a ": "
+		// The field name ends with a ": "
 		while(line.at(pos) != ':' && line.at(pos + 1) != ' ') {
 
 			if( (line.at(pos) < 0x0021 || line.at(pos) > 0x0039) && (line.at(pos) < 0x003B || line.at(pos) > 0x007E) ) {
@@ -267,12 +266,12 @@ void WebSocketClientHeader::readFieldLine(const std::string &line)
 		}
 	}
 	catch(std::out_of_range e) {
-	//This exception will only be thrown if we never hit a ": " sequence in this line.
+	// This exception will only be thrown if we never hit a ": " sequence in this line.
 
 		throw WebSocketException(INVALID_HEADER_EXCEPTION_MESSAGE);
 	}
 
-	//Validate field name length. It must be one or more characters in length.
+	// Validate field name length. It must be one or more characters in length.
 	if(name.empty()) {
 
 		throw WebSocketException(INVALID_HEADER_EXCEPTION_MESSAGE);
@@ -280,7 +279,7 @@ void WebSocketClientHeader::readFieldLine(const std::string &line)
 
 	pos += 2;//Skip over the ": "
 
-	//The value may be zero or more characters in length, and consists of the remainder of the line.
+	// The value may be zero or more characters in length, and consists of the remainder of the line.
 	this->fields[name] = line.substr(pos);
 }
 
@@ -299,13 +298,13 @@ void WebSocketClientHeader::readFirstLine(const std::string &line)
 
 	this->method = line.substr(posBefore, pos - posBefore);
 
-	//Validate the method(must be equal to "GET").
+	// Validate the method(must be equal to "GET").
 	if(this->method != "GET") {
 
 		throw WebSocketException(INVALID_HEADER_EXCEPTION_MESSAGE);
 	}
 
-	//Read the resource.
+	// Read the resource.
 	if(++pos >= line.size() || line[pos] != '/') {
 
 		throw WebSocketException(INVALID_HEADER_EXCEPTION_MESSAGE);
@@ -321,7 +320,7 @@ void WebSocketClientHeader::readFirstLine(const std::string &line)
 
 	resource = line.substr(posBefore, pos - posBefore);
 
-	//Validate the resource(only characters between U+0021 and U+007E are permitted).
+	// Validate the resource(only characters between U+0021 and U+007E are permitted).
 	for(index = 0;index < method.size();++index) {
 
 		if(method[index] < 0x0021 || method[index] > 0x007E) {
@@ -330,12 +329,13 @@ void WebSocketClientHeader::readFirstLine(const std::string &line)
 		}
 	}
 
-	//The ending can be safely ignored(we know the ending CRLF was stripped successfully).
+	// The ending can be safely ignored(we know the ending CRLF was stripped successfully).
 }
 
-std::string WebSocketClientHeader::getFieldByName(const std::string &fieldName)
+std::optional<std::string> WebSocketClientHeader::getFieldByName(const std::string &fieldName) const
 {
-	return fields[fieldName];
+	auto fieldIter = fields.find(fieldName);
+	return fieldIter == fields.end() ? std::optional<std::string>() : std::optional<std::string>(fieldIter->second);
 }
 
 WebSocketClientHeader *WebSocketClientHeader::allocateByInitialClientPacket(const std::string &packet)
@@ -344,8 +344,6 @@ WebSocketClientHeader *WebSocketClientHeader::allocateByInitialClientPacket(cons
 		return new WebSocketClientHeaderIETF_HYBI17();
 
 	return NULL;
-//	else
-//		return new WebSocketClientHeaderHixie76();
 }
 
 bool WebSocketClientHeader::isComplete(const std::string &buffer)

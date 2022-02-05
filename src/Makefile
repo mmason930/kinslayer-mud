@@ -53,6 +53,8 @@ OBJFILES =	accounts.o \
 			commands/infrastructure/Social.o \
 			config.o \
 			constants.o \
+			db-migrations/DatabaseMigrationStatus.o \
+			db-migrations/DatabaseMigrationUtil.o \
 			DatabaseUtil.o \
 			DateTime.o \
 			db.o \
@@ -71,12 +73,10 @@ OBJFILES =	accounts.o \
 			fight.o \
 			ForumUtil.o \
 			Game.o \
-			GatewayClient.o \
 			GatewayDescriptor.o \
 			GatewayDescriptorStatus.o \
 			GatewayDescriptorType.o \
 			GatewayListener.o \
-			GatewayServer.o \
 			graph.o \
 			guilds/Guild.o \
 			guilds/GuildApplication.o \
@@ -169,7 +169,6 @@ OBJFILES =	accounts.o \
 			weather.o \
 			weave.o \
 			WebSocketClientHeader.o \
-			WebSocketClientHeaderHixie76.o \
 			WebSocketClientHeaderIETF_HYBI17.o \
 			WebSocketDataFrame.o \
 			wedit.o \
@@ -179,7 +178,7 @@ OBJFILES =	accounts.o \
 OBJFILES := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILES))
 
 
-OBJFILESGATEWAY = DateTime.o GatewayClient.o GatewayDescriptor.o GatewayDescriptorStatus.o \
+OBJFILESGATEWAY = DateTime.o GatewayDescriptor.o GatewayDescriptorStatus.o \
 	GatewayMain.o GatewayServer.o kuClient.o kuDescriptor.o kuListener.o kuSockets.o MiscUtil.o \
 	StringUtil.o MudStatus.o SystemUtil.o sha1.o GatewayDescriptorType.o WebSocketDataFrame.o \
 	WebSocketClientHeaderIETF_HYBI17.o WebSocketClientHeader.o WebSocketClientHeaderHixie76.o \

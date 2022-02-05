@@ -35,11 +35,11 @@ void ForumUtil::addForumUser(Character *character)
 	std::string userPassword = character->player.passwd;
 	int passwordChanged = 0;
 	std::string userEmail = "";
-	int userEmailHash = 0;
 	std::string userBirthday = "";
 	int userLastVisit = 0;
 	int userLastMark = 0;
 	int userLastPostTime = 0;
+	int resetTokenExpiration = 0;
 	std::string userLastPage = "";
 	std::string userLastConfirmKey = "";
 	std::string userLang = "en";
@@ -53,6 +53,7 @@ void ForumUtil::addForumUser(Character *character)
 	std::string userNewPassword = "0";
 	std::string userFormSalt = "";
 	std::string userSig = "";
+	std::string resetToken = "";
 
 	queryBuffer
 		<< "INSERT INTO phpbb_users(" 	
@@ -68,7 +69,6 @@ void ForumUtil::addForumUser(Character *character)
 		<< " `user_password`,"
 		<< " `user_passchg`,"
 		<< " `user_email`,"
-		<< " `user_email_hash`,"
 		<< " `user_birthday`,"
 		<< " `user_lastvisit`,"
 		<< " `user_lastmark`,"
@@ -83,6 +83,8 @@ void ForumUtil::addForumUser(Character *character)
 		<< " `user_sig_bbcode_uid`,"
 		<< " `user_jabber`,"
 		<< " `user_actkey`,"
+		<< " `reset_token`,"
+		<< " `reset_token_expiration`,"
 		<< " `user_newpasswd`,"
 		<< " `user_form_salt`,"
 		<< " `user_sig`"
@@ -99,7 +101,6 @@ void ForumUtil::addForumUser(Character *character)
 		<< sql::escapeQuoteString(userPassword) << ","
 		<< passwordChanged << ","
 		<< sql::escapeQuoteString(userEmail) << ","
-		<< userEmailHash << ","
 		<< sql::escapeQuoteString(userBirthday) << ","
 		<< userLastVisit << ","
 		<< userLastMark << ","
@@ -114,6 +115,8 @@ void ForumUtil::addForumUser(Character *character)
 		<< sql::escapeQuoteString(userSigBbcodeUid) << ","
 		<< sql::escapeQuoteString(userJabber) << ","
 		<< sql::escapeQuoteString(userActKey) << ","
+		<< sql::escapeQuoteString(resetToken) << ","
+		<< resetTokenExpiration << ","
 		<< sql::escapeQuoteString(userNewPassword) << ","
 		<< sql::escapeQuoteString(userFormSalt) << ","
 		<< sql::escapeQuoteString(userSig)

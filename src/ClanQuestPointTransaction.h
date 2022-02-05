@@ -28,7 +28,7 @@ public:
 		return userId;
 	}
 
-	 void setUserId(const int userId)
+	void setUserId(const int userId)
 	{
 		this->userId = userId;
 	}
