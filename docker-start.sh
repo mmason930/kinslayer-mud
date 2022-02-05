@@ -45,6 +45,7 @@ sed -i 's|${DB_USERNAME}|'"$DB_USERNAME"'|' lib/misc/BasicConfig
 sed -i 's|${DB_PASSWORD}|'"$DB_PASSWORD"'|' lib/misc/BasicConfig
 sed -i 's|${DB_SCHEMA}|'"$DB_SCHEMA"'|' lib/misc/BasicConfig
 sed -i 's|${DB_HOSTNAME}|'"$DB_HOSTNAME"'|' lib/misc/BasicConfig
+echo "core.%p.%t" > /proc/sys/kernel/core_pattern
 
 if [[ "$TARGET" == "kinslayer" ]]; then
 	echo "Building MUD..."
