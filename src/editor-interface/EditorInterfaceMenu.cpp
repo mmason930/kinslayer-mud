@@ -1,8 +1,6 @@
 #include "EditorInterfaceInstance.h"
 #include "EditorInterfaceMenu.h"
 
-#include "../utils.h"
-#include "../StringUtil.h"
 
 void EditorInterfaceMenu::print(EditorInterfaceInstance *i)
 {

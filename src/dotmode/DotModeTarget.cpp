@@ -1,8 +1,5 @@
-#include "../conf.h"
-#include "../sysdep.h"
 
 #include "DotModeTarget.h"
-#include "DotModeTargetType.h"
 
 DotModeTarget::DotModeTarget()
 {

@@ -1,19 +1,13 @@
 #include "../../conf.h"
-#include "../../sysdep.h"
 
-#include "../../structs.h"
 #include "../../interpreter.h"
 #include "../../constants.h"
-#include "../../screen.h"
 #include "../../StringUtil.h"
-#include "../../MiscUtil.h"
 #include "../../utils.h"
 #include "../../olc/olc.h"
 #include "../../js/js_functions.h"
 #include "../../guilds/GuildUtil.h"
-#include "../../Descriptor.h"
 
-#include "CommandUtil.h"
 #include "CommandInfo.h"
 #include "Social.h"
 

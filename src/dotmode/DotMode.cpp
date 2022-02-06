@@ -1,9 +1,5 @@
-#include "../conf.h"
-#include "../sysdep.h"
 
 #include "DotMode.h"
-#include "DotModeTarget.h"
-#include "DotModeArea.h"
 
 DotMode::DotMode(const std::optional<DotModeTarget> &target, DotModeArea *area, const std::optional<std::string> &targetName)
 {

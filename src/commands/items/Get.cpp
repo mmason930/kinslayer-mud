@@ -1,33 +1,15 @@
 #include "../../conf.h"
-#include "../../sysdep.h"
 
 
 #include "../../structs.h"
 #include "../../spells.h"
-#include "../../utils.h"
-#include "../../comm.h"
-#include "../../interpreter.h"
-#include "../../handler.h"
-#include "../../db.h"
-#include "../../clans.h"
-#include "../../constants.h"
-#include "../../shop.h"
 #include "../../olc/olc.h"
-#include "../../screen.h"
-#include "../../auction.h"
-#include "../../StringUtil.h"
-#include "../../MiscUtil.h"
 #include "../../Descriptor.h"
 #include "../../rooms/Room.h"
-#include "../../ClanUtil.h"
 
 #include "../../js/js.h"
-#include "../../js/js_functions.h"
 
-#include "../../commands/infrastructure/CommandUtil.h"
-#include "../../commands/infrastructure/CommandInfo.h"
 
-#include "../../dotmode/DotModeUtil.h"
 
 void get_from_room( Character *ch, char *arg );
 void get_from_container( Character *ch, Object *cont, char *arg, int mode );

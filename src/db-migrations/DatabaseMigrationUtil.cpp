@@ -1,13 +1,5 @@
 #include "../conf.h"
-#include "../sysdep.h"
-#include "../structs.h"
-#include "../utils.h"
-#include "../Game.h"
-#include "../dbutils/QueryUtil.h"
-#include "../MiscUtil.h"
 #include "../dbutils/StoreDataObjectSQLBuilder.h"
-#include "../screen.h"
-#include "../StringUtil.h"
 
 #include "DatabaseMigrationUtil.h"
 

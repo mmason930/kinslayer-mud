@@ -1,17 +1,12 @@
 #include "../conf.h"
-#include "../sysdep.h"
 #include "../structs.h"
-#include "../Descriptor.h"
-#include "../screen.h"
 #include "../olc/olc.h"
 #include "../StringUtil.h"
 #include "../utils.h"
 
-#include <cstdarg>
 
 #include "EditorInterfaceInstance.h"
 #include "EditorInterfaceMenu.h"
-#include "EditorInterfaceData.h"
 
 EditorInterfaceMenu *EditorInterfaceInstance::push(EditorInterfaceMenu *menu)
 {

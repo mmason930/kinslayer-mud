@@ -8,11 +8,8 @@
 ** By: Mark A. Heilpern (Sammy @ eQuoria MUD   equoria.com:4000)
 */
 #include "conf.h"
-#include "sysdep.h"
-#include "structs.h"
 #include "utils.h"
 #include "dg_event.h"
-#include "shop.h"
 
 
 /*

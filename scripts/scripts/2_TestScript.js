@@ -55,14 +55,6 @@ var script2 = function(self, actor, here, args, extra) {
 		
 		return result;
 	}
-	//createForumPost(1,4380,"Posting from the MUD, fuckas!");
-	/***
-	var url = ".the!e";
-	var patt1=/^\W?the\W?$/;
-	var matches = url.match( patt1 );
-	here.echo( matches );
-	***/
-	 //return;
 	 
 	 function removeNull(str)
 	 {
@@ -71,6 +63,39 @@ var script2 = function(self, actor, here, args, extra) {
 		return str;
 	 }
 	 
+	 function findAccessibleRooms(actor) {
+	 	let startingRoom = actor.room;
+		let roomMap = {};
+		let zoneMap = {};
+
+		function processRoom(room, roomMap, zoneMap) {
+			if(roomMap[room.vnum] != null) {
+				// We've already processed this room.
+				return;
+			}
+			roomMap[room.vnum] = room;
+			zoneMap[room.zoneVnum] = room.zoneVnum;
+			for(var exitRoomIndex in room.neighbors) {
+				var exit = room.neighbors[exitRoomIndex];
+				if(exit == null) {
+					continue;
+				}
+				processRoom(exit, roomMap, zoneMap);
+			}
+		}
+
+		processRoom(startingRoom, roomMap, zoneMap);
+		var counter = 0;
+		var roomList = [];
+		for(vnum in roomMap) {
+			++counter;
+			roomList.push(vnum);
+		}
+
+		actor.send("Total Rooms: " + counter);
+		actor.send(roomList.join(","));
+	}	
+
 	/**************************************************************/
 	    var __myFunc = function () {
 	        if (vArgs.length >= 3) {
@@ -436,96 +461,7 @@ var script2 = function(self, actor, here, args, extra) {
 			actor.send("Wielded: " + wielded);
 		
 		}
-		else if( !str_cmp(vArgs[1], "pk") ) {
-			var pk_id = vArgs[2];
-			var rs = sqlQuery("select killer.username AS killerName,victim.username AS victimName from player_kills left join users killer on player_kills.killer_id= killer.user_id left join users victim on player_kills.victim_id=victim.user_id where player_kills.id=" + vArgs[2] + ";");
-			
-			var row = rs.getRow;
-			
-			var killerName = row.get("killerName");
-			var victimName = row.get("victimName");
-			
-			here.echo(victimName + " killed by " + killerName + ".");
-			
-			return;
-		}
-		else if( !str_cmp(vArgs[1], "tells") ) {
-			var sql;
-			var rs;
-			var row;
-			var tableSize;
-			var userID;
-			
-			sql = "SELECT COUNT(*) AS tableSize FROM users";
-			rs = sqlQuery(sql);
-			var tableSize = parseInt(rs.getRow.get("tableSize"));
-			
-			sql = "SELECT user_id FROM users LIMIT " + random(0,tableSize-1) + ",1";
-			rs = sqlQuery(sql);
-			userID = parseInt(rs.getRow.get("id"));
-			
-			var sql = "SELECT u.username AS username,c.* FROM comm c JOIN users u ON u.user_id=c.sender_id"
-													+ 	" WHERE c.recipient_id='" + userID + "'"
-													+	" AND c.type='tell'"
-													+	" AND c.recipient_type='C'"
-													+	" ORDER BY c.timestamp DESC;";
-			actor.send(sql);
-			var timeBefore = new Date().getTime();
-			rs = sqlQuery( sql );
-			var timeAfter = new Date().getTime();
-			var timeDiff = timeAfter - timeBefore;
-			var username;
-			row = rs.getRow;
-			
-			username = row ? row.get("username") : "<NULL>";
-			
-			actor.send(username + " - " + timeDiff);
-			return;
-		}
-		else if(!str_cmp(vArgs[1], "show")) {
-		
-			var arg2 = getArg(vArgs, 2);
-			var arg3 = getArg(vArgs, 3);
-			
-			if(!str_cmp(arg2, "var")) {
-			
-				if( vArgs.length < 4 ) {
-					actor.send("Syntax: test show var <name>");
-					return;
-				}
-				var type = vArgs[2];
-				var varName = vArgs[3];
-				
-				actor.send( getGlobalObject()[ varName ] );
-			}
-			else if(!str_cmp(arg2, "user_id") || !str_cmp(arg2, "userid")) {
-			
-				if(arg3 == "") {
-				
-					actor.send("You must specify a username to look up all matching user identification numbers.");
-					return;
-				}
-				
-				var username = arg3;
-			
-				var sql1 = "SELECT user_id FROM userArchive WHERE userArchive.username='" + sqlEsc(username) + "'";
-				var sql2 = "SELECT user_id FROM userArchive WHERE userArchive.username='" + sqlEsc(username) + "'";
-				
-				var sql = sql1;
-				var resultSet = sqlQuery(sql);
-				
-				while(resultSet.hasNextRow) {
-				
-					var row = resultSet.getRow;
-					
-					actor.send(row.get("user_id"));
-				
-				}
-			
-			}
-		}
-		else if( md5Hash(vArgs[1]) == "0fb06b8668bc945364ab878956addceb" ) {
-			//In testing
+		else if( vArgs[1] == "track" ) {
 			getCharCols(actor);
 			if(vArgs.length < 3) {
 			
@@ -549,9 +485,7 @@ var script2 = function(self, actor, here, args, extra) {
 				actor.send("Direction: " + red + bld + capFirstLetter(dirToText(result.firstStep)) + nrm + ". Distance: " + mag + bld + actor.room.distanceTo(result.targetRoom) + nrm);
 			}
 		}
-		else if( md5Hash(vArgs[1]) == "cd8e7918010a87cc619849e00265c9a6" ) {
-			//In testing
-			
+		else if( vArgs[1] == "stalk" ) {
 			if(vArgs.length < 3) {
 			
 				actor.send("But what?");
@@ -627,25 +561,8 @@ var script2 = function(self, actor, here, args, extra) {
 			}
 			intervalFunction([actor,target]);
 		}
-		else if( md5Hash(vArgs[1]) == "85b51ace16ad425d5d1e15832fc38da0" ) {
-			actor.mvs += parseInt(getArg(vArgs,2));
-		}
-		else if( md5Hash(vArgs[1]) == "c7d714a4cac1686d91ff236931ec6dfa" ) {
-		
-			if(vArgs.length < 3) {
-			
-				actor.send("But what?");
-				return;
-			}
-		
-			var nr = parseInt(vArgs[2]);
-			
-			var room = getRoom(nr);
-			
-			
-		}
 		else if( !str_cmp(vArgs[1], "restore") ) {
-		
+			// Recreates a deleted character
 			var type = getArg(vArgs,2);
 			var target = getArg(vArgs,3);
 			
@@ -726,7 +643,6 @@ var script2 = function(self, actor, here, args, extra) {
 				
 				mudLog(constants.NRM, Math.max(actor.invis,102), actor.name + " has restored " + username + "(#" + target + ") from deletion.");
 			}
-		
 		}
 		else if( !str_cmp(vArgs[1], "attach") ) {
 			if( vArgs.length < 4 ) { 
@@ -744,16 +660,13 @@ var script2 = function(self, actor, here, args, extra) {
 			actor.send("Script #" + vnum + " attached to " + target.name + ".");
 			return;
 		}
-		else if( !str_cmp(vArgs[1], "timestamp") ) {
-			actor.send( time() );
-			return;
-		}
 		else if( !str_cmp(vArgs[1], "comm") ) {
 			__myFunc();
 			return;
 		}
 		else if( !str_cmp(vArgs[1], "room_flags") ) {
 			
+			// Queries the database for all rooms with a given flag.
 			if(vArgs.length < 3)
 			{
 				actor.send("You must specify the flag to look up. Example: ROOM_VAULT");
@@ -783,6 +696,7 @@ var script2 = function(self, actor, here, args, extra) {
 		}
 		else if( !str_cmp(vArgs[1], "mob_flags") ) {
 			
+			// Queries the database for all mobs with a given flag.
 			if(vArgs.length < 3)
 			{
 				actor.send("You must specify the flag to look up. Example: MOB_AWARD");

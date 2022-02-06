@@ -1,14 +1,7 @@
 #include "../conf.h"
-#include "../sysdep.h"
 
-#include "../structs.h"
-#include "../screen.h"
 #include "../utils.h"
 
-#include "EditorInterfaceBase.h"
-#include "EditorInterfaceMenu.h"
-#include "EditorInterfaceData.h"
-#include "EditorInterfaceInstance.h"
 #include "EditorInterface.h"
 
 EditorInterfaceBase::EditorInterfaceBase()

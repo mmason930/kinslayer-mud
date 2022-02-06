@@ -1,13 +1,9 @@
 #include "../conf.h"
-#include "../sysdep.h"
 
-#include "../MiscUtil.h"
 #include "../StringUtil.h"
 #include "../utils.h"
 
 #include "DotModeUtil.h"
-#include "DotModeTarget.h"
-#include "DotModeArea.h"
 
 
 DotModeUtil *DotModeUtil::self = nullptr;
