@@ -34,7 +34,7 @@ While the container is running, you can perform a full build by running:
 ```
 docker exec -it game.kinslayermud.org bash -c 'make clean -C /kinslayer/src && make -j${GCC_THREADS} -C /kinslayer/src'
 ```
-
+ 
 ## Stop game container
 To stop the container, run:
 
