@@ -8,8 +8,6 @@
 #include "UserEmailAddressConfirmation.h"
 #include "CharacterUtil.h"
 #include "UserMacro.h"
-#include "StringUtil.h"
-#include "MiscUtil.h"
 #include "MailUtil.h"
 #include "structs.h"
 #include "db.h"

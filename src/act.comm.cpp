@@ -9,7 +9,6 @@
 ************************************************************************ */
 
 #include "conf.h"
-#include "sysdep.h"
 
 #include "structs.h"
 #include "spells.h"
@@ -20,12 +19,10 @@
 #include "db.h"
 #include "screen.h"
 #include "clans.h"
-#include "olc/olc.h"
 #include "customcmds.h"
 
 #include "js/js_functions.h"
 #include "StringUtil.h"
-#include "MiscUtil.h"
 #include "ClanUtil.h"
 #include "Descriptor.h"
 #include "rooms/Room.h"

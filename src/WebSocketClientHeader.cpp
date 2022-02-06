@@ -8,14 +8,10 @@
  *                                                                 *
  *******************************************************************/
 
-#include "WebSocketClientHeader.h"
 #include "WebSocketException.h"
 
 #include "WebSocketClientHeaderIETF_HYBI17.h"
 
-#include <sstream>
-#include <stdexcept>
-#include <vector>
 #include <cstring>
 
 #define GET_ULONG_LE(n, b, i)                        \

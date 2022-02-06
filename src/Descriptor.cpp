@@ -1,11 +1,8 @@
 
 #include "conf.h"
-#include "sysdep.h"
-#include "structs.h"
 #include "utils.h"
 #include "db.h"
 #include "md5.h"
-#include "screen.h"
 #include "accounts.h"
 #include "interpreter.h"
 #include "olc/olc.h"

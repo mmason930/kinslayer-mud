@@ -752,7 +752,7 @@ const int AGGRO_AIEL = 4;
 const int AGGRO_NON_CLAN = 5;
 const int AGGRO_MOB = 6;
 
-#define OUTSIDE(ch) (!ROOM_FLAGGED((ch)->in_room, ROOM_INDOORS))
+#define OUTSIDE(ch) ((ch)->in_room->getSector() == RoomSector::inside)
 
 #define ATTACK_TYPE(obj, val) (
 

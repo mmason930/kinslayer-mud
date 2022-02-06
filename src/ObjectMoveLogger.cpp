@@ -1,9 +1,6 @@
 #include "ObjectMoveLogger.h"
 
 #include "utils.h"
-#include "StringUtil.h"
-#include "MiscUtil.h"
-#include "DateTime.h"
 
 ObjectMoveLogger::ObjectMoveLogger()
 {

@@ -1,13 +1,9 @@
 #include "conf.h"
-#include "sysdep.h"
 
-#include "structs.h"
 #include "utils.h"
 #include "db.h"
-#include "handler.h"
 #include "accounts.h"
 #include "md5.h"
-#include "MiscUtil.h"
 #include "Descriptor.h"
 #include "CharacterUtil.h"
 

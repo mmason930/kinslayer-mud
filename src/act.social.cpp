@@ -9,21 +9,15 @@
 ************************************************************************ */
 
 #include "conf.h"
-#include "sysdep.h"
 
-#include "structs.h"
 #include "utils.h"
 #include "comm.h"
 #include "interpreter.h"
 #include "handler.h"
 #include "db.h"
-#include "shop.h"
-#include "MiscUtil.h"
-#include "Descriptor.h"
 
 #include "rooms/Room.h"
 
-#include "commands/infrastructure/CommandUtil.h"
 #include "commands/infrastructure/Social.h"
 
 #include "items/ItemUtil.h"

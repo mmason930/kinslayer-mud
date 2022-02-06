@@ -9,55 +9,34 @@
 ************************************************************************ */
 
 #include "conf.h"
-#include "sysdep.h"
 
 #include "structs.h"
 #include "spells.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "screen.h"
 #include "constants.h"
-#include "olc/olc.h"
-#include "clans.h"
-#include "shop.h"
 #include "stats.h"
 #include "customcmds.h"
 #include "weaves.h"
 #include "mobs.h"
 #include "md5.h"
 #include "js/js.h"
-#include "js/js_trigger.h"
-#include "js/js_functions.h"
 #include "accounts.h"
 #include "Descriptor.h"
 #include "rooms/Room.h"
 #include "rooms/RoomSector.h"
 #include "rooms/Exit.h"
-#include "zones.h"
 
-#include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
 
-#include "MiscUtil.h"
 #include "CharacterUtil.h"
 #include "StringUtil.h"
 #include "ForumUtil.h"
 #include "ClanUtil.h"
 #include "MailUtil.h"
 #include "SQLUtil.h"
-#include "SystemUtil.h"
 
-#include "ku/kuSockets.h"
-#include "ku/kuListener.h"
-#include "ku/kuDescriptor.h"
 #include "threaded_jobs.h"
-#include "ku/kuClient.h"
 #include "UserLogoutType.h"
 #include "UserDisabledCommand.h"
-#include "ClanQuestPointTransaction.h"
 #include "dg_event.h"
 #include "MobLoadLogger.h"
 
@@ -71,7 +50,6 @@
 
 #include "test/TestUtil.h"
 
-#include "commands/infrastructure/CommandUtil.h"
 #include "commands/infrastructure/CommandInfo.h"
 
 #include "items/ItemUtil.h"

@@ -11,32 +11,21 @@
 #define __ACT_OTHER_C__
 
 #include "conf.h"
-#include "sysdep.h"
-#include "stdio.h"
 
 #include "structs.h"
 #include "spells.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "screen.h"
 #include "mobs.h"
 #include "md5.h"
-#include "MiscUtil.h"
 #include "UserLogoutType.h"
 #include "Descriptor.h"
 #include "rooms/Room.h"
 #include "rooms/RoomSector.h"
 #include "js/js.h"
-#include "js/js_trigger.h"
 
 #include "StringUtil.h"
 #include "ForumUtil.h"
 #include "CharacterUtil.h"
 
-#include "commands/infrastructure/CommandUtil.h"
 #include "commands/infrastructure/CommandInfo.h"
 
 #include "items/ItemUtil.h"

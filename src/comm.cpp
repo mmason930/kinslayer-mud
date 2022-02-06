@@ -12,8 +12,6 @@
 
 #include "conf.h"
 #include "sysdep.h"
-#include "screen.h"
-#include "constants.h"
 
 
 #ifdef CIRCLE_MACINTOSH /* Includes for the Macintosh */
@@ -48,15 +46,7 @@
 
 #include "structs.h"
 #include "spells.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "olc/olc.h"
 #include "poker.h"
-#include "clans.h"
-#include "shop.h"
 #include "weaves.h"
 #include "dg_event.h"
 #include "stats.h"
@@ -67,16 +57,13 @@
 #include "js/JSRow.h"
 #include "accounts.h"
 #include "StringUtil.h"
-#include "MiscUtil.h"
 #include "ForumUtil.h"
 #include "UserLogoutType.h"
 #include "gateway/GatewayServer.h"
 #include "Descriptor.h"
 #include "rooms/Room.h"
-#include "gateway/GatewayDescriptorType.h"
 #include "UserType.h"
 #include "rooms/RoomSector.h"
-#include "PlayerPortalDescriptorStatus.h"
 #include "olc/OlcEditType.h"
 #include "EntityType.h"
 #include "Game.h"

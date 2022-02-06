@@ -9,17 +9,11 @@
 ************************************************************************ */
 
 #include "conf.h"
-#include "sysdep.h"
 
 
-#include "structs.h"
 #include "utils.h"
-#include "comm.h"
 #include "interpreter.h"
-#include "handler.h"
 #include "db.h"
-#include "shop.h"
-#include "md5.h"
 
 extern Descriptor *descriptor_list;
 

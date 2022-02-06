@@ -2,8 +2,6 @@
 #define CHARACTER_UTIL_UTIL_H
 
 #include <mysql/sqlDatabase.h>
-#include <list>
-#include <vector>
 
 class PlayerIndex;
 class Character;

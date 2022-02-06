@@ -1,7 +1,5 @@
-#include <sstream>
 
 #include "conf.h"
-#include "sysdep.h"
 #include "structs.h"
 #include "db.h"
 #include "utils.h"

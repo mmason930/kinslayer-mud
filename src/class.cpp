@@ -16,15 +16,11 @@
  */
 
 #include "conf.h"
-#include "sysdep.h"
 
 #include "structs.h"
 #include "db.h"
-#include "spells.h"
 #include "utils.h"
-#include "interpreter.h"
 #include "handler.h"
-#include "clans.h"
 #include "screen.h"
 #include "olc/olc.h"
 #include "stats.h"
@@ -32,7 +28,6 @@
 #include "weaves.h"
 #include "zones.h"
 #include "StringUtil.h"
-#include "MiscUtil.h"
 
 extern int siteok_everyone;
 

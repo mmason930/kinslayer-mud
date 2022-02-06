@@ -9,7 +9,6 @@
 ************************************************************************ */
 
 #include "conf.h"
-#include "sysdep.h"
 
 
 #include "structs.h"
@@ -19,17 +18,14 @@
 #include "interpreter.h"
 #include "handler.h"
 #include "db.h"
-#include "constants.h"
 #include "screen.h"
 #include "dg_event.h"
 #include "weaves.h"
-#include "MiscUtil.h"
 #include "Descriptor.h"
 #include "rooms/Room.h"
 #include "rooms/RoomSector.h"
 #include "rooms/Exit.h"
 
-#include "commands/infrastructure/CommandUtil.h"
 #include "commands/infrastructure/CommandInfo.h"
 
 /* extern variables */

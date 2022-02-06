@@ -9,22 +9,12 @@
 ************************************************************************ */
 
 #include "conf.h"
-#include "sysdep.h"
 
-#include "structs.h"
 #include "utils.h"
 #include "spells.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
 #include "screen.h"
 #include "constants.h"
-#include "dg_event.h"
-#include "weaves.h"
-#include "md5.h"
 #include "js/js.h"
-#include "zones.h"
 #include "StringUtil.h"
 #include "Descriptor.h"
 #include "rooms/Room.h"
@@ -1362,7 +1352,7 @@ CommandHandler do_enter = DEFINE_COMMAND
 		return;
 	}
 
-	else if (ROOM_FLAGGED(ch->in_room, ROOM_INDOORS))
+	else if (ch->in_room->getSector() == RoomSector::inside)
 		ch->send("You are already indoors.\r\n");
 
 	else
@@ -1374,7 +1364,7 @@ CommandHandler do_enter = DEFINE_COMMAND
 			{
 				if (EXIT(ch, door)->getToRoom())
 				{
-					if (!EXIT(ch, door)->isFlagged( EX_CLOSED ) && ROOM_FLAGGED(EXIT(ch, door)->getToRoom(), ROOM_INDOORS))
+					if (!EXIT(ch, door)->isFlagged( EX_CLOSED ) && EXIT(ch, door)->getToRoom()->getSector() == RoomSector::inside)
 					{
 						perform_move(ch, door, 1);
 						return;
@@ -1392,7 +1382,7 @@ CommandHandler do_leave = DEFINE_COMMAND
 {
 	int door;
 
-	if (!ROOM_FLAGGED(ch->in_room, ROOM_INDOORS))
+	if (ch->in_room->getSector() == RoomSector::inside)
 		ch->send("You are outside.. where do you want to go?\r\n");
 
 	else
@@ -1403,7 +1393,7 @@ CommandHandler do_leave = DEFINE_COMMAND
 			{
 				if (EXIT(ch, door)->getToRoom())
 				{
-					if (!EXIT(ch, door)->isFlagged(EX_CLOSED) && !ROOM_FLAGGED(EXIT(ch, door)->getToRoom(), ROOM_INDOORS))
+					if (!EXIT(ch, door)->isFlagged(EX_CLOSED) && EXIT(ch, door)->getToRoom()->getSector() == RoomSector::inside)
 					{
 						perform_move(ch, door, 1);
 						return;

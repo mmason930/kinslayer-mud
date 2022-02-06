@@ -12,20 +12,10 @@
 #define __DB_C__
 
 #include "conf.h"
-#include "sysdep.h"
 
 
 #include "structs.h"
-#include "spells.h"
-#include "utils.h"
-#include "db.h"
-#include "comm.h"
-#include "handler.h"
-#include "interpreter.h"
 #include "olc/olc.h"
-#include "clans.h"
-#include "constants.h"
-#include "shop.h"
 #include "weather.h"
 #include "stats.h"
 #include "weaves.h"
@@ -35,15 +25,12 @@
 #include "dg_event.h"
 #include "md5.h"
 #include "threaded_jobs.h"
-#include "MiscUtil.h"
 #include "DatabaseUtil.h"
 #include "Descriptor.h"
 #include "UserDisabledCommand.h"
-#include "UserType.h"
 #include "CharacterUtil.h"
 #include "ClanUtil.h"
 #include "EntityType.h"
-#include "gateway/GatewayDescriptorType.h"
 #include "ObjectMoveLogger.h"
 #include "MobLoadLogger.h"
 #include "Game.h"
@@ -51,15 +38,11 @@
 #include "rooms/Exit.h"
 
 #include "js/js.h"
-#include "js/js_trigger.h"
 
 #include "StringUtil.h"
-#include <boost/filesystem.hpp>
 
 #include "guilds/GuildUtil.h"
 
-#include "commands/infrastructure/CommandUtil.h"
-#include "commands/infrastructure/CommandInfo.h"
 
 boost::uuids::uuid u;
 

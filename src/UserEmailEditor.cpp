@@ -1,23 +1,16 @@
 #include "conf.h"
-#include "sysdep.h"
 
-#include "structs.h"
 #include "comm.h"
 #include "interpreter.h"
 #include "db.h"
 #include "utils.h"
-#include "handler.h"
-#include "screen.h"
 #include "olc/olc.h"
-#include "constants.h"
 
 #include "UserEmailAddress.h"
 #include "UserEmailAddressConfirmation.h"
 #include "Descriptor.h"
 
-#include "MailUtil.h"
 #include "CharacterUtil.h"
-#include "MiscUtil.h"
 #include "StringUtil.h"
 
 void userEmailAddressEditorDisplayMainMenu(Descriptor *descriptor)

@@ -1,11 +1,9 @@
 #include "PlayerPortalCommandProcessor.h"
 #include "utils.h"
 #include "js/js.h"
-#include "jsoncpp/json.h"
 #include "constants.h"
 #include "StringUtil.h"
 
-#include <vector>
 #include <boost/regex.hpp>
 
 extern int top_of_objt;

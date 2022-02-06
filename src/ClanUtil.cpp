@@ -1,10 +1,7 @@
-#include <sstream>
 
-#include "conf.h"
 #include "utils.h"
 #include "ClanUtil.h"
 #include "CharacterUtil.h"
-#include "UserType.h"
 #include "mobs.h"
 #include "clans.h"
 #include "Exception.h"

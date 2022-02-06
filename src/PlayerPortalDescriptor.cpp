@@ -3,7 +3,6 @@
 #include "WebSocketException.h"
 #include "WebSocketDataFrame.h"
 #include "StringUtil.h"
-#include "jsoncpp/json.h"
 #include "CharacterUtil.h"
 #include "utils.h"
 

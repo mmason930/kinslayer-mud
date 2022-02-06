@@ -1,11 +1,7 @@
 #include <boost/filesystem.hpp>
 
 #include "Game.h"
-#include "MiscUtil.h"
-#include "utils.h"
-#include "structs.h"
 
-#include "SystemUtil.h"
 
 extern Character *character_list;
 

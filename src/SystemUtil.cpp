@@ -1,17 +1,7 @@
 #include "SystemUtil.h"
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
-#include <map>
-#include <vector>
-#include <list>
 
-#include "StringUtil.h"
-#include "MiscUtil.h"
 
 #ifdef WIN32
-#include <Windows.h>
-#include <TlHelp32.h>
 #else
 #include <unistd.h>
 #include <dirent.h>

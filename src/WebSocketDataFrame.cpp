@@ -1,6 +1,5 @@
 #include "WebSocketDataFrame.h"
 
-#include <string>
 #include <sstream>
 
 WebSocketDataFrame::WebSocketDataFrame()

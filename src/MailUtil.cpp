@@ -1,10 +1,8 @@
-#include "conf.h"
 #include "sysdep.h"
 
 #include "MailUtil.h"
 #include "StringUtil.h"
 
-#include "ku/kuSockets.h"
 #include "ku/kuClient.h"
 
 #include <thread>

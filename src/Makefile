@@ -6,9 +6,8 @@
 CC = g++
 
 # Any special flags you want to pass to the compiler
-MYFLAGS = -O0 -std=c++2a -DXP_UNIX -I/usr/local/include -Wformat-security -Wformat -Wpointer-arith -Wcast-align -Wredundant-decls \
- 		-L/usr/local/lib -DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10 \
-              -I/usr/local/lib/pkgconfig/../../include -I/usr/local/include
+MYFLAGS = -O0 -std=c++2a -DXP_UNIX -Wformat-security -Wformat -Wpointer-arith -Wcast-align -Wredundant-decls \
+ 		-L/usr/local/lib -DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10 -I/usr/local/include
 
 #-Werror
 

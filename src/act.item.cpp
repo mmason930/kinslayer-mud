@@ -9,34 +9,19 @@
 ************************************************************************ */
 
 #include "conf.h"
-#include "sysdep.h"
 
 
 #include "structs.h"
 #include "spells.h"
-#include "utils.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "clans.h"
 #include "constants.h"
-#include "shop.h"
 #include "olc/olc.h"
 #include "screen.h"
 #include "auction.h"
 #include "StringUtil.h"
-#include "MiscUtil.h"
 #include "Descriptor.h"
 #include "rooms/Room.h"
 #include "ClanUtil.h"
-
 #include "js/js.h"
-#include "js/js_functions.h"
-
-#include "commands/infrastructure/CommandUtil.h"
-#include "commands/infrastructure/CommandInfo.h"
-
 #include "items/ItemUtil.h"
 
 /* extern variables */

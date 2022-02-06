@@ -6,9 +6,7 @@
  ********************************************************************/
 
 #include "conf.h"
-#include "sysdep.h"
 
-#include "structs.h"
 #include "utils.h"
 #include "constants.h"
 #include "db.h"
@@ -18,7 +16,6 @@
 #include "handler.h"
 #include "screen.h"
 
-#include "MiscUtil.h"
 #include "StringUtil.h"
 #include "CharacterUtil.h"
 #include "Descriptor.h"
