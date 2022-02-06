@@ -10,7 +10,7 @@
 #include "threaded_jobs.h"
 #include "handler.h"
 #include "weather.h"
-#include "js.h"
+#include "js/js.h"
 #include "rooms/Room.h"
 #include "MobLoadLogger.h"
 #include "items/ItemUtil.h"

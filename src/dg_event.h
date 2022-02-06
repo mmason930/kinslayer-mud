@@ -1,3 +1,18 @@
+/**
+ * @file dg_event.h
+ * @author
+ * @brief 
+ * @version
+ * @date
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ * This file was originally part of the Death Gate scripts system.
+ * We have since removed the system, but we used DG events in
+ * various parts of the game, so we've kept this portion.
+ * 
+ */
+
 /*
 ** how often will heartbeat() call our event function?
 */

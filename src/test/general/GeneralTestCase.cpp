@@ -7,7 +7,7 @@
 #include "../../comm.h"
 #include "../../fight.h"
 #include "../../screen.h"
-#include "../../olc.h"
+#include "../../olc/olc.h"
 #include "../../utils.h"
 #include "../../StringUtil.h"
 #include "../../MiscUtil.h"

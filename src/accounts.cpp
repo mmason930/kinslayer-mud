@@ -333,6 +333,7 @@ bool SwitchManager::IsExemptFromWaiting( const std::string &sHostFrom, const std
 }
 bool SwitchManager::IsExemptFromMultiplayRestriction( const std::string &sHost, const std::string &sName, const std::list< std::string > lAlreadyLoggedInNames )
 {
+	return true;
 	std::stringstream QueryBuffer;
 	sql::Query MyQuery;
 	sql::Row MyRow;

@@ -12,7 +12,7 @@
 #include "utils.h"
 #include "db.h"
 #include "constants.h"
-#include "olc.h"
+#include "olc/olc.h"
 #include "clans.h"
 #include "mobs.h"
 #include "shop.h"
@@ -22,8 +22,8 @@
 #include "Descriptor.h"
 #include "ClanUtil.h"
 
-#include "js.h"
-#include "js_trigger.h"
+#include "js/js.h"
+#include "js/js_trigger.h"
 
 MobManager *MobManager::Self = NULL;
 extern Character *character_list;

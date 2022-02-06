@@ -8,8 +8,8 @@
 #include "../../StringUtil.h"
 #include "../../MiscUtil.h"
 #include "../../utils.h"
-#include "../../olc.h"
-#include "../../js_functions.h"
+#include "../../olc/olc.h"
+#include "../../js/js_functions.h"
 #include "../../guilds/GuildUtil.h"
 #include "../../Descriptor.h"
 

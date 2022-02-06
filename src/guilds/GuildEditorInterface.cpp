@@ -8,7 +8,7 @@
 #include "../structs.h"
 #include "../Descriptor.h"
 #include "../screen.h"
-#include "../olc.h"
+#include "../olc/olc.h"
 #include "../utils.h"
 #include "../CharacterUtil.h"
 #include "../db.h"

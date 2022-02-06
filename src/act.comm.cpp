@@ -20,10 +20,10 @@
 #include "db.h"
 #include "screen.h"
 #include "clans.h"
-#include "olc.h"
+#include "olc/olc.h"
 #include "customcmds.h"
 
-#include "js_functions.h"
+#include "js/js_functions.h"
 #include "StringUtil.h"
 #include "MiscUtil.h"
 #include "ClanUtil.h"

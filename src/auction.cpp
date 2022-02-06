@@ -13,7 +13,7 @@
 #include "constants.h"
 #include "db.h"
 #include "clans.h"
-#include "olc.h"
+#include "olc/olc.h"
 #include "auction.h"
 #include "handler.h"
 #include "screen.h"

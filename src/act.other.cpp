@@ -29,8 +29,8 @@
 #include "Descriptor.h"
 #include "rooms/Room.h"
 #include "rooms/RoomSector.h"
-#include "js.h"
-#include "js_trigger.h"
+#include "js/js.h"
+#include "js/js_trigger.h"
 
 #include "StringUtil.h"
 #include "ForumUtil.h"

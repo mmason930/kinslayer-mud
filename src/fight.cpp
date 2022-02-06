@@ -25,7 +25,7 @@
 #include "mobs.h"
 #include "fight.h"
 #include "dg_event.h"
-#include "js.h"
+#include "js/js.h"
 
 #include "MiscUtil.h"
 #include "ClanUtil.h"

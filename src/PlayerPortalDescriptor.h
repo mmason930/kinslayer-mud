@@ -1,8 +1,8 @@
 #ifndef PLAYER_PORTAL_DESCRIPTOR_H
 #define PLAYER_PORTAL_DESCRIPTOR_H
 
-#include "kuSockets.h"
-#include "kuDescriptor.h"
+#include "ku/kuSockets.h"
+#include "ku/kuDescriptor.h"
 #include "PlayerPortalServer.h"
 #include "PlayerPortalDescriptorStatus.h"
 #include "jsoncpp/json.h"

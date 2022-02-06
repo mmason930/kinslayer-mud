@@ -23,7 +23,7 @@
 #include "dg_event.h"
 #include "weaves.h"
 #include "md5.h"
-#include "js.h"
+#include "js/js.h"
 #include "zones.h"
 #include "StringUtil.h"
 #include "Descriptor.h"

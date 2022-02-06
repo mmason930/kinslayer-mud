@@ -8,7 +8,7 @@
 #include "utils.h"
 #include "handler.h"
 #include "screen.h"
-#include "olc.h"
+#include "olc/olc.h"
 #include "constants.h"
 
 #include "UserEmailAddress.h"

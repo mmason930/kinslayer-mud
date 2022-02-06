@@ -20,7 +20,7 @@
 #include "db.h"
 #include "screen.h"
 #include "constants.h"
-#include "olc.h"
+#include "olc/olc.h"
 #include "clans.h"
 #include "shop.h"
 #include "weaves.h"
@@ -36,8 +36,8 @@
 #include "Game.h"
 #include "TextTableBuilder.h"
 
-#include "js.h"
-#include "js_utils.h"
+#include "js/js.h"
+#include "js/js_utils.h"
 #include "rooms/RoomSector.h"
 #include "rooms/Exit.h"
 

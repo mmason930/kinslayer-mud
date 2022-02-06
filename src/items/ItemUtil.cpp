@@ -10,7 +10,7 @@
 #include "../spells.h"
 #include "../interpreter.h"
 #include "../comm.h"
-#include "../js_functions.h"
+#include "../js/js_functions.h"
 
 #include "ItemUtil.h"
 

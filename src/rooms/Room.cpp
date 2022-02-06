@@ -10,7 +10,7 @@
 #include "../constants.h"
 #include "../weather.h"
 #include "../threaded_jobs.h"
-#include "../js.h"
+#include "../js/js.h"
 #include "../poker.h"
 #include "Room.h"
 #include "RoomSector.h"

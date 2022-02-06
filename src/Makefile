@@ -36,16 +36,16 @@ OBJFILES =	accounts.o \
 			act.other.o \
 			act.social.o \
 			act.wizard.o \
-			aedit.o \
+			olc/aedit.o \
 			auction.o \
 			ban.o \
-			cedit.o \
+			olc/cedit.o \
 			CharacterUtil.o \
 			ClanQuestPointTransaction.o \
 			clans.o \
 			ClanUtil.o \
 			class.o \
-			cledit.o \
+			olc/cledit.o \
 			comm.o \
 			commands/immortals/Locate.o \
 			commands/items/Get.o \
@@ -73,10 +73,10 @@ OBJFILES =	accounts.o \
 			fight.o \
 			ForumUtil.o \
 			Game.o \
-			GatewayDescriptor.o \
-			GatewayDescriptorStatus.o \
-			GatewayDescriptorType.o \
-			GatewayListener.o \
+			gateway/GatewayDescriptor.o \
+			gateway/GatewayDescriptorStatus.o \
+			gateway/GatewayDescriptorType.o \
+			gateway/GatewayListener.o \
 			graph.o \
 			guilds/Guild.o \
 			guilds/GuildApplication.o \
@@ -97,30 +97,30 @@ OBJFILES =	accounts.o \
 			handler.o \
 			interpreter.o \
 			items/ItemUtil.o \
-			jedit.o \
-			js.o \
-			js_constants.o \
-			js_functions.o \
-			js_interpreter.o \
-			js_utils.o \
-			JSCharacter.o \
-			JSObject.o \
+			olc/jedit.o \
+			js/js.o \
+			js/js_constants.o \
+			js/js_functions.o \
+			js/js_interpreter.o \
+			js/js_utils.o \
+			js/JSCharacter.o \
+			js/JSObject.o \
 			jsoncpp/json_reader.o \
 			jsoncpp/json_value.o \
 			jsoncpp/json_writer.o \
-			JSQuery.o \
-			JSRoom.o \
-			JSRow.o \
+			js/JSQuery.o \
+			js/JSRoom.o \
+			js/JSRow.o \
 			kedit.o \
-			kuClient.o \
-			kuDescriptor.o \
-			kuListener.o \
-			kuSockets.o \
+			ku/kuClient.o \
+			ku/kuDescriptor.o \
+			ku/kuListener.o \
+			ku/kuSockets.o \
 			limits.o \
 			magic.o \
 			MailUtil.o \
 			md5.o \
-			medit.o \
+			olc/medit.o \
 			MiscUtil.o \
 			mobact.o \
 			MobLoadLogger.o \
@@ -129,21 +129,20 @@ OBJFILES =	accounts.o \
 			MudStatus.o \
 			ObjectMoveLogger.o \
 			objsave.o \
-			oedit.o \
-			olc.o \
-			OlcEditType.o \
-			OLCUtil.o \
+			olc/oedit.o \
+			olc/olc.o \
+			olc/OlcEditType.o \
 			PlayerPortalCommandProcessor.o \
 			PlayerPortalDescriptor.o \
 			PlayerPortalDescriptorStatus.o \
 			PlayerPortalServer.o \
 			poker.o \
-			redit.o \
+			olc/redit.o \
 			rooms/Exit.o \
 			rooms/Room.o \
 			rooms/RoomSector.o \
-			Script.o \
-			sedit.o \
+			js/Script.o \
+			olc/sedit.o \
 			sha1.o \
 			shop.o \
 			spec_assign.o \
@@ -171,18 +170,18 @@ OBJFILES =	accounts.o \
 			WebSocketClientHeader.o \
 			WebSocketClientHeaderIETF_HYBI17.o \
 			WebSocketDataFrame.o \
-			wedit.o \
-			zedit.o \
+			olc/wedit.o \
+			olc/zedit.o \
 			zones.o \
 
 OBJFILES := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILES))
 
 
-OBJFILESGATEWAY = DateTime.o GatewayDescriptor.o GatewayDescriptorStatus.o \
-	GatewayMain.o GatewayServer.o kuClient.o kuDescriptor.o kuListener.o kuSockets.o MiscUtil.o \
-	StringUtil.o MudStatus.o SystemUtil.o sha1.o GatewayDescriptorType.o WebSocketDataFrame.o \
-	WebSocketClientHeaderIETF_HYBI17.o WebSocketClientHeader.o WebSocketClientHeaderHixie76.o \
-	GatewayListener.o jsoncpp/json_reader.o jsoncpp/json_writer.o jsoncpp/json_value.o
+OBJFILESGATEWAY = DateTime.o gateway/GatewayDescriptor.o gateway/GatewayDescriptorStatus.o \
+	gateway/GatewayMain.o gateway/GatewayServer.o kuClient.o kuDescriptor.o kuListener.o \
+	kuSockets.o MiscUtil.o StringUtil.o MudStatus.o SystemUtil.o sha1.o GatewayDescriptorType.o \
+	WebSocketDataFrame.o WebSocketClientHeaderIETF_HYBI17.o WebSocketClientHeader.o \
+	gateway/GatewayListener.o jsoncpp/json_reader.o jsoncpp/json_writer.o jsoncpp/json_value.o
 
 OBJFILESGATEWAY := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILESGATEWAY))
 

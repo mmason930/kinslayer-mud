@@ -2,7 +2,7 @@
 #define DESCRIPTOR_H
 
 #include "DateTime.h"
-#include "GatewayDescriptorType.h"
+#include "gateway/GatewayDescriptorType.h"
 
 #include <list>
 #include "jsoncpp/json.h"

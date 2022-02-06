@@ -5,9 +5,9 @@
 #include <map>
 
 #include "PlayerPortalDescriptor.h"
-#include "kuSockets.h"
-#include "kuListener.h"
-#include "kuClient.h"
+#include "ku/kuSockets.h"
+#include "ku/kuListener.h"
+#include "ku/kuClient.h"
 #include "PlayerPortalCommandProcessor.h"
 #include "jsoncpp/json.h"
 

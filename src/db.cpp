@@ -22,7 +22,7 @@
 #include "comm.h"
 #include "handler.h"
 #include "interpreter.h"
-#include "olc.h"
+#include "olc/olc.h"
 #include "clans.h"
 #include "constants.h"
 #include "shop.h"
@@ -43,15 +43,15 @@
 #include "CharacterUtil.h"
 #include "ClanUtil.h"
 #include "EntityType.h"
-#include "GatewayDescriptorType.h"
+#include "gateway/GatewayDescriptorType.h"
 #include "ObjectMoveLogger.h"
 #include "MobLoadLogger.h"
 #include "Game.h"
 #include "rooms/Room.h"
 #include "rooms/Exit.h"
 
-#include "js.h"
-#include "js_trigger.h"
+#include "js/js.h"
+#include "js/js_trigger.h"
 
 #include "StringUtil.h"
 #include <boost/filesystem.hpp>

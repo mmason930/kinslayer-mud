@@ -22,7 +22,7 @@
 #include "weaves.h"
 #include "dg_event.h"
 
-#include "js_functions.h"
+#include "js/js_functions.h"
 #include "MiscUtil.h"
 #include "rooms/Room.h"
 

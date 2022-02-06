@@ -1,6 +1,6 @@
 #include "PlayerPortalCommandProcessor.h"
 #include "utils.h"
-#include "js.h"
+#include "js/js.h"
 #include "jsoncpp/json.h"
 #include "constants.h"
 #include "StringUtil.h"

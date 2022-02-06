@@ -7,7 +7,7 @@
 #include "utils.h"
 #include "interpreter.h"
 #include "handler.h"
-#include "olc.h"
+#include "olc/olc.h"
 #include "screen.h"
 #include "dg_event.h"
 

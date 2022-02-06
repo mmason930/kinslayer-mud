@@ -22,7 +22,7 @@
 #include "clans.h"
 #include "constants.h"
 #include "shop.h"
-#include "olc.h"
+#include "olc/olc.h"
 #include "screen.h"
 #include "auction.h"
 #include "StringUtil.h"
@@ -31,8 +31,8 @@
 #include "rooms/Room.h"
 #include "ClanUtil.h"
 
-#include "js.h"
-#include "js_functions.h"
+#include "js/js.h"
+#include "js/js_functions.h"
 
 #include "commands/infrastructure/CommandUtil.h"
 #include "commands/infrastructure/CommandInfo.h"

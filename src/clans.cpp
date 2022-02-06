@@ -20,7 +20,7 @@
 #include "comm.h"
 #include "handler.h"
 #include "interpreter.h"
-#include "olc.h"
+#include "olc/olc.h"
 #include "clans.h"
 
 #include "ClanUtil.h"

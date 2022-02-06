@@ -22,7 +22,7 @@
 #include "utils.h"
 #include "handler.h"
 #include "screen.h"
-#include "olc.h"
+#include "olc/olc.h"
 #include "weaves.h"
 #include "stats.h"
 #include "mobs.h"
@@ -30,8 +30,8 @@
 #include "accounts.h"
 #include "constants.h"
 
-#include "js_functions.h"
-#include "js.h"
+#include "js/js_functions.h"
+#include "js/js.h"
 
 #include "UserEmailAddress.h"
 
@@ -39,7 +39,7 @@
 #include "UserLogoutType.h"
 #include "CharacterUtil.h"
 #include "Descriptor.h"
-#include "GatewayDescriptorType.h"
+#include "gateway/GatewayDescriptorType.h"
 #include "rooms/Room.h"
 #include "guilds/GuildUtil.h"
 

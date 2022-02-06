@@ -53,7 +53,7 @@
 #include "interpreter.h"
 #include "handler.h"
 #include "db.h"
-#include "olc.h"
+#include "olc/olc.h"
 #include "poker.h"
 #include "clans.h"
 #include "shop.h"
@@ -61,23 +61,23 @@
 #include "dg_event.h"
 #include "stats.h"
 #include "mobs.h"
-#include "js.h"
+#include "js/js.h"
 #include "auction.h"
 #include "threaded_jobs.h"
-#include "JSRow.h"
+#include "js/JSRow.h"
 #include "accounts.h"
 #include "StringUtil.h"
 #include "MiscUtil.h"
 #include "ForumUtil.h"
 #include "UserLogoutType.h"
-#include "GatewayServer.h"
+#include "gateway/GatewayServer.h"
 #include "Descriptor.h"
 #include "rooms/Room.h"
-#include "GatewayDescriptorType.h"
+#include "gateway/GatewayDescriptorType.h"
 #include "UserType.h"
 #include "rooms/RoomSector.h"
 #include "PlayerPortalDescriptorStatus.h"
-#include "OlcEditType.h"
+#include "olc/OlcEditType.h"
 #include "EntityType.h"
 #include "Game.h"
 #include "SystemUtil.h"
@@ -93,8 +93,6 @@
 
 #ifdef HAVE_ARPA_TELNET_H
 #include <arpa/telnet.h>
-#else
-#include "telnet.h"
 #endif
 
 #ifndef INVALID_SOCKET

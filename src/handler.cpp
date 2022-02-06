@@ -39,7 +39,7 @@
 
 #include "items/ItemUtil.h"
 
-#include "js.h"
+#include "js/js.h"
 
 /* external vars */
 extern Character *combat_list;

@@ -20,7 +20,7 @@
 #include "db.h"
 #include "constants.h"
 #include "interpreter.h"
-#include "olc.h"
+#include "olc/olc.h"
 #include "screen.h"
 #include "shop.h"
 #include "weaves.h"

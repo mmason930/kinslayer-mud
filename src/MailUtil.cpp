@@ -4,8 +4,8 @@
 #include "MailUtil.h"
 #include "StringUtil.h"
 
-#include "kuSockets.h"
-#include "kuClient.h"
+#include "ku/kuSockets.h"
+#include "ku/kuClient.h"
 
 #include <thread>
 

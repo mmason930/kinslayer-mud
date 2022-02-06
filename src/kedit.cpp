@@ -22,7 +22,7 @@
 #include "comm.h"
 #include "utils.h"
 #include "db.h"
-#include "olc.h"
+#include "olc/olc.h"
 #include "constants.h"
 #include "interpreter.h"
 

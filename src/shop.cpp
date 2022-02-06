@@ -26,9 +26,9 @@
 #include "utils.h"
 #include "shop.h"
 #include "mobs.h"
-#include "olc.h"
+#include "olc/olc.h"
 
-#include "js_functions.h"
+#include "js/js_functions.h"
 #include "StringUtil.h"
 #include "Descriptor.h"
 #include "rooms/Room.h"

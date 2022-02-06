@@ -10,7 +10,7 @@
 #include "../../db.h"
 #include "../../screen.h"
 #include "../../constants.h"
-#include "../../olc.h"
+#include "../../olc/olc.h"
 #include "../../clans.h"
 #include "../../shop.h"
 #include "../../stats.h"

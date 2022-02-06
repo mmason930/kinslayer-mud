@@ -23,8 +23,8 @@
 #include "mobs.h"
 #include "weather.h"
 
-#include "js.h"
-#include "js_interpreter.h"
+#include "js/js.h"
+#include "js/js_interpreter.h"
 #include "Descriptor.h"
 #include "UserClan.h"
 #include "rooms/Room.h"
