@@ -255,13 +255,13 @@ var script2 = function(self, actor, here, args, extra) {
 				+ "  player_highs.tcount AS player_high "
 				+ "FROM("
 				+ "  SELECT"
-				+ "  COUNT(DISTINCT userLogin.user_id) AS numberOfDistinctLogins,"
-				+ "  COUNT(DISTINCT userLogin.host) AS numberOfDistinctUsers,"
-				+ "  DATE(userLogin.login_datetime) AS date"
+				+ "    COUNT(DISTINCT userLogin.user_id) AS numberOfDistinctLogins,"
+				+ "    COUNT(DISTINCT userLogin.host) AS numberOfDistinctUsers,"
+				+ "    DATE(userLogin.login_datetime) AS date"
 				+ "  FROM userLogin"
 				+ (startingDate.length > 0 ? ("  WHERE DATE(userLogin.login_datetime) <= '" + startingDate + "'") : "")
 				+ "  GROUP BY DATE(userLogin.login_datetime)"
-				+ "  ORDER BY userLogin.login_datetime DESC"
+				+ "  ORDER BY DATE(userLogin.login_datetime) DESC"
 				+ "  LIMIT " + cnt
 				+ ") AS tmp "
 				+ "LEFT JOIN player_highs ON DATE(FROM_UNIXTIME(player_highs.tdate))=tmp.date";
