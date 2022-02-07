@@ -1340,7 +1340,7 @@ int Character::TrackLines(Room *room, bool auto_track, bool &full_view)
 		return MIN(3, (this->GetSkillLevel(SKILL_TRACK) - 2) / (MOUNT(this) ? 2 : 1));
 	}
 	return 0;
-};
+}
 
 void Character::PrintTracks(Room *room, bool auto_track)
 {

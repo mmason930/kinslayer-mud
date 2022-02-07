@@ -1,13 +1,6 @@
-#include <functional>
-#include <string>
-#include <vector>
-#include <iostream>
 
 #include "../conf.h"
-#include "../sysdep.h"
 #include "../structs.h"
-#include "../Descriptor.h"
-#include "../screen.h"
 #include "../olc/olc.h"
 #include "../utils.h"
 #include "../CharacterUtil.h"
@@ -108,7 +101,6 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 				}
 				else
 				{
-					Log("Deleting: %p", (*iter).second);
 					delete (*iter).second;
 					getData(i)->guildPrivilegeIdToGuildRankRoleMap.erase(guildPrivilege->getValue());
 				}
@@ -181,7 +173,7 @@ GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 			auto guildRankRoleIter = getData(i)->guildPrivilegeIdToGuildRankRoleMap.find(guildPrivilege->getValue());
 			auto guildRankRole = guildRankRoleIter != getData(i)->guildPrivilegeIdToGuildRankRoleMap.end() ? guildRankRoleIter->second : nullptr;
 
-			Log("Privilege: %d, Role: %p", guildPrivilege->getValue(), guildRankRole);
+			Log("Privilege: %d, Role: %p", guildPrivilege->getValue(), static_cast<void*>(guildRankRole));
 			privilegeTableBuilder
 				.startRow()
 				->put(cyn)->append(guildPrivilege->getValue())->append(nrm)

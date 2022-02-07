@@ -9,28 +9,18 @@
 ************************************************************************ */
 
 #include "conf.h"
-#include "sysdep.h"
 
 
 #include "structs.h"
 #include "spells.h"
-#include "utils.h"
-#include "comm.h"
-#include "handler.h"
-#include "interpreter.h"
-#include "db.h"
 #include "screen.h"
-#include "clans.h"
 #include "weaves.h"
 #include "mobs.h"
 #include "fight.h"
-#include "dg_event.h"
 #include "js/js.h"
 
-#include "MiscUtil.h"
 #include "ClanUtil.h"
 #include "DatabaseUtil.h"
-#include "MiscUtil.h"
 #include "rooms/Room.h"
 #include "rooms/Exit.h"
 

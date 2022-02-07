@@ -398,7 +398,9 @@ Room::~Room()
 		delete this->PTable;
 }
 
-void Room::bootWorld()
+void Room::bootWorld(
+	std::map<Room *, std::map<int, int>> &roomToExitToVnumMap
+)
 {
 
 	class PassiveRoomQueryReleaseJob : public Job
@@ -480,7 +482,7 @@ void Room::bootWorld()
 		while (jsQuery->hasNextRow() && jsQuery->peekRow()["target_vnum"] == MyRow["vnum"])
 			MyJS.push_back(jsQuery->getRow());
 
-		Room *r = Room::boot(MyRow, MyExits, MyJS, MyObjects);
+		Room *r = Room::boot(MyRow, MyExits, MyJS, MyObjects, roomToExitToVnumMap);
 
 		if (r != NULL)
 			World.push_back(r);
@@ -515,10 +517,12 @@ void Room::bootWorld()
 	ThreadedJobManager::get().addJob(cleanupJob);
 }
 
-Room *Room::boot(const sql::Row &MyRow,
-	const std::list< sql::Row > &MyExits,
-	const std::list< sql::Row > &MyJS,
-	const std::list< Object* > &MyObjects)
+Room *Room::boot(const sql::Row &roomRow,
+	const std::list< sql::Row > &exitRows,
+	const std::list< sql::Row > &jsRows,
+	const std::list< Object* > &objectRows,
+	std::map<Room *, std::map<int, int>> &roomToExitToVnumMap
+)
 {
 	static bool hasRoomExitIndexes = false;
 	static int EXIT_ROOM_VNUM_INDEX;
@@ -531,27 +535,27 @@ Room *Room::boot(const sql::Row &MyRow,
 	static int EXIT_KEY_VNUM_INDEX;
 	static int EXIT_DIR_INDEX;
 
-	Room *NewRoom = new Room();
+	Room *newRoom = new Room();
 	Zone *zone;
-	if ((zone = ZoneManager::GetManager().GetZoneByVnum(MiscUtil::convert<unsigned int>(MyRow["znum"]))) == NULL)
+	if ((zone = ZoneManager::GetManager().GetZoneByVnum(MiscUtil::convert<unsigned int>(roomRow["znum"]))) == NULL)
 	{
 		MudLog(BRF, LVL_APPR, TRUE,
-			"Attempting to load room with invalid zone vnum. Room: %d. Zone: %d.", atoi(MyRow["vnum"].c_str()),
-			MiscUtil::convert<unsigned int>(MyRow["znum"]));
+			"Attempting to load room with invalid zone vnum. Room: %d. Zone: %d.", atoi(roomRow["vnum"].c_str()),
+			MiscUtil::convert<unsigned int>(roomRow["znum"]));
 		return (NULL);
 	}
 
-	NewRoom->name = str_dup(MyRow["name"].c_str());
-	NewRoom->description = str_dup(MyRow["description"].c_str());
-	NewRoom->zone = zone->GetRnum();
-	NewRoom->room_flags = atoi(MyRow["room_flags"].c_str());
-	NewRoom->setAuctionVnum(atoi(MyRow["auction_vnum"].c_str()));
-	NewRoom->setSector((RoomSector*)RoomSector::getEnumByValue(atoi(MyRow["sector"].c_str())));
-	NewRoom->vnum = atoi(MyRow["vnum"].c_str());
-	NewRoom->ex_description = ExtraDescription::Parse(MyRow["edescription"]);
+	newRoom->name = str_dup(roomRow["name"].c_str());
+	newRoom->description = str_dup(roomRow["description"].c_str());
+	newRoom->zone = zone->GetRnum();
+	newRoom->room_flags = atoi(roomRow["room_flags"].c_str());
+	newRoom->setAuctionVnum(atoi(roomRow["auction_vnum"].c_str()));
+	newRoom->setSector((RoomSector*)RoomSector::getEnumByValue(atoi(roomRow["sector"].c_str())));
+	newRoom->vnum = atoi(roomRow["vnum"].c_str());
+	newRoom->ex_description = ExtraDescription::Parse(roomRow["edescription"]);
 
-	if (hasRoomExitIndexes == false && MyExits.empty() == false) {
-		sql::Row row = MyExits.front();
+	if (hasRoomExitIndexes == false && exitRows.empty() == false) {
+		sql::Row row = exitRows.front();
 		EXIT_ROOM_VNUM_INDEX = row.getIndexByField("room_vnum");
 		EXIT_TO_ROOM_INDEX = row.getIndexByField("to_room");
 		EXIT_GENERAL_DESCRIPTION_INDEX = row.getIndexByField("general_description");
@@ -564,37 +568,60 @@ Room *Room::boot(const sql::Row &MyRow,
 		hasRoomExitIndexes = true;
 	}
 
-	for (std::list< sql::Row >::const_iterator eRow = MyExits.begin(); eRow != MyExits.end(); ++eRow)
+	if(!exitRows.empty())
 	{
-		int dir = atoi((*eRow)[EXIT_DIR_INDEX].c_str());
-
-		if (dir >= 0 && dir < NUM_OF_DIRS)
+		std::map<int, int> exitToVnumMap;
+		for (std::list< sql::Row >::const_iterator eRow = exitRows.begin(); eRow != exitRows.end(); ++eRow)
 		{
-			NewRoom->dir_option[dir] = new Exit();
-			NewRoom->dir_option[dir]->setGeneralDescription((*eRow)[EXIT_GENERAL_DESCRIPTION_INDEX].c_str());
-			NewRoom->dir_option[dir]->setKeywords((*eRow)[EXIT_KEYWORD_INDEX].c_str());
-			NewRoom->dir_option[dir]->setExitInfo(atoi((*eRow)[EXIT_EXIT_INFO_INDEX].c_str()));
-			NewRoom->dir_option[dir]->setPickRequirement((sbyte)(atoi((*eRow)[EXIT_PICK_REQ_INDEX].c_str())));
-			NewRoom->dir_option[dir]->setHiddenLevel((sbyte)(atoi((*eRow)[EXIT_HIDDEN_LEVEL_INDEX].c_str())));
-			NewRoom->dir_option[dir]->setKey(atoi((*eRow)[EXIT_KEY_VNUM_INDEX].c_str()));
-			NewRoom->dir_option[dir]->setToRoom((Room*)(atoi((*eRow)[EXIT_TO_ROOM_INDEX].c_str())));
-			//This last line is a HACK!
-			//Instead of wasting memory on a seperate int to hold the vnum,
-			//we'll just store it in the pointer until later.
+			int dir = atoi((*eRow)[EXIT_DIR_INDEX].c_str());
+
+			if (dir >= 0 && dir < NUM_OF_DIRS)
+			{
+				int exitVnum = atoi((*eRow)[EXIT_TO_ROOM_INDEX].c_str());
+				newRoom->dir_option[dir] = new Exit();
+				newRoom->dir_option[dir]->setGeneralDescription((*eRow)[EXIT_GENERAL_DESCRIPTION_INDEX].c_str());
+				newRoom->dir_option[dir]->setKeywords((*eRow)[EXIT_KEYWORD_INDEX].c_str());
+				newRoom->dir_option[dir]->setExitInfo(atoi((*eRow)[EXIT_EXIT_INFO_INDEX].c_str()));
+				newRoom->dir_option[dir]->setPickRequirement((sbyte)(atoi((*eRow)[EXIT_PICK_REQ_INDEX].c_str())));
+				newRoom->dir_option[dir]->setHiddenLevel((sbyte)(atoi((*eRow)[EXIT_HIDDEN_LEVEL_INDEX].c_str())));
+				newRoom->dir_option[dir]->setKey(atoi((*eRow)[EXIT_KEY_VNUM_INDEX].c_str()));
+				newRoom->dir_option[dir]->setToRoom(nullptr);
+				
+				// We need to keep this in a separate map, because Exit::toRoom is a pointer to a Room
+				// that doesn't yet exist(because we're booting the rooms up right now). We'll need to
+				// loop back to it later to set the pointer based on the mapped data.
+				exitToVnumMap[dir] = exitVnum;
+			}
+			roomToExitToVnumMap[newRoom] = exitToVnumMap;
 		}
 	}
-	NewRoom->js_scripts = std::shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
-	for (std::list< sql::Row >::const_iterator jsIter = MyJS.begin(); jsIter != MyJS.end(); ++jsIter)
+	newRoom->js_scripts = std::shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
+	for (std::list< sql::Row >::const_iterator jsIter = jsRows.begin(); jsIter != jsRows.end(); ++jsIter)
 	{
 		int vnum = atoi((*jsIter)["script_vnum"].c_str());
 		JSTrigger* t = JSManager::get()->getTrigger(vnum);
-		NewRoom->js_scripts->push_back(t);
+		newRoom->js_scripts->push_back(t);
 	}
 
-	if (!MyObjects.empty())
-		NewRoom->loadItems(MyObjects);
+	if (!objectRows.empty())
+		newRoom->loadItems(objectRows);
 
-	return (NewRoom);
+	return (newRoom);
+}
+
+void Room::renumberRoomExits(const std::map<Room *, std::map<int, int>> &roomToExitToVnumMap)
+{
+	for(const auto &outerIter : roomToExitToVnumMap)
+	{
+		Room *room = outerIter.first;
+		for(const auto &innerIter : outerIter.second)
+		{
+			int exitDirection = innerIter.first;
+			int exitRoomVnum = innerIter.second;
+
+			room->dir_option[exitDirection]->setToRoom(FindRoomByVnum(exitRoomVnum));
+		}
+	}
 }
 
 void Room::addToBatch(sql::BatchInsertStatement &roomInsert, sql::BatchInsertStatement &exitInsert, sql::BatchInsertStatement &jsInsert)

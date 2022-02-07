@@ -241,7 +241,7 @@ void JSManager::setupMonitoringThreads()
 	monitorScriptImportTableThread = new std::thread(&JSManager::monitorScriptImportTable, this, dbContext->createConnection(), true);
 
 	this->monitorFileModificationsThreadRunning = true;
-	monitorFileModificationsThread = new std::thread(&JSManager::monitorFileModifications, this, dbContext->createConnection(), true);
+	monitorFileModificationsThread = new std::thread(&JSManager::monitorFileModifications, this, true);
 }
 
 JSManager* JSManager::get()
@@ -560,34 +560,42 @@ void JSManager::heartbeat()
 	processScriptImports();
 }
 
-void JSManager::monitorFileModifications(sql::Connection connection, bool continuous)
+void JSManager::monitorFileModifications(bool continuous)
 {
 	while(monitorFileModificationsThreadRunning || !continuous)
 	{
-		sql::BatchInsertStatement batchInsertStatement(connection, "scriptImportQueue", 1000);
-			
-		batchInsertStatement.addField("file_path");
-		batchInsertStatement.addField("queued_datetime");
-		batchInsertStatement.addField("operation");
-
-		batchInsertStatement.start();
-
-		int numberOfImports = checkFileModifications("scripts/", "scripts/", batchInsertStatement);
-
-		if(numberOfImports > 0)
+		try
 		{
-			batchInsertStatement.finish();
-		}
+			sql::Connection connection = dbContext->createConnection();
+			sql::BatchInsertStatement batchInsertStatement(connection, "scriptImportQueue", 1000);
+				
+			batchInsertStatement.addField("file_path");
+			batchInsertStatement.addField("queued_datetime");
+			batchInsertStatement.addField("operation");
 
+			batchInsertStatement.start();
+
+			int numberOfImports = checkFileModifications("scripts/", "scripts/", batchInsertStatement);
+
+			if(numberOfImports > 0)
+			{
+				batchInsertStatement.finish();
+			}
+
+			{
+				std::lock_guard<std::mutex> lock(monitorFilesystemRunOnceMutex);
+				monitorFilesystemRunOnce = true;
+			}
+
+			if(!continuous)
+				break;
+
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+		}
+		catch(sql::QueryException queryException)
 		{
-			std::lock_guard<std::mutex> lock(monitorFilesystemRunOnceMutex);
-			monitorFilesystemRunOnce = true;
+			MudLog(BRF, LVL_BUILDER, TRUE, "Error importing scripts: %s", queryException.getMessage().c_str());
 		}
-
-		if(!continuous)
-			break;
-
-		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 }
 

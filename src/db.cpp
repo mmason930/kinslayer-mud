@@ -133,7 +133,7 @@ void assign_the_shopkeepers(void);
 void buildPlayerIndex(void);
 void destroyPlayerIndex(void);
 void bootWorld(void);
-void renum_world(void);
+void renumberRoomExits(const std::map<Room *, std::map<int, int>> &roomToExitToVnumMap);
 void renum_zone_table(void);
 void add_follower(Character * ch, Character * leader);
 int perform_group( Character *ch, Character *vict );
@@ -373,6 +373,8 @@ void SaveGlobalScripts()
 
 void bootWorld(void)
 {
+	std::map<Room *, std::map<int, int>> roomToExitToVnumMap;
+
 	Log("Loading zone table.");
 	ZoneManager::GetManager().BootZones();
 
@@ -380,7 +382,7 @@ void bootWorld(void)
 	BootObjects();
 
 	Log("Loading rooms.");
-	Room::bootWorld();
+	Room::bootWorld(roomToExitToVnumMap);
 
 	Log("Loading global scripts.");
 	BootGlobalScripts();
@@ -389,7 +391,7 @@ void bootWorld(void)
 	mobLoadLoggerThread = new std::thread(&MobLoadLogger::threadHandler, &mobLoadLogger);
 	
 	Log("Renumbering rooms.");
-	renum_world();
+	Room::renumberRoomExits(roomToExitToVnumMap);
 
 	Log("Loading kits and generating index.");
 	BootKits();
@@ -506,7 +508,7 @@ void boot_db(void)
 	temp->loadScriptsFromFile(std::string("scripts/lib/util/LoDash-2.4.1.js"));
 
 	Log("Monitoring file modifications...");
-	temp->monitorFileModifications(gameDatabase, false);
+	temp->monitorFileModifications(false);
 
 	Log("Loading scripts from filesystem...");
 	temp->loadScriptsFromFilesystem("scripts", false);
@@ -525,9 +527,6 @@ void boot_db(void)
 
 	JSManager::get()->executeExpression("initGlobals();");
 	JSManager::get()->executeExpression("bootProcs();");
-
-	//Log("Running Live Object Maintenance Queries...");
-	//ThreadedJobManager::get().addJob( new LiveObjectMaintenanceJob( dbContext->createConnection() ) );
 
 	Log("Booting Warrants.");
 	BootWarrants();
@@ -603,16 +602,6 @@ void boot_db(void)
 			zone->Reset();
 		}
 	}
-	/*************
-	TheClock.Off();
-	MobClock.Off();
-	ObjClock.Off();
-	EqClock.Off();
-	Log("Overall : %d", TheClock.Clocks());
-	Log("MobLoads: %d", MobClock.Clocks());
-	Log("ObjLoads: %d", ObjClock.Clocks());
-	Log("Eq Loads: %d", EqClock.Clocks());
-	*************/
 	reset_q.head = reset_q.tail = NULL;
 	boot_time = time(0);
 
@@ -763,26 +752,6 @@ char fread_letter(FILE *fp)
 	while (isspace(c));
 
 	return c;
-}
-
-/* resolve all vnums into rnums in the world */
-void renum_world(void)
-{
-	int door;
-	unsigned int room;
-	for (room = 0; room < World.size(); ++room)
-	{
-		for (door = 0; door < NUM_OF_DIRS; ++door)
-		{
-			if (World[room]->dir_option[door])
-			{
-				if (World[room]->dir_option[door]->getToRoom())
-				{
-					World[room]->dir_option[door]->setToRoom(FindRoomByVnum( (__int64)World[room]->dir_option[door]->getToRoom()) );
-				}
-			}
-		}
-	}
 }
 
 

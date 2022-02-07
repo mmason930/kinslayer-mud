@@ -68,6 +68,7 @@
 #include "EntityType.h"
 #include "Game.h"
 #include "SystemUtil.h"
+#include "shop.h"
 
 #include "ObjectMoveLogger.h"
 #include "MobLoadLogger.h"

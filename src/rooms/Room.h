@@ -108,9 +108,10 @@ public:
 	void freeLiveRoom();
 	void deleteFromDatabase();
 
-	static void bootWorld();
+	static void bootWorld(std::map<Room *, std::map<int, int>> &roomToExitToVnumMap);
 	static Room *boot(const sql::Row &MyRow, const std::list< sql::Row > &MyExits,
-		const std::list< sql::Row > &MyJS, const std::list< Object* > &MyObjects);
+		const std::list< sql::Row > &MyJS, const std::list< Object* > &MyObjects, std::map<Room *, std::map<int, int>> &roomToExitToVnumMap);
+	static void renumberRoomExits(const std::map<Room *, std::map<int, int>> &roomToExitToVnumMap);
 
 	std::list< Object* > loadItemList(bool recursive);
 	void loadItems();

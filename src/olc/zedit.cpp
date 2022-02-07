@@ -273,7 +273,7 @@ CommandHandler do_zlist = DEFINE_COMMAND
 {
 	Zone *z = 0;
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH], arg4[MAX_INPUT_LENGTH],
-		buf2[MAX_STRING_LENGTH], buf3[1024*100];
+		buf2[1024*50], buf3[1024*100];
 	int count = 0;
 	unsigned int s;
 	Room *cmd_room = 0;
@@ -619,8 +619,9 @@ void zedit_disp_menu(Descriptor *d)
 		/*
 		 * Build the display buffer for this command
 		 */
-		sprintf(buf1, "%s%d - %s%s\r\n", nrm, counter++, yel, buf2);
-		strcat(buf, buf1);
+		std::stringstream bufferStream;
+		bufferStream << nrm << counter++ << yel << buf2 << "\r\n";
+		strcat(buf, bufferStream.str().c_str());
 		*buf2 = '\0';
 		++subcmd;
 	}

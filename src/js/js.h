@@ -201,7 +201,7 @@ class JSManager
 		std::list< JSTrigger* > triggersInRange( const int lo, const int hi );
 
 		void setupMonitoringThreads();
-		void monitorFileModifications(sql::Connection connection, bool continuous);
+		void monitorFileModifications(bool continuous);
     private:
 		std::unordered_map<int, JSTrigger*> mapper;
 		std::map<int, Script*> scriptMap;

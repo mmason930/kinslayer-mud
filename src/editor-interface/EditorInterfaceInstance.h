@@ -4,6 +4,7 @@
 #include <list>
 #include <vector>
 #include <string>
+#include "EditorInterfaceData.h"
 
 class EditorInterfaceMenu;
 class EditorInterfaceData;

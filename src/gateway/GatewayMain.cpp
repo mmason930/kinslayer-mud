@@ -1,14 +1,5 @@
-#include "GatewayServer.h"
 
-#include <fstream>
-#include <ctime>
-#include <iostream>
-#include <map>
-#include <string>
-#include <vector>
 
-#include "../StringUtil.h"
-#include "../MiscUtil.h"
 
 int main( void )
 {

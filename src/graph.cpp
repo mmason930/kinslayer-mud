@@ -19,21 +19,15 @@
 #endif
 
 #include "conf.h"
-#include "sysdep.h"
 
 
-#include "structs.h"
 #include "utils.h"
-#include "comm.h"
 #include "interpreter.h"
-#include "handler.h"
 #include "db.h"
-#include "shop.h"
 #include "rooms/Room.h"
 #include "rooms/RoomSector.h"
 #include "rooms/Exit.h"
 
-#include <stack>
 
 /* Externals */
 extern Character *character_list;
@@ -182,7 +176,7 @@ int Room::findFirstStep( Room *OtherRoom )
 
 	if ( !OtherRoom )
 	{
-		Log( "Illegal value %p or %p passed to find_first_step. (%s)", this, OtherRoom, __FILE__ );
+		Log( "Illegal value %p or %p passed to find_first_step. (%s)", static_cast<void*>(this), static_cast<void*>(OtherRoom), __FILE__ );
 		return BFS_ERROR;
 	}
 
@@ -331,7 +325,7 @@ int find_first_step( Room *src, Room *target )
 
 	if ( !src || !target )
 	{
-		Log( "Illegal value %p or %p passed to find_first_step. (%s)", src, target, __FILE__ );
+		Log( "Illegal value %p or %p passed to find_first_step. (%s)", static_cast<void*>(src), static_cast<void*>(target), __FILE__ );
 		return BFS_ERROR;
 	}
 

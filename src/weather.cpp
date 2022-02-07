@@ -47,6 +47,7 @@
 #include "weather.h"
 #include "zones.h"
 #include "rooms/Room.h"
+#include "rooms/RoomSector.h"
 
 #include <algorithm>
 
