@@ -92,8 +92,7 @@ var script2 = function(self, actor, here, args, extra) {
 			roomList.push(vnum);
 		}
 
-		actor.send("Total Rooms: " + counter);
-		actor.send(roomList.join(","));
+		return roomList;
 	}	
 
 	/**************************************************************/
@@ -241,6 +240,31 @@ var script2 = function(self, actor, here, args, extra) {
 			var str = vArgs.join(" ");
 			here.echo( eval(str) );
 			return;
+		}
+		else if(!str_cmp(vArgs[1], "roomdesc")) {
+			var roomNumber = 0;
+			var counter = 0;
+			var roomCount = numberOfRooms();
+			var accessibleRooms = findAccessibleRooms(actor);
+			var accessibleRoomMap = {};
+			var targetLineCount = parseInt(vArgs[2]);
+
+			accessibleRooms.forEach(function(roomId) {
+				accessibleRoomMap[roomId] = roomId;
+			})
+
+			for(var roomNumber = 0;roomNumber < roomCount;++roomNumber) {
+				var room = getRoomByRnum(roomNumber)
+				var lineCount = room.description.split("\n").length - 1;
+
+				if(isZoneOpen(room.zoneVnum) && lineCount == targetLineCount) {
+					++counter;
+					var accessible = accessibleRoomMap.hasOwnProperty(room.vnum);
+					actor.send("[" + room.vnum + "] [" + lineCount + "] [" + (accessible ? "ACCESSIBLE" : "INACCESSIBLE") + "] " + room.name);
+				}
+			}
+
+			actor.send("Rooms: " + counter);
 		}
 		else if(!str_cmp(vArgs[1], "daily_login_report")) {
 		
