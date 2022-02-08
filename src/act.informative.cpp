@@ -1631,7 +1631,7 @@ void look_at_room(Character * ch, int ignore_brief)
 	else if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS))
 	{
 		sprintbit((long)ch->in_room->room_flags, (const char**)room_bits, buf, " ", "", "");
-		ch->send("[%5d] %s [ %s]", ch->in_room->getVnum(), ch->in_room->getName(), buf);
+		ch->send("[%5d] %s [%s] [ %s]", ch->in_room->getVnum(), ch->in_room->getName(), StringUtil::allUpper(ch->in_room->getSector()->getStandardName()).c_str(), buf);
 	}
 	else
 	{

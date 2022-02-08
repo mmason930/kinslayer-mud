@@ -56,8 +56,7 @@ public:
 	template<typename T>
 	static std::string toString(T convertible)
 	{
-		static std::stringstream buffer;
-		buffer.str("");
+		std::stringstream buffer;
 		buffer << convertible;
 		return buffer.str();
 	}

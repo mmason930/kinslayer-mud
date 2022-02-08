@@ -157,7 +157,6 @@ OBJFILES =	accounts.o \
 			test/TestUtil.o \
 			TextTableBuilder.o \
 			threaded_jobs.o \
-			TimeUtil.o \
 			UserClan.o \
 			UserEmailEditor.o \
 			UserLogoutType.o \
