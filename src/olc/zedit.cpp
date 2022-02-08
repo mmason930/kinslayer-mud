@@ -620,7 +620,7 @@ void zedit_disp_menu(Descriptor *d)
 		 * Build the display buffer for this command
 		 */
 		std::stringstream bufferStream;
-		bufferStream << nrm << counter++ << yel << buf2 << "\r\n";
+		bufferStream << nrm << counter++ << ". " << yel << buf2 << "\r\n";
 		strcat(buf, bufferStream.str().c_str());
 		*buf2 = '\0';
 		++subcmd;

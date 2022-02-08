@@ -241,6 +241,43 @@ var script2 = function(self, actor, here, args, extra) {
 			here.echo( eval(str) );
 			return;
 		}
+		else if(!str_cmp(vArgs[1], "watch") || !str_cmp(vArgs[1], "unwatch")) {
+			var startRoom = parseInt(vArgs[2]);
+			var endRoom = parseInt(vArgs[3]);
+
+			if(isNaN(startRoom)) {
+				startRoom = actor.room.vnum;
+			}
+			if(isNaN(endRoom)) {
+				endRoom = startRoom;
+			}
+
+			actor.watchRooms = actor.watchRooms || {};
+
+			for(var roomVnum = startRoom;roomVnum <= endRoom;++roomVnum) {
+
+				if(vArgs[1] == "watch") {
+					var room = getRoom(roomVnum);
+
+					if(room == null) {
+						continue;
+					}
+
+					actor.watchRooms[roomVnum] = roomVnum;
+				}
+				else {
+					delete actor.watchRooms[roomVnum];
+				}
+			}
+		}
+		else if(!str_cmp(vArgs[1], "pwatch")) {
+			var watchRooms = actor.watchRooms || {};
+			var roomList = [];
+			for(var roomVnum in watchRooms) {
+				roomList.push(roomVnum);
+			}
+			actor.send(roomList.join(","));
+		}
 		else if(!str_cmp(vArgs[1], "roomdesc")) {
 			var roomNumber = 0;
 			var counter = 0;
