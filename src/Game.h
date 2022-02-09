@@ -8,7 +8,7 @@
 
 #include <mysql/sqlDatabase.h>
 
-#include "PlayerPortalServer.h"
+#include "playerportal/PlayerPortalServer.h"
 
 #include "guilds/GuildEditorInterface.h"
 

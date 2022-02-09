@@ -1,8 +1,22 @@
+#include <iostream>
+#include <thread>
 
+#include "../DateTime.h"
+#include "../MiscUtil.h"
+#include "../SystemUtil.h"
 
+#include "GatewayServer.h"
+#include "GatewayListener.h"
+#include "GatewayDescriptorStatus.h"
+#include "GatewayDescriptorType.h"
+#include "StringUtil.h"
 
+#include "../websocket/WebSocketClientHeader.h"
+#include "../websocket/WebSocketException.h"
 
 #ifndef WIN32
+#include <sys/types.h>
+#include <sys/wait.h>
 #endif
 
 bool debugBoolean = false;

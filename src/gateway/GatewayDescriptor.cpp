@@ -1,7 +1,7 @@
 #include <sstream>
 #include "GatewayDescriptor.h"
-#include "../WebSocketDataFrame.h"
-#include "../WebSocketException.h"
+#include "../websocket/WebSocketDataFrame.h"
+#include "../websocket/WebSocketException.h"
 
 #include "../jsoncpp/json.h"
 

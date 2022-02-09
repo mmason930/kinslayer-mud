@@ -131,10 +131,10 @@ OBJFILES =	accounts.o \
 			olc/oedit.o \
 			olc/olc.o \
 			olc/OlcEditType.o \
-			PlayerPortalCommandProcessor.o \
-			PlayerPortalDescriptor.o \
-			PlayerPortalDescriptorStatus.o \
-			PlayerPortalServer.o \
+			playerportal/PlayerPortalCommandProcessor.o \
+			playerportal/PlayerPortalDescriptor.o \
+			playerportal/PlayerPortalDescriptorStatus.o \
+			playerportal/PlayerPortalServer.o \
 			poker.o \
 			olc/redit.o \
 			rooms/Exit.o \
@@ -165,9 +165,9 @@ OBJFILES =	accounts.o \
 			utils/ThreadedLogFile.o \
 			weather.o \
 			weave.o \
-			WebSocketClientHeader.o \
-			WebSocketClientHeaderIETF_HYBI17.o \
-			WebSocketDataFrame.o \
+			websocket/WebSocketClientHeader.o \
+			websocket/WebSocketClientHeaderIETF_HYBI17.o \
+			websocket/WebSocketDataFrame.o \
 			olc/wedit.o \
 			olc/zedit.o \
 			zones.o \
@@ -178,7 +178,7 @@ OBJFILES := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILES))
 OBJFILESGATEWAY = DateTime.o gateway/GatewayDescriptor.o gateway/GatewayDescriptorStatus.o \
 	gateway/GatewayMain.o gateway/GatewayServer.o kuClient.o kuDescriptor.o kuListener.o \
 	kuSockets.o MiscUtil.o StringUtil.o MudStatus.o SystemUtil.o sha1.o GatewayDescriptorType.o \
-	WebSocketDataFrame.o WebSocketClientHeaderIETF_HYBI17.o WebSocketClientHeader.o \
+	websocket/WebSocketDataFrame.o websocket/WebSocketClientHeaderIETF_HYBI17.o websocket/WebSocketClientHeader.o \
 	gateway/GatewayListener.o jsoncpp/json_reader.o jsoncpp/json_writer.o jsoncpp/json_value.o
 
 OBJFILESGATEWAY := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILESGATEWAY))
