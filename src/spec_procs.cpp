@@ -9,7 +9,6 @@
 ************************************************************************ */
 
 #include "conf.h"
-#include "sysdep.h"
 
 
 #include "structs.h"
@@ -21,16 +20,13 @@
 #include "handler.h"
 #include "db.h"
 #include "dg_event.h"
-#include "screen.h"
 #include "clans.h"
 #include "weaves.h"
 
-#include "MiscUtil.h"
 #include "StringUtil.h"
 #include "ClanUtil.h"
 #include "rooms/Room.h"
 
-#include "commands/infrastructure/CommandUtil.h"
 #include "commands/infrastructure/CommandInfo.h"
 
 /*   external vars  */

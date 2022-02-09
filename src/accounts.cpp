@@ -89,7 +89,7 @@ Account SwitchManager::GetAccountByName( const std::string &Name )
 
 	try {
 		MyQuery = gameDatabase->sendQuery( QueryBuffer.str() );
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Error loading account by name: %s", e.getMessage().c_str());
 		return a;
 	}
@@ -110,7 +110,7 @@ Account SwitchManager::GetAccountByID( const int id )
 
 	try {
 		MyQuery = gameDatabase->sendQuery( QueryBuffer.str() );
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Error loading account by id: %s", e.getMessage().c_str());
 		return a;
 	}
@@ -132,7 +132,7 @@ Account SwitchManager::GetAccountByPlayerName( const std::string &Name )
 
 	try {
 		MyQuery = gameDatabase->sendQuery( QueryBuffer.str() );
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException  &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Error loading account by player name: %s", e.getMessage().c_str());
 		return a;
 	}
@@ -155,7 +155,7 @@ Account SwitchManager::GetAccountByPlayerID( const int id )
 
 	try {
 		MyQuery = gameDatabase->sendQuery( QueryBuffer.str() );
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e) {
 		MudLog(BRF, LVL_APPR, TRUE, "Error loading account by player id: %s", e.getMessage().c_str());
 		return a;
 	}
@@ -177,7 +177,7 @@ void Account::BootFromSQL( sql::Row MyRow )
 }
 bool SwitchManager::WillBeMultiplaying( const std::string &Host, const std::string &Name )
 {
-	Character *ch, *t;
+	Character *t;
 	std::list< Character * > MyAlts;
 	std::list< pLogin > tLogins;
 	std::string tHost;
@@ -221,7 +221,7 @@ bool SwitchManager::WillBeMultiplaying( const std::string &Host, const std::stri
 		}
 		MyAlts.push_back( t );
 	}
-	if( IsExemptFromMultiplayRestriction(Host, Name, MyAlts) )
+	if( IsExemptFromMultiplayRestriction(Name, MyAlts) )
 		return false;
 	return true;
 }
@@ -321,13 +321,13 @@ bool SwitchManager::IsExemptFromWaiting( const std::string &sHostFrom, const std
 			return false;
 		MyRow = MyQuery->getRow();
 		return AuthCheck(MyRow["from_username"],MyRow["to_username"], MyRow["auth_key"] );
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_IMPL, TRUE, "IsExemptFromWaiting() - %s", e.getMessage().c_str());
 		return false;
 	}
 	return true;
 }
-bool SwitchManager::IsExemptFromMultiplayRestriction( const std::string &sHost, const std::string &sName, const std::list< std::string > lAlreadyLoggedInNames )
+bool SwitchManager::IsExemptFromMultiplayRestriction( const std::string &userName, const std::list< std::string > lAlreadyLoggedInNames )
 {
 	return true;
 	std::stringstream QueryBuffer;
@@ -354,8 +354,8 @@ bool SwitchManager::IsExemptFromMultiplayRestriction( const std::string &sHost, 
 				std::string sToUsername = MyRow["to_username"];
 
 				if(
-					((!str_cmp(MyRow["from_username"],sName) && !str_cmp(MyRow["to_username"],(*iter)))
-				||	(!str_cmp(MyRow["to_username"],sName) && !str_cmp(MyRow["from_username"],(*iter))))
+					((!str_cmp(MyRow["from_username"],userName) && !str_cmp(MyRow["to_username"],(*iter)))
+				||	(!str_cmp(MyRow["to_username"],userName) && !str_cmp(MyRow["from_username"],(*iter))))
 				&&  (AuthCheck(MyRow["from_username"],MyRow["to_username"], MyRow["auth_key"]))
 				)
 				{
@@ -367,19 +367,19 @@ bool SwitchManager::IsExemptFromMultiplayRestriction( const std::string &sHost, 
 				return false;
 		}
 
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_IMPL, TRUE, "IsExemptFromMultiplayRestriction() - %s", e.getMessage().c_str());
 	}
 	return true;
 }
-bool SwitchManager::IsExemptFromMultiplayRestriction( const std::string &sHost, const std::string &sName, const std::list< Character* > lAlreadyLoggedIn )
+bool SwitchManager::IsExemptFromMultiplayRestriction( const std::string &userName, const std::list< Character* > lAlreadyLoggedIn )
 {
 	std::list<std::string> lAlreadyLoggedInNames;
 	for(std::list<Character*>::const_iterator iter = lAlreadyLoggedIn.begin();iter != lAlreadyLoggedIn.end();++iter)
 	{
 		lAlreadyLoggedInNames.push_back( GET_NAME( (*iter) ) );
 	}
-	return IsExemptFromMultiplayRestriction( sHost, sName, lAlreadyLoggedInNames );
+	return IsExemptFromMultiplayRestriction( userName, lAlreadyLoggedInNames );
 }
 Switch *SwitchManager::GetSwitchByIP( const std::string &IP )
 {

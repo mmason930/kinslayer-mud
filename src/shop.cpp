@@ -15,9 +15,7 @@
 #define __SHOP_C__
 
 #include "conf.h"
-#include "sysdep.h"
 
-#include "structs.h"
 #include "comm.h"
 #include "handler.h"
 #include "db.h"
@@ -33,7 +31,6 @@
 #include "Descriptor.h"
 #include "rooms/Room.h"
 
-#include "commands/infrastructure/CommandUtil.h"
 #include "commands/infrastructure/CommandInfo.h"
 
 #include "items/ItemUtil.h"

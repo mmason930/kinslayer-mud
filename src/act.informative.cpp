@@ -595,7 +595,7 @@ CommandHandler do_view = DEFINE_COMMAND
 
 		try {
 			MyQuery = gameDatabase->sendQuery(QueryText.str());
-		} catch(sql::QueryException e) {
+		} catch(sql::QueryException &e) {
 			e.report();
 			MudLog(BRF,LVL_APPR,TRUE,"Error viewing Legends interval : %s", e.getMessage().c_str());
 			return;
@@ -832,7 +832,7 @@ void showObjectToCharacter(Object *object, Character *ch, int mode, int amount)
 				strcat(buf, std::string(" (" + decayString.to_string() + ")").c_str());
 				found = TRUE;
 			}
-		} catch( flusspferd::exception e ) {
+		} catch( flusspferd::exception &e ) {
 			//...
 		}
 	}
@@ -1597,15 +1597,6 @@ void look_at_room(Character * ch, int ignore_brief)
 {
 	if (!ch->desc)
 		return;
-
-	if(ch->in_room < 0)
-	{
-		MudLog(BRF, MAX(GET_INVIS_LEV(ch), LVL_APPR), TRUE, "Player %s's room is less than 0!", GET_NAME(ch));
-		ch->RemoveFromRoom();
-		char sRoom[5];
-		strcpy(sRoom,"1");
-		ch->MoveToRoom(FindTargetRoom(ch, sRoom));
-	}
 
 	if (ch->in_room->isDark() && !CAN_SEE_IN_DARK(ch))
 	{
@@ -2989,7 +2980,8 @@ CommandHandler do_toggle = DEFINE_COMMAND
 
 CommandHandler do_commands = DEFINE_COMMAND
 {
-	int no, i, cmd_num;
+	int no, i;
+	std::size_t cmd_num;
 	int wizhelp = 0, socials = 0;
 	Character *vict;
 	char arg[MAX_INPUT_LENGTH];

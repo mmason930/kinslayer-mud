@@ -1282,7 +1282,7 @@ CommandHandler do_gen_door = DEFINE_COMMAND
 
 	Exit *reverse_exit = 0;
 	//Notify the other end of the door if it was an open/close.
-	if(exit && EXIT(ch, door) && EXIT(ch, door)->getToRoom() > 0 && EXIT(ch, door)->getToRoom() &&
+	if(exit && EXIT(ch, door) && EXIT(ch, door)->getToRoom() != nullptr && EXIT(ch, door)->getToRoom() &&
 	        (subcmd == SCMD_OPEN || subcmd == SCMD_CLOSE) &&
 	        (reverse_exit = EXIT(ch, door)->getToRoom()->dir_option[rev_dir[door]]))
 	{

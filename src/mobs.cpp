@@ -5,25 +5,15 @@
  *																	*
  ********************************************************************/
 #include "conf.h"
-#include "sysdep.h"
-#include "structs.h"
-#include "comm.h"
-#include "interpreter.h"
 #include "utils.h"
-#include "db.h"
-#include "constants.h"
-#include "olc/olc.h"
-#include "clans.h"
 #include "mobs.h"
 #include "shop.h"
 
-#include "MiscUtil.h"
 #include "ClanUtil.h"
 #include "Descriptor.h"
 #include "ClanUtil.h"
 
 #include "js/js.h"
-#include "js/js_trigger.h"
 
 MobManager *MobManager::Self = NULL;
 extern Character *character_list;
@@ -130,7 +120,7 @@ void MobManager::BootPrototypes()
 	Query1 << "SELECT * FROM mob_protos ORDER BY vnum ASC;";
 	try {
 		MyQuery1 = gameDatabase->sendQuery(Query1.str());
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "MobManager::BootPrototypes : %s", e.getMessage().c_str());
 		return;
 	}
@@ -245,7 +235,7 @@ Character *MobManager::BootPrototype( sql::Row &MyRow )
 			JSTrigger* t = JSManager::get()->getTrigger(vnum);
             NewMob->js_scripts->push_back(t);
         }
-    } catch( sql::QueryException e ) {
+    } catch( sql::QueryException &e ) {
 		cout << "error in js mob load:" << endl;
         e.report();
     }
@@ -305,7 +295,7 @@ void MobManager::SavePrototypes( const unsigned int zone_vnum )
 						fail=false;
 						gameDatabase->sendRawQuery( (*sqlIter) );
 					}
-					catch( sql::QueryException e ) {
+					catch( sql::QueryException &e ) {
 						if( e.err == 2013 ) {
 							fail=true;
 							SetupMySQL(false);
@@ -318,7 +308,7 @@ void MobManager::SavePrototypes( const unsigned int zone_vnum )
 						++sqlIter;
 					}
 				}
-			} catch(sql::QueryException e) {
+			} catch(sql::QueryException &e) {
 				MudLog(BRF, LVL_APPR, TRUE, "MobManager::SavePrototypes : %s", e.getMessage().c_str());
 				return;
 			}
@@ -354,7 +344,7 @@ void MobManager::SavePrototypes( const unsigned int bottom_vnum, const unsigned 
 			try {
 				fail=false;
 				gameDatabase->sendRawQuery( (*sqlIter) );
-			} catch( sql::QueryException e ) {
+			} catch( sql::QueryException &e ) {
 				if( e.err == 2013 )
 				{//We got disconnected from the database...
 					SetupMySQL( false );
@@ -567,7 +557,7 @@ void MobManager::SavePrototype( const unsigned int index )
 		{
 			gameDatabase->sendRawQuery( (*sqlIter) );
 		}
-	} catch(sql::QueryException e) {
+	} catch(sql::QueryException &e) {
 		MudLog(BRF, LVL_APPR, TRUE, "MobManager::SavePrototype : %s", e.getMessage().c_str());
 		e.report();
 		return;
@@ -681,7 +671,7 @@ void MobManager::DeletePrototypeFromDatabase( const unsigned int mob_rnum )
 		{
 			gameDatabase->sendRawQuery( (*sqlIter) );
 		}
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "MobManager::DeletePrototypeFromDatabase : %s", e.getMessage().c_str());
 		e.report();
 		return;

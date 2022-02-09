@@ -82,7 +82,7 @@ void PlayerPortalServer::processCommand(PlayerPortalDescriptor *playerPortalDesc
 	{
 		(*commandProcessorIter).second->process(playerPortalDescriptor, command);
 	}
-	catch (std::exception e)
+	catch (std::exception &e)
 	{
 		MudLog(NRM, LVL_APPR, TRUE, "Could not process web socket command. Command: '%s', Error: %s", command["method"].asString().c_str(), e.what());
 	}

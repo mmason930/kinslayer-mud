@@ -11,26 +11,13 @@
 //
 
 #include "../structs.h"
-#include "../sysdep.h"
 #include "js.h"
-#include "js_functions.h"
-#include "js_constants.h"
-#include "../utils.h"
-#include "../olc/olc.h"
 #include "../weaves.h"
-#include "../dg_event.h"
-#include <flusspferd.hpp>
-#include <flusspferd/spidermonkey/context.hpp>
-#include "js_trigger.h"
 #include "../mobs.h"
 #include "JSQuery.h"
-#include "JSRow.h"
 #include "../md5.h"
-#include "../db.h"
-#include "../zones.h"
 
 #include "../StringUtil.h"
-#include "../MiscUtil.h"
 #include "../ClanUtil.h"
 #include "../Descriptor.h"
 #include "../CharacterUtil.h"
@@ -1205,7 +1192,7 @@ flusspferd::value JS_sendQuery( flusspferd::string qBuffer )
 	sql::Query MyQuery;
 	try {
 		MyQuery = gameDatabase->sendQuery( qBuffer.to_string() );
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "JavaScript : sql::Query() : %s", e.getMessage().c_str());
 		return flusspferd::value();
 	}
@@ -1421,7 +1408,7 @@ bool JS_isArenaZone(int zoneVnum)
 			}
 		}
 	}
-	catch(flusspferd::exception e) {
+	catch(flusspferd::exception &e) {
 
 		MudLog(BRF, LVL_APPR, TRUE, "Generic Exception: %s", e.what());
 	}
@@ -1441,7 +1428,7 @@ int JS_getArenaStartRoomVnum( int race )
 
 		return (int)roomVnum.to_number();
 	}
-	catch(flusspferd::exception e) {
+	catch(flusspferd::exception &e) {
 
 		MudLog(BRF, LVL_APPR, TRUE, "Generic Exception: %s", e.what());
 	}
@@ -1463,7 +1450,7 @@ int JS_getCharacterArenaTeam( Character *ch )
 		if(chArenaTeam.is_number() != false)
 			return (int)chArenaTeam.to_number();
 	}
-	catch(flusspferd::exception e) {
+	catch(flusspferd::exception &e) {
 		MudLog(BRF, LVL_APPR, TRUE, "Generic Exception: %s", e.what());
 	}
 
@@ -1481,7 +1468,7 @@ bool JS_isArenaInFFAMode()
 		
 		return (bool)ffa.to_boolean();
 	}
-	catch(flusspferd::exception e) {
+	catch(flusspferd::exception &e) {
 		MudLog(BRF, LVL_APPR, TRUE, "Generic Exception: %s", e.what());
 	}
 	

@@ -1,20 +1,16 @@
 #include "../conf.h"
-#include "../sysdep.h"
 
-#include "../structs.h"
 #include "../utils.h"
 #include "../handler.h"
 
 #include "../rooms/Room.h"
 #include "../Descriptor.h"
 #include "../spells.h"
-#include "../interpreter.h"
 #include "../comm.h"
 #include "../js/js_functions.h"
 
 #include "ItemUtil.h"
 
-#include "../dotmode/DotMode.h"
 
 ItemUtil *ItemUtil::self = nullptr;
 

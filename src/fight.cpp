@@ -97,7 +97,7 @@ PKManager::PKManager()
 	{
 		topKillIdString = DatabaseUtil::getSingleResultFromQuery(gameDatabase, "SELECT MAX(kill_id) FROM userPlayerKill");
 	}
-	catch(sql::QueryException e)
+	catch(sql::QueryException &e)
 	{
 		e.report();
 		MudLog(BRF, TRUE, LVL_APPR, "Unable to grab top kill ID upon PKManager construction.");
@@ -141,7 +141,7 @@ void PKManager::RegisterKill( Character *Killer, Character *Victim, const unsign
 
 	try {
 		gameDatabase->sendRawQuery( QueryText.str() );
-	} catch(sql::QueryException e) {
+	} catch(sql::QueryException &e) {
 		e.report();
 		MudLog(BRF, MAX(LVL_APPR,MAX(GET_INVIS_LEV(Killer),GET_INVIS_LEV(Victim))), TRUE,
 			"Unable to add player kill. Killer: %s, Victim: %s : %s", GET_NAME(Killer),GET_NAME(Victim),

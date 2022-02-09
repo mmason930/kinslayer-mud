@@ -12,28 +12,13 @@
  *************************************************************/
 
 #include "../conf.h"
-#include "../sysdep.h"
 
-#include "../structs.h"
-#include "../utils.h"
 #include "../comm.h"
-#include "../db.h"
-#include "olc.h"
-#include "../dg_event.h"
-#include "../shop.h"
-#include "../interpreter.h"
-#include "../handler.h"
 #include "../md5.h"
 
 #include "../js/js.h"
-#include "../js/JSCharacter.h"
-#include "../js/JSObject.h"
-#include "../js/JSRoom.h"
-#include "../js/js_constants.h"
-#include "../js/js_trigger.h"
 #include "../js/Script.h"
 
-#include "../MiscUtil.h"
 #include "../StringUtil.h"
 
 #include "../Descriptor.h"

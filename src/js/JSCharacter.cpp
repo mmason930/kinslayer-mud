@@ -1,19 +1,10 @@
 #include "../conf.h"
-#include "../sysdep.h"
 
-#include "JSCharacter.h"
-#include "JSRoom.h"
-#include "JSObject.h"
 #include "../utils.h"
 #include "../spells.h"
-#include "../handler.h"
-#include "../mobs.h"
-#include "../db.h"
 #include "../screen.h"
-#include "../clans.h"
 
 #include "js.h"
-#include "js_functions.h"
 
 #include "../StringUtil.h"
 #include "../ClanUtil.h"

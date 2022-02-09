@@ -6,21 +6,13 @@
  ********************************************************************/
 
 #include "conf.h"
-#include "sysdep.h"
-#include <functional>
 
 #include "structs.h"
-#include "spells.h"
 #include "utils.h"
-#include "interpreter.h"
-#include "handler.h"
 #include "comm.h"
 #include "db.h"
 #include "constants.h"
 #include "weaves.h"
-#include "clans.h"
-#include "weather.h"
-#include "stats.h"
 #include "utils.h"
 #include "screen.h"
 
@@ -571,7 +563,7 @@ std::list< std::pair<int, std::string> > WeaveManager::GetListOfWeavePairs()
 	return lPairs;
 }
 
-const int WeaveManager::GetWeaveVnum( const std::string Name )
+int WeaveManager::GetWeaveVnum( const std::string Name )
 {
 	for(std::vector<Weave*>::iterator weaveIter = WeaveVector.begin();weaveIter != WeaveVector.end();++weaveIter)
 	{
@@ -580,7 +572,7 @@ const int WeaveManager::GetWeaveVnum( const std::string Name )
 	}
 	return -1;
 }
-const std::string WeaveManager::GetWeaveName( const int vnum )
+std::string WeaveManager::GetWeaveName( const int vnum )
 {
 	Weave* w;
 	if( (w = GetWeave(vnum)) == NULL )
@@ -728,10 +720,6 @@ void GateManager::Free()
 	if( Self )
 		delete Self;
 }
-
-
-
-
 
 Gate::~Gate()
 {

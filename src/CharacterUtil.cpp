@@ -93,7 +93,7 @@ Character *CharacterUtil::loadCharacter(const int userId)
 				   "WHERE user_id = " << userId;
 
 	try {query = gameDatabase->sendQuery(queryBuffer.str());}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		MudLog(BRF, LVL_APPR, TRUE, "CharacterUtil::loadCharacter : %s", e.getMessage().c_str());
 		return NULL;

@@ -3,15 +3,11 @@
  *		   By Galnor on 4-16-2005					 *
  *****************************************************/
 #include "../conf.h"
-#include "../sysdep.h"
-#include "../structs.h"
 #include "../comm.h"
 #include "../interpreter.h"
 #include "../utils.h"
 #include "../db.h"
-#include "../constants.h"
 #include "olc.h"
-#include "../shop.h"
 #include "../clans.h"
 #include "../weaves.h"
 #include "../Descriptor.h"

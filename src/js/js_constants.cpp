@@ -17,13 +17,6 @@
 #include "../structs.h"
 #include "../sysdep.h"
 #include "js.h"
-#include "js_functions.h"
-#include "js_constants.h"
-#include "../utils.h"
-#include "../olc/olc.h"
-#include <flusspferd.hpp>
-#include <flusspferd/spidermonkey/context.hpp>
-#include "js_trigger.h"
 #include "../screen.h"
 #include "../rooms/RoomSector.h"
 

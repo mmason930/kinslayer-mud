@@ -9,10 +9,8 @@
 ************************************************************************ */
 
 #include "conf.h"
-#include "sysdep.h"
 
 
-#include "structs.h"
 #include "comm.h"
 #include "handler.h"
 #include "db.h"
@@ -22,14 +20,12 @@
 #include "screen.h"
 #include "olc/olc.h"
 
-#include "MiscUtil.h"
 #include "StringUtil.h"
 #include "CharacterUtil.h"
 #include "UserLogoutType.h"
 #include "Descriptor.h"
 #include "rooms/Room.h"
 
-#include "commands/infrastructure/CommandUtil.h"
 #include "commands/infrastructure/CommandInfo.h"
 
 #include "items/ItemUtil.h"
@@ -66,7 +62,7 @@ Object *Object::bootLiveObject( const sql::Row &MyRow, bool recursive )
 		QueryBuffer2 << "SELECT * FROM object_specials WHERE id='" << MyRow["id"] << "';";
 		try {
 			MyQuery = gameDatabase->sendQuery(QueryBuffer2.str());
-		} catch( sql::QueryException e ) {
+		} catch( sql::QueryException &e ) {
 			MudLog(BRF, LVL_APPR, TRUE, "Unable to load item (special data) for object ID #%d: %s",
 				MyRow["id"].c_str(), e.getMessage().c_str());
 			return (NULL);
@@ -211,7 +207,7 @@ Object *Object::loadSingleItem(const boost::uuids::uuid &oID, bool recursive)
 		<< "WHERE o.id='" << oID << "';";
 	try {
 		MyQuery = gameDatabase->sendQuery(QueryBuffer.str());
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Unable to load single item #%d: %s",
 			ToString(oID).c_str(), e.getMessage().c_str());
 		return NULL;
@@ -255,7 +251,7 @@ std::list< std::pair<Object*,int> > Object::loadItemPairs(
 		<< "AND o.holder_id='" << holderID << "';";
 	try {
 		MyQuery = gameDatabase->sendQuery(QueryBuffer.str());
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Unable to load items held by ID %d(%c): %s",
 			holderType, holderID.c_str(), e.getMessage().c_str());
 		return (ObjList);
@@ -490,7 +486,7 @@ void Object::saveMultipleHolderItems(const std::map<std::pair<char, std::string>
 		gameDatabase->sendRawQuery("INSERT DELAYED INTO object_specials SELECT * FROM tempObjectSpecials");
 
 	}
-	catch(sql::QueryException e) {
+	catch(sql::QueryException &e) {
 
 		MudLog(BRF, LVL_APPR, TRUE, "Could not save items: %s", e.getMessage().c_str());
 	}
@@ -647,7 +643,7 @@ void Object::saveHolderItems(const char holderType, const std::string &holderId,
 		gameDatabase->sendRawQuery("INSERT INTO object_retools SELECT * FROM tempObjectRetools");
 		gameDatabase->sendRawQuery("INSERT INTO object_specials SELECT * FROM tempObjectSpecials");
 	}
-	catch(sql::QueryException e) {
+	catch(sql::QueryException &e) {
 
 		MudLog(BRF, LVL_APPR, TRUE, "Could not save items. Holder Type='%c', Holder Id='%s' : %s", holderType, holderId.c_str(), e.getMessage().c_str());
 	}

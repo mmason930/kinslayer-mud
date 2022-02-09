@@ -83,7 +83,7 @@ void AuctionManager::Boot()
 
 	try {
 		MyQuery = gameDatabase->sendQuery("SELECT ai.* FROM auctions ai WHERE 1 ORDER BY vnum ASC;");
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Failed to boot auctions from database: %s", e.getMessage().c_str());
 		return;
 	}
@@ -217,7 +217,7 @@ void AuctionManager::UpdateAuctions()
 		QueryBuffer << "UPDATE auctionItem SET active='0' WHERE end_time <= '" << curTime << "';";
 		gameDatabase->sendRawQuery(QueryBuffer.str());
 //		QueryBuffer.str("");
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "ActionManager::UpdateAuctions : Failed to run maintenance queries : %s",
 			e.getMessage().c_str());
 		return;
@@ -237,7 +237,7 @@ void AuctionManager::RewardOwner( const int ai_id )
 		" WHERE ai.id='" << ai_id << "' ORDER BY ab.bid_amount DESC LIMIT 1;";
 	try {
 		MyQuery = gameDatabase->sendQuery(QueryBuffer.str());
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "AuctionManager::RewardWinner : Failed to send query : %s",
 			e.getMessage().c_str());
 		return;
@@ -308,7 +308,7 @@ void AuctionManager::ReimburseLosers( const int ai_id, const int winnerID )
 					bld, mag, MiscUtil::convert<long long>(MyRow["bid_amount"].c_str()), nrm);
 			}
 		}
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "AuctionManager::ReimburseUsers : Failed to send query : %s",
 			e.getMessage().c_str());
 	}
@@ -345,7 +345,7 @@ std::string Auction::getName()
 	return (Name);
 }
 /* Return auction's vnum */
-const int Auction::getVnum()
+int Auction::getVnum()
 {
 	return (vnum);
 }
@@ -412,7 +412,7 @@ void Auction::save()
 		<< "',aRaces='" << ar << "',dClans='" << dc << "';";
 	try {
 		gameDatabase->sendRawQuery( QueryBuffer.str() );
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Unable to save auction #%d : %s", getVnum(), e.getMessage().c_str());
 		return;
 	}
@@ -486,7 +486,7 @@ bool Auction::placeAuction( Character *ch, AuctionData *ad )
 
 	try {
 		gameDatabase->sendRawQuery(QueryBuffer.str());
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, MAX(GET_INVIS_LEV(ch), LVL_APPR), TRUE, "%s failed to place item into auction #%d (item: %s): %s",
 			GET_NAME(ch), this->getVnum(), obj->GetSDesc(), e.getMessage().c_str());
 		obj_to_char(obj, ch);
@@ -517,7 +517,7 @@ bool Auction::placeBid( Character *bidder, class AuctionData *ad )
 
 	try {
 		gameDatabase->sendRawQuery(QueryBuffer.str());
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, MAX(LVL_APPR,GET_LEVEL(bidder)), TRUE, "SYSERR : %s failed to place bid : %s",
 			GET_NAME(bidder), e.getMessage().c_str());
 		return false;
@@ -534,7 +534,7 @@ bool Auction::placeBid( Character *bidder, class AuctionData *ad )
 			<< itemID << "';";
 		try {
 			gameDatabase->sendRawQuery(QueryBuffer.str());
-		} catch( sql::QueryException e ) {
+		} catch( sql::QueryException &e ) {
 			MudLog(BRF, MAX(LVL_APPR,GET_LEVEL(bidder)), TRUE, "SYSERR : %s failed to place bid : %s",
 				GET_NAME(bidder), e.getMessage().c_str());
 			return false;
@@ -558,7 +558,7 @@ void Auction::retrieveItem(Descriptor *d, class AuctionData *ad )
 	QueryBuffer << "UPDATE auctionItem SET retrieved='1' WHERE id='" << ad->GetSelectedItem()->GetID() << "';";
 	try {
 		gameDatabase->sendRawQuery(QueryBuffer.str());
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Error attempting to mark auction item as retrieved(Auction Item #%d) : %s",
 			ad->GetSelectedItem()->GetID(), e.getMessage().c_str());
 	}
@@ -583,7 +583,7 @@ std::vector< AuctionItem* > Auction::loadItems( class AuctionData* Filter )
 		<< " ORDER BY ai.end_time ASC;";
 	try {
 		MyQuery =  gameDatabase->sendQuery(QueryBuffer.str());
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Failed to load items for auction #%d : %s",
 			this->getVnum(), e.getMessage().c_str());
 		return lAuctionItems;
@@ -621,7 +621,7 @@ std::vector< AuctionItem* > Auction::loadMyBids(Descriptor *d, class AuctionData
 		<< " ORDER BY ai.end_time ASC;";
 	try {
 		MyQuery =  gameDatabase->sendQuery(QueryBuffer.str());
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Failed to load items for auction #%d : %s",
 			this->getVnum(), e.getMessage().c_str());
 		return lAuctionItems;
@@ -660,7 +660,7 @@ std::vector< AuctionItem* > Auction::loadMyAuctions(Descriptor *d, AuctionData *
 		<< " ORDER BY ai.end_time ASC;";
 	try {
 		MyQuery =  gameDatabase->sendQuery(QueryBuffer.str());
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Failed to load items for auction #%d : %s",
 			this->getVnum(), e.getMessage().c_str());
 		return lAuctionItems;
@@ -710,7 +710,7 @@ AuctionItem::AuctionItem( const sql::Row &MyRow )
 
 	try {
 		this->BidQuery = gameDatabase->sendQuery(QueryBuffer.str());
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Could not load list of auction bids : %s", e.getMessage().c_str());
 		return;
 	}
@@ -730,18 +730,18 @@ AuctionItem::AuctionItem( const sql::Row &MyRow )
 AuctionItem::~AuctionItem()
 {
 }
-const long long AuctionItem::GetNextMinBid()
+long long AuctionItem::GetNextMinBid()
 {
 	return GetTopBid() + 100;
 }
-const long long AuctionItem::GetTopBid()
+long long AuctionItem::GetTopBid()
 {
 	if( BidQuery && BidQuery->numRows() )
 		return MiscUtil::convert<long long>(BidQuery->peekRow()["bid_amount"]);
 	else
 		return starting;
 }
-const long long AuctionItem::GetLastBid( const int uid )
+long long AuctionItem::GetLastBid( const int uid )
 {
 	long long bid = 0;
 	while( BidQuery->hasNextRow() )
@@ -769,7 +769,7 @@ void AuctionItem::Refresh()
 		<< " ORDER BY ai.end_time ASC;";
 	try {
 		MyQuery = gameDatabase->sendQuery(QueryBuffer.str());
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Failed to refresh auction item : %s", e.getMessage().c_str());
 		return;
 	}
@@ -802,11 +802,11 @@ bool AuctionItem::CanBeRetrievedBy( Character *user )
 		return true;
 	return false;
 }
-const std::string AuctionItem::GetTopBidderName()
+std::string AuctionItem::GetTopBidderName()
 {
 	return (this->BidQuery->numRows() ? this->BidQuery->peekRow()["username"] : "");
 }
-const int AuctionItem::GetTopBidderID()
+int AuctionItem::GetTopBidderID()
 {
 	return (this->BidQuery->numRows() ? atoi(this->BidQuery->peekRow()["uid"].c_str()) : -1);
 }
@@ -852,7 +852,7 @@ void AuctionDispBuyTypeMenu( Descriptor *d )
 
 	std::bitset<8> bs;
 
-	for(int i = 0;i < d->olc->auction_data->item_types.size();++i)
+	for(std::size_t i = 0;i < d->olc->auction_data->item_types.size();++i)
 	{
 		d->send("%s%d%s) %s%s%s\r\n", grn, (i+1), nrm, cyn, atTypeStr[i], nrm);
 	}
@@ -939,7 +939,7 @@ void AuctionDispBrowseMenu( Descriptor *d )
 	const static int maxNameSize=45;
 	int firstItem = d->olc->auction_data->GetPage() * AuctionManager::ItemsPerPage
 		- AuctionManager::ItemsPerPage;
-	int lastItem = (firstItem + AuctionManager::ItemsPerPage);
+	std::size_t lastItem = (firstItem + AuctionManager::ItemsPerPage);
 	lastItem = MIN(lastItem, d->olc->auction_data->aiCache.size()) - 1;
 
 	get_char_cols(d->character);

@@ -31,7 +31,7 @@ void PlayerPortalJavaScriptCommandProcessor::process(PlayerPortalDescriptor *des
 		if (returnValue.is_string())
 			descriptor->send(returnValue.to_std_string());
 	}
-	catch (flusspferd::exception e)
+	catch (flusspferd::exception &e)
 	{
 		MudLog(BRF, 100, TRUE, "Could not execute player portal command `%s`: %s", command["method"].asString().c_str(), e.what());
 	}
@@ -81,7 +81,7 @@ void PlayerPortalLoadItemFlagsCommandProcess::process(PlayerPortalDescriptor *de
 
 		descriptor->send(writer.write(response, true));
 	}
-	catch (flusspferd::exception e)
+	catch (flusspferd::exception &e)
 	{
 		MudLog(BRF, 100, TRUE, "Could not execute player portal command `%s`: %s", command["method"].asString().c_str(), e.what());
 	}
@@ -208,7 +208,7 @@ void PlayerPortalLoadObjectListCommandProcess::process(PlayerPortalDescriptor *d
 				if(!ldescRegex.empty() && !boost::regex_search(objectPrototype->description, ldescRegex))
 			 		continue;
 			}
-			catch(std::exception e)
+			catch(std::exception &e)
 			{
 				MudLog(BRF, LVL_APPR, TRUE, "Invalid regular expression: %s", ldescPatternString.c_str());
 			}
@@ -218,7 +218,7 @@ void PlayerPortalLoadObjectListCommandProcess::process(PlayerPortalDescriptor *d
 				if(!sdescRegex.empty() && !boost::regex_search(objectPrototype->short_description, sdescRegex))
 			 		continue;
 			}
-			catch(std::exception e)
+			catch(std::exception &e)
 			{
 				MudLog(BRF, LVL_APPR, TRUE, "Invalid regular expression: %s", sdescPatternString.c_str());
 			}
@@ -228,7 +228,7 @@ void PlayerPortalLoadObjectListCommandProcess::process(PlayerPortalDescriptor *d
 				if(!namelistRegex.empty() && !boost::regex_search(objectPrototype->name, namelistRegex))
 			 		continue;
 			}
-			catch(std::exception e)
+			catch(std::exception &e)
 			{
 				MudLog(BRF, LVL_APPR, TRUE, "Invalid regular expression: %s", namelistPatternString.c_str());
 			}
@@ -271,7 +271,7 @@ void PlayerPortalLoadObjectListCommandProcess::process(PlayerPortalDescriptor *d
 
 		descriptor->send(writer.write(response, true));
 	}
-	catch (flusspferd::exception e)
+	catch (flusspferd::exception &e)
 	{
 		MudLog(BRF, 100, TRUE, "Could not execute player portal command `%s`: %s", command["method"].asString().c_str(), e.what());
 	}

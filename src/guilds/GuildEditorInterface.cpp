@@ -1,27 +1,21 @@
 
-#include "../conf.h"
 #include "../structs.h"
 #include "../olc/olc.h"
-#include "../utils.h"
 #include "../CharacterUtil.h"
 #include "../db.h"
 #include "../StringUtil.h"
 #include "../TextTableBuilder.h"
 
 #include "GuildEditorInterface.h"
-#include "GuildEditorInterfaceData.h"
 #include "GuildUtil.h"
 #include "GuildApplication.h"
 #include "Guild.h"
 #include "GuildApplicationSignature.h"
-#include "UserGuildStatus.h"
 #include "GuildJoinApplication.h"
 #include "GuildJoinApplicationStatus.h"
 #include "UserGuild.h"
-#include "UserGuildStatus.h"
 #include "GuildRank.h"
 #include "GuildRankRole.h"
-#include "GuildRankStatus.h"
 
 GuildEditorInterface::GuildEditorInterface() : EditorInterface()
 {

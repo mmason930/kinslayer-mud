@@ -56,20 +56,20 @@ void CommManager::Free()
 		delete (Self);
 	Self = 0;
 }
-const int CommManager::SaveComm( const std::string &Type, const std::string &Message, Character *sender,
+int CommManager::SaveComm( const std::string &Type, const std::string &Message, Character *sender,
 		const int room_vnum, Character *recipient)
 {
 	return SaveComm(Type, Message, sender->GetType(), sender->getVnumOrID(),
 		(recipient ? recipient->GetType() : 'X'), (recipient ? recipient->getVnumOrID() : -1),
 		sender->points.invis, room_vnum);
 }
-const int CommManager::SaveComm( const std::string &Type, const std::string &Message, Character *sender,
+int CommManager::SaveComm( const std::string &Type, const std::string &Message, Character *sender,
 	const int room_vnum, const int rid, const int invis_level)
 {
 	//This is a special case. rid needs to represent something specific.
 	return SaveComm(Type, Message, sender->GetType(), sender->getVnumOrID(), 'S', rid, invis_level, room_vnum);
 }
-const int CommManager::SaveComm( const std::string &Type, const std::string &Message, const char sType, 
+int CommManager::SaveComm( const std::string &Type, const std::string &Message, const char sType, 
 	const int sid, const char rType, const int rid, const int invis_level, const int room_vnum)
 {
 	std::stringstream QueryBuffer;
@@ -87,7 +87,7 @@ const int CommManager::SaveComm( const std::string &Type, const std::string &Mes
 
 	try {
 		gameDatabase->sendRawQuery(QueryBuffer.str());
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		e.report();
 		return -1;
 	}
@@ -221,9 +221,8 @@ CommandHandler do_say = DEFINE_COMMAND
 			}
 		}
 
-		for(int i = 0; i < ch->in_room->eavesdropping.size(); i++)
+		for(Character *vict : ch->in_room->eavesdropping)
 		{
-			vict = ch->in_room->eavesdropping.at(i);
 			if(GET_POS(vict) > POS_SLEEPING)
 			{
 				vict->send("%s %s '%s'\r\n", StringUtil::cap(PERS(ch, vict)), SayType.c_str(), ch->ScrambleSpeech(argument, vict).c_str());
@@ -864,7 +863,6 @@ CommandHandler do_gen_comm = DEFINE_COMMAND
 
 	if(subcmd == SCMD_GLOBAL)
 	{
-		int amountOfNoquit;
 		for (affected_type *af = ch->affected; af; af = af->next)
 		{
 			if(af->bitvector == AFF_NOQUIT && af->duration > 2)

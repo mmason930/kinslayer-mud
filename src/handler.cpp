@@ -9,24 +9,14 @@
 ************************************************************************ */
 
 #include "conf.h"
-#include "sysdep.h"
 
 #include "structs.h"
 #include "spells.h"
-#include "utils.h"
-#include "comm.h"
-#include "db.h"
-#include "handler.h"
-#include "interpreter.h"
 #include "screen.h"
-#include "clans.h"
-#include "shop.h"
-#include "weather.h"
 #include "weaves.h"
 #include "mobs.h"
 #include "dg_event.h"
 
-#include "MiscUtil.h"
 #include "StringUtil.h"
 #include "UserLogoutType.h"
 #include "Descriptor.h"
@@ -171,7 +161,7 @@ void UpdateBootHigh( const int new_high, bool first )
 
 	try {
 		MyQuery = gameDatabase->sendQuery("SELECT * FROM player_highs WHERE 1 ORDER BY tdate DESC LIMIT 1");
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Error when attempting to update boot high: %s", e.message.c_str());
 		return;
 	}
@@ -213,7 +203,7 @@ void UpdateBootHigh( const int new_high, bool first )
 	{
 		try {
 			gameDatabase->sendRawQuery(Query.str());
-		} catch( sql::QueryException e ) {
+		} catch( sql::QueryException &e ) {
 			MudLog(BRF, LVL_APPR, TRUE, "Unable to update/insert player_highs: %s", e.message.c_str());
 		}
 	}
@@ -1176,7 +1166,7 @@ Object *unequip_char(Character * ch, int pos)
 }
 
 
-const int GetNumber(char **name)
+int GetNumber(char **name)
 {
 	int i;
 	char *ppos;
@@ -1201,7 +1191,7 @@ const int GetNumber(char **name)
 	return 1;
 }
 
-const int GetNumber(std::string &name)
+int GetNumber(std::string &name)
 {
 	std::string::size_type pos;
 	std::string number;

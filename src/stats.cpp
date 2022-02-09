@@ -1,16 +1,9 @@
 
 #include "conf.h"
-#include "sysdep.h"
 
 #include "structs.h"
-#include "spells.h"
 #include "utils.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "comm.h"
 #include "db.h"
-#include "constants.h"
-#include "weaves.h"
 #include "stats.h"
 
 extern Character * character_list;
@@ -23,7 +16,7 @@ Stat::Stat(const std::string _Name, const std::string _Abbrev, const int _ID)
     StatID  = _ID;
 }
 
-const int Stat::GetID()
+int Stat::GetID()
 {
     return this->StatID;
 }

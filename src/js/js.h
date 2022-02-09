@@ -74,7 +74,7 @@ public:
 		return NULL;
 	}
 
-	const char getCharCode()
+	char getCharCode()
 	{
 		return charCode;
 	}

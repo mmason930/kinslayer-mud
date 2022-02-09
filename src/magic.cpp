@@ -10,7 +10,6 @@
 
 
 #include "conf.h"
-#include "sysdep.h"
 
 #include "structs.h"
 #include "spells.h"
@@ -23,7 +22,6 @@
 #include "dg_event.h"
 
 #include "js/js_functions.h"
-#include "MiscUtil.h"
 #include "rooms/Room.h"
 
 extern Object *object_list;

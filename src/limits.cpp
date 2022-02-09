@@ -9,7 +9,6 @@
 ************************************************************************ */
 
 #include "conf.h"
-#include "sysdep.h"
 
 #include "structs.h"
 #include "spells.h"
@@ -19,7 +18,6 @@
 #include "handler.h"
 #include "screen.h"
 #include "weather.h"
-#include "zones.h"
 
 #include "UserLogoutType.h"
 #include "Descriptor.h"

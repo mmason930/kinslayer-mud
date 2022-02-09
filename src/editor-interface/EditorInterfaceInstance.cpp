@@ -75,7 +75,7 @@ EditorInterfaceMenu *EditorInterfaceInstance::print()
 
 		menuStack.back()->print(this);
 	}
-	catch(std::exception e)
+	catch(std::exception &e)
 	{
 		terminateWithError();
 		MudLog(BRF, MAX(GET_INVIS_LEV(ch), LVL_APPR), TRUE, "Exception caught(std::exception) while printing editor interface for %s : %s", GET_NAME(ch), e.what());

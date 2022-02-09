@@ -123,7 +123,7 @@ void ForumUtil::addForumUser(Character *character)
 	try {
 		gameDatabase->sendRawQuery(queryBuffer.str());
 	}
-	catch(sql::QueryException e) {
+	catch(sql::QueryException &e) {
 
 		MudLog(BRF, LVL_APPR, TRUE, "Could not add user to forum user table. User Id: %d, Username: %s.\n%s", character->player.idnum, character->player.name.c_str(), e.getMessage().c_str());
 		return;

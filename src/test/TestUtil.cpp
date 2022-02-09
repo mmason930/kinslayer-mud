@@ -1,8 +1,5 @@
-#include "../conf.h"
-#include "../sysdep.h"
 
 #include "TestUtil.h"
-#include "TestCase.h"
 
 #include "general/GeneralTestCase.h"
 

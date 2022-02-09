@@ -5,21 +5,13 @@
  ************************************************************************/
 
 #include "../conf.h"
-#include "../sysdep.h"
-#include "../structs.h"
-#include "../comm.h"
-#include "../interpreter.h"
 #include "../utils.h"
-#include "../db.h"
 #include "../constants.h"
 #include "olc.h"
-#include "../shop.h"
 #include "../weaves.h"
 #include "../auction.h"
-#include "../clans.h"
 #include "../js/js.h"
 
-#include "../MiscUtil.h"
 #include "../StringUtil.h"
 #include "../ClanUtil.h"
 #include "../Descriptor.h"
@@ -673,7 +665,7 @@ void Config::save()
 
 		gameDatabase->sendRawQuery("DROP TABLE tempConfig");
 	}
-	catch(sql::QueryException e) {
+	catch(sql::QueryException &e) {
 
 		MudLog(BRF, LVL_APPR, TRUE, "Failed to save config: %s", e.getMessage().c_str());
 	}

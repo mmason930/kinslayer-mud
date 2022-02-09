@@ -8,22 +8,14 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "../conf.h"
-#include "../sysdep.h"
 
 #include "../structs.h"
 #include "../interpreter.h"
-#include "../handler.h"
-#include "../comm.h"
-#include "../utils.h"
 #include "../db.h"
 #include "olc.h"
-#include "../screen.h"
-#include "../shop.h"
 #include "../Descriptor.h"
 #include "../Game.h"
 
-#include "../commands/infrastructure/CommandUtil.h"
-#include "../commands/infrastructure/CommandInfo.h"
 #include "../commands/infrastructure/Social.h"
 
 extern const char	*position_types[];

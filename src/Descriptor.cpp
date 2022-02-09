@@ -736,7 +736,7 @@ void Descriptor::processWebSocketUserCreationCommand(Json::Value &commandObject)
 	try {
 		username = commandObject["username"].asString();
 	}
-	catch (std::runtime_error e) {
+	catch (std::runtime_error &e) {
 		sendWebSocketErrorMessage(commandObject, "Please enter a username.");
 		return;
 	}
@@ -744,7 +744,7 @@ void Descriptor::processWebSocketUserCreationCommand(Json::Value &commandObject)
 	try {
 		password = commandObject["password"].asString();
 	}
-	catch (std::runtime_error e) {
+	catch (std::runtime_error &e) {
 		sendWebSocketErrorMessage(commandObject, "Please enter a password.");
 		return;
 	}
@@ -752,7 +752,7 @@ void Descriptor::processWebSocketUserCreationCommand(Json::Value &commandObject)
 	try {
 		emailAddress = commandObject["emailAddress"].asString();
 	}
-	catch (std::runtime_error e) {
+	catch (std::runtime_error &e) {
 		sendWebSocketErrorMessage(commandObject, "Please enter an email.");
 		return;
 	}

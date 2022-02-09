@@ -35,21 +35,15 @@
 // the zone (emotes, damage, reduced visibility, etc).
 
 #include "conf.h"
-#include "sysdep.h"
 
 
-#include "structs.h"
 #include "utils.h"
-#include "comm.h"
-#include "handler.h"
-#include "interpreter.h"
 #include "db.h"
 #include "weather.h"
 #include "zones.h"
 #include "rooms/Room.h"
 #include "rooms/RoomSector.h"
 
-#include <algorithm>
 
 extern struct GameTime time_info;
 
@@ -700,12 +694,6 @@ void Weather::change_storms()
 {
 	storm->change(this);
 }
-
-
-
-
-
-
 
 void Storm::change(Weather * weather)
 {

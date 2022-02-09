@@ -172,7 +172,7 @@ void miscBootMaintenance() {
 
 				gameDatabase->sendRawQuery(queries[index]);
 			}
-			catch(sql::QueryException e) {
+			catch(sql::QueryException &e) {
 
 				Log("miscBootMaintenance() : Could not execute query : %s", e.getMessage().c_str());
 				exit(1);
@@ -274,14 +274,14 @@ public:
 			connection->sendRawQuery("DELETE FROM object_specials WHERE id NOT IN(SELECT id FROM objects);");
 			connection->sendRawQuery("DELETE FROM object_retools WHERE id NOT IN(SELECT id FROM objects);");
 			this->numberOfItemsDeleted = objectsPurgeQueueSizeAfter;
-		} catch( sql::QueryException e ) {
+		} catch( sql::QueryException &e ) {
 			e.report();
 		}
 
 		try {
 			connection->sendRawQuery("DROP TABLE IF EXISTS `tempObjectsPurgeQueue`");
 		}
-		catch( sql::QueryException e ) {
+		catch( sql::QueryException &e ) {
 			e.report();
 		}
 		MyClock.turnOff();
@@ -336,7 +336,7 @@ void BootGlobalScripts()
 
 	try {
 		MyQuery = gameDatabase->sendQuery("SELECT * FROM js_attachments WHERE type='G';");
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Error booting global JavaScripts : %s", e.getMessage().c_str());
 		return;
 	}
@@ -366,7 +366,7 @@ void SaveGlobalScripts()
 			gameDatabase->sendRawQuery("INSERT INTO js_attachments(`type`,`script_vnum`) VALUES('G','"
 				+ MiscUtil::convert<std::string>(globalJS_Scripts->at(i)->vnum) + "');");
 		}
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Error saving global JavaScripts : %s", e.getMessage().c_str());
 	}
 }
@@ -427,7 +427,7 @@ void SetupMySQL( bool crash_on_failure )
 		game->setContext(dbContext);
 		game->setConnection(gameDatabase);
 	}
-	catch (sql::ConnectionException e) {
+	catch (sql::ConnectionException &e) {
 		e.report();
 		if( crash_on_failure == true )
 			exit(1);
@@ -662,7 +662,7 @@ void buildPlayerIndex(void)
 	std::stringstream strQuery;
 
 	try {Query = gameDatabase->sendQuery("SELECT username, user_id FROM users");}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		e.report();
 		exit(1);
@@ -900,7 +900,7 @@ void SetupItemCount()
 	sql::Query MyQuery;
 	try {
 		MyQuery = gameDatabase->sendQuery("SELECT vnum,COUNT(*) AS num FROM objects WHERE vnum >= 0 GROUP BY vnum;");
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Failed to send query for item count(SetupItemCount()): %s",
 			e.getMessage().c_str());
 		return;
@@ -1240,7 +1240,7 @@ void Character::AddLogin(const std::string &host, const DateTime &loginDatetime,
 		<< gatewayDescriptorType->getValue() << ")";
 
 	try {gameDatabase->sendRawQuery(Buffer.str());}
-	catch (sql::QueryException e)
+	catch (sql::QueryException &e)
 	{
 		e.report();
 		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
@@ -1289,7 +1289,7 @@ bool Character::LoadLogins(std::list<pLogin> &Logins, std::string &Name,
 	Query << ";";
 
 	try {MyQuery = gameDatabase->sendQuery(Query.str());}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		e.report();
 		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
@@ -1408,7 +1408,7 @@ std::list<UserDisabledCommand *> Character::loadUserDisabledCommands(const int u
 			userDisabledCommands.push_back(userDisabledCommand);
 		}
 	}
-	catch(sql::QueryException e)
+	catch(sql::QueryException &e)
 	{
 		e.report();
 		MudLog(BRF, LVL_APPR, TRUE, "Could not load user disabled commands for character #%d", user_id);
@@ -1479,7 +1479,7 @@ bool Character::mysqlInsertQuery()
 	Query = "INSERT INTO users (username) VALUES ('" + sql::escapeString(this->player.name) + "')";
 
 	try {gameDatabase->sendQuery(Query);}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		e.report();
 		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
@@ -1585,7 +1585,7 @@ bool Character::basicSave()
 	Query << " WHERE username = '" << this->player.name << "'";
 
 	try {gameDatabase->sendRawQuery(Query.str());}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		e.report();
 		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
@@ -1619,7 +1619,7 @@ bool Character::loadSkills()
 	sql::Row row;
 
 	try {query = gameDatabase->sendQuery(queryStr);}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		e.report();
 		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
@@ -1641,7 +1641,7 @@ bool Character::loadIgnores()
 	sql::Row MyRow;
 
 	try {MyQuery = gameDatabase->sendQuery(query);}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		e.report();
 		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
@@ -1672,7 +1672,7 @@ void MySQLSaveAlias(const std::string &playername, std::map<std::string,std::str
 				<< sql::escapeString((*a).first) << "','" << sql::escapeString((*a).second) << "')";
 
 	try { gameDatabase->sendRawQuery(Query.str()); }
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		MudLog(BRF, LVL_APPR, TRUE, "MySQLSaveAlias : %s", e.getMessage().c_str());
 	}
@@ -1691,7 +1691,7 @@ void MySQLDeleteAlias(const std::string &playername, const std::string &command)
 			<< " AND command = " << sql::escapeQuoteString(command);
 
 	try{ gameDatabase->sendRawQuery(Query.str()); }
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		MudLog(BRF, LVL_APPR, TRUE, "MySQLDeleteAlias : %s", e.getMessage().c_str());
 	}
@@ -1706,7 +1706,7 @@ bool Character::loadAliases()
 	Query << "SELECT command,replacement FROM userAlias WHERE user_id=" << this->player.idnum;
 
 	try { MyQuery = gameDatabase->sendQuery(Query.str()); }
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		MudLog(BRF, LVL_APPR, TRUE, "Character::loadAliases : %s", e.getMessage().c_str());
 		return false;
@@ -1734,7 +1734,7 @@ bool Character::loadClans()
 	{
 		query = gameDatabase->sendQuery(sql.str());
 	}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		MudLog(BRF, LVL_APPR, TRUE, "Character::loadClans : %s", e.getMessage().c_str());
 		return false;
@@ -1758,7 +1758,7 @@ bool Character::loadTrophies()
 		return false;
 
 	try { MyQuery = gameDatabase->sendQuery(query); }
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		MudLog(BRF, LVL_APPR, TRUE, "Character::loadTrophies : %s", e.getMessage().c_str());
 		return false;
@@ -1798,7 +1798,7 @@ bool MySQLSaveRolls(const std::string &playername, const std::string &TableName,
 				+ roll + " WHERE user_id=" + MiscUtil::convert<std::string>(index->id);
 
 			try { MyQuery = gameDatabase->sendQuery( Query ); }
-			catch( sql::QueryException e )
+			catch( sql::QueryException &e )
 			{
 				MudLog(BRF, LVL_APPR, TRUE, "MySQLSaveRolls : %s", e.getMessage().c_str());
 				return false;
@@ -1820,7 +1820,7 @@ bool MySQLSaveRolls(const std::string &playername, const std::string &TableName,
 			try {
 				MyQuery = gameDatabase->sendQuery(Query);
 			}
-			catch(sql::QueryException e) {
+			catch(sql::QueryException &e) {
 				MudLog(BRF, LVL_APPR, TRUE, "MySQLSaveRolls : %s", e.getMessage().c_str());
 				return false;
 			}
@@ -1835,7 +1835,7 @@ bool MySQLSaveRolls(const std::string &playername, const std::string &TableName,
 		try {
 			MyQuery = gameDatabase->sendQuery(Query);
 		}
-		catch(sql::QueryException e) {
+		catch(sql::QueryException &e) {
 			MudLog(BRF, LVL_APPR, TRUE, "MySQLSaveRolls : %s", e.getMessage().c_str());
 			return false;
 		}
@@ -1880,7 +1880,7 @@ bool MySQLLoadRolls(const std::string &playername, const std::string TableName, 
 			Rolls[level - 1] = roll;
 		}
 	}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		MudLog(BRF, LVL_APPR, TRUE, "MySQLLoadRolls : %s", e.getMessage().c_str());
 		return false;
@@ -1917,7 +1917,7 @@ bool Character::loadQuests()
 			new Quest(this, MyRow[0], atoi(MyRow[1].c_str()));
 		}
 	}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		MudLog(BRF, LVL_APPR, TRUE, "Character::loadQuests : %s", e.getMessage().c_str());
 		return false;
@@ -1993,7 +1993,7 @@ bool Character::saveTrophies()
 				try {
 					gameDatabase->sendRawQuery(queryBuffer.str());
 				}
-				catch( sql::QueryException e )
+				catch( sql::QueryException &e )
 				{
 					MudLog(BRF, LVL_APPR, TRUE, "Character::saveTrophies : %s", e.getMessage().c_str());
 					return false;
@@ -2014,7 +2014,7 @@ bool Character::saveTrophies()
 			try {
 				gameDatabase->sendRawQuery(queryBuffer.str());
 			}
-			catch( sql::QueryException e ) {
+			catch( sql::QueryException &e ) {
 				MudLog(BRF, LVL_APPR, TRUE, "Character::saveTrophies : %s", e.getMessage().c_str());
 				return false;
 			}
@@ -2047,7 +2047,7 @@ bool Character::CreateDatabaseEntry()
 	sprintf(query, "INSERT INTO users (name) VALUES ('%s')", this->player.name.c_str());
 
 	try {gameDatabase->sendRawQuery(query);}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		MudLog(BRF, LVL_APPR, TRUE, "Character::CreateDatabaseEntry : %s", e.getMessage().c_str());
 		return false;
@@ -2223,7 +2223,7 @@ int BootObjects()
 		MyQuery = gameDatabase->sendQuery(QueryBuffer.str());
 		jsAttachmentQuery = gameDatabase->sendQuery("SELECT * FROM js_attachments WHERE type='O' ORDER BY target_vnum ASC");
 	}
-	catch(sql::QueryException e)
+	catch(sql::QueryException &e)
 	{
 		e.report();
 		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
@@ -2321,7 +2321,7 @@ void Object::protoSave()
 	
 	sql::Query MyQuery;
 	try {MyQuery = gameDatabase->sendQuery(Buffer.str());}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		MudLog(BRF,LVL_APPR, TRUE, "Error saving object #%d: %s",
 			obj_index[this->item_number].vnum, e.getMessage().c_str());
@@ -2333,7 +2333,7 @@ void Object::protoSave()
 	<<  obj_index[this->item_number].vnum << "';" << std::endl;
 	try {
 		gameDatabase->sendRawQuery(Buffer.str());
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF,LVL_APPR, TRUE, "Error saving object #%d: %s",
 			obj_index[this->item_number].vnum, e.getMessage().c_str());
 		return;
@@ -2345,7 +2345,7 @@ void Object::protoSave()
 			<< this->getVnum() << "','" << this->js_scripts->at(i)->vnum << "');";
 		try {
 			gameDatabase->sendRawQuery(Buffer.str());
-		} catch( sql::QueryException e ) {
+		} catch( sql::QueryException &e ) {
 			MudLog(BRF,LVL_APPR, TRUE, "Error saving object #%d: %s",
 				obj_index[this->item_number].vnum, e.getMessage().c_str());
 			return;
@@ -2362,7 +2362,7 @@ void Object::ProtoDelete()
 	{
 		MyQuery = gameDatabase->sendQuery(Buffer.str());
 	}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		e.report();
 		MudLog(BRF, LVL_APPR, TRUE, "Object::ProtoDelete : %s", e.getMessage().c_str());
@@ -2504,22 +2504,22 @@ void KitItem::SetPercent( const int perc )
 	this->percent = perc;
 }
 
-const int KitItem::GetBodyPos()
+int KitItem::GetBodyPos()
 {
 	return this->body_pos;
 }
-const int KitItem::GetItemVnum()
+int KitItem::GetItemVnum()
 {
 	return this->item_vnum;
 }
 /*** Galnor, 04/27/2009 - Return the item's REAL MiscUtil::random(obj_index subscript) ***/
-const int KitItem::GetItemRnum()
+int KitItem::GetItemRnum()
 {
 	if( this->item_vnum >= 0 )
 		return real_object(this->item_vnum);
 	return -1;//Invalid vnum...
 }
-const int KitItem::GetPercent()
+int KitItem::GetPercent()
 {
 	return this->percent;
 }
@@ -2540,7 +2540,7 @@ bool KitItem::IsInDB()
 {
 	return (this->dbID != -1);
 }
-const int KitItem::GetDBID()
+int KitItem::GetDBID()
 {
 	return this->dbID;
 }
@@ -2604,7 +2604,7 @@ void BootKits()
 
 	try {
 		gameDatabase->sendRawQuery("DELETE FROM kitItem WHERE kit_vnum NOT IN(SELECT vnum FROM kits);");
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		Log("Could not delete kit item from non existent kit : %s", e.getErrorMessage().c_str());
 	}
 
@@ -2616,7 +2616,7 @@ void BootKits()
 		Query << "SELECT * FROM kitItem WHERE 1 ORDER BY kit_vnum ASC;";
 		SecondQuery = gameDatabase->sendQuery(Query.str());
 	}
-	catch (sql::QueryException e) {
+	catch (sql::QueryException &e) {
 		e.report();
 		exit(1);
 	}
@@ -2692,11 +2692,11 @@ bool Character::PasswordUpdated()
 	return (this->pw_updated);
 }
 
-const int Character::getVnumOrID() const
+int Character::getVnumOrID() const
 {
 	return (IS_NPC(this) ? getVnum() : player.idnum);
 }
-const char Character::GetType() const
+char Character::GetType() const
 {
 	return (IS_NPC(this) ? 'M' : 'C');
 }
@@ -3232,7 +3232,7 @@ int topUserId() {
 
 	sql::Query MyQuery;
 	try {MyQuery = gameDatabase->sendQuery("SELECT MAX(user_id) FROM users");}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		e.report();
 		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
@@ -3246,7 +3246,7 @@ int PlayerBaseCount()
 {
 	sql::Query MyQuery;
 	try {MyQuery = gameDatabase->sendQuery("SELECT COUNT(user_id) FROM users");}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		e.report();
 		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
@@ -3409,7 +3409,7 @@ void MySQLDeleteAll(const std::string &playername)
 
 	try {
 		MyQuery = gameDatabase->sendQuery("SELECT user_id FROM users WHERE username='" + sql::escapeString(playername) + "';");
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		e.report();
 		return;
 	}
@@ -3427,7 +3427,7 @@ void MySQLDeleteAll(const std::string &playername)
 		try {
 			gameDatabase->sendRawQuery(Query);
 		}
-		catch( sql::QueryException e )
+		catch( sql::QueryException &e )
 		{
 			//...Not a problem
 		}
@@ -3451,7 +3451,7 @@ void MySQLDeleteAll(const std::string &playername)
 			+ MiscUtil::convert<std::string>(id) + "';");
 		gameDatabase->sendRawQuery("UPDATE forums_topics SET topic_poster='-1' WHERE topic_poster='"
 			+ MiscUtil::convert<std::string>(id) + "';");
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		e.report();
 	}
 }
@@ -3491,7 +3491,7 @@ void PlayerFileCycle(void)
 			"ORDER BY weave DESC"
 		);
 	}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		e.report();
 		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
@@ -3577,7 +3577,7 @@ void PlayerFileCycle(void)
 
 			gameDatabase->sendRawQuery(queryBuffer.str());
 		}
-		catch(sql::QueryException e)
+		catch(sql::QueryException &e)
 		{
 			MudLog(BRF, LVL_APPR, TRUE, "PlayerFileCycle() : Unable to archive deleted users : %s", e.getMessage().c_str());
 			exit(1);

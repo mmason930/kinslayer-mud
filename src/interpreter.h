@@ -48,12 +48,12 @@ public:
 	static CommManager &GetManager();
 		
 	void Free();
-	const int SaveComm( const std::string &Type, const std::string &Message, Character *sender,
+	int SaveComm( const std::string &Type, const std::string &Message, Character *sender,
 		const int room_vnum, Character *recipient=0);
-	const int SaveComm( const std::string &Type, const std::string &Message, Character *sender,
+	int SaveComm( const std::string &Type, const std::string &Message, Character *sender,
 		const int room_vnum, const int rid, const int invis_level);
 private:
-	const int SaveComm( const std::string &Type, const std::string &Message, const char sType,
+	int SaveComm( const std::string &Type, const std::string &Message, const char sType,
 		const int sid, const char rType, const int rid, const int invis_level, const int room_vnum);
 };
 

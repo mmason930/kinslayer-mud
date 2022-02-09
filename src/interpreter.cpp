@@ -13,37 +13,23 @@
 #define __INTERPRETER_C__
 
 #include "conf.h"
-#include "sysdep.h"
 
-#include "structs.h"
 #include "comm.h"
-#include "interpreter.h"
-#include "db.h"
-#include "utils.h"
-#include "handler.h"
 #include "screen.h"
-#include "olc/olc.h"
-#include "weaves.h"
 #include "stats.h"
 #include "mobs.h"
 #include "md5.h"
 #include "accounts.h"
-#include "constants.h"
 
-#include "js/js_functions.h"
 #include "js/js.h"
 
-#include "UserEmailAddress.h"
 
 #include "StringUtil.h"
 #include "UserLogoutType.h"
 #include "CharacterUtil.h"
 #include "Descriptor.h"
-#include "gateway/GatewayDescriptorType.h"
 #include "rooms/Room.h"
-#include "guilds/GuildUtil.h"
 
-#include "commands/infrastructure/CommandUtil.h"
 #include "commands/infrastructure/CommandInfo.h"
 
 extern const char *human_class_menu;
@@ -908,7 +894,7 @@ void Descriptor::nanny( char* arg )
 				}
 			}
 		}
-		catch(std::out_of_range e) {
+		catch(std::out_of_range &e) {
 
 			//Error...
 		}

@@ -38,8 +38,8 @@ bool isname(const char *str, const std::string &namelist);
 bool isname(const char *str, const char *namelist);
 bool is_name(const char *str, const char *namelist);
 char *fname(const char *namelist);
-const int GetNumber(char **name);
-const int GetNumber(std::string &name);
+int GetNumber(char **name);
+int GetNumber(std::string &name);
 
 /* ******** objects *********** */
 void	obj_to_char(Object *object, Character *ch);

@@ -1,11 +1,6 @@
-#include "JSQuery.h"
 #include "JSRow.h"
 
-#include "../structs.h"
-#include "../mobs.h"
-#include "../db.h"
 
-#include "js_functions.h"
 #include "js_interpreter.h"
 
 void JSEnvironment::LoadJSRow()

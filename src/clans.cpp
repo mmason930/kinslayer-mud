@@ -288,7 +288,7 @@ void MySQLSaveQuest(const std::string &playername, const Quest *quest, bool upda
 	try {
 		MyQuery = gameDatabase->sendQuery(Query.str());
 	}
-	catch( sql::QueryException e ) {
+	catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
 	}
 }
@@ -310,7 +310,7 @@ Quest *MySQLGrabQuest(const std::string &playername, const std::string &questnam
 	try {
 		MyQuery = gameDatabase->sendQuery(Query);
 	}
-	catch( sql::QueryException e ) {
+	catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
 		return NULL;
 	}
@@ -353,7 +353,7 @@ void Clan::GetPlayerList(std::vector< std::list<std::string> > &Players, std::li
 	try {
 		MyQuery = gameDatabase->sendQuery(Query.str());
 	}
-	catch( sql::QueryException e ) {
+	catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
 		return;
 	}

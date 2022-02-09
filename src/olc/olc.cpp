@@ -7,31 +7,20 @@
 #define _OASIS_OLC_
 
 #include "../conf.h"
-#include "../sysdep.h"
-#include "../structs.h"
-#include "../interpreter.h"
 #include "../comm.h"
 #include "../spells.h"
-#include "../utils.h"
-#include "../db.h"
-#include "olc.h"
 #include "../screen.h"
-#include "../handler.h"
 #include "../shop.h"
-#include "../clans.h"
 #include "../stats.h"
 #include "../mobs.h"
 #include "../js/js.h"
 #include "../auction.h"
 
-#include "../MiscUtil.h"
 #include "../StringUtil.h"
 #include "../Descriptor.h"
 #include "../UserEmailAddress.h"
 #include "../rooms/Room.h"
 
-#include "../commands/infrastructure/CommandUtil.h"
-#include "../commands/infrastructure/CommandInfo.h"
 #include "../commands/infrastructure/Social.h"
 
 #include <boost/regex.hpp>
@@ -125,7 +114,7 @@ Object *AuctionData::GetItemToSell()
 	return itemToSell;
 }
 
-const int AuctionData::GetSellDuration()
+int AuctionData::GetSellDuration()
 {
 	return sellDuration;
 }
@@ -133,7 +122,7 @@ void AuctionData::SetSellDuration( const int duration )
 {
 	sellDuration = duration;
 }
-const int AuctionData::GetBuyoutPrice( const char t )
+int AuctionData::GetBuyoutPrice( const char t )
 {
 	if( toupper(t) == 'G' )
 		return (CalcGold(buyoutPrice));
@@ -163,7 +152,7 @@ void AuctionData::SetBuyoutPrice( const unsigned int bp, const char t )
 	else
 		buyoutPrice = bp;
 }
-const int AuctionData::GetStartingPrice( const char t )
+int AuctionData::GetStartingPrice( const char t )
 {
 	if( toupper(t) == 'G' )
 		return (CalcGold(startingPrice));
@@ -202,11 +191,11 @@ const std::string &AuctionData::GetSearchTerm()
 {
 	return (this->SearchTerm);
 }
-const int AuctionData::GetPage()
+int AuctionData::GetPage()
 {
 	return page;
 }
-const int AuctionData::NumPages()
+int AuctionData::NumPages()
 {
 	return ((this->aiCache.size() / AuctionManager::ItemsPerPage)+1);
 }
@@ -1549,7 +1538,7 @@ void AddOlcLog( Character *ch, const std::string &Type, const int targetId )
 					<< ")";
 
 		gameDatabase->sendRawQuery( QueryBuffer.str() );
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "AddOLCLog - %s", e.getMessage().c_str());
 		return;
 	}

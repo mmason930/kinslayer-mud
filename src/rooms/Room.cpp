@@ -1,12 +1,9 @@
 #include "../conf.h"
-#include "../sysdep.h"
 #include "../structs.h"
 #include "../db.h"
-#include "../utils.h"
 #include "../weaves.h"
 #include "../md5.h"
 #include "../EntityType.h"
-#include "../zones.h"
 #include "../constants.h"
 #include "../weather.h"
 #include "../threaded_jobs.h"
@@ -230,7 +227,7 @@ void Room::deleteFromDatabase()
 		gameDatabase->sendRawQuery(QueryBuffer.str());
 
 	}
-	catch (sql::QueryException e) {
+	catch (sql::QueryException &e) {
 		MudLog(BRF, LVL_APPR, TRUE, "Failed to delete room #%d from database: %s", this->vnum, e.getMessage().c_str());
 		return;
 	}
@@ -455,7 +452,7 @@ void Room::bootWorld(
 		ObjectQuery = gameDatabase->sendQuery(objectQueryBuffer.str());
 		jsQuery = gameDatabase->sendQuery("SELECT * FROM js_attachments WHERE type='R' ORDER BY target_vnum ASC,id ASC;");
 	}
-	catch (sql::QueryException e) {
+	catch (sql::QueryException &e) {
 		MudLog(BRF, LVL_APPR, TRUE, "Could not send query in Room::bootWorld() : %s", e.getMessage().c_str());
 		exit(1);
 	}

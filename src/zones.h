@@ -59,7 +59,7 @@ public:
 	~ZoneManager();
 	static ZoneManager& GetManager();
 
-	const size_t NumZones(); //Thread safe.
+	size_t NumZones(); //Thread safe.
 	Zone* AddNewZone( const unsigned int vnum ); //Thread safe.
 	Zone *GetZoneByVnum( const unsigned int vnum ); //Thread safe.
 	Zone *GetZoneByRnum( const unsigned int rnum ); //Thread safe.
@@ -112,25 +112,25 @@ public:
 	std::string getName() { return Name; }
 	void setName( const std::string &Name ) { this->Name = Name; }
 
-	const int GetLifespan() { return lifespan; }
+	int GetLifespan() { return lifespan; }
 	void SetLifespan( const int _lifespan ) { lifespan = _lifespan; }
 
-	const int GetAge() { return age; }
+	int GetAge() { return age; }
 	void SetAge( const int _age ) { age = _age; }
 
-	const int GetX() { return x; }
+	int GetX() { return x; }
 	void SetX( const int _x ) { x = _x; }
 
-	const int GetY() { return y; }
+	int GetY() { return y; }
 	void SetY( const int _y ) { y = _y; }
 
-	const unsigned int GetTop() { return top; }
+	unsigned int GetTop() { return top; }
 	void SetTop( const int _top ) { top = _top; }
 
-	const unsigned int GetBottom() { return bot; }
+	unsigned int GetBottom() { return bot; }
 	void SetBottom( const int _bot ) { bot = _bot; }
 
-	const int GetResetMode() { return reset_mode; }
+	int GetResetMode() { return reset_mode; }
 	void SetResetMode( const int rm ) { reset_mode = rm; }
 
 	std::string GetSunrise() { return Sunrise; }

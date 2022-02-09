@@ -213,7 +213,7 @@ function saveManor(manor) {
 			+ " ) VALUES ("
 			+ manor.id + ","
 			+ manor.ownerUserId + ","
-			+ manor.race + ","
+			+ Math.min(0,manor.race) + "," // Galnor - 2022-02-08 - prevents SQL exception for "-1" values that worked in previous MySQL versions
 			+ manor.goldOwed + ","
 			+ sqlEscapeQuoteString(manor.name) + ","
 			+ sqlEscapeQuoteString(manor.area) + ","

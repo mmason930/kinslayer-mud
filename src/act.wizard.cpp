@@ -946,7 +946,7 @@ CommandHandler do_ipfind = DEFINE_COMMAND
 	try {
 		query = gameDatabase->sendQuery(sqlBuffer.str());
 	}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		MudLog(BRF, MAX(GET_LEVEL(ch), LVL_APPR), TRUE, "IPFind: %s", e.getMessage().c_str());
 		return;
@@ -974,7 +974,7 @@ CommandHandler do_ipfind = DEFINE_COMMAND
 	try {
 		query = gameDatabase->sendQuery(sqlBuffer.str());
 	}
-	catch(sql::QueryException e)
+	catch(sql::QueryException &e)
 	{
 		MudLog(BRF, MAX(GET_LEVEL(ch), LVL_APPR), TRUE, "IPFind: %s", e.getErrorMessage().c_str());
 		return;
@@ -1033,7 +1033,7 @@ CommandHandler do_extra = DEFINE_COMMAND
 			Character *target = get_char_vis(ch, vArgs.at(2).c_str());
 			int nrOfTracks = 0;
 			int tracksPerRoom = 12;
-			for(int i = 0;i < World.size();++i)
+			for(std::size_t i = 0;i < World.size();++i)
 			{
 				for(int trackNumber = 0;trackNumber < tracksPerRoom;++trackNumber)
 				{
@@ -1159,7 +1159,7 @@ CommandHandler do_extra = DEFINE_COMMAND
 		{
 		}
 		else bCorrectArgument=false;
-	} catch( std::out_of_range ) {
+	} catch( std::out_of_range const& ) {
 		bCorrectArgument=false;
 	}
 	if( !bCorrectArgument )
@@ -1332,7 +1332,7 @@ CommandHandler do_disable = DEFINE_COMMAND
 			ch->send("You can disable the following: command\r\n");
 		}
 	}
-	catch(sql::QueryException e) {
+	catch(sql::QueryException &e) {
 		MudLog(BRF, LVL_GOD, TRUE, "Failed while processing command `disable` : %s", e.getMessage().c_str());
 	}
 };
@@ -1763,7 +1763,7 @@ CommandHandler do_find = DEFINE_COMMAND
 {
 	std::stringstream QueryBuffer, OutputBuffer;
 	sql::Query MyQuery;
-	unsigned int i = 0;
+	int i = 0;
 	int nr_arg;
 	char name[MAX_INPUT_LENGTH];
 
@@ -1797,7 +1797,7 @@ CommandHandler do_find = DEFINE_COMMAND
 
 	try {
 		MyQuery = gameDatabase->sendQuery(QueryBuffer.str());
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, TRUE, MAX(LVL_APPR, GET_INVIS_LEV(ch)), "do_find : Failed to send object query: %s",
 			e.getMessage().c_str());
 		return;
@@ -1831,7 +1831,7 @@ CommandHandler do_find = DEFINE_COMMAND
 				QueryBuffer.str("");
 				QueryBuffer << "SELECT * FROM objects WHERE id='" << MyRow["holder_id"] << "';";
 				MyQueryStack.push(gameDatabase->sendQuery(QueryBuffer.str()));
-			} catch( sql::QueryException e ) {
+			} catch( sql::QueryException &e ) {
 				MudLog(BRF, TRUE, MAX(LVL_APPR, GET_INVIS_LEV(ch)), "do_find : Failed to send object query: %s",
 					e.getMessage().c_str());
 				return;
@@ -2224,7 +2224,7 @@ CommandHandler do_council = DEFINE_COMMAND
 			victim->RemoveFromRoom();
 		}
 	}
-	catch(flusspferd::exception e)
+	catch(flusspferd::exception &e)
 	{
 		MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "Error while changing %s's council flag by %s in clan %s: %s", GET_NAME(victim), GET_NAME(ch), clan->Name.c_str(), e.what());
 	}
@@ -2340,7 +2340,7 @@ CommandHandler do_clan = DEFINE_COMMAND
 			victim->RemoveFromRoom();
 		}
 	}
-	catch(flusspferd::exception e)
+	catch(flusspferd::exception &e)
 	{
 		MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "Error while clanning %s by %s to clan %s: %s", GET_NAME(victim), GET_NAME(ch), clan->Name.c_str(), e.what());
 	}
@@ -2502,7 +2502,7 @@ CommandHandler do_declan = DEFINE_COMMAND
 			victim->RemoveFromRoom();
 		}
 	}
-	catch(flusspferd::exception e)
+	catch(flusspferd::exception &e)
 	{
 		MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "Error while clanning %s by %s to clan %s: %s", GET_NAME(victim), GET_NAME(ch), clan->Name.c_str(), e.what());
 	}
@@ -2793,11 +2793,11 @@ CommandHandler do_award = DEFINE_COMMAND
 	{
 		clanQuestPointTransaction = ClanUtil::performQuestPointTransaction(gameDatabase, targetUserId, clanId, questPointAmount, ch->getUserType(), ch->getUserId(), argument); //'argument' is the reason.
 	}
-	catch(Exception e)
+	catch(Exception &e)
 	{
 		ch->send("%s\r\n", e.what());
 	}
-	catch(std::exception e)
+	catch(std::exception &e)
 	{
 		ch->send("Could not award quest points.\r\n%s\r\n", e.what());
 	}
@@ -3159,7 +3159,7 @@ CommandHandler do_vnum = DEFINE_COMMAND
         std::vector<JSTrigger*> results= JSManager::get()->searchTrigger(buf2);
         if (!results.empty())
         {
-            for(int i = 0; i < results.size(); ++i)
+            for(std::size_t i = 0; i < results.size(); ++i)
             {
                 ch->send("%3d. [%5d] %s\r\n", i+1, results[i]->vnum, results[i]->name.c_str());
             }
@@ -4979,6 +4979,7 @@ CommandHandler do_wiznet = DEFINE_COMMAND
 
 		case '*':
 			emote = TRUE;
+			break;
 
 		case '#':
 			OneArgument(argument + 1, buf1);
@@ -5536,7 +5537,7 @@ struct BackupFileNameFunctor
 			//Same...
 			return true;
 
-		} catch( std::out_of_range e ) {
+		} catch( std::out_of_range &e ) {
 			return false;
 		}
 	}
@@ -5989,7 +5990,7 @@ CommandHandler do_wshow = DEFINE_COMMAND
 						<< "AND c.recipient_id<='" << (int)(ch->player.level) << "' "
 						<< "ORDER BY c.timestamp DESC LIMIT 500";
 				MyQuery = gameDatabase->sendQuery( sBuf.str() );
-			} catch( sql::QueryException e ) {
+			} catch( sql::QueryException &e ) {
 				e.report();
 				return;
 			}
@@ -6574,6 +6575,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			break;
 		case 15:
 			vict->points.gold = value;
+			break;
 		case 16:
 			GET_BANK_GOLD(vict) = RANGE(0, 100000000);
 			break;
@@ -6879,6 +6881,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 				return 0;
 			}
 			vict->was_in_room = FindRoomByVnum(value);
+			break;
 		case 65:
 			SET_OR_REMOVE2(PLR_FLAGS(vict), PLR_NO_WEAVE);
 			break;
@@ -6891,6 +6894,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 			}
 
 			vict->PlayerData->spellpracs = value;
+			break;
 		case 67:
 			SET_OR_REMOVE2(PLR_FLAGS(vict), PLR_NO_TRACE);
 			break;

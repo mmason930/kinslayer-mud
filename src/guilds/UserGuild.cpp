@@ -1,5 +1,3 @@
-#include "../conf.h"
-#include "../sysdep.h"
 
 #include "UserGuild.h"
 

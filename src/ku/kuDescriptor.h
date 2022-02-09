@@ -53,18 +53,18 @@ public:
 
 	struct HostRetriever *hostRetriever;
 
-	std::string getInputBuffer();
+	std::string getInputBuffer() const;
 
 	const char *getInputDataBuffer() const
 	{
 		return input.c_str();
 	}
 
-	const std::string &getHost()
+	std::string getHost() const
 	{
 		return host;
 	}
-	const std::string &getIp()
+	std::string getIp() const
 	{
 		return ipAddress;
 	}
@@ -88,9 +88,9 @@ public:
 	}
 	sockaddr_in *GetSaAddress();
 	sockaddr *GetSinAddress();
-	const std::string GetIP();
-	const std::string GetHost();
-	const u_short GetPort();
+	std::string GetIP() const;
+	std::string GetHost() const;
+	u_short GetPort() const;
 };
 
 #endif

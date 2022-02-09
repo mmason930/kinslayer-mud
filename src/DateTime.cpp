@@ -347,6 +347,16 @@ bool DateTime::after(const DateTime &otherDate)
 
 void DateTime::operator =(const DateTime &otherDate)
 {
+	copyFrom(otherDate);
+}
+
+DateTime::DateTime(const DateTime &otherDate)
+{
+	copyFrom(otherDate);
+}
+
+void DateTime::copyFrom(const DateTime &otherDate)
+{
 	this->year = (unsigned char)(otherDate.getYear()-1900);
 	this->month = (unsigned char)(otherDate.getMonth());
 	this->day = (unsigned char)(otherDate.getDay());

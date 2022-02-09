@@ -6,10 +6,8 @@
  *   as well as accepting and processing incoming connections.      *
  ********************************************************************/
 
-#include "kuDescriptor.h"
 #include "kuListener.h"
 
-#include <iostream>
 
 kuListener::kuListener(const int port, e_SocketType socketType)
 {

@@ -17,7 +17,7 @@ private:
 
 public:
 
-    const int GetID();
+    int GetID();
     const std::string getName();
     const std::string GetAbbrev();
 

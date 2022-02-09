@@ -115,8 +115,8 @@ public:
 	BanElement( const BanType t, const time_t d, std::string N, std::string S, const int id=-1 );
 	~BanElement();
 
-	const BanType GetType();
-	const time_t GetDate();
+	BanType GetType();
+	time_t GetDate();
 	std::string getName();
 	std::string GetSite();
 	std::string GetTypeStr();

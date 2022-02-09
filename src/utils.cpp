@@ -8,18 +8,12 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#include <mutex>
 #include "conf.h"
-#include "sysdep.h"
 
 #include "structs.h"
-#include "spells.h"
 #include "utils.h"
 #include "db.h"
-#include "comm.h"
 #include "screen.h"
-#include "handler.h"
-#include "shop.h"
 
 #include "StringUtil.h"
 #include "Descriptor.h"

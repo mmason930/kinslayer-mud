@@ -10,33 +10,15 @@
 *
 */
 
-#include <boost/regex.hpp>
 
-#include "JSCharacter.h"
-#include "JSObject.h"
 #include "JSRoom.h"
-#include "js_constants.h"
-#include "js_trigger.h"
-#include "js_interpreter.h"
-#include "js_utils.h"
-#include "js_functions.h"
 #include "Script.h"
 
-#include "../constants.h"
-#include "../structs.h"
-#include "../olc/olc.h"
 #include "js.h"
-#include "../handler.h"
 
 #include "../Game.h"
 
-#include "../ku/kuSockets.h"
-#include "../ku/kuListener.h"
-#include "../ku/kuDescriptor.h"
-#include "../Descriptor.h"
-#include "../md5.h"
 
-#include "../CharacterUtil.h"
 #include "../StringUtil.h"
 #include "../SystemUtil.h"
 #include "../SQLUtil.h"
@@ -228,7 +210,7 @@ JSManager::JSManager()
 			monitorSubversionThread = new std::thread(&JSManager::monitorSubversion, this, dbContext->createConnection(), game->getScriptPullCommand());
 		}
 	}
-	catch(sql::QueryException queryException)
+	catch(sql::QueryException &queryException)
 	{
 		MudLog(BRF, LVL_BUILDER, TRUE, "Error loading scripts: %s", queryException.getMessage().c_str());
 		exit(1);
@@ -319,11 +301,11 @@ void JSManager::monitorScriptImportTable(sql::Connection connection, bool contin
 				idDeleteQueue.clear();
 			}
 		}
-		catch(sql::QueryException queryException)
+		catch(sql::QueryException &queryException)
 		{
 			MudLog(BRF, LVL_APPR, TRUE, "Error while fetching from scriptImportQueue: %s", queryException.getMessage().c_str());
 		}
-		catch(std::exception e)
+		catch(std::exception &e)
 		{
 			MudLog(BRF, LVL_APPR, TRUE, "Error while fetching from scriptImportQueue: %s", e.what());
 		}
@@ -357,7 +339,7 @@ void JSManager::monitorSubversion(sql::Connection connection, const std::string 
 			
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 		}
-		catch(std::exception e)
+		catch(std::exception &e)
 		{
 			MudLog(BRF, LVL_APPR, TRUE, "Exception in repository monitoring thread: %s", e.what());
 		}
@@ -431,7 +413,7 @@ void JSManager::deleteTrigger(JSTrigger* t)
 	try {
 		gameDatabase->sendRawQuery( QueryBuffer.str() );
 	}
-	catch( sql::QueryException e ) {
+	catch( sql::QueryException &e ) {
 		MudLog(NRM, LVL_APPR, TRUE, "Failed to send JSTrigger deletion query for #%d : %s", t->vnum, e.getMessage().c_str());
 		return;
 	}
@@ -490,7 +472,7 @@ int JSManager::saveTrigger(JSTrigger* t)
 		//cout << tempstring << endl;
 		gameDatabase->sendRawQuery(tempstring);
 	}
-	catch (sql::QueryException e)
+	catch (sql::QueryException &e)
 	{
 		MudLog(BRF, LVL_APPR, TRUE, "Error saving JS Script %d : %s", trig->vnum, e.getErrorMessage().c_str());
 		e.report();
@@ -592,7 +574,7 @@ void JSManager::monitorFileModifications(bool continuous)
 
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 		}
-		catch(sql::QueryException queryException)
+		catch(sql::QueryException &queryException)
 		{
 			MudLog(BRF, LVL_BUILDER, TRUE, "Error importing scripts: %s", queryException.getMessage().c_str());
 		}
@@ -857,7 +839,7 @@ void JSManager::runTimeouts()
 			//flusspferd::global().apply(scriptEvent->callback, scriptEvent->arguments);
 			removeTimeout();
 		}
-		catch(flusspferd::exception e)
+		catch(flusspferd::exception &e)
 		{
 			MudLog(NRM, LVL_BUILDER, TRUE, "Error in the runTimeouts() callback: %s", e.what());
 		}
@@ -868,7 +850,7 @@ void JSManager::runTimeouts()
 			//Unroot the event.
 			flusspferd::global().delete_property(scriptEvent->propertyName);
 		}
-		catch(flusspferd::exception e)
+		catch(flusspferd::exception &e)
 		{
 			MudLog(NRM, LVL_BUILDER, TRUE, "Error in runTimeouts() : Could not delete script event property %s : %s", scriptEvent->propertyName.c_str(), e.what());
 		}

@@ -64,12 +64,12 @@ class Storm
 		void change(class Weather * weather);
 		void change_intensity(class Weather * weather);
 
-		const int get_type() const
+		int get_type() const
 		{
 			return type;
 		}
 
-		const int get_event_type() const
+		int get_event_type() const
 		{
 			return event_type;
 		}
@@ -126,7 +126,7 @@ class Weather
 
 		void sun_message();
 		
-		static const int getSun()
+		static int getSun()
 		{
 			return sunlight;
 		}
@@ -136,19 +136,19 @@ class Weather
 			Weather::sunlight = i;
 		}
 
-		const int get_sky() const
+		int get_sky() const
 		{
 			return sky;
 		}
-		const int get_precipitation() const
+		int get_precipitation() const
 		{
 			return precipitation;
 		}
-		const int get_temp() const
+		int get_temp() const
 		{
 			return temperature;
 		}
-		const int get_visibility() const
+		int get_visibility() const
 		{
 			return visibility;
 		}

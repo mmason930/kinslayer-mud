@@ -10,15 +10,10 @@
 #  include "json_batchallocator.h"
 # endif // #ifndef JSON_USE_SIMPLE_INTERNAL_ALLOCATOR
 #endif // if !defined(JSON_IS_AMALGAMATION)
-#include <iostream>
-#include <utility>
-#include <stdexcept>
 #include <cstring>
-#include <cassert>
 #ifdef JSON_USE_CPPTL
 # include <cpptl/conststring.h>
 #endif
-#include <cstddef>    // size_t
 
 #define JSON_ASSERT_UNREACHABLE assert( false )
 #define JSON_ASSERT( condition ) assert( condition );  // @todo <= change this into an exception throw

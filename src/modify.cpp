@@ -9,21 +9,11 @@
 **************************************************************************/
 
 #include "conf.h"
-#include "sysdep.h"
 
 
 #include "structs.h"
-#include "spells.h"
-#include "utils.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "db.h"
-#include "comm.h"
-#include "olc/olc.h"
-#include "shop.h"
 #include "weaves.h"
 #include "js/js.h"
-#include "js/js_trigger.h"
 
 #include "StringUtil.h"
 #include "Descriptor.h"

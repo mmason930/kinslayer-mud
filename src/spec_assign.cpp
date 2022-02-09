@@ -9,12 +9,9 @@
 ************************************************************************ */
 
 #include "conf.h"
-#include "sysdep.h"
 
 #include "structs.h"
 #include "db.h"
-#include "interpreter.h"
-#include "utils.h"
 #include "mobs.h"
 #include "rooms/Room.h"
 

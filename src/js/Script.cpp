@@ -1,4 +1,3 @@
-#include "../conf.h"
 
 #include "Script.h"
 

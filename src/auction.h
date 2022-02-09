@@ -57,7 +57,7 @@ public:
 	~Auction();
 
 	std::string getName();
-	const int getVnum();
+	int getVnum();
 
 	void setVnum( const int _vnum );
 	void setName( const std::string _Name );

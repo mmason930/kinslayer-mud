@@ -1,17 +1,11 @@
 #include "conf.h"
-#include "sysdep.h"
 
 #include "structs.h"
 #include "poker.h"
-#include "db.h"
 #include "utils.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "olc/olc.h"
 #include "screen.h"
 #include "dg_event.h"
 
-#include "MiscUtil.h"
 #include "StringUtil.h"
 #include "rooms/Room.h"
 

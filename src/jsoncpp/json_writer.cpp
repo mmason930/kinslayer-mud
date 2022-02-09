@@ -7,12 +7,8 @@
 # include "writer.h"
 # include "json_tool.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
-#include <utility>
 #include <assert.h>
-#include <stdio.h>
 #include <string.h>
-#include <iostream>
-#include <sstream>
 #include <iomanip>
 
 #if _MSC_VER >= 1400 // VC++ 8.0

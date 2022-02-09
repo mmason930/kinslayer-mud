@@ -61,8 +61,8 @@ public:
 	bool WillBeMultiplaying( const std::string &Host, const std::string &Name );
 	bool HasWaitedLongEnough( std::string Name, std::string Host, Switch* sw );
 	bool IsExemptFromWaiting( const std::string &sHostFrom, const std::string &sNameFrom, const std::string &sHostTo, const std::string &sNameTo );
-	bool IsExemptFromMultiplayRestriction( const std::string &sHost, const std::string &sName, const std::list< Character* > lAlreadyLoggedIn );
-	bool IsExemptFromMultiplayRestriction( const std::string &sHost, const std::string &sName, const std::list< std::string > lAlreadyLoggedInNames );
+	bool IsExemptFromMultiplayRestriction( const std::string &userName, const std::list< Character* > lAlreadyLoggedIn );
+	bool IsExemptFromMultiplayRestriction( const std::string &userName, const std::list< std::string > lAlreadyLoggedInNames );
 	Time TimeRemaining(std::string Name, std::string Host, Switch *sw);
 	int TimeToWait(std::string Name, std::string Host, Switch *sw);
 	void Free();

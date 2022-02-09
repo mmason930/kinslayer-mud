@@ -17,8 +17,6 @@
 */
 
 #include "conf.h"
-#include "sysdep.h"
-#include "structs.h"
 #include "comm.h"
 #include "utils.h"
 #include "db.h"
@@ -26,7 +24,6 @@
 #include "constants.h"
 #include "interpreter.h"
 
-#include "MiscUtil.h"
 #include "Descriptor.h"
 
 #if 0
@@ -685,7 +682,7 @@ void Kit::save()
 
 	try {
 		gameDatabase->sendRawQuery(Query.str());
-	} catch (sql::QueryException e) {
+	} catch (sql::QueryException &e) {
 		MudLog(BRF, LVL_APPR, TRUE, "An error occurred when saving kit #%d : %s", this->vnum, e.message.c_str());
 		return;
 	}
@@ -695,7 +692,7 @@ void Kit::save()
 	//Delete all pre-existing kit items...
 //	try {
 //		gameDatabase->sendRawQuery(Query.str());
-//	} catch( sql::QueryException e ) {
+//	} catch( sql::QueryException &e ) {
 //		MudLog(BRF, LVL_APPR, TRUE, "An error occurred when saving kit #%d : %s", this->vnum, e.Message.c_str());
 //		return;
 //	}
@@ -725,7 +722,7 @@ void Kit::save()
 
 			try {
 				gameDatabase->sendRawQuery(Query.str());
-			} catch( sql::QueryException e ) {
+			} catch( sql::QueryException &e ) {
 				MudLog(BRF, LVL_APPR, TRUE, "An error occurred when saving kit #%d : %s", this->vnum, e.message.c_str());
 				return;
 			}
@@ -756,7 +753,7 @@ void Kit::save()
 
 		try {
 			gameDatabase->sendRawQuery(Query.str());
-		} catch( sql::QueryException e ) {
+		} catch( sql::QueryException &e ) {
 			MudLog(BRF, LVL_APPR, TRUE, "An error occurred when saving kit #%d : %s", this->vnum, e.message.c_str());
 			return;
 		}

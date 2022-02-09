@@ -193,7 +193,7 @@ CommandHandler do_locate = DEFINE_COMMAND
 			try {
 				objectValueEntry.objectId = uuidGenerator(value);
 			}
-			catch (std::exception e)
+			catch (std::exception &e)
 			{
 				ch->send("Invalid value for option '%s' : '%s'\r\n", option.c_str(), value.c_str());
 				return false;

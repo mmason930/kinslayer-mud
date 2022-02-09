@@ -50,4 +50,3 @@ EXPOSE 4001
 EXPOSE 4002
 
 ENTRYPOINT ["/kinslayer/docker-start.sh"]
-

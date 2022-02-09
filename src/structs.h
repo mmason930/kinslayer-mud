@@ -1707,7 +1707,7 @@ public:
 	{
 		this->percent = (sbyte)percent;
 	}
-	const int getPercent()
+	int getPercent()
 	{
 		return percent;
 	}
@@ -1829,8 +1829,8 @@ public:
 
 	bool TooHeavyToPickUp( Object *obj );
 
-	const int getVnumOrID() const;
-	const char GetType() const;
+	int getVnumOrID() const;
+	char GetType() const;
 	int Difficulty();		//MOB / Character's 'difficulty' based on equipment,level,HP,etc.
 	int getVnum() const;
 	int VnumMobile( std::string SearchName );
@@ -2203,17 +2203,17 @@ public:
 	void SetItemVnum( const int iv );
 	void SetPercent( const int perc );
 
-	const int GetBodyPos();
-	const int GetItemVnum();
-	const int GetItemRnum();
-	const int GetPercent();
+	int GetBodyPos();
+	int GetItemVnum();
+	int GetItemRnum();
+	int GetPercent();
 
 	bool IsDeleted();
 	void SetDeletion();
 	void UnsetDeletion();
 
 	bool IsInDB();
-	const int GetDBID();
+	int GetDBID();
 	void SetDBID( const int dbid );
 
 
@@ -2619,7 +2619,7 @@ class Config
 		void Load();
 		void save();
 		void RenumberRooms();
-		const int GetReboots()
+		int GetReboots()
 		{
 			return NumberOfReboots;
 		}

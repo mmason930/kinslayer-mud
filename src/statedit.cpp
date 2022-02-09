@@ -1,19 +1,13 @@
 
 #include "conf.h"
-#include "sysdep.h"
 
-#include "structs.h"
 #include "comm.h"
 #include "interpreter.h"
-#include "db.h"
 #include "utils.h"
-#include "handler.h"
-#include "screen.h"
 #include "olc/olc.h"
 #include "stats.h"
 #include "constants.h"
 
-#include "MiscUtil.h"
 #include "Descriptor.h"
 
 extern Descriptor *descriptor_list;

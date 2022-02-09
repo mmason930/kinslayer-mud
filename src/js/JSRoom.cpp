@@ -1,17 +1,10 @@
-#include <flusspferd.hpp>
 
 #include "../conf.h"
-#include "../sysdep.h"
 
 #include "../structs.h"
 #include "../mobs.h"
-#include "../db.h"
-#include "../olc/olc.h"
 #include "../constants.h"
 
-#include "JSRoom.h"
-#include "JSCharacter.h"
-#include "JSObject.h"
 #include "js_functions.h"
 #include "../StringUtil.h"
 #include "../rooms/Room.h"

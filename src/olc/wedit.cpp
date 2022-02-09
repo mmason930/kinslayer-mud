@@ -3,15 +3,11 @@
  *		   By Galnor on 4-17-2005					 *
  *****************************************************/
 #include "../conf.h"
-#include "../sysdep.h"
-#include "../structs.h"
 #include "../comm.h"
 #include "../interpreter.h"
 #include "../utils.h"
 #include "../db.h"
-#include "../constants.h"
 #include "olc.h"
-#include "../shop.h"
 #include "../clans.h"
 #include "../Descriptor.h"
 
@@ -100,7 +96,7 @@ void SaveWarrants()
 		gameDatabase->sendRawQuery("RENAME TABLE `warrant` TO `oldWarrant`, `tempWarrant` TO `warrant`, `oldWarrant` TO `tempWarrant`");
 		gameDatabase->sendRawQuery("DROP TABLE `tempWarrant`");
 	}
-	catch( sql::QueryException e ) {
+	catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Unable to save warrants: %s", e.getMessage().c_str());
 	}
 }

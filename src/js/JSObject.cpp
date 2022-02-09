@@ -1,14 +1,6 @@
 #include "../conf.h"
-#include "../sysdep.h"
 
-#include "../structs.h"
-#include "JSObject.h"
-#include "JSCharacter.h"
 #include "JSRoom.h"
-#include "../mobs.h"
-#include "../db.h"
-#include "../handler.h"
-#include "../utils.h"
 
 #include "js_functions.h"
 #include "js_interpreter.h"

@@ -78,8 +78,8 @@ public:
 	static bool SavingRoll(Character* caster, Character* victim);
 	static int PercentForSkillLevel( int skill_level );
 
-	const int GetWeaveVnum( const std::string Name );
-	const std::string GetWeaveName( const int vnum );
+	int GetWeaveVnum( const std::string Name );
+	std::string GetWeaveName( const int vnum );
 
 	Weave* GetWeave( int vnum );
 	Weave* GetWeave( const std::string &Name );
@@ -162,7 +162,7 @@ public:
 	std::list< Gate* > GetGatesgetRoom( class Room* room );
 	std::list< Gate* > GetGatesByCreator( class Character* creator );
 
-	const size_t NumberOfGates() { return GateList.size(); }
+	size_t NumberOfGates() { return GateList.size(); }
 	void UpdateGates();
 	void KillAllGates( Character* creator );
 	void Free();

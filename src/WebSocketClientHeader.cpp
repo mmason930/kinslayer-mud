@@ -261,7 +261,7 @@ void WebSocketClientHeader::readFieldLine(const std::string &line)
 			++pos;
 		}
 	}
-	catch(std::out_of_range e) {
+	catch(std::out_of_range &e) {
 	// This exception will only be thrown if we never hit a ": " sequence in this line.
 
 		throw WebSocketException(INVALID_HEADER_EXCEPTION_MESSAGE);

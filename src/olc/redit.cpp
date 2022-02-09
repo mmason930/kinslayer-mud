@@ -316,7 +316,7 @@ void redit_save_to_disk( int lowVnum, int highVnum )
 	sql::Connection localConnection;
 	try {
 		localConnection = dbContext->createConnection();
-	} catch( sql::ConnectionException e ) {
+	} catch( sql::ConnectionException &e ) {
 		MudLog(BRF, LVL_APPR, TRUE, "Unable to establish connection with MUD database while saving rooms : %s",
 			e.getMessage().c_str());
 		return;
@@ -439,7 +439,7 @@ void redit_save_to_disk( int lowVnum, int highVnum )
 		thread5.detach();
 		thread6.detach();
 
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(BRF, TRUE, LVL_APPR, "Failed to save rooms : %s", e.getErrorMessage().c_str());
 		return;
 	}

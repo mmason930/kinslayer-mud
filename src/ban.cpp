@@ -70,7 +70,7 @@ void BanManager::Boot()
 	Query << "SELECT * FROM banlist ORDER BY id ASC;";
 	try {
 		MyQuery = gameDatabase->sendQuery(Query.str());
-	} catch(sql::QueryException e) {
+	} catch(sql::QueryException &e) {
 		e.report();
 		return;
 	}
@@ -196,11 +196,11 @@ BanElement::BanElement( const BanType t, const time_t d, std::string N, std::str
 }
 BanElement::~BanElement() {}//Do nothing?
 
-const BanType BanElement::GetType()
+BanType BanElement::GetType()
 {
 	return type;
 }
-const time_t BanElement::GetDate()
+time_t BanElement::GetDate()
 {
 	return date;
 }
@@ -245,7 +245,7 @@ void BanElement::AddToDatabase()
 
 	try {
 		gameDatabase->sendRawQuery(Query.str());
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(NRM, LVL_GOD, TRUE, "Unable to add ban element(site:%s) to database : %s",
 			GetSite().c_str(), e.message.c_str());
 		return;//Get outta here!
@@ -263,7 +263,7 @@ void BanElement::RemoveFromDatabase()
 	Query << "DELETE FROM banlist WHERE id='" << dbID << "';";
 	try {
 		gameDatabase->sendRawQuery(Query.str());
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		MudLog(NRM, LVL_GOD, TRUE, "Unable to remove ban element(site:%s) from database : %s",
 			GetSite().c_str(), e.message.c_str());
 		return;

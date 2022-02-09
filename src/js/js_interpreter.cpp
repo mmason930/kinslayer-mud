@@ -1,33 +1,12 @@
-#include "js_interpreter.h"
 
-#include <csignal>
-#include <ctime>
-#include <cstdlib>
 
 #ifndef WIN32
-#include <unistd.h>
 #endif
 
-#include <iostream>
-#include <string>
-#include <flusspferd.hpp>
-#include <flusspferd/spidermonkey/context.hpp>
-#include <cstdlib>
-#include <cstring>
 
-#include <js/jsapi.h>
 
-#include "JSCharacter.h"
-#include "JSObject.h"
-#include "JSRoom.h"
-#include "JSQuery.h"
 #include "JSRow.h"
-#include "../constants.h"
 #include "js.h"
-#include "../olc/olc.h"
-#include "../utils.h"
-#include "js_utils.h"
-#include "js_trigger.h"
 #include "Script.h"
 
 #include "../StringUtil.h"
@@ -240,7 +219,7 @@ flusspferd::value JSEnvironment::executeExpression( const std::string &expressio
 	flusspferd::value v;
 	try {
 		v = flusspferd::evaluate( expression );
-	} catch( flusspferd::exception e ) {
+	} catch( flusspferd::exception &e ) {
 		std::stringstream errorBuffer;
 		errorBuffer << "Error executing hard coded expression : " << e.what() << std::endl;
 		errorBuffer << "Expression: " << expression;
@@ -397,7 +376,7 @@ void JSEnvironment::cleanup(JSInstance* instance)
 	{
 		evaluate(instance->delstring);
 	}
-	catch (flusspferd::exception e)
+	catch (flusspferd::exception &e)
 	{
 		MudLog(NRM, LVL_BUILDER, TRUE, "Error in script %d cleanup : %s", instance->vnum, e.what());
 	}
@@ -449,7 +428,7 @@ int JSEnvironment::process_yield(std::shared_ptr<JSInstance> instance, value yie
 			}
 			else
 				return 0;
-		} catch( flusspferd::exception e ) {
+		} catch( flusspferd::exception &e ) {
 			//MudLog(NRM, LVL_APPR, TRUE, "JavaScript yielding exception: %s", e.what());
 			return 1;
 		}
@@ -477,7 +456,7 @@ int JSEnvironment::execute_timer(std::shared_ptr<JSInstance> instance, bool succ
 		removeTimeout();
         return process_yield(instance, yielded, dump);
     }
-    catch (flusspferd::exception e)
+    catch (flusspferd::exception &e)
     {
         if (strstr(e.what(), "[object StopIteration]")) // we don't want trivial messages.
         {
@@ -488,7 +467,7 @@ int JSEnvironment::execute_timer(std::shared_ptr<JSInstance> instance, bool succ
 		        	get_native<JSObject>(instance->self.to_object()).toReal()->delayed_script.reset(); // prevent leak
 				else if( is_native<JSRoom>(instance->self.to_object()) )
 		        	get_native<JSRoom>(instance->self.to_object()).toReal()->delayed_script.reset(); // prevent leak
-			} catch( flusspferd::exception e ) {
+			} catch( flusspferd::exception &e ) {
 				//...
 				return 1;
 			}
@@ -534,7 +513,7 @@ int JSEnvironment::execute(std::shared_ptr<JSInstance> instance)
             }
             instance->state = v.get_object(); // this is a generator, we need to continue
         }
-        catch (flusspferd::exception e)
+        catch (flusspferd::exception &e)
         {
             MudLog(NRM, LVL_BUILDER, TRUE, "Error in script %d : %s", instance->vnum, e.what());
             removeTimeout();
@@ -555,7 +534,7 @@ int JSEnvironment::execute(std::shared_ptr<JSInstance> instance)
 		}
 	    removeTimeout();
     }
-    catch (flusspferd::exception e)
+    catch (flusspferd::exception &e)
     {
         if (strstr(e.what(), "[object StopIteration]")) // we don't want trivial messages.
         {
@@ -617,7 +596,7 @@ bool JSEnvironment::compile(const std::string &fileName, std::string &scriptBuff
 		flusspferd::evaluate(formattedScriptBuffer, fileName.c_str(), 1);
 		removeTimeout();
 	}
-	catch(flusspferd::exception e)
+	catch(flusspferd::exception &e)
 	{
 		MudLog(BRF, TRUE, LVL_APPR, "Error evaluating script: %s", e.what());
 	}

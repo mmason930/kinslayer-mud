@@ -32,7 +32,6 @@
  Gregory Petrosyan
  */
 
-#include "sha1.h"
 
 namespace sha1
 {

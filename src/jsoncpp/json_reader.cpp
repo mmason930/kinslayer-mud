@@ -8,12 +8,8 @@
 # include "value.h"
 # include "json_tool.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
-#include <utility>
-#include <cstdio>
 #include <cassert>
 #include <cstring>
-#include <iostream>
-#include <stdexcept>
 
 #if _MSC_VER >= 1400 // VC++ 8.0
 #pragma warning( disable : 4996 )   // disable warning about strdup being deprecated.

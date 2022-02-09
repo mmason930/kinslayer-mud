@@ -21,6 +21,7 @@ class DateTime {
 public:
 	DateTime();
 	DateTime(__int64 unixTimestamp);
+	DateTime(const DateTime &otherDate);
 
 	int getSecond() const;
 	int getMinute() const;
@@ -68,6 +69,8 @@ private:
 	static std::string getWeekdayName(int weekDay);
 	static std::string getMonthName(int month);
 	static int getDaysInMonth(int month, int year);
+
+	void copyFrom(const DateTime &otherDate);
 
 	unsigned char _getYear() const;
 	unsigned char _getMonth() const;

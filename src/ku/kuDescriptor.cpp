@@ -1,13 +1,6 @@
 #include "kuListener.h"
-#include "kuDescriptor.h"
 
-#include <list>
-#include <map>
-#include <string>
-#include <stdarg.h>
 #include <cstring>
-#include <cstdio>
-#include <iostream>
 
 int kuDescriptor::d_TopUID = 0;
 
@@ -161,7 +154,7 @@ int kuDescriptor::getUid()
 	return d_UID;
 }
 
-std::string kuDescriptor::getInputBuffer()
+std::string kuDescriptor::getInputBuffer() const
 {
 	return this->input;
 }
@@ -179,11 +172,11 @@ sockaddr *Address::GetSinAddress()
 {
 	return (sockaddr *)&udp_Sin;
 }
-const std::string Address::GetIP()
+std::string Address::GetIP() const
 {
 	return inet_ntoa(this->udp_Sin.sin_addr);
 }
-const std::string Address::GetHost()
+std::string Address::GetHost() const
 {
 	hostent *host;
 
@@ -191,7 +184,7 @@ const std::string Address::GetHost()
 		return "";
 	return host->h_name;
 }
-const u_short Address::GetPort()
+u_short Address::GetPort() const
 {
 	return this->udp_Sin.sin_port;
 }

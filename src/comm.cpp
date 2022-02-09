@@ -461,7 +461,7 @@ int main( int argc, char **argv )
 
 							remove((*iter).path().string().c_str());
 						}
-						catch(sql::QueryException exception)
+						catch(sql::QueryException &exception)
 						{
 							MudLog(BRF, 100, TRUE, "Could not store log. Error: %s", exception.getMessage().c_str());
 						}
@@ -472,7 +472,7 @@ int main( int argc, char **argv )
 					}
 				}
 			}
-			catch(std::exception e)
+			catch(std::exception &e)
 			{
 				MudLog(BRF, 100, TRUE, "Error while importing: %s", e.what());
 			}
@@ -642,7 +642,7 @@ void processGatewayCommand(const std::string &input)
 			gatewayConnection->send("PingResponse " + DateTime::parse("%Y-%m-%d %H:%M:%S", DateTime()) + "\n");
 		}
 	}
-	catch(std::out_of_range e) {
+	catch(std::out_of_range &e) {
 
 		Log("Invalid input received from gateway: %s", input.c_str());
 	}
@@ -756,7 +756,7 @@ void initiateGame( int port )
 	{
 		boot_db();
 	}
-	catch(sql::QueryException queryException)
+	catch(sql::QueryException &queryException)
 	{
 		MudLog(BRF, 0, TRUE, "Could not boot game. SQL Exception: %s", queryException.getMessage().c_str());
 
@@ -1129,15 +1129,15 @@ void gameLoop()
 			try {
 				d->processInput();
 			}
-			catch( sql::Exception e ) {
+			catch( sql::Exception &e ) {
 
 				MudLog(BRF, LVL_APPR, TRUE, "Generic sql::exception uncaught while processing user input: %s", e.getMessage().c_str());
 			}
-			catch( flusspferd::exception e) {
+			catch( flusspferd::exception &e) {
 
 				MudLog(BRF, LVL_APPR, TRUE, "Generic flusspferd::exception uncaught while processing user input: %s", e.what());
 			}
-			catch( std::exception e ) {
+			catch( std::exception &e ) {
 
 				MudLog(BRF, LVL_APPR, TRUE, "Generic std::exception uncaught while processing user input: %s", e.what());
 			}
@@ -1200,15 +1200,15 @@ void gameLoop()
 			try {
 				heartbeat( ++pulse );
 			}
-			catch( sql::Exception e ) {
+			catch( sql::Exception &e ) {
 
 				MudLog(BRF, LVL_APPR, TRUE, "Generic sql::exception uncaught while processing heartbeat(): %s", e.getMessage().c_str());
 			}
-			catch( flusspferd::exception e) {
+			catch( flusspferd::exception &e) {
 
 				MudLog(BRF, LVL_APPR, TRUE, "Generic flusspferd::exception uncaught while heartbeat(): %s", e.what());
 			}
-			catch( std::exception e ) {
+			catch( std::exception &e ) {
 
 				MudLog(BRF, LVL_APPR, TRUE, "Generic std::exception uncaught while processing heartbeat(): %s", e.what());
 			}

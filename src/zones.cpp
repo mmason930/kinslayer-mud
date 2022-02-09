@@ -1,14 +1,9 @@
 #include "conf.h"
-#include "sysdep.h"
 
-#include "structs.h"
 #include "comm.h"
 #include "db.h"
-#include "utils.h"
 #include "mobs.h"
-#include "zones.h"
 #include "threaded_jobs.h"
-#include "handler.h"
 #include "weather.h"
 #include "js/js.h"
 #include "rooms/Room.h"
@@ -501,7 +496,7 @@ void Zone::save()
 			<< SQLVal(sql::escapeString(Sunset)) << SQLVal(sql::escapeString(Builders)) << SQLVal(closed,true) << ");";
 	try {
 		gameDatabase->sendRawQuery(Query.str());
-	} catch(sql::QueryException e) {
+	} catch(sql::QueryException &e) {
 		MudLog(BRF, LVL_APPR, TRUE, "Unable to save zone #%d <%s>", getVnum(), e.message.c_str());
 		Log("Errant query: %s", Query.str().c_str());
 		return;
@@ -543,7 +538,7 @@ void Zone::save()
 //			continue;
 		try {
 			gameDatabase->sendRawQuery(Query.str());
-		} catch(sql::QueryException e) {
+		} catch(sql::QueryException &e) {
 			MudLog(BRF, LVL_APPR, TRUE, "Unable to save zone #%d (COMMANDS) <%s>", getVnum(), e.message.c_str());
 			Log("Errant query: %s", Query.str().c_str());
 			continue;
@@ -567,7 +562,7 @@ void Zone::save()
 		DeleteQuery << " AND zone_id = '" << this->getVnum() << "';";
 		try {
 			gameDatabase->sendRawQuery(DeleteQuery.str());
-		} catch(sql::QueryException e) {
+		} catch(sql::QueryException &e) {
 			MudLog(BRF, LVL_APPR, TRUE, "Unable to save zone #%d (DELETING COMMANDS) <%s>", getVnum(), e.message.c_str());
 			Log("Errant query: %s", Query.str().c_str());
 			return;
@@ -655,7 +650,7 @@ Zone *ZoneManager::GetZoneByRoomVnum( const unsigned int rvnum )
 	}
 	return NULL;
 }
-const size_t ZoneManager::NumZones()
+size_t ZoneManager::NumZones()
 {
 	std::lock_guard<std::recursive_mutex > lock(this->ZoneListMutex);
 	return ZoneList.size();
@@ -733,7 +728,7 @@ void ZoneManager::LoadThreadedZoneBatch( sql::Connection connection, const int z
 				zone->Boot( ZoneRow, RowList );
 			}
 		}
-	} catch( sql::QueryException e ) {
+	} catch( sql::QueryException &e ) {
 		Log("Could not boot zones : %s", e.getMessage().c_str());
 	}
 

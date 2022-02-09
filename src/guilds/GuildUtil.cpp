@@ -1,27 +1,19 @@
 #include "../conf.h"
-#include "../sysdep.h"
-#include "../structs.h"
-#include "../utils.h"
 #include "../Game.h"
 #include "../dbutils/QueryUtil.h"
-#include "../MiscUtil.h"
 #include "../dbutils/StoreDataObjectSQLBuilder.h"
 #include "../EntityType.h"
 #include "../CharacterUtil.h"
-#include "../screen.h"
-#include "../StringUtil.h"
 
 #include "GuildUtil.h"
 #include "Guild.h"
 #include "GuildApplication.h"
 #include "GuildApplicationSignature.h"
-#include "GuildApplicationSignatureStatus.h"
 #include "UserGuild.h"
 #include "GuildJoinApplication.h"
 #include "GuildJoinApplicationStatus.h"
 #include "GuildRank.h"
 #include "GuildRankRole.h"
-#include "GuildRankStatus.h"
 
 GuildUtil *GuildUtil::self = nullptr;
 

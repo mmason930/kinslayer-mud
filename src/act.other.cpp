@@ -168,7 +168,7 @@ void Character::AddIgnore(const std::string &name)
 
 	sql::Query MyQuery;
 	try {MyQuery = gameDatabase->sendQuery(query);}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		MudLog(BRF, LVL_IMPL, TRUE, "AddIgnore : %s", e.message.c_str());
 		return;
@@ -192,7 +192,7 @@ void Character::RemoveIgnore(const std::string &name)
 
 	sql::Query MyQuery;
 	try {MyQuery = gameDatabase->sendQuery(query);}
-	catch( sql::QueryException e )
+	catch( sql::QueryException &e )
 	{
 		MudLog(BRF, LVL_IMPL, TRUE, "RemoveIgnore : %s", e.message.c_str());
 		return;

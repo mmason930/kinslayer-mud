@@ -1,8 +1,5 @@
-#include "../conf.h"
-#include "../sysdep.h"
 
 #include "GuildJoinApplication.h"
-#include "GuildJoinApplicationStatus.h"
 
 int GuildJoinApplication::getUserId() const
 {

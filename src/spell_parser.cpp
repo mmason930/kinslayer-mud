@@ -10,7 +10,6 @@
 
 
 #include "conf.h"
-#include "sysdep.h"
 
 #include "structs.h"
 #include "spells.h"
@@ -19,10 +18,7 @@
 #include "handler.h"
 #include "comm.h"
 #include "db.h"
-#include "constants.h"
 #include "weaves.h"
-#include "clans.h"
-#include "MiscUtil.h"
 #include "Descriptor.h"
 #include "rooms/Room.h"
 

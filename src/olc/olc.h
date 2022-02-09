@@ -133,16 +133,16 @@ public:
 	~AuctionItem();
 
 	bool IsActive() { return is_active; }
-	const time_t GetEndTime() { return endTime; }
-	const long long GetBuyout() { return buyout; }
-	const long long GetStartingBid() { return starting; }
-	const long long GetNextMinBid();
-	const long long GetTopBid();
-	const boost::uuids::uuid &GetObjID() { return objID; }
-	const long long GetLastBid( const int uid );
+	time_t GetEndTime() { return endTime; }
+	long long GetBuyout() { return buyout; }
+	long long GetStartingBid() { return starting; }
+	long long GetNextMinBid();
+	long long GetTopBid();
+	boost::uuids::uuid &GetObjID() { return objID; }
+	long long GetLastBid( const int uid );
 	int GetID() { return id; }
 	int GetOwnerID() { return ownerID; }
-	const std::string &GetObjShortDesc() { return objShortDesc; }
+	std::string &GetObjShortDesc() { return objShortDesc; }
 	void Refresh();
 
 	bool IsRetrieved() { return is_retrieved; }
@@ -150,8 +150,8 @@ public:
 
 	bool CanBeRetrievedBy( Character *user );
 
-	const std::string GetTopBidderName();
-	const int GetTopBidderID();
+	std::string GetTopBidderName();
+	int GetTopBidderID();
 };
 
 /* Data for the user's interactions with the Auction interface */
@@ -176,18 +176,18 @@ public:
 
 	void SetItemToSell( Object *o );
 	Object *GetItemToSell();
-	const int GetSellDuration();
+	int GetSellDuration();
 	void SetSellDuration( const int duration );
-	const int GetBuyoutPrice( const char t='\0' );
+	int GetBuyoutPrice( const char t='\0' );
 	void SetBuyoutPrice( const unsigned int bp, const char t='\0' );
-	const int GetStartingPrice( const char t='\0' );
+	int GetStartingPrice( const char t='\0' );
 	void SetStartingPrice( const unsigned int sp, const char t='\0' );
 
 	void SetSearchTerm( const std::string &st );
 	const std::string &GetSearchTerm();
 
-	const int GetPage();
-	const int NumPages();
+	int GetPage();
+	int NumPages();
 	void SetPage( const int _page );
 
 	long long GetBidRequest() { return bidRequest; }

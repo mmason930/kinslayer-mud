@@ -9,22 +9,13 @@
 ************************************************************************ */
 
 #include "conf.h"
-#include "sysdep.h"
 
 #include "structs.h"
 #include "spells.h"
-#include "utils.h"
-#include "db.h"
-#include "comm.h"
-#include "interpreter.h"
-#include "handler.h"
-#include "clans.h"
-#include "shop.h"
 #include "mobs.h"
 #include "weather.h"
 
 #include "js/js.h"
-#include "js/js_interpreter.h"
 #include "Descriptor.h"
 #include "UserClan.h"
 #include "rooms/Room.h"
