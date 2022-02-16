@@ -90,7 +90,7 @@ const int SCMD_DOWN = 6;
 /* do_gen_ps */
 const int SCMD_CREDITS = 0;
 const int SCMD_WIZLIST = 1;
-const int SCMD_VERSION = 2;
+//const int SCMD_VERSION = 2; // No longer used.
 const int SCMD_MOTD = 3;
 const int SCMD_IMOTD = 4;
 const int SCMD_CLEAR = 5;

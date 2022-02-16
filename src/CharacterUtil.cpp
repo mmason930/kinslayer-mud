@@ -483,12 +483,16 @@ UserMacro *CharacterUtil::getUserMacro(sql::Row row)
 {
 	UserMacro *userMacro = new UserMacro();
 
+	std::string locationStr;
+
 	userMacro->setId(row.getInt("id"));
 	userMacro->setUserId(row.getInt("user_id"));
-	userMacro->setKeyCode(row.getInt("key_code"));
+	userMacro->setKeyCode(row.getUnsignedShort("key_code"));
+	userMacro->setLocation(row.getNullableUnsignedShort("location"));
 	userMacro->setReplacement(row.getString("replacement"));
+	userMacro->setCode(row.getString("code"));
 	userMacro->setCreatedDatetime(DateTime(row.getTimestamp("created_datetime")));
-	
+
 	return userMacro;
 }
 
@@ -515,19 +519,24 @@ UserMacro *CharacterUtil::getUserMacro(sql::Connection connection, int userMacro
 	return getUserMacroMeetingCriteria(connection, "id = " + MiscUtil::toString(userMacroId));
 }
 
-UserMacro *CharacterUtil::getUserMacro(sql::Connection connection, int userId, const unsigned short &keyCode)
+UserMacro *CharacterUtil::getUserMacro(sql::Connection connection, int userId, const unsigned short &keyCode, const std::optional<unsigned short> &location)
 {
-	std::string criteria = "user_id = " + MiscUtil::toString(userId) + " AND key_code = " + MiscUtil::toString(keyCode);
-	return getUserMacroMeetingCriteria(connection, criteria);
+	std::stringstream criteriaBuffer;
+
+	criteriaBuffer	<< "user_id = " << userId 
+					<< " AND key_code = " << keyCode
+					<< " AND (location " << (location.has_value() ? (std::string("=") + MiscUtil::toString(*location).c_str()) : std::string("IS NULL")) << ")";
+	return getUserMacroMeetingCriteria(connection, criteriaBuffer.str());
 }
 
-void CharacterUtil::deleteUserMacro(sql::Connection connection, int userId, const unsigned short &keyCode)
+void CharacterUtil::deleteUserMacro(sql::Connection connection, int userId, const unsigned short &keyCode, const std::optional<unsigned short> &location)
 {
 	std::stringstream sqlBuffer;
 
 	sqlBuffer	<< " DELETE FROM userMacro"
 				<< " WHERE user_id = " << userId
-				<< " AND key_code = " << keyCode;
+				<< " AND key_code = " << keyCode
+				<< " AND (location " << (location.has_value() ? (std::string("=") + MiscUtil::toString(*location)) : std::string("IS NULL")) << ")";
 
 	connection->sendRawQuery(sqlBuffer.str());
 }
@@ -551,24 +560,30 @@ void CharacterUtil::putUserMacro(sql::Connection connection, UserMacro *userMacr
 		sqlBuffer	<< " INSERT INTO userMacro("
 					<< "   `user_id`,"
 					<< "   `key_code`,"
+					<< "   `location`,"
 					<< "   `replacement`,"
+					<< "   `code`,"
 					<< "   `created_datetime`"
 					<< " ) VALUES ("
 					<< userMacro->getUserId() << ","
 					<< userMacro->getKeyCode() << ","
+					<< (userMacro->getLocation().has_value() ? MiscUtil::toString(*(userMacro->getLocation())).c_str() : "NULL") << ","
 					<< sql::escapeQuoteString(userMacro->getReplacement()) << ","
+					<< sql::escapeQuoteString(userMacro->getCode()) << ","
 					<< sql::encodeQuoteDate(userMacro->getCreatedDatetime().getTime()) << ")";
+
 
 		connection->sendRawQuery(sqlBuffer.str());
 		userMacro->setId(connection->lastInsertID());
 	}
 	else
 	{
-
 		sqlBuffer	<< " UPDATE userMacro SET"
 					<< "   user_id = " << userMacro->getUserId() << ","
 					<< "   key_code = " << userMacro->getKeyCode() << ","
+					<< "   location = " << (userMacro->getLocation().has_value() ? MiscUtil::toString(*(userMacro->getLocation())).c_str() : "NULL") << ","
 					<< "   replacement = " << sql::escapeQuoteString(userMacro->getReplacement()) << ","
+					<< "   code = " << sql::escapeQuoteString(userMacro->getCode()) << ","
 					<< "   created_datetime = " << sql::encodeQuoteDate(userMacro->getCreatedDatetime().getTime())
 					<< " WHERE id = " << userMacro->getId();
 

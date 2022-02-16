@@ -296,7 +296,6 @@ CommandUtil::CommandUtil()
 	addCommand(new CommandInfo("users", "user", POS_DEAD, do_users, LVL_GRGOD, 0, 0.0f, 0));
 	
 	addCommand(new CommandInfo("value", "val", POS_STANDING, do_not_here, 0, 0, 0.0f, 0));
-	addCommand(new CommandInfo("version", "ver", POS_DEAD, do_gen_ps, 0, SCMD_VERSION, 0.0f, 0));
 	addCommand(new CommandInfo("visible", "vis", POS_RESTING, do_visible, 1, 0, 0.0f, 0));
 	addCommand(new CommandInfo("view", "vie", POS_DEAD, do_view, 0, 0, 0.0f, 0));
 	addCommand(new CommandInfo("vnum", "vnum", POS_DEAD, do_vnum, LVL_IMMORT, 0, 0.0f, 0));

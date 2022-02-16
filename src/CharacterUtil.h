@@ -33,8 +33,8 @@ public:
 	static class UserMacro *getUserMacro(sql::Row row);
 	static UserMacro *getUserMacroMeetingCriteria(sql::Connection connection, const std::string &criteria);
 	static UserMacro *getUserMacro(sql::Connection connection, int userMacroId);
-	static UserMacro *getUserMacro(sql::Connection connection, int userId, const unsigned short &keyCode);
-	static void deleteUserMacro(sql::Connection connection, int userId, const unsigned short &keyCode);
+	static UserMacro *getUserMacro(sql::Connection connection, int userId, const unsigned short &keyCode, const std::optional<unsigned short> &location);
+	static void deleteUserMacro(sql::Connection connection, int userId, const unsigned short &keyCode, const std::optional<unsigned short> &location);
 	static void deleteUserMacro(sql::Connection connection, int userMacroId);
 	static void putUserMacro(sql::Connection connection, class UserMacro *);
 	static void freeUserMacros(std::list<class UserMacro *> &userMacros);

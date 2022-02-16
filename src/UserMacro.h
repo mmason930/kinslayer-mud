@@ -10,7 +10,9 @@ class UserMacro : public DataObjectWithIntId
 protected:
 	unsigned int userId;
 	unsigned short keyCode;
+	std::optional<unsigned short> location;
 	std::string replacement;
+	std::string code;
 	DateTime createdDatetime;
 public:
 
@@ -39,6 +41,16 @@ public:
 		this->keyCode = keyCode;
 	}
 
+	std::optional<unsigned short> getLocation() const
+	{
+		return location;
+	}
+
+	void setLocation(const std::optional<unsigned short> &location)
+	{
+		this->location = location;
+	}
+
 	std::string getReplacement() const
 	{
 		return replacement;
@@ -47,6 +59,16 @@ public:
 	void setReplacement(const std::string &replacement)
 	{
 		this->replacement = replacement;
+	}
+
+	std::string getCode() const
+	{
+		return code;
+	}
+
+	void setCode(const std::string &code)
+	{
+		this->code = code;
 	}
 
 	DateTime getCreatedDatetime() const

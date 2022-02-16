@@ -2447,8 +2447,6 @@ CommandHandler do_gen_ps = DEFINE_COMMAND
 		case SCMD_CLEAR:
 			ch->send("\033[H\033[J");
 			break;
-		case SCMD_VERSION:
-			break;
 		default:
 			return;
 	}

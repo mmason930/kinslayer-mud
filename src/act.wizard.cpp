@@ -5570,23 +5570,19 @@ CommandHandler do_wshow = DEFINE_COMMAND
 		    { "death",			LVL_GOD		},
 		    { "godrooms",		LVL_GOD		},
 		    { "shops",			LVL_IMMORT	},
-		    { "houses",			LVL_GOD		},
-		    { "buffers",		LVL_GOD		},			// 10
 		    { "skills",			LVL_GRGOD	},
-		    { "descriptions",	LVL_IMMORT	},
+		    { "descriptions",	LVL_IMMORT	},			// 10
 		    { "zoneperms",		LVL_GOD		},
 		    { "spells"	,		LVL_GRGOD	},
-		    { "tells",			LVL_GRGOD   },			// 15
 			{ "logins",			LVL_GRGOD	},
 			{ "accounts",		LVL_GOD		},
-			{ "logs",			LVL_IMMORT	},
-			{ "backups",		LVL_GOD		},
-			{ "switches",		LVL_GRGOD	},			// 20
+			{ "logs",			LVL_IMMORT	},			// 15
+			{ "switches",		LVL_GRGOD	},
 			{ "lag",			LVL_GRGOD	},
 			{ "userdeletions",	LVL_GRGOD	},
 			{ "userrestores",	LVL_GRGOD	},
-			{ "qptransactions",	LVL_GOD		},
-			{ "guilds",			LVL_GOD		},			// 25
+			{ "qptransactions",	LVL_GOD		},			// 20
+			{ "guilds",			LVL_GOD		},			// 21
 		    { "\n",				0			}
 	    };
 
@@ -5631,7 +5627,7 @@ CommandHandler do_wshow = DEFINE_COMMAND
 	switch (l)
 	{
 
-		case 1:			/* zone */
+		case 1:	// zones
 		{
 			std::string Buffer;
 			Zone *zone;
@@ -5667,7 +5663,7 @@ CommandHandler do_wshow = DEFINE_COMMAND
 
 			break;
 		}
-		case 2:			/* player */
+		case 2: // player
 		{
 			if (!*value)
 			{
@@ -5706,11 +5702,11 @@ CommandHandler do_wshow = DEFINE_COMMAND
 			delete vict;
 			break;
 		}
-		case 3:
+		case 3: // rent
 			crashListRent(ch, value);
 			break;
 
-		case 4:
+		case 4: // stats
 		{
 			i = 0;
 			j = 0;
@@ -5781,7 +5777,7 @@ CommandHandler do_wshow = DEFINE_COMMAND
 			ch->send(buf);
 			break;
 		}
-		case 5:
+		case 5: // errors
 			strcpy(buf, "Errant Rooms\r\n------------\r\n");
 
 			for (i = 0, k = 0; i < (int)World.size(); ++i)
@@ -5795,7 +5791,7 @@ CommandHandler do_wshow = DEFINE_COMMAND
 			page_string(ch->desc, buf, TRUE);
 			break;
 
-		case 6:
+		case 6: // death
 			strcpy(buf, "Death Traps\r\n-----------\r\n");
 
 			for (i = 0, j = 0;i < (int)World.size(); ++i)
@@ -5808,7 +5804,7 @@ CommandHandler do_wshow = DEFINE_COMMAND
 			page_string(ch->desc, buf, TRUE);
 			break;
 
-		case 7:
+		case 7: // godrooms
 			strcpy(buf, "Godrooms\r\n--------------------------\r\n");
 
 			for (i = 0, j = 0; (unsigned int)i < World.size(); ++i)
@@ -5821,18 +5817,11 @@ CommandHandler do_wshow = DEFINE_COMMAND
 			page_string(ch->desc, buf, TRUE);
 			break;
 
-		case 8:
+		case 8: // shops
 			show_shops(ch, value);
 			break;
-
-		case 9:
-			ch->send("This has been removed.\r\n");
-			break;
-
-		case 10:
-			ch->send("This has been removed.\r\n");
-			break;
-		case 11:
+		
+		case 9: // skills
 
 			if (!*value)
 			{
@@ -5856,7 +5845,8 @@ CommandHandler do_wshow = DEFINE_COMMAND
 					ch->send("%s: %d\r\n", WeaveManager::GetManager().GetWeaveName(i).c_str(), GET_SKILL(vict, i));
 			}
 			break;
-		case 12:
+		
+		case 10: // descriptions
 
 			if( atoi(arg3) < 0 )
 			{
@@ -5884,7 +5874,8 @@ CommandHandler do_wshow = DEFINE_COMMAND
 				}
 			}
 			break;
-		case 13:
+
+		case 11: // zoneperms
 			vict = NULL;
 			if( (vict = CharacterUtil::loadCharacter(value)) == NULL )
 				ch->send(NOPERSON);
@@ -5896,15 +5887,14 @@ CommandHandler do_wshow = DEFINE_COMMAND
 			if(vict)
 				delete vict;
 			break;
-		case 14:
+
+		case 12: // spells
 			ch->send("Weaves for Kinslayer:\r\n");
 			ch->send("Weave Name          Earth   Fire   Water   Air   Spirit\r\n");
 			ch->send(WeaveManager::GetManager().ListWeaves(2).c_str());
 			break;
-		case 15:
-			ch->send("Removed.");//Unused as of 06/02/2010
-			break;
-		case 16:
+		
+		case 13: // logins
 		{
 			std::list<pLogin> Logins;
 			std::list<pLogin>::iterator it;
@@ -5959,7 +5949,7 @@ CommandHandler do_wshow = DEFINE_COMMAND
 			delete[] cBuffer;//Free the buffer.
 			break;
 		}
-		case 17:
+		case 14: // accounts
 		{
 			if( !*value )
 			{//List all accounts.
@@ -5977,7 +5967,7 @@ CommandHandler do_wshow = DEFINE_COMMAND
 			}
 			break;
 		}
-		case 18:
+		case 15: // logs
 		{
 			get_char_cols( ch );
 			sql::Query MyQuery;
@@ -6020,27 +6010,7 @@ CommandHandler do_wshow = DEFINE_COMMAND
 
 			break;
 		}
-		case 19:
-		{
-		   std::string sBackupDirectory = "/kinslayer/cache/";
-		   //if( !std::tr2::sys::exists( std::tr2::sys::path(sBackupDirectory) ) ) {
-			if (!boost::filesystem::exists(sBackupDirectory)) {
-				ch->send("The directory holding the MUD backups could not be found.\r\n");
-				return;
-			}
-			std::list< std::string > lBackupFileNames;
-			GetDirectoryList( sBackupDirectory, lBackupFileNames, ".tar.bz2" );
-			BackupFileNameFunctor backupFileNameFunctor;
-			lBackupFileNames.sort( backupFileNameFunctor );
-			for(std::list<std::string>::iterator fIter = lBackupFileNames.begin();fIter != lBackupFileNames.end();++fIter)
-			{
-				//kmud\.\d{4}-\d\d-\d\d\.bak\.tar\.bz2
-				get_char_cols(ch);
-				ch->send(" - %s%s%s%s\r\n", bld, grn, StripFilePath((*fIter)).c_str(), nrm);
-			}
-			break;
-		}
-		case 20:
+		case 16: // switches
 		{
 			std::stringstream SwitchBuffer;
 			SwitchManager::GetManager().PrintSwitchesToBuffer( SwitchBuffer );
@@ -6048,7 +6018,7 @@ CommandHandler do_wshow = DEFINE_COMMAND
 			ch->send( StringUtil::vaEscape(SwitchBuffer.str()) );
 			break;
 		}
-		case 21:
+		case 17: // lag
 		{
 			std::stringstream buffer;
 			buffer << "Name                               Times Run    Total Time      Average" << std::endl;
@@ -6066,8 +6036,8 @@ CommandHandler do_wshow = DEFINE_COMMAND
 			ch->send("%s", buffer.str().c_str());
 			break;
 		}
-		case 22:
-		{//User Deletions
+		case 18: // userdeletions
+		{
 			std::stringstream sql;
 			
 			sql <<	" SELECT"
@@ -6128,8 +6098,8 @@ CommandHandler do_wshow = DEFINE_COMMAND
 			delete[] outputBufferCString;
 			break;
 		}
-		case 23:
-		{//User Restores
+		case 19: // userrestores
+		{
 			std::stringstream sql;
 			
 			sql <<	" SELECT"
@@ -6190,7 +6160,7 @@ CommandHandler do_wshow = DEFINE_COMMAND
 			delete[] outputBufferCString;
 			break;
 		}
-		case 24:
+		case 20: // qptransactions
 		{
 			std::stringstream outputBuffer;
 			std::list<ClanQuestPointTransaction *> clanQuestPointTransactions = ClanUtil::getAllClanQuestPointTransactions(gameDatabase);
@@ -6255,7 +6225,7 @@ CommandHandler do_wshow = DEFINE_COMMAND
 
 			break;
 		}
-		case 25:
+		case 21: // guilds
 		{
 		;
 			auto guildMap = GuildUtil::get()->getGuildMap();

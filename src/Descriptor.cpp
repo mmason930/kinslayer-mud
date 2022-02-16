@@ -402,7 +402,9 @@ void Descriptor::sendWebSocketUsernameCommand(const std::string &username, const
 	{
 		Json::Value userMacroObject;
 		userMacroObject["keyCode"] = (*userMacroIter)->getKeyCode();
+		userMacroObject["location"] = (*userMacroIter)->getLocation().has_value() ? (*(*userMacroIter)->getLocation()) : Json::Value::null;
 		userMacroObject["replacement"] = (*userMacroIter)->getReplacement();
+		userMacroObject["code"] = (*userMacroIter)->getCode();
 		userMacroObject["id"] = (*userMacroIter)->getId();
 		
 		commandObject["macros"].append(userMacroObject);
@@ -467,17 +469,35 @@ void Descriptor::processWebSocketSaveUserMacroCommand(Json::Value &commandObject
 	{
 		UserMacro *userMacro = NULL;
 		unsigned short keyCode;
+		std::optional<unsigned short> location;
 		std::string replacement;
+		std::string code;
 
 		if(commandObject["keyCode"].isNull() || !commandObject["keyCode"].isInt())
 		{
-			MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(character)), TRUE, "%s attempting to save macro with invalid keyCode.", GET_NAME(character));
+			MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(character)), TRUE, "%s attempting to save macro with an invalid keyCode.", GET_NAME(character));
 			return;
 		}
 		if(commandObject["replacement"].isNull() || !commandObject["replacement"].isString())
 		{
-			MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(character)), TRUE, "%s attempting to save macro with invalid replacement.", GET_NAME(character));
+			MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(character)), TRUE, "%s attempting to save macro with an invalid replacement.", GET_NAME(character));
 			return;
+		}
+		// We use code for display purposes.
+		if(!commandObject["code"].isNull())
+		{
+			code = commandObject["code"].asString();
+		}
+		// Location is optional (it wasn't originally supported), so accept a null value as valid.
+		if(!commandObject["location"].isNull())
+		{
+			if(!commandObject["location"].isInt())
+			{
+				MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(character)), TRUE, "%s attempting to save a macro with an invalid location.", GET_NAME(character));
+				return;
+			}
+
+			location = std::optional<unsigned short>(commandObject["location"].asInt());
 		}
 
 		keyCode = (unsigned short)commandObject["keyCode"].asInt();
@@ -503,7 +523,7 @@ void Descriptor::processWebSocketSaveUserMacroCommand(Json::Value &commandObject
 		}
 		else
 		{
-			CharacterUtil::deleteUserMacro(gameDatabase, character->getUserId(), keyCode);
+			CharacterUtil::deleteUserMacro(gameDatabase, character->getUserId(), keyCode, location);
 
 			userMacro = new UserMacro();
 			userMacro->setUserId(character->getUserId());
@@ -511,7 +531,9 @@ void Descriptor::processWebSocketSaveUserMacroCommand(Json::Value &commandObject
 		}
 
 		userMacro->setKeyCode(keyCode);
+		userMacro->setLocation(location);
 		userMacro->setReplacement(replacement);
+		userMacro->setCode(code);
 
 		CharacterUtil::putUserMacro(gameDatabase, userMacro);
 
@@ -520,7 +542,9 @@ void Descriptor::processWebSocketSaveUserMacroCommand(Json::Value &commandObject
 		commandResponse["wasSuccessful"] = true;
 		commandResponse["userMacroId"] = userMacro->getId();
 		commandResponse["keyCode"] = userMacro->getKeyCode();
+		commandResponse["location"] = userMacro->getLocation().has_value() ? (*(userMacro->getLocation())) : Json::Value::null;
 		commandResponse["replacement"] = userMacro->getReplacement();
+		commandResponse["code"] = userMacro->getCode();
 
 		Json::FastWriter writer;
 
@@ -535,14 +559,26 @@ void Descriptor::processWebSocketDeleteUserMacroCommand(Json::Value &commandObje
 	if(!character)
 		return;
 
+	std::optional<unsigned short> location;
+
 	if(commandObject["keyCode"].isNull() || !commandObject["keyCode"].isInt())
 	{
-		MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(character)), TRUE, "%s attempting to delete user macro with invalid ID.", GET_NAME(character));
+		MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(character)), TRUE, "%s attempting to delete user macro with invalid an key code.", GET_NAME(character));
 		return;
+	}
+	if(!commandObject["location"].isNull())
+	{
+		if(!commandObject["location"].isInt())
+		{
+			MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(character)), TRUE, "%s attempting to delete user macro with invalid an location.", GET_NAME(character));
+			return;
+		}
+
+		location = std::optional<unsigned short>(commandObject["location"].asInt());
 	}
 
 	unsigned short keyCode = (unsigned short)commandObject["keyCode"].asInt();
-	CharacterUtil::deleteUserMacro(gameDatabase, character->getUserId(), keyCode);
+	CharacterUtil::deleteUserMacro(gameDatabase, character->getUserId(), keyCode, location);
 }
 
 void Descriptor::processWebSocketSignInCommand(Json::Value &commandObject)
