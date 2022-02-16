@@ -465,7 +465,7 @@ void GatewayServer::processInputFromMotherConnectionToServer()
 
 			}
 		}
-		catch(std::out_of_range e) {
+		catch(std::out_of_range &e) {
 
 			//...Error...
 		}
@@ -654,7 +654,7 @@ void GatewayServer::run()
 				{
 					 inputFromClient = descriptor->pullFromClient();
 				}
-				catch(WebSocketException webSocketException)
+				catch(WebSocketException &webSocketException)
 				{
 					if(webSocketException.what() == "Socket Closed")
 					{
@@ -731,7 +731,7 @@ void GatewayServer::run()
 						std::cout << makeTimestamp() << " Client `" << descriptor->getSession() << "` is being put into awaitingConnection status." << std::endl;
 					}
 				}
-				catch(WebSocketException webSocketException)
+				catch(WebSocketException &webSocketException)
 				{
 					descriptor->setStatus(GatewayDescriptorStatus::disconnected);
 					std::cout << "ERROR : WebSocketException caught while handshaking: " << webSocketException.what() << std::endl;
