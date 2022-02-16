@@ -9,7 +9,7 @@
 #include "GatewayListener.h"
 #include "GatewayDescriptorStatus.h"
 #include "GatewayDescriptorType.h"
-#include "StringUtil.h"
+#include "../StringUtil.h"
 
 #include "../websocket/WebSocketClientHeader.h"
 #include "../websocket/WebSocketException.h"
