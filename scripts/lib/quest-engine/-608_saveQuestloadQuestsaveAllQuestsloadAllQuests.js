@@ -319,7 +319,7 @@ function saveQuest( quest )
 	/**** Dialogue ****/
 	sqlQuery("DELETE FROM " + QUEST_DIALOGUE_TABLE + " WHERE quest_id='" + quest.databaseID + "';");
 	for(var i = 0;i < quest.dialogue.length;++i) {
-		if( getObjectClass(quest.dialogue[ i ]) != "string" ) {
+		if( getObjectClass(quest.dialogue[ i ]) != "String" ) {
 			var sHandle = sqlEsc(quest.dialogue[ i ].handle);
 			var iPulses = quest.dialogue[ i ].pulses;
 		}
