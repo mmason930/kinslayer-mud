@@ -176,8 +176,8 @@ OBJFILES := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILES))
 
 
 OBJFILESGATEWAY = DateTime.o gateway/GatewayDescriptor.o gateway/GatewayDescriptorStatus.o \
-	gateway/GatewayMain.o gateway/GatewayServer.o kuClient.o kuDescriptor.o kuListener.o \
-	kuSockets.o MiscUtil.o StringUtil.o MudStatus.o SystemUtil.o sha1.o GatewayDescriptorType.o \
+	gateway/GatewayMain.o gateway/GatewayServer.o ku/kuClient.o ku/kuDescriptor.o ku/kuListener.o \
+	ku/kuSockets.o MiscUtil.o StringUtil.o MudStatus.o SystemUtil.o sha1.o gateway/GatewayDescriptorType.o \
 	websocket/WebSocketDataFrame.o websocket/WebSocketClientHeaderIETF_HYBI17.o websocket/WebSocketClientHeader.o \
 	gateway/GatewayListener.o jsoncpp/json_reader.o jsoncpp/json_writer.o jsoncpp/json_value.o
 
