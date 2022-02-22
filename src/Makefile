@@ -153,7 +153,6 @@ OBJFILES =	accounts.o \
 			spec_procs.o \
 			spell_parser.o \
 			spells.o \
-			sg.o \
 			SQLUtil.o \
 			statedit.o \
 			stats.o \
