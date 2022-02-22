@@ -38,6 +38,11 @@ RUN mkdir ../lib
 RUN make -j${GCC_THREADS}
 RUN make install
 
+# cpp-httplib
+RUN git clone https://github.com/yhirose/cpp-httplib /kinslayer-cpp-httplib
+RUN cp /kinslayer-cpp-httplib/httplib.h /usr/local/include/
+RUN rm -rf /kinslayer-cpp-httplib
+
 WORKDIR /
 RUN ulimit -S -c unlimited
 RUN ldconfig

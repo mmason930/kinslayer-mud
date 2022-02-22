@@ -12,6 +12,9 @@
 /* Define to empty if the keyword does not work.  */
 #undef const
 
+/* Do we have SSL support for the cpp-httplib library. **/
+#define CPPHTTPLIB_OPENSSL_SUPPORT
+
 /* Define if you don't have vprintf but do have _doprnt.  */
 #undef HAVE_DOPRNT
 
@@ -348,7 +351,8 @@
 /* Define to `int' if <sys/types.h> doesn't define.  */
 /* #undef ssize_t */
 
-
+/* Do we have SSL support for the cpp-httplib library. **/
+#define CPPHTTPLIB_OPENSSL_SUPPORT
 
 /* Define to 1 if you have the <arpa/inet.h> header file. */
 #define HAVE_ARPA_INET_H 1

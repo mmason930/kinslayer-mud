@@ -6,8 +6,10 @@
 CC = g++
 #  -Wignored-qualifiers -Wextra
 # Any special flags you want to pass to the compiler
-MYFLAGS = -O0 -std=c++2a -Wformat-security -Wformat -Wpointer-arith -Wcast-align -Wredundant-decls -Wcatch-value -Werror \
- 		-DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10
+MYFLAGS = \
+-O0 -std=c++2a -Wformat-security -Wformat -Wpointer-arith \
+-Wcast-align -Wredundant-decls -Wcatch-value -Werror \
+-DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10
 
 #-Werror
 
@@ -22,7 +24,10 @@ BINDIR = ../bin
 
 CPPFLAGS = -ggdb3 $(MYFLAGS) $(PROFILE)
 
-LIBS = -lsqlDatabase -lflusspferd -lstdc++ -lboost_regex -lmozjs -lmysqlclient -lboost_thread -lboost_filesystem -lcrypt -lboost_system -lpthread -ldl
+LIBS = \
+-lsqlDatabase -lflusspferd -lstdc++ -lboost_regex -lmozjs \
+-lmysqlclient -lboost_thread -lboost_filesystem -lcrypt \
+-lssl -lcrypto -lboost_system -lpthread -ldl
 
 OBJDIR = obj
 
@@ -148,6 +153,7 @@ OBJFILES =	accounts.o \
 			spec_procs.o \
 			spell_parser.o \
 			spells.o \
+			sg.o \
 			SQLUtil.o \
 			statedit.o \
 			stats.o \

@@ -41,14 +41,14 @@ public:
 	void setName(const std::string &name);
 
 	void loadBasicConfig();
-	std::string getBasicConfigValue(const std::string &configName);
+	std::string getBasicConfigValue(const std::string &configName) const;
 
 	std::string getVersion();
 	std::string getDefaultDirectory();
 	std::string getPlayerLogsDirectory();
 	std::string getScriptPullCommand();
 
-	bool hasBasicConfiguration(const std::string &basicConfigurationName);
+	bool hasBasicConfiguration(const std::string &basicConfigurationName) const;
 	void setupFilesystem();
 	bool playerPortalServerIsConnected();
 	int getPlayerPortalPort();

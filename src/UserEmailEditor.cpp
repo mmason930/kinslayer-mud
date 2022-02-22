@@ -153,7 +153,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 		break;
 	}
 	case USER_EMAIL_EDITOR_ADD_EMAIL_CONFIRM:
-
+	{
 		if(olc->userEmailAddress->getEmailAddress() != arg)
 		{
 			descriptor->send("%s%sThe emails you entered did not match. Your email has not been added.%s\r\n", bld, red, nrm);
@@ -179,6 +179,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 		olc->userEmailAddress = NULL;
 		userEmailAddressEditorDisplayMainMenu(descriptor);
 		break;
+	}
 	case USER_EMAIL_EDITOR_CONFIRM_EMAIL_SELECT:
 	{
 		int emailNumber = atoi(arg.c_str()) - 1;

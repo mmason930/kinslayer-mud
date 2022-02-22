@@ -63,12 +63,12 @@ void Game::loadBasicConfig()
 	basicConfig = MiscUtil::loadResourcesFromFile("misc/BasicConfig");
 }
 
-std::string Game::getBasicConfigValue(const std::string &configName)
+std::string Game::getBasicConfigValue(const std::string &configName) const
 {
-	return basicConfig[configName];
+	return basicConfig.find(configName)->second;
 }
 
-bool Game::hasBasicConfiguration(const std::string &basicConfigurationName)
+bool Game::hasBasicConfiguration(const std::string &basicConfigurationName) const
 {
 	return basicConfig.find(basicConfigurationName) != basicConfig.end();
 }

@@ -30,6 +30,7 @@
 #include "UserDisabledCommand.h"
 #include "CharacterUtil.h"
 #include "ClanUtil.h"
+#include "MailUtil.h"
 #include "EntityType.h"
 #include "ObjectMoveLogger.h"
 #include "MobLoadLogger.h"
@@ -531,13 +532,16 @@ void boot_db(void)
 	Log("Booting Warrants.");
 	BootWarrants();
 
-	Log("Booting Clans:");
+	Log("Booting Clans.");
 	BootClans();
+
+	Log("Loading Email.");
+	MailUtil::loadConfig(game);
 
 	Log("Booting the Weaves.");
 	WeaveManager::GetManager().LoadWeaves();
 
-	Log("Resetting the game time:");
+	Log("Resetting the game time.");
 	reset_time();
 
 	Log("Booting StatGroups.");

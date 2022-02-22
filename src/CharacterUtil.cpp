@@ -436,7 +436,7 @@ UserEmailAddressConfirmation *CharacterUtil::getUserEmailAddressConfirmationByUs
 void CharacterUtil::sendUserEmailAddressConfirmationEmail(sql::Connection connection, Character *character, const UserEmailAddress *userEmailAddress, const UserEmailAddressConfirmation *userEmailAddressConfirmation)
 {
 	std::string subject = "Email Verification";
-	std::string message = "Thank you for registering your email address. You can confirm your email with the following verification code: <span style='font-weight:bold;'>" + userEmailAddressConfirmation->getConfirmationKey() + "</span>";
+	std::string message = "<html><head></head><body>Thank you for registering your email address. You can confirm your email with the following verification code: <span style='font-weight:bold;'>" + userEmailAddressConfirmation->getConfirmationKey() + "</span></body>";
 	MailUtil::sendEmail("noreply@kinslayermud.org", "KinslayerMUD", userEmailAddress->getEmailAddress(), subject, message);
 }
 

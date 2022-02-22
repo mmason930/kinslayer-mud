@@ -1092,7 +1092,7 @@ CommandHandler do_extra = DEFINE_COMMAND
 		}
 		else if( !str_cmp(vArgs.at(0), "email"))
 		{
-			MailUtil::sendEmail("admin@kinslayermud.org", "KinslayerMUD Staff", "mikemason930@gmail.com", "Test Email!", "This is a test. Hope you got it!");
+			MailUtil::sendEmail("admin@kinslayermud.org", "KinslayerMUD Staff", "mikemason930@gmail.com", "Test Email!", "<html><head></head><body>This is a test. Hope you got it!</body></html>");
 		}
 		else if( !str_cmp(vArgs.at(0), "forums") )
 		{
