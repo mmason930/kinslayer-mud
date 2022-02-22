@@ -26,10 +26,6 @@ void	UpdateBootHigh( const int new_high, bool first=false );
 // Races
 int race_alias( Character *ch, char *alias );
 
-/* Weight */
-int CAN_GET_OBJ(Character *ch, Object *obj);
-int CAN_CARRY_OBJ(Character *ch, Object *obj);
-
 /* utility */
 
 bool isname(const std::string &str, const std::string &namelist);

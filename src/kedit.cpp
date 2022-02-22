@@ -1,6 +1,6 @@
 /*
 	Joshua Roys - Serai of 'Kinslayer MUD' and 'Wheel of Time MUD' 2004, 2005
-	http://www.epicsol.org/kinslayer/
+	https://www.kinslayermud.org
 	http://www.wotmud.org/
 	http://mud.frostmud.com/~serai/
  

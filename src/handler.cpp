@@ -1042,26 +1042,6 @@ float Object::Weight()
 	return weight;
 }
 
-int CAN_GET_OBJ(Character *ch, Object *obj)
-{
-
-	if((CAN_WEAR((obj), ITEM_WEAR_TAKE) && CAN_CARRY_OBJ((ch),(obj)) &&
-	        CAN_SEE_OBJ((ch),(obj))))
-		return 1;
-
-	else
-		return 0;
-}
-
-int CAN_CARRY_OBJ(Character *ch, Object *obj)
-{
-	if((ch->CarriedWeight() + obj->Weight()) > CAN_CARRY_W(ch))
-		return 0;
-
-	else
-		return 0;
-}
-
 /********************************************************/
 
 void equip_char(Character * ch, Object * obj, int pos)

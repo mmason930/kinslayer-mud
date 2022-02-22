@@ -21,6 +21,7 @@
 #include "rooms/Room.h"
 #include "rooms/RoomSector.h"
 #include "rooms/Exit.h"
+#include "items/ItemUtil.h"
 
 extern Character *character_list;
 
@@ -186,19 +187,18 @@ void mobileActivity(void)
 
 				for (obj = ch->in_room->contents; obj; obj = obj->next_content)
 				{
-					if (CAN_GET_OBJ(ch, obj) && GET_OBJ_COST(obj) > max)
+					if(GET_OBJ_COST(obj) > max && ItemUtil::get()->canTakeObject(ch, obj))
 					{
-
 						best_obj = obj;
 						max = GET_OBJ_COST(obj);
 					}
+				}
 
-					if (best_obj != NULL)
-					{
-						best_obj->RemoveFromRoom();
-						obj_to_char(best_obj, ch);
-						Act("$n gets $p.", FALSE, ch, best_obj, 0, TO_ROOM);
-					}
+				if (best_obj != NULL)
+				{
+					best_obj->RemoveFromRoom();
+					obj_to_char(best_obj, ch);
+					Act("$n gets $p.", FALSE, ch, best_obj, 0, TO_ROOM);
 				}
 			}
 		}

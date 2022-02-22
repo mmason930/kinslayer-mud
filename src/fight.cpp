@@ -392,9 +392,7 @@ void Character::weaveGroupDistribution( Character* victim )
 /* Weapon attack texts */
 struct attack_hit_type attack_hit_text[] =
     {//TODO: Database
-	    {"hit", "hits"
-	    }
-	    , 			/* 0 */
+	    {"hit", "hits"}, 			/* 0 */
 	    {"sting", "stings"},
 	    {"whip", "whips"},
 	    {"slash", "slashes"},
@@ -1052,7 +1050,7 @@ void dam_message( int dam, Character * ch, Character * victim, int w_type, int B
 	        },
 
 	        {
-	            "$n barely tickles $N's #b with $s #w,", 	/* 7: 19..23 */
+	            "$n barely tickles $N's #b with $s #w.", 	/* 7: 19..23 */
 	            "You barely tickle $N's #b with your #w.",
 	            "$n barely tickles your #b with $s #w."
 	        },
