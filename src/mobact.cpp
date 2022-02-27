@@ -187,7 +187,7 @@ void mobileActivity(void)
 
 				for (obj = ch->in_room->contents; obj; obj = obj->next_content)
 				{
-					if(GET_OBJ_COST(obj) > max && ItemUtil::get()->canTakeObject(ch, obj))
+					if(GET_OBJ_COST(obj) > max && !obj->hidden && ItemUtil::get()->canTakeObject(ch, obj))
 					{
 						best_obj = obj;
 						max = GET_OBJ_COST(obj);

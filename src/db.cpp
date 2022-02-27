@@ -408,9 +408,8 @@ void bootWorld(void)
 
 	Log("Loading shops.");
 	boot_the_shops();
-
-//	flusspferd::value JSEnvironment::executeExpression( const std::string &expression )
 }
+
 void SetupMySQL( bool crash_on_failure )
 {
 	std::string username, password, dbname, hostname;
