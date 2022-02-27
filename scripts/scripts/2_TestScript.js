@@ -24,12 +24,6 @@ var script2 = function(self, actor, here, args, extra) {
 			return "";
 		return vArgs[index];
 	}
-	function test() {
-		var obj = new Object();
-		obj[ 1234 ] = "Test";
-		actor.send( obj[1234] );
-	}
-	
 	function getFirstStepToTarget(actor, targetInput) {
 		var result = new Object();
 		result.targetRoom = null;
@@ -241,6 +235,44 @@ var script2 = function(self, actor, here, args, extra) {
 			here.echo( eval(str) );
 			return;
 		}
+		else if(!str_cmp(vArgs[1], "strandedrooms")) {
+			var accessibleRooms = findAccessibleRooms(actor);
+			var accessMap = {};
+			accessibleRooms.forEach(function(roomNum) {
+				accessMap[roomNum] = roomNum;
+			})
+
+			var roomRnum = 0;
+			var finalList = [];
+			while(true) {
+				var room = getRoomByRnum(roomRnum);
+
+				if(room == null) {
+					break;
+				}
+
+				// Room is accessible.
+				if(accessMap[room.vnum] != null) {
+					++roomRnum;
+					continue;
+				}
+
+				if(!isZoneOpen(room.zoneVnum)) {
+					++roomRnum;
+					continue;
+				}
+				
+				finalList.push(room);
+				++roomRnum;
+			}
+
+			var outputBuffer = "";
+			finalList.forEach(function(room) {
+				outputBuffer += ("[" + room.zoneName + "] " + room.vnum + ") " + room.name) + "\n";
+			})
+			actor.send(outputBuffer);
+			//actor.send(room.vnum + ") " + room.name);
+		}
 		else if(!str_cmp(vArgs[1], "watch") || !str_cmp(vArgs[1], "unwatch")) {
 			var startRoom = parseInt(vArgs[2]);
 			var endRoom = parseInt(vArgs[3]);
@@ -371,58 +403,6 @@ var script2 = function(self, actor, here, args, extra) {
 			}
 			return;
 		}
-		else if( !str_cmp(vArgs[1], "mobstats") ) {
-			
-			var levelExp =
-			[
-				0, 1, 2000, 5000, 10000, 20000, 40000, 70000, 100000, 150000, 225000, 325000, 525000,
-				825000, 1225000, 1725000, 2325000, 3025000, 3825000, 4725000, 5725000, 7000000, 9000000,
-				12000000, 16000000, 21000000, 27000000, 34000000, 42000000, 51000000, 61000000, 71000000,
-				81000000, 91000000, 101000000, 116000000, 131000000, 146000000, 161000000, 176000000, 196000000,
-				216000000, 236000000, 256000000, 276000000, 296000000, 316000000, 336000000, 356000000, 376000000,
-				396000000, 999999999
-			];
-			var getExpToGainLevel = function(levelFrom) {
-				if(levelFrom < 1 || levelFrom > 49) {
-					return 0;
-				}
-				return levelExp[levelFrom+1]-levelExp[levelFrom];
-			}
-			var level = parseInt(getArg(vArgs,2));
-			var expRequirement = getExpToGainLevel(level);
-			var recommendedExp = parseInt(expRequirement/20);
-			
-			actor.send("Mob level: " + level);
-			actor.send("Rec EXP  : " + recommendedExp);
-			return;
-		}
-		else if( !str_cmp(vArgs[1], "describe") ) {
-			
-			if(vArgs.length >= 3 ) {
-				var sTableName = vArgs[2];
-				
-				var sql = "DESCRIBE " + sqlEsc(sTableName);
-				var resultSet = sqlQuery(sql);
-				
-				var rows = [];
-				while( resultSet.hasNextRow ) {
-					rows.push(resultSet.getRow);
-				}
-				
-				var sBuffer = "";
-				
-				for(var i = 0;i < rows.length;++i) {
-					var row = rows[i];
-					sBuffer += row.get("Field") + "\n";
-				}
-				
-				here.echo(sBuffer);
-			}
-			else {
-				actor.send("Describe what?");
-				return;
-			}
-		}
 		else if( !str_cmp(vArgs[1], "shopkeeper") ) {
 		///Find which shop a MOB is shopkeeper of.
 			var mob_vnum = getArg(vArgs, 2);
@@ -458,16 +438,6 @@ var script2 = function(self, actor, here, args, extra) {
 				}
 			}
 		}
-		else if( !str_cmp(vArgs[1], "highs") ) {
-			var rs = sqlQuery("SELECT tdate, tcount FROM player_highs ORDER BY tdate DESC LIMIT 20;");
-			while( rs.hasNextRow ) {
-				var row = rs.getRow;
-				var date = new Date( parseInt(row.get("tdate")) * 1000 );
-				var timestamp = date.strftime("%m-%d-%Y : " + row.get("tcount"));
-				actor.send( timestamp );
-			}
-			return;
-		}
 		else if( !str_cmp(vArgs[1], "emptyrooms") )
 		{//Find rooms that do not exist in a given range.
 			var low = parseInt(getArg(vArgs, 2));
@@ -501,26 +471,6 @@ var script2 = function(self, actor, here, args, extra) {
 			var str = vArgs.join(" ");
 			eval(str);
 			return;
-		}
-		else if( !str_cmp(vArgs[1], "test") ) {
-		
-			var before = new Date().getTime();
-			var wielded = 0;
-			
-			for (var _autoKey in global.characters) {
-			
-				var ch = global.characters[_autoKey];
-				if(ch.eq(constants.WEAR_WIELD))
-				{
-					++wielded;
-				}
-			}
-			
-			var after = new Date().getTime();
-			
-			actor.send("Duration: " + (after - before));
-			actor.send("Wielded: " + wielded);
-		
 		}
 		else if( vArgs[1] == "track" ) {
 			getCharCols(actor);
@@ -792,19 +742,4 @@ var script2 = function(self, actor, here, args, extra) {
 			}
 		}
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 }
