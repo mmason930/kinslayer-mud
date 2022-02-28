@@ -173,13 +173,13 @@ Room *FindFadingRoom(char *name)
 		if(!strcmp(name, room->fadeCode()))
 		{
 			if(ROOM_FLAGGED(room, ROOM_PRIVATE) || ROOM_FLAGGED(room, ROOM_DEATH))
-				return 0;
+				return nullptr;
 			else
 				return room;
 		}
 	}
 
-	return 0;
+	return nullptr;
 }
 
 int fade_distance(Character *ch)

@@ -57,8 +57,8 @@ var script2 = function(self, actor, here, args, extra) {
 		return str;
 	 }
 	 
-	 function findAccessibleRooms(actor) {
-	 	let startingRoom = actor.room;
+	 function findAccessibleRooms(startingRoomVnum) {
+	 	let startingRoom = getRoom(startingRoomVnum);
 		let roomMap = {};
 		let zoneMap = {};
 
@@ -235,8 +235,32 @@ var script2 = function(self, actor, here, args, extra) {
 			here.echo( eval(str) );
 			return;
 		}
+		else if(!str_cmp(vArgs[1], "rlist")) {
+			let lowRoomVnum = parseInt(vArgs[2]);
+			let highRoomVnum = parseInt(vArgs[3]);
+			let accessibleRooms = findAccessibleRooms(100);
+			let accessMap = {};
+			accessibleRooms.forEach(function(roomNum) {
+				accessMap[roomNum] = roomNum;
+			});
+			getCharCols(actor);
+			
+			var outputArray = [];
+			for(var roomVnum = lowRoomVnum;roomVnum <= highRoomVnum;++roomVnum) {
+				var room = getRoom(roomVnum);
+
+				if(room == null) {
+					continue;
+				}
+				let accessibleDisplay = accessMap[roomVnum] ? "ACCESSIBLE" : "INACCESSIBLE";
+				outputArray.push("[" + cyn + room.zoneName + nrm + "] " + "[" + yel + accessibleDisplay + nrm + "] " + "[" + bld + grn + room.vnum + nrm + "] " + room.name);
+			}
+
+			actor.send(outputArray.join("\r\n"));
+			return;
+		}
 		else if(!str_cmp(vArgs[1], "strandedrooms")) {
-			var accessibleRooms = findAccessibleRooms(actor);
+			var accessibleRooms = findAccessibleRooms(100);
 			var accessMap = {};
 			accessibleRooms.forEach(function(roomNum) {
 				accessMap[roomNum] = roomNum;
@@ -314,7 +338,7 @@ var script2 = function(self, actor, here, args, extra) {
 			var roomNumber = 0;
 			var counter = 0;
 			var roomCount = numberOfRooms();
-			var accessibleRooms = findAccessibleRooms(actor);
+			var accessibleRooms = findAccessibleRooms(100);
 			var accessibleRoomMap = {};
 			var targetLineCount = parseInt(vArgs[2]);
 
