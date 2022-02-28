@@ -62,20 +62,6 @@ int can_edit_zone(Character *ch, int number);
 
 /*------------------------------------------------------------------------*/
 
-/***
-class ReditGUIListener
-{
-	std::map< std::string, kuDescriptor* > sessions;
-	kuListener *listener;
-
-public:
-	ReditGUIListener( kuListener *listener );
-
-	void listen( kuListener *listener );
-
-};
-***/
-
 #define  W_EXIT(room, num) (World[(room)]->dir_option[(num)])
 
 /*------------------------------------------------------------------------*\
@@ -372,7 +358,11 @@ void redit_save_to_disk( int lowVnum, int highVnum )
 
 		while (bottomRnum < World.size() && World[bottomRnum]->getVnum() <= highVnum)
 		{
-			World[bottomRnum++]->addToBatch(roomInsert, exitInsert, jsInsert);
+			if(!World[bottomRnum]->isDeleted())
+			{
+				World[bottomRnum]->addToBatch(roomInsert, exitInsert, jsInsert);
+			}
+			++bottomRnum;
 		}
 
 		roomInsert.finish();
