@@ -260,6 +260,14 @@ var script2 = function(self, actor, here, args, extra) {
 			return;
 		}
 		else if(!str_cmp(vArgs[1], "strandedrooms")) {
+
+			var hideNoportRooms = false
+			if(vArgs.length >= 2) {
+				if(vArgs[2] == "hidenoports") {
+					hideNoportRooms = true;
+				}
+			}
+
 			var accessibleRooms = findAccessibleRooms(100);
 			var accessMap = {};
 			accessibleRooms.forEach(function(roomNum) {
@@ -277,6 +285,11 @@ var script2 = function(self, actor, here, args, extra) {
 
 				// Room is accessible.
 				if(accessMap[room.vnum] != null) {
+					++roomRnum;
+					continue;
+				}
+
+				if(hideNoportRooms && room.roomFlagged(constants.ROOM_NOPORT)) {
 					++roomRnum;
 					continue;
 				}
