@@ -80,7 +80,7 @@ const char *room_bits[] = {
                         "DARK",
                         "DEATH",
                         "!MOB",
-                        "INDOORS",
+                        "INACCESSIBLE",
                         "PEACEFUL",
                         "SOUNDPROOF",
                         "!TRACK",

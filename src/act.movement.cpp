@@ -242,7 +242,7 @@ CommandHandler do_sense = DEFINE_COMMAND
 			return;
 		}
 
-		if(ROOM_FLAGGED(ch->in_room, ROOM_NOPORT))
+		if(ROOM_FLAGGED(ch->in_room, ROOM_NOPORT) || ROOM_FLAGGED(ch->in_room, ROOM_INACCESSIBLE))
 		{
 			ch->send("You try with all of your might, but you can't seem to sense the shadows here.\r\n");
 			return;
@@ -286,7 +286,7 @@ CommandHandler do_fade = DEFINE_COMMAND
 		return;
 	}
 
-	if(!ch->in_room->isDark() || ROOM_FLAGGED(ch->in_room, ROOM_NOPORT))
+	if(!ch->in_room->isDark() || ROOM_FLAGGED(ch->in_room, ROOM_NOPORT) || ROOM_FLAGGED(ch->in_room, ROOM_INACCESSIBLE))
 	{
 		ch->send("There are no shadows to reach out to.\r\n");
 		return;
@@ -328,7 +328,7 @@ CommandHandler do_fade = DEFINE_COMMAND
 	else
 	{
 		// This means the room was either not found, or found and unreachable //
-		if( !(room = FindFadingRoom(arg)) || ROOM_FLAGGED(room, ROOM_NOPORT))
+		if( !(room = FindFadingRoom(arg)) || ROOM_FLAGGED(room, ROOM_NOPORT) || ROOM_FLAGGED(room, ROOM_INACCESSIBLE))
 		{
 			ch->send("You begin to reach for the shadows, but realize the other end cannot be reached!\r\n");
 			return;

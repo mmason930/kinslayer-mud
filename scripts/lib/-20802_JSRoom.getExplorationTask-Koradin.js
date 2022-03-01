@@ -46,9 +46,9 @@ function getExplorationTask( rVnum )
 			//{
 				for (var i = area[0]; i < (area[0]+100); i++)
 				{
-					if (getRoom(i))
+					let room = getRoom(i);
+					if (room && !room.isFlagged(constants.ROOM_NOPORT) && !room.isFlagged(constants.ROOM_INACCESSIBLE))
 					{
-						if (getRoom(i).isFlagged(constants.ROOM_NOPORT) == false)
 							area.push(i);
 					}
 				}

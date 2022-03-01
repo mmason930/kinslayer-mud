@@ -184,6 +184,7 @@ flusspferd::object makeConstants()
 
 	o.set_property("ROOM_DARK", flusspferd::value(ROOM_DARK));
 	o.set_property("ROOM_NOMOB", flusspferd::value(ROOM_NOMOB));
+	o.set_property("ROOM_INACCESSIBLE", flusspferd::value(ROOM_INACCESSIBLE));
 	o.set_property("ROOM_PEACEFUL", flusspferd::value(ROOM_PEACEFUL));
 	o.set_property("ROOM_SOUNDPROOF", flusspferd::value(ROOM_SOUNDPROOF));
 	o.set_property("ROOM_NOTRACK", flusspferd::value(ROOM_NOTRACK));

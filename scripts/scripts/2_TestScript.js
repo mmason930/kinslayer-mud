@@ -261,10 +261,10 @@ var script2 = function(self, actor, here, args, extra) {
 		}
 		else if(!str_cmp(vArgs[1], "strandedrooms")) {
 
-			var hideNoportRooms = false
+			var hideAccessibleFlaggedRooms = false
 			if(vArgs.length >= 2) {
-				if(vArgs[2] == "hidenoports") {
-					hideNoportRooms = true;
+				if(vArgs[2] == "hideaccessible") {
+					hideAccessibleFlaggedRooms = true;
 				}
 			}
 
@@ -289,7 +289,7 @@ var script2 = function(self, actor, here, args, extra) {
 					continue;
 				}
 
-				if(hideNoportRooms && room.roomFlagged(constants.ROOM_NOPORT)) {
+				if(hideAccessibleFlaggedRooms && room.roomFlagged(constants.ROOM_INACCESSIBLE)) {
 					++roomRnum;
 					continue;
 				}

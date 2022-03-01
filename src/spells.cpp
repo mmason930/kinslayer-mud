@@ -188,7 +188,7 @@ ASPELL(spell_locate_object)
 		room = obj->getRoom();
 		if( !room ) continue;
 
-		if(ROOM_FLAGGED(room, ROOM_NOPORT) || ROOM_FLAGGED(room, ROOM_NOMAGIC) || room->getZone()->IsClosed())
+		if(ROOM_FLAGGED(room, ROOM_NOPORT) || ROOM_FLAGGED(room, ROOM_INACCESSIBLE) || ROOM_FLAGGED(room, ROOM_NOMAGIC) || room->getZone()->IsClosed())
 			continue;
 
 		if( !is_name(arg, obj->getName()) )
@@ -310,13 +310,14 @@ ASPELL(spell_gate)
 		return;
 	}
 
-	if( !ROOM_FLAGGED( ch->in_room, ROOM_NOPORT ) )
+	if( !ROOM_FLAGGED(ch->in_room, ROOM_NOPORT) && !ROOM_FLAGGED(ch->in_room, ROOM_INACCESSIBLE) )
 	{
 		for(int i = 0;i < World.size();++i)
 		{
 			if(	ROOM_FLAGGED(World[i], ROOM_NOPORT)  ||
 				ROOM_FLAGGED(World[i], ROOM_NOMAGIC) ||
 				ROOM_FLAGGED(World[i], ROOM_DEATH) ||
+				ROOM_FLAGGED(World[i], ROOM_INACCESSIBLE) ||
 				World[i]->getZone()->IsClosed()
 			)
 			{
@@ -338,6 +339,7 @@ ASPELL(spell_gate)
 						if(	ROOM_FLAGGED(World[i], ROOM_NOPORT)  ||
 							ROOM_FLAGGED(World[i], ROOM_NOMAGIC) ||
 							ROOM_FLAGGED(World[i], ROOM_DEATH) ||
+							ROOM_FLAGGED(World[i], ROOM_INACCESSIBLE) ||
 							World[i]->getZone()->IsClosed()
 						)
 							continue;
@@ -390,7 +392,7 @@ ASPELL(spell_locate_life)
 		distance = vict->in_room->getZone()->Distance(ch->in_room->getZone());
 		location = find_zone_slope(zone, ch->in_room->getZoneNumber());
 
-		if(ROOM_FLAGGED(vict->in_room, ROOM_NOPORT) || ROOM_FLAGGED(vict->in_room, ROOM_NOMAGIC) || vict->in_room->getZone()->IsClosed())
+		if(ROOM_FLAGGED(vict->in_room, ROOM_NOPORT) || ROOM_FLAGGED(vict->in_room, ROOM_NOMAGIC) || ROOM_FLAGGED(vict->in_room, ROOM_INACCESSIBLE) || vict->in_room->getZone()->IsClosed())
 			continue;
 
 		if(distance <= GET_SKILL(ch, SPELL_LOCATE_LIFE) / 20)
