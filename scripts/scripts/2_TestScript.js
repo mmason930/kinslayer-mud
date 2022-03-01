@@ -259,6 +259,56 @@ var script2 = function(self, actor, here, args, extra) {
 			actor.send(outputArray.join("\r\n"));
 			return;
 		}
+		else if(!str_cmp(vArgs[1], "accessiblerooms")) {
+			var accessibleRooms = findAccessibleRooms(100);
+			var accessMap = {};
+			accessibleRooms.forEach(function(roomNum) {
+				accessMap[roomNum] = roomNum;
+			})
+
+			var onlyInaccessibleFlaggedRooms = false
+			if(vArgs.length >= 2) {
+				if(vArgs[2] == "onlyinaccessible") {
+					onlyInaccessibleFlaggedRooms = true;
+				}
+			}
+
+			var roomRnum = 0;
+			var finalList = [];
+			while(true) {
+				var room = getRoomByRnum(roomRnum);
+
+				if(room == null) {
+					break;
+				}
+
+				// Room is inaccessible.
+				if(accessMap[room.vnum] == null) {
+					++roomRnum;
+					continue;
+				}
+
+				if(onlyInaccessibleFlaggedRooms && !room.roomFlagged(constants.ROOM_INACCESSIBLE)) {
+					++roomRnum;
+					continue;
+				}
+
+				if(!isZoneOpen(room.zoneVnum)) {
+					++roomRnum;
+					continue;
+				}
+				
+				finalList.push(room);
+				++roomRnum;
+			}
+
+			var outputBuffer = "";
+			finalList.forEach(function(room) {
+				outputBuffer += ("[" + room.zoneName + "] " + room.vnum + ") " + room.name) + "\n";
+			})
+			actor.send(outputBuffer);
+
+		}
 		else if(!str_cmp(vArgs[1], "strandedrooms")) {
 
 			var hideAccessibleFlaggedRooms = false
@@ -308,7 +358,6 @@ var script2 = function(self, actor, here, args, extra) {
 				outputBuffer += ("[" + room.zoneName + "] " + room.vnum + ") " + room.name) + "\n";
 			})
 			actor.send(outputBuffer);
-			//actor.send(room.vnum + ") " + room.name);
 		}
 		else if(!str_cmp(vArgs[1], "watch") || !str_cmp(vArgs[1], "unwatch")) {
 			var startRoom = parseInt(vArgs[2]);
