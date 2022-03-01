@@ -1,9 +1,6 @@
 var script4000 = function(self, actor, here, args, extra) {
 	_block;
 	
-	/* 7/28 Fogel - Temporarily disabled this skill until I can make it less gay */
-	actor.send("This skill has been temporarily disabled, sorry!");
-	return;
 	var vArgs = getArgList(args);
 	var ch = actor;
 	var vict;
@@ -43,7 +40,7 @@ var script4000 = function(self, actor, here, args, extra) {
 		ch.send("But they have already been choked!");
 		return;
 	}
-	ch.startTimer(4.0);
+	ch.startTimer(7.0);
 	var success = runTimer(ch);
 	if(success){
 		var roll = random(1, 100) - (vict.level - ch.level);
