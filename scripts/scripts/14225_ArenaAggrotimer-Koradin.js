@@ -20,7 +20,7 @@ var script14225 = function(self, actor, here, args, extra) {
 	var assistArr = [];
 	for (var _autoKey in self.room.people) {
 		var player = self.room.people[_autoKey];
-		if (player != self && !player.mobFlagged(constants.MOB_MOUNT)) {
+		if (player != self && !player.isMount()) {
 			if (self.mobFlagged(constants.MOB_SMOB))
 				aggArr.push(player);
 			else if (global.arenaFreeForAll == true) {

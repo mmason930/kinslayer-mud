@@ -2890,26 +2890,16 @@ Room *FindTargetRoom(Character *ch, char *rawroomstr)
 	}
 	else
 	{
-//		if( !str_cmp(ch->player.name, "Fogel") )
-//			ch->send("There's a private conversation going on in that room.\r\n");
-//		else
-			ch->send("No such creature or object around.\r\n");
+		ch->send("No such creature or object around.\r\n");
 		return 0;
 	}
 
 	/* a location has been found -- if you're < GRGOD, check restrictions. */
-	if (GET_LEVEL(ch) < LVL_GRGOD)
+	if (GET_LEVEL(ch) < LVL_IMMORT)
 	{
 		if (ROOM_FLAGGED(location, ROOM_GODROOM))
 		{
 			ch->send("You are not godly enough to use that room!\r\n");
-			return 0;
-		}
-
-		if (ROOM_FLAGGED(location, ROOM_PRIVATE) &&
-		        location->people && location->people->next_in_room)
-		{
-			ch->send("There's a private conversation going on in that room.\r\n");
 			return 0;
 		}
 	}

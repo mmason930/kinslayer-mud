@@ -183,6 +183,7 @@ flusspferd::object makeConstants()
 	o.set_property("WEAR_FEET", flusspferd::value(WEAR_FEET));
 
 	o.set_property("ROOM_DARK", flusspferd::value(ROOM_DARK));
+	o.set_property("ROOM_DEATH", flusspferd::value(ROOM_DEATH));
 	o.set_property("ROOM_NOMOB", flusspferd::value(ROOM_NOMOB));
 	o.set_property("ROOM_INACCESSIBLE", flusspferd::value(ROOM_INACCESSIBLE));
 	o.set_property("ROOM_PEACEFUL", flusspferd::value(ROOM_PEACEFUL));

@@ -172,7 +172,7 @@ Room *FindFadingRoom(char *name)
 		room = World[i];
 		if(!strcmp(name, room->fadeCode()))
 		{
-			if(ROOM_FLAGGED(room, ROOM_PRIVATE) || ROOM_FLAGGED(room, ROOM_DEATH))
+			if(ROOM_FLAGGED(room, ROOM_NOPORT) || ROOM_FLAGGED(room, ROOM_INACCESSIBLE) || ROOM_FLAGGED(room, ROOM_GODROOM))
 				return nullptr;
 			else
 				return room;
@@ -328,7 +328,7 @@ CommandHandler do_fade = DEFINE_COMMAND
 	else
 	{
 		// This means the room was either not found, or found and unreachable //
-		if( !(room = FindFadingRoom(arg)) || ROOM_FLAGGED(room, ROOM_NOPORT) || ROOM_FLAGGED(room, ROOM_INACCESSIBLE))
+		if( !(room = FindFadingRoom(arg)) || ROOM_FLAGGED(room, ROOM_NOPORT) || ROOM_FLAGGED(room, ROOM_INACCESSIBLE) || ROOM_FLAGGED(room, ROOM_GODROOM))
 		{
 			ch->send("You begin to reach for the shadows, but realize the other end cannot be reached!\r\n");
 			return;
@@ -540,7 +540,7 @@ int can_move(Character *ch, int dir, int need_specials_check, bool flee)
 		return 0;
 	}
 
-	/* Mortals and low level gods cannot enter greater god rooms. */
+	/* Mortals cannot enter god rooms. */
 	if (ROOM_FLAGGED(EXIT(ch, dir)->getToRoom(), ROOM_GODROOM) &&
 	        GET_LEVEL(ch) < LVL_IMMORT)
 	{

@@ -24,7 +24,7 @@ JSCharacter.prototype.faceoff = function (vict) {
 			continue;
 		}
 		if (this.canSee(target) && (target.leader == vict.leader || target == vict.leader || target.leader == vict)) {
-			if (target.numFighting() < vict.numFighting() && !target.mobFlagged(constants.MOB_MOUNT) && !target.mobFlagged(constants.MOB_SHADOW_MOUNT)) {
+			if (target.numFighting() < vict.numFighting() && !target.isMount()) {
 				return target;
 			}
 		}

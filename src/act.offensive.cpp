@@ -605,7 +605,7 @@ void perform_assist(Character *ch, Character *helpee)
 		Act("$n assists $N.", FALSE, ch, 0, helpee, TO_NOTVICT);
 
 		if(( (opponent->NumFighting() >= 3 && !IS_NPC(ch)) ||
-		        (ROOM_FLAGGED(ch->in_room, ROOM_TUNNEL) && opponent->NumFighting() >= 2)))
+		        (ROOM_FLAGGED(ch->in_room, ROOM_TUNNEL) && opponent->NumFighting() >= CONFIG_TUNNEL_SIZE)))
 		{
 			ch->send("You'd probably get killed before you reached the fight because it is so crowded!\r\n");
 			return;
