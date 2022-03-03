@@ -288,7 +288,7 @@ const char *preference_bits[] = {
                               "!WIZ",
                               "L1",
                               "L2",
-							  "!SPEAKS",
+                              "!SPEAKS",
                               "SPARE2",
                               "SPARE3",
                               "RMFLG",
@@ -297,10 +297,18 @@ const char *preference_bits[] = {
                               "COUNCIL",
                               "INCOG",
                               "!TELL",
+                              "!SAY",
                               "!NARR",
                               "!CHAT",
                               "!YELL",
                               "!SHOUT",
+                              "BUILDWALK",
+                              "SPAM",
+                              "ALERT",
+                              "GCOMM1",
+                              "GCOMM2",
+                              "AUTOSCAN",
+                              "!GLOBAL",
                               "\n"
                           };
 

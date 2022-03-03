@@ -701,7 +701,7 @@ int perform_drop( Character *ch, Object *obj, bool vaultSave )
 	if ( !js_dropped_in_room( ch->in_room, obj, ch ) || ch->IsPurged() || obj->IsPurged() )
 		return 0;
 
-	if ( IS_OBJ_STAT( obj, ITEM_NODROP ) && OBJ_FLAGGED(obj, ITEM_TEMP) )
+	if ( IS_OBJ_STAT( obj, ITEM_NODROP ) )
 	{
 		sprintf( buf, "It would be gone the second you did that." );
 		Act( buf, FALSE, ch, obj, 0, TO_CHAR );
@@ -803,11 +803,6 @@ CommandHandler  do_drop  = DEFINE_COMMAND
 
 void perform_give( Character *ch, Character *vict, Object *obj )
 {
-	if ( IS_OBJ_STAT( obj, ITEM_NODROP ) || OBJ_FLAGGED(obj, ITEM_TEMP))
-	{
-		Act( "It would be gone the second you did that.", FALSE, ch, obj, 0, TO_CHAR );
-		return ;
-	}
 	if ( IS_OBJ_STAT( obj, ITEM_NODROP ) )
 	{
 		Act( "You can't let go of $p!!  Yeech!", FALSE, ch, obj, 0, TO_CHAR );
@@ -1958,7 +1953,7 @@ void Character::performRemove( int wearLocation )
 
 	if (!(obj = GET_EQ(this, wearLocation)))
 		MudLog(BRF, 100, TRUE, "Error in Character::performRemove: bad wearLocation %d passed.", wearLocation);
-	else if ( IS_OBJ_STAT( obj, ITEM_NODROP ) && !OBJ_FLAGGED(obj, ITEM_TEMP))
+	else if ( IS_OBJ_STAT( obj, ITEM_NODROP ) )
 		Act( "You can't remove $p, it must be CURSED!", FALSE, this, obj, 0, TO_CHAR );
 	else if ( IS_CARRYING_N( this ) >= CAN_CARRY_N( this ) )
 		Act( "$p: you can't carry that many items!", FALSE, this, obj, 0, TO_CHAR );

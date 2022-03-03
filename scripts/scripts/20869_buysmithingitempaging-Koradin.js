@@ -154,7 +154,7 @@ var script20869 = function(self, actor, here, args, extra) {
 				  highDmg *= 10;
 			   }
 			   var oneTwo = "one";
-			   if (obj.extraFlags(8) == true)
+			   if (obj.extraFlags(constants.ITEM_TWO_HANDED) == true)
 				  oneTwo = "two";
 			   actor.send("It is a "+oneTwo+"-handed "+objType+".\n");
 			   var objWeight = Math.floor(obj.weight*100)/100;

@@ -109,7 +109,7 @@ var script20910 = function(self, actor, here, args, extra) {
 	}
 	objLocation = " ("+baseObjLoc+")";
 	var color = cyn;
-	if (obj.extraFlags(15) == true) // RARE check
+	if (obj.extraFlags(constants.ITEM_RARE) == true) // RARE check
 		color = mag;
 	if (isName("masterweapon", obj.namelist)) // Master weapon check
 		color = grn;
@@ -268,7 +268,7 @@ var script20910 = function(self, actor, here, args, extra) {
 		}
 		return;
 	}
-	if (obj.extraFlags(12) == true && obj.extraFlags(16) == false && msgCol == red) { //NO SHOW on, TRADES off, actor out of clan
+	if (obj.extraFlags(constants.ITEM_NO_SHOW) == true && obj.extraFlags(constants.ITEM_TRADES) == false && msgCol == red) { //NO SHOW on, TRADES off, actor out of clan
 		return;
 	}
 	if (color == grn && !isName(actor.name, obj.namelist)) {

@@ -531,7 +531,7 @@ CommandHandler  do_butcher  = DEFINE_COMMAND
 				ch->send( "You failed to skin for unknown reasons...\r\n" );
 				return ;
 			}
-			if (obj->getType()  != ITEM_SKIN)
+			if (obj->getType() != ITEM_SKIN)
 			{
 				ch->send( "Error with skinning...\r\n" );
 				delete obj;
