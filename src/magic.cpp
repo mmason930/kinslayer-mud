@@ -847,8 +847,6 @@ int GetAffNumber(Weave *weave)
 		return AFF_SLICE;
 	else if( !weave->getName().compare("Blaze") )
 		return AFF_BURN;
-	else if( !weave->getName().compare("Chill") )
-		return AFF_CHILL;
 	else if( !weave->getName().compare("Daze") )
 		return AFF_DAZE;
 	else if( !weave->getName().compare("Dark Plague") )

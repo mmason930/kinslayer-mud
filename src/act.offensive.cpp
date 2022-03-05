@@ -2087,7 +2087,7 @@ void apply_shieldblock(Character *ch)
 	affect_to_char( ch, &af );
 }
 
-/* 6/9/09 by Fogel - Applies the "SEVERE WOUND" status effect, which multiplies the victim's parry and dodge bonuses by .75 */
+/* 6/9/09 by Fogel - Applies the "SEVERE WOUND" status effect, which multiplies the victim's parry and dodge bonuses by .80 */
 void apply_severewound(Character *ch, Character *vict)
 {
 	struct affected_type af;

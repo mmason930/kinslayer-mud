@@ -346,15 +346,19 @@ void medit_display_aggros(Descriptor *d)
 	for(i = 0;i < NUM_AGGROS;++i)
 		d->send("%d) %s%s%s\r\n", i + 1, grn, aggros[i], nrm);
 
-	d->send("Current aggros:");
+	d->send("Current aggros: ");
+	int numberWritten = 0;
 	for(i = 0;i < NUM_AGGROS;++i)
 	{
 		if(GET_AGGRO(OLC_MOB(d), i))
 		{
-			if(i)
-				d->send(" ,");
+			if(numberWritten > 0)
+			{
+				d->send(", ");
+			}
 
 			d->send("%s%s%s", cyn, aggros[i], nrm);
+			++numberWritten;
 		}
 	}
 }
@@ -671,7 +675,7 @@ void medit_disp_menu(Descriptor *d)
 
 
 	aggro_list[0] = '\0';
-	for(i = 0;aggros[i] && aggros[i] != "\n";++i)
+	for(i = 0;aggros[i] && *(aggros[i]) != '\n';++i)
 	{
 		if(GET_AGGRO(mob, i))
 		{
