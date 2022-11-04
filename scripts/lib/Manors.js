@@ -604,22 +604,3 @@ function isCharAllowedAndInManor(actor, zoneId) {
 		return true;
 	return false;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

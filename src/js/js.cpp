@@ -578,6 +578,10 @@ void JSManager::monitorFileModifications(bool continuous)
 		{
 			MudLog(BRF, LVL_BUILDER, TRUE, "Error importing scripts: %s", queryException.getMessage().c_str());
 		}
+		catch(sql::ConnectionException &connectionException)
+		{
+			MudLog(BRF, LVL_BUILDER, TRUE, "Error importing scripts: %s", connectionException.getMessage().c_str());
+		}
 	}
 }
 

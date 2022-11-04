@@ -197,7 +197,7 @@ void kuDescriptor::disconnect() {
 #else
 		close(sock);
 #endif
-		if(server != NULL) {
+		if(server != nullptr) {
 
 			server->handleCloseDescriptor(this);
 		}
