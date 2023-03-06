@@ -1,6 +1,7 @@
 #ifndef USER_GUILD_H
 #define USER_GUILD_H
 
+#include <optional>
 #include "../DataObjectWithIntId.h"
 #include "../DateTime.h"
 

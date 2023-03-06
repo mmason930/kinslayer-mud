@@ -7,7 +7,7 @@ CC = g++
 #  -Wignored-qualifiers -Wextra
 # Any special flags you want to pass to the compiler
 MYFLAGS = \
--O0 -std=c++2a -Wformat-security -Wformat -Wpointer-arith \
+-O0 -std=c++17 -Wformat-security -Wformat -Wpointer-arith \
 -Wcast-align -Wredundant-decls -Wcatch-value -Werror \
 -DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10
 

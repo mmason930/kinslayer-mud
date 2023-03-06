@@ -22,18 +22,6 @@ var script638 = function(self, actor, here, args, extra) {
 	 ***************************************************/
 	// Add actor to global array of actors
 	global.players.unshift(actor);
-	// Create testing var for Alder
-	if (actor.name == "Alder") {
-		if (!global.alder)
-			actor.send(grn + "[ Your global variable does not currently exist " + actor.name + ". ]" + nrm);
-		else {
-			delete global.alder;
-			actor.send(grn + "[ Your global variable has been deleted " + actor.name + ". ]" + nrm);
-		}
-		global.alder = actor;
-		getCharCols(actor);
-		actor.send(grn + "[ Your global variable has been created " + actor.name + ". ]" + nrm);
-	}
 	// Lead new players into the tutorial
 	if (actor.race == constants.RACE_HUMAN && actor.level == 1 && actor.room.zoneVnum == 5 && actor.quest("newbieTutorial") != 2) { //Level 1 logging on in crossroads, hasn't done tutorial before
 		actor.comm("change spam complete");
