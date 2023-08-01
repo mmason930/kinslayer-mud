@@ -440,7 +440,7 @@ const int TYPE_OUT = 2;
 
 #define IS_LIGHT(room)  (!room->isDark())
 
-#define GET_ROOM_SPEC(room) ((room) >= 0 ? (room)->func : NULL)
+#define GET_ROOM_SPEC(room) ((room) != nullptr ? (room)->func : nullptr)
 
 /* char utils ************************************************************/
 

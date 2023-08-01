@@ -252,8 +252,6 @@ HelpManager.prototype.getSearchedFile = function(term)
 		var helpFile = this.helpFiles[_autoKey];	
 		if(helpFile.keywords != null && helpFile.keywords.length > 0)
 		{// File has keywords
-
-		
 			if(helpFile.keywords.toLowerCase().split(/,\s*/).indexOf(term) != -1)
 				return helpFile;
 		}

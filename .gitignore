@@ -1,5 +1,6 @@
 *.sdf
 *.opensdf
+.DS_Store
 Debug/
 DebugGateway/
 .idea

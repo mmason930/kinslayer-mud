@@ -12,6 +12,7 @@ Game::Game()
 	this->version = "KinslayerMUD, version 2.0";
 	this->playerLogsDirectory = "plrlogs/";
 	this->defaultDirectory = "lib";
+	this->playerPortalServer = nullptr;
 }
 
 Game::~Game()
@@ -27,8 +28,11 @@ void Game::setupPlayerPortalServer(const int port)
 
 void Game::cleanupPlayerPortalServer()
 {
-	delete playerPortalServer;
-	playerPortalServer = NULL;
+	if(this->playerPortalServer != nullptr)
+	{
+		delete playerPortalServer;
+		playerPortalServer = nullptr;
+	}
 }
 
 

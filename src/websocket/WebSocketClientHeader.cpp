@@ -13,6 +13,7 @@
 #include "WebSocketClientHeaderIETF_HYBI17.h"
 
 #include <cstring>
+#include <stdexcept>
 
 #define GET_ULONG_LE(n, b, i)                        \
 {                                                    \

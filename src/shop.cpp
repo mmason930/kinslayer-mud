@@ -1326,7 +1326,8 @@ void list_all_shops(Character * ch)
 		else
 			sprintf(buf1, "%6d", MobManager::GetManager().GetIndex((u_int)shop_index[shop_nr].keeper)->vnum);
 
-		sprintf(END_OF(buf2), "%s   %3.2f   %3.2f    ", buf1,
+		size_t buf2Size = strlen(buf2);
+		snprintf(buf2 + buf2Size, sizeof(buf2) - buf2Size, "%s   %3.2f   %3.2f    ", buf1,
 		        SHOP_SELLPROFIT(shop_nr), SHOP_BUYPROFIT(shop_nr));
 		strcat(buf2, customer_string(shop_nr, FALSE));
 		sprintf(END_OF(buf), "%s\r\n", buf2);
