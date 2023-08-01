@@ -284,18 +284,21 @@ let script635 = function(self, actor, here, args, extra) {
 		disp += "\n--------------   Stats   --------------\n"+nl+nrm;
 		disp += "Currently active:"+nrm+lsCount+dsCount+ssCount+asCount+".\n";
 		if ( getWaitingPlayers("all").length > 0 ) {
+			let isAre = "";
+			let playerS = "";
+			let aiHere = "";
 			if (getWaitingPlayers("all").length === 1) {
-				let isAre = "is";
-				let playerS = "player";
+				isAre = "is";
+				playerS = "player";
 			}
 			else if (getWaitingPlayers("all").length > 1) {
-				let isAre = "are";
-				let playerS = "players";
+				isAre = "are";
+				playerS = "players";
 			}
 			if (getWaitingPlayers("ai").length > 0)
-				let aiHere = " ("+infoColor+getWaitingPlayers("ai").length+nrm+" ai)";
+				aiHere = " ("+infoColor+getWaitingPlayers("ai").length+nrm+" ai)";
 			else
-				let aiHere = "";
+				aiHere = "";
 			disp += "There "+isAre+" currently "+infoColor+getWaitingPlayers("all").length+nrm+" "+playerS+aiHere+" waiting to enter the Arena.\n";
 		}
 		else if ( global.arenaStage === constants.ARENA_PLAYING) {
