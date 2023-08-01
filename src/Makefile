@@ -196,6 +196,7 @@ $(OBJDIR)/%.d: %.cpp
 default: kinslayer
 
 -include $(OBJFILES:.o)
+-include $(OBJFILESGATEWAY:.o)
 
 $(OBJDIR)/%.o: %.cpp
 	@mkdir -p $(@D)
@@ -222,6 +223,7 @@ $(BINDIR)/gateway : $(OBJFILESGATEWAY)
 
 clean:
 	rm -f $(OBJFILES) *~
+	rm -f $(OBJFILESGATEWAY) *~
 
 full:
 	clean

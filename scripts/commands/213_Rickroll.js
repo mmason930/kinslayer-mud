@@ -1,16 +1,16 @@
-var script213 = function(self, actor, here, args, extra) {
+let script213 = function(self, actor, here, args, extra) {
 	if( actor.level < 100 ) {
 		return;
 	}
 	_block;
-	var vArgs = getArgList( args );
+	let vArgs = getArgList( args );
 	if( vArgs.length < 2 ) {
 		actor.send("Rickroll whom?");
 		return;
 	}
-	var targetStr = vArgs[1];
-	var rickAstleyMobVnum = 9;
-	var target = actor.getCharVis(targetStr);
+	let targetStr = vArgs[1];
+	let rickAstleyMobVnum = 9;
+	let target = actor.getCharVis(targetStr);
 	if( !actor ) {
 		actor.send("Nobody is around by that name!");
 		return;
@@ -23,7 +23,7 @@ var script213 = function(self, actor, here, args, extra) {
 		act("$n " + message, false, actor, null, null, constants.TO_ROOM);
 		actor.send("You " + message);
 	}
-	var rickAstley = target.room.loadMob(rickAstleyMobVnum);
+	let rickAstley = target.room.loadMob(rickAstleyMobVnum);
 	rickAstley.room.echo("A catchy beat begins playing.");
 	mudLog(constants.CMP, 102, target.name + " just got rickroll'd by " + actor.name + "!");
 	wait 2;
@@ -33,7 +33,7 @@ var script213 = function(self, actor, here, args, extra) {
 	if( rickAstley.isValid )
 		fakeEmote(rickAstley, "dances a little strut.");
 	wait 3;
-	var lyrics = [];
+	let lyrics = [];
 	lyrics.push("We're no strangers to love.");
 	lyrics.push("You know the rules and so do I.");
 	lyrics.push("A full commitment's what I'm thinking of.");
@@ -58,15 +58,15 @@ var script213 = function(self, actor, here, args, extra) {
 	lyrics.push("We know the game and we're gonna play it.");
 	lyrics.push("I just wanna tell you how I'm feeling.");
 	lyrics.push("Gotta make you understand.");
-	for(var index = 0;index < lyrics.length;++index) {
-		if( rickAstley.isValid == false )
+	for(let index = 0;index < lyrics.length;++index) {
+		if(rickAstley.isValid === false)
 			break;
-		var line = lyrics[ index ];
+		let line = lyrics[ index ];
 		fakeEmote(rickAstley, "sings, '" + line + "'");
 		
 		wait 3;
 	}
-	if( rickAstley.isValid == true ) {
+	if(rickAstley.isValid === true) {
 		
 		fakeEmote(rickAstley, "takes a bow.");
 		

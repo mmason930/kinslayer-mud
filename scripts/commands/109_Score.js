@@ -48,7 +48,7 @@ let script109 = function(self, actor, here, args, extra) {
 		return vRankRequirements[ iCurrentRank ];
 	}
 	let vClans = actor.findClans();
-	if(typeof vClans == "number" && vClans != -1)
+	if(typeof vClans == "number" && vClans !== -1)
 		vClans = [vClans];
 	if( vClans.length ) {
 		sBuffer += "You are in the following clans:\n";

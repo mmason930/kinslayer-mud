@@ -1,19 +1,19 @@
-var script9 = function(self, actor, here, args, extra) {
+let script9 = function(self, actor, here, args, extra) {
 	_block;
 	getCharCols(actor);
 
-	var vArgs = getArgList(args);
+	let vArgs = getArgList(args);
 	vArgs.splice(0, 1);
-	var searchTerm = vArgs.join(" ");
-	var hideFooter = false;
+	let searchTerm = vArgs.join(" ");
+	let hideFooter = false;
 
 	if (searchTerm.length > 0) {
-		var file = global.helpManager.getSearchedFile(searchTerm);
+		let file = global.helpManager.getSearchedFile(searchTerm);
 		if (!file)
-			var msg = red + "Your search did not return any results. Showing Table of Contents:";
+			let msg = red + "Your search did not return any results. Showing Table of Contents:";
 		else {
-			var msg = bld + cyn + "Your search returned the following page:";
-			var id = file.id;
+			let msg = bld + cyn + "Your search returned the following page:";
+			let id = file.id;
 		}
 		actor.send(msg + nrm);
 		hideFooter = true;
