@@ -1,4 +1,4 @@
-var script635 = function(self, actor, here, args, extra) {
+let script635 = function(self, actor, here, args, extra) {
 	//Alder
 	//May 2010
 	/*****************************
