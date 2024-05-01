@@ -1,9 +1,9 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG GCC_THREADS
-ARG BOOST_VERSION="1_83_0"
-ARG BOOST_VERSION_DOT="1.83.0"
+ARG BOOST_VERSION="1_84_0"
+ARG BOOST_VERSION_DOT="1.84.0"
 
 # Install pre-requisites
 RUN apt update
