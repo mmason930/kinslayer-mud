@@ -939,8 +939,8 @@ void AuctionDispBrowseMenu( Descriptor *d )
 	const static int maxNameSize=45;
 	int firstItem = d->olc->auction_data->GetPage() * AuctionManager::ItemsPerPage
 		- AuctionManager::ItemsPerPage;
-	std::size_t lastItem = (firstItem + AuctionManager::ItemsPerPage);
-	lastItem = MIN(lastItem, d->olc->auction_data->aiCache.size()) - 1;
+	int lastItem = (firstItem + AuctionManager::ItemsPerPage);
+	lastItem = MIN(lastItem, (int)d->olc->auction_data->aiCache.size()) - 1;
 
 	get_char_cols(d->character);
 
