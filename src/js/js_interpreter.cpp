@@ -28,7 +28,7 @@ bool blocking=false;
 extern std::vector<Object*> obj_proto;
 extern int top_of_objt;
 
-JSBool kill_script(JSContext * cx);
+bool kill_script(JSContext * cx);
 void removeTimeoutHandler();
 void removeTimeout();
 void timeout_handler(int);
@@ -59,7 +59,7 @@ void printJSObject( flusspferd::object obj )
 	}
 }
 
-JSBool kill_script(JSContext * cx)
+bool kill_script(JSContext * cx)
 {
 #ifdef KJS_USE_TIMEOUT_SIGNALS
 //	std::cout << "kill_script() is running." << std::endl;
@@ -76,11 +76,11 @@ JSBool kill_script(JSContext * cx)
     if (end_time == 0) // no timer set up
     {//If we get here, then no timer is set up. This likely means that script limitation is disabled.
 	 //As such, we will merely tell SpiderMonkey to continue running the script.
-        return JS_TRUE;
+        return true;
     }
 	if( cx == 0 )
 	{//Context is invalid. Kill whatever script is running.
-		return JS_FALSE;
+		return false;
 	}
 
 	//Calculate the time at which the script should end.
@@ -90,19 +90,19 @@ JSBool kill_script(JSContext * cx)
 //  cout << "now: " << ms << " target: " << end_time << endl;
     if (ms < end_time)
     {//We still have time.
-        return JS_TRUE;
+        return true;
     }
     else
     {//Script has run too long. Kill it.
-        JS_ReportError(cx, "This trigger has run too long.");
-        return JS_FALSE;
+        JS_ReportErrorASCII(cx, "This trigger has run too long.");
+        return false;
     }
 #else
-	return JS_TRUE;
+	return true;
 #endif
 }
 
-JSBool kjsOperationalCallback(JSContext * cx)
+bool kjsOperationalCallback(JSContext * cx)
 {
 	scriptRuntimeClock.turnOff();
 	unsigned long long secondsElapsed = scriptRuntimeClock.getClocks() / 1000;
@@ -110,12 +110,12 @@ JSBool kjsOperationalCallback(JSContext * cx)
 
 	if(secondsElapsed >= TIMEOUT_SECONDS)
 	{
-        JS_ReportError(cx, "This trigger has run too long.");
-        return JS_FALSE;
+        JS_ReportErrorASCII(cx, "This trigger has run too long.");
+        return false;
 	}
 	else
 	{
-		return JS_TRUE;
+		return true;
 	}
 }
 
@@ -134,7 +134,8 @@ void triggerOperationalCallback(flusspferd::context context)
 
 		if(context.is_valid())
 		{
-			JS_TriggerOperationCallback(Impl::get_context(context));
+				//JS_TriggerOperationCallback(Impl::get_context(context));
+				JS_RequestInterruptCallback(Impl::get_context(context));
 		}
 
 		std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -208,7 +209,8 @@ JSEnvironment::JSEnvironment()
 
 //  cout << "JSCharacter size: " << sizeof(JSCharacter) << " JSRoom size: " << sizeof(JSRoom) << " JSObject size: " << sizeof(JSRoom) << "flusspferd::value size: " << sizeof(flusspferd::value) << endl;
 
-    JS_SetOperationCallback(Impl::get_context(current_context()), &kjsOperationalCallback);
+	//JS_SetOperationCallback(Impl::get_context(current_context()), &kjsOperationalCallback);
+    JS_AddInterruptCallback(Impl::get_context(current_context()), &kjsOperationalCallback);
     
 	triggerOperationalCallbackThread = std::thread( &triggerOperationalCallback, current_context() );
 
@@ -297,7 +299,8 @@ void JSEnvironment::timeout()
 {
 	JSContext *c = raw_context();
 	if( c ) {
-		JS_TriggerOperationCallback( c );
+		//JS_TriggerOperationCallback( c );
+		JS_RequestInterruptCallback( c );
 	}
 }
 
@@ -365,8 +368,9 @@ void setupTimeout( bool setScriptEndingTime )
 	    end_time = (tt.tv_sec*1000000) + (tt.tv_usec) + TIMEOUT - (TIMEOUT/5); // give ourselves some time to breathe
 	}
 
-    // this only matters when signals are enabled.
-    JS_SetOperationCallback(Impl::get_context(current_context()), &kill_script);
+	// this only matters when signals are enabled.
+	//JS_SetOperationCallback(Impl::get_context(current_context()), &kill_script);
+	JS_AddInterruptCallback(Impl::get_context(current_context()), &kill_script);
 #endif
 }
 

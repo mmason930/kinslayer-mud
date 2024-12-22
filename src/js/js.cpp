@@ -24,7 +24,7 @@
 #include "../SQLUtil.h"
 #include "../rooms/Room.h"
 
-#include <js/jsdbgapi.h>
+//#include <js/jsdbgapi.h>
 
 
 using namespace std;
@@ -967,24 +967,27 @@ void JSManager::deleteScriptFromDatabase(sql::Connection connection, int scriptI
 const char *JSManager::getFunctionFilename(const std::string &functionName)
 {
 	if(!flusspferd::global().has_property(functionName) || !flusspferd::global().get_property(functionName).is_function())
-		return NULL;
+		return nullptr;
 
 	JSContext *context = flusspferd::Impl::get_context(flusspferd::current_context());
 
-	if(context == NULL)
-		return NULL;
+	if(context == nullptr)
+		return nullptr;
 
-	JSObject *globalObject = JS_GetGlobalObject(context);
-	jsval methodValue;
-	JS_GetProperty(context, globalObject, functionName.c_str(), &methodValue);
+	//JSObject *globalObject = JS_GetGlobalObject(context);
+	JSObject *globalObject = JS::CurrentGlobalOrNull(context);
+	JS::Rooted<JSObject*> globalRooted(context, globalObject);
+	JS::RootedValue methodValue(context);
+	JS_GetProperty(context, globalRooted, functionName.c_str(), &methodValue);
 	JSFunction *function = JS_ValueToFunction(context, methodValue);
 	
-	if(function == NULL)
-		return NULL;
+	if(function == nullptr)
+		return nullptr;
 
-	JSScript *jsScript = JS_GetFunctionScript(context, function);
-	if(jsScript == NULL)
-		return NULL;
+	JS::RootedFunction rootedFunction(context, function);
+	JSScript *jsScript = JS_GetFunctionScript(context, rootedFunction);
+	if(jsScript == nullptr)
+		return nullptr;
 
-	return JS_GetScriptFilename(context, jsScript);
+	return JS_GetScriptFilename(jsScript);
 }
