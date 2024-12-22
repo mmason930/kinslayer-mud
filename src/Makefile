@@ -9,7 +9,8 @@ CC = g++
 MYFLAGS = \
 -O0 -std=c++20 -Wformat-security -Wformat -Wpointer-arith \
 -Wcast-align -Wredundant-decls -Wcatch-value -Werror \
--DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10
+-DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10 \
+-I/usr/local/include/js
 
 #-Werror
 
@@ -24,9 +25,16 @@ BINDIR = ../bin
 
 CPPFLAGS = -ggdb3 $(MYFLAGS) $(PROFILE)
 
+#LIBS = \
+#-lsqlDatabase -lflusspferd -lstdc++ -lboost_regex -lz \
+#-lmysqlclient -lboost_thread -lboost_filesystem -lcrypt -lmozjs-134a1 \
+#-lzerovec_derive-b4b971f67a2c069d -lserde_derive-07c3ed3723c33a44 -lyoke_derive-72e47a3559812f22 \
+#-ldiplomat-86acc469c03c5a9c -lzerofrom_derive-d83c5c4a405073a8 -ldisplaydoc-abd67e90224e4228 \
+#-l:libmozglue_static-cc03b01e5b38868e.rlib -licu_provider_macros-f0453bf7d6484ab3 -ljsrust -lwrappers -lpure_virtual -ljsrust -lssl -lcrypto -lboost_system -lpthread -ldl
+
 LIBS = \
--lsqlDatabase -lflusspferd -lstdc++ -lboost_regex -lmozjs \
--lmysqlclient -lboost_thread -lboost_filesystem -lcrypt \
+-lsqlDatabase -lflusspferd -lstdc++ -lboost_regex -lz \
+-lmysqlclient -lboost_thread -lboost_filesystem -lcrypt -lmozjs-135a1 \
 -lssl -lcrypto -lboost_system -lpthread -ldl
 
 OBJDIR = obj
