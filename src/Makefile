@@ -34,7 +34,7 @@ CPPFLAGS = -ggdb3 $(MYFLAGS) $(PROFILE)
 
 LIBS = \
 -lsqlDatabase -lflusspferd -lstdc++ -lboost_regex -lz \
--lmysqlclient -lboost_thread -lboost_filesystem -lcrypt -lmozjs-135a1 \
+-lmysqlclient -lboost_thread -lboost_filesystem -lcrypt -lmozjs \
 -lssl -lcrypto -lboost_system -lpthread -ldl
 
 OBJDIR = obj
