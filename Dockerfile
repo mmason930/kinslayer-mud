@@ -22,7 +22,7 @@ RUN wget https://hg.mozilla.org/mozilla-central/raw-file/default/python/mozboot/
 RUN python3 bootstrap.py --vcs=git --no-interactive --application-choice="SpiderMonkey JavaScript engine"
 WORKDIR /mozilla-unified
 RUN ./mach build
-RUN cp ./obj-x86_64-pc-linux-gnu/dist/bin/libmozjs-135a1.so /usr/local/lib/
+RUN cp ./obj-x86_64-pc-linux-gnu/dist/bin/libmozjs-*.so /usr/local/lib/libmozjs.so
 RUN mkdir /usr/local/include/js/
 RUN cp -Lr ./obj-x86_64-pc-linux-gnu/dist/include/* /usr/local/include/js
 #RUN git clone https://github.com/kinslayermud/kinslayer-spidermonkey /kinslayer-spidermonkey
