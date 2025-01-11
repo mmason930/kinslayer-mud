@@ -11,7 +11,7 @@ MYFLAGS = \
 -Wcast-align -Wredundant-decls -Wcatch-value -Werror \
 -DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10 \
 -DSPRINTF_H_USES_VSNPRINTF \
--I/usr/local/include/js
+-I./js -I/usr/local/include/js
 
 #-Werror
 
