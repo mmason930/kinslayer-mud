@@ -7,7 +7,7 @@ ARG BOOST_VERSION_DOT="1.84.0"
 
 # Install pre-requisites
 RUN apt update
-RUN apt install libmysqlclient-dev cmake g++ gcc wget git-all dos2unix python3 python3-pip -y
+RUN apt install libmysqlclient-dev cmake g++ gcc wget git-all dos2unix python3 python3-pip gdb nano -y
 
 # sqlDatabase
 RUN git clone https://github.com/kinslayermud/kinslayer-sqlDatabase /kinslayer-sqlDatabase

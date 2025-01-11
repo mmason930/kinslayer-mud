@@ -51,6 +51,8 @@ fi
 ### to modify this file will fail.
 echo "core.%p.%t" > /proc/sys/kernel/core_pattern
 
+sleep 1000000000
+
 ### Perform clean build if specified.
 if [[ "$FULL_PARTIAL" == "full" ]]; then
 	make clean -C /kinslayer/src
@@ -62,6 +64,7 @@ if [[ "$TARGET" == "kinslayer" ]]; then
 	make -C /kinslayer/src -j"$GCC_THREADS"
 	echo "Starting MUD..."
 	ldconfig
+	sleep 1000000000
 	./bin/kinslayer
 elif [[ "$TARGET" == "gateway" ]]; then
 	echo "Building gateway..."
@@ -69,6 +72,7 @@ elif [[ "$TARGET" == "gateway" ]]; then
 	make gateway -C /kinslayer/src -j"$GCC_THREADS"
 	echo "Starting gateway..."
 	ldconfig
+	sleep 1000000000
 	./bin/gateway
 else
 	echo "Invalid target."
