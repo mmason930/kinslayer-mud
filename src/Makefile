@@ -223,6 +223,7 @@ kinslayer:
 $(BINDIR)/kinslayer : $(OBJFILES)
 	$(CC) -o $(BINDIR)/kinslayer $(PROFILE) $(OBJFILES) $(LIBS)
 
+.PHONY: gateway
 gateway:
 	@mkdir -p ../bin
 	$(MAKE) $(BINDIR)/gateway
