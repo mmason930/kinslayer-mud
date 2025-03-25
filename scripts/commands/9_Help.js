@@ -6,14 +6,17 @@ let script9 = function(self, actor, here, args, extra) {
 	vArgs.splice(0, 1);
 	let searchTerm = vArgs.join(" ");
 	let hideFooter = false;
+	let id;
 
 	if (searchTerm.length > 0) {
 		let file = global.helpManager.getSearchedFile(searchTerm);
-		if (!file)
-			let msg = red + "Your search did not return any results. Showing Table of Contents:";
+		let msg;
+		let id;
+		if (!file) {
+			msg = red + "Your search did not return any results. Showing Table of Contents:";
+		}
 		else {
-			let msg = bld + cyn + "Your search returned the following page:";
-			let id = file.id;
+			msg = bld + cyn + "Your search returned the following page:";
 		}
 		actor.send(msg + nrm);
 		hideFooter = true;
