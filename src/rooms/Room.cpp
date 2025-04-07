@@ -187,7 +187,7 @@ bool Room::isDark()
 	else
 	{
 		Zone *MyZone = this->getZone();
-		if (MyZone == NULL)
+		if (MyZone == nullptr)
 		{
 			MudLog(CMP, LVL_GOD, TRUE, "Room %d has an invalid zone.", this->vnum);
 			dark = false;
