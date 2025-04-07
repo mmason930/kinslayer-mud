@@ -171,7 +171,7 @@ bool Room::isDark()
 	if (this->light)
 		return false;
 
-	else if (lampPresent == true)
+	else if (lampPresent)
 		dark = false;
 
 	else if (ROOM_FLAGGED(this, ROOM_DARK))
@@ -180,7 +180,11 @@ bool Room::isDark()
 	else if (ROOM_FLAGGED(this, ROOM_LIT))
 		dark = false;
 
-	else if (getSector() == RoomSector::inside)
+    else if(getSector() == RoomSector::inside) {
+        return false;
+    }
+
+	else
 	{
 		Zone *MyZone = this->getZone();
 		if (MyZone == NULL)
@@ -199,7 +203,6 @@ bool Room::isDark()
 			case SUN_LIGHT:
 			case SUN_RISE:
 				dark = false;
-				break;
 				break;
 			}
 		}
