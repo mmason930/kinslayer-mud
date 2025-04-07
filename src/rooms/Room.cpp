@@ -171,7 +171,7 @@ bool Room::isDark()
 	if (this->light)
 		return false;
 
-	else if (lampPresent == true)
+	else if (lampPresent)
 		dark = false;
 
 	else if (ROOM_FLAGGED(this, ROOM_DARK))
@@ -180,10 +180,14 @@ bool Room::isDark()
 	else if (ROOM_FLAGGED(this, ROOM_LIT))
 		dark = false;
 
-	else if (getSector() == RoomSector::inside)
+	else if(getSector() == RoomSector::inside) {
+		return false;
+	}
+
+	else
 	{
 		Zone *MyZone = this->getZone();
-		if (MyZone == NULL)
+		if (MyZone == nullptr)
 		{
 			MudLog(CMP, LVL_GOD, TRUE, "Room %d has an invalid zone.", this->vnum);
 			dark = false;
@@ -199,7 +203,6 @@ bool Room::isDark()
 			case SUN_LIGHT:
 			case SUN_RISE:
 				dark = false;
-				break;
 				break;
 			}
 		}
