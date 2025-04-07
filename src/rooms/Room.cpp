@@ -180,9 +180,9 @@ bool Room::isDark()
 	else if (ROOM_FLAGGED(this, ROOM_LIT))
 		dark = false;
 
-    else if(getSector() == RoomSector::inside) {
-        return false;
-    }
+	else if(getSector() == RoomSector::inside) {
+		return false;
+	}
 
 	else
 	{
