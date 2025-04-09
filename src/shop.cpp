@@ -128,6 +128,7 @@ std::vector<ShopItemEntry> getShopItemEntries(Character *ch, Character *keeper, 
 			shopItemEntry.obj = obj;
 			shopItemEntry.cost = obj->obj_flags.cost;
 			shopItemEntries.push_back(shopItemEntry);
+			objectIdToShopItemEntryMap[shopItemEntry.obj->getVnum()] = shopItemEntry;
 		}
 	}
 
@@ -141,6 +142,7 @@ std::vector<ShopItemEntry> getShopItemEntries(Character *ch, Character *keeper, 
 				shopItemEntry.obj = obj;
 				shopItemEntry.cost = obj->obj_flags.cost;
 				shopItemEntries.push_back(shopItemEntry);
+				objectIdToShopItemEntryMap[shopItemEntry.obj->getVnum()] = shopItemEntry;
 			} else if(matchingIter->second.numberAvailable != -1) {
 				++matchingIter->second.numberAvailable;
 			}
