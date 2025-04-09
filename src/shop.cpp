@@ -31,6 +31,9 @@
 #include "Descriptor.h"
 #include "rooms/Room.h"
 
+#include <map>
+#include <vector>
+
 #include "commands/infrastructure/CommandInfo.h"
 
 #include "items/ItemUtil.h"
@@ -43,8 +46,6 @@ extern const char *drinks[];
 extern const char *item_types[];
 extern const char *extra_bits[];
 
-// Forward/External function declarations
-void sort_keeper_objs(Character * keeper, int shop_nr);
 
 // Local variables
 Shop *shop_index;
@@ -56,9 +57,8 @@ void shopping_list(char *arg, Character * ch, Character * keeper, int shop_nr);
 void shopping_value(char *arg, Character * ch, Character * keeper, int shop_nr);
 void shopping_sell(char *arg, Character * ch, Character * keeper, int shop_nr);
 Object *get_selling_obj(Character * ch, char *name, Character * keeper, int shop_nr, int msg);
-Object *slide_obj(Object * obj, Character * keeper, int shop_nr);
 void shopping_buy(char *arg, Character * ch, Character * keeper, int shop_nr);
-Object *get_purchase_obj(Character * ch, char *arg, Character * keeper, int shop_nr, int msg);
+Object *get_purchase_obj(Character * ch, char *arg, Character * keeper, int shop_nr, const std::vector<struct ShopItemEntry> &shopItemEntries, int msg);
 Object *get_hash_obj_vis(Character * ch, char *name, Object * listy);
 Object *get_slide_obj_vis(Character * ch, char *name, Object * listy);
 void boot_the_shops();
@@ -71,12 +71,6 @@ void show_shops(Character * ch, char *arg);
 int is_ok_char(Character * keeper, Character * ch, int shop_nr);
 int is_open(Character * keeper, int shop_nr, int msg);
 int is_ok(Character * keeper, Character * ch, int shop_nr);
-void push(struct stack_data * stack, int pushval);
-int top(struct stack_data * stack);
-int pop(struct stack_data * stack);
-void evaluate_operation(struct stack_data * ops, struct stack_data * vals);
-int find_oper_num(char token);
-int evaluate_expression(Object * obj, char *expr);
 int trade_with(Object * item, int shop_nr);
 int same_obj(Object * obj1, Object * obj2);
 int shop_producing(Object * item, int shop_nr);
@@ -87,19 +81,6 @@ int sell_price(Character * ch, Object * obj, int shop_nr);
 char *list_object(Character *ch, Object * obj, int cnt, int index, int shop_nr);
 int ok_shop_room(int shop_nr, int room);
 SPECIAL(shop_keeper);
-int ok_damage_shopkeeper(Character * ch, Character * victim);
-void read_line(FILE * shop_f, const char *string, void *data);
-
-
-// config arrays
-const char *operator_str[] =
-    {
-        "[({",
-        "])}",
-        "|+",
-        "&*",
-        "^'"
-    } ;
 
 // Constant list for printing out who we sell to
 const char *trade_letters[] =
@@ -121,6 +102,55 @@ const char *shop_bits[] =
         "USES_BANK",
         "\n"
     };
+
+struct ShopItemEntry {
+public:
+	int listItemNumber;
+	int numberAvailable;
+	Object *obj;
+	int cost;
+};
+
+std::vector<ShopItemEntry> getShopItemEntries(Character *ch, Character *keeper, int shopId) {
+	std::map<int, ShopItemEntry> objectIdToShopItemEntryMap;
+	std::vector<ShopItemEntry> shopItemEntries;
+
+	// Go through producing first.
+	for (int producingIndex = 0; producingIndex < shop_index[shopId].producing.size(); ++producingIndex) {
+
+		int producingVnum = shop_index[shopId].producing[producingIndex];
+		Object *obj = obj_proto[shop_index[shopId].producing[producingIndex]];
+
+		if(GET_OBJ_COST(obj) > 0) {
+			ShopItemEntry shopItemEntry;
+			shopItemEntry.listItemNumber = shopItemEntries.size() + 1;
+			shopItemEntry.numberAvailable = -1;
+			shopItemEntry.obj = obj;
+			shopItemEntry.cost = obj->obj_flags.cost;
+			shopItemEntries.push_back(shopItemEntry);
+			objectIdToShopItemEntryMap[shopItemEntry.obj->getVnum()] = shopItemEntry;
+		}
+	}
+
+	for (Object *obj = keeper->carrying; obj; obj = obj->next_content) {
+		if (CAN_SEE_OBJ(ch, obj) && GET_OBJ_COST(obj) > 0) {
+			auto matchingIter = objectIdToShopItemEntryMap.find(obj->getVnum());
+			if(matchingIter == objectIdToShopItemEntryMap.end()) {
+				ShopItemEntry shopItemEntry;
+				shopItemEntry.listItemNumber = shopItemEntries.size() + 1;
+				shopItemEntry.numberAvailable = 1;
+				shopItemEntry.obj = obj;
+				shopItemEntry.cost = obj->obj_flags.cost;
+				shopItemEntries.push_back(shopItemEntry);
+				objectIdToShopItemEntryMap[shopItemEntry.obj->getVnum()] = shopItemEntry;
+			} else if(matchingIter->second.numberAvailable != -1) {
+				++matchingIter->second.numberAvailable;
+			}
+		}
+	}
+
+	return shopItemEntries;
+}
 
 CommandHandler do_slist = DEFINE_COMMAND
 {
@@ -205,62 +235,6 @@ int is_ok(Character * keeper, Character * ch, int shop_nr)
 		return (FALSE);
 }
 
-
-void push(struct stack_data * stack, int pushval)
-{
-	S_DATA(stack, S_LEN(stack)++) = pushval;
-}
-
-
-int top(struct stack_data * stack)
-{
-	if (S_LEN(stack) > 0)
-		return (S_DATA(stack, S_LEN(stack) - 1));
-
-	else
-		return (NOTHING);
-}
-
-
-int pop(struct stack_data * stack)
-{
-	if (S_LEN(stack) > 0)
-		return (S_DATA(stack, --S_LEN(stack)));
-
-	else
-	{
-		Log("Illegal expression %d in shop keyword list.", S_LEN(stack));
-		return (0);
-	}
-}
-
-
-void evaluate_operation(struct stack_data * ops, struct stack_data * vals)
-{
-	int oper;
-
-	if ((oper = pop(ops)) == OPER_NOT)
-		push(vals, !pop(vals));
-
-	else if (oper == OPER_AND)
-		push(vals, pop(vals) && pop(vals));
-
-	else if (oper == OPER_OR)
-		push(vals, pop(vals) || pop(vals));
-}
-
-
-int find_oper_num(char token)
-{
-	int index;
-
-	for (index = 0; index <= MAX_OPER; index++)
-		if (strchr(operator_str[index], token))
-			return (index);
-
-	return (NOTHING);
-}
-
 bool ShopTradeObjByName(Object *obj, char *expr)
 {
 	char expr_cpy[MAX_INPUT_LENGTH], name_cpy[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
@@ -278,89 +252,6 @@ bool ShopTradeObjByName(Object *obj, char *expr)
 
 	return false;
 }
-
-int evaluate_expression(Object * obj, char *expr)
-{
-	struct stack_data ops, vals;
-	char *ptr, *end, name[200];
-	int temp, index;
-
-	if (!expr)
-		return TRUE;
-
-	if (!isalpha(*expr))
-		return TRUE;
-
-	ops.len = vals.len = 0;
-	ptr = expr;
-
-	while (*ptr)
-	{
-
-		if (isspace(*ptr))
-			++ptr;
-
-		else
-		{
-			if ((temp = find_oper_num(*ptr)) == NOTHING)
-			{
-				end = ptr;
-
-				while (*ptr && !isspace(*ptr) && (find_oper_num(*ptr) == NOTHING))
-					++ptr;
-
-				strncpy(name, end, ptr - end);
-				name[ptr - end] = 0;
-
-				for (index = 0; *extra_bits[index] != '\n'; ++index)
-					if (!str_cmp(name, extra_bits[index]))
-					{
-						push(&vals, IS_SET(GET_OBJ_EXTRA(obj), 1 << index));
-						break;
-					}
-
-				if (*extra_bits[index] == '\n')
-					push(&vals, isname(name, obj->name));
-			}
-
-			else
-			{
-				if (temp != OPER_OPEN_PAREN)
-					while (top(&ops) > temp)
-						evaluate_operation(&ops, &vals);
-
-
-				if (temp == OPER_CLOSE_PAREN)
-				{
-					if ((temp = pop(&ops)) != OPER_OPEN_PAREN)
-					{
-						Log("Illegal parenthesis in shop keyword expression.");
-						return (FALSE);
-					}
-				}
-
-				else
-					push(&ops, temp);
-
-				ptr++;
-			}
-		}
-	}
-
-	while (top(&ops) != NOTHING)
-		evaluate_operation(&ops, &vals);
-
-	temp = pop(&vals);
-
-	if (top(&vals) != NOTHING)
-	{
-		Log("Extra operands left on shop keyword expression stack.");
-		return (FALSE);
-	}
-
-	return (temp);
-}
-
 
 int trade_with(Object * item, int shop_nr)
 {
@@ -463,59 +354,55 @@ char *times_message(Object *obj, char *name, int num)
 	return (buf);
 }
 
-Object *get_slide_obj_vis(Character * ch, char *name, Object * listy)
+Object *get_slide_obj_vis(Character * ch, char *name, const std::vector<ShopItemEntry> &shopItemEntries)
 {
-	Object *i = 0, *last_match = 0;
-	int j = 0, num = 0;
 	char tmpname[MAX_INPUT_LENGTH];
 	char *tmp;
+	int num;
 
 	strcpy(tmpname, name);
 	tmp = tmpname;
 
 	if (!(num = GetNumber(&tmp)))
-		return (0);
+		return nullptr;
 
-	for (i = listy, j = 1; i && (j <= num); i = i->next_content)
-	{
-		if (isname(tmp, i->name) && CAN_SEE_OBJ(ch, i) && !same_obj(last_match, i))
-		{
-			if (j == num)
-				return (i);
+	for(auto shopItemEntry: shopItemEntries) {
+		if (isname(tmp, shopItemEntry.obj->name) && (shopItemEntry.numberAvailable == -1 || CAN_SEE_OBJ(ch, shopItemEntry.obj))) {
+			--num;
 
-			last_match = i;
-			++j;
+			if(num <= 0) {
+				return shopItemEntry.obj;
+			}
 		}
 	}
-	return (0);
+	return nullptr;
 }
 
-Object *get_hash_obj_vis(Character * ch, char *name, Object * listy)
+Object *get_hash_obj_vis(Character * ch, char *name, const std::vector<ShopItemEntry> &shopItemEntries)
 {
 	Object *loop, *last_obj = 0;
 	int index;
 
-	if ((IsNumber(name + 1)))
-		index = atoi(name + 1);
+	if ((IsNumber(name + 1))) {
+		index = atoi(name + 1) -1;
+	} else {
+		return nullptr;
+	}
 
-	else
-		return (0);
+	if(index < 0 || index >= shopItemEntries.size()) {
+		return nullptr;
+	}
 
-	for (loop = listy; loop; loop = loop->next_content)
-		if (CAN_SEE_OBJ(ch, loop) && (loop->obj_flags.cost > 0))
-			if (!same_obj(last_obj, loop))
-			{
-				if (--index == 0)
-					return (loop);
+	Object *obj = shopItemEntries[index].obj;
+	if(shopItemEntries[index].numberAvailable == -1 || CAN_SEE_OBJ(ch, obj)) {
+		return obj;
+	}
 
-				last_obj = loop;
-			}
-
-	return (0);
+	return nullptr;
 }
 
 
-Object *get_purchase_obj(Character *ch, char *arg, Character *keeper, int shop_nr, int msg)
+Object *get_purchase_obj(Character *ch, char *arg, Character *keeper, int shop_nr, const std::vector<ShopItemEntry> &shopItemEntries, int msg)
 {
 	char buf[MAX_STRING_LENGTH], name[MAX_INPUT_LENGTH];
 	Object *obj;
@@ -524,9 +411,9 @@ Object *get_purchase_obj(Character *ch, char *arg, Character *keeper, int shop_n
 	do
 	{
 		if(*name == '#')
-			obj = get_hash_obj_vis(ch, name, keeper->carrying);
+			obj = get_hash_obj_vis(ch, name, shopItemEntries);
 		else
-			obj = get_slide_obj_vis(ch, name, keeper->carrying);
+			obj = get_slide_obj_vis(ch, name, shopItemEntries);
 		if (!obj)
 		{
 			if(msg)
@@ -535,11 +422,6 @@ Object *get_purchase_obj(Character *ch, char *arg, Character *keeper, int shop_n
 				do_tell(keeper, buf, cmd_tell, 0);
 			}
 			return (0);
-		}
-		if (GET_OBJ_COST(obj) <= 0)
-		{
-			obj->Extract(true);
-			obj = 0;
 		}
 	}
 	while (!obj);
@@ -562,9 +444,6 @@ void shopping_buy(char *arg, Character *ch, Character *keeper, int shop_nr)
 	if (!(is_ok(keeper, ch, shop_nr)))
 		return;
 
-	if (SHOP_SORT(shop_nr) < IS_CARRYING_N(keeper))
-		sort_keeper_objs(keeper, shop_nr);
-
 	if ((buynum = transaction_amt(arg)) < 0)
 	{
 		sprintf(buf, "%s A negative amount?  Try selling me something.", GET_NAME(ch));
@@ -579,7 +458,9 @@ void shopping_buy(char *arg, Character *ch, Character *keeper, int shop_nr)
 		return;
 	}
 
-	if (!(obj = get_purchase_obj(ch, arg, keeper, shop_nr, TRUE)))
+	std::vector<ShopItemEntry> shopItemEntries = getShopItemEntries(ch, keeper, shop_nr);
+
+	if (!(obj = get_purchase_obj(ch, arg, keeper, shop_nr, shopItemEntries, TRUE)))
 		return;
 
 	if ((buy_price(obj, shop_nr) > ch->points.gold) && !IS_GOD(ch))
@@ -589,7 +470,6 @@ void shopping_buy(char *arg, Character *ch, Character *keeper, int shop_nr)
 
 		switch (SHOP_BROKE_TEMPER(shop_nr))
 		{
-
 			case 0:
 				do_action(keeper, (char*)GET_NAME(ch), cmd_puke, 0);
 				return;
@@ -636,6 +516,7 @@ void shopping_buy(char *arg, Character *ch, Character *keeper, int shop_nr)
 		{
 			obj_from_char(obj);
 			--SHOP_SORT(shop_nr);
+			shopItemEntries = getShopItemEntries(ch, keeper, shop_nr);
 		}
 
 		obj_to_char(obj, ch);
@@ -645,7 +526,7 @@ void shopping_buy(char *arg, Character *ch, Character *keeper, int shop_nr)
 			ch->points.gold -= buy_price(obj, shop_nr);
 
 		last_obj = obj;
-		obj = get_purchase_obj(ch, arg, keeper, shop_nr, FALSE);
+		obj = get_purchase_obj(ch, arg, keeper, shop_nr, shopItemEntries, FALSE);
 
 		if (!same_obj(obj, last_obj))
 			break;
@@ -723,86 +604,10 @@ int sell_price(Character * ch, Object * obj, int shop_nr)
 	return ((int) (GET_OBJ_COST(obj) * SHOP_SELLPROFIT(shop_nr)));
 }
 
-
-Object *slide_obj(Object * obj, Character * keeper, int shop_nr)
-/*
-   This function is a slight hack!  To make sure that duplicate items are
-   only listed once on the "list", this function groups "identical"
-   objects together on the shopkeeper's inventory list.  The hack involves
-   knowing how the list is put together, and manipulating the order of
-   the objects on the list.  (But since most of DIKU is not encapsulated,
-   and information hiding is almost never used, it isn't that big a deal) -JF
-*/
-{
-	Object *loop;
-	int temp;
-
-	if (SHOP_SORT(shop_nr) < IS_CARRYING_N(keeper))
-		sort_keeper_objs(keeper, shop_nr);
-
-	// Extract the object if it is identical to one produced
-	if (shop_producing(obj, shop_nr))
-	{
-		temp = GET_OBJ_RNUM(obj);
-		obj->Extract(true);
-		return (obj_proto[temp]);
-	}
-
-	++SHOP_SORT(shop_nr);
-	loop = keeper->carrying;
-	obj_to_char(obj, keeper);
-	keeper->carrying = loop;
-
-	while (loop)
-	{
-		if (same_obj(obj, loop))
-		{
-			obj->next_content = loop->next_content;
-			loop->next_content = obj;
-			return (obj);
-		}
-
-		loop = loop->next_content;
-	}
-
-	keeper->carrying = obj;
-	return (obj);
-}
-
-
-void sort_keeper_objs(Character *keeper, int shop_nr)
-{
-	Object *list = 0, *temp;
-
-	while (SHOP_SORT(shop_nr) < IS_CARRYING_N(keeper))
-	{
-		temp = keeper->carrying;
-		obj_from_char(temp);
-		temp->next_content = list;
-		list = temp;
-	}
-
-	while (list)
-	{
-		temp = list;
-		list = list->next_content;
-
-		if ((shop_producing(temp, shop_nr)) && !(ItemUtil::get()->getObjectInListByRealNumber(GET_OBJ_RNUM(temp), keeper->carrying)))
-		{
-
-			obj_to_char(temp, keeper);
-			SHOP_SORT(shop_nr)++;
-		}
-
-		else
-			(void) slide_obj(temp, keeper, shop_nr);
-	}
-}
-
 void shopping_sell(char *arg, Character *ch, Character *keeper, int shop_nr)
 {
 	char tempstr[200], buf[MAX_STRING_LENGTH], name[MAX_INPUT_LENGTH];
-	Object *obj, *tag = 0;
+	Object *obj;
 	int sellnum, sold = 0, goldamt = 0;
 
 	if (!(is_ok(keeper, ch, shop_nr)))
@@ -842,7 +647,6 @@ void shopping_sell(char *arg, Character *ch, Character *keeper, int shop_nr)
 		keeper->points.gold -= sell_price(ch, obj, shop_nr);
 
 		obj_from_char(obj);
-		tag = slide_obj(obj, keeper, shop_nr);
 		obj = get_selling_obj(ch, name, keeper, shop_nr, FALSE);
 	}
 
@@ -904,7 +708,7 @@ char *list_object(Character *ch, Object * obj, int cnt, int index, int shop_nr)
 	static char buf[512];
 	char buf2[300], buf3[200];
 
-	if (shop_producing(obj, shop_nr))
+	if (cnt == -1)
 		strcpy(buf2, "Unlimited   ");
 	else
 		sprintf(buf2, "%5d       ", cnt);
@@ -924,60 +728,38 @@ char *list_object(Character *ch, Object * obj, int cnt, int index, int shop_nr)
 			sprintf(END_OF(buf3), " of %s", drinks[liquidType]);
 	}
 
-	/* FUTURE: */
-	/* Add glow/hum/etc */
-
 	sprintf(buf2, "%-46s %-2lu %-2lu %-2lu\r\n", buf3, CalcGold(buy_price(obj, shop_nr)),
 	        CalcSilver(buy_price(obj, shop_nr)), CalcCopper(buy_price(obj, shop_nr)));
 	strcat(buf, StringUtil::cap(buf2));
 	return (buf);
 }
 
-void shopping_list(char *arg, Character *ch, Character *keeper, int shop_nr)
+void shopping_list(char *arg, Character *ch, Character *keeper, int shopId)
 {
 	char buf[MAX_STRING_LENGTH], name[MAX_INPUT_LENGTH];
 	Object *obj, *last_obj = 0;
 	int cnt = 0, index = 0;
 
-	if (!(is_ok(keeper, ch, shop_nr)))
+	if (!(is_ok(keeper, ch, shopId)))
 		return;
-
-	if (SHOP_SORT(shop_nr) < IS_CARRYING_N(keeper))
-		sort_keeper_objs(keeper, shop_nr);
 
 	OneArgument(arg, name);
 	strcpy(buf, " ##   Available   Item                                           G  S  C\r\n");
 	strcat(buf, "-------------------------------------------------------------------------\r\n");
 
-	if (keeper->carrying)
-		for (obj = keeper->carrying; obj; obj = obj->next_content)
-			if (CAN_SEE_OBJ(ch, obj) && (obj->obj_flags.cost > 0))
-			{
+	auto shopItemEntries = getShopItemEntries(ch, keeper, shopId);
+	int counter = 0;
 
-				if (!last_obj)
-				{
-					last_obj = obj;
-					cnt = 1;
-				}
-
-				else if (same_obj(last_obj, obj))
-					++cnt;
-
-				else
-				{
-					++index;
-
-					if (!(*name) || isname(name, last_obj->name))
-						strcat(buf, list_object(ch, last_obj, cnt, index, shop_nr));
-
-					cnt = 1;
-					last_obj = obj;
-				}
-			}
+	for(auto itemEntry: shopItemEntries) {
+		++counter;
+		if (!(*name) || isname(name, itemEntry.obj->name)) {
+			strcat(buf, list_object(ch, itemEntry.obj, itemEntry.numberAvailable, counter, shopId));
+		}
+	}
 
 	++index;
 
-	if (!last_obj)
+	if (shopItemEntries.empty())
 	{
 
 		if (*name)
@@ -986,9 +768,6 @@ void shopping_list(char *arg, Character *ch, Character *keeper, int shop_nr)
 		else
 			strcpy(buf, "Currently, there is nothing for sale.\r\n");
 	}
-
-	else if (!(*name) || isname(name, last_obj->name))
-		strcat(buf, list_object(ch, last_obj, cnt, index, shop_nr));
 
 	page_string(ch->desc, buf, 1);
 }
@@ -1070,34 +849,6 @@ SPECIAL(shop_keeper)
 	}
 
 	return (FALSE);
-}
-
-
-int ok_damage_shopkeeper(Character *ch, Character *victim)
-{
-	char buf[200];
-	int index;
-
-	if (IS_MOB(victim) && (MobManager::GetManager().GetIndex((u_int)victim->nr)->func == shop_keeper))
-		for (index = 0; index < top_shop; index++)
-			if ((GET_MOB_RNUM(victim) == SHOP_KEEPER(index)) && !SHOP_KILL_CHARS(index))
-			{
-				do_action(victim, (char*)GET_NAME(ch), cmd_slap, 0);
-				sprintf(buf, "%s %s", GET_NAME(ch), MSG_CANT_KILL_KEEPER);
-				do_tell(victim, buf, cmd_tell, 0);
-				return (FALSE);
-			}
-
-	return (TRUE);
-}
-
-void read_line(FILE * shop_f, const char *str, void *data)
-{
-	if (!get_line(shop_f, buf) || !sscanf(buf, str, data))
-	{
-		Log("SYSERR: Error in shop #%d\n", SHOP_NUM(top_shop));
-		exit(1);
-	}
 }
 
 void Shop::BootTypes( FILE* file )
