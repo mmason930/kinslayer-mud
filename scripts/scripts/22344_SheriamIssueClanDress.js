@@ -3,7 +3,6 @@ var script22344 = function(self, actor, here, args, extra) {
 	//October 2010
 	//CLAN: White Tower
 	//Edit as you see fit.
-	getRoom(22344).echo("Test");
 	var rank = actor.getRank(16);
 	if( actor.inClan(16) && rank < 5) {
 	     if ( rank <= 2 ) {
