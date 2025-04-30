@@ -60,7 +60,7 @@ Object *Room::findFirstObject(const std::function<bool(class Object *obj)> &pred
 
 bool Room::isTrackable()
 {
-	return (this->getSector() == RoomSector::inside && !ROOM_FLAGGED(this, ROOM_NOTRACK));
+	return (this->getSector() != RoomSector::inside && !ROOM_FLAGGED(this, ROOM_NOTRACK));
 }
 
 std::string Room::getDisplayableId()
