@@ -72,7 +72,7 @@ let script635 = function(self, actor, here, args, extra) {
 			if ( arrContains(legends,player.name) ) {
 				legOnline = true;
 			}
-			else if ( player.race === constants.RACE_TROLLOC ) {
+			if ( player.race === constants.RACE_TROLLOC ) {
 				ds.push(player);
 			}
 			else if ( player.race === constants.RACE_HUMAN ) {
