@@ -175,7 +175,7 @@ void AuctionManager::UpdateAuctions()
 	try {
 		//Select all auctions that have expired.
 		QueryBuffer << "SELECT ai.*,"
-			<< " (SELECT ab.bidder_id FROM auctionBid ab WHERE ab.auction_id=ai.auction_id"
+			<< " (SELECT ab.bidder_id FROM auctionBid ab WHERE ab.ai_id=ai.id"
 			<< " ORDER BY ab.bid_amount DESC LIMIT 1) AS winner_id"
 			<< " FROM auctionItem ai"
 			<< " WHERE ai.end_time <= '" << curTime << "' AND ai.active='1';";
