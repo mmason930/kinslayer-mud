@@ -519,3 +519,7 @@ JSCharacter.prototype.checkTitle = function ( strTitle ) {
 	}
 	return false;
 };
+
+JSCharacter.prototype.isMob = function() {
+	return this.vnum !== -1;
+}
