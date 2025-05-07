@@ -16,7 +16,7 @@ var script22814 = function(self, actor, here, args, extra) {
 			(!str_cmp(vArgs[7],"test") || !str_cmp(vArgs[7],"test."))
 		) {
 			let noviceName = vArgs[2];
-			self.comm("narrate " + capFirstLetter(name.toLowerCase()) + ", you are summoned to the Hall of the White Tower. The Light keep you whole and see you safe.");
+			self.comm("narrate " + capFirstLetter(noviceName.toLowerCase()) + ", you are summoned to the Hall of the White Tower. The Light keep you whole and see you safe.");
 		}
 	}
 }

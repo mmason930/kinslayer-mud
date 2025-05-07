@@ -294,6 +294,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 	let tvRoad        = [8,5,""   ,"|"  ,19];
 	let sTV           = [7,6,(actor.room.zoneVnum === 12 ? "" : "   "),"  .",82];
 	let TV            = [8,6,""   ,"TV" ,(actor.room.zoneVnum === 223 ? 223 : 213), cyn];
+	let aridhol       = [2,6," ,--", "'",24];
 	let tvRoad2       = [8,6,"  |","'",19];
 	let tvProp        = [9,6,"*  ","   ",334, ( getManor(getRoom(33401)).ownerUserId === 0 ? bld : ( getManor(getRoom(33401)).race === 1 ? red : cyn ) )];
 	let FM            = [9,5,"FM" ,"   ",103, cyn];
@@ -340,16 +341,15 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 	let leg12         = [12,12,"on/","   ",-1,bld];
 	let leg13         = [13,12,"off","   ",-1,bld];
 	let leg14         = [14,12,".  ","   ",-1,bld];
-	let rooms = [name, name2, name3, name4, name5, name6, hold, stoneRoad, stoneRoadProp, stoneRoad2, keep, nKeep, sKeep, sKeep2, gapProp, gap, niamh, niamh3, niamh2, niamhOgier, nFD, wFD, nFM, FD, wFM, nFM2, wFM2, FM, tvRoad, sTV, TV, tvRoad2, tvProp, FK2, FK, caemRoad, lowCaem, caem, caem2, lowCaem2, sTV2, aRoad, aRoad2, AR, lugRoad, sCaem, sCaem2, LG, sLG, nFarMadding, blackTower, wFK, WB, wFK2, nWB, wWB, wWB2, BR, nRoad, nRoad2, EF, EF2, leg1, leg2, leg3, leg4, leg5, leg6, leg7, leg8, leg9, leg10, leg11, leg12, leg13, leg14];
-	for (let _autoKey in rooms) {
-		let r = rooms[_autoKey];
-		//here.echo(actor.room.vnum);
-		if (actor.room.zoneVnum == r[4])
-		{
-			var actor_room = [r[0],r[1]];
-			//here.echo(actor_room);
-		}
-	}
+	let rooms = [
+		name, name2, name3, name4, name5, name6, hold, stoneRoad, stoneRoadProp, stoneRoad2,
+		keep, nKeep, sKeep, sKeep2, gapProp, gap, niamh, niamh3, niamh2, niamhOgier, nFD, wFD,
+		nFM, FD, wFM, nFM2, wFM2, FM, aridhol, tvRoad, sTV, TV, tvRoad2, tvProp, FK2, FK, caemRoad,
+		lowCaem, caem, caem2, lowCaem2, sTV2, aRoad, aRoad2, AR, lugRoad, sCaem, sCaem2,
+		LG, sLG, nFarMadding, blackTower, wFK, WB, wFK2, nWB, wWB, wWB2, BR, nRoad, nRoad2,
+		EF, EF2, leg1, leg2, leg3, leg4, leg5, leg6, leg7, leg8, leg9, leg10, leg11, leg12,
+		leg13, leg14
+	];
 	let aMob = getMobAtRoom(20800, 20804);
 	let damaneZones = [];
 	if(aMob) {
@@ -364,7 +364,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 	}
 	//sendKoradin("koradin test: zones: "+damaneZones.join(" "));
 	let buffer = "";
-	if (actor.quest("MapLegend") !== 2 || bool == true)
+	if (actor.quest("MapLegend") !== 2 || bool)
 		var limit = 13;
 	else
 		var limit = 9;
@@ -384,21 +384,21 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 				}else{
 					var hlColor = nrm;
 				}
-				if (x == 7 && y == 6 && actor.room.zoneVnum == 12 && count < 1) {
+				if (x === 7 && y === 6 && actor.room.zoneVnum === 12 && count < 1) {
 					buffer += yel+bld+"  X"+nrm;
 					count += 1;
 				}
-				if (actor.room.zoneVnum == r[4])
+				if (actor.room.zoneVnum === r[4])
 				{
-					if (r[0] == x && r[1] == y) {
+					if (r[0] === x && r[1] === y) {
 						var city = false;
 						for (var i=0;i<3;i++) {
 							if (r[2].charCodeAt(i) > 64 && r[2].charCodeAt(i) < 91) {
 								city = true;
 							}
 						}
-						if (city == false) {
-							if (r[2] == "   " && r[3] == "   " && r[6] != null) {
+						if (!city) {
+							if (r[2] === "   " && r[3] === "   " && r[6] != null) {
 								buffer += bld+yel+r[6]+nrm;
 								duplicateX = true;
 							}
@@ -418,7 +418,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 						city = false;
 					}
 				}
-				else if (r[0] == x && r[1] == y)
+				else if (r[0] === x && r[1] === y)
 				{
 					buffer += hlColor + r[2] + nrm;
 					count += 1;
@@ -460,9 +460,6 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 		//Bottom line
 		for (let x = 0; x <= 15; ++x)
 		{
-			// var coor = [];
-			// coor.push(x);
-			// coor.push(y);
 			for (let _autoKey in rooms) {
 				let r = rooms[_autoKey];
 				if(arrContains(damaneZones,r[4]) && questIsOn){
@@ -505,7 +502,7 @@ HelpManager.prototype.getWorldMap = function(actor, bool)
 						city = false;
 					}
 				}
-				else if (r[0] == x && r[1] == y)
+				else if (r[0] === x && r[1] === y)
 				{
 					buffer += hlColor + r[3] + nrm;
 					count += 1;
