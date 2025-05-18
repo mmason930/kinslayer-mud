@@ -22,6 +22,7 @@
 #include "../Descriptor.h"
 #include "../CharacterUtil.h"
 #include "../rooms/Room.h"
+#include "../zones.h"
 
 
 extern const int rev_dir[];
@@ -1100,9 +1101,17 @@ void JS_mudLog( int type, int lvl, flusspferd::string str )
 }
 flusspferd::value JS_getRoomByRnum( int rnum )
 {
-	if( rnum >= 0 && rnum < World.size() )
-		return lookupValue( World[rnum] );
-	return lookupValue( 0 );
+        if( rnum >= 0 && rnum < World.size() )
+                return lookupValue( World[rnum] );
+        return lookupValue( 0 );
+}
+
+flusspferd::value JS_getZone( int vnum )
+{
+        Zone *zone = ZoneManager::GetManager().GetZoneByVnum(vnum);
+        if(!zone)
+                return flusspferd::object();
+        return lookupValue(zone);
 }
 
 void JS_fwrite( flusspferd::string fileName, flusspferd::string str )

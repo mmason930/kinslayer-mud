@@ -144,18 +144,20 @@ void triggerOperationalCallback(flusspferd::context context)
 JSEnvironment::JSEnvironment()
     : context_scope(context::create())
 {
-	LoadJSCharacter();
-	LoadJSRoom();
-	LoadJSObject();
-	LoadJSQuery();
+        LoadJSCharacter();
+        LoadJSRoom();
+        LoadJSZone();
+        LoadJSObject();
+        LoadJSQuery();
 	LoadJSRow();
 
 	gcCount=0;
 
 	object g = global();
     g.set_property("constants", makeConstants());
-	flusspferd::create_native_function(g, "getRoom", JS_getRoom);
-	flusspferd::create_native_function(g, "getRoomByRnum", JS_getRoomByRnum);
+        flusspferd::create_native_function(g, "getRoom", JS_getRoom);
+        flusspferd::create_native_function(g, "getRoomByRnum", JS_getRoomByRnum);
+        flusspferd::create_native_function(g, "getZone", JS_getZone);
 	flusspferd::create_native_function(g, "mudLog", JS_mudLog);
 	flusspferd::create_native_function(g, "_act", JS_act);
 	flusspferd::create_native_function(g, "fwrite", JS_fwrite);

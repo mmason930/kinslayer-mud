@@ -39,6 +39,9 @@ flusspferd::value lookupValue(JSBindable * b);
 std::string lookupName(JSBindable * b);
 void deleteValue( JSBindable * addr );
 
+flusspferd::value lookupValue(Zone *z);
+std::string lookupName(Zone *z);
+
 
 /******
 
