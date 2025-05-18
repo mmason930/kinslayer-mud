@@ -22,10 +22,10 @@ var script13514 = function(self, actor, here, args, extra) {
 		waitpulse 12;
 		actor.moveToRoom( here.direction( constants.DOWN ) );
 		actor.comm("look");
-		here.echoaround(actor, capFirstLetter(actor.name) + " grunts in pain as " + his_her(actor.sex) + " head hits a pile of rocks.");
+		here.echoaround(actor, capFirstLetter(actor.name) + " grunts in pain as " + actor.hisHer() + " head hits a pile of rocks.");
 		actor.send("OUF! You grunt in pain as your head hits a pile of dry rocks.");
 		waitpulse 10;
-		here.echoaround(actor, capFirstLetter(actor.name) + " rubs " + his_her(actor.sex) + " head.");
+		here.echoaround(actor, capFirstLetter(actor.name) + " rubs " + actor.hisHer() + " head.");
 		actor.send("You rub your head.");
 	}
 }

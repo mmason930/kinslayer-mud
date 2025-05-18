@@ -935,7 +935,7 @@ CommandHandler  do_rlist  = DEFINE_COMMAND
 		if (World[i]->getVnum() >= r1)
 		{
 			found = true;
-			ch->send( "[%s%s%d%s]%s\r\n", COLOR_BOLD( ch, CL_COMPLETE ), COLOR_GREEN( ch, CL_COMPLETE ),
+			ch->send( "[%s%s%d%s] %s\r\n", COLOR_BOLD( ch, CL_COMPLETE ), COLOR_GREEN( ch, CL_COMPLETE ),
 				World[i]->getVnum(), COLOR_NORMAL(ch, CL_COMPLETE), World[i]->getName());
 		}
 	}

@@ -1172,7 +1172,7 @@ var script18605 = function(self, actor, here, args, extra) {
 					dmg = random(27,39);
 					length = 3.25;
 					msgToActor = "A huge boulder rises from the ground and then crashes into you, causing a lot of pain.";
-					msgToRoom = "A boulder floats up into the air and then races towards " + target.name + ", crashing right into " + him_her(target.sex) + ".";
+					msgToRoom = "A boulder floats up into the air and then races towards " + target.name + ", crashing right into " + target.himHer() + ".";
 					combat = true;
 					cost = 65;
 					break;
@@ -1187,7 +1187,7 @@ var script18605 = function(self, actor, here, args, extra) {
 					dmg = random(15,25);
 					length = 1.5;
 					msgToActor = "There is sudden burst of light as sparks ignite your clothing.";
-					msgToRoom = target.name + " howls in pain as flames suddenly appear on " + him_her(target.sex) + ".";
+					msgToRoom = target.name + " howls in pain as flames suddenly appear on " + target.himHer() + ".";
 					combat = true;
 					cost = 40;
 					break;

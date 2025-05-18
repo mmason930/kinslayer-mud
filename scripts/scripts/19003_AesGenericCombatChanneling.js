@@ -30,14 +30,14 @@ var script19003 = function(self, actor, here, args, extra) {
 			dmg = random(27,39);
 			length = 3.25;
 			msgToActor = "A huge boulder rises from the ground and then crashes into you, causing a lot of pain.";
-			msgToRoom = "A boulder floats up into the air and then races towards " + actor.name + ", crashing right into " + him_her(actor.sex) + ".";
+			msgToRoom = "A boulder floats up into the air and then races towards " + actor.name + ", crashing right into " + actor.himHer() + ".";
 			break;
 		case 4:
 			/*Create Fire*/
 			dmg = random(15,25);
 			length = 1.5;
 			msgToActor = "There is sudden burst of light as sparks ignite your clothing.";
-			msgToRoom = actor.name + " howls in pain as flames suddenly appear on " + him_her(actor.sex) + ".";
+			msgToRoom = actor.name + " howls in pain as flames suddenly appear on " + actor.himHer() + ".";
 			break;
 		case 5:
 			/*Frostbite*/

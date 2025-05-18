@@ -49,7 +49,7 @@ var script13466 = function(self, actor, here, args, extra) {
 	        actor.send("You stop digging.");
 	        return;
 	}
-	here.echoaround(actor, capFirstLetter(actor.name) + " removes some dirt from beneath " + his_her(actor.sex) + " fingernails.");
+	here.echoaround(actor, capFirstLetter(actor.name) + " removes some dirt from beneath " + actor.hisHer() + " fingernails.");
 	actor.send("You pick some dirt from underneath your fingernails.");
 	waitpulse 18;
 	if( actor.room != here )
@@ -75,7 +75,7 @@ var script13466 = function(self, actor, here, args, extra) {
 	        actor.send("You stop digging.");
 	        return;
 	}
-	here.echoaround(actor, capFirstLetter(actor.name) + " ajusts " + his_her(actor.sex) + " position slightly and continues digging.");
+	here.echoaround(actor, capFirstLetter(actor.name) + " ajusts " + actor.hisHer() + " position slightly and continues digging.");
 	actor.send("You shift about, trying to get comfortable.");
 	waitpulse 18;
 	if( actor.room != here )

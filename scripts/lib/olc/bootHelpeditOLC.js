@@ -53,7 +53,7 @@ function bootHelpeditOLC()
 	}
 	oConfig.modes.push( mode );
 /** EDIT FILE **/
-	mode = new Object();
+	mode = {};
 	mode.mode = "MODE_EDIT_FILE";
 	mode.parser = function(actor,fLetter,vArgs) 
 	{

@@ -282,6 +282,10 @@ bool JSCharacter::shouldBlockEngagementDueToNumberFighting(JSCharacter *victim, 
 	return false;
 }
 
+bool JSCharacter::canAggro(JSCharacter *victim) {
+	return real && !real->IsPurged() && victim && !victim->real->IsPurged() && real->CanAggro(victim->real);
+}
+
 flusspferd::array JSCharacter::getAliases()
 {
 	if( !real || IS_NPC(real) ) return flusspferd::create_array();

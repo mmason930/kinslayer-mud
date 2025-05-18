@@ -1,7 +1,7 @@
 var script1005 = function(self, actor, here, args, extra) {
 	waitpulse 1;
-	if(random(1,5) == 1) {
-		if (actor.room == self)
+	if(random(1,5) === 1) {
+		if (actor.room === self)
 	{
 		act("You lose your footing and fall off the ladder!!", true, actor, null, null, constants.TO_CHAR);
 		act("$n loses $s footing and falls off the ladder!", true, actor, null, null, constants.TO_ROOM);

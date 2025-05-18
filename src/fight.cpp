@@ -892,9 +892,6 @@ void Character::Die( Character *killer )
 		
 		look_at_room( this, 0 );
 
-		if ( GET_LEVEL( this ) <= 5 )//Allow those level 5 or under to request another kit.
-			REMOVE_BIT_AR( PRF_FLAGS( this ), PRF_KIT );
-
 		Act( "$n suddenly arrives from the midst of the air.", FALSE, this, 0, 0, TO_ROOM );
 		if( !isInArena(this) )
 			this->send( "\nYou feel completely drained of all of your strength..." );
