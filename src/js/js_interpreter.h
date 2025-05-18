@@ -19,6 +19,7 @@
 #include "JSCharacter.h"
 #include "JSObject.h"
 #include "JSRoom.h"
+#include "JSZone.h"
 #include "js_constants.h"
 #include "js_trigger.h"
 
@@ -78,10 +79,11 @@ class JSEnvironment
         void cleanup(JSInstance*); // cleans up that instance. Its called from ~JSInstance, so it uses a raw pointer.
 
 	void LoadJSCharacter();
-	void LoadJSObject();
-	void LoadJSRoom();  
-	void LoadJSQuery();
-	void LoadJSRow();      
+        void LoadJSObject();
+        void LoadJSRoom();
+        void LoadJSZone();
+        void LoadJSQuery();
+        void LoadJSRow();
 
     private:
 		__int64 gcCount;
