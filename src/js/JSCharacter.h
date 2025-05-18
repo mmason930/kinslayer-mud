@@ -302,7 +302,7 @@ public:
     void setWisdom(int x)			{ if( !real || real->IsPurged() ) return; real->real_abils.wis = real->aff_abils.wis = MAX(0,x); }
     void setDexterity(int x)		{ if( !real || real->IsPurged() ) return; real->real_abils.dex = real->aff_abils.dex = MAX(0,x); }
     void setConstitution(int x)		{ if( !real || real->IsPurged() ) return; real->real_abils.con = real->aff_abils.con = MAX(0,x); }
-	flusspferd::value getFighting()		{ if( !real || real->IsPurged() ) return lookupValue(0); return lookupValue(FIGHTING(real)); }
+	flusspferd::value getFighting()		{ if( !real || real->IsPurged() ) return lookupValue((JSBindable*)0); return lookupValue(FIGHTING(real)); }
 	void setFightingVar( JSCharacter *t );
 	void setFighting( JSCharacter *t );
 	void stopFighting();

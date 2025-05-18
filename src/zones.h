@@ -1,6 +1,8 @@
 #ifndef ZONES_H
 #define ZONES_H
 
+#include "structs.h"
+
 class ResetCommand
 {
 	public:
@@ -74,7 +76,7 @@ public:
 };
 
 /* zone definition structure. for the 'zone-table'					*/
-class Zone
+class Zone : public JSBindable
 {
 private:
 	std::string Name;		/* name of this zone					*/
@@ -172,7 +174,10 @@ public:
 	unsigned int getVnum() { return vnum; }
 	void setVnum( const int _vnum ) { vnum = _vnum; }
 	unsigned int GetRnum() { return rnum; }
-	void SetRnum( const int _rnum ) { rnum = _rnum; }
+        void SetRnum( const int _rnum ) { rnum = _rnum; }
+
+        Room *getRoom() override { return NULL; }
+        bool IsPurged() override { return deleted; }
 
 	void Boot( const sql::Row &ZoneRow, std::list< sql::Row > &RowList );
 	void save();

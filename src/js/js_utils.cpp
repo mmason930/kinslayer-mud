@@ -5,6 +5,7 @@
 #include "JSObject.h"
 #include "JSQuery.h"
 #include "JSRow.h"
+#include "JSZone.h"
 
 #include "../rooms/Room.h"
 
@@ -36,10 +37,14 @@ void deleteValue( JSBindable *addr )
 		{
 			get_native<JSObject>(o).setReal( 0 );
 		}
-		else if( is_native<JSRoom>(o) )
-		{
-			get_native<JSRoom>(o).setReal( 0 );
-		}
+                else if( is_native<JSRoom>(o) )
+                {
+                        get_native<JSRoom>(o).setReal( 0 );
+                }
+                else if( is_native<JSZone>(o) )
+                {
+                        get_native<JSZone>(o).setReal( 0 );
+                }
 	}
 }
 
@@ -122,9 +127,19 @@ flusspferd::value lookupValue(JSBindable * b)
 	    return findPair<JSRoom>(r).second;
 	else if( (query = dynamic_cast<sqlJSQuery *>(b)) != 0 )
 		return findPair<JSQuery>(query).second;
-	else if( (row = dynamic_cast<sqlJSRow *>(b)) != 0 )
-	    return findPair<JSRow>(row).second;
-	return flusspferd::value();
+        else if( (row = dynamic_cast<sqlJSRow *>(b)) != 0 )
+            return findPair<JSRow>(row).second;
+        return flusspferd::value();
+}
+
+flusspferd::value lookupValue(Zone *z)
+{
+        return findPair<JSZone>(z).second;
+}
+
+std::string lookupName(Zone *z)
+{
+        return findPair<JSZone>(z).first;
 }
 
 //Created by Narg: August 2009

@@ -86,18 +86,18 @@ bool JSObject::getIsCorpse()
 
 flusspferd::value JSObject::load_obj( const int vnum )
 {
-	if( !real || real->IsProto() ) return lookupValue(0);
+	if( !real || real->IsProto() ) return lookupValue((JSBindable*)0);
 
 	int r_num;
 	Object *obj;
 	if ((r_num = real_object(vnum)) < 0)
 	{
-		return lookupValue(0);
+		return lookupValue((JSBindable*)0);
 	}
 
 	if (obj_proto[r_num]->getType() == ITEM_SPECIAL)
 	{
-		lookupValue(0);
+		lookupValue((JSBindable*)0);
 	}
 
 	obj = read_object(r_num, REAL, true);
