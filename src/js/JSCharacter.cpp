@@ -226,7 +226,7 @@ flusspferd::array JSCharacter::getFollowers()
 flusspferd::value JSCharacter::eq(int pos)
 {
 	if(pos < 0 || pos >= NUM_WEARS)
-		return lookupValue(0);
+		return lookupValue((JSBindable*)0);
 	return lookupValue(real && !real->IsProto() ? GET_EQ(real, pos) : 0);
 }
 
@@ -367,17 +367,17 @@ void JSCharacter::extract()
 
 flusspferd::value JSCharacter::load_obj( const int vnum )
 {
-	if( !real || real->IsPurged() || real->IsProto() ) return lookupValue( 0 );
+	if( !real || real->IsPurged() || real->IsProto() ) return lookupValue((JSBindable*)0);
 	int r_num;
 	Object *obj;
 	if ((r_num = real_object(vnum)) < 0)
 	{
-		return lookupValue(0);
+		return lookupValue((JSBindable*)0);
 	}
 
 	if (obj_proto[r_num]->getType() == ITEM_SPECIAL)
 	{
-		lookupValue(0);
+		lookupValue((JSBindable*)0);
 	}
 
 	obj = read_object(r_num, REAL, true);
@@ -565,37 +565,37 @@ flusspferd::string JSCharacter::getLeaveMessage()
 flusspferd::value JSCharacter::getMount()
 {
 	if( real && !real->IsPurged() && !real->IsProto() ) return lookupValue(real->player.mount);
-	return lookupValue( 0 );
+	return lookupValue((JSBindable*)0);
 }
 flusspferd::value JSCharacter::getRiddenBy()
 {
 	if( real && !real->IsPurged() && !real->IsProto() ) return lookupValue(real->player.ridden_by);
-	return lookupValue( 0 );
+	return lookupValue((JSBindable*)0);
 }
 flusspferd::value JSCharacter::getTarget()
 {
 	if( real && !real->IsPurged() && !real->IsProto() ) return lookupValue(real->player.target);
-	return lookupValue( 0 );
+	return lookupValue((JSBindable*)0);
 }
 flusspferd::value JSCharacter::getMarked()
 {
 	if( real && !real->IsPurged() && !real->IsProto() ) return lookupValue(real->player.marked);
-	return lookupValue( 0 );
+	return lookupValue((JSBindable*)0);
 }
 flusspferd::value JSCharacter::getHunting()
 {
 	if( real && !real->IsPurged() && !real->IsProto() ) return lookupValue(real->player.hunting);
-	return lookupValue( 0 );
+	return lookupValue((JSBindable*)0);
 }
 flusspferd::value JSCharacter::getOTarget()
 {
 	if( real && !real->IsPurged() && !real->IsProto() ) return lookupValue(real->player.otarget);
-	return lookupValue( 0 );
+	return lookupValue((JSBindable*)0);
 }
 flusspferd::value JSCharacter::getSittingOn()
 {
 	if( real && !real->IsPurged() && !real->IsProto() ) return lookupValue(real->player.sitting_on);
-	return lookupValue( 0 );
+	return lookupValue((JSBindable*)0);
 }
 int JSCharacter::getDeathWait()
 {
@@ -668,19 +668,19 @@ flusspferd::value JSCharacter::getDecayedBy()
 {
 	if( real && !real->IsPurged() && !real->IsProto() )
 		return lookupValue( real->DecayedBy );
-	return lookupValue( 0 );
+	return lookupValue((JSBindable*)0);
 }
 flusspferd::value JSCharacter::getBurnedBy()
 {
 	if( real && !real->IsPurged() && !real->IsProto() )
 		return lookupValue( real->BurnedBy );
-	return lookupValue( 0 );
+	return lookupValue((JSBindable*)0);
 }
 flusspferd::value JSCharacter::getPlaguedBy()
 {
 	if( real && !real->IsPurged() && !real->IsProto() )
 		return lookupValue( real->PlaguedBy );
-	return lookupValue( 0 );
+	return lookupValue((JSBindable*)0);
 }
 // SETTERS 
 

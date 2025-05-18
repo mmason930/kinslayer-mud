@@ -47,11 +47,11 @@ flusspferd::value JSQuery::getpeekRow()
 {
 	if( real->MyQuery->hasNextRow() )
 		return lookupValue( new class sqlJSRow( new sql::Row(real->MyQuery->peekRow())) );
-	return lookupValue( 0 );
+	return lookupValue((JSBindable*)0);
 }
 flusspferd::value JSQuery::getRow()
 {
 	if( real->MyQuery->hasNextRow() )
 		return lookupValue( new class sqlJSRow( new sql::Row(real->MyQuery->getRow())) );
-	return lookupValue( 0 );
+	return lookupValue((JSBindable*)0);
 }

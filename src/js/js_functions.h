@@ -49,6 +49,7 @@ void JS_fwrite( flusspferd::string fileName, flusspferd::string str );
 flusspferd::string JS_fread( flusspferd::string fileName );
 flusspferd::value JS_getRoom( int vnum );
 flusspferd::value JS_getRoomByRnum( int rnum );
+flusspferd::value JS_getZone( int vnum );
 void JS_mudLog( int type, int lvl, flusspferd::string str );
 
 int JS_getHour();

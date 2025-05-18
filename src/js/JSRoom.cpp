@@ -202,18 +202,18 @@ void JSRoom::echoaround(JSCharacter& ch, std::string message)
 
 flusspferd::value JSRoom::loadObj( const int vnum )
 {
-	if( !real ) return lookupValue(0);
+	if( !real ) return lookupValue((JSBindable*)0);
 
 	int r_num;
 	Object *obj;
 	if ((r_num = real_object(vnum)) < 0)
 	{
-		return lookupValue(0);
+		return lookupValue((JSBindable*)0);
 	}
 
 	if( obj_proto[r_num]->getType() == ITEM_SPECIAL )
 	{
-		lookupValue(0);
+		lookupValue((JSBindable*)0);
 	}
 
 	obj = read_object(r_num, REAL, true);
@@ -229,12 +229,12 @@ flusspferd::value JSRoom::loadObj( const int vnum )
 
 flusspferd::value JSRoom::loadMob( const int vnum )
 {
-	if( !real ) return lookupValue(0);
+	if( !real ) return lookupValue((JSBindable*)0);
 	int r_num;
 	Character *mob;
 	if ((r_num = MobManager::GetManager().RealMobile(vnum)) < 0)
 	{
-		return lookupValue(0);
+		return lookupValue((JSBindable*)0);
 	}
 	mob = new Character(r_num, REAL);
 	

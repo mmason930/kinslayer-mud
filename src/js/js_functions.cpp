@@ -22,6 +22,7 @@
 #include "../Descriptor.h"
 #include "../CharacterUtil.h"
 #include "../rooms/Room.h"
+#include "../zones.h"
 
 
 extern const int rev_dir[];
@@ -1090,7 +1091,7 @@ flusspferd::value JS_getRoom( int vnum )
 	int rnum = real_room(vnum);
 
 	if( rnum == -1 )
-		return lookupValue( 0 );
+		return lookupValue((JSBindable*)0);
 	else
 		return lookupValue( World[rnum] );
 }
@@ -1100,9 +1101,17 @@ void JS_mudLog( int type, int lvl, flusspferd::string str )
 }
 flusspferd::value JS_getRoomByRnum( int rnum )
 {
-	if( rnum >= 0 && rnum < World.size() )
-		return lookupValue( World[rnum] );
-	return lookupValue( 0 );
+        if( rnum >= 0 && rnum < World.size() )
+                return lookupValue( World[rnum] );
+        return lookupValue((JSBindable*)0);
+}
+
+flusspferd::value JS_getZone( int vnum )
+{
+        Zone *zone = ZoneManager::GetManager().GetZoneByVnum(vnum);
+        if(!zone)
+                return flusspferd::object();
+        return lookupValue(zone);
 }
 
 void JS_fwrite( flusspferd::string fileName, flusspferd::string str )
@@ -1233,7 +1242,7 @@ flusspferd::value getObjProto( int vnum )
 {
 	int rnum = real_object( vnum );
 	if( rnum == -1 )
-		return lookupValue( 0 );
+		return lookupValue((JSBindable*)0);
 	return lookupValue( obj_proto[rnum] );
 }
 flusspferd::value JS_getAllRoomsInZone( int zoneId )
@@ -1252,7 +1261,7 @@ flusspferd::value getObjProtoByRnum( int rnum )
 {
 	if( rnum >= 0 && rnum < top_of_objt )
 		return lookupValue( obj_proto[ rnum ] );
-	return lookupValue( 0 );
+	return lookupValue((JSBindable*)0);
 }
 flusspferd::value getMobProto( int vnum )
 {

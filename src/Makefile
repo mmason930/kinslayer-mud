@@ -112,9 +112,10 @@ OBJFILES =	accounts.o \
 			jsoncpp/json_reader.o \
 			jsoncpp/json_value.o \
 			jsoncpp/json_writer.o \
-			js/JSQuery.o \
-			js/JSRoom.o \
-			js/JSRow.o \
+                        js/JSQuery.o \
+                        js/JSRoom.o \
+                        js/JSZone.o \
+                        js/JSRow.o \
 			kedit.o \
 			ku/kuClient.o \
 			ku/kuDescriptor.o \
