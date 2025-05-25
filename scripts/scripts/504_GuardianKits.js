@@ -15,9 +15,9 @@ var script504 = function(self, actor, here, args, extra) {
 		actor.gsend("You've already received a kit.");
 		return;
 	}
-	if( actor.race == constants.RACE_HUMAN )
+	if( actor.race === constants.RACE_HUMAN )
 	{
-		if( actor.class == constants.CLASS_CHANNELER || actor.class == constants.CLASS_THIEF )
+		if( actor.class === constants.CLASS_CHANNELER || actor.class === constants.CLASS_THIEF )
 		{
 			actor.loadObj(107);
 			actor.loadObj(309);
@@ -33,7 +33,7 @@ var script504 = function(self, actor, here, args, extra) {
 			actor.loadObj(2102);
 			actor.loadObj(2021);
 		}
-		else if( actor.class == constants.CLASS_WARRIOR || actor.class == constants.CLASS_RANGER )
+		else if( actor.class === constants.CLASS_WARRIOR || actor.class === constants.CLASS_RANGER )
 		{
 			actor.loadObj(107);
 			actor.loadObj(309);
@@ -51,9 +51,9 @@ var script504 = function(self, actor, here, args, extra) {
 			actor.loadObj(1901);
 		}
 	}
-	else if( actor.race == constants.RACE_TROLLOC )
+	else if( actor.race === constants.RACE_TROLLOC )
 	{
-		if( actor.class == constants.CLASS_RANGER || actor.class == constants.CLASS_WARRIOR )
+		if( actor.class === constants.CLASS_RANGER || actor.class === constants.CLASS_WARRIOR )
 		{
 			actor.loadObj(107);
 			actor.loadObj(309);
@@ -69,7 +69,7 @@ var script504 = function(self, actor, here, args, extra) {
 			actor.loadObj(2104);
 			actor.loadObj(2026);
 		}
-		else if( actor.class == constants.CLASS_THIEF )
+		else if( actor.class === constants.CLASS_THIEF )
 		{
 			actor.loadObj(107);
 			actor.loadObj(309);
@@ -84,7 +84,7 @@ var script504 = function(self, actor, here, args, extra) {
 			actor.loadObj(2026);
 			actor.loadObj(1901);
 		}
-		else if( actor.class == constants.CLASS_DREADGUARD )
+		else if( actor.class === constants.CLASS_DREADGUARD )
 		{
 			actor.loadObj(107);
 			actor.loadObj(309);

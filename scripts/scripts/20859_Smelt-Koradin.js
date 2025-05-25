@@ -82,7 +82,7 @@ var script20859 = function(self, actor, here, args, extra) {
 					if (smeltObj.vnum < 2600 || smeltObj.vnum > 2699 && smeltObj.vnum < 11300 || smeltObj.vnum > 12999 && smeltObj.vnum < 30000 || smeltObj.vnum > 31499) {
 						if (!isName(argArray[1], smeltProto.namelist))
 							objWeight /= 100;
-						else if (smeltObj.vnum > 4584 && smeltObj.vnum < 4604 || smeltObj.absorb < 10 && smeltObj.wearPos != constants.ITEM_WEAR_SHIELD && smeltObj.type != constants.ITEM_WEAPON && smeltObj.weight > 0.9)
+						else if (smeltObj.vnum > 4584 && smeltObj.vnum < 4604 || smeltObj.absorb < 10 && !smeltObj.canWear(constants.ITEM_WEAR_SHIELD) && smeltObj.type != constants.ITEM_WEAPON && smeltObj.weight > 0.9)
 							objWeight /= 10;
 						else if (smeltObj.weight > 0.9)
 							objWeight /= 3;

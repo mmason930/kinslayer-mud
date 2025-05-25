@@ -84,6 +84,7 @@ FLUSSPFERD_CLASS_DESCRIPTION(
 		("stopFighting", bind, stopFighting)
 		("removeSource", bind, removeSource)
 		("shouldBlockEngagementDueToNumberFighting", bind, shouldBlockEngagementDueToNumberFighting)
+		("canAggro", bind, canAggro)
         )
     (properties,
         //read only properties
@@ -308,6 +309,7 @@ public:
 	void stopFighting();
 	void removeSource();
 	bool shouldBlockEngagementDueToNumberFighting(JSCharacter *victim, bool displayMessage);
+	bool canAggro(JSCharacter *victim);
 
 	void setPosition( int x );
 	void setSkill_Practices( int x );

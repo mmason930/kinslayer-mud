@@ -5,7 +5,7 @@
  * equipment position to a string representation.        *
  * Returns -1 if parameter is not an equipment position. *
  *********************************************************/
- 
+
 function wearPosToString( constant ) {
 	if ( constant == constants.ITEM_WEAR_FINGER )
 		return "FINGER";
@@ -44,5 +44,4 @@ function wearPosToString( constant ) {
 	if ( constant == constants.ITEM_WEAR_TAKE )
 		return "TAKE";
 	return -1;
-	
 }

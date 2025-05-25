@@ -135,7 +135,7 @@ JSRoom.prototype.purgeMobs = function() {
 
 // Returns an array of all the connected players within a zone with the specified vnum
 function getPlayersInZone(zone) {
-    var players = new Array();
+    var players = [];
     for (var _autoKey in getConnectedPlayers()) {
     	var person = getConnectedPlayers()[_autoKey];
         if( person.room.zoneVnum == zone ) {

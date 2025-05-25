@@ -1311,6 +1311,17 @@ int JS_numberOfRooms()
 {
 	return (int)World.size();
 }
+
+int JS_getZoneBottomRoomVnum(int zoneVnum) {
+	Zone *zone = ZoneManager::GetManager().GetZoneByVnum(zoneVnum);
+	return (zone != nullptr ? zone->GetBottom() : -1);
+}
+
+int JS_getZoneTopRoomVnum(int zoneVnum) {
+	Zone *zone = ZoneManager::GetManager().GetZoneByVnum(zoneVnum);
+	return (zone != nullptr ? zone->GetTop() : -1);
+}
+
 bool JS_isClanSecret( int iClanVnum )
 {
 	Clan *c = ClanUtil::getClan( iClanVnum );

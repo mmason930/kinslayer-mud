@@ -501,24 +501,6 @@ function getManorTarget(guard) {
 	return null;
 }
 
-/** GET ALL ROOMS IN ZONE **/
-function getAllRoomsInZone(zoneVnum) {
-	if (!zoneVnum)
-		return [];
-	var zoneBot = parseInt(zoneVnum+"00");
-	var returnArr = [];
-	var zoneTop = zoneBot+99;
-	for (var i = 0; i < 100; i++) {
-		if (getRoom(zoneBot+i)) {
-			//sendKoradin("pushing");
-			returnArr.push(getRoom(zoneBot+i));
-		}
-		else
-			break;
-	}
-	return returnArr;
-}
-
 /** RETURN WHETHER ACTOR IS STANDING OUTSIDE A ROOM **/
 JSRoom.prototype.hasNeighbor = function(roomVnum) {
 	for (var _autoKey in this.neighbors) {

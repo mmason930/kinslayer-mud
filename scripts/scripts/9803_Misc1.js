@@ -1,6 +1,6 @@
 var script9803 = function(self, actor, here, args, extra) {
 	var weapon = actor.eq( constants.WEAR_WIELD );
-	if( !weapon || weapon.name != "a 12 gauge double barreled remington" )
+	if( !weapon || weapon.name !== "a 12 gauge double barreled remington" )
 		return;
 	_block;
 	var vArgs = getArgList( args );

@@ -12,15 +12,15 @@ function parseRace( sRaceName, bAbbrev ) {
 			return constants.RACE_OTHER;
 		}
 	else {
-		if( sRaceName == "human" )
+		if( sRaceName === "human" )
 			return constants.RACE_HUMAN;
-		if( sRaceName == "trolloc" )
+		if( sRaceName === "trolloc" )
 			return constants.RACE_TROLLOC;
-		if( sRaceName == "seanchan" )
+		if( sRaceName === "seanchan" )
 			return constants.RACE_SEANCHAN;
-		if( sRaceName == "aiel" )
+		if( sRaceName === "aiel" )
 			return constants.RACE_AIEL;
-		if( sRaceName == "other" )
+		if( sRaceName === "other" )
 			return constants.RACE_OTHER;
 	}
 	return null;

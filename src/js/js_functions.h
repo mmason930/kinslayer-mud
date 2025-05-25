@@ -79,6 +79,8 @@ flusspferd::string JS_md5( flusspferd::string key );
 flusspferd::string JS_clanNumToText( int iClanNum );
 flusspferd::string JS_getClanRankName( int iClanNum, int iRankNum );
 int JS_numberOfRooms();
+int JS_getZoneBottomRoomVnum(int zoneVnum);
+int JS_getZoneTopRoomVnum(int zoneVnum);
 bool JS_isClanSecret( int iClanVnum );
 flusspferd::object JS_getGlobalObject();
 flusspferd::string JS_getUserNameByUserId(int userId);

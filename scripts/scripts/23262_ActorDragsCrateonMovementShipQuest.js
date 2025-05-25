@@ -9,7 +9,7 @@ var script23262 = function(self, actor, here, args, extra) {
 	    if ( success ) //Actor moves with crate and exit and entrance is displayed to others.
 	    {
 	        actor.send("\nYou drag " + self.name + " along the floor as you move " + dirToText(dir) + ".\n");
-	        here.echoaround(actor, actor.name + " drags " + self.name + " along the floor as " + he_she(actor.sex) + " leaves " + dirToText(dir) + ".\n");
+	        here.echoaround(actor, actor.name + " drags " + self.name + " along the floor as " + actor.heShe() + " leaves " + dirToText(dir) + ".\n");
 	        var rev_dir = revDir(dir); //Numerical value of arriving direction
 	        var dt = ("the " + dirToText(rev_dir) );           //Text version of arriving direction
 	        if ( rev_dir == constants.UP )
@@ -25,7 +25,7 @@ var script23262 = function(self, actor, here, args, extra) {
 	    else          //Actor's movement is interrupted and sits down.
 	    {
 	        actor.send("\nYou lose your grip on " + self.name + " and stumble.\n");
-	        actor.room.echoaround(actor, actor.name + "'s hands slip from " + self.name + ", causing " + him_her(actor.sex) + " to stumble.\n");
+	        actor.room.echoaround(actor, actor.name + "'s hands slip from " + self.name + ", causing " + actor.himHer() + " to stumble.\n");
 	        actor.comm("sit");
 			setSval(actor, 23259, "attached", undefined);
 	        setSval(self, 23259, "attached", undefined);                 /*Disassociate actor and crate*/
