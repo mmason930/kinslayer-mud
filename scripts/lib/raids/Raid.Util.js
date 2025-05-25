@@ -439,6 +439,6 @@ let script20942 = function(self, actor, here, args, extra) {
     Raid.Util.headMobMove(self);
 }
 
-let script20943 = function(self, actor, here, args, extra) {
+let script20944 = function(self, actor, here, args, extra) {
     Raid.Util.summonFollowersDueToFighting(self);
 }
