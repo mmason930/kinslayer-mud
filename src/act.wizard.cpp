@@ -53,6 +53,7 @@
 #include "commands/infrastructure/CommandInfo.h"
 
 #include "items/ItemUtil.h"
+#include "openai/OpenAIUtil.h"
 
 /*   external vars  */
 extern GameTime time_info;
@@ -1027,10 +1028,15 @@ CommandHandler do_extra = DEFINE_COMMAND
 	vArgs = StringUtil::splitToVector( argument, ' ' );
 
 	try {
-		if(false);
-		else if( !str_cmp(vArgs.at(0), "trackgen") )
+		if( !str_cmp(vArgs.at(0), "trackgen") )
 		{
 			Character *target = get_char_vis(ch, vArgs.at(2).c_str());
+
+			if(!target) {
+				ch->send("Target `%s` could not be found.\r\n", vArgs.at(2).c_str());
+				return;
+			}
+
 			int nrOfTracks = 0;
 			int tracksPerRoom = 12;
 			for(std::size_t i = 0;i < World.size();++i)
@@ -1045,6 +1051,12 @@ CommandHandler do_extra = DEFINE_COMMAND
 				if(nrOfTracks >= 100000)
 					break;
 			}
+		}
+		else if(!str_cmp(vArgs.at(0), "openai")) {
+			OpenAIUtil::get().performChatCompletion(
+					"You are a non-playable character in a game. Your name is 'an ordinary commoner'",
+					"Provide me with what your character should say upon seeing someone enter the room."
+					);
 		}
 		else if(!str_cmp(vArgs.at(0), "testcases"))
 		{
@@ -1154,9 +1166,6 @@ CommandHandler do_extra = DEFINE_COMMAND
 			std::string filePath = vArgs.at(1);
 
 			JSManager::get()->loadScriptsFromFile(filePath);
-		}
-		else if(!str_cmp(vArgs.at(0), "js"))
-		{
 		}
 		else bCorrectArgument=false;
 	} catch( std::out_of_range const& ) {
@@ -7112,9 +7121,9 @@ public:
 	void performRoutine() {
 
 		kuClient client;
-		client.connect("wotmud.org", 2222);
+		client.connect("game.wotmud.org", 2224);
 
-		if(client.isConnected() == false) {
+		if(!client.isConnected()) {
 			isUp = false;
 			return;
 		}

@@ -19,3 +19,4 @@ Monitor Repository: 1
 Script Pull Command: /kinslayer/PullScripts.sh
 Database Migration Directory: /kinslayer/migrations/
 Sendgrid API Key: ${SENDGRID_API_KEY}
+OpenAI API Key: ${OPENAI_API_KEY}

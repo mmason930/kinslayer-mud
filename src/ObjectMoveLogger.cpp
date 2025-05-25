@@ -16,6 +16,9 @@ ObjectMoveLogger::~ObjectMoveLogger()
 
 void ObjectMoveLogger::logObjectMove(const boost::uuids::uuid &objectId, const std::string &message)
 {
+	// Disabling - May 24 2025
+	return;
+
 	ObjectMoveLogEntry objectMoveLogEntry;
 
 	objectMoveLogEntry.objectId = objectId;

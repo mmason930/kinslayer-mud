@@ -43,7 +43,7 @@
 #include "StringUtil.h"
 
 #include "guilds/GuildUtil.h"
-
+#include "openai/OpenAIUtil.h"
 
 boost::uuids::uuid u;
 
@@ -555,6 +555,9 @@ void boot_db(void)
 	GuildUtil::get()->loadGuildApplicationSignaturesFromDatabase(game->getConnection());
 	GuildUtil::get()->loadUserGuildsFromDatabase(game->getConnection());
 	GuildUtil::get()->loadGuildJoinApplicationsFromDatabase(game->getConnection());
+
+	Log("Loading OpenAIUtil.");
+	OpenAIUtil::get().loadClient(game->getOpenAIApiKey());
 
 	bootWorld();
 

@@ -47,6 +47,7 @@ public:
 	std::string getDefaultDirectory();
 	std::string getPlayerLogsDirectory();
 	std::string getScriptPullCommand();
+	std::string getOpenAIApiKey();
 
 	bool hasBasicConfiguration(const std::string &basicConfigurationName) const;
 	void setupFilesystem();
