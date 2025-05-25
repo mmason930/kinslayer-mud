@@ -434,3 +434,7 @@ Raid.Util = (function() {
 
     return self;
 })();
+
+let script20942 = function(self, actor, here, args, extra) {
+    Raid.Util.headMobMove(self);
+}
