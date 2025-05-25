@@ -6,14 +6,14 @@
 #include <vector>
 #include <httplib.h>
 
-struct OpenAIChatCompletionResult {
+struct OpenAIResponsesResult {
 
 	bool wasSuccessful;
-	std::string completion;
+	std::string responses;
 
-	OpenAIChatCompletionResult(const bool wasSuccessful, const std::string &completion) {
+	OpenAIResponsesResult(const bool wasSuccessful, const std::string &responses) {
 		this->wasSuccessful = wasSuccessful;
-		this->completion = completion;
+		this->responses = responses;
 	}
 };
 
@@ -23,7 +23,7 @@ public:
 		this->timeout = 30;
 	}
 
-	OpenAIChatCompletionResult chatCompletion(const std::string &model,
+	OpenAIResponsesResult performResponses(const std::string &model,
 							   const std::string &userPrompt,
 							   double temperature = 0.7) const;
 
@@ -31,11 +31,13 @@ private:
 	std::string apiKey_;
 	int timeout;
 
-	std::string generateChatCompletionRequestBody(
+	std::string generateResponsesRequestBody(
 			const std::string &model,
 			const std::string &userPrompt,
 			double temperature
 	) const;
+
+	std::string extractAssistantText(const std::string& responseBody) const;
 
 	httplib::Headers generateRequestHeaders() const;
 };

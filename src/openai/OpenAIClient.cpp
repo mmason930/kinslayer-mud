@@ -5,13 +5,13 @@
 
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
-#include <boost/beast/ssl.hpp>   // wraps asio::ssl for Beast
+#include <boost/beast/ssl.hpp>
 
-#include <openssl/ssl.h>         // SSL_set_tlsext_host_name
-#include <openssl/err.h>         // ERR_get_error
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 #include "../jsoncpp/json.h"
 
-OpenAIChatCompletionResult OpenAIClient::chatCompletion(
+OpenAIResponsesResult OpenAIClient::performResponses(
 		const std::string& model,
 		const std::string& userPrompt,
 		double temperature
@@ -22,7 +22,7 @@ OpenAIChatCompletionResult OpenAIClient::chatCompletion(
 	namespace http  = beast::http;
 	using     tcp   = asio::ip::tcp;
 
-	const std::string body    = generateChatCompletionRequestBody(model, userPrompt, temperature);
+	const std::string body    = generateResponsesRequestBody(model, userPrompt, temperature);
 	auto              headers = generateRequestHeaders();
 
 	try {
@@ -65,19 +65,15 @@ OpenAIChatCompletionResult OpenAIClient::chatCompletion(
 			throw boost::beast::system_error{ec};
 		}
 
+		std::cout << "Response: " << res << std::endl;
+
 		if (res.result() != http::status::ok) {
 			return {false, ""};
 		}
 
-		Json::Reader reader;
-		Json::Value  root;
-		if (!reader.parse(res.body(), root)) {
-			throw std::runtime_error(
-					"JSON parse failed: " + reader.getFormattedErrorMessages());
-		}
-		std::cout << "...9" << std::endl;
-		std::string completion = root["output"][1]["message"]["content"].asString();
-		return {true, completion};
+		std::string responseBody = res.body();
+		std::string responses = this->extractAssistantText(responseBody);
+		return {true, responses};
 	}
 	catch (const std::exception& ex) {
 		std::cerr << "Network error: " << ex.what() << '\n';
@@ -85,7 +81,38 @@ OpenAIChatCompletionResult OpenAIClient::chatCompletion(
 	}
 }
 
-std::string OpenAIClient::generateChatCompletionRequestBody(
+std::string OpenAIClient::extractAssistantText(const std::string& responseBody) const
+{
+	Json::Value  root;
+	Json::Reader reader;
+
+	if (!reader.parse(responseBody, root))
+		throw std::runtime_error("JSON parse failed: " +
+								 reader.getFormattedErrorMessages());
+
+	const Json::Value output = root["output"];
+	if (!output.isArray())
+		throw std::runtime_error("\"output\" is missing or not an array");
+
+	for (const auto& item : output)
+	{
+		if (item["type"].asString() != "message")
+			continue;
+
+		const Json::Value content = item["content"];
+		if (!content.isArray())
+			continue;
+
+		for (const auto& chunk : content)
+		{
+			if (chunk["type"].asString() == "output_text" && chunk.isMember("text"))
+				return chunk["text"].asString();
+		}
+	}
+	throw std::runtime_error("No assistant text found in response");
+}
+
+std::string OpenAIClient::generateResponsesRequestBody(
 		const std::string &model,
 		const std::string &userPrompt,
 		double temperature

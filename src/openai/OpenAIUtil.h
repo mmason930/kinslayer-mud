@@ -11,7 +11,10 @@ public:
 	void loadClient(const std::string &apiKey);
 	OpenAIClient *getClient();
 	void free();
-	void performChatCompletion(const std::string &systemPrompt, const std::string &userPrompt);
+	void performResponses(
+			const std::string &model,
+			const std::string &prompt,
+			std::function<void(const OpenAIResponsesResult&)> onCompletionCallback);
 
 private:
 	OpenAIUtil();

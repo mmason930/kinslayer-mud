@@ -5,32 +5,40 @@
 class OpenAIThreadedJob : public Job
 {
 private:
-	std::string systemPrompt;
-	std::string userPrompt;
+	std::string model;
+	std::string prompt;
 
-	OpenAIChatCompletionResult completionResult = {false, ""};
+	OpenAIResponsesResult responsesResult = {false, ""};
+	std::function<void(const OpenAIResponsesResult&)> onCompletionCallback;
 public:
 
-	OpenAIThreadedJob(const std::string &systemPrompt, const std::string &userPrompt) {
-		this->systemPrompt = systemPrompt;
-		this->userPrompt = userPrompt;
+	OpenAIThreadedJob(
+			const std::string &model,
+			const std::string &prompt,
+			std::function<void(const OpenAIResponsesResult&)> onCompletionCallback)
+			: model(model),
+			prompt(prompt),
+			onCompletionCallback(std::move(onCompletionCallback)) {
 	}
 
 	void performRoutine() {
-
-		std::string model = "o4-mini";
-		this->completionResult = OpenAIUtil::get().getClient()->chatCompletion(model, userPrompt);
+		this->responsesResult = OpenAIUtil::get().getClient()->performResponses(model, prompt);
 	}
 
 	void performPostJobRoutine() {
-		std::cout << "Chat Completion: " << this->completionResult.completion.c_str() << std::endl;
+		if(onCompletionCallback) {
+			onCompletionCallback(this->responsesResult);
+		}
 	}
 };
 
 OpenAIUtil* OpenAIUtil::self = nullptr;
 
-void OpenAIUtil::performChatCompletion(const std::string &systemPrompt, const std::string &userPrompt) {
-	OpenAIThreadedJob *job = new OpenAIThreadedJob(systemPrompt, userPrompt);
+void OpenAIUtil::performResponses(
+		const std::string &model,
+		const std::string &userPrompt,
+		std::function<void(const OpenAIResponsesResult&)> onCompletionCallback) {
+	OpenAIThreadedJob *job = new OpenAIThreadedJob(model, userPrompt, onCompletionCallback);
 	ThreadedJobManager::get().addJob(job);
 }
 

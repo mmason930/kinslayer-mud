@@ -3,11 +3,20 @@ var script177 = function(self, actor, here, args, extra) {
 };
 
 var script178 = function(self, actor, here, args, extra) {
-	if( actor.vnum == -1 && random(1,100) <= 15 ) {
-		wait 1;
-		if(self.canSee(actor)) {
-			self.say("Please spare me a few coins, " + actor.name + "!");
-		}
+	if( actor.vnum === -1 && random(1,100) <= 15 && self.canSee(actor) ) {
+		llmResponse({
+			model: "gpt-4.1-nano",
+			prompt: "You're an NPC in a game. Your name is: " + self.name + ", you are in a room named " + here.name
+				+ ". A player named " + actor.name + " just entered your room. Provide me the dialog you'd say."
+				+ " Provide only the dialog, nothing else, and not in quotes. Max 1-2 sentence. Include begging or"
+			    + " some kind of pathetic plead",
+			onSuccess: function (result) {
+				self.say(result.response);
+			}
+		});
+		//
+		//	self.say("Please spare me a few coins, " + actor.name + "!");
+		//}
 	}
 
 };
