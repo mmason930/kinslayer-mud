@@ -375,12 +375,13 @@ Raid.Util = (function() {
         headMob.comm("group all");
     };
 
-    self.beginRaid = function () {
+    self.raidHeadMobAnnounceRaid = function(headMob) {
+        const raidLocation = headMob.raidLocation;
 
-        let raidPartyArray = _.values(self.parties);
-        let rnd = random(0, raidPartyArray.length - 1);
-        let raidParty = raidPartyArray[rnd];
-        let raidLocation = raidParty.allowedStartingLocations[random(0, raidParty.allowedStartingLocations.length - 1)];
+        headMob.comm("shout My army gathers at " + headMob.room.name);
+    };
+
+    self.beginRaidPartyAtLocation = function(raidParty, raidLocation) {
         let startRoomVnum = raidLocation.startRoomVnum;
         let startLocationRoom = getRoom(startRoomVnum);
 
@@ -398,9 +399,21 @@ Raid.Util = (function() {
         self.loadSameRoomFollowers(raidParty, headMob);
 
         gecho(function(player) {
-           getCharCols(player, constants.CL_NORMAL);
-           return mag + "*** A NEW RAID HAS BEGUN! ***" + nrm;
+            getCharCols(player, constants.CL_NORMAL);
+            return mag + "*** A NEW RAID HAS BEGUN! ***" + nrm;
         });
+
+        self.raidHeadMobAnnounceRaid(headMob);
+    };
+
+    self.beginRaid = function () {
+
+        let raidPartyArray = _.values(self.parties);
+        let rnd = random(0, raidPartyArray.length - 1);
+        let raidParty = raidPartyArray[rnd];
+        let raidLocation = raidParty.allowedStartingLocations[random(0, raidParty.allowedStartingLocations.length - 1)];
+
+        self.beginRaidPartyAtLocation(raidParty, raidLocation);
 
         /**
          * mgecho %(color_magenta%)*** RAID: %(raider.name%) retires with a flawless reputation, living on only in legend. ***%(color_normal%)
