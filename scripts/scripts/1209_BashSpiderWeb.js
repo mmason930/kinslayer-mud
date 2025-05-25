@@ -9,13 +9,13 @@ var script1209 = function(self, actor, here, args, extra) {
 		{
 			actor.send("Your powerful bash smashes the web into tatters, clearing the way through!");
 			here.echoaround(actor, actor.name + "'s powerful bash smashes a huge spiderweb into tatters, clearing the way through!\r\n");
-			getRoom( (here.vnum == 1207 ? 1208 : 1207) ).echo("The huge spiderweb is destroyed from the other side!");
+			getRoom( (here.vnum === 1207 ? 1208 : 1207) ).echo("The huge spiderweb is destroyed from the other side!");
 			var itemListA = getRoom(1207).items;
 			var itemListB = getRoom(1208).items;
 		   
 			for(var itemIndex = 0;itemIndex < itemListA.length;++itemIndex) {
 		   
-				if(itemListA[ itemIndex ].vnum == 20639 || itemListA[ itemIndex ].vnum == 20640) {
+				if(itemListA[ itemIndex ].vnum === 20639 || itemListA[ itemIndex ].vnum === 20640) {
 				
 					itemListA[ itemIndex ].extract();
 				}
@@ -23,7 +23,7 @@ var script1209 = function(self, actor, here, args, extra) {
 		   
 			for(var itemIndex = 0;itemIndex < itemListB.length;++itemIndex) {
 		   
-				if(itemListB[ itemIndex ].vnum == 20639 || itemListB[ itemIndex ].vnum == 20640) {
+				if(itemListB[ itemIndex ].vnum === 20639 || itemListB[ itemIndex ].vnum === 20640) {
 				
 					itemListB[ itemIndex ].extract();
 				}

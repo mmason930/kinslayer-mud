@@ -1,12 +1,12 @@
 var script1738 = function(self, actor, here, args, extra) {
-	var vArgs = getArgList(args);
-	if( actor.race != constants.RACE_HUMAN || vArgs[1].toLowerCase() != "garrison" )
+	const vArgs = getArgList(args);
+	if( actor.race !== constants.RACE_HUMAN || vArgs.length < 2 || vArgs[1].toLowerCase() !== "garrison" )
 	{
 		_noblock;
 		return;
 	}
 	_block;
-	if(actor.position != constants.POS_STANDING){
+	if(actor.position !== constants.POS_STANDING){
 	    actor.send("You're not in the correct position.");
 	    return;
 	}
@@ -30,5 +30,4 @@ var script1738 = function(self, actor, here, args, extra) {
 		waitpulse 5;
 		here.echo( "The Jammed Door closes quietly." );
 	}
-	return;
 }

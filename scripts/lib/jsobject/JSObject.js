@@ -4,6 +4,21 @@ JSObject.prototype.__defineGetter__("weaponType", function() {
 	return this.value(constants.VALUE_WEAPON_TYPE);
 });
 
+JSObject.prototype.__defineGetter__("room", function()
+	{
+		if( this.inRoom )
+			return this.inRoom;
+		var holder = this.findHolder;
+		if( holder ) {
+			if( holder.room )
+				return holder.room;
+			if( holder.inRoom )
+				return holder.inRoom;
+		}
+		return undefined;
+	}
+);
+
 JSObject.prototype.hasItem = function(item_vnum, recursive)
 {
 	for(var i in this.contents) {
@@ -55,21 +70,6 @@ JSObject.prototype.getItems = function(itemList, recursive)
 	}
 	return objArr;
 };
-
-JSObject.prototype.__defineGetter__("room", function()
-	{
-		if( this.inRoom )
-			return this.inRoom;
-		var holder = this.findHolder;
-		if( holder ) {
-			if( holder.room )
-				return holder.room;
-			if( holder.inRoom )
-				return holder.inRoom;
-		}
-		return undefined;
-	}
-);
 
 //	June 2010 - Fogel
 //      Moved this method to JavaScript to avoid having crafting items show up as retooled.

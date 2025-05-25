@@ -37,6 +37,7 @@ FLUSSPFERD_CLASS_DESCRIPTION(
         ("value", bind, value)                            /* Values of the item (see list)                    */
         ("canWear", bind, can_wear)   /* Where you can wear it                            */
         ("extraFlags", bind, extra_flags)           /* If it hums, glows, etc.                          */
+		("wearFlagged", bind, wear_flagged)
         ("bitvector", bind, bitvector)         /* To set chars bits                    */
 		("moveToRoom", bind, move_to_room)
 		("moveToChar", bind, move_to_char)
@@ -138,6 +139,11 @@ public:
     {
 		return ( real ? OBJ_FLAGGED(real, flag) : false );
     }
+
+	bool wear_flagged(int flag)
+	{
+		return ( real ? OBJWEAR_FLAGGED(real, flag) : false );
+	}
 
     bool bitvector(int flag)
     {

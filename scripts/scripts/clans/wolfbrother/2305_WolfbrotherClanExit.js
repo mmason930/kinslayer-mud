@@ -1,5 +1,5 @@
 var script2305 = function(self, actor, here, args, extra) {
-	var vArgs = getArgList(args);
+	const vArgs = getArgList(args);
 	if(vArgs.length >= 2 && !str_cmp(vArgs[1], "stump")) {
 		actor.send("You knock on the stump.");
 		act("$n knocks on a stump.", true, actor, null, null, constants.TO_ROOM);

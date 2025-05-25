@@ -203,6 +203,8 @@ JSEnvironment::JSEnvironment()
 	flusspferd::create_native_function(g, "getUserIdByUserName", JS_getUserIdByUserName);
 	flusspferd::create_native_function(g, "sendToZone", JS_sendToZone);
 	flusspferd::create_native_function(g, "setTimeout", JS_setTimeout);
+	flusspferd::create_native_function(g, "getZoneBottomRoomVnum", JS_getZoneBottomRoomVnum);
+	flusspferd::create_native_function(g, "getZoneTopRoomVnum", JS_getZoneTopRoomVnum);
 
 //	flusspferd::create<flusspferd::function>("setTimeout", &JS_SetTimeout, flusspferd::param::_container = g);
 

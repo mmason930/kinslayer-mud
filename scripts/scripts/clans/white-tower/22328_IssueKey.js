@@ -1,5 +1,5 @@
 var script22328 = function(self, actor, here, args, extra) {
-	var vArgs = getArgList(args);
+	let vArgs = getArgList(args);
 	
 	if(actor.inClan(constants.CLAN_GAIDIN) || (actor.inClan(constants.CLAN_WHITE_TOWER) && actor.getRank(constants.CLAN_WHITE_TOWER) >= 5))
 	{
