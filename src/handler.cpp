@@ -1436,9 +1436,9 @@ void Character::Extract()
 {
 	Extract(UserLogoutType::unknown, false);
 }
-void Character::Extract(bool full_delete)
+void Character::Extract(bool fullDelete)
 {
-	Extract(UserLogoutType::unknown, full_delete);
+	Extract(UserLogoutType::unknown, fullDelete);
 }
 void Character::Extract(UserLogoutType *userLogoutType)
 {
@@ -1446,7 +1446,7 @@ void Character::Extract(UserLogoutType *userLogoutType)
 }
 
 /* Extract a ch completely from the world, and leave his stuff behind */
-void Character::Extract( UserLogoutType *userLogoutType, bool full_delete )
+void Character::Extract( UserLogoutType *userLogoutType, bool fullDelete, bool purgeItems )
 {
 	Character *k, *temp;
 	Descriptor *t_desc;
@@ -1454,7 +1454,7 @@ void Character::Extract( UserLogoutType *userLogoutType, bool full_delete )
 	int i = 0, freed = 0;
 	int playerRoomVnum = this->in_room ? this->in_room->getVnum() : -1;
 
-	if( purged == true )
+	if( purged )
 		return;
 
 	js_extraction_scripts( this );
@@ -1493,14 +1493,24 @@ void Character::Extract( UserLogoutType *userLogoutType, bool full_delete )
 	{
 		obj = this->carrying;
 		obj_from_char(obj);
-		obj->MoveToRoom(this->in_room);
+		if(purgeItems) {
+			obj->Extract();
+		} else {
+			obj->MoveToRoom(this->in_room);
+		}
 	}
 
 	/* transfer equipment to room, if any */
 	for (i = 0; i < NUM_WEARS; ++i)
 	{
-		if (GET_EQ(this, i))
-			unequip_char(this, i)->MoveToRoom(this->in_room);
+		if (GET_EQ(this, i)) {
+			Object *removedObj = unequip_char(this, i);
+			if(purgeItems) {
+				removedObj->Extract();
+			} else {
+				removedObj->MoveToRoom(this->in_room);
+			}
+		}
 	}
 
 	/* Set greyman marked target to NULL if we are extracting their target. */

@@ -410,7 +410,6 @@ Raid.Util = (function() {
     self.raidHeadMobAnnounceRaid = function(headMob) {
         const raidLocation = headMob.raidLocation;
         const endRoom = getRoom(raidLocation.endRoomVnum);
-
         headMob.comm("shout My army gathers at " + headMob.room.name + "! We march towards " + endRoom.name + " near " + endRoom.zoneName + ".");
     };
 
@@ -432,8 +431,8 @@ Raid.Util = (function() {
         self.loadSameRoomFollowers(raidParty, headMob);
 
         gecho(function(player) {
-           getCharCols(player, constants.CL_NORMAL);
-           return mag + "*** A NEW RAID HAS BEGUN! ***" + nrm;
+            getCharCols(player, constants.CL_NORMAL);
+            return mag + "*** A NEW RAID HAS BEGUN! ***" + nrm;
         });
 
         self.raidHeadMobAnnounceRaid(headMob);
@@ -449,5 +448,28 @@ Raid.Util = (function() {
         self.beginRaidPartyAtLocation(raidParty, raidLocation);
     };
 
+    self.onHeadMobDeath = function(headMob) {
+        const followers = headMob.followers;
+        setTimeout(60 * constants.PULSES_PER_SEC,function() {
+            followers.forEach(function(follower) {
+                if(follower.isValid) {
+                    act("$n")
+                }
+            });
+        });
+    }
+
     return self;
 })();
+
+let script20942 = function(self, actor, here, args, extra) {
+    Raid.Util.headMobMove(self);
+}
+
+let script20944 = function(self, actor, here, args, extra) {
+    Raid.Util.summonFollowersDueToFighting(self);
+}
+
+let script20945 = function(self, actor, here, args, extra) {
+    Raid.Util.onHeadMobDeath(self);
+}
