@@ -1,9 +1,9 @@
-var script164 = function(self, actor, here, args, extra) {
+let script164 = function(self, actor, here, args, extra) {
 	//Alder
 	//June 2011
 	//Sifting for Clues: speak with The Katana's Sheath weaponsmith
-	var qName = "Sifting for Clues";
-	var quest = Quest.getByName(qName);
+	let qName = "Sifting for Clues";
+	let quest = Quest.getByName(qName);
 	if ( actor.quest(qName) && !actor.questTaskProgress(qName)[1] ) {
 		waitpulse 1;
 		self.comm("emote stops what she's doing in looks up.");

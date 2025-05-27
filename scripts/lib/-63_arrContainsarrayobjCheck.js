@@ -7,5 +7,5 @@
  ********************************************************/
 function arrContains ( array, objCheck ) {
 
-	return array != null && array.indexOf(objCheck) != -1;
+	return array != null && array.indexOf(objCheck) !== -1;
 }

@@ -139,7 +139,8 @@ Raid.Util = (function() {
 
     self.numberOfReinforcementsWhileFighting = 3;
     self.desiredFollowersInRoom = 5;
-    self.probabilityOfMoving = 30;
+    self.probabilityOfMoving = 99;
+    self.probabilityOfMovingWrongDirection = 25;
 
     self.getValidRoomsInZone = function(zoneVnum, predicate) {
         return getAllRoomsInZone(zoneVnum, function(room) {
@@ -250,6 +251,12 @@ Raid.Util = (function() {
             return;
         }
 
+        // TODO: If any followers in the room are fighting, assist them instead of wandering off.
+
+        // TODO: Give a random chance of going in the wrong direction.
+
+        // TODO: Periodic shouting / yelling
+
         const headMobRoom = headMob.room;
 
         let validRoomsInZone = self.getValidRoomsInZone(headMobRoom.zoneVnum,function(room) {
@@ -275,15 +282,26 @@ Raid.Util = (function() {
             }
         }
 
+        let followersInRoomFighting = Raid.Util.getFollowersInRoom(headMob)
+            .filter(function(follower) {
+                return follower.fighting;
+            });
+
+        // Don't move if any followers in the current room are fighting.
+        if(followersInRoomFighting.length > 0) {
+            self.debugSend("Not moving because " + followersInRoomFighting.length + " follower(s) fighting.");
+            return;
+        }
+
         const advanceRoll = random(1, 100);
         if(advanceRoll >= self.probabilityOfMoving) {
+            self.debugSend("Not moving because rolled " + advanceRoll + " >= " + self.probabilityOfMoving);
             return;
         }
 
         let endRoom = getRoom(headMob.raidLocation.endRoomVnum);
 
-        self.debugSend("End Room Vnum: " + endRoom.vnum);
-        self.debugSend("End Room Name: " + endRoom.name);
+        self.debugSend("End Room Vnum: " + endRoom.vnum + ", Name: " + endRoom.name);
 
         if(headMobRoom.vnum === endRoom.vnum) {
             let numberOfAggroTargets = headMobRoom.people.filter(function(personInRoom) {
@@ -296,14 +314,29 @@ Raid.Util = (function() {
         } else {
             let firstStepToEndRoom = headMobRoom.firstStep(endRoom);
             let distanceToEndRoom = headMobRoom.distanceTo(endRoom);
-            let firstStepToEndRoomText = dirToText(firstStepToEndRoom);
+            let directionMoved = firstStepToEndRoom;
 
-            if(headMobRoom.doorIsClosed(firstStepToEndRoom)) {
-                act("$n opens the way " + firstStepToEndRoomText + ".", false, headMob, null, null, constants.TO_ROOM);
-                headMobRoom.openDoor(firstStepToEndRoom);
+            // Small chance of going the wrong way.
+            if(random(1, 100) <= self.probabilityOfMovingWrongDirection) {
+                directionMoved = headMobRoom.getRandomExitDirection(function(neighborRoom, neighborExit) {
+                    return neighborExit !== firstStepToEndRoom;
+                });
+
+                self.debugSend("Changing direction from " + (firstStepToEndRoom == null ? "NULL" : dirToText(firstStepToEndRoom)) + " to " + (directionMoved == null ? "NULL" : dirToText(directionMoved)));
             }
 
-            self.debugSend("First Step To End Room: " + firstStepToEndRoom);
+            if(directionMoved === null) {
+                return;
+            }
+
+            let directionMovedText = dirToText(directionMoved);
+
+            if(headMobRoom.doorIsClosed(directionMoved)) {
+                act("$n opens the way " + directionMovedText + ".", false, headMob, null, null, constants.TO_ROOM);
+                headMobRoom.openDoor(directionMoved);
+            }
+
+            self.debugSend("Moving: " + dirToText(directionMoved));
             self.debugSend("Distance To End Room: " + distanceToEndRoom);
 
             if(distanceToEndRoom === 1) {
@@ -311,7 +344,7 @@ Raid.Util = (function() {
             }
 
             // Move to next room
-            headMob.comm(firstStepToEndRoomText);
+            headMob.comm(directionMovedText);
         }
 
         // TODO: Add battering ram functionality for locked doors
@@ -353,7 +386,6 @@ Raid.Util = (function() {
             follower.moveToRoom(roomToSpawnFollower);
             roomToSpawnFollower.echo("A member of " + headMob.name + "'s growing army has arrived, scouting the area.");
 
-            // TODO: Remove test code.
             self.debugSend("Spawned " + follower.name + " in room " + follower.room.vnum);
 
             ++disbursedFollowerLoaded;
@@ -375,12 +407,14 @@ Raid.Util = (function() {
         headMob.comm("group all");
     };
 
-    self.beginRaid = function () {
+    self.raidHeadMobAnnounceRaid = function(headMob) {
+        const raidLocation = headMob.raidLocation;
+        const endRoom = getRoom(raidLocation.endRoomVnum);
 
-        let raidPartyArray = _.values(self.parties);
-        let rnd = random(0, raidPartyArray.length - 1);
-        let raidParty = raidPartyArray[rnd];
-        let raidLocation = raidParty.allowedStartingLocations[random(0, raidParty.allowedStartingLocations.length - 1)];
+        headMob.comm("shout My army gathers at " + headMob.room.name + "! We march towards " + endRoom.name + " near " + endRoom.zoneName + ".");
+    };
+
+    self.beginRaidPartyAtLocation = function(raidParty, raidLocation) {
         let startRoomVnum = raidLocation.startRoomVnum;
         let startLocationRoom = getRoom(startRoomVnum);
 
@@ -402,21 +436,17 @@ Raid.Util = (function() {
            return mag + "*** A NEW RAID HAS BEGUN! ***" + nrm;
         });
 
-        /**
-         * mgecho %(color_magenta%)*** RAID: %(raider.name%) retires with a flawless reputation, living on only in legend. ***%(color_normal%)
-         * mteleport %(raider%) 20800
-         * mat 20800 mpurge %(raider%)
-         * wait 60s
-         */
+        self.raidHeadMobAnnounceRaid(headMob);
+    };
 
-        /**
-         * end
-         * mgecho %(color_magenta%)*** A NEW RAID HAS BEGUN! ***%(color_normal%)
-         * mecho Mob %(headmob%) will start at room %(startloc%) this raid.
-         * mat %(startloc%) mload m %(headmob%)
-         * mload m 20801
-         * sval bellmob 20801 %(headmob%)
-         */
+    self.beginRaid = function () {
+
+        let raidPartyArray = _.values(self.parties);
+        let rnd = random(0, raidPartyArray.length - 1);
+        let raidParty = raidPartyArray[rnd];
+        let raidLocation = raidParty.allowedStartingLocations[random(0, raidParty.allowedStartingLocations.length - 1)];
+
+        self.beginRaidPartyAtLocation(raidParty, raidLocation);
     };
 
     return self;
