@@ -1052,15 +1052,6 @@ CommandHandler do_extra = DEFINE_COMMAND
 					break;
 			}
 		}
-		else if(!str_cmp(vArgs.at(0), "openai")) {
-			std::string model = vArgs.at(1);
-			OpenAIUtil::get().performResponses(
-					model,
-					"You are a non-playable character in a game. Provide me with what your character should say upon seeing someone enter the room. The character who entered is named 'Jack', gender: Male, clan: Valon Guard. Provide just the dialog. Do not provide anything else like other actions that occur. Provide it without quotation marks. Provide simply what you are saying, in a single line. Your name is 'a veteran Shienaran soldier'. You are standing in a room titled 'A Small Guardhouse' You are in the clan: Borderguards. Your character's description is: Looking to be prepared for a battle, this proud Shienaran has the look often experienced fighter.  Standing tall, he looks to have had many encounters with Shadowspawn in his years, making him a tough target for one to take down.",
-					[ch](const OpenAIResponsesResult& result) {
-						ch->send("Result: %s\r\n", result.responses.c_str());
-					});
-		}
 		else if(!str_cmp(vArgs.at(0), "testcases"))
 		{
 			TestUtil::get()->processTestCases();

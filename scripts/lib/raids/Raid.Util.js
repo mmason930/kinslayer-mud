@@ -420,9 +420,7 @@ Raid.Util = (function() {
             + " also meant for those you're marching against. Make it 1-2 sentences max.",
             onSuccess: function(result) {
                 headMob.comm("shout " + startOfShoutMessage + " " + result.response);
-            }})
-
-        //headMob.comm("shout My army gathers at " + headMob.room.name + "! We march towards " + endRoom.name + " near " + endRoom.zoneName + ".");
+            }});
     };
 
     self.beginRaidPartyAtLocation = function(raidParty, raidLocation) {
