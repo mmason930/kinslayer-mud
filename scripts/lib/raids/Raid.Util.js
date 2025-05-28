@@ -400,12 +400,10 @@ Raid.Util = (function() {
                 + " called " + headMob.room.name + ". Shout something menacing to everyone nearby. Keep it short, 1-2"
                 + " sentences maximum. Provide only the dialog, not even in quotes.",
             onSuccess: function(result) {
-                headMob.comm("shout " + startOfShoutMessage + " " + result.response);
-                headMob.shouts.push(startOfShoutMessage + " " + result.response);
+                headMob.comm("shout " + result.response);
+                headMob.shouts.push(result.response);
                 headMob.lastShoutTime = new Date();
             }});
-
-        headMob.lastShoutTime = new Date();
     };
 
     self.loadSameRoomFollowers = function(raidParty, headMob) {
