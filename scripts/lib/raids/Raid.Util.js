@@ -23,10 +23,11 @@ Raid.Party = (function() {
  */
 Raid.Location = (function() {
     return {
-        create: function(startRoomVnum, endRoomVnum) {
+        create: function(startRoomVnum, endRoomVnum, numberOfReinforcementsWhileFighting) {
             return {
                 startRoomVnum: startRoomVnum,
-                endRoomVnum: endRoomVnum
+                endRoomVnum: endRoomVnum,
+                numberOfReinforcementsWhileFighting: numberOfReinforcementsWhileFighting
             }
         }
     }
@@ -39,17 +40,17 @@ Raid.Util = (function() {
 
     let self = {};
     self.startLocationMap = {
-        gapBasin: Raid.Location.create(20622, 8068),
-        stagnantPond: Raid.Location.create(1024, 8170),
-        falDaraToGapRoad: Raid.Location.create(19301, 8068),
-        blightedScout: Raid.Location.create(1090, 8170),
-        northOfKeep: Raid.Location.create(5658, 8068),
-        nearBaerlonEastGate: Raid.Location.create(10247, 4571),
-        northwestOfLugard: Raid.Location.create(412, 8436),
-        bowlPatrolInGap: Raid.Location.create(20675, 1779),
-        pathCavePatrolNorthwestTarValon: Raid.Location.create(1239, 21390),
-        falMoranPatrol: Raid.Location.create(6463, 10392),
-        eastOfCaemlynNearAringill: Raid.Location.create(21473, 117)
+        gapBasin: Raid.Location.create(20622, 8068, 3),
+        stagnantPond: Raid.Location.create(1024, 8170, 4),
+        falDaraToGapRoad: Raid.Location.create(19301, 8068, 3),
+        blightedScout: Raid.Location.create(1090, 8170, 3),
+        northOfKeep: Raid.Location.create(5658, 8068, 3),
+        nearBaerlonEastGate: Raid.Location.create(10247, 4571, 3),
+        northwestOfLugard: Raid.Location.create(412, 8436, 3),
+        bowlPatrolInGap: Raid.Location.create(20675, 1779, 3),
+        pathCavePatrolNorthwestTarValon: Raid.Location.create(1239, 21390, 3),
+        falMoranPatrol: Raid.Location.create(6463, 10392, 3),
+        eastOfCaemlynNearAringill: Raid.Location.create(21473, 117, 3)
     };
 
     self.parties = {
@@ -137,7 +138,6 @@ Raid.Util = (function() {
         )
     };
 
-    self.numberOfReinforcementsWhileFighting = 3;
     self.desiredFollowersInRoom = 5;
     self.probabilityOfMoving = 99;
     self.probabilityOfMovingWrongDirection = 15;
@@ -187,7 +187,7 @@ Raid.Util = (function() {
         self.debugSend("All checks passed. Proceeding with follower summon.");
         self.summonFollowersToHeadMobRoom(
             headMob,
-            self.numberOfReinforcementsWhileFighting,
+            headMob.raidLocation.numberOfReinforcementsWhileFighting,
             function(headMob) {
                 headMob.comm("yell " + capFirstLetter(headMob.fighting.name) + " is attacking me at " + headMob.room.name + "! Help!");
             },
