@@ -344,7 +344,7 @@ public:
     void lag(int pulses);
 
 	void start_timer(float seconds);
-	void extract();
+	void extract(bool purgeItem);
 
 	void comm(const char*);
 	flusspferd::value load_obj( const int vnum );

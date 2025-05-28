@@ -410,7 +410,19 @@ Raid.Util = (function() {
     self.raidHeadMobAnnounceRaid = function(headMob) {
         const raidLocation = headMob.raidLocation;
         const endRoom = getRoom(raidLocation.endRoomVnum);
-        headMob.comm("shout My army gathers at " + headMob.room.name + "! We march towards " + endRoom.name + " near " + endRoom.zoneName + ".");
+        const startOfShoutMessage = "My army gathers at " + headMob.room.name + "! We march towards " + endRoom.name + " near " + endRoom.zoneName + ".";
+        llmResponse({
+            model: "gpt-4.1-mini",
+            prompt: "You're an NPC in a game. Your name is: " + headMob.name + ". You are the head NPC leading a small"
+            + " army in a raid. Your raid has just begin. You just shouted a menacing message to announce your raid,"
+            + " which said: " + startOfShoutMessage + ". Generate me the next 1-2 sentences to add to this dialog."
+            + " Provide the dialog only, nothing else, and not in quotes. The announcement should be menacing, and"
+            + " also meant for those you're marching against. Make it 1-2 sentences max.",
+            onSuccess: function(result) {
+                headMob.comm("shout " + startOfShoutMessage + " " + result.response);
+            }})
+
+        //headMob.comm("shout My army gathers at " + headMob.room.name + "! We march towards " + endRoom.name + " near " + endRoom.zoneName + ".");
     };
 
     self.beginRaidPartyAtLocation = function(raidParty, raidLocation) {
@@ -435,6 +447,10 @@ Raid.Util = (function() {
             return mag + "*** A NEW RAID HAS BEGUN! ***" + nrm;
         });
 
+        headMob.attach(20942);
+        headMob.attach(20944);
+        headMob.attach(20945);
+
         self.raidHeadMobAnnounceRaid(headMob);
     };
 
@@ -453,7 +469,9 @@ Raid.Util = (function() {
         setTimeout(60 * constants.PULSES_PER_SEC,function() {
             followers.forEach(function(follower) {
                 if(follower.isValid) {
-                    act("$n")
+                    act("$n flees into the distance, $s leader having perished.", false, follower, null, null, constants.TO_ROOM);
+                    act("You flee into the distance, your leader having perished.", false, follower, null, null, constants.TO_CHAR);
+                    follower.extract(true);
                 }
             });
         });

@@ -1601,15 +1601,8 @@ void Character::Extract( UserLogoutType *userLogoutType, bool fullDelete, bool p
 		freed = 1;
 	}
 
-	if (!freed && (this->desc && !full_delete))
+	if (!freed && (this->desc && !fullDelete))
 		STATE(this->desc) = CON_CLOSE;
-/***
-	else
-	{  // if a player gets purged from within the game 
-		if (!freed)
-			delete (this);
-	}
-***/
 }
 
 /* ***********************************************************************
