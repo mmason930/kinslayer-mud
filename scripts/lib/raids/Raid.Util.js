@@ -140,7 +140,8 @@ Raid.Util = (function() {
 
     self.desiredFollowersInRoom = 5;
     self.probabilityOfMoving = 99;
-    self.probabilityOfMovingWrongDirection = 15;
+    self.probabilityOfMovingWrongDirection = 8;
+    self.secondsBetweenShouts = 180;
 
     self.getValidRoomsInZone = function(zoneVnum, predicate) {
         return getAllRoomsInZone(zoneVnum, function(room) {
@@ -252,6 +253,10 @@ Raid.Util = (function() {
         }
 
         const headMobRoom = headMob.room;
+
+        if(self.canShout(headMob)) {
+            self.performPeriodicShout(headMob);
+        }
 
         let validRoomsInZone = self.getValidRoomsInZone(headMobRoom.zoneVnum,function(room) {
             return room.vnum !== headMobRoom.vnum;
@@ -386,6 +391,23 @@ Raid.Util = (function() {
         }
     };
 
+    self.performPeriodicShout = function(headMob) {
+
+        llmResponse({
+            model: "gpt-4.1-mini",
+            prompt: "You're an NPC in a game. Your name is: " + headMob.name + ". You are the head NPC leading a small"
+                + " army in a raid. Your raid is in progress and you are advancing on your target. You are now in a room"
+                + " called " + headMob.room.name + ". Shout something menacing to everyone nearby. Keep it short, 1-2"
+                + " sentences maximum. Provide only the dialog, not even in quotes.",
+            onSuccess: function(result) {
+                headMob.comm("shout " + startOfShoutMessage + " " + result.response);
+                headMob.shouts.push(startOfShoutMessage + " " + result.response);
+                headMob.lastShoutTime = new Date();
+            }});
+
+        headMob.lastShoutTime = new Date();
+    };
+
     self.loadSameRoomFollowers = function(raidParty, headMob) {
         // Load the followers in the same room as the head raid mob.
         [
@@ -414,7 +436,19 @@ Raid.Util = (function() {
             + " also meant for those you're marching against. Make it 1-2 sentences max.",
             onSuccess: function(result) {
                 headMob.comm("shout " + startOfShoutMessage + " " + result.response);
+                headMob.shouts.push(startOfShoutMessage + " " + result.response);
+                headMob.lastShoutTime = new Date();
             }});
+    };
+
+    self.canShout = function(headMob) {
+        let secondsSinceLastShout = self.secondsBetweenShouts;
+
+        if(headMob.lastShoutTime !== null) {
+            secondsSinceLastShout = parseInt(new Date().getTime() / 1000) - parseInt(headMob.lastShoutTime.getTime() / 1000);
+        }
+
+        return secondsSinceLastShout >= self.secondsBetweenShouts;
     };
 
     self.beginRaidPartyAtLocation = function(raidParty, raidLocation) {
@@ -442,6 +476,7 @@ Raid.Util = (function() {
         headMob.attach(20942);
         headMob.attach(20944);
         headMob.attach(20945);
+        headMob.shouts = [];
 
         self.raidHeadMobAnnounceRaid(headMob);
     };
