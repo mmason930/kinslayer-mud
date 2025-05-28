@@ -22,6 +22,7 @@
 #include "../Descriptor.h"
 #include "../CharacterUtil.h"
 #include "../rooms/Room.h"
+#include "../openai/OpenAIUtil.h"
 
 
 extern const int rev_dir[];
@@ -1530,6 +1531,35 @@ void JS_sendToZone(int zoneNumber, flusspferd::string message)
 	Zone *zone = ZoneManager::GetManager().GetZoneByVnum( zoneNumber );
 	if( !zone ) return;
 	sendToZone(message.c_str(), zone->GetRnum());
+}
+
+flusspferd::object JS_llmResponse(const flusspferd::object &requestObject)
+{
+	flusspferd::object responseObject;
+
+	std::string model = requestObject.get_property("model").to_string().to_string();
+	std::string prompt = requestObject.get_property("prompt").to_string().to_string();
+	flusspferd::value onSuccessCallback = requestObject.get_property("onSuccess");
+	std::string globalObjectKey = StringUtil::getRandomString(30);
+	flusspferd::object globalObject = flusspferd::global();
+
+	globalObject.set_property(globalObjectKey, onSuccessCallback);
+
+	OpenAIUtil::get().performResponses(
+			model,
+			prompt,
+			[globalObjectKey](const OpenAIResponsesResult& result) {
+				flusspferd::object globalObjectPostCompletion = flusspferd::global();
+
+				flusspferd::object resultObject = flusspferd::create_object();
+				resultObject.set_property("response", result.responses);
+
+				globalObjectPostCompletion.call(globalObjectKey, resultObject);
+
+				globalObjectPostCompletion.delete_property(globalObjectKey);
+			});
+
+	return responseObject;
 }
 
 void JS_setTimeout(unsigned int pulses, flusspferd::value callback, flusspferd::object arguments)

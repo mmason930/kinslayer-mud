@@ -8,7 +8,7 @@ All commands in this document should be executed from the kinslayer-loader direc
 ## Start game container
 The simplest way to star the container is to run the following:
 ```
-docker-compose up game
+docker compose up game
 ```
 
 By default, the container will perform a clean build of the game, resulting in a full compilation of the game code.
@@ -16,10 +16,10 @@ By default, the container will perform a clean build of the game, resulting in a
 Becuase this is time consuming, you can alternatively run the container and perform a partial build:
 
 ```
-docker-compose run --service-ports game gateway partial
+docker compose run --service-ports game gateway partial
 ```
 
-Note that running docker-compose run may change the name of the running container(from game.kinslayermud.org below). You can run docker container ls to get the actual name of the container if you need it for subsequent commands.
+Note that running docker compose run may change the name of the running container(from game.kinslayermud.org below). You can run docker container ls to get the actual name of the container if you need it for subsequent commands.
 
 ## Incremental build
 While the container is running, you can perform a partial build by running:
@@ -39,7 +39,7 @@ docker exec -it game.kinslayermud.org bash -c 'make clean -C /kinslayer/src && m
 To stop the container, run:
 
 ```
-docker-compose down game
+docker compose down game
 ```
 
 ## After starting the container

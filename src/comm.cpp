@@ -74,6 +74,7 @@
 #include "MobLoadLogger.h"
 #include "editor-interface/EditorInterfaceInstance.h"
 #include <boost/filesystem.hpp>
+#include "openai/OpenAIUtil.h"
 
 #include "commands/infrastructure/CommandUtil.h"
 #include "commands/infrastructure/CommandInfo.h"
@@ -714,7 +715,7 @@ void initiateGame( int port )
 
 	listener = new kuListener(port, TCP);
 
-	if( listener->isListening() == false ) {
+	if( !listener->isListening() ) {
 
 		Log("Could not bind to port %d.", port);
 
@@ -722,11 +723,8 @@ void initiateGame( int port )
 	}
 
 	listener->setCloseDescriptorCallback(&onDescriptorClose);
-
 	listener->setOpenDescriptorCallback(&onDescriptorOpen);
-
 	listener->setBeforeSocketWriteCallback(&onBeforeSocketWrite);
-	
 	listener->setAfterSocketWriteCallback(&onAfterSocketWrite);
 
 	if(!(listener->enableKeepAlive()))
@@ -748,16 +746,9 @@ void initiateGame( int port )
 	Log("Waiting for gateway to establish connection.");
 	waitForGatewayConnection();
 
-	//TODO:
-	//	1) Obtain a list of players to load back into the game.
-	//	2) 
-
-	try
-	{
+	try {
 		boot_db();
-	}
-	catch(sql::QueryException &queryException)
-	{
+	} catch(sql::QueryException &queryException) {
 		MudLog(BRF, 0, TRUE, "Could not boot game. SQL Exception: %s", queryException.getMessage().c_str());
 
 		throw queryException;
@@ -962,6 +953,9 @@ void initiateGame( int port )
 
 	Log("Freeing Stat Manager...");
 	StatManager::GetManager().Free();
+
+	Log("Freeing OpenAIUtil...");
+	OpenAIUtil::get().free();
 
 	Log("Freeing Comm Manager...");
 	CommManager::GetManager().Free();

@@ -136,6 +136,8 @@ OBJFILES =	accounts.o \
 			olc/oedit.o \
 			olc/olc.o \
 			olc/OlcEditType.o \
+			openai/OpenAIClient.o \
+			openai/OpenAIUtil.o \
 			playerportal/PlayerPortalCommandProcessor.o \
 			playerportal/PlayerPortalDescriptor.o \
 			playerportal/PlayerPortalDescriptorStatus.o \

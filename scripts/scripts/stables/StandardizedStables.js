@@ -44,7 +44,7 @@ var script205 = function(self, actor, here, args, extra) {
 		self.comm("give ticket " + actor.name);
 		ticket.setPval("mount", iMountVnum);
 
-		if(ticket.carriedBy != actor)
+		if(ticket.carriedBy !== actor)
 		{
 			self.say("You can't seem to carry this ticket, so I'll just leave it here.");
 			wait 1;
@@ -69,7 +69,7 @@ var script206 = function(self, actor, here, args, extra) {
 		iHorseVnum = parseInt(objectReceived.getPval("mount"));
 	else
 		iHorseVnum = 201;//Default, for old tickets.
-	if( !horseMapper[ iHorseVnum ] || ticketMapper[ here.vnum ] != objectReceived.vnum ) {
+	if( !horseMapper[ iHorseVnum ] || ticketMapper[ here.vnum ] !== objectReceived.vnum ) {
 		wait 1;
 		self.say("Sorry, but we don't accept that here.");
 		waitpulse 5;
@@ -77,7 +77,7 @@ var script206 = function(self, actor, here, args, extra) {
 		objectReceived.moveToChar( actor );
 		return;
 	}
-	if( iHorseVnum == 201 && getSval( actor, 207, "horse" ) )
+	if( iHorseVnum === 201 && getSval( actor, 207, "horse" ) )
 	{
 		wait 1;
 		self.say("You already have a horse issued!");

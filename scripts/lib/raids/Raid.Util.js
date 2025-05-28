@@ -139,7 +139,8 @@ Raid.Util = (function() {
 
     self.numberOfReinforcementsWhileFighting = 3;
     self.desiredFollowersInRoom = 5;
-    self.probabilityOfMoving = 30;
+    self.probabilityOfMoving = 99;
+    self.probabilityOfMovingWrongDirection = 25;
 
     self.getValidRoomsInZone = function(zoneVnum, predicate) {
         return getAllRoomsInZone(zoneVnum, function(room) {
@@ -250,6 +251,12 @@ Raid.Util = (function() {
             return;
         }
 
+        // TODO: If any followers in the room are fighting, assist them instead of wandering off.
+
+        // TODO: Give a random chance of going in the wrong direction.
+
+        // TODO: Periodic shouting / yelling
+
         const headMobRoom = headMob.room;
 
         let validRoomsInZone = self.getValidRoomsInZone(headMobRoom.zoneVnum,function(room) {
@@ -275,15 +282,26 @@ Raid.Util = (function() {
             }
         }
 
+        let followersInRoomFighting = Raid.Util.getFollowersInRoom(headMob)
+            .filter(function(follower) {
+                return follower.fighting;
+            });
+
+        // Don't move if any followers in the current room are fighting.
+        if(followersInRoomFighting.length > 0) {
+            self.debugSend("Not moving because " + followersInRoomFighting.length + " follower(s) fighting.");
+            return;
+        }
+
         const advanceRoll = random(1, 100);
         if(advanceRoll >= self.probabilityOfMoving) {
+            self.debugSend("Not moving because rolled " + advanceRoll + " >= " + self.probabilityOfMoving);
             return;
         }
 
         let endRoom = getRoom(headMob.raidLocation.endRoomVnum);
 
-        self.debugSend("End Room Vnum: " + endRoom.vnum);
-        self.debugSend("End Room Name: " + endRoom.name);
+        self.debugSend("End Room Vnum: " + endRoom.vnum + ", Name: " + endRoom.name);
 
         if(headMobRoom.vnum === endRoom.vnum) {
             let numberOfAggroTargets = headMobRoom.people.filter(function(personInRoom) {
@@ -296,14 +314,29 @@ Raid.Util = (function() {
         } else {
             let firstStepToEndRoom = headMobRoom.firstStep(endRoom);
             let distanceToEndRoom = headMobRoom.distanceTo(endRoom);
-            let firstStepToEndRoomText = dirToText(firstStepToEndRoom);
+            let directionMoved = firstStepToEndRoom;
 
-            if(headMobRoom.doorIsClosed(firstStepToEndRoom)) {
-                act("$n opens the way " + firstStepToEndRoomText + ".", false, headMob, null, null, constants.TO_ROOM);
-                headMobRoom.openDoor(firstStepToEndRoom);
+            // Small chance of going the wrong way.
+            if(random(1, 100) <= self.probabilityOfMovingWrongDirection) {
+                directionMoved = headMobRoom.getRandomExitDirection(function(neighborRoom, neighborExit) {
+                    return neighborExit !== firstStepToEndRoom;
+                });
+
+                self.debugSend("Changing direction from " + (firstStepToEndRoom == null ? "NULL" : dirToText(firstStepToEndRoom)) + " to " + (directionMoved == null ? "NULL" : dirToText(directionMoved)));
             }
 
-            self.debugSend("First Step To End Room: " + firstStepToEndRoom);
+            if(directionMoved === null) {
+                return;
+            }
+
+            let directionMovedText = dirToText(directionMoved);
+
+            if(headMobRoom.doorIsClosed(directionMoved)) {
+                act("$n opens the way " + directionMovedText + ".", false, headMob, null, null, constants.TO_ROOM);
+                headMobRoom.openDoor(directionMoved);
+            }
+
+            self.debugSend("Moving: " + dirToText(directionMoved));
             self.debugSend("Distance To End Room: " + distanceToEndRoom);
 
             if(distanceToEndRoom === 1) {
@@ -311,7 +344,7 @@ Raid.Util = (function() {
             }
 
             // Move to next room
-            headMob.comm(firstStepToEndRoomText);
+            headMob.comm(directionMovedText);
         }
 
         // TODO: Add battering ram functionality for locked doors
@@ -353,7 +386,6 @@ Raid.Util = (function() {
             follower.moveToRoom(roomToSpawnFollower);
             roomToSpawnFollower.echo("A member of " + headMob.name + "'s growing army has arrived, scouting the area.");
 
-            // TODO: Remove test code.
             self.debugSend("Spawned " + follower.name + " in room " + follower.room.vnum);
 
             ++disbursedFollowerLoaded;
@@ -377,8 +409,18 @@ Raid.Util = (function() {
 
     self.raidHeadMobAnnounceRaid = function(headMob) {
         const raidLocation = headMob.raidLocation;
-
-        headMob.comm("shout My army gathers at " + headMob.room.name);
+        const endRoom = getRoom(raidLocation.endRoomVnum);
+        const startOfShoutMessage = "My army gathers at " + headMob.room.name + "! We march towards " + endRoom.name + " near " + endRoom.zoneName + ".";
+        llmResponse({
+            model: "gpt-4.1-mini",
+            prompt: "You're an NPC in a game. Your name is: " + headMob.name + ". You are the head NPC leading a small"
+            + " army in a raid. Your raid has just begin. You just shouted a menacing message to announce your raid,"
+            + " which said: " + startOfShoutMessage + ". Generate me the next 1-2 sentences to add to this dialog."
+            + " Provide the dialog only, nothing else, and not in quotes. The announcement should be menacing, and"
+            + " also meant for those you're marching against. Make it 1-2 sentences max.",
+            onSuccess: function(result) {
+                headMob.comm("shout " + startOfShoutMessage + " " + result.response);
+            }});
     };
 
     self.beginRaidPartyAtLocation = function(raidParty, raidLocation) {
@@ -403,6 +445,10 @@ Raid.Util = (function() {
             return mag + "*** A NEW RAID HAS BEGUN! ***" + nrm;
         });
 
+        headMob.attach(20942);
+        headMob.attach(20944);
+        headMob.attach(20945);
+
         self.raidHeadMobAnnounceRaid(headMob);
     };
 
@@ -414,23 +460,20 @@ Raid.Util = (function() {
         let raidLocation = raidParty.allowedStartingLocations[random(0, raidParty.allowedStartingLocations.length - 1)];
 
         self.beginRaidPartyAtLocation(raidParty, raidLocation);
-
-        /**
-         * mgecho %(color_magenta%)*** RAID: %(raider.name%) retires with a flawless reputation, living on only in legend. ***%(color_normal%)
-         * mteleport %(raider%) 20800
-         * mat 20800 mpurge %(raider%)
-         * wait 60s
-         */
-
-        /**
-         * end
-         * mgecho %(color_magenta%)*** A NEW RAID HAS BEGUN! ***%(color_normal%)
-         * mecho Mob %(headmob%) will start at room %(startloc%) this raid.
-         * mat %(startloc%) mload m %(headmob%)
-         * mload m 20801
-         * sval bellmob 20801 %(headmob%)
-         */
     };
+
+    self.onHeadMobDeath = function(headMob) {
+        const followers = headMob.followers;
+        setTimeout(60 * constants.PULSES_PER_SEC,function() {
+            followers.forEach(function(follower) {
+                if(follower.isValid) {
+                    act("$n flees into the distance, $s leader having perished.", false, follower, null, null, constants.TO_ROOM);
+                    act("You flee into the distance, your leader having perished.", false, follower, null, null, constants.TO_CHAR);
+                    follower.extract(true);
+                }
+            });
+        });
+    }
 
     return self;
 })();
@@ -441,4 +484,8 @@ let script20942 = function(self, actor, here, args, extra) {
 
 let script20944 = function(self, actor, here, args, extra) {
     Raid.Util.summonFollowersDueToFighting(self);
+}
+
+let script20945 = function(self, actor, here, args, extra) {
+    Raid.Util.onHeadMobDeath(self);
 }

@@ -19,6 +19,9 @@ MobLoadLogger::~MobLoadLogger()
 
 void MobLoadLogger::logMobLoad(const int mobVnum, const std::string &message)
 {
+	// Disabling - May 24 2025
+	return;
+
 	MobLoadLogEntry mobLoadLogEntry;
 
 	mobLoadLogEntry.mobVnum = mobVnum;

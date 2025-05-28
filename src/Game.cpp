@@ -61,6 +61,11 @@ std::string Game::getScriptPullCommand()
 	return getBasicConfigValue("Script Pull Command");
 }
 
+std::string Game::getOpenAIApiKey()
+{
+	return hasBasicConfiguration("OpenAI API Key") ? getBasicConfigValue("OpenAI API Key") : std::string("");
+}
+
 void Game::loadBasicConfig()
 {
 	Log("Loading Basic Configuration...");

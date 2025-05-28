@@ -44,6 +44,9 @@ sed -i 's|${DB_HOSTNAME}|'"$DB_HOSTNAME"'|' lib/misc/BasicConfig
 if [[ ! -z "$SENDGRID_API_KEY" ]]; then
 	sed -i 's|${SENDGRID_API_KEY}|'"$SENDGRID_API_KEY"'|' lib/misc/BasicConfig
 fi
+if [[ ! -z "$OPENAI_API_KEY" ]]; then
+	sed -i 's|${OPENAI_API_KEY}|'"$OPENAI_API_KEY"'|' lib/misc/BasicConfig
+fi
 
 ### Set up core dump filename pattern - the defaults on some systems (ex: Ubuntu)
 ### don't work for us, so we'll need to set it explicitly. Note that this operation

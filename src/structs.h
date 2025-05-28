@@ -2081,9 +2081,9 @@ public:
 	void InterruptTimer();
 	void Appear();
 	void Extract();
-	void Extract(bool full_delete);
+	void Extract(bool fullDelete);
 	void Extract(class UserLogoutType *userLogoutType);
-	void Extract(class UserLogoutType *userLogoutType, bool full_delete);
+	void Extract(class UserLogoutType *userLogoutType, bool fullDelete, bool purgeItems = false);
 	void SetWarrant( Character *warranter, int clan, bool hide );
 	void RemoveWarrant( Character *pardoner, int num );
 	void LayTrack( Room *room, int direction );

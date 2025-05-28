@@ -65,12 +65,12 @@ JSRoom.prototype.lockDoor = function(dir, bOtherSide)
  **/
 
 JSRoom.prototype.limitObjLoadToContainer = function( containerVnum, objVnumToLoad, objMax ) {
-    var container = 0;//This variable will store JSObject of container
-    var items = this.items;//Array of items in room
-    var people = this.people;//Array of people in room
+    let container = 0;//This variable will store JSObject of container
+    let items = this.items;//Array of items in room
+    let people = this.people;//Array of people in room
     /**Loop through room to find container as item**/
     for ( var i = 0; i < items.length; i++ ) {
-        if ( items[i].vnum == containerVnum ) {
+        if ( items[i].vnum === containerVnum ) {
             container = items[i];//Passed container is item in room
             var containerItems = container.contents;
             break;
@@ -117,46 +117,59 @@ JSRoom.prototype.doorName_cmp = function( strDoorName ) {
     return -1;//The supplied door name did not match any doors in the room
 }
 
-// Purges all of the objects in a room. If skipChests is true, skips all objects flagged with ITEM_CHEST
-JSRoom.prototype.purgeItems = function( skipChests) {
-    for (var _autoKey in this.items) {
-    	var obj = this.items[_autoKey];
-        if( !skipChests || !obj.extraFlags(constants.ITEM_CHEST) )
-            obj.extract();
+// Purges all objects in a room. If skipChests is true, skips all objects flagged with ITEM_CHEST
+JSRoom.prototype.purgeItems = function(skipChests) {
+    const itemsInRoom = this.items;
+    for (let itemIndex in itemsInRoom) {
+    	const item = itemsInRoom[itemIndex];
+        if( !skipChests || !item.extraFlags(constants.ITEM_CHEST) ) {
+            item.extract();
+        }
     }
 }
 JSRoom.prototype.purgeMobs = function() {
-    for (var _autoKey in this.people) {
-    	var mob = this.people[_autoKey];
-        if (mob.vnum > 0)
-            mob.extract();
+    const peopleInRoom = this.people;
+    for (let personIndex in peopleInRoom) {
+    	let personInRoom = peopleInRoom[personIndex];
+        if (personInRoom.isMob()) {
+            personInRoom.extract();
+        }
     }
 }
 
 // Returns an array of all the connected players within a zone with the specified vnum
-function getPlayersInZone(zone) {
-    var players = [];
-    for (var _autoKey in getConnectedPlayers()) {
-    	var person = getConnectedPlayers()[_autoKey];
-        if( person.room.zoneVnum == zone ) {
-            players.push(person);
-        }
-    }
-    return players;
+function getPlayersInZone(zoneVnum) {
+    const connectedPlayers = getConnectedPlayers();
+    return connectedPlayers.filter(function(player) {
+        return player.room.zoneVnum === zoneVnum;
+    });
 }
 
 //Alder
 //June 2011
 /** Returns a random direction constant that leads to one of the room's exits **/
-JSRoom.prototype.getRandomExitDirection = function () {
-    var exits = this.neighbors;
-    for ( var i = 0; i < exits.length; i++ ) {
-        if ( exits[i] == undefined ) {
-            exits.splice(i,1);
-            i--;
+JSRoom.prototype.getRandomExitDirection = function (predicate) {
+    const exitDirections = [];
+    const neighbors = this.neighbors;
+
+    for ( let direction = 0; direction < neighbors.length; direction++ ) {
+        const neighborRoom = neighbors[direction];
+        if ( typeof neighborRoom === 'undefined' ) {
+            continue;
         }
+        if(predicate && !predicate(neighborRoom, direction)) {
+            continue;
+        }
+
+        exitDirections.push(direction);
     }
-    return this.firstStep(exits[random(0,exits.length-1)]);
+
+    const numberOfExitDirections = exitDirections.length;
+    if(numberOfExitDirections === 0) {
+        return null;
+    }
+
+    return exitDirections[random(0, numberOfExitDirections - 1)];
 }
 
 /**************************************************************************

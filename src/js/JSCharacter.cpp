@@ -362,10 +362,11 @@ void JSCharacter::move_to_room( JSRoom *r )
 		real->MoveToRoom( r->toReal() );
 	}
 }
-void JSCharacter::extract()
+void JSCharacter::extract(bool purgeItem)
 {
+	std::cout << "PURGE ITEMS: " << purgeItem << std::endl;
 	if( real && !real->IsPurged() && !real->IsProto() ) {
-		real->Extract(UserLogoutType::scriptExtraction);
+		real->Extract(UserLogoutType::scriptExtraction, false, purgeItem);
 	}
 }
 
