@@ -79,7 +79,7 @@ Raid.Util = (function() {
 
         kari: Raid.Party.create(
             20892,
-            [20955,20956,20962,20963,20964],
+            [20955,20956,20957,20958,20959],
             [
                 self.startLocationMap.gapBasin,
                 self.startLocationMap.stagnantPond,
@@ -140,7 +140,7 @@ Raid.Util = (function() {
     self.numberOfReinforcementsWhileFighting = 3;
     self.desiredFollowersInRoom = 5;
     self.probabilityOfMoving = 99;
-    self.probabilityOfMovingWrongDirection = 25;
+    self.probabilityOfMovingWrongDirection = 15;
 
     self.getValidRoomsInZone = function(zoneVnum, predicate) {
         return getAllRoomsInZone(zoneVnum, function(room) {
@@ -250,12 +250,6 @@ Raid.Util = (function() {
         if(headMob.position !== constants.POS_STANDING) {
             return;
         }
-
-        // TODO: If any followers in the room are fighting, assist them instead of wandering off.
-
-        // TODO: Give a random chance of going in the wrong direction.
-
-        // TODO: Periodic shouting / yelling
 
         const headMobRoom = headMob.room;
 
