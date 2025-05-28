@@ -151,7 +151,9 @@ std::string Execute( const char *command );
 
 #define LOWER(c)		(((c)>='A'  && (c) <= 'Z') ? ((c)+('a'-'A')) : (c))
 #define UPPER(c)		(((c)>='a'  && (c) <= 'z') ? ((c)+('A'-'a')) : (c))
-#define is_alpha(c)		( 'A' < c && 'z' > c )
+
+#define IS_ALPHA(c)        ( 'A' < c && 'z' > c )
+
 
 #define	core_dump()		core_dump_real(__FILE__, __LINE__)
 

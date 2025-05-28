@@ -49,7 +49,6 @@
 #include "TextTableBuilder.h"
 
 #include "test/TestUtil.h"
-
 #include "commands/infrastructure/CommandInfo.h"
 
 #include "items/ItemUtil.h"

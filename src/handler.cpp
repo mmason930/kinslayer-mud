@@ -383,7 +383,7 @@ bool isname(const char *str, const char *namelist)
 			//If the 'str' has all been read...
 			if (!*str)
 			{
-				if(!is_alpha(*namelist))
+				if(!IS_ALPHA(*namelist))
 					return true;
 				else if(*namelist == ' ')
 					break;
@@ -397,7 +397,7 @@ bool isname(const char *str, const char *namelist)
 
 		++namelist;
 		/* skip to next name */
-		for (; is_alpha(*namelist); ++namelist);
+		for (; IS_ALPHA(*namelist); ++namelist);
 		for (; *namelist == ' '; ++namelist);
 	}
 }
