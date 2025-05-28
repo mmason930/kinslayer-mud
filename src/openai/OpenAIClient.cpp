@@ -6,10 +6,23 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/ssl.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include "../jsoncpp/json.h"
+
+void normalizePunctuation(std::string &inputString) {
+	boost::replace_all(inputString, "―", "--");
+	boost::replace_all(inputString, "—", "--");
+	boost::replace_all(inputString, "–", "--");
+	boost::replace_all(inputString, "‒", "--");
+	boost::replace_all(inputString, "‑", "--");
+	boost::replace_all(inputString, "‐", "--");
+	boost::replace_all(inputString, "…", "...");
+	boost::replace_all(inputString, "‥", "..");
+	boost::replace_all(inputString, "․", ".");
+}
 
 OpenAIResponsesResult OpenAIClient::performResponses(
 		const std::string& model,
@@ -17,13 +30,13 @@ OpenAIResponsesResult OpenAIClient::performResponses(
 		double temperature
 		) const
 {
-	namespace asio  = boost::asio;
+	namespace asio = boost::asio;
 	namespace beast = boost::beast;
-	namespace http  = beast::http;
-	using     tcp   = asio::ip::tcp;
+	namespace http = beast::http;
+	using tcp = asio::ip::tcp;
 
-	const std::string body    = generateResponsesRequestBody(model, userPrompt, temperature);
-	auto              headers = generateRequestHeaders();
+	const std::string body = generateResponsesRequestBody(model, userPrompt, temperature);
+	auto headers = generateRequestHeaders();
 
 	try {
 		asio::io_context ioc;
@@ -73,6 +86,8 @@ OpenAIResponsesResult OpenAIClient::performResponses(
 
 		std::string responseBody = res.body();
 		std::string responses = this->extractAssistantText(responseBody);
+		normalizePunctuation(responses);
+
 		return {true, responses};
 	}
 	catch (const std::exception& ex) {
