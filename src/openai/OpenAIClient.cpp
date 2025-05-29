@@ -22,6 +22,11 @@ void normalizePunctuation(std::string &inputString) {
 	boost::replace_all(inputString, "…", "...");
 	boost::replace_all(inputString, "‥", "..");
 	boost::replace_all(inputString, "․", ".");
+	boost::replace_all(inputString, "’", "'");
+	boost::replace_all(inputString, "‘", "'");
+	
+
+
 }
 
 OpenAIResponsesResult OpenAIClient::performResponses(
