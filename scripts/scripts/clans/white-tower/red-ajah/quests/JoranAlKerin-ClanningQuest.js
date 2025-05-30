@@ -13,9 +13,9 @@ let script13233 = function(self, actor, here, args, extra) {
                 }
             });
         } else if(channelingRoll <= 50) {
-            act("$n extends his arms outwards towards $N, and a fireball fires from $s hands!", false, self, null, null, constants.TO_NOTVICT);
-            act("$n extends his arms outwards towards you, and a fireball fires from $s hands!", false, self, null, null, constants.TO_VICT);
-            act("You extend your arms outwards towards $N and a fireball fires from your hands!", false, self, null, null, constants.TO_CHAR);
+            act("$n extends his arms outwards towards $N, and a fireball fires from $s hands!", false, self, null, self.fighting, constants.TO_NOTVICT);
+            act("$n extends his arms outwards towards you, and a fireball fires from $s hands!", false, self, null, self.fighting, constants.TO_VICT);
+            act("You extend your arms outwards towards $N and a fireball fires from your hands!", false, self, null, self.fighting, constants.TO_CHAR);
             self.fighting.damage(random(35, 75), self);
         }
 
