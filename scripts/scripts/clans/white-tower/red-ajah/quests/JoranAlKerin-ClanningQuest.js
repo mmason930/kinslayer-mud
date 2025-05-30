@@ -1,4 +1,4 @@
-let script13219 = function(self, actor, here, args, extra) {
+let script13233 = function(self, actor, here, args, extra) {
 
     const seenPlayers = here.people.filter(function(personInRoom) {
         if(!personInRoom.isMob() && self.canSee(personInRoom)) {
