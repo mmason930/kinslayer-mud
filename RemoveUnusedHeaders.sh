@@ -18,7 +18,7 @@ do
     for i in $includes
     do
         touch "$file" # just to be sure it recompiles
-	echo "$file: Testing $i"
+        echo "$file: Testing $i"
         removeinclude "$file" "$i"
         if make -j10 >/dev/null  2>&1;
         then

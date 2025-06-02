@@ -2,8 +2,8 @@ FROM ubuntu:24.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG GCC_THREADS
-ARG BOOST_VERSION="1_84_0"
-ARG BOOST_VERSION_DOT="1.84.0"
+ARG BOOST_VERSION="1_88_0"
+ARG BOOST_VERSION_DOT="1.88.0"
 
 # Install pre-requisites
 RUN apt update
@@ -47,6 +47,10 @@ WORKDIR /
 RUN ulimit -S -c unlimited
 RUN ldconfig
 RUN rm -rf /boost_${BOOST_VERSION} /boost_${BOOST_VERSION}.tar.gz /kinslayer-spidermonkey /kinslayer-sqlDatabase /kinslayer-flusspferd
+
+ADD ./crontab /etc/cron.d/crontab
+RUN chmod 0644 /etc/cron.d/crontab
+RUN crontab /etc/cron.d/crontab
 
 EXPOSE 2230
 EXPOSE 2222
