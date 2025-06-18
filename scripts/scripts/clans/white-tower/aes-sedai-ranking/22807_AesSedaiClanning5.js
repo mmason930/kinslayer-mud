@@ -1,15 +1,16 @@
 var script22807 = function(self, actor, here, args, extra) {
 	wait 3;
 	here.echo("The portal closes in on itself.");
-	var items = here.items;
-	var portal = 0;
-	for(var i = 0;i < items.length;++i) {
+	let items = here.items;
+	let portal = 0;
+	for(let i = 0;i < items.length;++i) {
 		portal = items[ i ];
-		if( portal.vnum == 10600 )
+		if( portal.vnum === 10600 )
 			break;
 	}
-	if( portal )
-		porta.extract();
+	if( portal ) {
+		portal.extract();
+	}
 	wait 3;
 	here.echo("The wind begins to pick up.");
 	wait 4;
