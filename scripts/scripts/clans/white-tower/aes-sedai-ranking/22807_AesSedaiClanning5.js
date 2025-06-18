@@ -1,4 +1,5 @@
 var script22807 = function(self, actor, here, args, extra) {
+	_block;
 	wait 3;
 	here.echo("The portal closes in on itself.");
 	let items = here.items;
@@ -23,7 +24,7 @@ var script22807 = function(self, actor, here, args, extra) {
 	act("A tough grey wolf starts running towards $n.", false, actor, null, null, constants.TO_ROOM);
 	wait 4;
 	actor.send("A gaunt trolloc swings at you with his enormous paws, catching your shoulder under his blow.");
-	var trolloc = here.lodMob(22806);
+	var trolloc = here.loadMob(22806);
 	wait 1;
 	actor.send("Ouch!");
 	wait 2;
