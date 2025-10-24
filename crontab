@@ -1,2 +1,2 @@
-30 5 * * * /kinslayer/ImportPlayerLogs
+30 5 * * * root /kinslayer/ImportPlayerLogs >> /root/import.out
 # remember to end this file with an empty new line

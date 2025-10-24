@@ -21,7 +21,7 @@ var script22809 = function(self, actor, here, args, extra) {
 	wait 6;
 	actor.send("The wolf whimpers to you from the pit, his unwounded forepaw scrabbling helplessly at the steep sides of the trap.");
 	wait 4;
-	actor.send("The continous wind blows gritty sand in to your face, forcing you to blink your eyes furiously to remove the intrusion.");
+	actor.send("The continuous wind blows gritty sand in to your face, forcing you to blink your eyes furiously to remove the intrusion.");
 	wait 7;
 	actor.send("When you open your eyes, a large star can be seen etched in to the dirt not far away.");
 	wait 5;

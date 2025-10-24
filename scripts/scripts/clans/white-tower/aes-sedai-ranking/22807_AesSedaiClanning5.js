@@ -16,7 +16,7 @@ var script22807 = function(self, actor, here, args, extra) {
 	here.echo("The wind begins to pick up.");
 	wait 4;
 	var wolf = here.loadMob(19303);
-	here.echo("An enormous wold steps out of an empty building.");
+	here.echo("An enormous wolf steps out of an empty building.");
 	wait 5;
 	wolf.comm("emote tosses his head into the air, snarling fiercely.");
 	wait 2;

@@ -5,7 +5,7 @@ var script18194 = function(self, actor, here, args, extra) {
 	if(!actor.inClan(30)) {
 		return 1;
 	}
-	if(actor.position != constants.POS_STANDING){
+	if(actor.position !== constants.POS_STANDING) {
 		actor.send("You're not in the correct position.");
 		return 0;
 	}

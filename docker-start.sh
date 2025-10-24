@@ -6,6 +6,10 @@ FULL_PARTIAL="$2"
 echo "TARGET: $TARGET"
 echo "FULL OR PARTIAL: $FULL_PARTIAL"
 
+printenv | perl -pe "s|(^.*?)=(.*$)|export \1\='\2'|" > /.env.sh
+chmod +x /.env.sh
+service cron start
+
 ### Install the Github SSH key
 SSH_DIR_PATH="/root/.ssh";
 SSH_CONFIG_FILE_PATH="$SSH_DIR_PATH/config";
