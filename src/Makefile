@@ -195,6 +195,8 @@ $(OBJDIR)/%.d: %.cpp
 	$(SHELL) -ec '$(CC) -MM $(CPPFLAGS) $< | \
 	sed '\''s,\($*\)\.o[ :]*,$(OBJDIR)\/\1.o $@ : ,g'\'' > $@'
 
+.PHONY: default all kinslayer gateway clean full
+
 default: kinslayer
 
 -include $(OBJFILES:.o)
