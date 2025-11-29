@@ -40,6 +40,11 @@ static JSClass global_class = {
 // ============================================================================
 
 static void errorReporter(JSContext *cx, const char *message, JSErrorReport *report) {
+    // StopIteration is a normal generator completion signal, not an error
+    if (message && strstr(message, "StopIteration")) {
+        return;
+    }
+    
     std::stringstream ss;
     ss << "JavaScript Error: ";
     if (report && report->filename) {

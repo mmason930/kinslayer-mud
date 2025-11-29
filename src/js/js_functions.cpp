@@ -1025,19 +1025,20 @@ void JS_act( flusspferd::array args )
 		MudLog(NRM, LVL_BUILDER, TRUE, "JSTrigger Error : act() - Second argument is not a boolean.");
 		return;
 	}
-	if( !args.get_element(2).is_object() )
+	// Arguments 2, 3, 4 can be objects OR null
+	if( !args.get_element(2).is_object() && !args.get_element(2).is_null() )
 	{
-		MudLog(NRM, LVL_BUILDER, TRUE, "JSTrigger Error : act() - Third argument is not an object.");
+		MudLog(NRM, LVL_BUILDER, TRUE, "JSTrigger Error : act() - Third argument is not an object or null.");
 		return;
 	}
-	if( !args.get_element(3).is_object() )
+	if( !args.get_element(3).is_object() && !args.get_element(3).is_null() )
 	{
-		MudLog(NRM, LVL_BUILDER, TRUE, "JSTrigger Error : act() - Fourth argument is not an object.");
+		MudLog(NRM, LVL_BUILDER, TRUE, "JSTrigger Error : act() - Fourth argument is not an object or null.");
 		return;
 	}
-	if( !args.get_element(4).is_object() )
+	if( !args.get_element(4).is_object() && !args.get_element(4).is_null() )
 	{
-		MudLog(NRM, LVL_BUILDER, TRUE, "JSTrigger Error : act() - Fifth argument is not an object.");
+		MudLog(NRM, LVL_BUILDER, TRUE, "JSTrigger Error : act() - Fifth argument is not an object or null.");
 		return;
 	}
 	if( !args.get_element(5).is_int() )
