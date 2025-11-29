@@ -75,7 +75,11 @@ public:
     bool get_bool() const { return to_boolean(); }
     double get_double() const { return to_number(); }
     double to_number() const;
-    bool to_boolean() const { return JS_ValueToBoolean(g_cx, val, nullptr) ? JSVAL_TO_BOOLEAN(val) : false; }
+    bool to_boolean() const {
+        JSBool b = JS_FALSE;
+        JS_ValueToBoolean(g_cx, val, &b);
+        return b == JS_TRUE;
+    }
     std::string to_std_string() const;
     string to_string() const;  // Forward declared, implemented after string class
     object to_object() const;
