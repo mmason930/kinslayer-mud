@@ -39,9 +39,29 @@ static JSClass global_class = {
 // Error reporting callback
 // ============================================================================
 
+// Thread-local storage for last exception message (used when JS_GetPendingException doesn't work)
+static thread_local std::string g_last_exception_message;
+static thread_local bool g_has_last_exception = false;
+
 static void errorReporter(JSContext *cx, const char *message, JSErrorReport *report) {
-    // StopIteration is a normal generator completion signal, not an error
-    if (message && strstr(message, "StopIteration")) {
+    if (!message) return;
+    
+    // Capture the exception message for use by check_and_throw_pending_exception
+    // This is needed because SpiderMonkey 1.8.5 sometimes doesn't keep exceptions pending
+    if (report && (report->flags & JSREPORT_EXCEPTION)) {
+        g_last_exception_message = message;
+        g_has_last_exception = true;
+        
+        // Don't print StopIteration - it's a normal generator completion signal
+        if (strstr(message, "StopIteration")) {
+            return;
+        }
+    }
+    
+    // StopIteration shouldn't be printed as an error
+    if (strstr(message, "StopIteration")) {
+        g_last_exception_message = "[object StopIteration]";
+        g_has_last_exception = true;
         return;
     }
     
@@ -53,6 +73,12 @@ static void errorReporter(JSContext *cx, const char *message, JSErrorReport *rep
     ss << message;
     
     fprintf(stderr, "%s\n", ss.str().c_str());
+}
+
+// Helper to clear the captured exception
+static void clear_last_exception() {
+    g_last_exception_message.clear();
+    g_has_last_exception = false;
 }
 
 // ============================================================================
@@ -201,23 +227,105 @@ bool object::is_array() const {
     return JS_IsArrayObject(g_cx, get_object_ptr()) == JS_TRUE;
 }
 
+// Helper to check for pending exception and throw it
+static void check_and_throw_pending_exception(const std::string &funcName) {
+    jsval exc;
+    
+    // Try to get any pending exception via SpiderMonkey API
+    if (JS_GetPendingException(g_cx, &exc)) {
+        JS_ClearPendingException(g_cx);
+        clear_last_exception();
+        
+        // Check if it's a StopIteration object
+        if (!JSVAL_IS_PRIMITIVE(exc)) {
+            JSObject *excObj = JSVAL_TO_OBJECT(exc);
+            if (excObj) {
+                // Check class name
+                JSClass *cls = JS_GET_CLASS(g_cx, excObj);
+                if (cls && cls->name) {
+                    if (strcmp(cls->name, "StopIteration") == 0) {
+                        throw exception("[object StopIteration]");
+                    }
+                    // Include class name in exception message
+                    std::string msg = "[object ";
+                    msg += cls->name;
+                    msg += "]";
+                    throw exception(msg);
+                }
+                
+                // Also check against global StopIteration
+                jsval stopIterVal;
+                if (JS_GetProperty(g_cx, g_global, "StopIteration", &stopIterVal)) {
+                    if (!JSVAL_IS_PRIMITIVE(stopIterVal)) {
+                        JSObject *stopIterObj = JSVAL_TO_OBJECT(stopIterVal);
+                        if (excObj == stopIterObj) {
+                            throw exception("[object StopIteration]");
+                        }
+                        // Check if exc is an instance of StopIteration
+                        JSBool isInstance = JS_FALSE;
+                        if (JS_HasInstance(g_cx, stopIterObj, exc, &isInstance) && isInstance) {
+                            throw exception("[object StopIteration]");
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Convert exception to string using JS_EncodeString (more reliable)
+        JSString *str = JS_ValueToString(g_cx, exc);
+        if (str) {
+            char *cstr = JS_EncodeString(g_cx, str);
+            if (cstr) {
+                std::string msg = cstr;
+                JS_free(g_cx, cstr);
+                if (!msg.empty()) {
+                    throw exception(msg);
+                }
+            }
+        }
+        throw exception("uncaught exception: [unknown]");
+    }
+    
+    // No pending exception found via JS_GetPendingException
+    // Check if we captured one via the error reporter
+    if (g_has_last_exception) {
+        std::string msg = g_last_exception_message;
+        clear_last_exception();
+        JS_ClearPendingException(g_cx);
+        throw exception(msg);
+    }
+    
+    // No exception found at all - clear state and let caller handle
+    JS_ClearPendingException(g_cx);
+}
+
 value object::call(const std::string &name) {
     if (is_null()) return value();
+    
+    // Clear any stale exception state before the call
+    clear_last_exception();
     
     jsval rval;
     if (JS_CallFunctionName(g_cx, get_object_ptr(), name.c_str(), 0, nullptr, &rval)) {
         return value(rval);
     }
     
-    return value();
+    // Call failed - check for pending exception and throw it
+    check_and_throw_pending_exception(name);
+    
+    // If we get here, no exception was found but call still failed
+    throw exception("Could not call function: " + name);
 }
 
 value object::call(const std::string &name, const value &arg) {
     if (is_null()) return value();
     
+    // Clear any stale exception state before the call
+    clear_last_exception();
+    
     jsval func;
     if (!JS_GetProperty(g_cx, get_object_ptr(), name.c_str(), &func)) {
-        return value();
+        throw exception("Could not get function property: " + name);
     }
     
     jsval argv[1] = { arg.val };
@@ -227,15 +335,22 @@ value object::call(const std::string &name, const value &arg) {
         return value(rval);
     }
     
-    return value();
+    // Call failed - check for pending exception and throw it
+    check_and_throw_pending_exception(name);
+    
+    // If we get here, no exception was found but call still failed
+    throw exception("Could not call function: " + name);
 }
 
 value object::call(const std::string &name, const value &arg1, const value &arg2) {
     if (is_null()) return value();
     
+    // Clear any stale exception state before the call
+    clear_last_exception();
+    
     jsval func;
     if (!JS_GetProperty(g_cx, get_object_ptr(), name.c_str(), &func)) {
-        return value();
+        throw exception("Could not get function property: " + name);
     }
     
     jsval argv[2] = { arg1.val, arg2.val };
@@ -245,7 +360,11 @@ value object::call(const std::string &name, const value &arg1, const value &arg2
         return value(rval);
     }
     
-    return value();
+    // Call failed - check for pending exception and throw it
+    check_and_throw_pending_exception(name);
+    
+    // If we get here, no exception was found but call still failed
+    throw exception("Could not call function: " + name);
 }
 
 object object::prototype() const {

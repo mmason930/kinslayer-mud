@@ -620,9 +620,6 @@ int Character::SimpleMove(int dir, int need_specials_check, bool flee)
 
 	was_in = this->in_room;
 	if(this->IsPurged() || !js_leave_triggers(this->in_room, this, dir) || this->IsPurged()) {
-		if(!str_cmp(GET_NAME(this), "Galnor")) {
-			std::cout << "SimpleMove1: " << GET_NAME(this) << " " << dir << std::endl;
-		}
 		return 0;
 	}
 	//Script moved us! Could cause problems.
@@ -630,9 +627,6 @@ int Character::SimpleMove(int dir, int need_specials_check, bool flee)
 		return 0;
 	}
 	if (EXIT(this, dir) && (!js_enter_triggers(EXIT(this, dir)->getToRoom(), this, dir) || this->IsPurged()) ) {
-		if(!str_cmp(GET_NAME(this), "Galnor")) {
-			std::cout << "SimpleMove2: " << GET_NAME(this) << " " << dir << std::endl;
-		}
 		return 0;
 	}
 

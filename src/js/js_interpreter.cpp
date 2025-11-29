@@ -497,9 +497,6 @@ int JSEnvironment::execute(std::shared_ptr<JSInstance> instance)
         {
             setupTimeout();
             value v = evaluate(instance->callstring);
-
-			std::cout << "execute123: " << instance->callstring << ", v: " << v.to_std_string() << std::endl;
-
             if (!v.is_object())
             {
                 // we're done. We don't add it to the wait queue, so it
@@ -508,8 +505,9 @@ int JSEnvironment::execute(std::shared_ptr<JSInstance> instance)
 				if (v.is_int()) {
                     return v.get_int();
 				}
-                else
+                else {
                     return 1; // a reasonable default value....
+				}
             }
             instance->state = v.get_object(); // this is a generator, we need to continue
         }

@@ -796,11 +796,6 @@ bool js_enter_test(Room *room, Character *actor, int dir, JSBindable *self=0)
 			if ( (!self || is_allowed(self, actor, trig)) && randomly_triggered(trig->narg))
 			{
 				int ret_val = JSManager::get()->execute(trig, self, actor, "", make_extra("direction", rev_dir[dir]));
-
-				if(!str_cmp(GET_NAME(actor), "Galnor")) {
-					std::cout << "js_enter_test123: " << GET_NAME(actor) << " " << dir << ", trig: " << trig->name << ", ret_val: " << ret_val << std::endl;
-				}
-
 				if (!ret_val) // ret_val == 0 means we block them.
 					return false;
 			}
