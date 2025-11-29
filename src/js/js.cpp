@@ -25,6 +25,7 @@
 #include "../rooms/Room.h"
 
 #include <js/jsdbgapi.h>
+#include <boost/filesystem.hpp>
 
 
 using namespace std;

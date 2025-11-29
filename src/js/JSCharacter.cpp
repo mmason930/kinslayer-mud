@@ -19,8 +19,13 @@ class JSEnvironment;
 int JSCharacter::numberAllocated = 0;
 int JSCharacter::numberDeallocated = 0;
 
+// Forward declaration of the binding registration function
+void RegisterJSCharacterBindings();
+
 void JSEnvironment::LoadJSCharacter()
 {
+	flusspferd::ClassTraits<JSCharacter>::class_name = "JSCharacter";
+	RegisterJSCharacterBindings();  // Register methods and properties first
 	load_class<JSCharacter>();
 }
 

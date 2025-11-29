@@ -594,10 +594,18 @@ bool JSEnvironment::compile(const std::string &fileName, std::string &scriptBuff
 		setupTimeout();
 		flusspferd::evaluate(formattedScriptBuffer, fileName.c_str(), 1);
 		removeTimeout();
+		// Debug: Log successful compilation
+		// MudLog(BRF, LVL_APPR, TRUE, "Successfully compiled: %s", fileName.c_str());
 	}
 	catch(flusspferd::exception &e)
 	{
-		MudLog(BRF, TRUE, LVL_APPR, "Error evaluating script: %s", e.what());
+		MudLog(BRF, TRUE, LVL_APPR, "Error evaluating script `%s`: %s", fileName.c_str(), e.what());
+		removeTimeout();
+	}
+	catch(std::exception &e)
+	{
+		MudLog(BRF, TRUE, LVL_APPR, "C++ exception evaluating script `%s`: %s", fileName.c_str(), e.what());
+		removeTimeout();
 	}
 
 /*

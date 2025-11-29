@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @param {string} sqlStr The SQL query string with argument placeholders in the form of {#},
  * where # corresponds to an argument provided in args
  * @param {...mixed} args Additional arguments which will be escaped and injected into the query string

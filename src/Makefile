@@ -8,7 +8,7 @@ CC = g++
 # Any special flags you want to pass to the compiler
 MYFLAGS = \
 -O0 -std=c++20 -Wformat-security -Wformat -Wpointer-arith \
--Wcast-align -Wredundant-decls -Wcatch-value -Werror \
+-Wcast-align -Wredundant-decls -Werror \
 -DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10
 
 #-Werror
@@ -25,7 +25,7 @@ BINDIR = ../bin
 CPPFLAGS = -ggdb3 $(MYFLAGS) $(PROFILE)
 
 LIBS = \
--lsqlDatabase -lflusspferd -lstdc++ -lboost_regex -lmozjs \
+-lsqlDatabase -lstdc++ -lboost_regex -lmozjs \
 -lmysqlclient -lboost_thread -lboost_filesystem -lcrypt \
 -lssl -lcrypto -lboost_system -lpthread -ldl
 
@@ -102,19 +102,25 @@ OBJFILES =	accounts.o \
 			interpreter.o \
 			items/ItemUtil.o \
 			olc/jedit.o \
+			js/flusspferd.o \
 			js/js.o \
 			js/js_constants.o \
 			js/js_functions.o \
 			js/js_interpreter.o \
 			js/js_utils.o \
 			js/JSCharacter.o \
+			js/JSCharacter_bindings.o \
 			js/JSObject.o \
+			js/JSObject_bindings.o \
 			jsoncpp/json_reader.o \
 			jsoncpp/json_value.o \
 			jsoncpp/json_writer.o \
 			js/JSQuery.o \
+			js/JSQuery_bindings.o \
 			js/JSRoom.o \
+			js/JSRoom_bindings.o \
 			js/JSRow.o \
+			js/JSRow_bindings.o \
 			kedit.o \
 			ku/kuClient.o \
 			ku/kuDescriptor.o \

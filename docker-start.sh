@@ -58,6 +58,8 @@ fi
 ### to modify this file will fail.
 echo "core.%p.%t" > /proc/sys/kernel/core_pattern
 
+sleep 1000000
+
 ### Perform clean build if specified.
 if [[ "$FULL_PARTIAL" == "full" ]]; then
 	make clean -C /kinslayer/src

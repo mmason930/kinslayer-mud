@@ -3,8 +3,13 @@
 
 #include "js_interpreter.h"
 
+// Forward declaration of binding registration function
+void RegisterJSRowBindings();
+
 void JSEnvironment::LoadJSRow()
 {
+	flusspferd::ClassTraits<JSRow>::class_name = "JSRow";
+	RegisterJSRowBindings();  // Register methods and properties first
 	load_class<JSRow>();
 }
 int sqlJSRow::numberAllocated = 0;

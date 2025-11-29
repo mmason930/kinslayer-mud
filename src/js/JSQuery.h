@@ -13,7 +13,7 @@
 #ifndef KINSLAYER_JSQUERY_H
 #define KINSLAYER_JSQUERY_H
 
-#include <flusspferd.hpp>
+#include "flusspferd.hpp"
 
 #include <string>
 #include <iostream>

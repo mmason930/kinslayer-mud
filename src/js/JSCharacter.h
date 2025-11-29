@@ -10,7 +10,7 @@
 #ifndef KINSLAYER_JSCHARACTER_H
 #define KINSLAYER_JSCHARACTER_H
 
-#include <flusspferd.hpp>
+#include "flusspferd.hpp"
 #include <string>
 #include <iostream>
 

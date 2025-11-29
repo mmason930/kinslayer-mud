@@ -24,8 +24,8 @@ class JSEnvironment;
 class Script;
 struct JSInstance;
 
-#include <flusspferd.hpp>
-#include <flusspferd/spidermonkey/context.hpp>
+#include "flusspferd.hpp"
+#include "flusspferd_context.hpp"
 #include <thread>
 #include <mutex>
 

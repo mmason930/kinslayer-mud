@@ -4,8 +4,13 @@
 
 #include "js_interpreter.h"
 
+// Forward declaration of binding registration function
+void RegisterJSQueryBindings();
+
 void JSEnvironment::LoadJSQuery()
 {
+	flusspferd::ClassTraits<JSQuery>::class_name = "JSQuery";
+	RegisterJSQueryBindings();  // Register methods and properties first
 	load_class<JSQuery>();
 }
 

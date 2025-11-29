@@ -13,7 +13,7 @@
 #ifndef KINSLAYER_JSROW_H
 #define KINSLAYER_JSROW_H
 
-#include <flusspferd.hpp>
+#include "flusspferd.hpp"
 
 #include <string>
 #include <iostream>

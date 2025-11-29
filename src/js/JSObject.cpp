@@ -6,8 +6,13 @@
 #include "js_interpreter.h"
 #include "../rooms/Room.h"
 
+// Forward declaration of the binding registration function
+void RegisterJSObjectBindings();
+
 void JSEnvironment::LoadJSObject()
 {
+	flusspferd::ClassTraits<JSObject>::class_name = "JSObject";
+	RegisterJSObjectBindings();  // Register methods and properties first
 	load_class<JSObject>();
 }
 

@@ -30,14 +30,6 @@ WORKDIR /boost_${BOOST_VERSION}
 RUN ./bootstrap.sh
 RUN ./b2 install -j ${GCC_THREADS} ; exit 0
 
-# Flusspferd
-RUN git clone https://github.com/kinslayermud/kinslayer-flusspferd /kinslayer-flusspferd
-WORKDIR /kinslayer-flusspferd/src
-RUN mkdir obj
-RUN mkdir ../lib
-RUN make -j${GCC_THREADS}
-RUN make install
-
 # cpp-httplib
 RUN git clone https://github.com/yhirose/cpp-httplib /kinslayer-cpp-httplib
 RUN cp /kinslayer-cpp-httplib/httplib.h /usr/local/include/
@@ -46,7 +38,7 @@ RUN rm -rf /kinslayer-cpp-httplib
 WORKDIR /
 RUN ulimit -S -c unlimited
 RUN ldconfig
-RUN rm -rf /boost_${BOOST_VERSION} /boost_${BOOST_VERSION}.tar.gz /kinslayer-spidermonkey /kinslayer-sqlDatabase /kinslayer-flusspferd
+RUN rm -rf /boost_${BOOST_VERSION} /boost_${BOOST_VERSION}.tar.gz /kinslayer-spidermonkey /kinslayer-sqlDatabase
 
 COPY crontab /etc/cron.d/
 

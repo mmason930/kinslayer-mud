@@ -13,8 +13,8 @@
 #ifndef KINSLAYER_JS_INTERPRETER_H
 #define KINSLAYER_JS_INTERPRETER_H
 
-#include <flusspferd.hpp>
-#include <flusspferd/spidermonkey/context.hpp>
+#include "flusspferd.hpp"
+#include "flusspferd_context.hpp"
 
 #include "JSCharacter.h"
 #include "JSObject.h"

@@ -16,8 +16,13 @@ extern std::vector<Object*> obj_proto;
 
 #include "js_interpreter.h"
 
+// Forward declaration of the binding registration function
+void RegisterJSRoomBindings();
+
 void JSEnvironment::LoadJSRoom()
 {
+	flusspferd::ClassTraits<JSRoom>::class_name = "JSRoom";
+	RegisterJSRoomBindings();  // Register methods and properties first
 	load_class<JSRoom>();
 }
 

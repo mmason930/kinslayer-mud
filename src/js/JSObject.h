@@ -13,7 +13,7 @@
 #ifndef KINSLAYER_JSOBJECT_H
 #define KINSLAYER_JSOBJECT_H
 
-#include <flusspferd.hpp>
+#include "flusspferd.hpp"
 #include <string>
 #include <iostream>
 #include "../structs.h"
