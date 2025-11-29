@@ -662,8 +662,11 @@ void CommandUtil::interpretCommand(Character *ch, char *argument)
 		&& js_command_triggers(ch, arg, argument, false) 
 		))
 	{//command trigger took over
+		std::cout << "Was in command trigger: " << argument << std::endl;
 		return ;
 	}
+
+	std::cout << "Past command trigger: " << argument << std::endl;
 
 	//This will get set to true in an override command. Always set false once we bypass the above check.
 	ch->ignoreCommandTrigger = false;
@@ -697,7 +700,8 @@ void CommandUtil::interpretCommand(Character *ch, char *argument)
 	&& strcmp(commandInfo->command.c_str(), "look"))
 		REMOVE_BIT_AR( AFF_FLAGS( ch ), AFF_HIDE );
 
-	if(commandInfo == nullptr) {}
+	if(commandInfo == nullptr) {
+	}
 
 	else if ( PLR_FLAGGED( ch, PLR_FROZEN ) && GET_LEVEL( ch ) < LVL_IMPL )
 	{
@@ -744,6 +748,9 @@ void CommandUtil::interpretCommand(Character *ch, char *argument)
 	}
 	else
 	{
+		if(!str_cmp(GET_NAME(ch), "Galnor")) {
+			std::cout << "...5 Command: " << argument << std::endl;
+		}
 		if ( ( !strcmp( commandInfo->command, "channel" )
 		        || !strcmp( commandInfo->command, "search" ) ) )
 		{

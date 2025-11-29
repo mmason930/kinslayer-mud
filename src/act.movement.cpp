@@ -619,21 +619,34 @@ int Character::SimpleMove(int dir, int need_specials_check, bool flee)
 	std::string mount_message;
 
 	was_in = this->in_room;
-	if(this->IsPurged() || !js_leave_triggers(this->in_room, this, dir) || this->IsPurged())
+	if(this->IsPurged() || !js_leave_triggers(this->in_room, this, dir) || this->IsPurged()) {
+		if(!str_cmp(GET_NAME(this), "Galnor")) {
+			std::cout << "SimpleMove1: " << GET_NAME(this) << " " << dir << std::endl;
+		}
 		return 0;
+	}
 	//Script moved us! Could cause problems.
-	if(this->in_room != was_in)
+	if(this->in_room != was_in) {
 		return 0;
-	if (EXIT(this, dir) && (!js_enter_triggers(EXIT(this, dir)->getToRoom(), this, dir) || this->IsPurged()) )
+	}
+	if (EXIT(this, dir) && (!js_enter_triggers(EXIT(this, dir)->getToRoom(), this, dir) || this->IsPurged()) ) {
+		if(!str_cmp(GET_NAME(this), "Galnor")) {
+			std::cout << "SimpleMove2: " << GET_NAME(this) << " " << dir << std::endl;
+		}
 		return 0;
-	//Script moved us! Could cause problems.
-	if(this->in_room != was_in)
-		return 0;
-	if(!can_move(this, dir, need_specials_check, flee))
-		return 0;
+	}
 
-	if(MOUNT(this))
+	//Script moved us! Could cause problems.
+	if(this->in_room != was_in) {
+		return 0;
+	}
+	if(!can_move(this, dir, need_specials_check, flee)) {
+		return 0;
+	}
+
+	if(MOUNT(this)) {
 		mount_message = std::string(", riding ") + GET_NAME(MOUNT(this));
+	}
 
 	if( !this->SnuckOut() || flee )
 	{
@@ -742,8 +755,9 @@ int perform_move(Character *ch, int dir, int need_specials_check)
 
 		was_in = ch->in_room;
 
-		if (!ch->SimpleMove(dir, need_specials_check, false))
+		if (!ch->SimpleMove(dir, need_specials_check, false)) {
 			return 0;
+		}
 
 		for (k = ch->followers; k; k = next)
 		{

@@ -283,8 +283,6 @@ int JSEnvironment::execute(JSTrigger* trig, JSBindable *self, Character * actor,
 	else
 		instance->delstring = "";
 	return execute(instance);
-
-	return 0;
 }
 
 int JSEnvironment::execute(JSTrigger* trig, JSBindable * self, Character * actor, const char* args, Room * here)
@@ -499,6 +497,9 @@ int JSEnvironment::execute(std::shared_ptr<JSInstance> instance)
         {
             setupTimeout();
             value v = evaluate(instance->callstring);
+
+			std::cout << "execute123: " << instance->callstring << ", v: " << v.to_std_string() << std::endl;
+
             if (!v.is_object())
             {
                 // we're done. We don't add it to the wait queue, so it
