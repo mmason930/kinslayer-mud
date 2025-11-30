@@ -286,11 +286,17 @@ void ClassTraits<T>::ensure_registered() {
     
     JS::RootedObject globalObj(g_cx, g_global->get());
     JS::RootedObject proto(g_cx);
+    JS::RootedObject nullProto(g_cx, nullptr);  // Null prototype for protoProto parameter
+    
+    // Debug output
+    fprintf(stderr, "DEBUG: ensure_registered for %s\n", class_name());
+    fprintf(stderr, "DEBUG: g_cx=%p, globalObj=%p, jsclass=%p\n", 
+            (void*)g_cx, (void*)globalObj.get(), (void*)&jsclass);
+    fflush(stderr);
     
     // Initialize class with constructor
     // JS_InitClass signature: cx, global, class, protoProto, name, constructor, nargs, ps, fs, static_ps, static_fs
-    // In SpiderMonkey 131, use JS::NullHandleObject for null handle parameters
-    proto = JS_InitClass(g_cx, globalObj, &jsclass, JS::NullHandleObject, class_name(), 
+    proto = JS_InitClass(g_cx, globalObj, &jsclass, nullProto, class_name(), 
                         constructor_stub, 0, nullptr, nullptr, nullptr, nullptr);
     
     if (proto) {
