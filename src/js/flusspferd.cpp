@@ -207,8 +207,9 @@ value object::get_property(const std::string &name) const {
 }
 
 value object::get_property(const char *name) const {
-    if (!g_cx || is_null()) return value();
+    if (!g_cx || !g_global || is_null()) return value();
     
+    JSAutoRealm ar(g_cx, g_global->get());
     JS::RootedObject obj(g_cx, get_object_ptr());
     JS::RootedValue v(g_cx);
     if (JS_GetProperty(g_cx, obj, name, &v)) {
@@ -222,8 +223,9 @@ void object::set_property(const std::string &name, const value &v) {
 }
 
 void object::set_property(const char *name, const value &v) {
-    if (!g_cx || is_null()) return;
+    if (!g_cx || !g_global || is_null()) return;
     
+    JSAutoRealm ar(g_cx, g_global->get());
     JS::RootedObject obj(g_cx, get_object_ptr());
     JS::RootedValue jv(g_cx, v.val);
     JS_SetProperty(g_cx, obj, name, jv);
@@ -234,8 +236,9 @@ bool object::has_property(const std::string &name) const {
 }
 
 bool object::has_property(const char *name) const {
-    if (!g_cx || is_null()) return false;
+    if (!g_cx || !g_global || is_null()) return false;
     
+    JSAutoRealm ar(g_cx, g_global->get());
     JS::RootedObject obj(g_cx, get_object_ptr());
     bool found = false;
     if (JS_HasProperty(g_cx, obj, name, &found)) {
@@ -249,18 +252,20 @@ void object::delete_property(const std::string &name) {
 }
 
 void object::delete_property(const char *name) {
-    if (!g_cx || is_null()) return;
+    if (!g_cx || !g_global || is_null()) return;
     
+    JSAutoRealm ar(g_cx, g_global->get());
     JS::RootedObject obj(g_cx, get_object_ptr());
     JS::ObjectOpResult result;
     JS_DeleteProperty(g_cx, obj, name, result);
 }
 
 value object::call(const std::string &name) {
-    if (!g_cx || is_null()) return value();
+    if (!g_cx || !g_global || is_null()) return value();
     
     clear_last_exception();
     
+    JSAutoRealm ar(g_cx, g_global->get());
     JS::RootedObject obj(g_cx, get_object_ptr());
     JS::RootedValue rval(g_cx);
     
@@ -273,10 +278,11 @@ value object::call(const std::string &name) {
 }
 
 value object::call(const std::string &name, const value &arg) {
-    if (!g_cx || is_null()) return value();
+    if (!g_cx || !g_global || is_null()) return value();
     
     clear_last_exception();
     
+    JSAutoRealm ar(g_cx, g_global->get());
     JS::RootedObject obj(g_cx, get_object_ptr());
     JS::RootedValue rval(g_cx);
     JS::RootedValueVector argv(g_cx);
@@ -293,10 +299,11 @@ value object::call(const std::string &name, const value &arg) {
 }
 
 value object::call(const std::string &name, const value &arg1, const value &arg2) {
-    if (!g_cx || is_null()) return value();
+    if (!g_cx || !g_global || is_null()) return value();
     
     clear_last_exception();
     
+    JSAutoRealm ar(g_cx, g_global->get());
     JS::RootedObject obj(g_cx, get_object_ptr());
     JS::RootedValue rval(g_cx);
     JS::RootedValueVector argv(g_cx);
@@ -496,8 +503,32 @@ void context::destroy() {
 // current_context_scope implementation
 // ============================================================================
 
+// Global class for the global object
+static JSClass global_class = {
+    "global",
+    JSCLASS_GLOBAL_FLAGS,
+    &JS::DefaultGlobalClassOps
+};
+
 current_context_scope::current_context_scope(const context &ctx) {
     g_cx = ctx.get();
+    
+    // Create the global object if it doesn't exist
+    if (g_cx && !g_global) {
+        JS::RealmOptions options;
+        JSObject *globalObj = JS_NewGlobalObject(g_cx, &global_class, nullptr, 
+                                                  JS::FireOnNewGlobalHook, options);
+        if (globalObj) {
+            g_global = new JS::PersistentRootedObject(g_cx, globalObj);
+            
+            // Enter the global's realm and initialize standard classes
+            JSAutoRealm ar(g_cx, globalObj);
+            if (!JS::InitRealmStandardClasses(g_cx)) {
+                delete g_global;
+                g_global = nullptr;
+            }
+        }
+    }
 }
 
 current_context_scope::~current_context_scope() {
@@ -610,6 +641,9 @@ value evaluate(const std::string &code, const char *filename, int lineno) {
 value evaluate(const char *code, const char *filename, int lineno) {
     if (!g_cx || !g_global) return value();
     
+    // Enter the global's realm
+    JSAutoRealm ar(g_cx, g_global->get());
+    
     JS::CompileOptions options(g_cx);
     options.setFileAndLine(filename, lineno);
     
@@ -620,7 +654,6 @@ value evaluate(const char *code, const char *filename, int lineno) {
     }
     
     JS::RootedValue rval(g_cx);
-    JS::RootedObject global(g_cx, g_global->get());
     
     if (!JS::Evaluate(g_cx, options, srcBuf, &rval)) {
         check_and_throw_pending_exception("evaluate");
@@ -637,19 +670,22 @@ void gc() {
 }
 
 object create_object() {
-    if (!g_cx) return object();
+    if (!g_cx || !g_global) return object();
+    JSAutoRealm ar(g_cx, g_global->get());
     JSObject *obj = JS_NewPlainObject(g_cx);
     return object(obj);
 }
 
 array create_array() {
-    if (!g_cx) return array();
+    if (!g_cx || !g_global) return array();
+    JSAutoRealm ar(g_cx, g_global->get());
     JSObject *arr = JS::NewArrayObject(g_cx, 0);
     return array(arr);
 }
 
 array create_array(uint32_t length) {
-    if (!g_cx) return array();
+    if (!g_cx || !g_global) return array();
+    JSAutoRealm ar(g_cx, g_global->get());
     JSObject *arr = JS::NewArrayObject(g_cx, length);
     return array(arr);
 }
