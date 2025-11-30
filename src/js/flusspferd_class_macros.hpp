@@ -272,6 +272,9 @@ void ClassTraits<T>::ensure_registered() {
     
     if (!g_cx || !g_global) return;
     
+    // Enter the global's realm
+    JSAutoRealm ar(g_cx, g_global->get());
+    
     // Initialize class info
     auto &info = g_class_registry[class_name()];
     info.jsclass = &jsclass;
@@ -342,9 +345,12 @@ template<typename T, typename... Args>
 object create_native_object(Args&&... args) {
     ClassTraits<T>::ensure_registered();
     
-    if (!g_cx) {
+    if (!g_cx || !g_global) {
         throw exception("No JavaScript context");
     }
+    
+    // Enter the global's realm
+    JSAutoRealm ar(g_cx, g_global->get());
     
     // Create the JS object
     JS::RootedObject proto(g_cx, ClassTraits<T>::prototype ? ClassTraits<T>::prototype->get() : nullptr);
