@@ -9,7 +9,7 @@ void RegisterJSQueryBindings();
 
 void JSEnvironment::LoadJSQuery()
 {
-	flusspferd::ClassTraits<JSQuery>::class_name = "JSQuery";
+	// class_name is now defined by FLUSSPFERD_CLASS_DESCRIPTION macro
 	RegisterJSQueryBindings();  // Register methods and properties first
 	load_class<JSQuery>();
 }

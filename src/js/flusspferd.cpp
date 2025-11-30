@@ -1,8 +1,15 @@
 /**
- * flusspferd.cpp - SpiderMonkey 1.8.5 compatibility shim implementation
+ * flusspferd.cpp - SpiderMonkey 131 compatibility shim implementation
  */
 
 #include "flusspferd.hpp"
+#include <js/Initialization.h>
+#include <js/CompilationAndEvaluation.h>
+#include <js/SourceText.h>
+#include <js/PropertyAndElement.h>
+#include <js/Array.h>
+#include <js/Object.h>
+#include <js/Exception.h>
 #include <cstring>
 #include <sstream>
 
@@ -13,72 +20,76 @@ namespace flusspferd {
 // ============================================================================
 
 JSContext *g_cx = nullptr;
-JSRuntime *g_rt = nullptr;
-JSObject *g_global = nullptr;
+JS::PersistentRootedObject *g_global = nullptr;
 
 std::map<std::string, NativeClassInfo> g_class_registry;
 std::map<std::string, void*> g_function_storage;
-std::map<std::string, ClassRegistry> g_class_registries;
 
-// Global class for the global object
-static JSClass global_class = {
-    "global",
-    JSCLASS_GLOBAL_FLAGS,
-    JS_PropertyStub,
-    JS_PropertyStub,
-    JS_PropertyStub,
-    JS_PropertyStub,
-    JS_EnumerateStub,
-    JS_ResolveStub,
-    JS_ConvertStub,
-    nullptr,
-    JSCLASS_NO_OPTIONAL_MEMBERS
-};
+// Note: g_class_registries is a macro alias defined in flusspferd.hpp
 
-// ============================================================================
-// Error reporting callback
-// ============================================================================
-
-// Thread-local storage for last exception message (used when JS_GetPendingException doesn't work)
+// Thread-local storage for last exception message
 static thread_local std::string g_last_exception_message;
 static thread_local bool g_has_last_exception = false;
 
-static void errorReporter(JSContext *cx, const char *message, JSErrorReport *report) {
-    if (!message) return;
-    
-    // Capture the exception message for use by check_and_throw_pending_exception
-    // This is needed because SpiderMonkey 1.8.5 sometimes doesn't keep exceptions pending
-    if (report && (report->flags & JSREPORT_EXCEPTION)) {
-        g_last_exception_message = message;
-        g_has_last_exception = true;
-        
-        // Don't print StopIteration - it's a normal generator completion signal
-        if (strstr(message, "StopIteration")) {
-            return;
-        }
-    }
-    
-    // StopIteration shouldn't be printed as an error
-    if (strstr(message, "StopIteration")) {
-        g_last_exception_message = "[object StopIteration]";
-        g_has_last_exception = true;
-        return;
-    }
-    
-    std::stringstream ss;
-    ss << "JavaScript Error: ";
-    if (report && report->filename) {
-        ss << report->filename << ":" << report->lineno << ": ";
-    }
-    ss << message;
-    
-    fprintf(stderr, "%s\n", ss.str().c_str());
-}
+// Global class definition for the global object
+static JSClass global_class = {
+    "global",
+    JSCLASS_GLOBAL_FLAGS,
+    &JS::DefaultGlobalClassOps
+};
 
-// Helper to clear the captured exception
+// ============================================================================
+// Error reporting and exception handling
+// ============================================================================
+
 static void clear_last_exception() {
     g_last_exception_message.clear();
     g_has_last_exception = false;
+}
+
+// Helper to check for pending exception and throw it
+static void check_and_throw_pending_exception(const std::string &funcName) {
+    if (!g_cx) return;
+    
+    if (JS_IsExceptionPending(g_cx)) {
+        JS::RootedValue exc(g_cx);
+        if (JS_GetPendingException(g_cx, &exc)) {
+            JS_ClearPendingException(g_cx);
+            clear_last_exception();
+            
+            // Check if it's a StopIteration object
+            if (exc.isObject()) {
+                JS::RootedObject excObj(g_cx, &exc.toObject());
+                const JSClass *cls = JS::GetClass(excObj);
+                if (cls && cls->name) {
+                    if (strcmp(cls->name, "StopIteration") == 0) {
+                        throw exception("[object StopIteration]");
+                    }
+                    std::string msg = "[object ";
+                    msg += cls->name;
+                    msg += "]";
+                    throw exception(msg);
+                }
+            }
+            
+            // Convert exception to string
+            JS::RootedString str(g_cx, JS::ToString(g_cx, exc));
+            if (str) {
+                JS::UniqueChars chars = JS_EncodeStringToUTF8(g_cx, str);
+                if (chars) {
+                    throw exception(chars.get());
+                }
+            }
+            throw exception("uncaught exception: [unknown]");
+        }
+    }
+    
+    // Check captured exception from error reporter
+    if (g_has_last_exception) {
+        std::string msg = g_last_exception_message;
+        clear_last_exception();
+        throw exception(msg);
+    }
 }
 
 // ============================================================================
@@ -86,101 +97,121 @@ static void clear_last_exception() {
 // ============================================================================
 
 value::value(const std::string &s) {
-    JSString *str = JS_NewStringCopyN(g_cx, s.c_str(), s.length());
-    val = str ? STRING_TO_JSVAL(str) : JSVAL_VOID;
+    if (!g_cx) {
+        val = JS::UndefinedValue();
+        return;
+    }
+    JSString *str = JS_NewStringCopyUTF8N(g_cx, JS::UTF8Chars(s.c_str(), s.length()));
+    val = str ? JS::StringValue(str) : JS::UndefinedValue();
 }
 
 value::value(const char *s) {
-    if (s) {
-        JSString *str = JS_NewStringCopyZ(g_cx, s);
-        val = str ? STRING_TO_JSVAL(str) : JSVAL_VOID;
-    } else {
-        val = JSVAL_NULL;
+    if (!g_cx || !s) {
+        val = JS::UndefinedValue();
+        return;
     }
+    JSString *str = JS_NewStringCopyUTF8Z(g_cx, JS::ConstUTF8CharsZ(s));
+    val = str ? JS::StringValue(str) : JS::UndefinedValue();
 }
 
 bool value::is_function() const {
-    if (!is_object()) return false;
-    JSObject *obj = JSVAL_TO_OBJECT(val);
-    return obj && JS_ObjectIsFunction(g_cx, obj);
+    if (!val.isObject()) return false;
+    JSObject *obj = &val.toObject();
+    return obj && JS_ObjectIsFunction(obj);
 }
 
 double value::to_number() const {
-    jsdouble d;
-    if (JS_ValueToNumber(g_cx, val, &d)) {
+    if (!g_cx) return 0.0;
+    double d;
+    if (JS::ToNumber(g_cx, JS::HandleValue::fromMarkedLocation(&val), &d)) {
         return d;
     }
     return 0.0;
 }
 
 std::string value::to_std_string() const {
-    JSString *str = JS_ValueToString(g_cx, val);
-    if (!str) return "";
+    if (!g_cx) return "";
+    if (!val.isString()) {
+        JS::RootedValue v(g_cx, val);
+        JS::RootedString str(g_cx, JS::ToString(g_cx, v));
+        if (!str) return "";
+        JS::UniqueChars chars = JS_EncodeStringToUTF8(g_cx, str);
+        return chars ? std::string(chars.get()) : "";
+    }
     
-    char *cstr = JS_EncodeString(g_cx, str);
-    if (!cstr) return "";
-    
-    std::string result(cstr);
-    JS_free(g_cx, cstr);
-    return result;
+    JS::RootedString str(g_cx, val.toString());
+    JS::UniqueChars chars = JS_EncodeStringToUTF8(g_cx, str);
+    return chars ? std::string(chars.get()) : "";
+}
+
+string value::to_string() const {
+    return string(val);
 }
 
 object value::to_object() const {
-    if (is_null() || is_undefined()) {
-        return object();
-    }
-    JSObject *obj;
-    if (JS_ValueToObject(g_cx, val, &obj)) {
-        return object(obj);
-    }
-    return object();
+    return object(val);
 }
 
 object value::get_object() const {
-    return to_object();
+    return object(val);
 }
 
 // ============================================================================
 // string implementation
 // ============================================================================
 
-string::string(const std::string &s) {
-    JSString *str = JS_NewStringCopyN(g_cx, s.c_str(), s.length());
-    val = str ? STRING_TO_JSVAL(str) : JSVAL_VOID;
+string::string(const std::string &s) : value() {
+    if (!g_cx) return;
+    JSString *str = JS_NewStringCopyUTF8N(g_cx, JS::UTF8Chars(s.c_str(), s.length()));
+    val = str ? JS::StringValue(str) : JS::UndefinedValue();
 }
 
-string::string(const char *s) {
-    if (s) {
-        JSString *str = JS_NewStringCopyZ(g_cx, s);
-        val = str ? STRING_TO_JSVAL(str) : JSVAL_VOID;
-    } else {
-        val = JSVAL_NULL;
-    }
+string::string(const char *s) : value() {
+    if (!g_cx || !s) return;
+    JSString *str = JS_NewStringCopyUTF8Z(g_cx, JS::ConstUTF8CharsZ(s));
+    val = str ? JS::StringValue(str) : JS::UndefinedValue();
+}
+
+string::string(JSString *str) : value() {
+    val = str ? JS::StringValue(str) : JS::UndefinedValue();
 }
 
 std::string string::to_std_string() const {
-    return value::to_std_string();
+    if (!g_cx || !val.isString()) return "";
+    JS::RootedString str(g_cx, val.toString());
+    JS::UniqueChars chars = JS_EncodeStringToUTF8(g_cx, str);
+    return chars ? std::string(chars.get()) : "";
 }
 
 const char *string::c_str() const {
-    if (!is_string()) return "";
-    JSString *str = JSVAL_TO_STRING(val);
-    return JS_EncodeString(g_cx, str);
+    // Note: This returns a temporary - caller should copy if needed
+    static thread_local std::string temp;
+    temp = to_std_string();
+    return temp.c_str();
 }
 
 // ============================================================================
 // object implementation
 // ============================================================================
 
+bool object::is_array() const {
+    if (!g_cx || !val.isObject()) return false;
+    bool isArray = false;
+    JS::RootedObject obj(g_cx, &val.toObject());
+    JS::IsArrayObject(g_cx, obj, &isArray);
+    return isArray;
+}
+
 value object::get_property(const std::string &name) const {
     return get_property(name.c_str());
 }
 
 value object::get_property(const char *name) const {
-    if (is_null()) return value();
+    if (!g_cx || is_null()) return value();
     
-    jsval v;
-    if (JS_GetProperty(g_cx, get_object_ptr(), name, &v)) {
+    JS::RootedObject obj(g_cx, get_object_ptr());
+    JS::RootedValue v(g_cx);
+    if (JS_GetProperty(g_cx, obj, name, &v)) {
         return value(v);
     }
     return value();
@@ -191,10 +222,11 @@ void object::set_property(const std::string &name, const value &v) {
 }
 
 void object::set_property(const char *name, const value &v) {
-    if (is_null()) return;
+    if (!g_cx || is_null()) return;
     
-    jsval jv = v.val;
-    JS_SetProperty(g_cx, get_object_ptr(), name, &jv);
+    JS::RootedObject obj(g_cx, get_object_ptr());
+    JS::RootedValue jv(g_cx, v.val);
+    JS_SetProperty(g_cx, obj, name, jv);
 }
 
 bool object::has_property(const std::string &name) const {
@@ -202,11 +234,12 @@ bool object::has_property(const std::string &name) const {
 }
 
 bool object::has_property(const char *name) const {
-    if (is_null()) return false;
+    if (!g_cx || is_null()) return false;
     
-    JSBool found;
-    if (JS_HasProperty(g_cx, get_object_ptr(), name, &found)) {
-        return found == JS_TRUE;
+    JS::RootedObject obj(g_cx, get_object_ptr());
+    bool found = false;
+    if (JS_HasProperty(g_cx, obj, name, &found)) {
+        return found;
     }
     return false;
 }
@@ -216,169 +249,87 @@ void object::delete_property(const std::string &name) {
 }
 
 void object::delete_property(const char *name) {
-    if (is_null()) return;
+    if (!g_cx || is_null()) return;
     
-    jsval v;
-    JS_DeleteProperty2(g_cx, get_object_ptr(), name, &v);
-}
-
-bool object::is_array() const {
-    if (is_null()) return false;
-    return JS_IsArrayObject(g_cx, get_object_ptr()) == JS_TRUE;
-}
-
-// Helper to check for pending exception and throw it
-static void check_and_throw_pending_exception(const std::string &funcName) {
-    jsval exc;
-    
-    // Try to get any pending exception via SpiderMonkey API
-    if (JS_GetPendingException(g_cx, &exc)) {
-        JS_ClearPendingException(g_cx);
-        clear_last_exception();
-        
-        // Check if it's a StopIteration object
-        if (!JSVAL_IS_PRIMITIVE(exc)) {
-            JSObject *excObj = JSVAL_TO_OBJECT(exc);
-            if (excObj) {
-                // Check class name
-                JSClass *cls = JS_GET_CLASS(g_cx, excObj);
-                if (cls && cls->name) {
-                    if (strcmp(cls->name, "StopIteration") == 0) {
-                        throw exception("[object StopIteration]");
-                    }
-                    // Include class name in exception message
-                    std::string msg = "[object ";
-                    msg += cls->name;
-                    msg += "]";
-                    throw exception(msg);
-                }
-                
-                // Also check against global StopIteration
-                jsval stopIterVal;
-                if (JS_GetProperty(g_cx, g_global, "StopIteration", &stopIterVal)) {
-                    if (!JSVAL_IS_PRIMITIVE(stopIterVal)) {
-                        JSObject *stopIterObj = JSVAL_TO_OBJECT(stopIterVal);
-                        if (excObj == stopIterObj) {
-                            throw exception("[object StopIteration]");
-                        }
-                        // Check if exc is an instance of StopIteration
-                        JSBool isInstance = JS_FALSE;
-                        if (JS_HasInstance(g_cx, stopIterObj, exc, &isInstance) && isInstance) {
-                            throw exception("[object StopIteration]");
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Convert exception to string using JS_EncodeString (more reliable)
-        JSString *str = JS_ValueToString(g_cx, exc);
-        if (str) {
-            char *cstr = JS_EncodeString(g_cx, str);
-            if (cstr) {
-                std::string msg = cstr;
-                JS_free(g_cx, cstr);
-                if (!msg.empty()) {
-                    throw exception(msg);
-                }
-            }
-        }
-        throw exception("uncaught exception: [unknown]");
-    }
-    
-    // No pending exception found via JS_GetPendingException
-    // Check if we captured one via the error reporter
-    if (g_has_last_exception) {
-        std::string msg = g_last_exception_message;
-        clear_last_exception();
-        JS_ClearPendingException(g_cx);
-        throw exception(msg);
-    }
-    
-    // No exception found at all - clear state and let caller handle
-    JS_ClearPendingException(g_cx);
+    JS::RootedObject obj(g_cx, get_object_ptr());
+    JS::ObjectOpResult result;
+    JS_DeleteProperty(g_cx, obj, name, result);
 }
 
 value object::call(const std::string &name) {
-    if (is_null()) return value();
+    if (!g_cx || is_null()) return value();
     
-    // Clear any stale exception state before the call
     clear_last_exception();
     
-    jsval rval;
-    if (JS_CallFunctionName(g_cx, get_object_ptr(), name.c_str(), 0, nullptr, &rval)) {
+    JS::RootedObject obj(g_cx, get_object_ptr());
+    JS::RootedValue rval(g_cx);
+    
+    if (JS_CallFunctionName(g_cx, obj, name.c_str(), JS::HandleValueArray::empty(), &rval)) {
         return value(rval);
     }
     
-    // Call failed - check for pending exception and throw it
     check_and_throw_pending_exception(name);
-    
-    // If we get here, no exception was found but call still failed
     throw exception("Could not call function: " + name);
 }
 
 value object::call(const std::string &name, const value &arg) {
-    if (is_null()) return value();
+    if (!g_cx || is_null()) return value();
     
-    // Clear any stale exception state before the call
     clear_last_exception();
     
-    jsval func;
-    if (!JS_GetProperty(g_cx, get_object_ptr(), name.c_str(), &func)) {
-        throw exception("Could not get function property: " + name);
+    JS::RootedObject obj(g_cx, get_object_ptr());
+    JS::RootedValue rval(g_cx);
+    JS::RootedValueVector argv(g_cx);
+    if (!argv.append(arg.val)) {
+        throw exception("Failed to create argument array");
     }
     
-    jsval argv[1] = { arg.val };
-    jsval rval;
-    
-    if (JS_CallFunctionValue(g_cx, get_object_ptr(), func, 1, argv, &rval)) {
+    if (JS_CallFunctionName(g_cx, obj, name.c_str(), argv, &rval)) {
         return value(rval);
     }
     
-    // Call failed - check for pending exception and throw it
     check_and_throw_pending_exception(name);
-    
-    // If we get here, no exception was found but call still failed
     throw exception("Could not call function: " + name);
 }
 
 value object::call(const std::string &name, const value &arg1, const value &arg2) {
-    if (is_null()) return value();
+    if (!g_cx || is_null()) return value();
     
-    // Clear any stale exception state before the call
     clear_last_exception();
     
-    jsval func;
-    if (!JS_GetProperty(g_cx, get_object_ptr(), name.c_str(), &func)) {
-        throw exception("Could not get function property: " + name);
+    JS::RootedObject obj(g_cx, get_object_ptr());
+    JS::RootedValue rval(g_cx);
+    JS::RootedValueVector argv(g_cx);
+    if (!argv.append(arg1.val) || !argv.append(arg2.val)) {
+        throw exception("Failed to create argument array");
     }
     
-    jsval argv[2] = { arg1.val, arg2.val };
-    jsval rval;
-    
-    if (JS_CallFunctionValue(g_cx, get_object_ptr(), func, 2, argv, &rval)) {
+    if (JS_CallFunctionName(g_cx, obj, name.c_str(), argv, &rval)) {
         return value(rval);
     }
     
-    // Call failed - check for pending exception and throw it
     check_and_throw_pending_exception(name);
-    
-    // If we get here, no exception was found but call still failed
     throw exception("Could not call function: " + name);
 }
 
 object object::prototype() const {
-    if (is_null()) return object();
-    return object(JS_GetPrototype(g_cx, get_object_ptr()));
+    if (!g_cx || is_null()) return object();
+    JS::RootedObject obj(g_cx, get_object_ptr());
+    JS::RootedObject proto(g_cx);
+    if (JS_GetPrototype(g_cx, obj, &proto)) {
+        return object(proto);
+    }
+    return object();
 }
 
 object object::parent() const {
-    if (is_null()) return object();
-    return object(JS_GetParent(g_cx, get_object_ptr()));
+    // In modern SpiderMonkey, parent is not directly accessible
+    // Return null for compatibility
+    return object();
 }
 
 property_iterator object::begin() const {
-    if (is_null()) return property_iterator();
+    if (!g_cx || is_null()) return property_iterator();
     return property_iterator(g_cx, get_object_ptr());
 }
 
@@ -390,41 +341,116 @@ property_iterator object::end() const {
 // array implementation
 // ============================================================================
 
-jsuint array::length() const {
-    if (is_null()) return 0;
+uint32_t array::length() const {
+    if (!g_cx || is_null()) return 0;
     
-    jsuint len;
-    if (JS_GetArrayLength(g_cx, get_object_ptr(), &len)) {
-        return len;
-    }
-    return 0;
+    JS::RootedObject obj(g_cx, get_object_ptr());
+    uint32_t len = 0;
+    JS::GetArrayLength(g_cx, obj, &len);
+    return len;
 }
 
-void array::set_length(jsuint len) {
-    if (is_null()) return;
-    JS_SetArrayLength(g_cx, get_object_ptr(), len);
+void array::set_length(uint32_t len) {
+    if (!g_cx || is_null()) return;
+    
+    JS::RootedObject obj(g_cx, get_object_ptr());
+    JS::SetArrayLength(g_cx, obj, len);
 }
 
-value array::get_element(jsuint index) const {
-    if (is_null()) return value();
+value array::get_element(uint32_t index) const {
+    if (!g_cx || is_null()) return value();
     
-    jsval v;
-    if (JS_GetElement(g_cx, get_object_ptr(), index, &v)) {
+    JS::RootedObject obj(g_cx, get_object_ptr());
+    JS::RootedValue v(g_cx);
+    if (JS_GetElement(g_cx, obj, index, &v)) {
         return value(v);
     }
     return value();
 }
 
-void array::set_element(jsuint index, const value &v) {
-    if (is_null()) return;
+void array::set_element(uint32_t index, const value &v) {
+    if (!g_cx || is_null()) return;
     
-    jsval jv = v.val;
-    JS_SetElement(g_cx, get_object_ptr(), index, &jv);
+    JS::RootedObject obj(g_cx, get_object_ptr());
+    JS::RootedValue jv(g_cx, v.val);
+    JS_SetElement(g_cx, obj, index, jv);
 }
 
 void array::push(const value &v) {
-    jsuint len = length();
+    uint32_t len = length();
     set_element(len, v);
+}
+
+// ============================================================================
+// root_value implementation
+// ============================================================================
+
+root_value::root_value() {
+    if (g_cx) {
+        rooted = std::make_unique<JS::PersistentRootedValue>(g_cx);
+    }
+}
+
+root_value::root_value(const value &v) {
+    if (g_cx) {
+        rooted = std::make_unique<JS::PersistentRootedValue>(g_cx, v.val);
+    }
+}
+
+root_value::~root_value() = default;
+
+root_value &root_value::operator=(const value &v) {
+    if (rooted) {
+        *rooted = v.val;
+    }
+    return *this;
+}
+
+root_value::operator value() const {
+    return get();
+}
+
+value root_value::get() const {
+    if (rooted) {
+        return value(rooted->get());
+    }
+    return value();
+}
+
+// ============================================================================
+// root_object implementation
+// ============================================================================
+
+root_object::root_object() {
+    if (g_cx) {
+        rooted = std::make_unique<JS::PersistentRootedObject>(g_cx);
+    }
+}
+
+root_object::root_object(const object &o) {
+    if (g_cx) {
+        rooted = std::make_unique<JS::PersistentRootedObject>(g_cx, o.get_object_ptr());
+    }
+}
+
+root_object::~root_object() = default;
+
+root_object &root_object::operator=(const object &o) {
+    if (rooted) {
+        *rooted = o.get_object_ptr();
+    }
+    return *this;
+}
+
+root_object::operator object() const {
+    return get();
+}
+
+object root_object::get() const {
+    if (rooted) {
+        return object(rooted->get());
+    }
+    return object();
 }
 
 // ============================================================================
@@ -432,54 +458,38 @@ void array::push(const value &v) {
 // ============================================================================
 
 context context::create() {
+    // Initialize SpiderMonkey if not already done
+    static bool initialized = false;
+    if (!initialized) {
+        if (!JS_Init()) {
+            return context();
+        }
+        initialized = true;
+    }
+    
+    // Create a new context
+    JSContext *cx = JS_NewContext(8L * 1024 * 1024);  // 8MB stack
+    if (!cx) {
+        return context();
+    }
+    
+    if (!JS::InitSelfHostedCode(cx)) {
+        JS_DestroyContext(cx);
+        return context();
+    }
+    
     context ctx;
-    
-    // Create runtime with 32MB heap
-    ctx.rt = JS_NewRuntime(32 * 1024 * 1024);
-    if (!ctx.rt) {
-        throw exception("Failed to create JS runtime");
-    }
-    
-    // Create context with 8KB stack
-    ctx.cx = JS_NewContext(ctx.rt, 8192);
-    if (!ctx.cx) {
-        JS_DestroyRuntime(ctx.rt);
-        throw exception("Failed to create JS context");
-    }
-    
+    ctx.cx = cx;
     ctx.owns_context = true;
     
-    // Set up error reporting
-    JS_SetErrorReporter(ctx.cx, errorReporter);
-    
-    // Set options - use JSOPTION_JIT for 1.8.5
-    JS_SetOptions(ctx.cx, JSOPTION_VAROBJFIX | JSOPTION_JIT);
-    JS_SetVersion(ctx.cx, JSVERSION_LATEST);
-    
-    // Create global object
-    JSObject *global = JS_NewObject(ctx.cx, &global_class, nullptr, nullptr);
-    if (!global) {
-        JS_DestroyContext(ctx.cx);
-        JS_DestroyRuntime(ctx.rt);
-        throw exception("Failed to create global object");
-    }
-    
-    // Set as global for this context
-    JS_SetGlobalObject(ctx.cx, global);
-    
-    // Initialize standard classes
-    if (!JS_InitStandardClasses(ctx.cx, global)) {
-        JS_DestroyContext(ctx.cx);
-        JS_DestroyRuntime(ctx.rt);
-        throw exception("Failed to initialize standard classes");
-    }
-    
-    // Set global state
-    g_cx = ctx.cx;
-    g_rt = ctx.rt;
-    g_global = global;
-    
     return ctx;
+}
+
+void context::destroy() {
+    if (owns_context && cx) {
+        JS_DestroyContext(cx);
+        cx = nullptr;
+    }
 }
 
 // ============================================================================
@@ -487,54 +497,78 @@ context context::create() {
 // ============================================================================
 
 current_context_scope::current_context_scope(const context &ctx) {
-    // Context is already set up in context::create()
+    g_cx = ctx.get();
 }
 
 current_context_scope::~current_context_scope() {
-    // Cleanup happens in context destruction
+    // Don't clear g_cx here as it may still be needed
 }
 
 // ============================================================================
 // property_iterator implementation
 // ============================================================================
 
+property_iterator::property_iterator() 
+    : cx(nullptr), obj(nullptr), ids(nullptr), current_index(0), at_end(true) {}
+
 property_iterator::property_iterator(JSContext *c, JSObject *o) 
-    : cx(c), obj(o), iter(nullptr), at_end(false) {
-    iter = JS_NewPropertyIterator(cx, obj);
-    if (!iter) {
+    : cx(c), obj(new JS::PersistentRootedObject(c, o)), 
+      ids(new JS::PersistentRooted<JS::IdVector>(c, JS::IdVector(c))), 
+      current_index(0), at_end(false) {
+    if (!JS_Enumerate(cx, *obj, &(*ids))) {
         at_end = true;
         return;
     }
-    advance();
+    if (ids->length() == 0) {
+        at_end = true;
+    }
+}
+
+property_iterator::property_iterator(property_iterator &&other) noexcept
+    : cx(other.cx), obj(other.obj), ids(other.ids), 
+      current_index(other.current_index), at_end(other.at_end) {
+    other.cx = nullptr;
+    other.obj = nullptr;
+    other.ids = nullptr;
+    other.at_end = true;
+}
+
+property_iterator &property_iterator::operator=(property_iterator &&other) noexcept {
+    if (this != &other) {
+        delete obj;
+        delete ids;
+        cx = other.cx;
+        obj = other.obj;
+        ids = other.ids;
+        current_index = other.current_index;
+        at_end = other.at_end;
+        other.cx = nullptr;
+        other.obj = nullptr;
+        other.ids = nullptr;
+        other.at_end = true;
+    }
+    return *this;
 }
 
 property_iterator::~property_iterator() {
-    // Iterator is GC'd
-}
-
-void property_iterator::advance() {
-    if (at_end || !iter) return;
-    
-    if (!JS_NextProperty(cx, iter, &current_id)) {
-        at_end = true;
-        return;
-    }
-    
-    jsval idval;
-    if (!JS_IdToValue(cx, current_id, &idval) || JSVAL_IS_VOID(idval)) {
-        at_end = true;
-    }
+    delete obj;
+    delete ids;
 }
 
 property_iterator &property_iterator::operator++() {
-    advance();
+    if (!at_end && ids) {
+        current_index++;
+        if (current_index >= ids->length()) {
+            at_end = true;
+        }
+    }
     return *this;
 }
 
 bool property_iterator::operator!=(const property_iterator &other) const {
     if (at_end && other.at_end) return false;
     if (at_end != other.at_end) return true;
-    return iter != other.iter;
+    return current_index != other.current_index;
 }
 
 bool property_iterator::operator==(const property_iterator &other) const {
@@ -542,14 +576,18 @@ bool property_iterator::operator==(const property_iterator &other) const {
 }
 
 string property_iterator::operator*() const {
-    if (at_end) return string();
+    if (at_end || !ids || current_index >= ids->length()) return string();
     
-    jsval idval;
-    if (!JS_IdToValue(cx, current_id, &idval)) {
+    JS::RootedId id(cx, (*ids)[current_index]);
+    JS::RootedValue idval(cx);
+    if (!JS_IdToValue(cx, id, &idval)) {
         return string();
     }
     
-    return string(idval);
+    JS::RootedString str(cx, JS::ToString(cx, idval));
+    if (!str) return string();
+    
+    return string(str);
 }
 
 // ============================================================================
@@ -557,11 +595,12 @@ string property_iterator::operator*() const {
 // ============================================================================
 
 context current_context() {
-    return context(g_cx, g_rt);
+    return context(g_cx);
 }
 
 object global() {
-    return object(g_global);
+    if (!g_global) return object();
+    return object(g_global->get());
 }
 
 value evaluate(const std::string &code, const char *filename, int lineno) {
@@ -569,24 +608,22 @@ value evaluate(const std::string &code, const char *filename, int lineno) {
 }
 
 value evaluate(const char *code, const char *filename, int lineno) {
-    jsval rval;
+    if (!g_cx || !g_global) return value();
     
-    if (!JS_EvaluateScript(g_cx, g_global, code, strlen(code), filename, lineno, &rval)) {
-        jsval exc;
-        if (JS_GetPendingException(g_cx, &exc)) {
-            JS_ClearPendingException(g_cx);
-            
-            std::string msg = "JavaScript error";
-            JSString *str = JS_ValueToString(g_cx, exc);
-            if (str) {
-                char *cstr = JS_EncodeString(g_cx, str);
-                if (cstr) {
-                    msg = cstr;
-                    JS_free(g_cx, cstr);
-                }
-            }
-            throw exception(msg);
-        }
+    JS::CompileOptions options(g_cx);
+    options.setFileAndLine(filename, lineno);
+    
+    JS::SourceText<mozilla::Utf8Unit> srcBuf;
+    if (!srcBuf.init(g_cx, code, strlen(code), JS::SourceOwnership::Borrowed)) {
+        check_and_throw_pending_exception("evaluate");
+        throw exception("Failed to initialize source buffer");
+    }
+    
+    JS::RootedValue rval(g_cx);
+    JS::RootedObject global(g_cx, g_global->get());
+    
+    if (!JS::Evaluate(g_cx, options, srcBuf, &rval)) {
+        check_and_throw_pending_exception("evaluate");
         throw exception("JavaScript evaluation failed");
     }
     
@@ -594,143 +631,129 @@ value evaluate(const char *code, const char *filename, int lineno) {
 }
 
 void gc() {
-    JS_GC(g_cx);
+    if (g_cx) {
+        JS_MaybeGC(g_cx);
+    }
 }
 
 object create_object() {
-    JSObject *obj = JS_NewObject(g_cx, nullptr, nullptr, nullptr);
+    if (!g_cx) return object();
+    JSObject *obj = JS_NewPlainObject(g_cx);
     return object(obj);
 }
 
 array create_array() {
-    JSObject *arr = JS_NewArrayObject(g_cx, 0, nullptr);
+    if (!g_cx) return array();
+    JSObject *arr = JS::NewArrayObject(g_cx, 0);
     return array(arr);
 }
 
-array create_array(jsuint length) {
-    JSObject *arr = JS_NewArrayObject(g_cx, length, nullptr);
+array create_array(uint32_t length) {
+    if (!g_cx) return array();
+    JSObject *arr = JS::NewArrayObject(g_cx, length);
     return array(arr);
 }
 
 // ============================================================================
-// detail:: type conversion specializations for flusspferd types
+// Type conversion implementations
 // ============================================================================
 
 namespace detail {
 
-template<>
-string js_to_cpp<string>(JSContext *cx, jsval v) {
-    return string(v);
+JS::Value to_jsval<std::string>::convert(JSContext *cx, const std::string &v) {
+    JSString *str = JS_NewStringCopyUTF8N(cx, JS::UTF8Chars(v.c_str(), v.length()));
+    return str ? JS::StringValue(str) : JS::UndefinedValue();
 }
 
-template<>
-value js_to_cpp<value>(JSContext *cx, jsval v) {
-    return value(v);
+JS::Value to_jsval<const char*>::convert(JSContext *cx, const char* const &v) {
+    if (!v) return JS::NullValue();
+    JSString *str = JS_NewStringCopyUTF8Z(cx, JS::ConstUTF8CharsZ(v));
+    return str ? JS::StringValue(str) : JS::UndefinedValue();
 }
 
-template<>
-object js_to_cpp<object>(JSContext *cx, jsval v) {
-    return object(v);
-}
-
-template<>
-jsval cpp_to_js<string>(JSContext *cx, const string &v) {
-    return v.val;
-}
-
-template<>
-jsval cpp_to_js<value>(JSContext *cx, const value &v) {
-    return v.val;
-}
-
-template<>
-jsval cpp_to_js<object>(JSContext *cx, const object &v) {
-    return v.val;
-}
-
-template<>
-jsval cpp_to_js<array>(JSContext *cx, const array &v) {
-    return v.val;
+std::string from_jsval<std::string>::convert(JSContext *cx, const JS::Value &v) {
+    if (!v.isString()) {
+        JS::RootedValue rv(cx, v);
+        JS::RootedString str(cx, JS::ToString(cx, rv));
+        if (!str) return "";
+        JS::UniqueChars chars = JS_EncodeStringToUTF8(cx, str);
+        return chars ? std::string(chars.get()) : "";
+    }
+    
+    JS::RootedString str(cx, v.toString());
+    JS::UniqueChars chars = JS_EncodeStringToUTF8(cx, str);
+    return chars ? std::string(chars.get()) : "";
 }
 
 } // namespace detail
 
 // ============================================================================
-// Universal method dispatch - called when a native method is invoked from JS
+// Universal method dispatcher for native classes
 // ============================================================================
 
-JSBool universal_method_dispatch(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval) {
-    // Get the callee to find the function name
-    jsval callee = argv[-2];
-    if (!JSVAL_IS_OBJECT(callee)) {
-        JS_ReportError(cx, "Could not get callee");
-        return JS_FALSE;
+bool universal_method_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) {
+    JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+    
+    // Get 'this' object
+    if (!args.thisv().isObject()) {
+        JS_ReportErrorASCII(cx, "Method called on non-object");
+        return false;
     }
     
-    JSFunction *fun = JS_ValueToFunction(cx, callee);
-    if (!fun) {
-        JS_ReportError(cx, "Could not get function");
-        return JS_FALSE;
+    JS::RootedObject thisObj(cx, &args.thisv().toObject());
+    
+    // Get the private data (native object pointer)
+    void *priv = sm_get_private(thisObj);
+    if (!priv) {
+        JS_ReportErrorASCII(cx, "No private data on object");
+        return false;
     }
     
-    JSString *nameStr = JS_GetFunctionId(fun);
-    if (!nameStr) {
-        JS_ReportError(cx, "Could not get function name");
-        return JS_FALSE;
+    // Get the method name from the callee's reserved slot
+    JS::RootedObject callee(cx, &args.callee());
+    JS::RootedValue methodNameVal(cx, sm_get_reserved_slot(callee.get(), 0));
+    
+    if (!methodNameVal.isString()) {
+        JS_ReportErrorASCII(cx, "Invalid method name");
+        return false;
     }
     
-    char *methodName = JS_EncodeString(cx, nameStr);
+    JS::RootedString methodNameStr(cx, methodNameVal.toString());
+    JS::UniqueChars methodName = JS_EncodeStringToUTF8(cx, methodNameStr);
     if (!methodName) {
-        JS_ReportError(cx, "Could not encode function name");
-        return JS_FALSE;
+        JS_ReportErrorASCII(cx, "Failed to get method name");
+        return false;
     }
     
-    // Get the object's class name
-    JSClass *cls = JS_GET_CLASS(cx, obj);
-    if (!cls || !cls->name) {
-        JS_free(cx, methodName);
-        JS_ReportError(cx, "Could not get class name");
-        return JS_FALSE;
+    // Get class name from reserved slot 1
+    JS::RootedValue classNameVal(cx, sm_get_reserved_slot(callee.get(), 1));
+    if (!classNameVal.isString()) {
+        JS_ReportErrorASCII(cx, "Invalid class name");
+        return false;
     }
     
-    std::string className = cls->name;
-    
-    // Look up the method in our registry
-    auto classIt = g_class_registries.find(className);
-    if (classIt == g_class_registries.end()) {
-        fprintf(stderr, "JS Warning: Class '%s' not found in registry when calling method '%s'\n", 
-                className.c_str(), methodName);
-        JS_free(cx, methodName);
-        *rval = JSVAL_VOID;
-        return JS_TRUE;
+    JS::RootedString classNameStr(cx, classNameVal.toString());
+    JS::UniqueChars className = JS_EncodeStringToUTF8(cx, classNameStr);
+    if (!className) {
+        JS_ReportErrorASCII(cx, "Failed to get class name");
+        return false;
     }
     
-    auto methodIt = classIt->second.methods.find(methodName);
+    // Look up the method in the registry
+    auto classIt = g_class_registry.find(className.get());
+    if (classIt == g_class_registry.end()) {
+        JS_ReportErrorASCII(cx, "Class not found in registry");
+        return false;
+    }
+    
+    auto methodIt = classIt->second.methods.find(methodName.get());
     if (methodIt == classIt->second.methods.end()) {
-        fprintf(stderr, "JS Warning: Method '%s' not found for class '%s'\n", 
-                methodName, className.c_str());
-        JS_free(cx, methodName);
-        *rval = JSVAL_VOID;
-        return JS_TRUE;
+        JS_ReportErrorASCII(cx, "Method '%s' not found", methodName.get());
+        return false;
     }
     
-    JS_free(cx, methodName);
-    
-    // Get the native pointer
-    void *native_ptr = JS_GetPrivate(cx, obj);
-    if (!native_ptr) {
-        JS_ReportError(cx, "Native object is null");
-        return JS_FALSE;
-    }
-    
-    // Call the dispatcher
-    try {
-        *rval = methodIt->second(native_ptr, cx, argc, argv);
-        return JS_TRUE;
-    } catch (const std::exception &e) {
-        JS_ReportError(cx, "%s", e.what());
-        return JS_FALSE;
-    }
+    // Call the method
+    return methodIt->second(priv, cx, argc, vp);
 }
 
 } // namespace flusspferd

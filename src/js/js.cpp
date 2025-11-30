@@ -24,7 +24,7 @@
 #include "../SQLUtil.h"
 #include "../rooms/Room.h"
 
-#include <js/jsdbgapi.h>
+// jsdbgapi.h was removed in modern SpiderMonkey
 #include <boost/filesystem.hpp>
 
 
@@ -975,17 +975,19 @@ const char *JSManager::getFunctionFilename(const std::string &functionName)
 	if(context == NULL)
 		return NULL;
 
-	JSObject *globalObject = JS_GetGlobalObject(context);
-	jsval methodValue;
-	JS_GetProperty(context, globalObject, functionName.c_str(), &methodValue);
+	JS::RootedObject globalObject(context, flusspferd::global().get_object_ptr());
+	JS::RootedValue methodValue(context);
+	if (!JS_GetProperty(context, globalObject, functionName.c_str(), &methodValue))
+		return NULL;
 	JSFunction *function = JS_ValueToFunction(context, methodValue);
 	
 	if(function == NULL)
 		return NULL;
 
-	JSScript *jsScript = JS_GetFunctionScript(context, function);
+	JS::RootedFunction rfunc(context, function);
+	JSScript *jsScript = JS_GetFunctionScript(context, rfunc);
 	if(jsScript == NULL)
 		return NULL;
 
-	return JS_GetScriptFilename(context, jsScript);
+	return JS_GetScriptFilename(jsScript);
 }

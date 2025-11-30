@@ -24,7 +24,7 @@ void RegisterJSCharacterBindings();
 
 void JSEnvironment::LoadJSCharacter()
 {
-	flusspferd::ClassTraits<JSCharacter>::class_name = "JSCharacter";
+	// class_name is now defined by FLUSSPFERD_CLASS_DESCRIPTION macro
 	RegisterJSCharacterBindings();  // Register methods and properties first
 	load_class<JSCharacter>();
 }

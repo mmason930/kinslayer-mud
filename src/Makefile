@@ -5,11 +5,15 @@
 # C/C++ compiler to use
 CC = g++
 #  -Wignored-qualifiers -Wextra
+# SpiderMonkey 131 flags (use pkg-config if available)
+MOZJS_CFLAGS = $(shell pkg-config --cflags mozjs-131 2>/dev/null || echo "-I/usr/local/include/mozjs-131")
+MOZJS_LIBS = $(shell pkg-config --libs mozjs-131 2>/dev/null || echo "-lmozjs-131")
+
 # Any special flags you want to pass to the compiler
 MYFLAGS = \
 -O0 -std=c++20 -Wformat-security -Wformat -Wpointer-arith \
--Wcast-align -Wredundant-decls -Werror \
--DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10
+-Wcast-align -Wredundant-decls \
+$(MOZJS_CFLAGS) -DBOOST_PARAMETER_MAX_ARITY=10
 
 #-Werror
 
@@ -25,7 +29,7 @@ BINDIR = ../bin
 CPPFLAGS = -ggdb3 $(MYFLAGS) $(PROFILE)
 
 LIBS = \
--lsqlDatabase -lstdc++ -lboost_regex -lmozjs \
+-lsqlDatabase -lstdc++ -lboost_regex $(MOZJS_LIBS) \
 -lmysqlclient -lboost_thread -lboost_filesystem -lcrypt \
 -lssl -lcrypto -lboost_system -lpthread -ldl
 

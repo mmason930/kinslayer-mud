@@ -1,5 +1,6 @@
 /**
  * JSRoom_bindings.cpp - Method and property bindings for JSRoom
+ * Updated for SpiderMonkey 131 API.
  */
 
 #include "../conf.h"
@@ -10,51 +11,50 @@
 
 namespace {
 
-inline jsval to_jsval(JSContext *cx, int v) { return INT_TO_JSVAL(v); }
-inline jsval to_jsval(JSContext *cx, bool v) { return BOOLEAN_TO_JSVAL(v); }
-inline jsval to_jsval(JSContext *cx, double v) { jsval rv; JS_NewNumberValue(cx, v, &rv); return rv; }
-inline jsval to_jsval(JSContext *cx, const flusspferd::string &v) { return v.val; }
-inline jsval to_jsval(JSContext *cx, const flusspferd::value &v) { return v.val; }
-inline jsval to_jsval(JSContext *cx, const flusspferd::object &v) { return v.val; }
-inline jsval to_jsval(JSContext *cx, const flusspferd::array &v) { return v.val; }
+inline JS::Value to_jsval(JSContext *cx, int v) { return JS::Int32Value(v); }
+inline JS::Value to_jsval(JSContext *cx, bool v) { return JS::BooleanValue(v); }
+inline JS::Value to_jsval(JSContext *cx, double v) { return JS::DoubleValue(v); }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::string &v) { return v.val; }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::value &v) { return v.val; }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::object &v) { return v.val; }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::array &v) { return v.val; }
 
-inline int from_jsval_int(JSContext *cx, jsval v) {
-    if (JSVAL_IS_INT(v)) return JSVAL_TO_INT(v);
-    jsdouble d; JS_ValueToNumber(cx, v, &d); return static_cast<int>(d);
+inline int from_jsval_int(JSContext *cx, JS::HandleValue v) {
+    if (v.isInt32()) return v.toInt32();
+    double d; JS::ToNumber(cx, v, &d); return static_cast<int>(d);
 }
-inline bool from_jsval_bool(JSContext *cx, jsval v) {
-    JSBool b; JS_ValueToBoolean(cx, v, &b); return b == JS_TRUE;
+inline bool from_jsval_bool(JSContext *cx, JS::HandleValue v) {
+    return JS::ToBoolean(v);
 }
-inline std::string from_jsval_string(JSContext *cx, jsval v) {
-    JSString *str = JS_ValueToString(cx, v);
+inline std::string from_jsval_string(JSContext *cx, JS::HandleValue v) {
+    JSString *str = JS::ToString(cx, v);
     if (!str) return "";
-    char *cstr = JS_EncodeString(cx, str);
+    JS::RootedString rstr(cx, str);
+    JS::UniqueChars cstr = JS_EncodeStringToUTF8(cx, rstr);
     if (!cstr) return "";
-    std::string result(cstr);
-    JS_free(cx, cstr);
-    return result;
+    return std::string(cstr.get());
 }
-inline flusspferd::string from_jsval_fstring(JSContext *cx, jsval v) {
-    return flusspferd::string(v);
+inline flusspferd::string from_jsval_fstring(JSContext *cx, JS::HandleValue v) {
+    return flusspferd::string(v.get());
 }
-inline flusspferd::value from_jsval_value(JSContext *cx, jsval v) {
-    return flusspferd::value(v);
+inline flusspferd::value from_jsval_value(JSContext *cx, JS::HandleValue v) {
+    return flusspferd::value(v.get());
 }
 
-inline JSRoom* get_js_room(JSContext *cx, jsval v) {
-    if (!JSVAL_IS_OBJECT(v) || JSVAL_IS_NULL(v)) return nullptr;
-    JSObject *obj = JSVAL_TO_OBJECT(v);
-    JSClass *cls = JS_GET_CLASS(cx, obj);
+inline JSRoom* get_js_room(JSContext *cx, JS::HandleValue v) {
+    if (!v.isObject()) return nullptr;
+    ::JSObject *obj = &v.toObject();
+    const JSClass *cls = JS::GetClass(obj);
     if (!cls || strcmp(cls->name, "JSRoom") != 0) return nullptr;
-    return static_cast<JSRoom*>(JS_GetPrivate(cx, obj));
+    return static_cast<JSRoom*>(flusspferd::sm_get_private(obj));
 }
 
-inline JSCharacter* get_js_character(JSContext *cx, jsval v) {
-    if (!JSVAL_IS_OBJECT(v) || JSVAL_IS_NULL(v)) return nullptr;
-    JSObject *obj = JSVAL_TO_OBJECT(v);
-    JSClass *cls = JS_GET_CLASS(cx, obj);
+inline JSCharacter* get_js_character(JSContext *cx, JS::HandleValue v) {
+    if (!v.isObject()) return nullptr;
+    ::JSObject *obj = &v.toObject();
+    const JSClass *cls = JS::GetClass(obj);
     if (!cls || strcmp(cls->name, "JSCharacter") != 0) return nullptr;
-    return static_cast<JSCharacter*>(JS_GetPrivate(cx, obj));
+    return static_cast<JSCharacter*>(flusspferd::sm_get_private(obj));
 }
 
 } // anonymous namespace
@@ -62,304 +62,388 @@ inline JSCharacter* get_js_character(JSContext *cx, jsval v) {
 void RegisterJSRoomBindings() {
     using namespace flusspferd;
     
-    // Methods
-    g_class_registries["JSRoom"].methods["echo"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    // Methods - signature: bool(void*, JSContext*, unsigned, JS::Value*)
+    g_class_registry["JSRoom"].methods["echo"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        flusspferd::string msg = argc > 0 ? from_jsval_fstring(cx, argv[0]) : flusspferd::string("");
+        if (!self) { args.rval().setUndefined(); return true; }
+        flusspferd::string msg = argc > 0 ? from_jsval_fstring(cx, args[0]) : flusspferd::string("");
         self->echo(msg);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["echoaround"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["echoaround"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        JSCharacter *ch = argc > 0 ? get_js_character(cx, argv[0]) : nullptr;
-        std::string msg = argc > 1 ? from_jsval_string(cx, argv[1]) : "";
+        if (!self) { args.rval().setUndefined(); return true; }
+        JSCharacter *ch = argc > 0 ? get_js_character(cx, args[0]) : nullptr;
+        std::string msg = argc > 1 ? from_jsval_string(cx, args[1]) : "";
         if (ch) self->echoaround(*ch, msg);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["loadObj"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["loadObj"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int vnum = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->loadObj(vnum));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int vnum = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->loadObj(vnum)));
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["loadMob"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["loadMob"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int vnum = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->loadMob(vnum));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int vnum = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->loadMob(vnum)));
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["zecho"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["zecho"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        flusspferd::string msg = argc > 0 ? from_jsval_fstring(cx, argv[0]) : flusspferd::string("");
+        if (!self) { args.rval().setUndefined(); return true; }
+        flusspferd::string msg = argc > 0 ? from_jsval_fstring(cx, args[0]) : flusspferd::string("");
         self->zecho(msg);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["zreset"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["zreset"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
+        if (!self) { args.rval().setUndefined(); return true; }
         self->zreset();
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["direction"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["direction"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int dir = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->direction(dir));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int dir = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->direction(dir)));
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["doorName"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["doorName"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int dir = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->doorName(dir));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int dir = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->doorName(dir)));
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["doorHidden"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["doorHidden"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int dir = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->doorHidden(dir));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int dir = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->doorHidden(dir)));
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["doorFlags"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["doorFlags"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int dir = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->getDoorFlags(dir));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int dir = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->getDoorFlags(dir)));
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["doorPick"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["doorPick"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int dir = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->doorPick(dir));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int dir = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->doorPick(dir)));
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["doorKey"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["doorKey"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int dir = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->doorKey(dir));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int dir = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->doorKey(dir)));
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["doorDesc"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["doorDesc"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int dir = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->doorDesc(dir));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int dir = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->doorDesc(dir)));
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["doorExists"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["doorExists"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int dir = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->doorExists(dir));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int dir = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->doorExists(dir)));
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["doorIsLocked"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["doorIsLocked"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int dir = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->doorIsLocked(dir));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int dir = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->doorIsLocked(dir)));
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["doorIsClosed"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["doorIsClosed"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int dir = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->doorIsClosed(dir));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int dir = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->doorIsClosed(dir)));
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["doorIsRammable"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["doorIsRammable"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int dir = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->doorIsRammable(dir));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int dir = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->doorIsRammable(dir)));
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["distanceTo"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["distanceTo"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        JSRoom *d = argc > 0 ? get_js_room(cx, argv[0]) : nullptr;
-        if (d) return to_jsval(cx, self->distanceTo(d));
-        return INT_TO_JSVAL(-1);
+        if (!self) { args.rval().setUndefined(); return true; }
+        JSRoom *d = argc > 0 ? get_js_room(cx, args[0]) : nullptr;
+        if (d) {
+            args.rval().set(to_jsval(cx, self->distanceTo(d)));
+        } else {
+            args.rval().setInt32(-1);
+        }
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["firstStep"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["firstStep"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        JSRoom *d = argc > 0 ? get_js_room(cx, argv[0]) : nullptr;
-        if (d) return to_jsval(cx, self->firstStep(d));
-        return INT_TO_JSVAL(-1);
+        if (!self) { args.rval().setUndefined(); return true; }
+        JSRoom *d = argc > 0 ? get_js_room(cx, args[0]) : nullptr;
+        if (d) {
+            args.rval().set(to_jsval(cx, self->firstStep(d)));
+        } else {
+            args.rval().setInt32(-1);
+        }
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["setDoorFlags"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["setDoorFlags"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int dir = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        int v = argc > 1 ? from_jsval_int(cx, argv[1]) : 0;
+        if (!self) { args.rval().setUndefined(); return true; }
+        int dir = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        int v = argc > 1 ? from_jsval_int(cx, args[1]) : 0;
         self->setDoorFlags(dir, v);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["attach"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["attach"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int tVnum = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
+        if (!self) { args.rval().setUndefined(); return true; }
+        int tVnum = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
         self->attach(tVnum);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["detach"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["detach"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int tVnum = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        int nr = argc > 1 ? from_jsval_int(cx, argv[1]) : 0;
+        if (!self) { args.rval().setUndefined(); return true; }
+        int tVnum = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        int nr = argc > 1 ? from_jsval_int(cx, args[1]) : 0;
         self->detach(tVnum, nr);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["countJS"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["countJS"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        flusspferd::value tVnum = argc > 0 ? from_jsval_value(cx, argv[0]) : flusspferd::value();
-        return to_jsval(cx, self->countJS(tVnum));
+        if (!self) { args.rval().setUndefined(); return true; }
+        flusspferd::value tVnum = argc > 0 ? from_jsval_value(cx, args[0]) : flusspferd::value();
+        args.rval().set(to_jsval(cx, self->countJS(tVnum)));
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["digTo"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["digTo"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int dir = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        JSRoom *d = argc > 1 ? get_js_room(cx, argv[1]) : nullptr;
-        bool bothSides = argc > 2 ? from_jsval_bool(cx, argv[2]) : false;
-        bool temporary = argc > 3 ? from_jsval_bool(cx, argv[3]) : false;
+        if (!self) { args.rval().setUndefined(); return true; }
+        int dir = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        JSRoom *d = argc > 1 ? get_js_room(cx, args[1]) : nullptr;
+        bool bothSides = argc > 2 ? from_jsval_bool(cx, args[2]) : false;
+        bool temporary = argc > 3 ? from_jsval_bool(cx, args[3]) : false;
         if (d) self->digTo(dir, d, bothSides, temporary);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["killExit"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["killExit"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int dir = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        bool bothSides = argc > 1 ? from_jsval_bool(cx, argv[1]) : false;
+        if (!self) { args.rval().setUndefined(); return true; }
+        int dir = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        bool bothSides = argc > 1 ? from_jsval_bool(cx, args[1]) : false;
         self->killExit(dir, bothSides);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["disableExit"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["disableExit"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int dir = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        bool bothSides = argc > 1 ? from_jsval_bool(cx, argv[1]) : false;
+        if (!self) { args.rval().setUndefined(); return true; }
+        int dir = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        bool bothSides = argc > 1 ? from_jsval_bool(cx, args[1]) : false;
         self->disableExit(dir, bothSides);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["enableExit"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["enableExit"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int dir = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        bool bothSides = argc > 1 ? from_jsval_bool(cx, argv[1]) : false;
+        if (!self) { args.rval().setUndefined(); return true; }
+        int dir = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        bool bothSides = argc > 1 ? from_jsval_bool(cx, args[1]) : false;
         self->enableExit(dir, bothSides);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["isFlagged"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["isFlagged"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int flag = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->isFlagged(flag));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int flag = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->isFlagged(flag)));
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["pathToRoom"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["pathToRoom"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        JSRoom *otherRoom = argc > 0 ? get_js_room(cx, argv[0]) : nullptr;
-        if (otherRoom) return to_jsval(cx, self->pathToRoom(otherRoom));
-        return JSVAL_VOID;
+        if (!self) { args.rval().setUndefined(); return true; }
+        JSRoom *otherRoom = argc > 0 ? get_js_room(cx, args[0]) : nullptr;
+        if (otherRoom) {
+            args.rval().set(to_jsval(cx, self->pathToRoom(otherRoom)));
+        } else {
+            args.rval().setUndefined();
+        }
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["roomFlagged"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["roomFlagged"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int flag = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->roomFlagged(flag));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int flag = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->roomFlagged(flag)));
+        return true;
     };
     
     // Method aliases for backward compatibility
-    g_class_registries["JSRoom"].methods["getObjects"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["getObjects"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        return self ? to_jsval(cx, self->items()) : JSVAL_VOID;
+        if (self) args.rval().set(to_jsval(cx, self->items())); else args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["getItems"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["getItems"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        return self ? to_jsval(cx, self->items()) : JSVAL_VOID;
+        if (self) args.rval().set(to_jsval(cx, self->items())); else args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].methods["getPeople"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSRoom"].methods["getPeople"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        return self ? to_jsval(cx, self->people()) : JSVAL_VOID;
+        if (self) args.rval().set(to_jsval(cx, self->people())); else args.rval().setUndefined();
+        return true;
     };
     
-    // Property getters
-    g_class_registries["JSRoom"].getters["name"] = [](void *ptr, JSContext *cx) -> jsval {
+    // Property getters - signature: bool(void*, JSContext*, JS::MutableHandleValue)
+    g_class_registry["JSRoom"].getters["name"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        return self ? to_jsval(cx, self->getName()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->getName())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].getters["description"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSRoom"].getters["description"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        return self ? to_jsval(cx, self->getDescription()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->getDescription())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].getters["neighbors"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSRoom"].getters["neighbors"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        return self ? to_jsval(cx, self->neighbors()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->neighbors())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].getters["people"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSRoom"].getters["people"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        return self ? to_jsval(cx, self->people()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->people())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].getters["vnum"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSRoom"].getters["vnum"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        return self ? to_jsval(cx, self->vnum()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->vnum())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].getters["sector"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSRoom"].getters["sector"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        return self ? to_jsval(cx, self->sector()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->sector())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].getters["items"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSRoom"].getters["items"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        return self ? to_jsval(cx, self->items()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->items())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].getters["dark"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSRoom"].getters["dark"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        return self ? to_jsval(cx, self->dark()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->dark())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].getters["zoneVnum"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSRoom"].getters["zoneVnum"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        return self ? to_jsval(cx, self->zoneVnum()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->zoneVnum())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSRoom"].getters["zoneName"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSRoom"].getters["zoneName"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         JSRoom *self = static_cast<JSRoom*>(ptr);
-        return self ? to_jsval(cx, self->zoneName()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->zoneName())); else vp.setUndefined();
+        return true;
     };
 }
-

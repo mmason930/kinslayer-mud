@@ -8,7 +8,7 @@ void RegisterJSRowBindings();
 
 void JSEnvironment::LoadJSRow()
 {
-	flusspferd::ClassTraits<JSRow>::class_name = "JSRow";
+	// class_name is now defined by FLUSSPFERD_CLASS_DESCRIPTION macro
 	RegisterJSRowBindings();  // Register methods and properties first
 	load_class<JSRow>();
 }

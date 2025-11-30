@@ -94,8 +94,8 @@ JSBool kill_script(JSContext * cx)
     }
     else
     {//Script has run too long. Kill it.
-        JS_ReportError(cx, "This trigger has run too long.");
-        return JS_FALSE;
+        JS_ReportErrorUTF8(cx, "This trigger has run too long.");
+        return false;
     }
 #else
 	return JS_TRUE;
@@ -110,8 +110,8 @@ JSBool kjsOperationalCallback(JSContext * cx)
 
 	if(secondsElapsed >= TIMEOUT_SECONDS)
 	{
-        JS_ReportError(cx, "This trigger has run too long.");
-        return JS_FALSE;
+        JS_ReportErrorUTF8(cx, "This trigger has run too long.");
+        return false;
 	}
 	else
 	{
@@ -134,7 +134,7 @@ void triggerOperationalCallback(flusspferd::context context)
 
 		if(context.is_valid())
 		{
-			JS_TriggerOperationCallback(Impl::get_context(context));
+			JS_RequestInterruptCallback(Impl::get_context(context));
 		}
 
 		std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -207,7 +207,7 @@ JSEnvironment::JSEnvironment()
 	flusspferd::create_native_function(g, "getZoneTopRoomVnum", JS_getZoneTopRoomVnum);
 	flusspferd::create_native_function(g, "llmResponse", JS_llmResponse);
 
-    JS_SetOperationCallback(Impl::get_context(current_context()), &kjsOperationalCallback);
+    JS_AddInterruptCallback(Impl::get_context(current_context()), &kjsOperationalCallback);
     
 	triggerOperationalCallbackThread = std::thread( &triggerOperationalCallback, current_context() );
 
@@ -294,7 +294,7 @@ void JSEnvironment::timeout()
 {
 	JSContext *c = raw_context();
 	if( c ) {
-		JS_TriggerOperationCallback( c );
+		JS_RequestInterruptCallback( c );
 	}
 }
 
@@ -363,7 +363,7 @@ void setupTimeout( bool setScriptEndingTime )
 	}
 
     // this only matters when signals are enabled.
-    JS_SetOperationCallback(Impl::get_context(current_context()), &kill_script);
+    JS_AddInterruptCallback(Impl::get_context(current_context()), &kill_script);
 #endif
 }
 

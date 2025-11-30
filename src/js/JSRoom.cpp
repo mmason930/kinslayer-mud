@@ -21,7 +21,7 @@ void RegisterJSRoomBindings();
 
 void JSEnvironment::LoadJSRoom()
 {
-	flusspferd::ClassTraits<JSRoom>::class_name = "JSRoom";
+	// class_name is now defined by FLUSSPFERD_CLASS_DESCRIPTION macro
 	RegisterJSRoomBindings();  // Register methods and properties first
 	load_class<JSRoom>();
 }

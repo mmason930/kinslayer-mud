@@ -1,5 +1,6 @@
 /**
  * JSQuery_bindings.cpp - Method and property bindings for JSQuery
+ * Updated for SpiderMonkey 131 API.
  */
 
 #include "../conf.h"
@@ -10,17 +11,17 @@
 
 namespace {
 
-inline jsval to_jsval(JSContext *cx, int v) { return INT_TO_JSVAL(v); }
-inline jsval to_jsval(JSContext *cx, bool v) { return BOOLEAN_TO_JSVAL(v); }
-inline jsval to_jsval(JSContext *cx, const flusspferd::string &v) { return v.val; }
-inline jsval to_jsval(JSContext *cx, const flusspferd::value &v) { return v.val; }
+inline JS::Value to_jsval(JSContext *cx, int v) { return JS::Int32Value(v); }
+inline JS::Value to_jsval(JSContext *cx, bool v) { return JS::BooleanValue(v); }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::string &v) { return v.val; }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::value &v) { return v.val; }
 
-inline int from_jsval_int(JSContext *cx, jsval v) {
-    if (JSVAL_IS_INT(v)) return JSVAL_TO_INT(v);
-    jsdouble d; JS_ValueToNumber(cx, v, &d); return static_cast<int>(d);
+inline int from_jsval_int(JSContext *cx, JS::HandleValue v) {
+    if (v.isInt32()) return v.toInt32();
+    double d; JS::ToNumber(cx, v, &d); return static_cast<int>(d);
 }
-inline flusspferd::string from_jsval_fstring(JSContext *cx, jsval v) {
-    return flusspferd::string(v);
+inline flusspferd::string from_jsval_fstring(JSContext *cx, JS::HandleValue v) {
+    return flusspferd::string(v.get());
 }
 
 } // anonymous namespace
@@ -28,66 +29,80 @@ inline flusspferd::string from_jsval_fstring(JSContext *cx, jsval v) {
 void RegisterJSQueryBindings() {
     using namespace flusspferd;
     
-    // Methods
-    g_class_registries["JSQuery"].methods["skipRow"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    // Methods - signature: bool(void*, JSContext*, unsigned, JS::Value*)
+    g_class_registry["JSQuery"].methods["skipRow"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSQuery *self = static_cast<JSQuery*>(ptr);
-        if (!self) return JSVAL_VOID;
+        if (!self) { args.rval().setUndefined(); return true; }
         self->skipRow();
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSQuery"].methods["getIndexByField"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSQuery"].methods["getIndexByField"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSQuery *self = static_cast<JSQuery*>(ptr);
-        if (!self) return JSVAL_VOID;
-        flusspferd::string field = argc > 0 ? from_jsval_fstring(cx, argv[0]) : flusspferd::string("");
-        return to_jsval(cx, self->getIndexByField(field));
+        if (!self) { args.rval().setUndefined(); return true; }
+        flusspferd::string field = argc > 0 ? from_jsval_fstring(cx, args[0]) : flusspferd::string("");
+        args.rval().set(to_jsval(cx, self->getIndexByField(field)));
+        return true;
     };
     
-    g_class_registries["JSQuery"].methods["getFieldByIndex"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSQuery"].methods["getFieldByIndex"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSQuery *self = static_cast<JSQuery*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int index = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->getFieldByIndex(index));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int index = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->getFieldByIndex(index)));
+        return true;
     };
     
-    g_class_registries["JSQuery"].methods["reverseRows"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSQuery"].methods["reverseRows"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSQuery *self = static_cast<JSQuery*>(ptr);
-        if (!self) return JSVAL_VOID;
+        if (!self) { args.rval().setUndefined(); return true; }
         self->reverseRows();
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSQuery"].methods["resetRowQueue"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSQuery"].methods["resetRowQueue"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSQuery *self = static_cast<JSQuery*>(ptr);
-        if (!self) return JSVAL_VOID;
+        if (!self) { args.rval().setUndefined(); return true; }
         self->resetRowQueue();
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    // Property getters
-    g_class_registries["JSQuery"].getters["numRows"] = [](void *ptr, JSContext *cx) -> jsval {
+    // Property getters - signature: bool(void*, JSContext*, JS::MutableHandleValue)
+    g_class_registry["JSQuery"].getters["numRows"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         JSQuery *self = static_cast<JSQuery*>(ptr);
-        return self ? to_jsval(cx, self->getnumRows()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->getnumRows())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSQuery"].getters["numFields"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSQuery"].getters["numFields"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         JSQuery *self = static_cast<JSQuery*>(ptr);
-        return self ? to_jsval(cx, self->getNumFields()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->getNumFields())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSQuery"].getters["hasNextRow"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSQuery"].getters["hasNextRow"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         JSQuery *self = static_cast<JSQuery*>(ptr);
-        return self ? to_jsval(cx, self->gethasNextRow()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->gethasNextRow())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSQuery"].getters["peekRow"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSQuery"].getters["peekRow"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         JSQuery *self = static_cast<JSQuery*>(ptr);
-        return self ? to_jsval(cx, self->getpeekRow()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->getpeekRow())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSQuery"].getters["getRow"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSQuery"].getters["getRow"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         JSQuery *self = static_cast<JSQuery*>(ptr);
-        return self ? to_jsval(cx, self->getRow()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->getRow())); else vp.setUndefined();
+        return true;
     };
 }
-

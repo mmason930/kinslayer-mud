@@ -1,5 +1,6 @@
 /**
  * JSObject_bindings.cpp - Method and property bindings for JSObject
+ * Updated for SpiderMonkey 131 API.
  */
 
 #include "../conf.h"
@@ -11,50 +12,50 @@
 
 namespace {
 
-inline jsval to_jsval(JSContext *cx, int v) { return INT_TO_JSVAL(v); }
-inline jsval to_jsval(JSContext *cx, bool v) { return BOOLEAN_TO_JSVAL(v); }
-inline jsval to_jsval(JSContext *cx, double v) { jsval rv; JS_NewNumberValue(cx, v, &rv); return rv; }
-inline jsval to_jsval(JSContext *cx, const flusspferd::string &v) { return v.val; }
-inline jsval to_jsval(JSContext *cx, const flusspferd::value &v) { return v.val; }
-inline jsval to_jsval(JSContext *cx, const flusspferd::object &v) { return v.val; }
-inline jsval to_jsval(JSContext *cx, const flusspferd::array &v) { return v.val; }
+inline JS::Value to_jsval(JSContext *cx, int v) { return JS::Int32Value(v); }
+inline JS::Value to_jsval(JSContext *cx, bool v) { return JS::BooleanValue(v); }
+inline JS::Value to_jsval(JSContext *cx, double v) { return JS::DoubleValue(v); }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::string &v) { return v.val; }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::value &v) { return v.val; }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::object &v) { return v.val; }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::array &v) { return v.val; }
 
-inline int from_jsval_int(JSContext *cx, jsval v) {
-    if (JSVAL_IS_INT(v)) return JSVAL_TO_INT(v);
-    jsdouble d; JS_ValueToNumber(cx, v, &d); return static_cast<int>(d);
+inline int from_jsval_int(JSContext *cx, JS::HandleValue v) {
+    if (v.isInt32()) return v.toInt32();
+    double d; JS::ToNumber(cx, v, &d); return static_cast<int>(d);
 }
-inline bool from_jsval_bool(JSContext *cx, jsval v) {
-    JSBool b; JS_ValueToBoolean(cx, v, &b); return b == JS_TRUE;
+inline bool from_jsval_bool(JSContext *cx, JS::HandleValue v) {
+    return JS::ToBoolean(v);
 }
-inline flusspferd::string from_jsval_fstring(JSContext *cx, jsval v) {
-    return flusspferd::string(v);
+inline flusspferd::string from_jsval_fstring(JSContext *cx, JS::HandleValue v) {
+    return flusspferd::string(v.get());
 }
-inline flusspferd::value from_jsval_value(JSContext *cx, jsval v) {
-    return flusspferd::value(v);
+inline flusspferd::value from_jsval_value(JSContext *cx, JS::HandleValue v) {
+    return flusspferd::value(v.get());
 }
 
-inline JSRoom* get_js_room(JSContext *cx, jsval v) {
-    if (!JSVAL_IS_OBJECT(v) || JSVAL_IS_NULL(v)) return nullptr;
-    JSObject *obj = JSVAL_TO_OBJECT(v);
-    JSClass *cls = JS_GET_CLASS(cx, obj);
+inline JSRoom* get_js_room(JSContext *cx, JS::HandleValue v) {
+    if (!v.isObject()) return nullptr;
+    ::JSObject *obj = &v.toObject();
+    const JSClass *cls = JS::GetClass(obj);
     if (!cls || strcmp(cls->name, "JSRoom") != 0) return nullptr;
-    return static_cast<JSRoom*>(JS_GetPrivate(cx, obj));
+    return static_cast<JSRoom*>(flusspferd::sm_get_private(obj));
 }
 
-inline JSCharacter* get_js_character(JSContext *cx, jsval v) {
-    if (!JSVAL_IS_OBJECT(v) || JSVAL_IS_NULL(v)) return nullptr;
-    JSObject *obj = JSVAL_TO_OBJECT(v);
-    JSClass *cls = JS_GET_CLASS(cx, obj);
+inline JSCharacter* get_js_character(JSContext *cx, JS::HandleValue v) {
+    if (!v.isObject()) return nullptr;
+    ::JSObject *obj = &v.toObject();
+    const JSClass *cls = JS::GetClass(obj);
     if (!cls || strcmp(cls->name, "JSCharacter") != 0) return nullptr;
-    return static_cast<JSCharacter*>(JS_GetPrivate(cx, obj));
+    return static_cast<JSCharacter*>(flusspferd::sm_get_private(obj));
 }
 
-inline class JSObject* get_js_object(JSContext *cx, jsval v) {
-    if (!JSVAL_IS_OBJECT(v) || JSVAL_IS_NULL(v)) return nullptr;
-    ::JSObject *obj = JSVAL_TO_OBJECT(v);
-    JSClass *cls = JS_GET_CLASS(cx, obj);
+inline class JSObject* get_js_object(JSContext *cx, JS::HandleValue v) {
+    if (!v.isObject()) return nullptr;
+    ::JSObject *obj = &v.toObject();
+    const JSClass *cls = JS::GetClass(obj);
     if (!cls || strcmp(cls->name, "JSObject") != 0) return nullptr;
-    return static_cast<class JSObject*>(JS_GetPrivate(cx, obj));
+    return static_cast<class JSObject*>(flusspferd::sm_get_private(obj));
 }
 
 } // anonymous namespace
@@ -62,325 +63,400 @@ inline class JSObject* get_js_object(JSContext *cx, jsval v) {
 void RegisterJSObjectBindings() {
     using namespace flusspferd;
     
-    // Methods
-    g_class_registries["JSObject"].methods["value"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    // Methods - signature: bool(void*, JSContext*, unsigned, JS::Value*)
+    g_class_registry["JSObject"].methods["value"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int index = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->value(index));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int index = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->value(index)));
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["canWear"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["canWear"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int flag = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->can_wear(flag));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int flag = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->can_wear(flag)));
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["extraFlags"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["extraFlags"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int flag = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->extra_flags(flag));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int flag = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->extra_flags(flag)));
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["wearFlagged"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["wearFlagged"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int flag = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->wear_flagged(flag));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int flag = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->wear_flagged(flag)));
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["bitvector"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["bitvector"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int flag = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->bitvector(flag));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int flag = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->bitvector(flag)));
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["moveToRoom"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["moveToRoom"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        JSRoom *dest = argc > 0 ? get_js_room(cx, argv[0]) : nullptr;
+        if (!self) { args.rval().setUndefined(); return true; }
+        JSRoom *dest = argc > 0 ? get_js_room(cx, args[0]) : nullptr;
         if (dest) self->move_to_room(dest);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["moveToChar"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["moveToChar"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        JSCharacter *dest = argc > 0 ? get_js_character(cx, argv[0]) : nullptr;
+        if (!self) { args.rval().setUndefined(); return true; }
+        JSCharacter *dest = argc > 0 ? get_js_character(cx, args[0]) : nullptr;
         if (dest) self->move_to_char(dest);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["moveToObj"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["moveToObj"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        class JSObject *dest = argc > 0 ? get_js_object(cx, argv[0]) : nullptr;
+        if (!self) { args.rval().setUndefined(); return true; }
+        class JSObject *dest = argc > 0 ? get_js_object(cx, args[0]) : nullptr;
         if (dest) self->move_to_obj(dest);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["loadObj"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["loadObj"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int vnum = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->load_obj(vnum));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int vnum = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->load_obj(vnum)));
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["extract"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["extract"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
+        if (!self) { args.rval().setUndefined(); return true; }
         self->extract();
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["open"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["open"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
+        if (!self) { args.rval().setUndefined(); return true; }
         self->open();
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["close"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["close"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
+        if (!self) { args.rval().setUndefined(); return true; }
         self->close();
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["lock"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["lock"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
+        if (!self) { args.rval().setUndefined(); return true; }
         self->lock();
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["unlock"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["unlock"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
+        if (!self) { args.rval().setUndefined(); return true; }
         self->unlock();
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["attach"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["attach"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int tVnum = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
+        if (!self) { args.rval().setUndefined(); return true; }
+        int tVnum = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
         self->attach(tVnum);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["detach"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["detach"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int tVnum = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        int nr = argc > 1 ? from_jsval_int(cx, argv[1]) : 0;
+        if (!self) { args.rval().setUndefined(); return true; }
+        int tVnum = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        int nr = argc > 1 ? from_jsval_int(cx, args[1]) : 0;
         self->detach(tVnum, nr);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["countJS"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["countJS"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        flusspferd::value tVnum = argc > 0 ? from_jsval_value(cx, argv[0]) : flusspferd::value();
-        return to_jsval(cx, self->countJS(tVnum));
+        if (!self) { args.rval().setUndefined(); return true; }
+        flusspferd::value tVnum = argc > 0 ? from_jsval_value(cx, args[0]) : flusspferd::value();
+        args.rval().set(to_jsval(cx, self->countJS(tVnum)));
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["getObjVal"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["getObjVal"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int x = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        return to_jsval(cx, self->getObjVal(x));
+        if (!self) { args.rval().setUndefined(); return true; }
+        int x = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->getObjVal(x)));
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["setObjVal"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["setObjVal"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        int x = argc > 0 ? from_jsval_int(cx, argv[0]) : 0;
-        int v = argc > 1 ? from_jsval_int(cx, argv[1]) : 0;
+        if (!self) { args.rval().setUndefined(); return true; }
+        int x = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        int v = argc > 1 ? from_jsval_int(cx, args[1]) : 0;
         self->setObjVal(x, v);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["setRetoolName"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["setRetoolName"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        flusspferd::string newName = argc > 0 ? from_jsval_fstring(cx, argv[0]) : flusspferd::string("");
+        if (!self) { args.rval().setUndefined(); return true; }
+        flusspferd::string newName = argc > 0 ? from_jsval_fstring(cx, args[0]) : flusspferd::string("");
         self->setRetoolName(newName);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["setRetoolDesc"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["setRetoolDesc"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        flusspferd::string newName = argc > 0 ? from_jsval_fstring(cx, argv[0]) : flusspferd::string("");
+        if (!self) { args.rval().setUndefined(); return true; }
+        flusspferd::string newName = argc > 0 ? from_jsval_fstring(cx, args[0]) : flusspferd::string("");
         self->setRetoolDesc(newName);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["setRetoolSDesc"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["setRetoolSDesc"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        flusspferd::string newName = argc > 0 ? from_jsval_fstring(cx, argv[0]) : flusspferd::string("");
+        if (!self) { args.rval().setUndefined(); return true; }
+        flusspferd::string newName = argc > 0 ? from_jsval_fstring(cx, args[0]) : flusspferd::string("");
         self->setRetoolSDesc(newName);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["setRetoolExDesc"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["setRetoolExDesc"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        flusspferd::string newExDesc = argc > 0 ? from_jsval_fstring(cx, argv[0]) : flusspferd::string("");
+        if (!self) { args.rval().setUndefined(); return true; }
+        flusspferd::string newExDesc = argc > 0 ? from_jsval_fstring(cx, args[0]) : flusspferd::string("");
         self->setRetoolExDesc(newExDesc);
-        return JSVAL_VOID;
+        args.rval().setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].methods["isRetooled"] = [](void *ptr, JSContext *cx, uintN argc, jsval *argv) -> jsval {
+    g_class_registry["JSObject"].methods["isRetooled"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        if (!self) return JSVAL_VOID;
-        return to_jsval(cx, self->isRetooled());
+        if (!self) { args.rval().setUndefined(); return true; }
+        args.rval().set(to_jsval(cx, self->isRetooled()));
+        return true;
     };
     
-    // Property getters
-    g_class_registries["JSObject"].getters["id"] = [](void *ptr, JSContext *cx) -> jsval {
+    // Property getters - signature: bool(void*, JSContext*, JS::MutableHandleValue)
+    g_class_registry["JSObject"].getters["id"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->getID()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->getID())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["name"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["name"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->getName()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->getName())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["namelist"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["namelist"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->getNameList()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->getNameList())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["ldesc"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["ldesc"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->getLongDescription()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->getLongDescription())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["contents"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["contents"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->contents()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->contents())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["containedBy"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["containedBy"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->contained_by()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->contained_by())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["wornBy"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["wornBy"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->worn_by()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->worn_by())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["carriedBy"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["carriedBy"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->carried_by()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->carried_by())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["satOnBy"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["satOnBy"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->getSatOnBy()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->getSatOnBy())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["findHolder"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["findHolder"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->getFindHolder()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->getFindHolder())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["inRoom"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["inRoom"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->getInRoom()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->getInRoom())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["weight"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["weight"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->weight()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->weight())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["cost"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["cost"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->cost()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->cost())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["type"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["type"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->type()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->type())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["timer"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["timer"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->timer()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->timer())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["vnum"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["vnum"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->vnum()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->vnum())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["max"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["max"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->getMax()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->getMax())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["isValid"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["isValid"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->getIsValid()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->getIsValid())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["isCorpse"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["isCorpse"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->getIsCorpse()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->getIsCorpse())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["count"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["count"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->getCount()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->getCount())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["hidden"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["hidden"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->getHidden()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->getHidden())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["canOpen"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["canOpen"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->canOpen()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->canOpen())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["canLock"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["canLock"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->canLock()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->canLock())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["isContainer"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["isContainer"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->isContainer()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->isContainer())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["isClosed"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["isClosed"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->isClosed()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->isClosed())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["isOpen"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["isOpen"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->isOpen()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->isOpen())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["isLocked"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["isLocked"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->isLocked()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->isLocked())); else vp.setUndefined();
+        return true;
     };
     
-    g_class_registries["JSObject"].getters["isPickProof"] = [](void *ptr, JSContext *cx) -> jsval {
+    g_class_registry["JSObject"].getters["isPickProof"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
-        return self ? to_jsval(cx, self->isPickProof()) : JSVAL_VOID;
+        if (self) vp.set(to_jsval(cx, self->isPickProof())); else vp.setUndefined();
+        return true;
     };
 }
-

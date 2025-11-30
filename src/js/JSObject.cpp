@@ -11,7 +11,7 @@ void RegisterJSObjectBindings();
 
 void JSEnvironment::LoadJSObject()
 {
-	flusspferd::ClassTraits<JSObject>::class_name = "JSObject";
+	// class_name is now defined by FLUSSPFERD_CLASS_DESCRIPTION macro
 	RegisterJSObjectBindings();  // Register methods and properties first
 	load_class<JSObject>();
 }
