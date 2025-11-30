@@ -480,11 +480,6 @@ context context::create() {
         return context();
     }
     
-    if (!JS::InitSelfHostedCode(cx)) {
-        JS_DestroyContext(cx);
-        return context();
-    }
-    
     context ctx;
     ctx.cx = cx;
     ctx.owns_context = true;
@@ -514,8 +509,17 @@ current_context_scope::current_context_scope(const context &ctx) {
         if (globalObj) {
             g_global = new JS::PersistentRootedObject(g_cx, globalObj);
             
-            // Enter the global's realm and initialize standard classes
+            // Enter the global's realm
             JSAutoRealm ar(g_cx, globalObj);
+            
+            // Initialize self-hosted code (must be done in a realm)
+            if (!JS::InitSelfHostedCode(g_cx)) {
+                delete g_global;
+                g_global = nullptr;
+                return;
+            }
+            
+            // Initialize standard classes
             if (!JS::InitRealmStandardClasses(g_cx)) {
                 delete g_global;
                 g_global = nullptr;
