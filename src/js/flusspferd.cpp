@@ -503,13 +503,6 @@ void context::destroy() {
 // current_context_scope implementation
 // ============================================================================
 
-// Global class for the global object
-static JSClass global_class = {
-    "global",
-    JSCLASS_GLOBAL_FLAGS,
-    &JS::DefaultGlobalClassOps
-};
-
 current_context_scope::current_context_scope(const context &ctx) {
     g_cx = ctx.get();
     
