@@ -8,6 +8,7 @@
 #include <js/SourceText.h>
 #include <js/PropertyAndElement.h>
 #include <js/Array.h>
+#include <js/GCAPI.h>
 #include <js/Object.h>
 #include <js/Exception.h>
 #include <cstring>
@@ -50,29 +51,49 @@ static void clear_last_exception() {
 // Helper to check for pending exception and throw it
 static void check_and_throw_pending_exception(const std::string &funcName) {
     if (!g_cx) return;
-    
+
     if (JS_IsExceptionPending(g_cx)) {
         JS::RootedValue exc(g_cx);
         if (JS_GetPendingException(g_cx, &exc)) {
             JS_ClearPendingException(g_cx);
             clear_last_exception();
-            
-            // Check if it's a StopIteration object
+
             if (exc.isObject()) {
                 JS::RootedObject excObj(g_cx, &exc.toObject());
                 const JSClass *cls = JS::GetClass(excObj);
-                if (cls && cls->name) {
-                    if (strcmp(cls->name, "StopIteration") == 0) {
-                        throw exception("[object StopIteration]");
+
+                // Check for StopIteration
+                if (cls && cls->name && strcmp(cls->name, "StopIteration") == 0) {
+                    throw exception("[object StopIteration]");
+                }
+
+                // For Error objects, extract the message and other properties
+                JS::RootedValue msgVal(g_cx);
+                if (JS_GetProperty(g_cx, excObj, "message", &msgVal) && msgVal.isString()) {
+                    JS::RootedString msgStr(g_cx, msgVal.toString());
+                    JS::UniqueChars msgChars = JS_EncodeStringToUTF8(g_cx, msgStr);
+                    if (msgChars) {
+                        std::string errorMsg;
+                        if (cls && cls->name) {
+                            errorMsg = cls->name;
+                            errorMsg += ": ";
+                        }
+                        errorMsg += msgChars.get();
+
+                        // Try to get lineNumber and fileName for better diagnostics
+                        JS::RootedValue lineVal(g_cx);
+                        if (JS_GetProperty(g_cx, excObj, "lineNumber", &lineVal) && lineVal.isInt32()) {
+                            errorMsg += " (line ";
+                            errorMsg += std::to_string(lineVal.toInt32());
+                            errorMsg += ")";
+                        }
+
+                        throw exception(errorMsg);
                     }
-                    std::string msg = "[object ";
-                    msg += cls->name;
-                    msg += "]";
-                    throw exception(msg);
                 }
             }
-            
-            // Convert exception to string
+
+            // Fallback: convert exception to string
             JS::RootedString str(g_cx, JS::ToString(g_cx, exc));
             if (str) {
                 JS::UniqueChars chars = JS_EncodeStringToUTF8(g_cx, str);
@@ -83,7 +104,7 @@ static void check_and_throw_pending_exception(const std::string &funcName) {
             throw exception("uncaught exception: [unknown]");
         }
     }
-    
+
     // Check captured exception from error reporter
     if (g_has_last_exception) {
         std::string msg = g_last_exception_message;
@@ -468,18 +489,26 @@ context context::create() {
     // Initialize SpiderMonkey if not already done
     static bool initialized = false;
     if (!initialized) {
+        // Disable JIT backend - use interpreter only.
+        // Our compatibility shim uses unrooted JS::Value in many places,
+        // which is unsafe with the JIT's exact GC rooting requirements.
+        JS::DisableJitBackend();
         if (!JS_Init()) {
             return context();
         }
         initialized = true;
     }
     
-    // Create a new context
-    JSContext *cx = JS_NewContext(8L * 1024 * 1024);  // 8MB stack
+    // Create a new context with 1GB max heap
+    JSContext *cx = JS_NewContext(1024L * 1024 * 1024);
     if (!cx) {
         return context();
     }
-    
+
+    // Configure GC parameters for a long-running game server
+    JS_SetGCParameter(cx, JSGC_MAX_BYTES, 1024 * 1024 * 1024);  // 1GB max
+    JS_SetGCParameter(cx, JSGC_INCREMENTAL_GC_ENABLED, 1);
+
     if (!JS::InitSelfHostedCode(cx)) {
         JS_DestroyContext(cx);
         return context();
@@ -503,17 +532,17 @@ void context::destroy() {
 // current_context_scope implementation
 // ============================================================================
 
-current_context_scope::current_context_scope(const context &ctx) {
+current_context_scope::current_context_scope(const context &ctx) : realm_(nullptr) {
     g_cx = ctx.get();
-    
+
     // Create the global object if it doesn't exist
     if (g_cx && !g_global) {
         JS::RealmOptions options;
-        JSObject *globalObj = JS_NewGlobalObject(g_cx, &global_class, nullptr, 
+        JSObject *globalObj = JS_NewGlobalObject(g_cx, &global_class, nullptr,
                                                   JS::FireOnNewGlobalHook, options);
         if (globalObj) {
             g_global = new JS::PersistentRootedObject(g_cx, globalObj);
-            
+
             // Enter the global's realm and initialize standard classes
             JSAutoRealm ar(g_cx, globalObj);
             if (!JS::InitRealmStandardClasses(g_cx)) {
@@ -522,10 +551,15 @@ current_context_scope::current_context_scope(const context &ctx) {
             }
         }
     }
+
+    // Keep the realm active for the lifetime of this scope
+    if (g_cx && g_global && g_global->get()) {
+        realm_ = new JSAutoRealm(g_cx, g_global->get());
+    }
 }
 
 current_context_scope::~current_context_scope() {
-    // Don't clear g_cx here as it may still be needed
+    delete realm_;
 }
 
 // ============================================================================
@@ -673,14 +707,20 @@ array create_array() {
     if (!g_cx || !g_global) return array();
     JSAutoRealm ar(g_cx, g_global->get());
     JSObject *arr = JS::NewArrayObject(g_cx, 0);
-    return array(arr);
+    if (!arr) return array();
+    array result(arr);
+    result.set_auto_root();
+    return result;
 }
 
 array create_array(uint32_t length) {
     if (!g_cx || !g_global) return array();
     JSAutoRealm ar(g_cx, g_global->get());
     JSObject *arr = JS::NewArrayObject(g_cx, length);
-    return array(arr);
+    if (!arr) return array();
+    array result(arr);
+    result.set_auto_root();
+    return result;
 }
 
 // ============================================================================
@@ -717,50 +757,183 @@ std::string from_jsval<std::string>::convert(JSContext *cx, const JS::Value &v) 
 } // namespace detail
 
 // ============================================================================
+// Property getter/setter dispatchers for native classes
+// ============================================================================
+
+bool property_getter_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) {
+    JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+
+    if (!args.thisv().isObject()) {
+        args.rval().setUndefined();
+        return true;
+    }
+
+    JS::RootedObject thisObj(cx, &args.thisv().toObject());
+    void *priv = sm_get_private(thisObj);
+    if (!priv) {
+        args.rval().setUndefined();
+        return true;
+    }
+
+    // Get property name from callee's reserved slot 0
+    JSObject *callee = &args.callee();
+    const JS::Value &propNameVal = js::GetFunctionNativeReserved(callee, 0);
+    if (!propNameVal.isString()) {
+        args.rval().setUndefined();
+        return true;
+    }
+
+    JS::RootedString propNameStr(cx, propNameVal.toString());
+    JS::UniqueChars propName = JS_EncodeStringToUTF8(cx, propNameStr);
+    if (!propName) {
+        args.rval().setUndefined();
+        return true;
+    }
+
+    // Get class name from callee's reserved slot 1
+    const JS::Value &classNameVal = js::GetFunctionNativeReserved(callee, 1);
+    if (!classNameVal.isString()) {
+        args.rval().setUndefined();
+        return true;
+    }
+
+    JS::RootedString classNameStr(cx, classNameVal.toString());
+    JS::UniqueChars className = JS_EncodeStringToUTF8(cx, classNameStr);
+    if (!className) {
+        args.rval().setUndefined();
+        return true;
+    }
+
+    // Look up getter in registry
+    auto classIt = g_class_registry.find(className.get());
+    if (classIt == g_class_registry.end()) {
+        args.rval().setUndefined();
+        return true;
+    }
+
+    auto getterIt = classIt->second.getters.find(propName.get());
+    if (getterIt == classIt->second.getters.end()) {
+        args.rval().setUndefined();
+        return true;
+    }
+
+    // Call the getter
+    JS::MutableHandleValue rval = args.rval();
+    return getterIt->second(priv, cx, rval);
+}
+
+bool property_setter_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) {
+    JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+
+    if (!args.thisv().isObject()) {
+        args.rval().setUndefined();
+        return true;
+    }
+
+    JS::RootedObject thisObj(cx, &args.thisv().toObject());
+    void *priv = sm_get_private(thisObj);
+    if (!priv) {
+        args.rval().setUndefined();
+        return true;
+    }
+
+    // Get property name from callee's reserved slot 0
+    JSObject *callee = &args.callee();
+    const JS::Value &propNameVal = js::GetFunctionNativeReserved(callee, 0);
+    if (!propNameVal.isString()) {
+        args.rval().setUndefined();
+        return true;
+    }
+
+    JS::RootedString propNameStr(cx, propNameVal.toString());
+    JS::UniqueChars propName = JS_EncodeStringToUTF8(cx, propNameStr);
+    if (!propName) {
+        args.rval().setUndefined();
+        return true;
+    }
+
+    // Get class name from callee's reserved slot 1
+    const JS::Value &classNameVal = js::GetFunctionNativeReserved(callee, 1);
+    if (!classNameVal.isString()) {
+        args.rval().setUndefined();
+        return true;
+    }
+
+    JS::RootedString classNameStr(cx, classNameVal.toString());
+    JS::UniqueChars className = JS_EncodeStringToUTF8(cx, classNameStr);
+    if (!className) {
+        args.rval().setUndefined();
+        return true;
+    }
+
+    // Look up setter in registry
+    auto classIt = g_class_registry.find(className.get());
+    if (classIt == g_class_registry.end()) {
+        args.rval().setUndefined();
+        return true;
+    }
+
+    auto setterIt = classIt->second.setters.find(propName.get());
+    if (setterIt == classIt->second.setters.end()) {
+        args.rval().setUndefined();
+        return true;
+    }
+
+    // Call the setter with the value argument
+    if (argc > 0) {
+        JS::HandleValue val = args[0];
+        setterIt->second(priv, cx, val);
+    }
+
+    args.rval().setUndefined();
+    return true;
+}
+
+// ============================================================================
 // Universal method dispatcher for native classes
 // ============================================================================
 
 bool universal_method_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) {
     JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
-    
+
     // Get 'this' object
     if (!args.thisv().isObject()) {
         JS_ReportErrorASCII(cx, "Method called on non-object");
         return false;
     }
-    
+
     JS::RootedObject thisObj(cx, &args.thisv().toObject());
-    
+
     // Get the private data (native object pointer)
     void *priv = sm_get_private(thisObj);
     if (!priv) {
         JS_ReportErrorASCII(cx, "No private data on object");
         return false;
     }
-    
-    // Get the method name from the callee's reserved slot
-    JS::RootedObject callee(cx, &args.callee());
-    JS::RootedValue methodNameVal(cx, sm_get_reserved_slot(callee.get(), 0));
-    
+
+    // Get the method name from the callee's function native reserved slot
+    JSObject *callee = &args.callee();
+    const JS::Value &methodNameVal = js::GetFunctionNativeReserved(callee, 0);
+
     if (!methodNameVal.isString()) {
         JS_ReportErrorASCII(cx, "Invalid method name");
         return false;
     }
-    
+
     JS::RootedString methodNameStr(cx, methodNameVal.toString());
     JS::UniqueChars methodName = JS_EncodeStringToUTF8(cx, methodNameStr);
     if (!methodName) {
         JS_ReportErrorASCII(cx, "Failed to get method name");
         return false;
     }
-    
-    // Get class name from reserved slot 1
-    JS::RootedValue classNameVal(cx, sm_get_reserved_slot(callee.get(), 1));
+
+    // Get class name from function native reserved slot 1
+    const JS::Value &classNameVal = js::GetFunctionNativeReserved(callee, 1);
     if (!classNameVal.isString()) {
         JS_ReportErrorASCII(cx, "Invalid class name");
         return false;
     }
-    
+
     JS::RootedString classNameStr(cx, classNameVal.toString());
     JS::UniqueChars className = JS_EncodeStringToUTF8(cx, classNameStr);
     if (!className) {

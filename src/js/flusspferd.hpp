@@ -9,6 +9,7 @@
 #define KINSLAYER_FLUSSPFERD_HPP
 
 #include <jsapi.h>
+#include <jsfriendapi.h>
 #include <js/Initialization.h>
 #include <js/Conversions.h>
 #include <js/CompilationAndEvaluation.h>
@@ -271,16 +272,52 @@ public:
 // array class - wraps JSObject* (array)
 // ============================================================================
 class array : public object {
+    // Auto-rooting: arrays created via create_array() hold a persistent root
+    // to prevent GC collection during construction (push loops etc.)
+    JS::PersistentRootedValue *auto_root_ = nullptr;
 public:
     array() : object() {}
     array(const JS::Value &v) : object(v) {}
     array(JSObject *obj) : object(obj) {}
     array(const object &o) : object(o) {}
-    
+
+    // Copy: don't transfer root (original stays rooted, copy is short-lived)
+    array(const array &other) : object(other), auto_root_(nullptr) {}
+    array &operator=(const array &other) {
+        if (this != &other) {
+            object::operator=(other);
+            delete auto_root_;
+            auto_root_ = nullptr;
+        }
+        return *this;
+    }
+
+    // Move: transfer root ownership
+    array(array &&other) noexcept : object(other.val), auto_root_(other.auto_root_) {
+        other.auto_root_ = nullptr;
+    }
+    array &operator=(array &&other) noexcept {
+        if (this != &other) {
+            val = other.val;
+            delete auto_root_;
+            auto_root_ = other.auto_root_;
+            other.auto_root_ = nullptr;
+        }
+        return *this;
+    }
+
+    ~array() { delete auto_root_; }
+
+    void set_auto_root() {
+        if (g_cx && !auto_root_ && !is_null()) {
+            auto_root_ = new JS::PersistentRootedValue(g_cx, val);
+        }
+    }
+
     uint32_t length() const;
     uint32_t size() const { return length(); }
     void set_length(uint32_t len);
-    
+
     value get_element(uint32_t index) const;
     void set_element(uint32_t index, const value &v);
     void push(const value &v);
@@ -304,6 +341,7 @@ public:
     bool is_undefined() const { return get().is_undefined(); }
     bool is_null() const { return get().is_null(); }
     bool is_object() const { return get().is_object(); }
+    object to_object() const { return get().to_object(); }
 };
 
 // ============================================================================
@@ -355,12 +393,16 @@ public:
 
 // ============================================================================
 // current_context_scope - RAII context management
+// Keeps the global realm active for the lifetime of the scope so all
+// SpiderMonkey API calls have a valid realm.
 // ============================================================================
 class current_context_scope {
+private:
+    JSAutoRealm *realm_;
 public:
     explicit current_context_scope(const context &ctx);
     ~current_context_scope();
-    
+
     current_context_scope(const current_context_scope&) = delete;
     current_context_scope &operator=(const current_context_scope&) = delete;
 };
@@ -716,23 +758,23 @@ Ret call_with_tuple(Ret (*func)(Args...), Tuple &args) {
 template<typename... Args>
 bool native_function_wrapper_void(JSContext *cx, unsigned argc, JS::Value *vp) {
     JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
-    
-    // Get function pointer from reserved slot or global storage
+
+    // Get function pointer from function native reserved slot
     JSObject *callee = &args.callee();
-    JS::Value funcPtrVal = sm_get_reserved_slot(callee, 0);
-    
+    const JS::Value &funcPtrVal = js::GetFunctionNativeReserved(callee, 0);
+
     if (!funcPtrVal.isDouble()) {
         JS_ReportErrorASCII(cx, "Invalid function pointer");
         return false;
     }
-    
+
     auto funcPtr = reinterpret_cast<void(*)(Args...)>(
         static_cast<uintptr_t>(funcPtrVal.toDouble())
     );
-    
+
     auto extracted = ArgExtractor<Args...>::extract(cx, args, 0);
     call_with_tuple(funcPtr, extracted);
-    
+
     args.rval().setUndefined();
     return true;
 }
@@ -741,23 +783,23 @@ bool native_function_wrapper_void(JSContext *cx, unsigned argc, JS::Value *vp) {
 template<typename Ret, typename... Args>
 bool native_function_wrapper(JSContext *cx, unsigned argc, JS::Value *vp) {
     JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
-    
-    // Get function pointer from reserved slot
+
+    // Get function pointer from function native reserved slot
     JSObject *callee = &args.callee();
-    JS::Value funcPtrVal = sm_get_reserved_slot(callee, 0);
-    
+    const JS::Value &funcPtrVal = js::GetFunctionNativeReserved(callee, 0);
+
     if (!funcPtrVal.isDouble()) {
         JS_ReportErrorASCII(cx, "Invalid function pointer");
         return false;
     }
-    
+
     auto funcPtr = reinterpret_cast<Ret(*)(Args...)>(
         static_cast<uintptr_t>(funcPtrVal.toDouble())
     );
-    
+
     auto extracted = ArgExtractor<Args...>::extract(cx, args, 0);
     Ret result = call_with_tuple(funcPtr, extracted);
-    
+
     args.rval().set(detail::to_jsval<Ret>::convert(cx, result));
     return true;
 }
@@ -772,10 +814,13 @@ extern std::map<std::string, void*> g_function_storage;
 template<typename Ret, typename... Args>
 object create_native_function(const std::string &name, Ret(*func)(Args...)) {
     if (!g_cx || !g_global) return object();
-    
+
+    // Must enter a realm before calling SpiderMonkey APIs
+    JSAutoRealm ar(g_cx, g_global->get());
+
     // Store the function pointer
     g_function_storage[name] = reinterpret_cast<void*>(func);
-    
+
     // Select the appropriate wrapper based on return type
     JSNative wrapper;
     if constexpr (std::is_void_v<Ret>) {
@@ -783,18 +828,18 @@ object create_native_function(const std::string &name, Ret(*func)(Args...)) {
     } else {
         wrapper = native_function_wrapper<Ret, Args...>;
     }
-    
-    // Create the function
-    JSFunction *jsFunc = JS_NewFunction(g_cx, wrapper, sizeof...(Args), 0, name.c_str());
+
+    // Create the function with reserved slots for storing the function pointer
+    JSFunction *jsFunc = js::NewFunctionWithReserved(g_cx, wrapper, sizeof...(Args), 0, name.c_str());
     if (!jsFunc) return object();
-    
+
     JSObject *funcObj = JS_GetFunctionObject(jsFunc);
-    
-    // Store the function pointer in reserved slot
-    sm_set_reserved_slot(funcObj, 0, JS::DoubleValue(static_cast<double>(
+
+    // Store the function pointer in function native reserved slot
+    js::SetFunctionNativeReserved(funcObj, 0, JS::DoubleValue(static_cast<double>(
         reinterpret_cast<uintptr_t>(func)
     )));
-    
+
     return object(funcObj);
 }
 

@@ -6,13 +6,16 @@
 #define KINSLAYER_FLUSSPFERD_CLASS_MACROS_HPP
 
 #include <jsapi.h>
+#include <jsfriendapi.h>
 #include <js/Object.h>
 #include <js/Class.h>
 #include <js/ValueArray.h>
 #include <js/Id.h>
+#include <js/PropertyAndElement.h>
 #include <stdexcept>
 #include <string>
 #include <map>
+#include <set>
 #include <functional>
 
 namespace flusspferd {
@@ -24,6 +27,10 @@ extern std::map<std::string, NativeClassInfo> g_class_registry;
 
 // Forward declaration for method dispatcher
 bool universal_method_dispatch(JSContext *cx, unsigned argc, JS::Value *vp);
+
+// Forward declarations for property dispatchers
+bool property_getter_dispatch(JSContext *cx, unsigned argc, JS::Value *vp);
+bool property_setter_dispatch(JSContext *cx, unsigned argc, JS::Value *vp);
 
 // Note: Wrapper functions (sm_get_private, sm_set_private, etc.) are defined in flusspferd.hpp
 
@@ -60,7 +67,10 @@ struct ClassTraits {
     
     // Define methods on prototype
     static void define_methods_on_prototype();
-    
+
+    // Define properties (accessor getters/setters) on prototype
+    static void define_properties_on_prototype();
+
     // Destructor
     static void destructor(JS::GCContext *gcx, JSObject *obj);
 };
@@ -233,34 +243,75 @@ bool ClassTraits<T>::setProperty(JSContext *cx, JS::HandleObject obj, JS::Handle
 template<typename T>
 void ClassTraits<T>::define_methods_on_prototype() {
     if (!g_cx || !prototype || !prototype->get()) return;
-    
+
     auto &info = g_class_registry[class_name()];
     JS::RootedObject proto(g_cx, prototype->get());
-    
+
     for (auto &pair : info.methods) {
         const std::string &methodName = pair.first;
-        
-        // Create a function object for this method
-        JS::RootedObject funcObj(g_cx, JS_NewObject(g_cx, nullptr));
-        if (!funcObj) continue;
-        
-        // Create the actual function
-        JSFunction *func = JS_NewFunction(g_cx, universal_method_dispatch, 0, 0, methodName.c_str());
+
+        // Create a function with reserved slots for storing method/class names
+        JSFunction *func = js::NewFunctionWithReserved(g_cx, universal_method_dispatch, 0, 0, methodName.c_str());
         if (!func) continue;
-        
+
         JS::RootedObject funcObjReal(g_cx, JS_GetFunctionObject(func));
-        
-        // Store method name in reserved slot 0
+
+        // Store method name in function native reserved slot 0
         JSString *nameStr = JS_NewStringCopyUTF8Z(g_cx, JS::ConstUTF8CharsZ(methodName.c_str()));
-        sm_set_reserved_slot(funcObjReal.get(), 0, JS::StringValue(nameStr));
-        
-        // Store class name in reserved slot 1
+        js::SetFunctionNativeReserved(funcObjReal.get(), 0, JS::StringValue(nameStr));
+
+        // Store class name in function native reserved slot 1
         JSString *classStr = JS_NewStringCopyUTF8Z(g_cx, JS::ConstUTF8CharsZ(class_name()));
-        sm_set_reserved_slot(funcObjReal.get(), 1, JS::StringValue(classStr));
-        
+        js::SetFunctionNativeReserved(funcObjReal.get(), 1, JS::StringValue(classStr));
+
         // Define the method on the prototype
         JS::RootedValue funcVal(g_cx, JS::ObjectValue(*funcObjReal));
         JS_DefineProperty(g_cx, proto, methodName.c_str(), funcVal, JSPROP_ENUMERATE);
+    }
+}
+
+template<typename T>
+void ClassTraits<T>::define_properties_on_prototype() {
+    if (!g_cx || !prototype || !prototype->get()) return;
+
+    auto &info = g_class_registry[class_name()];
+    JS::RootedObject proto(g_cx, prototype->get());
+
+    // Collect all property names (union of getters and setters)
+    std::set<std::string> propNames;
+    for (auto &pair : info.getters) propNames.insert(pair.first);
+    for (auto &pair : info.setters) propNames.insert(pair.first);
+
+    for (const std::string &propName : propNames) {
+        bool hasGetter = info.getters.count(propName) > 0;
+        bool hasSetter = info.setters.count(propName) > 0;
+
+        JS::RootedObject getterObj(g_cx);
+        JS::RootedObject setterObj(g_cx);
+
+        if (hasGetter) {
+            JSFunction *getterFunc = js::NewFunctionWithReserved(g_cx, property_getter_dispatch, 0, 0, nullptr);
+            if (!getterFunc) continue;
+            getterObj.set(JS_GetFunctionObject(getterFunc));
+
+            JSString *nameStr = JS_NewStringCopyUTF8Z(g_cx, JS::ConstUTF8CharsZ(propName.c_str()));
+            js::SetFunctionNativeReserved(getterObj, 0, JS::StringValue(nameStr));
+            JSString *classStr = JS_NewStringCopyUTF8Z(g_cx, JS::ConstUTF8CharsZ(class_name()));
+            js::SetFunctionNativeReserved(getterObj, 1, JS::StringValue(classStr));
+        }
+
+        if (hasSetter) {
+            JSFunction *setterFunc = js::NewFunctionWithReserved(g_cx, property_setter_dispatch, 1, 0, nullptr);
+            if (!setterFunc) continue;
+            setterObj.set(JS_GetFunctionObject(setterFunc));
+
+            JSString *nameStr = JS_NewStringCopyUTF8Z(g_cx, JS::ConstUTF8CharsZ(propName.c_str()));
+            js::SetFunctionNativeReserved(setterObj, 0, JS::StringValue(nameStr));
+            JSString *classStr = JS_NewStringCopyUTF8Z(g_cx, JS::ConstUTF8CharsZ(class_name()));
+            js::SetFunctionNativeReserved(setterObj, 1, JS::StringValue(classStr));
+        }
+
+        JS_DefineProperty(g_cx, proto, propName.c_str(), getterObj, setterObj, JSPROP_ENUMERATE);
     }
 }
 
@@ -269,24 +320,27 @@ void ClassTraits<T>::ensure_registered() {
     static bool registered = false;
     if (registered) return;
     registered = true;
-    
+
     if (!g_cx || !g_global) return;
-    
+
+    // Must enter a realm before calling SpiderMonkey APIs
+    JSAutoRealm ar(g_cx, g_global->get());
+
     // Initialize class info
     auto &info = g_class_registry[class_name()];
     info.jsclass = &jsclass;
-    
+
     // Create prototype
     if (!prototype) {
         prototype = new JS::PersistentRootedObject(g_cx);
     }
-    
+
     JS::RootedObject global(g_cx, g_global->get());
     JS::RootedObject proto(g_cx);
-    
+
     // Initialize class with constructor
     // JS_InitClass signature: cx, global, class, protoProto, name, constructor, nargs, ps, fs, static_ps, static_fs
-    proto = JS_InitClass(g_cx, global, &jsclass, nullptr, class_name(), 
+    proto = JS_InitClass(g_cx, global, &jsclass, nullptr, class_name(),
                         constructor_stub, 0, nullptr, nullptr, nullptr, nullptr);
     
     if (proto) {
@@ -295,6 +349,9 @@ void ClassTraits<T>::ensure_registered() {
         
         // Define methods on prototype
         define_methods_on_prototype();
+
+        // Define accessor properties (getters/setters) on prototype
+        define_properties_on_prototype();
     }
 }
 
@@ -341,25 +398,28 @@ T &get_native(const object &obj) {
 template<typename T, typename... Args>
 object create_native_object(Args&&... args) {
     ClassTraits<T>::ensure_registered();
-    
-    if (!g_cx) {
+
+    if (!g_cx || !g_global) {
         throw exception("No JavaScript context");
     }
-    
+
+    // Must enter a realm before calling SpiderMonkey APIs
+    JSAutoRealm ar(g_cx, g_global->get());
+
     // Create the JS object
     JS::RootedObject proto(g_cx, ClassTraits<T>::prototype ? ClassTraits<T>::prototype->get() : nullptr);
     JS::RootedObject obj(g_cx, JS_NewObjectWithGivenProto(g_cx, &ClassTraits<T>::jsclass, proto));
-    
+
     if (!obj) {
         throw exception("Failed to create native object");
     }
-    
+
     // Create the native C++ object
     T *native = new T(std::forward<Args>(args)...);
-    
+
     // Set the private data
     sm_set_private(obj, native);
-    
+
     return object(obj);
 }
 

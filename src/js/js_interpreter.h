@@ -51,7 +51,7 @@ struct JSInstance
     std::string delstring;
     bool first_run;
     flusspferd::root_object state;
-    flusspferd::value self;
+    flusspferd::root_value self;
     JSInstance();
     ~JSInstance();
 };

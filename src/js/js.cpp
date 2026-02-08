@@ -839,9 +839,12 @@ void JSManager::runTimeouts()
 		try
 		{
 			setupTimeout();
-			flusspferd::global().get_property(scriptEvent->propertyName).get_object().call("callback", scriptEvent->arguments);
-			//scriptEvent->callback.call(flusspferd::global(), scriptEvent->arguments);
-			//flusspferd::global().apply(scriptEvent->callback, scriptEvent->arguments);
+			// Retrieve the event object from the global (rooted) rather than using
+			// scriptEvent->arguments which is an unrooted flusspferd::object that
+			// may have been GC'd between ScriptEvent creation and now.
+			flusspferd::object eventObj = flusspferd::global().get_property(scriptEvent->propertyName).get_object();
+			flusspferd::value args = eventObj.get_property("arguments");
+			eventObj.call("callback", args);
 			removeTimeout();
 		}
 		catch(flusspferd::exception &e)
