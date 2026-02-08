@@ -198,7 +198,16 @@ string::string(JSString *str) : value() {
 }
 
 std::string string::to_std_string() const {
-    if (!g_cx || !val.isString()) return "";
+    if (!g_cx) return "";
+    if (!val.isString()) {
+        // Value might not be a JS string type (e.g., number passed to sqlEsc) -
+        // convert it using JS::ToString, matching value::to_std_string() behavior
+        JS::RootedValue v(g_cx, val);
+        JS::RootedString str(g_cx, JS::ToString(g_cx, v));
+        if (!str) return "";
+        JS::UniqueChars chars = JS_EncodeStringToUTF8(g_cx, str);
+        return chars ? std::string(chars.get()) : "";
+    }
     JS::RootedString str(g_cx, val.toString());
     JS::UniqueChars chars = JS_EncodeStringToUTF8(g_cx, str);
     return chars ? std::string(chars.get()) : "";

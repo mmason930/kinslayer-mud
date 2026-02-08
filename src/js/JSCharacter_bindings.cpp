@@ -1021,6 +1021,355 @@ void RegisterJSCharacterBindings() {
         return true;
     };
     
+    // --- Missing getters (int return type) ---
+    g_class_registry["JSCharacter"].getters["invis"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getInvis())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["taint"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getTaint())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["shadowPoints"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getShadow_Points())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["maxShadow"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getMax_Shadow_Points())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["strain"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getStrain())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["damRollMod"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getDamroll_Mod())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["mood"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getMood())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["stance"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getStance())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["strength"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getStrength())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["intelligence"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getIntelligence())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["wisdom"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getWisdom())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["dexterity"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getDexterity())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["constitution"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getConstitution())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["hunger"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getHunger())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["thirst"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getThirst())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["drunk"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getDrunk())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["wimpy"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getWimpy())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["deathWait"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getDeathWait())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["warnings"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getWarnings())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["masterWeapon"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getMasterWeapon())); else vp.setUndefined();
+        return true;
+    };
+    // --- Missing getters (bool return type) ---
+    g_class_registry["JSCharacter"].getters["isBashed"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getIsBashed())); else vp.setUndefined();
+        return true;
+    };
+    // --- Missing getters (flusspferd::value return type) ---
+    g_class_registry["JSCharacter"].getters["otarget"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getOTarget())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["sittingOn"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getSittingOn())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["decayedBy"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getDecayedBy())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["burnedBy"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getBurnedBy())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSCharacter"].getters["plaguedBy"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getPlaguedBy())); else vp.setUndefined();
+        return true;
+    };
+    // --- Missing getters (flusspferd::object return type) ---
+    g_class_registry["JSCharacter"].getters["createdDatetime"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getCreatedDatetime())); else vp.setUndefined();
+        return true;
+    };
+
+    // --- Missing setters (int parameter) ---
+    g_class_registry["JSCharacter"].setters["invis"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setInvis(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["taint"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setTaint(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["shadowPoints"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setShadow_Points(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["maxShadow"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setMax_Shadow_Points(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["strain"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setStrain(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["damRollMod"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setDamroll_Mod(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["mood"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setMood(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["stance"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setStance(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["strength"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setStrength(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["intelligence"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setIntelligence(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["wisdom"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setWisdom(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["dexterity"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setDexterity(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["constitution"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setConstitution(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["hunger"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setHunger(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["thirst"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setThirst(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["drunk"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setDrunk(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["wimpy"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setWimpy(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["deathWait"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setDeathWait(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["warnings"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setWarnings(val.toInt32());
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["masterWeapon"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setMasterWeapon(val.toInt32());
+        return true;
+    };
+    // --- Missing setters (bool parameter) ---
+    g_class_registry["JSCharacter"].setters["isBashed"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self) self->setIsBashed(val.toBoolean());
+        return true;
+    };
+    // --- Missing setters (JSCharacter* parameter) ---
+    g_class_registry["JSCharacter"].setters["fighting"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self && val.isObject()) {
+            JSObject *obj = &val.toObject();
+            void *priv = sm_get_private(obj);
+            if (priv) self->setFightingVar(static_cast<JSCharacter*>(priv));
+        }
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["mount"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self && val.isObject()) {
+            JSObject *obj = &val.toObject();
+            void *priv = sm_get_private(obj);
+            if (priv) self->setMount(static_cast<JSCharacter*>(priv));
+        }
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["riddenBy"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self && val.isObject()) {
+            JSObject *obj = &val.toObject();
+            void *priv = sm_get_private(obj);
+            if (priv) self->setRiddenBy(static_cast<JSCharacter*>(priv));
+        }
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["target"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self && val.isObject()) {
+            JSObject *obj = &val.toObject();
+            void *priv = sm_get_private(obj);
+            if (priv) self->setTarget(static_cast<JSCharacter*>(priv));
+        }
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["marked"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self && val.isObject()) {
+            JSObject *obj = &val.toObject();
+            void *priv = sm_get_private(obj);
+            if (priv) self->setMarked(static_cast<JSCharacter*>(priv));
+        }
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["hunting"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self && val.isObject()) {
+            JSObject *obj = &val.toObject();
+            void *priv = sm_get_private(obj);
+            if (priv) self->setHunting(static_cast<JSCharacter*>(priv));
+        }
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["decayedBy"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self && val.isObject()) {
+            JSObject *obj = &val.toObject();
+            void *priv = sm_get_private(obj);
+            if (priv) self->setDecayedBy(static_cast<JSCharacter*>(priv));
+        }
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["burnedBy"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self && val.isObject()) {
+            JSObject *obj = &val.toObject();
+            void *priv = sm_get_private(obj);
+            if (priv) self->setBurnedBy(static_cast<JSCharacter*>(priv));
+        }
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["plaguedBy"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self && val.isObject()) {
+            JSObject *obj = &val.toObject();
+            void *priv = sm_get_private(obj);
+            if (priv) self->setPlaguedBy(static_cast<JSCharacter*>(priv));
+        }
+        return true;
+    };
+    // --- Missing setters (JSObject* parameter) ---
+    g_class_registry["JSCharacter"].setters["otarget"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self && val.isObject()) {
+            JSObject *obj = &val.toObject();
+            void *priv = sm_get_private(obj);
+            if (priv) self->setOTarget(static_cast<::JSObject*>(priv));
+        }
+        return true;
+    };
+    g_class_registry["JSCharacter"].setters["sittingOn"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (self && val.isObject()) {
+            JSObject *obj = &val.toObject();
+            void *priv = sm_get_private(obj);
+            if (priv) self->setSittingOn(static_cast<::JSObject*>(priv));
+        }
+        return true;
+    };
+
     // Method alias for backward compatibility
     g_class_registry["JSCharacter"].methods["getInventory"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
         JS::CallArgs args = JS::CallArgsFromVp(argc, vp);

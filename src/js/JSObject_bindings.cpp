@@ -459,4 +459,84 @@ void RegisterJSObjectBindings() {
         if (self) vp.set(to_jsval(cx, self->isPickProof())); else vp.setUndefined();
         return true;
     };
+
+    // --- Missing getters (int return type) ---
+    g_class_registry["JSObject"].getters["costPerDay"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->cost_per_day())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSObject"].getters["offensive"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->offensive())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSObject"].getters["parry"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->parry())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSObject"].getters["dodge"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->dodge())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSObject"].getters["absorb"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->absorb())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSObject"].getters["clan"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->clan())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSObject"].getters["decayType"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->decayType())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSObject"].getters["decayTimer"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->decayTimer())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSObject"].getters["decayTimerType"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->decayTimerType())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSObject"].getters["scalpLevel"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getScalpLevel())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSObject"].getters["scalpRace"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getScalpRace())); else vp.setUndefined();
+        return true;
+    };
+    // --- Missing getters (bool return type) ---
+    g_class_registry["JSObject"].getters["isScalp"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getIsScalp())); else vp.setUndefined();
+        return true;
+    };
+    g_class_registry["JSObject"].getters["isPlayerScalp"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getIsPlayerScalp())); else vp.setUndefined();
+        return true;
+    };
+    // --- Missing getters (flusspferd::string return type) ---
+    g_class_registry["JSObject"].getters["extraDescription"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getExtraDescription())); else vp.setUndefined();
+        return true;
+    };
+    // --- Missing getters (flusspferd::array return type) ---
+    g_class_registry["JSObject"].getters["affects"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (self) vp.set(to_jsval(cx, self->getAffects())); else vp.setUndefined();
+        return true;
+    };
 }

@@ -11,7 +11,7 @@ MOZJS_LIBS = $(shell pkg-config --libs mozjs-131 2>/dev/null || echo "-lmozjs-13
 
 # Any special flags you want to pass to the compiler
 MYFLAGS = \
--O0 -std=c++20 -Wformat-security -Wformat -Wpointer-arith \
+-O0 -std=c++23 -Wformat-security -Wformat -Wpointer-arith \
 -Wcast-align -Wredundant-decls \
 $(MOZJS_CFLAGS) -DBOOST_PARAMETER_MAX_ARITY=10
 
