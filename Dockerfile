@@ -2,13 +2,13 @@ FROM ubuntu:24.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG GCC_THREADS
-ARG BOOST_VERSION="1_84_0"
-ARG BOOST_VERSION_DOT="1.84.0"
+ARG BOOST_VERSION="1_90_0"
+ARG BOOST_VERSION_DOT="1.90.0"
 
 # Install pre-requisites
 RUN apt update
-RUN apt install libmysqlclient-dev cmake g++ gcc wget git-all dos2unix cron nano \
-    autoconf2.13 python3 python3-pip llvm clang pkg-config curl -y
+RUN apt install libmysqlclient-dev cmake g++ gcc gdb gdbserver wget git-all dos2unix cron nano \
+    autoconf2.13 python3 python3-pip llvm clang pkg-config curl openssh-server rsync -y
 
 # Install Rust via rustup (need newer version than Ubuntu packages provide)
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y

@@ -1258,8 +1258,10 @@ void Descriptor::flushOutputBuffer()
 	else
 		descriptor->send(outputBuffer);
 
-	if(snoop_by && snoop_by->descriptor && snoop_by->hasPermissionToSnoop())
-		snoop_by->writeToOutput(false, outputBuffer.c_str(), 0);
+	if(snoop_by && snoop_by->descriptor && snoop_by->hasPermissionToSnoop()) {
+		va_list dummy{};
+		snoop_by->writeToOutput(false, outputBuffer.c_str(), dummy);
+	}
 
 	clearOutputBuffer();
 }
