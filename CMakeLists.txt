@@ -168,6 +168,7 @@ set(KINSLAYER_ONLY_SOURCES
     src/playerportal/PlayerPortalDescriptorStatus.cpp
     src/playerportal/PlayerPortalServer.cpp
     src/poker.cpp
+    src/PvalManager.cpp
     src/olc/redit.cpp
     src/rooms/Exit.cpp
     src/rooms/Room.cpp

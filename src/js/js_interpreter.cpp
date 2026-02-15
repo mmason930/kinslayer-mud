@@ -206,6 +206,8 @@ JSEnvironment::JSEnvironment()
 	flusspferd::create_native_function(g, "getZoneBottomRoomVnum", JS_getZoneBottomRoomVnum);
 	flusspferd::create_native_function(g, "getZoneTopRoomVnum", JS_getZoneTopRoomVnum);
 	flusspferd::create_native_function(g, "llmResponse", JS_llmResponse);
+	flusspferd::create_native_function(g, "numberOfPvals", JS_numberOfPvals);
+	flusspferd::create_native_function(g, "savePvalsInNeedOfSaving", JS_savePvalsInNeedOfSaving);
 
     JS_AddInterruptCallback(Impl::get_context(current_context()), &kjsOperationalCallback);
     
@@ -860,12 +862,12 @@ bool JSEnvironment::compile(const std::string &fileName, const std::string &scri
 	}
 	catch(flusspferd::exception &e)
 	{
-		MudLog(BRF, TRUE, LVL_APPR, "Error evaluating script `%s`: %s", fileName.c_str(), e.what());
+		MudLog(BRF, LVL_APPR, TRUE, "Error evaluating script `%s`: %s", fileName.c_str(), e.what());
 		removeTimeout();
 	}
 	catch(std::exception &e)
 	{
-		MudLog(BRF, TRUE, LVL_APPR, "C++ exception evaluating script `%s`: %s", fileName.c_str(), e.what());
+		MudLog(BRF, LVL_APPR, TRUE, "C++ exception evaluating script `%s`: %s", fileName.c_str(), e.what());
 		removeTimeout();
 	}
 

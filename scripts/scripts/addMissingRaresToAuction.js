@@ -45,7 +45,7 @@ var addMissingRaresToAuction =  function(self, actor, here, args, extra) {
     }
     
     // Load items for auction
-    for each (var vnum in auctionableRareItems) {
+    for(var vnum of auctionableRareItems) {
         var obj = getObjProto(vnum);
         if (obj.count < obj.max) {
             // Can only load one of each object per cycle.
@@ -54,7 +54,7 @@ var addMissingRaresToAuction =  function(self, actor, here, args, extra) {
     }
     
     // Load items into auction
-    for each (var item in self.inventory) {
+    for (var item of self.inventory) {
         // Flip a coin and decide which race gets the auction
         var auction_id = random(1, 2);
         var owner_id = null;

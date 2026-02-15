@@ -175,4 +175,6 @@ Quest.Task = (function() {
 })();
 
 // Reload all Quests to ensure prototypes aren't stale
-loadAllQuests();
+if(loadAllQuests) {
+	loadAllQuests();
+}

@@ -11,6 +11,7 @@
 #include "JSObject.h"
 #include "flusspferd.hpp"
 #include "js_utils.h"
+#include "../PvalManager.h"
 
 // Helper to convert return value to jsval (JS::Value)
 namespace {
@@ -1375,6 +1376,48 @@ void RegisterJSCharacterBindings() {
         JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
         if (self) args.rval().set(to_jsval(cx, self->inventory())); else args.rval().setUndefined();
+        return true;
+    };
+
+    // Pval methods (backed by C++ PvalManager)
+    g_class_registry["JSCharacter"].methods["getPval"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (!self || !self->toReal() || self->toReal()->IsPurged()) { args.rval().setNull(); return true; }
+        std::string keyName = argc > 0 ? from_jsval_string(cx, args[0]) : "";
+        std::string ownerID = std::to_string(self->toReal()->player.idnum);
+        std::string result = PvalManager::get()->getPval("C", ownerID, keyName);
+        if (result.empty()) {
+            args.rval().setNull();
+        } else {
+            JSString *str = JS_NewStringCopyZ(cx, result.c_str());
+            args.rval().setString(str);
+        }
+        return true;
+    };
+
+    g_class_registry["JSCharacter"].methods["setPval"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (!self || !self->toReal() || self->toReal()->IsPurged()) { args.rval().setUndefined(); return true; }
+        std::string keyName = argc > 0 ? from_jsval_string(cx, args[0]) : "";
+        std::string value = argc > 1 ? from_jsval_string(cx, args[1]) : "";
+        bool instant = argc > 2 ? from_jsval_bool(cx, args[2]) : false;
+        std::string ownerID = std::to_string(self->toReal()->player.idnum);
+        PvalManager::get()->setPval("C", ownerID, keyName, value, instant);
+        args.rval().setUndefined();
+        return true;
+    };
+
+    g_class_registry["JSCharacter"].methods["deletePval"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (!self || !self->toReal() || self->toReal()->IsPurged()) { args.rval().setUndefined(); return true; }
+        std::string keyName = argc > 0 ? from_jsval_string(cx, args[0]) : "";
+        bool instant = argc > 1 ? from_jsval_bool(cx, args[1]) : false;
+        std::string ownerID = std::to_string(self->toReal()->player.idnum);
+        PvalManager::get()->deletePval("C", ownerID, keyName, instant);
+        args.rval().setUndefined();
         return true;
     };
 }

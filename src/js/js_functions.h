@@ -98,4 +98,7 @@ void JS_sendToZone(int zoneNumber, flusspferd::string message);
 void JS_setTimeout(unsigned int pulses, flusspferd::value callback, flusspferd::object arguments);
 flusspferd::object JS_createDatetime(const DateTime &dateTime);
 
+int JS_numberOfPvals();
+void JS_savePvalsInNeedOfSaving();
+
 #endif

@@ -7,12 +7,6 @@ function bootProcs()
 		mudLog(constants.BRF, 102, "End of quests...");
 		global.questsHaveBeenBooted = true;
 	}
-	if( !global.pvalsHaveBeenBooted ) {
-		mudLog(constants.BRF, 102, "Start of pvals...");
-		loadAllPvals();
-		mudLog(constants.BRF, 102, "End of pvals...");
-		global.pvalsHaveBeenBooted = true;
-	}
 	if( !global.achievementsHaveBeenBooted ) {
 		mudLog(constants.BRF, 102, "Start of achievements...");
 		loadAllAchievements();

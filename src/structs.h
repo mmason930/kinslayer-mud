@@ -1720,7 +1720,7 @@ private:
 	short int skillId;
 public:
 
-	PlayerSkill(const int percent, const sbyte skillId)
+	PlayerSkill(const int percent, const short int skillId)
 	{
 		this->percent = percent;
 		this->skillId = skillId;

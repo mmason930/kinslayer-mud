@@ -39,6 +39,7 @@
 #include "rooms/Exit.h"
 
 #include "js/js.h"
+#include "PvalManager.h"
 
 #include "StringUtil.h"
 
@@ -524,6 +525,10 @@ void boot_db(void)
 	temp->loadScriptMap();
 
 	JSManager::get()->executeExpression("initGlobals();");
+
+	Log("Booting PvalManager.");
+	PvalManager::get()->boot();
+
 	JSManager::get()->executeExpression("bootProcs();");
 
 	Log("Booting Warrants.");

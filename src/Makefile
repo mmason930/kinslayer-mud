@@ -146,6 +146,7 @@ OBJFILES =	accounts.o \
 			playerportal/PlayerPortalDescriptorStatus.o \
 			playerportal/PlayerPortalServer.o \
 			poker.o \
+			PvalManager.o \
 			olc/redit.o \
 			rooms/Exit.o \
 			rooms/Room.o \

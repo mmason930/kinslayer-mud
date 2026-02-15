@@ -23,6 +23,7 @@
 #include "../CharacterUtil.h"
 #include "../rooms/Room.h"
 #include "../openai/OpenAIUtil.h"
+#include "../PvalManager.h"
 
 
 extern const int rev_dir[];
@@ -1611,4 +1612,14 @@ void JS_saveTopLevelHolderItems(const std::string &holderType, const std::string
 	}
 
 	Object::saveTopLevelHolderItems(holderType[0], holderId, objectsToSave);
+}
+
+int JS_numberOfPvals()
+{
+	return PvalManager::get()->size();
+}
+
+void JS_savePvalsInNeedOfSaving()
+{
+	PvalManager::get()->saveDirtyPvals();
 }

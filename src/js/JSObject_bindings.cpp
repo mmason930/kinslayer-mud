@@ -9,6 +9,7 @@
 #include "JSRoom.h"
 #include "flusspferd.hpp"
 #include "js_utils.h"
+#include "../PvalManager.h"
 
 namespace {
 
@@ -26,6 +27,14 @@ inline int from_jsval_int(JSContext *cx, JS::HandleValue v) {
 }
 inline bool from_jsval_bool(JSContext *cx, JS::HandleValue v) {
     return JS::ToBoolean(v);
+}
+inline std::string from_jsval_string(JSContext *cx, JS::HandleValue v) {
+    JSString *str = JS::ToString(cx, v);
+    if (!str) return "";
+    JS::RootedString rstr(cx, str);
+    JS::UniqueChars cstr = JS_EncodeStringToUTF8(cx, rstr);
+    if (!cstr) return "";
+    return std::string(cstr.get());
 }
 inline flusspferd::string from_jsval_fstring(JSContext *cx, JS::HandleValue v) {
     return flusspferd::string(v.get());
@@ -537,6 +546,48 @@ void RegisterJSObjectBindings() {
     g_class_registry["JSObject"].getters["affects"] = [](void *ptr, JSContext *cx, JS::MutableHandleValue vp) -> bool {
         class JSObject *self = static_cast<class JSObject*>(ptr);
         if (self) vp.set(to_jsval(cx, self->getAffects())); else vp.setUndefined();
+        return true;
+    };
+
+    // Pval methods (backed by C++ PvalManager)
+    g_class_registry["JSObject"].methods["getPval"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (!self || !self->toReal() || self->toReal()->IsPurged()) { args.rval().setNull(); return true; }
+        std::string keyName = argc > 0 ? from_jsval_string(cx, args[0]) : "";
+        std::string ownerID = ToString(self->toReal()->objID);
+        std::string result = PvalManager::get()->getPval("O", ownerID, keyName);
+        if (result.empty()) {
+            args.rval().setNull();
+        } else {
+            ::JSString *str = JS_NewStringCopyZ(cx, result.c_str());
+            args.rval().setString(str);
+        }
+        return true;
+    };
+
+    g_class_registry["JSObject"].methods["setPval"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (!self || !self->toReal() || self->toReal()->IsPurged()) { args.rval().setUndefined(); return true; }
+        std::string keyName = argc > 0 ? from_jsval_string(cx, args[0]) : "";
+        std::string value = argc > 1 ? from_jsval_string(cx, args[1]) : "";
+        bool instant = argc > 2 ? from_jsval_bool(cx, args[2]) : false;
+        std::string ownerID = ToString(self->toReal()->objID);
+        PvalManager::get()->setPval("O", ownerID, keyName, value, instant);
+        args.rval().setUndefined();
+        return true;
+    };
+
+    g_class_registry["JSObject"].methods["deletePval"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (!self || !self->toReal() || self->toReal()->IsPurged()) { args.rval().setUndefined(); return true; }
+        std::string keyName = argc > 0 ? from_jsval_string(cx, args[0]) : "";
+        bool instant = argc > 1 ? from_jsval_bool(cx, args[1]) : false;
+        std::string ownerID = ToString(self->toReal()->objID);
+        PvalManager::get()->deletePval("O", ownerID, keyName, instant);
+        args.rval().setUndefined();
         return true;
     };
 }
