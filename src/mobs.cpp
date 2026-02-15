@@ -124,19 +124,29 @@ void MobManager::BootPrototypes()
 		MudLog(BRF, LVL_APPR, TRUE, "MobManager::BootPrototypes : %s", e.getMessage().c_str());
 		return;
 	}
-	
-	Clock MyClock;
-	MyClock.reset(true);
+
+	sql::Query jsQuery = gameDatabase->sendQuery("SELECT * FROM js_attachments WHERE type='M'");
+	std::map<int, std::vector<sql::Row>> mobVnumToJsQueryRowsMap;
+	while (jsQuery->hasNextRow())
+	{
+		sql::Row jsRow = jsQuery->getRow();
+		int mobVnum = jsRow.getInt("target_vnum");
+		MiscUtil::pushToVectorMap(mobVnumToJsQueryRowsMap, mobVnum, jsRow);
+	}
+
 	while( MyQuery1->hasNextRow() )
 	{
 		MyRow = MyQuery1->getRow();
-		BootPrototype( MyRow );
+
+		int roomVnum = MyRow.getInt("vnum");
+		auto jsRowsMatch = mobVnumToJsQueryRowsMap.find(roomVnum);
+		std::vector<sql::Row> jsRows = jsRowsMatch == mobVnumToJsQueryRowsMap.end() ? std::vector<sql::Row>() : jsRowsMatch->second;
+
+		BootPrototype( MyRow, jsRows );
 	}
-	MyClock.turnOff();
-	MyClock.print();
 }
 /* The mother of the booting methods for mobs... */
-Character *MobManager::BootPrototype( sql::Row &MyRow )
+Character *MobManager::BootPrototype( sql::Row &MyRow, const std::vector<sql::Row> &jsRows )
 {
 	Character *NewMob = new Character();
 	NewMob->MobData = new MobOnlyData();
@@ -227,10 +237,8 @@ Character *MobManager::BootPrototype( sql::Row &MyRow )
 // Find any js scripts that are listed as attached to this mob in the db, and attach them to it
     NewMob->js_scripts = std::shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
     try {
-        sql::Query q = gameDatabase->sendQuery("SELECT * FROM js_attachments WHERE type='M' AND target_vnum='" + MyRow["vnum"] + "'");
-        while( q->hasNextRow() )
+        for (const auto& row: jsRows)
         {
-            sql::Row row = q->getRow();
 			int vnum = atoi(row["script_vnum"].c_str());
 			JSTrigger* t = JSManager::get()->getTrigger(vnum);
             NewMob->js_scripts->push_back(t);

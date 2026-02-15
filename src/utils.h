@@ -16,11 +16,13 @@
 
 /* external declarations and prototypes **********************************/
 
+class ThreadedLogFile;
 extern FILE *logfile;
 
 #define Log			BasicMudLog
 
 long	asciiflag_conv(char *flag);
+extern ThreadedLogFile *mudLog;
 
 //Done by Galnor: March 2nd, 2006
 //Insert an item into a vector of any kind AFTER the object with the given "index"
@@ -136,7 +138,7 @@ __int64 AvailableSystemMemory();
 int strcmp(const std::string &str1, const std::string &str2);
 int strcmp(const std::string &str1, const char *str2);
 int strcmp(const char *str1, const std::string &str2);
-int str_cmp(const char *str1, const char *str2);
+int str_cmp(const char* s1, const char* s2) noexcept;
 int str_cmp(const std::string &str1, const char *str2);
 int str_cmp(const char *str1, const std::string &str2);
 int str_cmp(const std::string &str1, const std::string &str2);

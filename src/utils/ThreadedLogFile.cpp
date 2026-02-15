@@ -8,10 +8,7 @@
 ThreadedLogFile::ThreadedLogFile(const std::string &filePath)
 {
 	setFilePath(filePath);
-}
-
-ThreadedLogFile::ThreadedLogFile()
-{
+	begin();
 }
 
 ThreadedLogFile::~ThreadedLogFile()
@@ -58,13 +55,13 @@ void ThreadedLogFile::processMessages()
 			flushQueue = tempQueue;
 		}
 	}
-		
+
 	//Write to file.
 
 	std::ofstream currentOutputStream;
 	for(auto entry : *flushQueue)
 	{
-		time_t submittedTime = (time_t)entry.submittedTimeval.tv_sec;
+		time_t submittedTime = entry.submittedTimeval.tv_sec;
 		tm* submittedTm = localtime(&submittedTime);
 
 		strftime(nextFileName, FILE_NAME_BUFFER_SIZE, filePath.c_str(), submittedTm);
@@ -74,9 +71,9 @@ void ThreadedLogFile::processMessages()
 
 			if(currentOutputStream.is_open())
 				currentOutputStream.close();
-			
+
 			boost::filesystem::path logFileDirectoryPath = boost::filesystem::path(nextFileName).parent_path();
-			
+
 			if(!boost::filesystem::exists(logFileDirectoryPath))
 			{
 				Log("Log file directory path `%s` does not exist. Creating it.", logFileDirectoryPath.c_str());
@@ -93,7 +90,6 @@ void ThreadedLogFile::processMessages()
 		}
 
 		//Write to file.
-		
 		currentOutputStream << MiscUtil::formatDateYYYYdmmdddHHcMMcSS(DateTime(submittedTime))
 			<< "." << std::setfill('0') << std::setw(3) << (entry.submittedTimeval.tv_usec / 1000)
 			<< " : " << entry.message << std::endl;

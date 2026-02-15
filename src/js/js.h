@@ -119,7 +119,7 @@ class JSManager
 		std::thread *monitorSubversionThread;
 		
 		void monitorSubversion(sql::Connection context, const std::string &scriptPullCommand);
-		int checkFileModifications(const std::string scriptsDirectory, const std::string &directoryPath, sql::BatchInsertStatement &batchInsertStatement);
+		int checkFileModifications(const std::string &scriptsDirectory, const std::string &directoryPath, sql::BatchInsertStatement &batchInsertStatement);
 
 		std::mutex monitorFilesystemRunOnceMutex;
 		bool monitorFilesystemRunOnce;
@@ -197,11 +197,12 @@ class JSManager
 		void loadTriggers();
 		void loadScriptsFromFilesystem(const std::string &directoryPath, const bool continuously);
 		bool loadScriptsFromFile(const std::string &filePath);
+		bool loadScriptsFromContent(const std::string& filePath, const std::string &scriptContent);
 
 		std::list< JSTrigger* > triggersInRange( const int lo, const int hi );
 
 		void setupMonitoringThreads();
-		void monitorFileModifications(bool continuous);
+		void monitorFileModifications(bool continuous, bool useMainDatabaseConnection);
     private:
 		std::unordered_map<int, JSTrigger*> mapper;
 		std::map<int, Script*> scriptMap;

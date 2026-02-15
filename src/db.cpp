@@ -179,11 +179,9 @@ void miscBootMaintenance() {
 				exit(1);
 			}
 		}
+
+		gameDatabase->sendRawQuery("UPDATE config SET value='' WHERE name='Boot_SQL'");
 	}
-
-	gameDatabase->sendRawQuery("UPDATE config SET value='' WHERE name='Boot_SQL'");
-
-	//Misc code below.
 }
 
 class LiveObjectMaintenanceJob : public Job
@@ -374,7 +372,7 @@ void SaveGlobalScripts()
 
 void bootWorld(void)
 {
-	std::map<Room *, std::map<int, int>> roomToExitToVnumMap;
+	std::unordered_map<Room *, std::unordered_map<int, int>> roomToExitToVnumMap;
 
 	Log("Loading zone table.");
 	ZoneManager::GetManager().BootZones();
@@ -508,7 +506,7 @@ void boot_db(void)
 	temp->loadScriptsFromFile(std::string("scripts/lib/util/LoDash-2.4.1.js"));
 
 	Log("Monitoring file modifications...");
-	temp->monitorFileModifications(false);
+	temp->monitorFileModifications(false, true);
 
 	Log("Loading scripts from filesystem...");
 	temp->loadScriptsFromFilesystem("scripts", false);
@@ -3408,7 +3406,7 @@ void MySQLDeleteAll(const std::string &playername)
 {
 	return;//Temporarily disabled.
 	std::string Query;
-	std::list<std::string> TableList = gameDatabase->getTableList();
+	std::vector<std::string> TableList = gameDatabase->getTableList();
 	long id=-1;
 
 	sql::Query MyQuery;
@@ -3424,7 +3422,7 @@ void MySQLDeleteAll(const std::string &playername)
 		id = atoi(MyQuery->getRow()["user_id"].c_str());
 	}
 
-	for(std::list<std::string>::iterator sIter = TableList.begin();sIter != TableList.end();++sIter)
+	for(std::vector<std::string>::iterator sIter = TableList.begin();sIter != TableList.end();++sIter)
 	{
 		if( (*sIter) == "users" )
 			Query = "DELETE FROM " + (*sIter) + " WHERE username = '" + playername + "'";

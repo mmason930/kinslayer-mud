@@ -886,10 +886,7 @@ void Character::setSkill(short int skillId, int percent)
 			skills.erase(skillIter);
 	}
 
-	PlayerSkill playerSkill;
-	playerSkill.setPercent(percent);
-	playerSkill.setSKillId(skillId);
-	skills[skillId] = playerSkill;
+	skills.try_emplace(skillId, skillId, percent);
 }
 
 int Character::getSkill(short int skillId)

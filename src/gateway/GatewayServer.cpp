@@ -226,7 +226,7 @@ void GatewayServer::setup()
 
 void GatewayServer::disconnectMotherConnectionFromGameServer()
 {
-	if(motherConnectionToServer != NULL) {
+	if(motherConnectionToServer != nullptr) {
 
 		motherConnectionToServer->disconnect();
 		delete motherConnectionToServer;
@@ -239,7 +239,7 @@ void GatewayServer::attemptConnectionWithGameServer()
 {
 	//Setup mother connection to the game server.
 
-	if(motherConnectionToServer != NULL) {
+	if(motherConnectionToServer != nullptr) {
 
 		delete motherConnectionToServer;
 	}
@@ -742,7 +742,7 @@ void GatewayServer::run()
 				++descriptorIter;
 		}
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
 }
 

@@ -19,7 +19,7 @@
 using namespace flusspferd;
 
 // in microseconds
-const int TIMEOUT = (15)*(1000000); // Make configurable somehow?
+const int TIMEOUT = (60)*(1000000); // Make configurable somehow?
 const int TIMEOUT_SECONDS = TIMEOUT / 1000000;
 
 JSEnvironment* env;
@@ -105,7 +105,7 @@ JSBool kill_script(JSContext * cx)
 JSBool kjsOperationalCallback(JSContext * cx)
 {
 	scriptRuntimeClock.turnOff();
-	unsigned long long secondsElapsed = scriptRuntimeClock.getClocks() / 1000;
+	unsigned long long secondsElapsed = scriptRuntimeClock.getClocks() / 1000000;
 	scriptRuntimeClock.turnOn();
 
 	if(secondsElapsed >= TIMEOUT_SECONDS)
@@ -816,7 +816,7 @@ static void convertLegacyGenerators(std::string &source)
 	}
 }
 
-bool JSEnvironment::compile(const std::string &fileName, std::string &scriptBuffer)
+bool JSEnvironment::compile(const std::string &fileName, const std::string &scriptBuffer)
 {
     JSScript *script;
     JSObject *scriptObj;

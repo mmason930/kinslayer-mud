@@ -8,6 +8,8 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
+#include <ranges>
+
 #include "conf.h"
 
 
@@ -24,6 +26,7 @@
 #include "CharacterUtil.h"
 #include "UserLogoutType.h"
 #include "Descriptor.h"
+#include "SQLUtil.h"
 #include "rooms/Room.h"
 
 #include "commands/infrastructure/CommandInfo.h"
@@ -49,7 +52,7 @@ int find_eq_pos(Character *ch, Object *obj, char *arg, bool msg);
 
 Object *Object::bootLiveObject( const sql::Row &MyRow, bool recursive )
 {
-	Object *obj = (NULL);
+	Object *obj = nullptr;
 
 	if( atoi(MyRow["special_type"].c_str()) != SPECIAL_NONE )
 	{
@@ -65,7 +68,7 @@ Object *Object::bootLiveObject( const sql::Row &MyRow, bool recursive )
 		} catch( sql::QueryException &e ) {
 			MudLog(BRF, LVL_APPR, TRUE, "Unable to load item (special data) for object ID #%d: %s",
 				MyRow["id"].c_str(), e.getMessage().c_str());
-			return (NULL);
+			return nullptr;
 		}
 
 		if( MyQuery->hasNextRow() )
@@ -117,7 +120,7 @@ Object *Object::bootLiveObject( const sql::Row &MyRow, bool recursive )
 			}
 		}
 		else {
-			return (0);//Error. Object flagged as special yet no special found... Bad!
+			return nullptr;//Error. Object flagged as special yet no special found... Bad!
 		}
 	}
 	else
@@ -125,7 +128,7 @@ Object *Object::bootLiveObject( const sql::Row &MyRow, bool recursive )
 		/* Normal */
 		int rnum = real_object(atoi(MyRow["vnum"].c_str()));
 		if( rnum == -1 )
-			return (NULL);
+			return nullptr;
 		obj = read_object(rnum, REAL, false, false);
 
 		boost::uuids::string_generator uuidGenerator;
@@ -185,96 +188,245 @@ std::list< Object* > Object::loadItemList( bool recursive )
 }
 void Object::loadItems()
 {
-	std::list< Object* > ObjList = this->loadItemList( false );
-	for( std::list<Object*>::iterator oIter = ObjList.begin();oIter != ObjList.end();++oIter )
+	std::list< Object* > objectList = this->loadItemList( true );
+	for(auto & objectIter : objectList)
 	{
-		(*oIter)->loadItems();
-		obj_to_obj( (*oIter), this );
+		obj_to_obj( objectIter, this );
 	}
 }
-Object *Object::loadSingleItem(const boost::uuids::uuid &oID, bool recursive)
+Object *Object::loadSingleItem(const boost::uuids::uuid &objID, bool recursive)
 {
-	std::stringstream QueryBuffer;
-	sql::Query MyQuery;
-	Object *obj;
+	std::vector<boost::uuids::uuid> objectIds;
+	objectIds.push_back(objID);
+	auto objectsLoaded = loadMultipleItems(objectIds, recursive);
 
-	QueryBuffer
+	if (objectsLoaded.empty())
+	{
+		return nullptr;
+	}
+
+	return objectsLoaded[0];
+}
+
+std::vector<Object *> Object::loadMultipleItems(const std::vector<boost::uuids::uuid> &objectIds, bool recursive)
+{
+	std::stringstream queryBuffer;
+	sql::Query query;
+	std::vector<Object *> loadedObjects;
+
+	if (objectIds.empty())
+	{
+		return loadedObjects;
+	}
+
+	queryBuffer
 		<< "SELECT o.*,"
 		<< "(SELECT COUNT(*) FROM objects o2 WHERE o2.holder_type='O' AND o2.holder_id=o.id) AS num_holding,"
 		<< "retool.retool_name,retool.retool_sdesc,retool.retool_ldesc,retool.retool_exdesc "
 		<< "FROM objects o "
 		<< "LEFT JOIN object_retools retool ON retool.id=o.id "
-		<< "WHERE o.id='" << oID << "';";
+		<< "WHERE o.id IN" << SQLUtil::buildListSQL(objectIds.begin(), objectIds.end(), true, true) << ";";
+
 	try {
-		MyQuery = gameDatabase->sendQuery(QueryBuffer.str());
+		query = gameDatabase->sendQuery(queryBuffer.str());
 	} catch( sql::QueryException &e ) {
-		MudLog(BRF, LVL_APPR, TRUE, "Unable to load single item #%d: %s",
-			ToString(oID).c_str(), e.getMessage().c_str());
-		return NULL;
+		MudLog(BRF, LVL_APPR, TRUE, "Unable to load multiple items: %s", e.getMessage().c_str());
+		return loadedObjects;
 	}
-	if( MyQuery->hasNextRow() )
-		obj = Object::bootLiveObject( MyQuery->getRow(), (false) );
-	else
-		obj = 0;
-	if( obj && recursive )
-		obj->loadItems();
-	return (obj);
+
+	std::vector<std::string> parentObjectIds;
+
+	while( query->hasNextRow() )
+	{
+		Object *obj = bootLiveObject( query->getRow(), false);
+		if (obj != nullptr) {
+			if (recursive) {
+				obj->loadItems();
+			}
+			loadedObjects.push_back(obj);
+		}
+	}
+
+	return loadedObjects;
 }
+
+std::unordered_map<boost::uuids::uuid, ObjectLoad> Object::loadItemsByTopLevelHolder(const char topLevelHolderType)
+{
+	std::stringstream queryBuffer;
+	sql::Query query;
+	std::unordered_map<boost::uuids::uuid, ObjectLoad> objectIdToLoadMap;
+
+	queryBuffer
+		<< "SELECT o.*,"
+		<< "(SELECT COUNT(*) FROM objects o2 WHERE o2.holder_type='O' AND o2.holder_id=o.id) AS num_holding,"
+		<< "retool.retool_name,retool.retool_sdesc,retool.retool_ldesc,retool.retool_exdesc "
+		<< "FROM objects o "
+		<< "LEFT JOIN object_retools retool ON retool.id=o.id "
+		<< "WHERE o.top_level_holder_type='R';";
+
+	try {
+		query = gameDatabase->sendQuery(queryBuffer.str());
+	} catch( sql::QueryException &e ) {
+		MudLog(BRF, LVL_APPR, TRUE, "Unable to load multiple items: %s", e.getMessage().c_str());
+		return objectIdToLoadMap;
+	}
+
+	std::vector<std::string> parentObjectIds;
+
+	while( query->hasNextRow() )
+	{
+		sql::Row row = query->getRow();
+		Object *obj = bootLiveObject( row, false);
+
+		if (obj != nullptr) {
+
+			ObjectLoad objectLoad;
+
+			objectLoad.obj = obj;
+			objectLoad.holderType = row.getChar("holder_type");
+			objectLoad.holderId = row.getString("holder_id");
+			objectLoad.topLevelHolderType = row.getChar("top_level_holder_type");
+			objectLoad.topLevelHolderId = row.getString("top_level_holder_id");
+
+			objectIdToLoadMap[objectLoad.obj->objID] = objectLoad;
+		}
+	}
+
+	// Move all loaded objects into its parents
+	for (const auto& val : objectIdToLoadMap | std::views::values)
+	{
+		ObjectLoad objectLoad = val;
+		if (objectLoad.holderType == 'O')
+		{
+			boost::uuids::string_generator generator;
+			boost::uuids::uuid parentObjectId = generator(objectLoad.holderId);
+			auto parentObjectLoad = objectIdToLoadMap.find(parentObjectId);
+			if (parentObjectLoad != objectIdToLoadMap.end())
+			{
+				obj_to_obj( objectLoad.obj, parentObjectLoad->second.obj );
+			}
+		}
+	}
+
+	return objectIdToLoadMap;
+}
+
 std::list< Object* > Object::loadItemList( bool recursive, const char holderType, const std::string &holderID )
 {
 	std::list< std::pair<Object*,int> > ItemPairs = Object::loadItemPairs( recursive, holderType, holderID );
 	std::list< Object* > ItemList;
 
 	//We want the same data, minus the position.
-	for(std::list< std::pair<Object*,int> >::iterator ipIter = ItemPairs.begin();ipIter != ItemPairs.end();++ipIter)
+	for(auto & ItemPair : ItemPairs)
 	{
-		ItemList.push_back( (*ipIter).first );
+		ItemList.push_back( ItemPair.first );
 	}
 	return ItemList;
 }
 
-std::list< std::pair<Object*,int> > Object::loadItemPairs(
-	bool recursive, const char holderType, const std::string &holderID )
+std::list<std::pair<Object*, int>> Object::loadItemPairs(
+    bool recursive, const char holderType, const std::string& holderID)
 {
-	std::list< std::pair<Object*,int> > ObjList;
+    std::list<std::pair<Object*, int>> objectPairList;
+    std::unordered_map<boost::uuids::uuid, Object*> objectIdObjectMap;
 
-	std::stringstream QueryBuffer;
-	sql::Query MyQuery;
+    // --- Initial load ---
+    std::stringstream QueryBuffer;
+    QueryBuffer
+        << "SELECT o.*,"
+        << "(SELECT COUNT(*) FROM objects o2 WHERE o2.holder_type='O' AND o2.holder_id=o.id) AS num_holding,"
+        << "retool.retool_name,retool.retool_sdesc,retool.retool_ldesc,retool.retool_exdesc "
+        << "FROM objects o "
+        << "LEFT JOIN object_retools retool ON retool.id=o.id "
+        << "WHERE o.holder_type='" << holderType << "' "
+        << "AND o.holder_id='" << holderID << "';";
 
-	QueryBuffer
-		<< "SELECT o.*,"
-		<< "(SELECT COUNT(*) FROM objects o2 WHERE o2.holder_type='O' AND o2.holder_id=o.id) AS num_holding,"
-		<< "retool.retool_name,retool.retool_sdesc,retool.retool_ldesc,retool.retool_exdesc "
-		<< "FROM objects o "
-		<< "LEFT JOIN object_retools retool ON retool.id=o.id "
-		<< "WHERE o.holder_type='" << holderType << "' "
-		<< "AND o.holder_id='" << holderID << "';";
-	try {
-		MyQuery = gameDatabase->sendQuery(QueryBuffer.str());
-	} catch( sql::QueryException &e ) {
-		MudLog(BRF, LVL_APPR, TRUE, "Unable to load items held by ID %d(%c): %s",
-			holderType, holderID.c_str(), e.getMessage().c_str());
-		return (ObjList);
-	}
-	while( MyQuery->hasNextRow() )
-	{
-		sql::Row MyRow = MyQuery->getRow();
-		Object *obj = Object::bootLiveObject( MyRow, (false) );
-		if( obj != NULL )
-			ObjList.push_back( std::pair<Object*,int>(obj, atoi(MyRow["pos"].c_str())) );
-	}
-	if( recursive )
-	{
-		for( std::list< std::pair<Object*,int> >::iterator oIter = ObjList.begin();oIter != ObjList.end();++oIter )
-		{
-			std::list< Object* > ObjList2 = (*oIter).first->loadItemList( true );
-			for( std::list< Object* >::iterator oIter2 = ObjList2.begin();oIter2 != ObjList2.end();++oIter2 )
-			{
-				ObjList.push_back( std::pair<Object*,int>((*oIter2), (-1)) );
-			}
-		}
-	}
-	return (ObjList);
+    sql::Query MyQuery;
+    try {
+        MyQuery = gameDatabase->sendQuery(QueryBuffer.str());
+    } catch (sql::QueryException& e) {
+        MudLog(BRF, LVL_APPR, TRUE, "Unable to load items held by ID %d(%c): %s",
+            holderType, holderID.c_str(), e.getMessage().c_str());
+        return objectPairList;
+    }
+
+    // Track which objects have children to load
+    std::vector<Object*> holdersToLoad;
+
+    while (MyQuery->hasNextRow())
+    {
+        sql::Row MyRow = MyQuery->getRow();
+        Object* obj = bootLiveObject(MyRow, false);
+        if (obj != nullptr)
+        {
+            objectPairList.push_back({obj, atoi(MyRow["pos"].c_str())});
+            objectIdObjectMap[obj->objID] = obj;
+
+            if (atoi(MyRow["num_holding"].c_str()) > 0)
+                holdersToLoad.push_back(obj);
+        }
+    }
+
+    if (recursive)
+    {
+        // Bulk-load descendants level by level until nothing left
+        while (!holdersToLoad.empty())
+        {
+            // Build a single IN(...) query for all current holders
+            std::stringstream batchQuery;
+            batchQuery
+                << "SELECT o.*,"
+                << "(SELECT COUNT(*) FROM objects o2 WHERE o2.holder_type='O' AND o2.holder_id=o.id) AS num_holding,"
+                << "retool.retool_name,retool.retool_sdesc,retool.retool_ldesc,retool.retool_exdesc "
+                << "FROM objects o "
+                << "LEFT JOIN object_retools retool ON retool.id=o.id "
+                << "WHERE o.holder_type='O' AND o.holder_id IN (";
+
+            for (std::size_t i = 0; i < holdersToLoad.size(); ++i)
+            {
+                if (i > 0) batchQuery << ',';
+                batchQuery << "'" << holdersToLoad[i]->objID << "'";
+            }
+            batchQuery << ");";
+
+            sql::Query batchResult;
+            try {
+                batchResult = gameDatabase->sendQuery(batchQuery.str());
+            } catch (sql::QueryException& e) {
+                MudLog(BRF, LVL_APPR, TRUE, "Unable to bulk-load descendant items: %s",
+                    e.getMessage().c_str());
+                break;
+            }
+
+            std::vector<Object*> nextHolders;
+
+            while (batchResult->hasNextRow())
+            {
+                sql::Row row = batchResult->getRow();
+                Object* obj = bootLiveObject(row, false);
+                if (obj == nullptr)
+                    continue;
+
+                objectIdObjectMap[obj->objID] = obj;
+
+                // Place this object into its parent container
+                std::string parentId = row["holder_id"];
+                // Convert parentId string to uuid and find the parent
+                boost::uuids::string_generator gen;
+                auto parentUuid = gen(parentId);
+                auto parentIt = objectIdObjectMap.find(parentUuid);
+                if (parentIt != objectIdObjectMap.end())
+                    obj_to_obj(obj, parentIt->second);
+
+                if (atoi(row["num_holding"].c_str()) > 0)
+                    nextHolders.push_back(obj);
+            }
+
+            holdersToLoad = std::move(nextHolders);
+        }
+    }
+
+    return objectPairList;
 }
 std::list< Object* > Room::loadItemList( bool recursive )
 {
@@ -282,10 +434,8 @@ std::list< Object* > Room::loadItemList( bool recursive )
 }
 void Room::loadItems( const std::list< Object* > &lItems )
 {
-	for( std::list< Object* >::const_iterator oIter = lItems.begin();oIter != lItems.end();++oIter )
+	for(auto obj : lItems)
 	{
-		Object *obj = (*oIter);
-
 		obj->loadItems();
 		obj->MoveToRoom(this, false);
 	}
@@ -365,7 +515,6 @@ void Object::saveMultipleHolderItems(const std::map<std::pair<char, std::string>
 {
 	std::stringstream queryBuffer;
 	auto holdTypeAndIdIter = holderTypeAndIdToContentsMap.begin();
-	Clock clockA, clockB, clockC1, clockC2, clockD1, clockD2, clockD3, clockD4, clockD5;
 
 	try
 	{
@@ -443,9 +592,7 @@ void Object::saveMultipleHolderItems(const std::map<std::pair<char, std::string>
 			for(auto iter = (*holdTypeAndIdIter).second.begin();iter != (*holdTypeAndIdIter).second.end();++iter)
 			{
 				Object *object = (*iter);
-				clockC1.turnOn();
 				object->saveItems( true, (*holdTypeAndIdIter).first.first, (*holdTypeAndIdIter).first.second, (*holdTypeAndIdIter).first.first, (*holdTypeAndIdIter).first.second, tempObjectsBatchInsertStatement, tempObjectRetoolsBatchInsertStatement, tempObjectSpecialsBatchInsertStatement, true );
-				clockC1.turnOff();
 			}
 		}
 		
@@ -567,7 +714,7 @@ void Object::saveHolderItems(const char holderType, const std::string &holderId,
 
 		if(deleteHolderContents) {
 
-			//Delete all items currently cotained by this holder.
+			//Delete all items currently contained by this holder.
 			query	<<	"DELETE"
 					<<	"  objects.*,"
 					<<	"  object_specials.*,"

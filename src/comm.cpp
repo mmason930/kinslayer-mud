@@ -12,6 +12,7 @@
 
 #include "conf.h"
 #include "sysdep.h"
+#include "utils/ThreadedLogFile.h"
 
 
 #ifdef CIRCLE_MACINTOSH /* Includes for the Macintosh */
@@ -310,7 +311,7 @@ int main( int argc, char **argv )
 	// It would be nice to make this a command line option but the parser uses
 	// the log() function, maybe later. -gg
 	logfile = fdopen( STDERR_FILENO, "w" );
-	if ( logfile == NULL )
+	if ( logfile == nullptr )
 	{
 		std::cout << "error opening log file stderr: " << strerror(errno) << std::endl;
 		exit(1);
@@ -358,6 +359,11 @@ int main( int argc, char **argv )
 		}
 		pos++;
 	}
+
+	if (!subroutine.empty())
+		mudLog = new ThreadedLogFile(std::string("misc/") + subroutine);
+	else
+		mudLog = new ThreadedLogFile(STDERR);
 
 	if ( pos < argc )
 	{
@@ -554,7 +560,7 @@ void onDescriptorClose(void *data, kuListener *listener, kuDescriptor *descripto
 
 void waitForGatewayConnection() {
 
-	while(gatewayConnection == NULL) {
+	while(gatewayConnection == nullptr) {
 
 		listener->acceptNewHosts();
 
@@ -562,11 +568,9 @@ void waitForGatewayConnection() {
 
 		std::list<kuDescriptor*> descriptors = listener->getDescriptors();
 
-		for(std::list<kuDescriptor*>::iterator iter = descriptors.begin();iter != descriptors.end();++iter) {
+		for(auto desc : descriptors) {
 
-			kuDescriptor *desc = (*iter);
-
-			if(desc->hasCommand() == false) {
+				if(desc->hasCommand() == false) {
 
 				continue;
 			}
@@ -596,7 +600,7 @@ void waitForGatewayConnection() {
 			}
 		}
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
 
 	//Kick out all connections except for our gateway.
@@ -1022,6 +1026,9 @@ void initiateGame( int port )
 		sql::Row::getNumberOfAllocations(), sql::Row::getNumberOfDeallocations(), sql::Row::getRemainder());
 
 	Log( "Normal termination of game." );
+
+	mudLog->shutdown();
+	delete mudLog;
 #if (defined WIN32 && defined _DEBUG && defined _MEM_LEAKS )
 	_CrtDumpMemoryLeaks();
 #endif
@@ -1215,7 +1222,7 @@ void gameLoop()
 
 		pulseTimer.turnOff();
 
-		missed_pulses = pulseTimer.getClocks() / (1000 / PASSES_PER_SEC);
+		missed_pulses = pulseTimer.getClocks() / (1000000 / PASSES_PER_SEC);
 
 #ifdef CIRCLE_UNIX
 		/* Update tics for deadlock protection (UNIX only) */
@@ -1490,7 +1497,7 @@ void LagMonitor::stopClock( const std::string &sRoutineName )
 {
 	timer.turnOff();
 
-	double runTime = (double)timer.getClocks() / (double)1000;
+	double runTime = (double)timer.getClocks() / (double)1000000;
 
 	if( mRoutineTimeCard.count( sRoutineName ) == 0 ) {
 		mRoutineTimeCard[ sRoutineName ].numberOfTimesRun = 1;

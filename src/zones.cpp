@@ -187,8 +187,7 @@ void Zone::Reset()
 			fol = 0;
 		switch (this->cmd[cmd_no]->command)
 		{
-			case 'M':			// read a mobile
-
+			case 'M':
 				if (this->cmd[cmd_no]->arg2 >= MiscUtil::random(1, 100) &&
 					(this->cmd[cmd_no]->arg4 == -1 || this->cmd[cmd_no]->arg4 > (int)CountMobsRoom(this->cmd[cmd_no]->arg1, World[this->cmd[cmd_no]->arg3])) &&
 					(this->cmd[cmd_no]->arg5 == -1 || this->cmd[cmd_no]->arg5 > (int)CountMobs(this->cmd[cmd_no]->arg1)) &&
@@ -201,13 +200,11 @@ void Zone::Reset()
 					else if (this->cmd[cmd_no]->arg7 != 1)
 						fol = NULL;
 
-				//MobClock.On();
 					mob = new Character(this->cmd[cmd_no]->arg1, REAL, false);
 					char logBuffer[256];
 					snprintf(logBuffer, sizeof(logBuffer), "Zone %d cmd %d", this->getVnum(), this->cmd[cmd_no]->dbID);
 					mobLoadLogger.logMobLoad(mob->getVnum(), logBuffer);
 					//TODO: Log mob load here.
-				//MobClock.Off();
 					mob->MoveToRoom(World[this->cmd[cmd_no]->arg3]);
 					this->cmd[cmd_no]->mob = mob;
 					last_cmd = 1;
@@ -232,7 +229,7 @@ void Zone::Reset()
 				}
 				break;
 
-			case 'O':			/* read an object */
+			case 'O': // Load object
 				if (this->cmd[cmd_no]->arg2 >= MiscUtil::random(1, 100) &&
 				(CountObjectsRoom(cmd[cmd_no]->arg1, cmd[cmd_no]->arg3) < this->cmd[cmd_no]->arg4 || cmd[cmd_no]->arg4 == -1)&&
 				(this->cmd[cmd_no]->arg5 == -1 || CountObjects(this->cmd[cmd_no]->arg1) < (unsigned int)cmd[cmd_no]->arg5) &&
@@ -258,7 +255,7 @@ void Zone::Reset()
 					else
 					{
 						obj = read_object(cmd[cmd_no]->arg1, REAL, true);
-						obj->in_room = 0;
+						obj->in_room = nullptr;
 						last_cmd = 1;
 						obj_load = TRUE;
 					}
@@ -619,6 +616,7 @@ Zone *ZoneManager::AddNewZone( const unsigned int vnum )
 	//If we have made it this far, we have found an iterator after which point the zone must go.
 	Zone *NewZone = new Zone( vnum );
 	ZoneList.insert( zIter, NewZone );
+	vnumToZoneMap[vnum] = NewZone;
 
 	RenumberZones();//This will reset all of the rnums of the zones to their proper value.
 
@@ -628,17 +626,13 @@ Zone *ZoneManager::AddNewZone( const unsigned int vnum )
 Zone *ZoneManager::GetZoneByVnum( const unsigned int vnum )
 {
 	std::lock_guard<std::recursive_mutex > lock(this->ZoneListMutex);
-	for(unsigned int i = 0;i < ZoneList.size();++i)
-	{
-		if( ZoneList[i]->getVnum() == vnum )
-			return ZoneList[i];
-	}
-	return (0);
+	auto matchedZone = vnumToZoneMap.find(vnum);
+	return matchedZone != vnumToZoneMap.end() ? matchedZone->second : nullptr;
 }
 Zone *ZoneManager::GetZoneByRnum( const unsigned int rnum )
 {
 	std::lock_guard<std::recursive_mutex > lock(this->ZoneListMutex);
-	return (rnum >= 0 && rnum < ZoneList.size()) ? (ZoneList[rnum]) : (NULL);
+	return (rnum >= 0 && rnum < ZoneList.size()) ? (ZoneList[rnum]) : nullptr;
 }
 Zone *ZoneManager::GetZoneByRoomVnum( const unsigned int rvnum )
 {
@@ -648,7 +642,7 @@ Zone *ZoneManager::GetZoneByRoomVnum( const unsigned int rvnum )
 		if( rvnum >= ZoneList[i]->GetBottom() && rvnum <= ZoneList[i]->GetTop() )
 			return ZoneList[i];
 	}
-	return NULL;
+	return nullptr;
 }
 size_t ZoneManager::NumZones()
 {
@@ -695,9 +689,7 @@ void ZoneManager::LoadThreadedZoneBatch( sql::Connection connection, const int z
 		if( MyQuery->numRows() > 0 )
 		{
 			int lowZoneID = atoi(MyQuery->peekRow()["id"].c_str());
-			MyQuery->reverseRows();
-			int highZoneID = atoi(MyQuery->peekRow()["id"].c_str());
-			MyQuery->reverseRows();
+			int highZoneID = atoi(MyQuery->lastRow()["id"].c_str());
 
 			//Using this range, obtain the matching zone commands.
 			Query.str("");

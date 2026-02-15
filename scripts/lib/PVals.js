@@ -2,7 +2,7 @@ let PVALS_TABLE = "pvals";
 let MAX_VALUE_LENGTH = 64;
 /****
   *
-  * Pvals is stored in global.pvals, which is an associative array.
+  * Pvals is stored in global.pvals, which is a JS map.
   * The key of the array is a string of the format: <O|C>~=~<ID>~=~sActualKey
   *    For example: C~=~123456~=~ragePoints
   * The value is an object with two properties: the string representing the actual value, and a boolean.
@@ -11,36 +11,37 @@ let MAX_VALUE_LENGTH = 64;
   */
 function numberOfPvals()
 {
-	var i = 0;
-	for(var property in global.pvals) {
-		++i;
-	}
-	return i;
+	return global.pvals.size;
 }
 function loadAllPvals()
 {
-	sqlQuery( "DELETE FROM " + PVALS_TABLE + " WHERE owner_type='O' AND owner_id NOT IN(SELECT id FROM objects);" );
-	sqlQuery( "DELETE FROM " + PVALS_TABLE + " WHERE owner_type='C' AND owner_id NOT IN(SELECT user_id FROM users);" );
+	//mudLog(constants.BRF, 102, "loadAllPvals 001");
+	//sqlQuery( "DELETE FROM " + PVALS_TABLE + " WHERE owner_type='O' AND owner_id NOT IN(SELECT id FROM objects);" );
+	//mudLog(constants.BRF, 102, "loadAllPvals 002");
+	//sqlQuery( "DELETE FROM " + PVALS_TABLE + " WHERE owner_type='C' AND owner_id NOT IN(SELECT user_id FROM users);" );
+	mudLog(constants.BRF, 102, "loadAllPvals 003");
 	var sQuery = "SELECT * FROM " + PVALS_TABLE + ";";
 	var rs = sqlQuery(sQuery);
-	
-	global.pvals = new Object();
-	
+
+	mudLog(constants.BRF, 102, "loadAllPvals 004");
+
+	global.pvals = new Map();
 	while( rs.hasNextRow ) {
-		var row = rs.getRow;
-		var sOwnerType = row.get("owner_type");
-		var sOwnerID = row.get("owner_id");
-		var sValue = row.get("value");
-		var sKey = row.get("sKey");
-		var sFullKey = sOwnerType + "~=~" + sOwnerID + "~=~" + sKey;
-		
-		var oValueObject = new Object();
+		const row = rs.getRow;
+		const sOwnerType = row.get("owner_type");
+		const sOwnerID = row.get("owner_id");
+		const sValue = row.get("value");
+		const sKey = row.get("sKey");
+		const sFullKey = sOwnerType + "~=~" + sOwnerID + "~=~" + sKey;
+
+		const oValueObject = {};
 		oValueObject.value = sValue;
 		oValueObject.needsSave = false;
-		
+
 //		mudLog(constants.BRF, 100, sFullKey);
-		global.pvals[ sFullKey ] = oValueObject;
+		global.pvals.set(sFullKey, oValueObject);
 	}
+	mudLog(constants.BRF, 102, "loadAllPvals 005");
 	
 //	mudLog(constants.BRF, 102, "pvals loaded.");
 }
@@ -83,7 +84,7 @@ function getPval( sOwnerType, sOwnerID, sKeyName )
 	
 //	mudLog(constants.BRF, 101, "Loading pval: " + sFullKey);
 	
-	var pval = global.pvals[ sFullKey ];
+	var pval = global.pvals.get(sFullKey);
 	if( pval && !pval.needsDelete ) {
 		return pval.value;
 	}
@@ -104,11 +105,11 @@ function setPval( sOwnerType, sOwnerID, sKeyName, sValue, bInstant )
 	if( !global.pvals )
 		return;
 	var sFullKey = sOwnerType + "~=~" + sOwnerID + "~=~" + sKeyName;
-	var pval = global.pvals[ sFullKey ];
+	var pval = global.pvals.get(sFullKey);
 	
 	if( !pval ) {
 		var newPval = true;
-		pval = new Object();
+		pval = {};
 	}
 	pval.value = sValue+"";
 	if( bInstant == true ) {
@@ -119,9 +120,9 @@ function setPval( sOwnerType, sOwnerID, sKeyName, sValue, bInstant )
 		pval.needsSave = true;
 	pval.needsDelete = false;
 	if( newPval ) {
-		global.pvals[ sFullKey ] = pval;
-		global.pvals[ sFullKey ].needsDelete = false;
-//		mudLog(constants.BRF, 101, global.pvals[ sFullKey ]);
+		global.pvals.set(sFullKey, pval);
+		global.pvals.get(sFullKey).needsDelete = false;
+//		mudLog(constants.BRF, 101, global.pvals.get(sFullKey));
 	}
 //	mudLog(constants.BRF, 101, "Saving pval: " + sFullKey);
 }
@@ -138,7 +139,7 @@ function( sKeyName, bInstant )
 function setPvalToDelete( sOwnerType, sOwnerID, sKeyName, bInstant )
 {
 	var sFullKey = sOwnerType + "~=~" + sOwnerID + "~=~" + sKeyName;
-	var pval = global.pvals[ sFullKey ];
+	var pval = global.pvals.get(sFullKey);
 	if( pval ) {
 		if( bInstant )
 			deletePval( sFullKey, pval );
@@ -162,19 +163,17 @@ function deletePval( sFullKey, pval )
 	
 	sqlQuery( sQuery );
 	
-	delete global.pvals[ sFullKey ];
+	global.pvals.delete(sFullKey);
 }
 function savePvalsInNeedOfSaving()
 {
 	if( !global.pvals )
 		return;
-	for(var sFullKey in global.pvals) {
-		var pval = global.pvals[ sFullKey ];
-		if( pval.needsDelete ) {
-			deletePval( sFullKey, pval );
-		}
-		else if( pval.needsSave ) {
-			savePval( sFullKey, pval );
+	for (const [sFullKey, pval] of global.pvals) {
+		if (pval.needsDelete) {
+			deletePval(sFullKey, pval);
+		} else if (pval.needsSave) {
+			savePval(sFullKey, pval);
 		}
 	}
 }

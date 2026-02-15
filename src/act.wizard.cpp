@@ -1144,6 +1144,45 @@ CommandHandler do_extra = DEFINE_COMMAND
 				ch->send("Switch added.");
 			}
 		}
+		else if (!str_cmp(vArgs.at(0), "query"))
+		{
+			std::string sql = "SELECT * FROM pvals";
+			sql::Query query = gameDatabase->sendQuery(sql);
+
+			while (query->hasNextRow())
+			{
+				sql::Row row = query->getRow();
+				/**
+				*	while( rs.hasNextRow ) {
+		const row = rs.getRow;
+		const sOwnerType = row.get("owner_type");
+		const sOwnerID = row.get("owner_id");
+		const sValue = row.get("value");
+		const sKey = row.get("sKey");
+		const sFullKey = sOwnerType + "~=~" + sOwnerID + "~=~" + sKey;
+
+		const oValueObject = {};
+		oValueObject.value = sValue;
+		oValueObject.needsSave = false;
+
+//		mudLog(constants.BRF, 100, sFullKey);
+		global.pvals[ sFullKey ] = oValueObject;
+		**/
+			}
+		}
+		else if ( !str_cmp(vArgs.at(0), "str_cmp"))
+		{
+			int iterations = atoi(vArgs.at(1).c_str());
+			Clock strCmpClock;
+			strCmpClock.turnOn();
+			for (int iter = 0;iter < iterations; iter++)
+			{
+				int res = str_cmp("sifjdisfjdsifjdsifjdisfdsifdsigbdfsjrjwe9irj34fEWFIERFGIJERIF", "sifjdisfjdsifjdsifjdisfdsifdsigbdfsjrjwe9irj34fEWFIERFGIJERIE");
+			}
+			strCmpClock.turnOff();
+
+			ch->send("Total seconds: %f", strCmpClock.getSeconds());
+		}
 		else if( !str_cmp(vArgs.at(0), "tic") ) {
 			//Subtract the progress to the next tic.
 			pulse -= pulse % (SECS_PER_MUD_HOUR * PASSES_PER_SEC);

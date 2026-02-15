@@ -8,7 +8,7 @@ ARG BOOST_VERSION_DOT="1.90.0"
 # Install pre-requisites
 RUN apt update
 RUN apt install libmysqlclient-dev cmake g++ gcc gdb gdbserver wget git-all dos2unix cron nano \
-    autoconf2.13 python3 python3-pip llvm clang pkg-config curl openssh-server rsync -y
+    autoconf2.13 python3 python3-pip llvm clang pkg-config curl openssh-server rsync valgrind -y
 
 # Install Rust via rustup (need newer version than Ubuntu packages provide)
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y

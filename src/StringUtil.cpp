@@ -139,21 +139,12 @@ std::string StringUtil::getRandomString(const int size)
 //2011-02-06 - Replaces string contents based on the value of toFind.
 void StringUtil::replace(std::string &input, const std::string &toFind, const std::string &replaceWith)
 {
-	std::string::size_type pos = 0, toFindSize = toFind.size(), replaceWithSize = replaceWith.size();
-
-	while(pos < input.size())
-	{
-		if(input.substr(pos, toFindSize) == toFind)
-		{
-			input.replace(pos, toFindSize, replaceWith);
-
-			pos += replaceWithSize;
-		}
-		else {
-
-			++pos;
-		}
-	}
+    std::string::size_type pos = 0;
+    while ((pos = input.find(toFind, pos)) != std::string::npos)
+    {
+        input.replace(pos, toFind.size(), replaceWith);
+        pos += replaceWith.size();
+    }
 }
 
 

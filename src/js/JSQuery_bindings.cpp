@@ -57,15 +57,6 @@ void RegisterJSQueryBindings() {
         return true;
     };
     
-    g_class_registry["JSQuery"].methods["reverseRows"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
-        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
-        JSQuery *self = static_cast<JSQuery*>(ptr);
-        if (!self) { args.rval().setUndefined(); return true; }
-        self->reverseRows();
-        args.rval().setUndefined();
-        return true;
-    };
-    
     g_class_registry["JSQuery"].methods["resetRowQueue"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
         JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSQuery *self = static_cast<JSQuery*>(ptr);

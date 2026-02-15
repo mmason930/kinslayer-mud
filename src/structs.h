@@ -733,83 +733,88 @@ public:
 
 class Clock
 {
-	private:
-		unsigned long long start;
-		unsigned long long clocks;
-		unsigned long long tics;
-		unsigned long long lastClocks;
-		bool on;
-	public:
-		Clock()
-		{
-			reset( false );
-		}
-		void reset( bool onstart )
+private:
+	unsigned long long start;
+	unsigned long long clocks;  // now in microseconds
+	unsigned long long tics;
+	unsigned long long lastClocks;
+	bool on;
+public:
+	Clock()
+	{
+		reset(false);
+	}
+	void reset(bool onstart)
+	{
+		start = Clock::getTick();
+		on = onstart;
+		clocks = 0;
+		tics = 0;
+		lastClocks = 0;
+	}
+	unsigned long long getClocks() const
+	{
+		return clocks;
+	}
+	double getSeconds() const
+	{
+		return static_cast<double>(clocks) / 1000000.0;
+	}
+	double getMilliseconds() const
+	{
+		return static_cast<double>(clocks) / 1000.0;
+	}
+	unsigned long long getTics() const
+	{
+		return tics;
+	}
+	unsigned long long getLastClocks() const
+	{
+		return lastClocks;
+	}
+	void print() const
+	{
+		double t = static_cast<double>(tics);
+		double c = static_cast<double>(clocks);
+		double cpt = (t > 0 ? (c / t) : 0.0);
+		std::cout << clocks << " us. " << cpt << " us per tic." << std::endl;
+	}
+	void tic()
+	{
+		++tics;
+	}
+	void turnOn()
+	{
+		if (!on)
 		{
 			start = Clock::getTick();
-			on = onstart;
-			clocks = 0;
-			tics = 0;
-			lastClocks = 0;
+			on = true;
 		}
-		unsigned long long getClocks() const
+	}
+	void turnOff()
+	{
+		if (on)
 		{
-			return clocks;
+			auto duration = Clock::getTick() - start;
+			clocks += duration;
+			lastClocks = duration;
+			on = false;
+			start = 0;
 		}
-		float getSeconds() const
-		{
-            return (float) ( (float)this->getClocks() / (float)1000 );
-		}
-		unsigned long long getTics() const
-		{
-			return tics;
-		}
-
-		unsigned long long getLastClocks() const
-		{
-			return lastClocks;
-		}
-
-		void print() const
-		{
-			float t = getTics();
-			float c = getClocks();
-			float cpt = (t > 0 ? (c/t) : (0.000f));
-			std::cout << getClocks() << " clocks. " << cpt << " clocks per tic." << std::endl;
-		}
-		void tic()
-		{
-			++tics;
-		}
-		void turnOn()
-		{
-			if ( !on )
-			{
-				start = Clock::getTick();
-				on = true;
-			}
-		}
-		void turnOff()
-		{
-			if ( on )
-			{
-				auto duration = ( Clock::getTick() - start );
-				clocks += duration;
-				lastClocks = duration;
-				on = false;
-				start = 0;
-			}
-		}
-		static unsigned long long getTick()
-		{
+	}
+	static unsigned long long getTick()
+	{
 #ifdef WIN32
-			return (unsigned long long)GetTickCount();
+		LARGE_INTEGER freq, count;
+		QueryPerformanceFrequency(&freq);
+		QueryPerformanceCounter(&count);
+		return (unsigned long long)(count.QuadPart * 1000000 / freq.QuadPart);
 #else
-			timeval tt;
-			gettimeofday(&tt, (struct timezone*)0);
-			return (tt.tv_sec*1000) + (tt.tv_usec/1000);
+		struct timespec ts;
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+		return (ts.tv_sec * 1000000ULL) + (ts.tv_nsec / 1000);
 #endif
-		}
+	}
 };
 
 class Time
@@ -1009,6 +1014,16 @@ struct obj_affected_type
 
 /* ================== Memory Structure for Objects ================== */
 
+class ObjectLoad
+{
+public:
+	Object *obj;
+	char holderType;
+	std::string holderId;
+	char topLevelHolderType;
+	std::string topLevelHolderId;
+};
+
 class Object : public JSBindable, public Entity
 //11/06/2009 - implement JSBindable interface
 {
@@ -1055,7 +1070,7 @@ class Object : public JSBindable, public Entity
 		sbyte decayType;										/* The type of material this object is made from */
 		sbyte decayTimerType;								/* Type of decay timer (ie minutes, hours, etc) */
 		sh_int decayTimer;									/* Timer for decay scripts */
-		
+
 		bool purged;										/* Is this Object queued for purging? */
 		bool deleted;
 		bool needs_save;
@@ -1102,6 +1117,8 @@ class Object : public JSBindable, public Entity
 
 		std::list<Object*> loadItemList( bool recursive );
 		static Object *loadSingleItem(const boost::uuids::uuid &objID, bool recursive);
+		static std::vector<Object *> loadMultipleItems(const std::vector<boost::uuids::uuid> &objectIds, bool recursive);
+		static std::unordered_map<boost::uuids::uuid, ObjectLoad> loadItemsByTopLevelHolder(const char topLevelHolderType);
 		static std::list< std::pair<Object*,int> > loadItemPairs( bool recursive, const char holderType, const std::string &holderID );
 		static std::list< Object* > loadItemList( bool recursive, const char holderType, const std::string &holderID );
 		void loadItems();
@@ -1523,7 +1540,7 @@ struct PlayerOnlyData
 //Variables only used by MOBs...
 struct MobOnlyData
 {
-	
+
 	std::list<int> assists;			// List of vnums for MOBs to assist.
 	std::list<long> memory;			// List of attacker's ids to remember.
 	std::list<long> ForgetList;		// List of attackers who the mob should forget.
@@ -1702,6 +1719,12 @@ private:
 	sbyte percent;
 	short int skillId;
 public:
+
+	PlayerSkill(const int percent, const sbyte skillId)
+	{
+		this->percent = percent;
+		this->skillId = skillId;
+	}
 
 	void setPercent(const int percent)
 	{

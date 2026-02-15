@@ -23,8 +23,10 @@
 #include "../SystemUtil.h"
 #include "../SQLUtil.h"
 #include "../rooms/Room.h"
+#include "../utils/ParallelFileLoader.h"
 
-// jsdbgapi.h was removed in modern SpiderMonkey
+#include <filesystem>
+#include <ranges>
 #include <boost/filesystem.hpp>
 
 
@@ -101,7 +103,7 @@ void JSManager::loadTriggers()
 	{
 		row = query->getRow();
 
-		int vnum = row.getInt("vnum");
+		int vnum = row.getInt("script_id");
 		JSTrigger* trigger = new JSTrigger(vnum);
 
 		trigger->scriptId = row.getInt("script_id");
@@ -130,18 +132,32 @@ void JSManager::loadScriptsFromFilesystem(const std::string &directoryPath, cons
 	while(continuously);
 }
 
-bool JSManager::loadScriptsFromFile(const std::string &filePath)
+// New method that does the actual work with already-loaded content:
+bool JSManager::loadScriptsFromContent(const std::string& filePath, const std::string &scriptContent)
 {
-	size_t fileSize;
-	char *fileBuffer;
-	FILE *fileHandle = fopen(filePath.c_str(), "r");
-
-	boost::filesystem::path boostFilePath = boost::filesystem::path(filePath);
-	if(!boostFilePath.has_extension() || str_cmp(boostFilePath.extension().string(), ".js"))
+	if (!filePath.ends_with(".js"))
 	{
 		MudLog(BRF, LVL_APPR, TRUE, "Ignoring non JavaScript file `%s`.", filePath.c_str());
 		return false;
 	}
+
+	MudLog(BRF, LVL_APPR, TRUE, "Compiling script `%s`", filePath.c_str());
+
+	auto res = env->compile(filePath, scriptContent);
+
+	return res;
+}
+
+bool JSManager::loadScriptsFromFile(const std::string &filePath)
+{
+	size_t fileSize;
+	if(!filePath.ends_with(".js"))
+	{
+		MudLog(BRF, LVL_APPR, TRUE, "Ignoring non JavaScript file `%s`.", filePath.c_str());
+		return false;
+	}
+
+	FILE *fileHandle = fopen(filePath.c_str(), "r");
 
 	//MudLog(BRF, LVL_APPR, TRUE, "Processing Script File `%s`...", filePath.c_str());
 
@@ -156,35 +172,27 @@ bool JSManager::loadScriptsFromFile(const std::string &filePath)
 	fileSize = ftell(fileHandle);
 	rewind(fileHandle);
 
-	if(fileSize >= MAX_SCRIPT_LENGTH)
+	if (fileSize >= MAX_SCRIPT_LENGTH)
 	{
 		MudLog(BRF, LVL_APPR, TRUE, "File `%s` exceeds the maximum file size of %llu bytes", filePath.c_str(), MAX_SCRIPT_LENGTH);
 		fclose(fileHandle);
 		return false;
 	}
 
-	//Allocate a string large enough to hold the file contents.
-	fileBuffer = new char[fileSize + 1];
+	// Read directly into the std::string — no intermediate buffer or copy needed
+	std::string scriptContent(fileSize, '\0');
+	fread(&scriptContent[0], 1, fileSize, fileHandle);
 
-	size_t bytesRead = fread(fileBuffer, sizeof(*fileBuffer), fileSize, fileHandle);
-
-	if(ferror(fileHandle))
+	if (ferror(fileHandle))
 	{
 		MudLog(BRF, LVL_APPR, TRUE, "There was an error while reading the file.");
+		fclose(fileHandle); // BUG FIX: original leaked the handle here
 		return false;
 	}
 
 	fclose(fileHandle);
 
-	fileBuffer[bytesRead] = '\0';
-
-	std::string scriptContent(fileBuffer);
-
-	delete[] fileBuffer;
-
-	MudLog(BRF, LVL_APPR, TRUE, "Compiling script `%s`", filePath.c_str());
-
-	return env->compile(filePath, scriptContent);
+	return loadScriptsFromContent(filePath, scriptContent);
 }
 
 JSManager::JSManager()
@@ -224,12 +232,12 @@ void JSManager::setupMonitoringThreads()
 	monitorScriptImportTableThread = new std::thread(&JSManager::monitorScriptImportTable, this, dbContext->createConnection(), true);
 
 	this->monitorFileModificationsThreadRunning = true;
-	monitorFileModificationsThread = new std::thread(&JSManager::monitorFileModifications, this, true);
+	monitorFileModificationsThread = new std::thread(&JSManager::monitorFileModifications, this, true, false);
 }
 
 JSManager* JSManager::get()
 {
-	static JSManager* _self = 0;
+	static JSManager* _self = nullptr;
 
 	if (!_self)
 	{
@@ -366,8 +374,8 @@ ScriptImport *JSManager::getScriptImport(const sql::Row &row) const
 JSTrigger* JSManager::getTrigger(int vnum)
 {
 	// check to see if its loaded.
-	if (mapper.count(vnum) != 0)
-		return mapper[vnum];
+	if (auto it = mapper.find(vnum); it != mapper.end())
+		return it->second;
 	else
 	{
 		JSTrigger* trigger = new JSTrigger(vnum);
@@ -543,15 +551,15 @@ void JSManager::heartbeat()
 	processScriptImports();
 }
 
-void JSManager::monitorFileModifications(bool continuous)
+void JSManager::monitorFileModifications(bool continuous, bool useMainDatabaseConnection)
 {
 	while(monitorFileModificationsThreadRunning || !continuous)
 	{
 		try
 		{
-			sql::Connection connection = dbContext->createConnection();
-			sql::BatchInsertStatement batchInsertStatement(connection, "scriptImportQueue", 1000);
-				
+			sql::Connection connection = useMainDatabaseConnection ? gameDatabase : dbContext->createConnection();
+			sql::BatchInsertStatement batchInsertStatement(connection, "scriptImportQueue", 3000);
+
 			batchInsertStatement.addField("file_path");
 			batchInsertStatement.addField("queued_datetime");
 			batchInsertStatement.addField("operation");
@@ -586,114 +594,146 @@ void JSManager::monitorFileModifications(bool continuous)
 	}
 }
 
-int JSManager::checkFileModifications(const std::string scriptsDirectory, const std::string &directoryPath, sql::BatchInsertStatement &batchInsertStatement)
+int JSManager::checkFileModifications(const std::string& scriptsDirectory,
+                                      const std::string& directoryPath,
+                                      sql::BatchInsertStatement& batchInsertStatement)
 {
-	boost::filesystem::path scriptDirectoryPath(directoryPath);
-	boost::filesystem::directory_iterator end;
+    const std::string encodedDate = sql::encodeDate(time(nullptr));
+    int numberOfImports = 0;
 
-	int numberOfImports = 0;
+    for (const auto& entry : std::filesystem::directory_iterator(directoryPath))
+    {
+        const auto& iterPath = entry.path();
+        const std::string iterPathString = iterPath.string();
 
-	for( boost::filesystem::directory_iterator iter(scriptDirectoryPath) ; iter != end ; ++iter )
-	{
-		boost::filesystem::path iterPath = (*iter).path();
-		std::string iterPathString = iterPath.string();
-		
-		if(boost::filesystem::is_directory(iterPath))
-		{
-			numberOfImports += checkFileModifications(scriptsDirectory, iterPathString, batchInsertStatement);
-		}
+        if (entry.is_directory())
+        {
+            numberOfImports += checkFileModifications(scriptsDirectory, iterPathString, batchInsertStatement);
+            continue;
+        }
 
-		if( !(*iter).path().has_extension() || str_cmp((*iter).path().extension().string(), ".js") )
-		{
-			continue;
-		}
+        if (!iterPathString.ends_with(".js"))
+        {
+            continue;
+        }
 
-		std::time_t lastModifiedTime = boost::filesystem::last_write_time((*iter));
-		ScriptImportOperation *importOperation = nullptr;
+        auto fileTime = entry.last_write_time();
+        auto sysTime = std::chrono::clock_cast<std::chrono::system_clock>(fileTime);
+        std::time_t lastModifiedTime = std::chrono::system_clock::to_time_t(sysTime);
 
-		if(filePathToLastModifiedMap.count(iterPathString) == 0)
-			importOperation = ScriptImportOperation::addition;
-		else if(filePathToLastModifiedMap[iterPathString] < lastModifiedTime)
-			importOperation = ScriptImportOperation::modification;
+        ScriptImportOperation* importOperation = nullptr;
 
-		if(importOperation != nullptr)
-		{
-			Log("File `%s` modification detected: %c", iterPathString.c_str(), importOperation->getCharCode());
+        auto it = filePathToLastModifiedMap.find(iterPathString);
+        if (it == filePathToLastModifiedMap.end())
+            importOperation = ScriptImportOperation::addition;
+        else if (it->second < lastModifiedTime)
+            importOperation = ScriptImportOperation::modification;
 
-			std::string relativeFilePath = iterPathString;
-			if(StringUtil::startsWith(relativeFilePath, scriptsDirectory))
-				relativeFilePath.erase(0, scriptsDirectory.size());
+        if (importOperation != nullptr)
+        {
+            Log("File `%s` modification detected: %c", iterPathString.c_str(), importOperation->getCharCode());
 
-			batchInsertStatement.beginEntry();
-			
-			batchInsertStatement.putString(relativeFilePath);
-			batchInsertStatement.putString(sql::encodeDate(time(0)));
-			batchInsertStatement.putInt(importOperation->getValue());
+            std::string_view relativeFilePath(iterPathString);
+            if (relativeFilePath.starts_with(scriptsDirectory))
+                relativeFilePath.remove_prefix(scriptsDirectory.size());
 
-			batchInsertStatement.endEntry();
+            batchInsertStatement.beginEntry();
+            batchInsertStatement.putString(std::string(relativeFilePath));
+            batchInsertStatement.putString(encodedDate);
+            batchInsertStatement.putInt(importOperation->getValue());
+            batchInsertStatement.endEntry();
 
-			filePathToLastModifiedMap[iterPathString] = lastModifiedTime;
+            filePathToLastModifiedMap[iterPathString] = lastModifiedTime;
 
-			++numberOfImports;
-		}
-	}
-	
-	return numberOfImports;
+            ++numberOfImports;
+        }
+    }
+
+    return numberOfImports;
 }
 
 void JSManager::processScriptImports()
 {
-	std::list<ScriptImport *> scriptImportsToProcess;
+    std::list<ScriptImport*> scriptImportsToProcess;
 
-	//There is no need to hold this lock for the entire operation.
-	//Copy everything from the read queue to our locally defined queue.
-	{//Obtain the lock.
-		std::lock_guard<std::mutex> lock(this->scriptImportMutex);
+    // Copy everything from the read queue to our local queue.
+    {
+        std::lock_guard lock(this->scriptImportMutex);
 
-		if(!this->scriptImportReadQueue->empty())
-		{
-			std::copy(this->scriptImportReadQueue->begin(), this->scriptImportReadQueue->end(), std::back_inserter(scriptImportsToProcess));
+        if (!this->scriptImportReadQueue->empty())
+        {
+            ranges::copy(*this->scriptImportReadQueue, std::back_inserter(scriptImportsToProcess));
+            this->scriptImportReadQueue->clear();
+        }
+    }
 
-			this->scriptImportReadQueue->clear();
-		}
-	}//Release the lock.
+    // Collect all file paths that need loading.
+    // Map each path back to its ScriptImport so we can process after loading.
+    std::vector<std::string> filePaths;
+    std::vector<ScriptImport*> importsToLoad;
 
-	//Process everything.
-	for(ScriptImport *scriptImport : scriptImportsToProcess)
-	{
-		//MudLog(BRF, LVL_BUILDER, TRUE, "Script import (%s), queued at %s, path `%s`", scriptImport->operation->getStandardName().c_str(), scriptImport->queuedDatetime.toString().c_str(), scriptImport->filePath.c_str());
+    for (ScriptImport* scriptImport : scriptImportsToProcess)
+    {
+        if (scriptImport->operation->getValue() == ScriptImportOperation::deletion->getValue())
+        {
+            MudLog(BRF, LVL_BUILDER, TRUE, "Ignoring deletion operation.");
+            delete scriptImport;
+            continue;
+        }
 
-		if(scriptImport->operation->getValue() == ScriptImportOperation::deletion->getValue())
-		{
-			MudLog(BRF, LVL_BUILDER, TRUE, "Ignoring operation.");
-		}
-		else
-		{
-			this->loadScriptsFromFile(std::string("scripts/") + scriptImport->filePath);
-		}
+        std::string fullPath = std::string("scripts/") + scriptImport->filePath;
+        filePaths.push_back(fullPath);
+        importsToLoad.push_back(scriptImport);
+    }
 
-		delete scriptImport;
-	}
+    if (!filePaths.empty())
+    {
+        ParallelFileLoader loader(10);
+        loader.submit(std::move(filePaths));
+        loader.wait();
+
+        // Process the loaded results.
+        for (ScriptImport* scriptImport : importsToLoad)
+        {
+            std::string fullPath = std::string("scripts/") + scriptImport->filePath;
+
+            if (auto result = loader.take(fullPath))
+            {
+                if (result->ok())
+                {
+                    this->loadScriptsFromContent(fullPath, result->content);
+                }
+                else
+                {
+                    MudLog(BRF, LVL_BUILDER, TRUE,
+                           "Failed to load `%s`: %s",
+                           fullPath.c_str(), result->errorMessage().c_str());
+                }
+            }
+
+            delete scriptImport;
+        }
+    }
 }
 
 std::list< JSTrigger* > JSManager::triggersInRange( const int lo, const int hi )
 {
 	std::list< JSTrigger * > myList;
-	for( std::unordered_map<int, JSTrigger*>::iterator tIter = mapper.begin();tIter != mapper.end();++tIter )
+	for(auto& val : mapper | views::values)
 	{
-		if( (*tIter).second->vnum >= lo && (*tIter).second->vnum <= hi )
+		if( val->vnum >= lo && val->vnum <= hi )
 		{//Insert in the right spot...
 			bool found = false;
-			for( std::list< JSTrigger* >::iterator jIter = myList.begin();jIter != myList.end();++jIter )
+			for( auto jIter = myList.begin();jIter != myList.end();++jIter )
 			{
-				if( (*jIter)->vnum > (*tIter).second->vnum ) {
+				if( (*jIter)->vnum > val->vnum ) {
 					found = true;
-					myList.insert( jIter, (*tIter).second );
+					myList.insert( jIter, val );
 					break;
 				}
 			}
 			if( !found ) {
-				myList.push_back( (*tIter).second );
+				myList.push_back( val );
 			}
 		}
 	}

@@ -1262,7 +1262,7 @@ void Object::MoveToRoom(Room *room, bool vaultSave)
 		this->next_content = room->contents;
 		room->contents = this;
 		this->in_room = room;
-		this->carried_by = NULL;
+		this->carried_by = nullptr;
 		
 		if (ROOM_FLAGGED(room, ROOM_VAULT))
 		{

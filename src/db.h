@@ -29,7 +29,7 @@ extern std::string DebugFileName;
 // names of various files and directories
 #define INDEX_FILE			"index"					// index of world files
 
-#define STDERR				LIB_MISC"MudLog"		// For MudLog file
+#define STDERR				LIB_MISC"mudlog.%Y%m%d"		// For MudLog file
 #define CHEST_LOG_FILE		LIB_MISC"chestlog"		// For the chest logs
 
 template <class _T >
