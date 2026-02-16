@@ -5,7 +5,7 @@
 
 extern Character *character_list;
 
-Game *game = NULL;
+Game *game = nullptr;
 
 Game::Game()
 {

@@ -42,7 +42,7 @@ void JSRoom::digTo( int dir, JSRoom *d, bool bothSides, bool temporary )
 {
 	if( dir < 0 || dir >= NUM_OF_DIRS || !real || !d->toReal() ) return;
 
-	if( real->dir_option[ dir ] != NULL )
+	if( real->dir_option[ dir ] != nullptr )
 		delete real->dir_option[ dir ];
 	real->dir_option[ dir ] = new Exit();
 	real->dir_option[ dir ]->setToRoom(d->toReal());
@@ -64,13 +64,13 @@ void JSRoom::killExit( int dir, bool bothSides )
 		if (real->getNeighbor(dir)->getNeighbor(rev_dir[dir]) == real)
 		{
 			delete real->getNeighbor(dir)->dir_option[rev_dir[dir]];
-			real->getNeighbor(dir)->dir_option[rev_dir[dir]] = NULL;
+			real->getNeighbor(dir)->dir_option[rev_dir[dir]] = nullptr;
 		}
 	}
-	if( real->dir_option[ dir ] != NULL )
+	if( real->dir_option[ dir ] != nullptr )
 	{
 		delete real->dir_option[ dir ];
-		real->dir_option[ dir ] = NULL;
+		real->dir_option[ dir ] = nullptr;
 	}
 }
 void JSRoom::disableExit( int dir, bool bothSides )

@@ -11,6 +11,8 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
+#include <future>
+
 #include "conf.h"
 #include "sysdep.h"
 
@@ -866,9 +868,9 @@ struct ExtraDescription
 	}
 	~ExtraDescription()
 	{
-		if( keyword != NULL )
+		if( keyword != nullptr )
 			delete[] keyword;
-		if( description != NULL )
+		if( description != nullptr )
 			delete[] description;
 	}
 	static ExtraDescription *Parse( const std::string &eDescStr );
@@ -1028,14 +1030,28 @@ class Object : public JSBindable, public Entity
 //11/06/2009 - implement JSBindable interface
 {
 	public:
-		static boost::uuids::random_generator uuidGenerator;
-		static int nr_alloc;
-		static int nr_dealloc;
-		obj_vnum	item_number;							/* Where in data-base				*/
-		class Room	*in_room;								/* In what room -1 when conta/carr	*/
 
-		struct	obj_flag_data obj_flags;					/* Object information				*/
-		struct	obj_affected_type affected[ MAX_OBJ_AFFECT ];/* effects					*/
+		struct ObjectPreBootDataObjectData
+		{
+			int vnum;
+			std::vector<int> scriptVnums;
+		};
+
+		struct ObjectPreBootData
+		{
+			std::unordered_map<int, ObjectPreBootDataObjectData> objectRnumToObjectDataMap;
+			std::vector<Object *> objectProtos;
+		};
+
+		static boost::uuids::random_generator uuidGenerator;
+		static std::atomic<int> nr_alloc;
+		static std::atomic<int> nr_dealloc;
+		static std::future<ObjectPreBootData> preBootFuture;
+		obj_vnum	item_number;							/* Where in data-base				*/
+		Room	*in_room;								/* In what room -1 when conta/carr	*/
+
+		obj_flag_data obj_flags;					/* Object information				*/
+		obj_affected_type affected[ MAX_OBJ_AFFECT ];/* effects					*/
 
 		char	*name;										/* Title of object :get etc.        */
 		char	*description;								/* When in room                     */
@@ -1045,23 +1061,23 @@ class Object : public JSBindable, public Entity
 		char	*short_description;							/* when worn/carry/in cont.         */
 		char    *retool_sdesc;                              /* retooled short description       */
 		char	*action_description;						/* What to write when used          */
-		struct ExtraDescription	*ex_description;			/* extra descriptions				*/
-		struct ExtraDescription *retool_ex_desc;			/* extra descriptions when retooled */
-		class Character	*carried_by;						/* Carried by :NULL in room/conta   */
-		class Character	*worn_by;							/* Worn by?							*/
-		class Character *SatOnBy;							/* Who's sitting on this?			*/
+		ExtraDescription	*ex_description;			/* extra descriptions				*/
+		ExtraDescription *retool_ex_desc;			/* extra descriptions when retooled */
+		Character	*carried_by;						/* Carried by :NULL in room/conta   */
+		Character	*worn_by;							/* Worn by?							*/
+		Character *SatOnBy;							/* Who's sitting on this?			*/
 		sh_int worn_on;										/* Worn where?						*/
 
-		class Object	*in_obj;							/* In what object NULL when none	*/
-		class Object	*contains;							/* Contains objects					*/
+		Object	*in_obj;							/* In what object NULL when none	*/
+		Object	*contains;							/* Contains objects					*/
 
 		boost::uuids::uuid objID;							/* Object's UID						*/
 		bool proto;											/* Object is a prototype			*/
 		DateTime createdDatetime;							/* When the item was created		*/
 
-		class Object	*next_content;						/* For 'contains' lists				*/
-		class Object	*next;								/* For the object list				*/
-		class ScalpData	*scalp;
+		Object	*next_content;						/* For 'contains' lists				*/
+		Object	*next;								/* For the object list				*/
+		ScalpData	*scalp;
 		std::string creator;								/* String containing object creator */
 
 		bool hidden;
@@ -1096,14 +1112,14 @@ class Object : public JSBindable, public Entity
 		const char *getDisplayName();
 		char *GetDesc();
 		char *GetSDesc();
-		struct ExtraDescription *GetExDesc();
+		ExtraDescription *GetExDesc();
 
 		unsigned long int Money;
 
 		float Weight();
 		std::string getDisplayableId();
 		Room *getRoom();
-		class EntityType *getEntityType();
+		EntityType *getEntityType();
 
 		float BashRating();
 		void MoveToRoom( Room *room, bool vaultSave=true );
@@ -1111,14 +1127,18 @@ class Object : public JSBindable, public Entity
 		void RemoveFromAll();
 		void RemoveFromRoom(bool vaultSave=true);
 
-		void ProtoBoot( class sql::Row &MyRow, const int rnum, const std::list<int> &jsAttachmentList );
+		void ProtoBoot( const sql::Row &MyRow, const int rnum);
 		void protoSave();
 		void ProtoDelete();
 
 		std::list<Object*> loadItemList( bool recursive );
+		static void preBootObjects();
+		static void bootObjects();
 		static Object *loadSingleItem(const boost::uuids::uuid &objID, bool recursive);
 		static std::vector<Object *> loadMultipleItems(const std::vector<boost::uuids::uuid> &objectIds, bool recursive);
-		static std::unordered_map<boost::uuids::uuid, ObjectLoad> loadItemsByTopLevelHolder(const char topLevelHolderType);
+		static sql::Query loadItemsByTopLevelHolderQuery(const sql::Connection &connection, const char topLevelHolderType);
+		static std::unordered_map<boost::uuids::uuid, ObjectLoad> loadItemsByTopLevelHolder(const sql::Connection &connection, const char topLevelHolderType);
+		static std::unordered_map<boost::uuids::uuid, ObjectLoad> loadItemMapFromQuery(const sql::Query &query);
 		static std::list< std::pair<Object*,int> > loadItemPairs( bool recursive, const char holderType, const std::string &holderID );
 		static std::list< Object* > loadItemList( bool recursive, const char holderType, const std::string &holderID );
 		void loadItems();
@@ -1243,26 +1263,26 @@ struct CharPlayerData
 {
 	CharPlayerData()
 	{
-		short_descr = 0;
-		long_descr = 0;
-		description = 0;
-		ArriveMessage = 0;
-		LeaveMessage = 0;
+		short_descr = nullptr;
+		long_descr = nullptr;
+		description = nullptr;
+		ArriveMessage = nullptr;
+		LeaveMessage = nullptr;
 		sex = 0;
 		chclass = 0;
 		race = 0;
 		level = 0;
 		weight = 0;
 		height = 0;
-		fighting = 0;
-		mount = 0;
-		ridden_by = 0;
-		target = 0;
-		target2 = 0;
-		marked = 0;
-		hunting = 0;
-		otarget = 0;
-		sitting_on = NULL;
+		fighting = nullptr;
+		mount = nullptr;
+		ridden_by = nullptr;
+		target = nullptr;
+		target2 = nullptr;
+		marked = nullptr;
+		hunting = nullptr;
+		otarget = nullptr;
+		sitting_on = nullptr;
 		idnum = 0;
 		position = POS_STANDING;
 
@@ -1765,20 +1785,20 @@ public:
 	Room	*was_in_room;					/* Location for idle people			*/
 	kill_record	kill_list;					/* Trophy list						*/
 
-	struct CharPlayerData	player;							/* Normal data						*/
-	struct CharAbilityData	real_abils;						/* Abilities without modifiers		*/
-	struct CharAbilityData	aff_abils;						/* Abils with spells/stones/etc		*/
-	struct CharPointData	points;							/* Points							*/
-	struct PlayerOnlyData	*PlayerData;
-	struct MobOnlyData		*MobData;
-	struct LoadOnlyData		*LoadData;
+	CharPlayerData	player;							/* Normal data						*/
+	CharAbilityData	real_abils;						/* Abilities without modifiers		*/
+	CharAbilityData	aff_abils;						/* Abils with spells/stones/etc		*/
+	CharPointData	points;							/* Points							*/
+	PlayerOnlyData	*PlayerData;
+	MobOnlyData		*MobData;
+	LoadOnlyData		*LoadData;
 	std::list<class UserClan *>	userClans;
 
-	struct affected_type	*affected;					/* Affected by what spells			*/
-	struct affect_type_not_saved*affection_list;
-	class Object	*equipment[ NUM_WEARS ];			/* Equipment array					*/
+	affected_type	*affected;					/* Affected by what spells			*/
+	affect_type_not_saved*affection_list;
+	Object	*equipment[ NUM_WEARS ];			/* Equipment array					*/
 
-	class Object	*carrying;							/* Head of list						*/
+	Object	*carrying;							/* Head of list						*/
 	class Descriptor	*desc;							/* NULL for mobiles					*/
 
 	Character	*next_in_room;					/* For room->people - list			*/
@@ -1788,7 +1808,7 @@ public:
 	class PokerPlayer	*PokerData;				/* Poker Table data					*/
 	class PokerTable	*PokerTable;			/* The Poker table this character is watching. */
 	Character	*NextSeated;					/* Next seated at a poker table		*/
-	struct Follower	*followers;					/* List of chars followers			*/
+	Follower	*followers;					/* List of chars followers			*/
 	Character	*master;						/* Who is char following?			*/
 	Character	*SlowedBy;						/* Who affected the char with the slow spell */
 	Character	*DecayedBy;						/* Who affected the char with the decay spell */
@@ -1987,7 +2007,7 @@ public:
 	bool isInClan(const int clanId);
 	bool CanTrack(Room *room);
 	bool canGainWeave( Character* victim );
-	bool CanPractice( class Weave* weave );
+	bool CanPractice( Weave* weave );
 	bool CanPractice( const int spell_vnum );
 	bool check_if_pc_in_group();
 	bool CanDraw(Object *obj);
@@ -2086,7 +2106,7 @@ public:
 	void MoveToRoom( Room *room );
 	void MoveToRoom( int rnum );
 	void Dismount();
-	void Die( Character *killer = NULL );
+	void Die( Character *killer = nullptr );
 	void DeathCry();
 	void MakeCorpse();
 	void StopFighting();
@@ -2639,10 +2659,12 @@ class Config
 
 		Config();
 		~Config(){}
-		void Load();
+		void load();
 		void save();
-		void RenumberRooms();
-		int GetReboots()
+		void saveRebootCount(const sql::Connection &connection);
+		void saveRebootCountAsync();
+		void renumberRooms();
+		int getReboots()
 		{
 			return NumberOfReboots;
 		}

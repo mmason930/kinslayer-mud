@@ -63,7 +63,7 @@ void Zone::CopyFrom( Zone *Source )
 	SetResetMode(Source->GetResetMode());
 	setVnum(Source->getVnum());
 	SetRnum(Source->GetRnum());
-	this->weather = NULL;
+	this->weather = nullptr;
 
 	SetSunrise(Source->GetSunrise());
 	SetSunset(Source->GetSunset());
@@ -164,8 +164,8 @@ void Zone::Reset()
 {
 	int last_cmd = 0;
 	unsigned int cmd_no;
-	Character *mob = NULL, *fol = NULL;
-	Object *obj = NULL, *obj_to;
+	Character *mob = nullptr, *fol = nullptr;
+	Object *obj = nullptr, *obj_to;
 	unsigned int room_vnum;
 	int room_rnum;
 	int mob_load = FALSE; /* ### */
@@ -195,10 +195,10 @@ void Zone::Reset()
 				{
 					// Serai - Sets the previously loaded mob to be the leader
 					//  And when loading a mob with the defualt arg7 (-1) it kills fol.
-					if (this->cmd[cmd_no]->arg7 == 1 && fol == NULL)
+					if (this->cmd[cmd_no]->arg7 == 1 && fol == nullptr)
 						fol = mob;
 					else if (this->cmd[cmd_no]->arg7 != 1)
-						fol = NULL;
+						fol = nullptr;
 
 					mob = new Character(this->cmd[cmd_no]->arg1, REAL, false);
 					char logBuffer[256];
@@ -368,18 +368,18 @@ void Zone::Reset()
 				break;
 
 			case 'R': /* rem obj from room */
-				if ((obj = ItemUtil::get()->getObjectInListByRealNumber(cmd[cmd_no]->arg2, World[cmd[cmd_no]->arg1]->contents)) != NULL)
+				if ((obj = ItemUtil::get()->getObjectInListByRealNumber(cmd[cmd_no]->arg2, World[cmd[cmd_no]->arg1]->contents)) != nullptr)
 				{
 					obj->RemoveFromRoom();
 					obj->Extract(true);
 				}
-				obj = 0;
+				obj = nullptr;
 
 				last_cmd = 1;
 				break;
 			case 'D':			/* set state of door */
 				if (cmd[cmd_no]->arg2 < 0 || cmd[cmd_no]->arg2 >= NUM_OF_DIRS ||
-				(World[cmd[cmd_no]->arg1]->dir_option[cmd[cmd_no]->arg2] == NULL))
+				(World[cmd[cmd_no]->arg1]->dir_option[cmd[cmd_no]->arg2] == nullptr))
 				{
 					this->LogError(cmd_no, "door does not exist");
 				}
@@ -473,7 +473,7 @@ void ZoneManager::SaveZones()
 }
 void ZoneManager::Free()
 {
-	if( Self != NULL )
+	if( Self != nullptr )
 		delete Self;
 }
 
@@ -578,7 +578,7 @@ void Zone::PrintToBuffer( std::string &Buffer )
 	Buffer += TBuff;
 }
 
-ZoneManager *ZoneManager::Self = NULL;
+ZoneManager *ZoneManager::Self = nullptr;
 ZoneManager::~ZoneManager()
 {
 	{
@@ -591,7 +591,7 @@ ZoneManager::~ZoneManager()
 	{
 	
 	std::lock_guard<std::recursive_mutex > lock(ZoneManager::SingletonMutex);
-	Self = NULL;
+	Self = nullptr;
 	}
 }
 ZoneManager &ZoneManager::GetManager()
@@ -609,7 +609,7 @@ Zone *ZoneManager::AddNewZone( const unsigned int vnum )
 	for( zIter = ZoneList.begin();zIter != ZoneList.end();++zIter )
 	{
 		if( (*zIter)->getVnum() == vnum )
-			return NULL;
+			return nullptr;
 		else if( (*zIter)->getVnum() > vnum ) //insert before...
 			break;
 	}
@@ -743,7 +743,7 @@ void ZoneManager::BootZones()
 	std::list< std::thread* > threadPool;
 
 	query = gameDatabase->sendQuery("SELECT COUNT(*) AS size FROM zoneIndex;");
-	zoneIndexTableSize = atoi(query->getRow()[ "size" ].c_str());
+	zoneIndexTableSize = query->getRow().getInt( "size" );
 
 	int zoneIndexOffset = 0;
 	int zoneIndexFetchSize = zoneIndexTableSize / SIZE_OF_THREAD_POOL + 1;
@@ -763,12 +763,12 @@ void ZoneManager::BootZones()
 		threadPool.pop_front();
 	}
 
-	Zone *zoneBefore = NULL;
-	Zone *zone = NULL;
+	Zone *zoneBefore = nullptr;
+	Zone *zone = nullptr;
 	//Validate the zone table.
 	for(size_t zoneIndex = 1;zoneIndex < ZoneManager::GetManager().NumZones();++zoneIndex)
 	{
-		if( zoneBefore == NULL )
+		if( zoneBefore == nullptr )
 			zoneBefore = ZoneManager::GetManager().GetZoneByRnum( zoneIndex - 1 );
 		else
 			zoneBefore = zone;

@@ -25,7 +25,7 @@
 
 extern Character *character_list;
 extern Descriptor *descriptor_list;
-extern struct Index *obj_index;
+extern Index *obj_index;
 
 
 void add_follower(Character *ch, Character *leader);
@@ -54,10 +54,10 @@ Object *Character::SittingOn()
 }
 void Character::StandFromChair()
 {
-	if( this->player.sitting_on != NULL )
+	if( this->player.sitting_on != nullptr )
 	{
-		player.sitting_on->SatOnBy = NULL;
-		player.sitting_on = NULL;
+		player.sitting_on->SatOnBy = nullptr;
+		player.sitting_on = nullptr;
 	}
 }
 void Character::SitOnChair( Object *Chair, bool show)
@@ -65,7 +65,7 @@ void Character::SitOnChair( Object *Chair, bool show)
 	if( show == true )
 	{
 		Act("You sit down on $p.", TRUE, this, Chair, 0, TO_CHAR);
-		Act("$n sits down on $p.", TRUE, this, Chair, 0, TO_ROOM, NULL, true);
+		Act("$n sits down on $p.", TRUE, this, Chair, 0, TO_ROOM, nullptr, true);
 	}
 	Chair->SatOnBy = this;
 	this->player.sitting_on = Chair;
@@ -94,7 +94,7 @@ bool Character::HasBoat()
 	/* non-wearable boats in inventory will do it */
 	for (obj = this->carrying; obj; obj = obj->next_content)
 	{
-		if (obj->getType() == ITEM_BOAT && (find_eq_pos(this, obj, NULL, false) < 0))
+		if (obj->getType() == ITEM_BOAT && (find_eq_pos(this, obj, nullptr, false) < 0))
 		{
 			return 1;
 		}
@@ -204,12 +204,12 @@ int fade_distance(Character *ch)
 void perform_actual_fade(Character *ch, Room *room)
 {
 	ch->send("You reach out for the shadows as they surround you completely.\r\n");
-	Act("$n is surrounded by shadows and vanishes.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
+	Act("$n is surrounded by shadows and vanishes.", TRUE, ch, nullptr, nullptr, TO_ROOM, nullptr, true);
 
 	ch->RemoveFromRoom();
 	ch->MoveToRoom(room);
 
-	Act("$n steps out from the dark shadows nearby.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
+	Act("$n steps out from the dark shadows nearby.", TRUE, ch, nullptr, nullptr, TO_ROOM, nullptr, true);
 
 	look_at_room(ch, 0);
 }
@@ -648,7 +648,7 @@ int Character::SimpleMove(int dir, int need_specials_check, bool flee)
 			sprintf(buf2, "$n leaves %s%s.", dirs[dir], mount_message.c_str());
 		else
 			sprintf(buf2, "$n %s %s%s.", this->player.LeaveMessage, dirs[dir], mount_message.c_str());
-		Act(buf2, TRUE, this, 0, 0, TO_ROOM, NULL, true);
+		Act(buf2, TRUE, this, 0, 0, TO_ROOM, nullptr, true);
 	}
 
 	if (this->ShouldLayTrack() && this->in_room->isTrackable())
@@ -682,10 +682,10 @@ int Character::SimpleMove(int dir, int need_specials_check, bool flee)
 			        ((dir == UP || dir == DOWN) ? "" : "the "),
 			        (dir == UP ? "below": dir == DOWN ? "above" : dirs[rev_dir[dir]]), mount_message.c_str());
 
-		Act(buf2, TRUE, this, 0, 0, TO_ROOM, NULL, true);
+		Act(buf2, TRUE, this, 0, 0, TO_ROOM, nullptr, true);
 	}
 
-	if (this->desc != NULL)
+	if (this->desc != nullptr)
 		look_at_room(this, 0);
 
 	//Fade Shadow Sensing
@@ -720,7 +720,7 @@ int perform_move(Character *ch, int dir, int need_specials_check)
 	Room *was_in;
 	struct Follower *k, *next;
 
-	if (ch == NULL || dir < 0 || dir >= NUM_OF_DIRS || FIGHTING(ch))
+	if (ch == nullptr || dir < 0 || dir >= NUM_OF_DIRS || FIGHTING(ch))
 		return 0;
 	else if(ch->PokerData || ch->PokerTable)
 		ch->send("You must leave the table before you can leave the room.\r\n");
@@ -791,7 +791,7 @@ CommandHandler do_lead = DEFINE_COMMAND
 	if(RIDDEN_BY(target))
 	{
 		sprintf(buf, "%s is already riding $M.", GET_NAME(RIDDEN_BY(target)));
-		Act(buf, TRUE, ch, NULL, target, TO_CHAR);
+		Act(buf, TRUE, ch, nullptr, target, TO_CHAR);
 		return;
 	}
 	if(target->master)
@@ -822,7 +822,7 @@ CommandHandler do_lead = DEFINE_COMMAND
 	{
 		Act("$N refuses to follow you!", FALSE, ch, 0, target, TO_CHAR);
 		Act("You refuse $n's attemt to lead you.", FALSE, ch, 0, target, TO_VICT);
-		Act("$N refuses $n's attempt to lead $M.", FALSE, ch, 0, target, TO_ROOM, NULL, true);
+		Act("$N refuses $n's attempt to lead $M.", FALSE, ch, 0, target, TO_ROOM, nullptr, true);
 		return;
 	}
 };
@@ -848,7 +848,7 @@ void Character::stopEavesdropping()
 
 void Character::stopWarding()
 {
-	this->in_room->setEavesdroppingWarder(NULL);
+	this->in_room->setEavesdroppingWarder(nullptr);
 	this->send("You release your ward.\r\n");
 }
 	
@@ -1096,8 +1096,8 @@ CommandHandler do_gen_door = DEFINE_COMMAND
 						/* equal after a -- operation. */
 						if (GET_OBJ_VAL(key, 0) == 0)
 						{
-							Act("$p breaks as you attempt to remove it from the lock...", FALSE, ch, key, NULL, TO_CHAR);
-							Act("$p breaks as $n attempts to remove it from the lock...", FALSE, ch, key, NULL, TO_ROOM);
+							Act("$p breaks as you attempt to remove it from the lock...", FALSE, ch, key, nullptr, TO_CHAR);
+							Act("$p breaks as $n attempts to remove it from the lock...", FALSE, ch, key, nullptr, TO_ROOM);
 							key->Extract();
 						}
 					}
@@ -1109,8 +1109,8 @@ CommandHandler do_gen_door = DEFINE_COMMAND
 							--GET_OBJ_VAL(key, 0);
 							if (GET_OBJ_VAL(key, 0) == 0)
 							{
-								Act("$p breaks as you attempt to remove it from the lock...", FALSE, ch, key, NULL, TO_CHAR);
-								Act("$p breaks as $n attempts to remove it from the lock...", FALSE, ch, key, NULL, TO_ROOM);
+								Act("$p breaks as you attempt to remove it from the lock...", FALSE, ch, key, nullptr, TO_CHAR);
+								Act("$p breaks as $n attempts to remove it from the lock...", FALSE, ch, key, nullptr, TO_ROOM);
 								key->Extract();
 							}
 						}
@@ -1230,7 +1230,7 @@ CommandHandler do_gen_door = DEFINE_COMMAND
 				//At this point, the unlock succeeded.
 				Object *key = GET_EQ(ch, WEAR_HOLD);
 
-				if(key == NULL || GET_OBJ_VNUM(key) != obj->KeyNum())
+				if(key == nullptr || GET_OBJ_VNUM(key) != obj->KeyNum())
 					key = ch->GetObjectFromInventory(obj->KeyNum());
 
 				if(key)
@@ -1238,8 +1238,8 @@ CommandHandler do_gen_door = DEFINE_COMMAND
 					--GET_OBJ_VAL(key, 0);
 					if(GET_OBJ_VAL(key, 0) <= 0)
 					{
-						Act("$p breaks as you attempt to remove it from the lock...", FALSE, ch, key, NULL, TO_CHAR);
-						Act("$p breaks as $n attempts to remove it from the lock...", FALSE, ch, key, NULL, TO_ROOM);
+						Act("$p breaks as you attempt to remove it from the lock...", FALSE, ch, key, nullptr, TO_CHAR);
+						Act("$p breaks as $n attempts to remove it from the lock...", FALSE, ch, key, nullptr, TO_ROOM);
 						key->Extract();
 					}
 				}
@@ -1286,7 +1286,7 @@ CommandHandler do_gen_door = DEFINE_COMMAND
 
 	//Notify the room.
 	sprintf(buf, "%s %ss %s%s.", GET_NAME(ch), cmd_door[subcmd], exit ? "the " : "", obj ? obj->GetSDesc() : exit->getKeywords());
-	Act(buf, TRUE, ch, 0, 0, TO_ROOM, NULL, true);
+	Act(buf, TRUE, ch, 0, 0, TO_ROOM, nullptr, true);
 
 	Exit *reverse_exit = 0;
 	//Notify the other end of the door if it was an open/close.
@@ -1418,32 +1418,32 @@ CommandHandler do_stand = DEFINE_COMMAND
 	switch (GET_POS(ch))
 	{
 		case POS_STANDING:
-			Act("You are already standing.", FALSE, ch, 0, 0, TO_CHAR);
+			Act("You are already standing.", FALSE, ch, nullptr, nullptr, TO_CHAR);
 			break;
 		case POS_SITTING:
-			Act("You stand up.", FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n clambers to $s feet.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
+			Act("You stand up.", FALSE, ch, nullptr, nullptr, TO_CHAR);
+			Act("$n clambers to $s feet.", TRUE, ch, nullptr, nullptr, TO_ROOM, nullptr, true);
 			GET_POS(ch) = POS_STANDING;
 			ch->StandFromChair();
 			break;
 		case POS_RESTING:
-			Act("You stop resting, and stand up.", FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n stops resting, and clambers on $s feet.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
+			Act("You stop resting, and stand up.", FALSE, ch, nullptr, nullptr, TO_CHAR);
+			Act("$n stops resting, and clambers on $s feet.", TRUE, ch, nullptr, nullptr, TO_ROOM, nullptr, true);
 			GET_POS(ch) = POS_STANDING;
 			break;
 		case POS_SLEEPING:
-			Act("You have to wake up first!", FALSE, ch, 0, 0, TO_CHAR);
+			Act("You have to wake up first!", FALSE, ch, nullptr, nullptr, TO_CHAR);
 			break;
 		case POS_FIGHTING:
-			Act("Do you not consider fighting as standing?", FALSE, ch, 0, 0, TO_CHAR);
+			Act("Do you not consider fighting as standing?", FALSE, ch, nullptr, nullptr, TO_CHAR);
 			break;
 		case POS_FLYING:
-			Act("You fly down and land on the ground.", FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n swoops down and lands on the ground.", FALSE, ch, 0, 0, TO_ROOM, NULL, true);
+			Act("You fly down and land on the ground.", FALSE, ch, nullptr, nullptr, TO_CHAR);
+			Act("$n swoops down and lands on the ground.", FALSE, ch, nullptr, nullptr, TO_ROOM, nullptr, true);
 			break;
 		default:
-			Act("You stop floating around, and put your feet on the ground.", FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n stops floating around, and puts $s feet on the ground.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
+			Act("You stop floating around, and put your feet on the ground.", FALSE, ch, nullptr, nullptr, TO_CHAR);
+			Act("$n stops floating around, and puts $s feet on the ground.", TRUE, ch, nullptr, nullptr, TO_ROOM, nullptr, true);
 			GET_POS(ch) = POS_STANDING;
 			break;
 	}
@@ -1461,7 +1461,7 @@ CommandHandler do_sit = DEFINE_COMMAND
 		case POS_STANDING:
 			if( *arg1 != '\0' )
 			{
-				if( (target = ItemUtil::get()->getObjectInListVis(ch, arg1, ch->in_room->contents)) == NULL )
+				if( (target = ItemUtil::get()->getObjectInListVis(ch, arg1, ch->in_room->contents)) == nullptr )
 				{
 					ch->send("You don't see that here.\r\n");
 					return;
@@ -1471,7 +1471,7 @@ CommandHandler do_sit = DEFINE_COMMAND
 					ch->send("You can't sit on that!\r\n");
 					return;
 				}
-				if( target->SatOnBy != NULL )
+				if( target->SatOnBy != nullptr )
 				{
 					ch->send("%s is already seated there.\r\n", GET_NAME(target->SatOnBy));
 					return;
@@ -1481,7 +1481,7 @@ CommandHandler do_sit = DEFINE_COMMAND
 			else
 			{
 				Act("You sit down.", FALSE, ch, 0, 0, TO_CHAR);
-				Act("$n sits down.", FALSE, ch, 0, 0, TO_ROOM, NULL, true);
+				Act("$n sits down.", FALSE, ch, 0, 0, TO_ROOM, nullptr, true);
 			}
 			GET_POS(ch) = POS_SITTING;
 			break;
@@ -1490,7 +1490,7 @@ CommandHandler do_sit = DEFINE_COMMAND
 			break;
 		case POS_RESTING:
 			Act("You stop resting, and sit up.", FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n stops resting.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
+			Act("$n stops resting.", TRUE, ch, 0, 0, TO_ROOM, nullptr, true);
 			GET_POS(ch) = POS_SITTING;
 			break;
 
@@ -1504,7 +1504,7 @@ CommandHandler do_sit = DEFINE_COMMAND
 
 		default:
 			Act("You stop floating around, and sit down.", FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n stops floating around, and sits down.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
+			Act("$n stops floating around, and sits down.", TRUE, ch, 0, 0, TO_ROOM, nullptr, true);
 			GET_POS(ch) = POS_SITTING;
 			break;
 	}
@@ -1515,33 +1515,33 @@ CommandHandler do_rest = DEFINE_COMMAND
 	switch (GET_POS(ch))
 	{
 		case POS_STANDING:
-			Act("You sit down and rest your tired bones.", FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n sits down and rests.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
+			Act("You sit down and rest your tired bones.", FALSE, ch, nullptr, nullptr, TO_CHAR);
+			Act("$n sits down and rests.", TRUE, ch, nullptr, nullptr, TO_ROOM, nullptr, true);
 			GET_POS(ch) = POS_RESTING;
 			break;
 
 		case POS_SITTING:
-			if( ch->SittingOn() != NULL )
+			if( ch->SittingOn() != nullptr )
 			{
 				ch->send("You cannot rest while sitting on %s.\r\n", ch->SittingOn()->GetSDesc());
 				return;
 			}
-			Act("You rest your tired bones.", FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n rests.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
+			Act("You rest your tired bones.", FALSE, ch, nullptr, nullptr, TO_CHAR);
+			Act("$n rests.", TRUE, ch, nullptr, nullptr, TO_ROOM, nullptr, true);
 			GET_POS(ch) = POS_RESTING;
 			break;
 		case POS_RESTING:
-			Act("You are already resting.", FALSE, ch, 0, 0, TO_CHAR);
+			Act("You are already resting.", FALSE, ch, nullptr, nullptr, TO_CHAR);
 			break;
 		case POS_SLEEPING:
-			Act("You have to wake up first.", FALSE, ch, 0, 0, TO_CHAR);
+			Act("You have to wake up first.", FALSE, ch, nullptr, nullptr, TO_CHAR);
 			break;
 		case POS_FIGHTING:
-			Act("Rest while fighting?  Are you MAD?", FALSE, ch, 0, 0, TO_CHAR);
+			Act("Rest while fighting?  Are you MAD?", FALSE, ch, nullptr, nullptr, TO_CHAR);
 			break;
 		default:
-			Act("You stop floating around, and stop to rest your tired bones.", FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n stops floating around, and rests.", FALSE, ch, 0, 0, TO_ROOM, NULL, true);
+			Act("You stop floating around, and stop to rest your tired bones.", FALSE, ch, nullptr, nullptr, TO_CHAR);
+			Act("$n stops floating around, and rests.", FALSE, ch, nullptr, nullptr, TO_ROOM, nullptr, true);
 			GET_POS(ch) = POS_RESTING;
 			break;
 	}
@@ -1554,13 +1554,13 @@ CommandHandler do_sleep = DEFINE_COMMAND
 		case POS_STANDING:
 		case POS_SITTING:
 		case POS_RESTING:
-			if( ch->SittingOn() != NULL )
+			if( ch->SittingOn() != nullptr )
 			{
 				ch->send("You cannot go to sleep while sitting on %s.\r\n", ch->SittingOn()->GetSDesc());
 				return;
 			}
 			ch->send("You go to sleep.\r\n");
-			Act("$n lies down and falls asleep.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
+			Act("$n lies down and falls asleep.", TRUE, ch, nullptr, nullptr, TO_ROOM, nullptr, true);
 			GET_POS(ch) = POS_SLEEPING;
 			break;
 		case POS_SLEEPING:
@@ -1571,8 +1571,8 @@ CommandHandler do_sleep = DEFINE_COMMAND
 			break;
 
 		default:
-			Act("You stop floating around, and lie down to sleep.", FALSE, ch, 0, 0, TO_CHAR);
-			Act("$n stops floating around, and lie down to sleep.", TRUE, ch, 0, 0, TO_ROOM, NULL, true);
+			Act("You stop floating around, and lie down to sleep.", FALSE, ch, nullptr, nullptr, TO_CHAR);
+			Act("$n stops floating around, and lie down to sleep.", TRUE, ch, nullptr, nullptr, TO_ROOM, nullptr, true);
 			GET_POS(ch) = POS_SLEEPING;
 			break;
 	}
@@ -1589,7 +1589,7 @@ CommandHandler do_wake = DEFINE_COMMAND
 	{
 		if (GET_POS(ch) == POS_SLEEPING)
 			ch->send("Maybe you should wake yourself up first.\r\n");
-		else if ((vict = get_char_room_vis(ch, ::arg)) == NULL)
+		else if ((vict = get_char_room_vis(ch, ::arg)) == nullptr)
 			ch->send(NOPERSON);
 		else if (vict == ch)
 			self = 1;
@@ -1602,7 +1602,7 @@ CommandHandler do_wake = DEFINE_COMMAND
 		else
 		{
 			Act("You wake $M up.", FALSE, ch, 0, vict, TO_CHAR);
-			Act("You are awakened by $n.", FALSE, ch, 0, vict, TO_VICT | TO_SLEEP, NULL, true);
+			Act("You are awakened by $n.", FALSE, ch, 0, vict, TO_VICT | TO_SLEEP, nullptr, true);
 			Act("$N wakes you up.", FALSE, vict, 0, ch, TO_CHAR);
 			GET_POS(vict) = POS_SITTING;
 		}
@@ -1681,7 +1681,7 @@ CommandHandler do_knock = DEFINE_COMMAND
 	}
 
 	Room *OtherRoom;
-	if( (OtherRoom = dir->getToRoom()) != NULL )
+	if( (OtherRoom = dir->getToRoom()) != nullptr )
 	{//Notify everyone on the other end of the door that it was knocked on.
 		int iRevDir = rev_dir[iDir];
 		Exit *revDir = OtherRoom->dir_option[iRevDir];
@@ -1878,9 +1878,9 @@ void add_follower(Character * ch, Character * leader)
 
 void Character::stopFollowing()
 {
-	struct Follower *j = 0, *k = 0;
+	Follower *j = nullptr, *k = nullptr;
 
-	if (this->master == NULL)
+	if (this->master == nullptr)
 	{
 		core_dump();
 		return;
@@ -1910,7 +1910,7 @@ void Character::stopFollowing()
 		delete (j);
 	}
 
-	this->master = NULL;
+	this->master = nullptr;
 	REMOVE_BIT_AR(AFF_FLAGS(this), AFF_GROUP);
 }
 

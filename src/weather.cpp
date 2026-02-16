@@ -68,7 +68,7 @@ void weather_and_time(int mode)
 {
 	another_hour(mode);
 	Zone *zone;
-//	for (int i = 0 ;(zone=ZoneManager::GetManager().GetZoneByRnum(i)) != NULL; ++i )
+//	for (int i = 0 ;(zone=ZoneManager::GetManager().GetZoneByRnum(i)) != nullptr; ++i )
 //	{
 //		if( zone->weather ) zone->weather->change();
 //	}
@@ -116,7 +116,7 @@ void another_hour(int mode)
 				{
 					if( ch->IsPurged() ) continue;
 					Zone *zone = ch->in_room->getZone();
-					if( (zone) == NULL )
+					if( (zone) == nullptr )
 					{
 						MudLog(CMP, TRUE, LVL_GOD, "%s has an invalid zone!", GET_NAME(ch));
 					}
@@ -137,7 +137,7 @@ void another_hour(int mode)
 			case 20:
 			{
 				Zone *zone;
-				for (int i = 0 ;(zone = ZoneManager::GetManager().GetZoneByRnum(i)) != NULL; ++i )
+				for (int i = 0 ;(zone = ZoneManager::GetManager().GetZoneByRnum(i)) != nullptr; ++i )
 				{
 					Weather::setSun(SUN_DARK);
 					sendToOutdoor(zone->getVnum(), "The night has begun.\r\n");

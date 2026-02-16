@@ -87,7 +87,7 @@ void AddRoomToWorld( Room *TheRoom )
 	}
 
 	Zone *zone;
-	for (i = 0;(zone = ZoneManager::GetManager().GetZoneByRnum(i)) != NULL;++i)
+	for (i = 0;(zone = ZoneManager::GetManager().GetZoneByRnum(i)) != nullptr;++i)
 	{
 		for (cmd_no = 0;cmd_no < zone->cmd.size(); ++cmd_no)
 		{
@@ -139,7 +139,7 @@ int buildwalk(Character *ch, int dir)
 			{
 				MudLog(BRF, LVL_IMMORT, TRUE, "SYSERR: buildwalk(): Player already had olc structure.");
 				cleanup_olc(d, CLEANUP_ALL);
-				d->olc = NULL;
+				d->olc = nullptr;
 			}
 
 			d->olc = new OLC();
@@ -220,7 +220,7 @@ void redit_save_internally(Descriptor *d)
 
 	//Change a few variables from their standard copy values.
 	new_room->setVnum(OLC_NUM(d));
-	new_room->func = NULL;
+	new_room->func = nullptr;
 
 	//EXISTING ROOM
 	if (room_num > 0)
@@ -262,7 +262,7 @@ void redit_save_internally(Descriptor *d)
 		World.erase(old_room);
 
 		V_InsertAfter(World, new_room, room_num - 1);
-		Conf->RenumberRooms();
+		Conf->renumberRooms();
 
 		for(i = 0;i < World.size();++i)
 		{
@@ -440,7 +440,7 @@ void redit_save_to_disk(int zone_num)
 	Room *room;
 	Zone *zone = ZoneManager::GetManager().GetZoneByRnum(zone_num);
 
-	if( zone == NULL )
+	if( zone == nullptr )
 	{
 		Log("SYSERR: redit_save_to_disk: Invalid real zone passed!");
 		return;
@@ -601,7 +601,7 @@ void redit_disp_menu(Descriptor *d)
 	sprintbit(room->room_flags, (const char**)room_bits, buf1);
 
 	if( d->olc->room->getAuctionVnum() != -1
-	&& (a = AuctionManager::GetManager().GetAuction(d->olc->room->getAuctionVnum())) != NULL )
+	&& (a = AuctionManager::GetManager().GetAuction(d->olc->room->getAuctionVnum())) != nullptr )
 		sprintf(aBuffer, "%s%s%s [ %s%d%s ]", cyn, a->getName().c_str(), nrm, cyn, a->getVnum(), nrm);
 	else
 		sprintf(aBuffer, "%s< NONE >%s", cyn, nrm);
@@ -726,7 +726,7 @@ void redit_parse(Descriptor *d, char *arg)
 #endif
 
 					d->send("Enter room description: (/s saves /h for help)\r\n\r\n");
-					d->backstr = NULL;
+					d->backstr = nullptr;
 					if (OLC_ROOM(d)->description)
 					{
 						d->send(OLC_ROOM(d)->description);
@@ -853,7 +853,7 @@ void redit_parse(Descriptor *d, char *arg)
 
 		case REDIT_SECTOR:
 			number = atoi(arg);
-			if (RoomSector::getEnumByValue(number) == NULL)
+			if (RoomSector::getEnumByValue(number) == nullptr)
 			{
 				d->send("Invalid choice!");
 				redit_disp_sector_menu(d);
@@ -875,7 +875,7 @@ void redit_parse(Descriptor *d, char *arg)
 				{
 					OLC_MODE(d) = REDIT_EXIT_DESCRIPTION;
 					d->sendRaw("Enter exit description: (/s saves /h for help)\r\n\r\n");
-					d->backstr = NULL;
+					d->backstr = nullptr;
 					if (OLC_EXIT(d)->getGeneralDescription())
 					{
 						d->sendRaw(OLC_EXIT(d)->getGeneralDescription());
@@ -908,7 +908,7 @@ void redit_parse(Descriptor *d, char *arg)
 				case '8':
 					 //Delete an exit.
 					delete OLC_EXIT(d);
-					OLC_EXIT(d) = NULL;
+					OLC_EXIT(d) = nullptr;
 					break;
 				default:
 					d->send("Try again : ");
@@ -932,7 +932,7 @@ void redit_parse(Descriptor *d, char *arg)
 			MudLog(BRF, LVL_BUILDER, TRUE, "SYSERR: Reached REDIT_EXIT_DESC case in parse_redit");
 			break;
 		case REDIT_EXIT_KEYWORD:
-			OLC_EXIT(d)->setKeywords(arg && *arg ? arg : NULL);
+			OLC_EXIT(d)->setKeywords(arg && *arg ? arg : nullptr);
 			redit_disp_exit_menu(d);
 			return;
 		case REDIT_EXIT_KEY:
@@ -992,14 +992,14 @@ void redit_parse(Descriptor *d, char *arg)
 			}
 			return;
 		case REDIT_AUCTION_VNUM:
-			if ((AuctionManager::GetManager().GetAuction(atoi(arg))) != NULL)
+			if ((AuctionManager::GetManager().GetAuction(atoi(arg))) != nullptr)
 				d->olc->room->setAuctionVnum(atoi(arg));
 			else
 				d->olc->room->setAuctionVnum(-1);
 			redit_disp_menu(d);
 			break;
 		case REDIT_EXTRADESC_KEY:
-			OLC_DESC(d)->keyword = ((arg && *arg) ? str_dup(arg) : NULL);
+			OLC_DESC(d)->keyword = ((arg && *arg) ? str_dup(arg) : nullptr);
 			redit_disp_extradesc_menu(d);
 			return;
 		case REDIT_EXTRADESC_MENU:
@@ -1022,7 +1022,7 @@ void redit_parse(Descriptor *d, char *arg)
 							{
 								if (*tmp_desc == OLC_DESC(d))
 								{
-									*tmp_desc = NULL;
+									*tmp_desc = nullptr;
 									break;
 								}
 							}
@@ -1037,7 +1037,7 @@ void redit_parse(Descriptor *d, char *arg)
 				case 2:
 					OLC_MODE(d) = REDIT_EXTRADESC_DESCRIPTION;
 					d->send("Enter extra description: (/s saves /h for help)\r\n\r\n");
-					d->backstr = NULL;
+					d->backstr = nullptr;
 					if (OLC_DESC(d)->description)
 					{
 						d->sendRaw(OLC_DESC(d)->description);

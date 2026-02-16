@@ -216,7 +216,7 @@ JSManager::JSManager()
 		if(monitorRepository)
 		{
 			this->monitorSubversionThreadRunning = true;
-			monitorSubversionThread = new std::thread(&JSManager::monitorSubversion, this, dbContext->createConnection(), game->getScriptPullCommand());
+			monitorSubversionThread = new std::thread(&JSManager::monitorSubversion, this, game->getScriptPullCommand());
 		}
 	}
 	catch(sql::QueryException &queryException)
@@ -338,8 +338,9 @@ void printSubversionInfoMap(const std::map<std::string, std::string> &subversion
 	}
 }
 
-void JSManager::monitorSubversion(sql::Connection connection, const std::string &scriptPullCommand)
+void JSManager::monitorSubversion(const std::string &scriptPullCommand)
 {
+	sql::Connection connection = dbContext->createConnection();
 	while(monitorSubversionThreadRunning)
 	{
 		try
@@ -841,7 +842,7 @@ Script *JSManager::getScript(int scriptId)
 {
 	auto iter = this->scriptMap.find(scriptId);
 	
-	return iter == scriptMap.end() ? NULL : this->scriptMap[scriptId];
+	return iter == scriptMap.end() ? nullptr : this->scriptMap[scriptId];
 }
 
 void JSManager::addScriptEvent(ScriptEvent *scriptEvent)
@@ -935,7 +936,7 @@ Script *JSManager::getScriptByMethodName(const std::string &methodName, bool cas
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void JSManager::putScript(sql::Connection connection, Script *script)
@@ -1011,26 +1012,26 @@ void JSManager::deleteScriptFromDatabase(sql::Connection connection, int scriptI
 const char *JSManager::getFunctionFilename(const std::string &functionName)
 {
 	if(!flusspferd::global().has_property(functionName) || !flusspferd::global().get_property(functionName).is_function())
-		return NULL;
+		return nullptr;
 
 	JSContext *context = flusspferd::Impl::get_context(flusspferd::current_context());
 
-	if(context == NULL)
-		return NULL;
+	if(context == nullptr)
+		return nullptr;
 
 	JS::RootedObject globalObject(context, flusspferd::global().get_object_ptr());
 	JS::RootedValue methodValue(context);
 	if (!JS_GetProperty(context, globalObject, functionName.c_str(), &methodValue))
-		return NULL;
+		return nullptr;
 	JSFunction *function = JS_ValueToFunction(context, methodValue);
 	
-	if(function == NULL)
-		return NULL;
+	if(function == nullptr)
+		return nullptr;
 
 	JS::RootedFunction rfunc(context, function);
 	JSScript *jsScript = JS_GetFunctionScript(context, rfunc);
-	if(jsScript == NULL)
-		return NULL;
+	if(jsScript == nullptr)
+		return nullptr;
 
 	return JS_GetScriptFilename(jsScript);
 }

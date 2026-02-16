@@ -126,7 +126,7 @@ const char *str_str(const char *cs, const char *ct)
 	const char *s, *t;
 
 	if (!cs || !ct)
-		return NULL;
+		return nullptr;
 
 	while (*cs)
 	{
@@ -147,7 +147,7 @@ const char *str_str(const char *cs, const char *ct)
 			return s;
 	}
 
-	return NULL;
+	return nullptr;
 }
 int is_substring(const char *sub, const char *str)
 {
@@ -1493,7 +1493,7 @@ flusspferd::string JS_getUserNameByUserId(int userId)
 {
 	PlayerIndex *playerIndex = CharacterUtil::getPlayerIndexByUserId(userId);
 
-	if(playerIndex == NULL)
+	if(playerIndex == nullptr)
 		return "";
 	return playerIndex->name;
 }
@@ -1502,7 +1502,7 @@ flusspferd::value JS_getUserIdByUserName(flusspferd::string userName)
 {
 	PlayerIndex *playerIndex = CharacterUtil::getPlayerIndexByUserName(userName.to_string());
 
-	if(playerIndex == NULL)
+	if(playerIndex == nullptr)
 		return flusspferd::object();
 	return flusspferd::value(playerIndex->id);
 }

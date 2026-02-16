@@ -9,7 +9,7 @@
 #include "StringUtil.h"
 #include "rooms/Room.h"
 
-PokerTable *PokerTableList = NULL;
+PokerTable *PokerTableList = nullptr;
 
 //#define POKER_DEBUG
 
@@ -281,7 +281,7 @@ void PokerTable::AddWatcher( Character *ch )
 void PokerTable::RemoveWatcher( Character *ch )
 {
 	this->Watchers.remove(ch);
-	ch->PokerTable = NULL;
+	ch->PokerTable = nullptr;
 }
 bool PokerTable::IsWatching( Character *ch )
 {
@@ -702,7 +702,7 @@ void PokerTable::PrintBoard( Character *ch, const int wait_time )
 
 	sprintf( Buffer + strlen( Buffer ), "\r\n");
 
-	if( ch != NULL )
+	if( ch != nullptr )
 		ch->send( Buffer );
 	else
 		SendToTable( Buffer );

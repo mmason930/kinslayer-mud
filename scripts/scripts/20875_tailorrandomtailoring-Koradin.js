@@ -40,7 +40,6 @@ var script20875 = function(self, actor, here, args, extra) {
 			var end_mat = aMat;
 	}
 	var cond = getCondition(self,type);
-	mudLog(constants.NRM, 102, "COND: " + cond);
 	var vnumAdd = cond[3];
 	if (type == "combo")
 		var attArg = random(1,2);

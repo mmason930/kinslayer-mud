@@ -25,8 +25,8 @@ extern std::string subroutine;
 ThreadedLogFile *mudLog;
 
 /* local functions */
-struct GameTime *real_time_passed(time_t t2, time_t t1);
-struct GameTime *mud_time_passed(time_t t2, time_t t1);
+GameTime *real_time_passed(time_t t2, time_t t1);
+GameTime *mud_time_passed(time_t t2, time_t t1);
 
 #ifndef WIN32
 std::string Execute( const char *command )
@@ -66,7 +66,7 @@ __int64 AvailableSystemMemory()
 {
 	char buffer[1024];
 	FILE *processPipe = popen("/usr/bin/free", "r");
-	if(processPipe == NULL)
+	if(processPipe == nullptr)
 	{
 		return -1;
 	}
@@ -76,7 +76,7 @@ __int64 AvailableSystemMemory()
 	{
 		char *returnValue = fgets(buffer, 1023, processPipe);
 
-		if(returnValue == NULL)
+		if(returnValue == nullptr)
 		{
 			Log("SYSERROR: AvailableSystemMemory() : Error while reading from pipe.");
 			return 0;
@@ -420,25 +420,24 @@ std::string ParamValue( const std::string &Buffer, const std::string &Param ) {
 	return (std::string(""));
 }
 
-std::string eatwhite( std::string str )
+std::string eatwhite(const std::string &str)
 {
-	std::string::size_type i;
-	while( (i = str.find(" ")) != std::string::npos )
-		str.erase(i,i+1);
-	return str;
+	auto start = str.find_first_not_of(' ');
+	if (start == std::string::npos)
+		return "";
+	return str.substr(start);
 }
 
 /* Create a duplicate of a string using C++ array alloation(use strdup() for C) */
 char *str_dup(const char *source)
 {
-	char *new_z;
+	if (!source)
+		return nullptr;
 
-	if(!source)
-		return NULL;
-
-	new_z = new char[strlen(source) + 1];
-
-	return (strcpy(new_z, source));
+	size_t len = strlen(source) + 1;
+	char *new_z = new char[len];
+	memcpy(new_z, source, len);
+	return new_z;
 }
 
 /* Return a string with 'n' counts of 'ch' */
@@ -827,7 +826,7 @@ int get_line(FILE * fl, char *buf)
 		++lines;
 		char *returnValue = fgets(temp, 256, fl);
 
-		if(returnValue == NULL)
+		if(returnValue == nullptr)
 		{
 			Log("SYSERR: get_line(): Error while reading file.");
 			return 0;
@@ -922,7 +921,7 @@ void format_text(char **ptr_string, int mode, Descriptor *d, int maxlen)
 {
 
 	int total_chars, cap_next = TRUE, cap_next_next = FALSE;
-	char *flow, *start = NULL, temp;
+	char *flow, *start = nullptr, temp;
 	/* warning: do not edit messages with max_str's of over this value */
 	char formated[MAX_STRING_LENGTH];
 

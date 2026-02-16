@@ -368,8 +368,8 @@ void Character::Dismount()
 {
 	if(MOUNT(this))
 	{
-		RIDDEN_BY(MOUNT(this)) = NULL;
-		MOUNT(this) = NULL;
+		RIDDEN_BY(MOUNT(this)) = nullptr;
+		MOUNT(this) = nullptr;
 	}
 }
 
@@ -639,7 +639,7 @@ struct affect_type_not_saved *find_affection(Character *target, struct affected_
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 /**********Non Saving Affection List**********/
@@ -720,7 +720,7 @@ void affect_remove(Character * ch, struct affected_type * af)
 	affect_modify(ch, af->location, af->modifier, af->bitvector, FALSE);
 	REMOVE_FROM_LIST(af, ch->affected, next);
 	delete(af);
-	af = NULL;
+	af = nullptr;
 	affect_total(ch);
 }
 
@@ -808,7 +808,7 @@ Character *Object::FindHolder()
 	}
 
 	// Serai - 03/27/05 - and somehow if nothing is found?  lets try returning NULL..
-	return (NULL);
+	return nullptr;
 }
 
 void Character::StepThroughGate( class Gate *g )
@@ -869,10 +869,10 @@ void Character::RemoveFromRoom()
 
 	if (FIGHTING(this))
 		this->StopFighting();
-	if( this->player.sitting_on != NULL )
+	if( this->player.sitting_on != nullptr )
 	{
-		player.sitting_on->SatOnBy = NULL;
-		player.sitting_on = NULL;
+		player.sitting_on->SatOnBy = nullptr;
+		player.sitting_on = nullptr;
 	}
 
 	for(temp = this->in_room->people;temp;temp = temp->next_in_room)
@@ -887,8 +887,8 @@ void Character::RemoveFromRoom()
 				in_room->setLight(in_room->getLight() - 1);
 
 	REMOVE_FROM_LIST(this, this->in_room->people, next_in_room);
-	in_room = 0;
-	next_in_room = NULL;
+	in_room = nullptr;
+	next_in_room = nullptr;
 }
 
 void Character::MoveToRoom(int rnum)
@@ -924,10 +924,10 @@ void Character::MoveToRoom(Room *room)
 	}
 
 	//We're checking to see if this character is shielded. If so, check how far from the caster they are.
-	if( (v = ShieldManager::GetManager().ShieldedBy( this )) != NULL && v->ShieldOutOfRange( this ) )
+	if( (v = ShieldManager::GetManager().ShieldedBy( this )) != nullptr && v->ShieldOutOfRange( this ) )
 		ShieldManager::GetManager().RemoveShield( v, this );
 	//Do the same as above, except checking to see if the caster moved out of range of the target.
-	if( (v = ShieldManager::GetManager().IsShielding( this )) != NULL && this->ShieldOutOfRange( v ) )
+	if( (v = ShieldManager::GetManager().IsShielding( this )) != nullptr && this->ShieldOutOfRange( v ) )
 	{
 		ShieldManager::GetManager().RemoveShield( this, v );
 	}
@@ -982,7 +982,7 @@ void obj_from_char(Object *object)
 {
 	Object *temp;
 
-	if (object == NULL)
+	if (object == nullptr)
 	{
 		Log("SYSERR: NULL object passed to obj_from_char.");
 		return;
@@ -999,13 +999,13 @@ void obj_from_char(Object *object)
 		SET_BITK(PLR_FLAGS(object->carried_by), Q_BIT(PLR_CRASH));
 
 	--IS_CARRYING_N(object->carried_by);
-	object->carried_by = NULL;
-	object->next_content = NULL;
+	object->carried_by = nullptr;
+	object->next_content = nullptr;
 }
 
 bool Character::HasObjectInInventory(int vnum)
 {
-	return GetObjectFromInventory(vnum) != NULL;
+	return GetObjectFromInventory(vnum) != nullptr;
 }
 
 //Grab the first item from the character's inventory with the virtual number vnum.
@@ -1106,14 +1106,14 @@ Object *unequip_char(Character * ch, int pos)
 	int j;
 	Object *obj;
 
-	if ((pos < 0 || pos >= NUM_WEARS) || GET_EQ(ch, pos) == NULL)
+	if ((pos < 0 || pos >= NUM_WEARS) || GET_EQ(ch, pos) == nullptr)
 	{
 		core_dump();
-		return NULL;
+		return nullptr;
 	}
 
 	obj = GET_EQ(ch, pos);
-	obj->worn_by = NULL;
+	obj->worn_by = nullptr;
 	obj->worn_on = -1;
 
 	objectMoveLogger.logObjectMove(obj->objID, std::string("Removed equip from ") + ch->getUserType()->getStandardName() + std::string(" ") + ToString(ch->getUserId()));
@@ -1127,18 +1127,18 @@ Object *unequip_char(Character * ch, int pos)
 		}
 	}
 
-	GET_EQ(ch, pos) = NULL;
+	GET_EQ(ch, pos) = nullptr;
 
 	for (j = 0; j < MAX_OBJ_AFFECT; ++j)
 	{
 		affect_modify_ar(ch, obj->affected[j].location, obj->affected[j].modifier,
-		                 (int *) obj->obj_flags.bitvector, FALSE);
+		                 (int *) obj->obj_flags.bitvector, false);
 	}
 
 	if ( ch->isInClan( GET_OBJ_CLAN( obj ) ) )
 	{
-		affect_modify_ar(ch, APPLY_MOVE, GET_OBJ_CL_MVS(obj), (int *) obj->obj_flags.bitvector, FALSE);
-		affect_modify_ar(ch, APPLY_HIT, GET_OBJ_CL_HPS(obj), (int *) obj->obj_flags.bitvector, FALSE);
+		affect_modify_ar(ch, APPLY_MOVE, GET_OBJ_CL_MVS(obj), (int *) obj->obj_flags.bitvector, false);
+		affect_modify_ar(ch, APPLY_HIT, GET_OBJ_CL_HPS(obj), (int *) obj->obj_flags.bitvector, false);
 	}
 
 	affect_total(ch);
@@ -1210,7 +1210,7 @@ Character *get_char_room(const char *name, room_rnum room)
 
 	strcpy(tmp, name);
 	if (!(number = GetNumber(&tmp)))
-		return NULL;
+		return nullptr;
 
 	for (i = World[room]->people; i && (j <= number); i = i->next_in_room)
 	{
@@ -1218,7 +1218,7 @@ Character *get_char_room(const char *name, room_rnum room)
 			return i;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -1235,7 +1235,7 @@ Character *get_char_num(mob_rnum nr)
 			return i;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -1299,10 +1299,10 @@ void Object::RemoveFromRoom(bool vaultSave)
 		Log("SYSERR: Object with invalid room passed to Object::RemoveFromRoom.");
 		return;
 	}
-	if( SatOnBy != NULL )
+	if( SatOnBy != nullptr )
 	{
-		SatOnBy->player.sitting_on = NULL;
-		SatOnBy = NULL;
+		SatOnBy->player.sitting_on = nullptr;
+		SatOnBy = nullptr;
 	}
 
 	REMOVE_FROM_LIST(this, r->contents, next_content);
@@ -1315,8 +1315,8 @@ void Object::RemoveFromRoom(bool vaultSave)
 
 	objectMoveLogger.logObjectMove(this->objID, std::string("Removed from room #") + ToString(this->item_number));
 
-	this->in_room = 0;
-	this->next_content = NULL;
+	this->in_room = nullptr;
+	this->next_content = nullptr;
 }
 
 /* put an object in an object (quaint)  */
@@ -1342,7 +1342,7 @@ void obj_from_obj(Object * obj)
 {
 	Object *temp, *obj_from;
 
-	if (obj->in_obj == NULL)
+	if (obj->in_obj == nullptr)
 	{
 		Log("SYSERR: (%s): trying to illegally extract obj from obj.", __FILE__);
 		return;
@@ -1353,8 +1353,8 @@ void obj_from_obj(Object * obj)
 	obj_from = obj->in_obj;
 	REMOVE_FROM_LIST(obj, obj_from->contains, next_content);
 
-	obj->in_obj = NULL;
-	obj->next_content = NULL;
+	obj->in_obj = nullptr;
+	obj->next_content = nullptr;
 }
 
 // Extract an object from the world. If lowerItemCount is set to true, then
@@ -1400,7 +1400,7 @@ void update_char_objects(Character * ch)
 {
 	int i;
 
-	if (GET_EQ(ch, WEAR_LIGHT) != NULL)
+	if (GET_EQ(ch, WEAR_LIGHT) != nullptr)
 		if (GET_EQ(ch, WEAR_LIGHT)->getType() == ITEM_LIGHT)
 			if (GET_OBJ_VAL(GET_EQ(ch, WEAR_LIGHT), 2) > 0)
 			{
@@ -1408,18 +1408,18 @@ void update_char_objects(Character * ch)
 
 				if (i == 3)
 				{
-					Act("Your light begins to flicker and fade.", FALSE, ch, 0, 0, TO_CHAR);
-					Act("$n's light begins to flicker and fade.", FALSE, ch, 0, 0, TO_ROOM);
+					Act("Your light begins to flicker and fade.", FALSE, ch, nullptr, nullptr, TO_CHAR);
+					Act("$n's light begins to flicker and fade.", FALSE, ch, nullptr, nullptr, TO_ROOM);
 				}
 				if (i == 1)
 				{
-					Act("Your light is about to go out.", FALSE, ch, 0, 0, TO_CHAR);
-					Act("$n's light is about to go out.", FALSE, ch, 0, 0, TO_ROOM);
+					Act("Your light is about to go out.", FALSE, ch, nullptr, nullptr, TO_CHAR);
+					Act("$n's light is about to go out.", FALSE, ch, nullptr, nullptr, TO_ROOM);
 				}
 				else if (i == 0)
 				{
-					Act("Your light sputters out and dies.", FALSE, ch, 0, 0, TO_CHAR);
-					Act("$n's light sputters out and dies.", FALSE, ch, 0, 0, TO_ROOM);
+					Act("Your light sputters out and dies.", FALSE, ch, nullptr, nullptr, TO_CHAR);
+					Act("$n's light sputters out and dies.", FALSE, ch, nullptr, nullptr, TO_ROOM);
 					ch->in_room->setLight(ch->in_room->getLight() - 1);
 				}
 			}
@@ -1463,7 +1463,7 @@ void Character::Extract( UserLogoutType *userLogoutType, bool fullDelete, bool p
 	{
 		for (t_desc = descriptor_list; t_desc; t_desc = t_desc->next)
 			if (t_desc->original == this)
-				do_return(t_desc->character, NULL, 0, 0);
+				do_return(t_desc->character, nullptr, 0, 0);
 	}
 	Dismount();
 	RemoveSource();
@@ -1477,14 +1477,14 @@ void Character::Extract( UserLogoutType *userLogoutType, bool fullDelete, bool p
 	{
 		if(desc->snooping && desc->snooping->snoop_by)
 		{
-			desc->snooping->snoop_by = NULL;
-			desc->snooping = NULL;
+			desc->snooping->snoop_by = nullptr;
+			desc->snooping = nullptr;
 		}
 		if (desc->snoop_by)
 		{
 			desc->snoop_by->send("Your snoop target is no longer among us.\r\n");
-			desc->snoop_by->snooping = NULL;
-			desc->snoop_by = NULL;
+			desc->snoop_by->snooping = nullptr;
+			desc->snoop_by = nullptr;
 		}
 	}
 
@@ -1517,23 +1517,23 @@ void Character::Extract( UserLogoutType *userLogoutType, bool fullDelete, bool p
 	for(k = character_list;k;k = k->next)
 	{
 		if(GET_MARKED(k) == this)
-			GET_MARKED(k) = NULL;
+			GET_MARKED(k) = nullptr;
 		if(FIGHTING(k) == this)
 			k->StopFighting();
 		if(GET_TARGET(k) == this)
-			GET_TARGET(k) = NULL;
+			GET_TARGET(k) = nullptr;
 		if(GET_TARGET2(k) == this)
-			GET_TARGET2(k) = NULL;
+			GET_TARGET2(k) = nullptr;
 		if(k->SlowedBy == this)
-			k->SlowedBy = 0;
+			k->SlowedBy = nullptr;
 		if(k->DecayedBy == this)
-			k->DecayedBy = 0;
+			k->DecayedBy = nullptr;
 		if(k->BurnedBy == this)
-			k->BurnedBy = 0;
+			k->BurnedBy = nullptr;
 		if(k->PlaguedBy == this)
-			k->PlaguedBy = 0;
+			k->PlaguedBy = nullptr;
 		if(HUNTING(k) == this)
-			HUNTING(k) = 0;
+			HUNTING(k) = nullptr;
 	}
 	event_info *e, *eNext;
 	for( event_info* e = event_list; e ; e = eNext )
@@ -1558,7 +1558,7 @@ void Character::Extract( UserLogoutType *userLogoutType, bool fullDelete, bool p
 	if(!IS_NPC(this))
 		this->save();
 
-	if(!IS_NPC(this) && userLogoutType != NULL && userLogoutType != UserLogoutType::notRealLogout) {
+	if(!IS_NPC(this) && userLogoutType != nullptr && userLogoutType != UserLogoutType::notRealLogout) {
 	
 		std::stringstream sqlBuffer;
 
@@ -1586,7 +1586,7 @@ void Character::Extract( UserLogoutType *userLogoutType, bool fullDelete, bool p
 	this->purged = true;
 
 	if (this->desc && this->desc->original)
-		do_return(this, NULL, 0, 0);
+		do_return(this, nullptr, 0, 0);
 
 	if (!IS_NPC(this))
 	{
@@ -1615,7 +1615,7 @@ Character *get_player_vis(Character * ch, char *name, int inroom)
 {
 	Character *i;
 
-	if( ch->IsPurged() ) return (0);
+	if( ch->IsPurged() ) return nullptr;
 
 	for (i = character_list; i; i = i->next)
 	{
@@ -1625,7 +1625,7 @@ Character *get_player_vis(Character * ch, char *name, int inroom)
 			return i;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 Character *get_char_room_vis(Character *ch, const char *name)
@@ -1635,7 +1635,7 @@ Character *get_char_room_vis(Character *ch, const char *name)
 	char tmpname[MAX_INPUT_LENGTH];
 	char *tmp = tmpname;
 
-	if( ch->IsPurged() ) return (0);
+	if( ch->IsPurged() ) return nullptr;
 
 	if (!str_cmp(name, "self") || !str_cmp(name, "me"))
 		return (ch);
@@ -1668,7 +1668,7 @@ Character *get_char_room_vis(Character *ch, const char *name)
 				return i;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 /* Search for matching name regardless of anything else. */
@@ -1677,7 +1677,7 @@ Character *get_char_by_name(const char *name, int npc)
 	Character *i;
 
 	if(!name)
-		return NULL;
+		return nullptr;
 
 	for (i = character_list; i; i = i->next)
 	{
@@ -1685,7 +1685,7 @@ Character *get_char_by_name(const char *name, int npc)
 			return i;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 Character *get_char_vis(Character * ch, const char *name)
@@ -1698,7 +1698,7 @@ Character *get_char_vis(Character * ch, const char *name)
 	if( ch->IsPurged() ) return (0);
 
 	/* check the room first */
-	if ((i = get_char_room_vis(ch, name)) != NULL)
+	if ((i = get_char_room_vis(ch, name)) != nullptr)
 	{
 		return i;
 	}
@@ -1720,7 +1720,7 @@ Character *get_char_vis(Character * ch, const char *name)
 			}
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 /* Generic Find, designed to find any object/character                    */
@@ -1748,8 +1748,8 @@ int generic_find(char *arg, int bitvector, Character * ch,
 	if (!*name)
 		return (0);
 
-	*tar_ch = NULL;
-	*tar_obj = NULL;
+	*tar_ch = nullptr;
+	*tar_obj = nullptr;
 
 	if (IS_SET(bitvector, FIND_CHAR_ROOM))
 	{	/* Find person in room */
@@ -1817,14 +1817,13 @@ int find_all_dots(char *arg)
 	if (!strcmp(arg, "all"))
 		return FIND_ALL;
 
-	else if (!strncmp(arg, "all.", 4))
+	if (!strncmp(arg, "all.", 4))
 	{
 		strcpy(arg, std::string(arg + 4).c_str());
 		return FIND_ALLDOT;
 	}
 
-	else
-		return FIND_INDIV;
+	return FIND_INDIV;
 }
 
 /***********************************************************

@@ -302,7 +302,7 @@ void JSEnvironment::timeout()
 
 JSContext * JSEnvironment::raw_context() const
 {
-	static JSContext *c = NULL;
+	static JSContext *c = nullptr;
 	if( current_context().is_valid() == true ) {
 		c = Impl::get_context(current_context());
 	}
@@ -316,7 +316,7 @@ void removeTimeoutHandler()
 	struct sigaction sa;
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = SIG_IGN;
-	sigaction(SIGALRM, &sa, NULL);
+	sigaction(SIGALRM, &sa, nullptr);
 #endif
 }
 
@@ -352,7 +352,7 @@ void setupTimeout( bool setScriptEndingTime )
 	struct sigaction sa;
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = &timeout_handler;
-	sigaction(SIGALRM, &sa, NULL);
+	sigaction(SIGALRM, &sa, nullptr);
 	ualarm(MICROSECONDS_TILL_INJECTION, 0);
     timeval tt;
     gettimeofday(&tt, (struct timezone*)0);
@@ -898,7 +898,7 @@ bool JSEnvironment::compile(const std::string &fileName, const std::string &scri
 	}
 
 	Log("SCRIPT: %p", script);
-    if (script == NULL)
+    if (script == nullptr)
     {
         return false;
     }
@@ -907,7 +907,7 @@ bool JSEnvironment::compile(const std::string &fileName, const std::string &scri
     
 	Log("SCRIPT OBJ: %p", scriptObj);
 
-	if (scriptObj == NULL) {
+	if (scriptObj == nullptr) {
         JS_DestroyScript(raw_context(), script);
         return false;
     }
@@ -965,14 +965,14 @@ bool JSEnvironment::compile(JSTrigger * trig)
 //	cout << temp << endl;
     
     script = JS_CompileScript(raw_context(), JS_GetGlobalObject(raw_context()), temp.c_str(), temp.size(), trig->js_name.c_str(), 1);
-    if (script == NULL)
+    if (script == nullptr)
     {
         trig->valid = false;
         return false;
     }
 
     scriptObj = JS_NewScriptObject(raw_context(), script);
-    if (scriptObj == NULL) {
+    if (scriptObj == nullptr) {
         JS_DestroyScript(raw_context(), script);
         trig->valid = false;
         return false;

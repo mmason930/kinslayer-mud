@@ -17,6 +17,11 @@
 #include "RoomSector.h"
 #include "Exit.h"
 
+std::future<Room::VectorRowResult> Room::roomQueryFuture;
+std::future<Room::UnorderedMapRowResult> Room::exitQueryFuture;
+std::future<Room::UnorderedMapRowResult> Room::jsFuture;
+std::future<sql::Query> Room::objectsFuture;
+
 //Returns the number of lines in the room's description.
 int Room::getLinesInDescription()
 {
@@ -402,61 +407,16 @@ Room::~Room()
 		delete this->PTable;
 }
 
-void Room::bootWorld(
-	std::unordered_map<Room *, std::unordered_map<int, int>> &roomToExitToVnumMap
-)
+void Room::preBootWorld()
 {
-	class PassiveRoomQueryReleaseJob : public Job
-	{
-		sql::Query RoomQuery, ExitQuery, jsQuery;
-	public:
-		PassiveRoomQueryReleaseJob(sql::Query RoomQuery, sql::Query ExitQuery, sql::Query jsQuery)
-		{
-			this->RoomQuery = RoomQuery;
-			this->ExitQuery = ExitQuery;
-			this->jsQuery = jsQuery;
-		}
-		virtual void performRoutine()
-		{
-			this->RoomQuery.reset();
-			this->ExitQuery.reset();
-			this->jsQuery.reset();
-		}
-		virtual void performPostJobRoutine()
-		{
-			//...
-		}
-	};
+	roomQueryFuture = std::async(std::launch::async, [&] {
 
-	struct UnorderedMapRowResult
-	{
-		sql::Query query;
-		std::unordered_map<int, std::vector<sql::Row>> roomVnumToRowsMap;
-	};
+		std::stringstream roomQueryBuffer;
 
-	struct VectorRowResult
-	{
-		sql::Query query;
-		std::vector<sql::Row> rows;
-	};
+		roomQueryBuffer << " SELECT *"
+						<< " FROM rooms"
+						<< " ORDER BY vnum ASC";
 
-	std::unordered_map<boost::uuids::uuid, ObjectLoad> objectIdToObjectLoadMap;
-
-	Clock roomLoopClock;
-	Clock dbClock;
-	Clock secondLoopClock;
-	dbClock.turnOn();
-	std::stringstream roomQueryBuffer, exitQueryBuffer;
-
-	roomQueryBuffer << " SELECT *"
-		<< " FROM rooms"
-		<< " ORDER BY vnum ASC";
-
-	exitQueryBuffer << " SELECT *"
-		<< " FROM roomExit"
-		<< " ORDER BY room_vnum ASC";
-
-	auto roomQueryFuture = std::async(std::launch::async, [&] {
 		sql::Connection connection = dbContext->createConnection();
 		sql::Query query = connection->sendQuery(roomQueryBuffer.str());
 		std::vector<sql::Row> roomRows(query->numRows());
@@ -471,7 +431,14 @@ void Room::bootWorld(
 
 		return VectorRowResult { query, roomRows };
 	});
-	auto exitQueryFuture = std::async(std::launch::async, [&] {
+	exitQueryFuture = std::async(std::launch::async, [&] {
+
+		std::stringstream exitQueryBuffer;
+
+		exitQueryBuffer << " SELECT *"
+						<< " FROM roomExit"
+						<< " ORDER BY room_vnum ASC";
+
 		sql::Connection connection = dbContext->createConnection();
 		sql::Query query = connection->sendQuery(exitQueryBuffer.str());
 		std::unordered_map<int, std::vector<sql::Row>> roomVnumToExitRowsMap;
@@ -485,10 +452,14 @@ void Room::bootWorld(
 
 		return UnorderedMapRowResult { query, roomVnumToExitRowsMap };
 	});
-	auto objectsFuture = std::async(std::launch::async, [&] {
-		return Object::loadItemsByTopLevelHolder('R');
+	objectsFuture = std::async(std::launch::async, [&] {
+		sql::Connection connection = dbContext->createConnection();
+		return Object::loadItemsByTopLevelHolderQuery(connection, 'R');
 	});
-	auto jsFuture = std::async(std::launch::async, [&] {
+	jsFuture = std::async(std::launch::async, [&] {
+
+		std::stringstream jsBuffer;
+
 		sql::Connection connection = dbContext->createConnection();
 
 		sql::Query query = connection->sendQuery("SELECT * FROM js_attachments WHERE type='R' ORDER BY target_vnum ASC,id ASC;");
@@ -503,25 +474,48 @@ void Room::bootWorld(
 
 		return UnorderedMapRowResult { query, romVnumToJsRowsMap };
 	});
+}
 
-	auto roomRows              = roomQueryFuture.get();
-	auto roomVnumToExitsMap              = exitQueryFuture.get();
-	objectIdToObjectLoadMap = objectsFuture.get();
-	auto roomVnumToJsRowsMap                = jsFuture.get();
+Clock readObjectClock, realObjectClock, specialLoadClock;
+
+void Room::bootWorld(
+	std::unordered_map<Room *, std::unordered_map<int, int>> &roomToExitToVnumMap
+)
+{
+
+	Clock roomLoopClock;
+	Clock dbClock;
+	Clock secondLoopClock;
+	readObjectClock.reset(false);
+	realObjectClock.reset(false);
+	specialLoadClock.reset(false);
+	dbClock.turnOn();
+
+	auto roomRows = roomQueryFuture.get();
+	auto roomVnumToExitsMap = exitQueryFuture.get();
+	auto objectQuery = objectsFuture.get();
+	auto roomVnumToJsRowsMap = jsFuture.get();
 
 	World.reserve(roomRows.query->numRows());
 
 	dbClock.turnOff();
+
+	Clock objectLoadClock;
+	objectLoadClock.turnOn();
+	// Load the objects from the query result
+	auto objectIdToObjectLoadMap = Object::loadItemMapFromQuery(objectQuery);
+	objectLoadClock.turnOff();
+
 
 	std::unordered_map<std::string, Room *> holderIdToRoomMap;
 
 	roomLoopClock.turnOn();
 	const std::vector<sql::Row> emptyRowVector;
 	Clock roomBootClock, roomLoopTopClock, exitPushCLock, jsPushClock, roomPushClock;
-	for (sql::Row roomRow: roomRows.rows)
+	for (const sql::Row& roomRow: roomRows.rows)
 	{
 		roomLoopTopClock.turnOn();
-		int roomVnum = roomRow.getInt("room_vnum");
+		int roomVnum = atoi(roomRow.getString("room_vnum").c_str());
 		roomLoopTopClock.turnOff();
 
 		exitPushCLock.turnOn();
@@ -566,6 +560,10 @@ void Room::bootWorld(
 	secondLoopClock.turnOff();
 
 	Log("DB Time: %f", dbClock.getSeconds());
+	Log("objectLoadClock: %f", objectLoadClock.getSeconds());
+	Log("readObjectClock: %f", readObjectClock.getSeconds());
+	Log("realObjectClock: %f", realObjectClock.getSeconds());
+	Log("specialLoadClock: %f", specialLoadClock.getSeconds());
 	Log("Second Loop Time: %f", secondLoopClock.getSeconds());
 
 	Log("roomLoopClock: %f", roomLoopClock.getSeconds());
@@ -575,18 +573,7 @@ void Room::bootWorld(
 	Log("jsPushClock: %f", jsPushClock.getSeconds());
 	Log("roomPushClock: %f", roomPushClock.getSeconds());
 
-
-	/***
-	Job *cleanupJob = new PassiveRoomQueryReleaseJob(RoomQuery, ExitQuery, jsQuery);
-
-	//Drop use count down to 1.
-	RoomQuery.reset();
-	ExitQuery.reset();
-	jsQuery.reset();
-
-	//And deploy the thread...
-	ThreadedJobManager::get().addJob(cleanupJob);
-	***/
+	//exit(0);
 }
 
 Room *Room::boot(const sql::Row &roomRow,

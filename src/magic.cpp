@@ -42,7 +42,7 @@ int PerformPeriodicEffects(Character *ch, affected_type *af);
 
 /* local functions */
 int mag_savingthrow(Character *ch, int type);
-void affect_update(void);
+void affect_update();
 
 /*
  * Saving throws are now in class.c (bpl13)
@@ -62,7 +62,7 @@ int mag_savingthrow(Character *ch, int type)
 }
 
 /* affect_update: called from comm.c (causes spells to wear off) */
-void affect_update(void)
+void affect_update()
 {
 	struct affected_type *af, *next;
 	Weave* weave;
@@ -88,7 +88,7 @@ void affect_update(void)
 			{
 				if ((!af->next || (af->next->type != af->type) || (af->next->duration > 0)))
 				{
-					if((weave = WeaveManager::GetManager().GetWeave( af->type )) != NULL)
+					if((weave = WeaveManager::GetManager().GetWeave( af->type )) != nullptr)
 					{
 						std::string WearOffMsg = weave->getAttribute("WearOffMsg");
 						if( WearOffMsg != "<None>" )
@@ -99,7 +99,7 @@ void affect_update(void)
 					else if(af->bitvector == AFF_DISORIENT)
 					{//TODO: we should have a map or something cleaner for this.
 						i->send("The world stops spinning around you as you regain your bearings.\r\n");
-						Act("$n appears to regain $s bearings.", true, i, NULL, NULL, TO_ROOM);
+						Act("$n appears to regain $s bearings.", true, i, nullptr, nullptr, TO_ROOM);
 					}
 				}
 				if(i->SlowedBy)
@@ -129,7 +129,7 @@ int mag_damage(Character *ch, Character *victim, int spellnum)
 	Object *angreal;
 	Weave *weave = WeaveManager::GetManager().GetWeave(spellnum);
 
-	if (victim == NULL || ch == NULL || weave == (NULL))
+	if (victim == nullptr || ch == nullptr || weave == (nullptr))
 		return 0;
 
 	/* Galnor 08/04/2009 - We had if statements below checking each weave by vnum, which actually is very unnnecessary.
@@ -151,7 +151,7 @@ int mag_damage(Character *ch, Character *victim, int spellnum)
 		}
 	}
 
-	if ( (angreal = GET_EQ(ch, WEAR_HOLD)) != NULL)
+	if ( (angreal = GET_EQ(ch, WEAR_HOLD)) != nullptr)
 	{
 		if (angreal->getType() == ITEM_ANGREAL && angreal->GetTotalVal2() != 0)
 		{
@@ -170,7 +170,7 @@ int mag_mana_damage(Character *ch, Character *victim, int spellnum)
 	Object *angreal;
 	Weave *weave = WeaveManager::GetManager().GetWeave(spellnum);
 
-	if (victim == NULL || ch == NULL || weave == (NULL))
+	if (victim == nullptr || ch == nullptr || weave == (nullptr))
 		return 0;
 
 	if( weave->hasAttribute("ManaDmgLow") && weave->hasAttribute("ManaDmgHigh") )
@@ -180,7 +180,7 @@ int mag_mana_damage(Character *ch, Character *victim, int spellnum)
 		dam = MiscUtil::random(low,high);
 	}
 
-	if ( (angreal = GET_EQ(ch, WEAR_HOLD)) != NULL)
+	if ( (angreal = GET_EQ(ch, WEAR_HOLD)) != nullptr)
 	{
 		if (angreal->getType() == ITEM_ANGREAL && angreal->GetTotalVal2() != 0)
 		{
@@ -217,7 +217,7 @@ void mag_affects(Character *ch, Character *victim, int spellnum)
 	bool accum_affect = FALSE, accum_duration = FALSE;
 	int i;
 
-	if (victim == NULL || ch == NULL)
+	if (victim == nullptr || ch == nullptr)
 		return;
 
 	for (i = 0; i < MAX_SPELL_AFFECTS; i++)
@@ -238,7 +238,7 @@ void mag_affects(Character *ch, Character *victim, int spellnum)
 	else if( !weave->getName().compare("Shield") )
 	{
 		if(!victim->ChannelingAbility() || WeaveManager::GetManager().SavingRoll(ch, victim) ||
-			(AFF_FLAGGED(victim, AFF_SHIELD) || ShieldManager::GetManager().ShieldedBy(victim) != NULL) )
+			(AFF_FLAGGED(victim, AFF_SHIELD) || ShieldManager::GetManager().ShieldedBy(victim) != nullptr) )
 		{
 			ch->send("You fail to cut %s off from the True Source.\r\n", GET_NAME(victim));
 			return;
@@ -398,13 +398,13 @@ void mag_groups(Character * ch, int spellnum)
 {
 	Character *k;
 
-	if (ch == NULL)
+	if (ch == nullptr)
 		return;
 
 	if (!AFF_FLAGGED(ch, AFF_GROUP))
 		return;
 
-	if (ch->master != NULL)
+	if (ch->master != nullptr)
 		k = ch->master;
 
 	else
@@ -445,7 +445,7 @@ void mag_areas(Character * ch, int spellnum)
 	Character *tch, *next_tch;
 	Weave *weave = WeaveManager::GetManager().GetWeave(spellnum);
 	
-	if (ch == NULL)
+	if (ch == nullptr)
 		return;
 
 	/*
@@ -489,8 +489,8 @@ void mag_areas(Character * ch, int spellnum)
 			af.bitvector= AFF_DEAF;
 			affect_to_char( tch, &af );
 
-			Act(WeaveManager::GetManager().GetWeave( "Thunderclap" )->getAttribute( "AffToVict" ).c_str(), FALSE, ch, NULL, tch, TO_VICT);
-			Act(WeaveManager::GetManager().GetWeave( "Thunderclap" )->getAttribute( "AffToVictRoom" ).c_str(), FALSE, ch, NULL, tch, TO_ROOM);
+			Act(WeaveManager::GetManager().GetWeave( "Thunderclap" )->getAttribute( "AffToVict" ).c_str(), FALSE, ch, nullptr, tch, TO_VICT);
+			Act(WeaveManager::GetManager().GetWeave( "Thunderclap" )->getAttribute( "AffToVictRoom" ).c_str(), FALSE, ch, nullptr, tch, TO_ROOM);
 		}
 
 		/* Doesn't matter if they die here so we don't check. -gg 6/24/98 */
@@ -503,7 +503,7 @@ void mag_points(Character * ch, Character * victim, int spellnum)
 	int hit = 0;
 	int move = 0;
 
-	if (victim == NULL)
+	if (victim == nullptr)
 		return;
 
 	if (victim == ch)
@@ -531,7 +531,7 @@ void mag_unaffects(Character * ch, Character * victim, int spellnum)
 {
 	int aff;
 
-	if (victim == NULL)
+	if (victim == nullptr)
 		return;
 	Weave* weave = WeaveManager::GetManager().GetWeave( spellnum );
 
@@ -584,9 +584,9 @@ void mag_unaffects(Character * ch, Character * victim, int spellnum)
 
 void mag_alter_objs(Character * ch, Object * obj, int spellnum)
 {
-	const char *to_char = NULL, *to_room = NULL;
+	const char *to_char = nullptr, *to_room = nullptr;
 
-	if (obj == NULL)
+	if (obj == nullptr)
 		return;
 
 	switch (spellnum)
@@ -616,16 +616,16 @@ void mag_alter_objs(Character * ch, Object * obj, int spellnum)
 			break;
 	}
 
-	if (to_char == NULL)
+	if (to_char == nullptr)
 		ch->send(NOEFFECT);
 
 	else
 		Act(to_char, TRUE, ch, obj, 0, TO_CHAR);
 
-	if (to_room != NULL)
+	if (to_room != nullptr)
 		Act(to_room, TRUE, ch, obj, 0, TO_ROOM);
 
-	else if (to_char != NULL)
+	else if (to_char != nullptr)
 		Act(to_char, TRUE, ch, obj, 0, TO_ROOM);
 
 }
@@ -637,7 +637,7 @@ void mag_creations(Character * ch, int spellnum)
 	int z;
 	Weave* weave = WeaveManager::GetManager().GetWeave(spellnum);
 
-	if (ch == NULL || weave == NULL)
+	if (ch == nullptr || weave == nullptr)
 		return;
 
 	level = MAX(MIN(level, LVL_IMPL), 1);
@@ -779,31 +779,31 @@ void DisplayWeaveMessages(Weave *weave, Character *ch, Character *victim)
 		ch->InvertNextWeave = false;
 
 		if(!InvertedToChar.empty())
-			Act(InvertedToChar.c_str(), FALSE, ch, NULL, victim, TO_CHAR);
+			Act(InvertedToChar.c_str(), FALSE, ch, nullptr, victim, TO_CHAR);
 		if(!InvertedToVict.empty())
-			Act(InvertedToVict.c_str(), FALSE, ch, NULL, victim, TO_VICT);
+			Act(InvertedToVict.c_str(), FALSE, ch, nullptr, victim, TO_VICT);
 		if(!InvertedToRoom.empty())
-			Act(InvertedToRoom.c_str(), TRUE, ch, NULL, victim, TO_NOTVICT);
+			Act(InvertedToRoom.c_str(), TRUE, ch, nullptr, victim, TO_NOTVICT);
 	}
 	else if( ch == victim )
 	{
 		if( !ToCharChIsVict.empty() )
-			Act(ToCharChIsVict.c_str(), FALSE, ch, NULL, victim, TO_CHAR);
+			Act(ToCharChIsVict.c_str(), FALSE, ch, nullptr, victim, TO_CHAR);
 		if( !ToRoomChIsVict.empty() )
-			Act(ToRoomChIsVict.c_str(), FALSE, ch, NULL, victim, TO_NOTVICT);
+			Act(ToRoomChIsVict.c_str(), FALSE, ch, nullptr, victim, TO_NOTVICT);
 	}
 	else
 	{
 		if(!ToChar.empty())
-			Act(ToChar.c_str(), FALSE, ch, NULL, victim, TO_CHAR);
+			Act(ToChar.c_str(), FALSE, ch, nullptr, victim, TO_CHAR);
 		if(!ToVict.empty() && ch != victim)
-			Act(ToVict.c_str(), FALSE, ch, NULL, victim, TO_VICT);
+			Act(ToVict.c_str(), FALSE, ch, nullptr, victim, TO_VICT);
 		if(!ToRoom.empty())
-			Act(ToRoom.c_str(), TRUE, ch, NULL, victim, TO_ROOM);
+			Act(ToRoom.c_str(), TRUE, ch, nullptr, victim, TO_ROOM);
 		if(!ToNotVict.empty())
-			Act(ToNotVict.c_str(), TRUE, ch, NULL, victim, TO_NOTVICT);
+			Act(ToNotVict.c_str(), TRUE, ch, nullptr, victim, TO_NOTVICT);
 //		else if(!ToRoom.empty())
-//			Act(ToRoom.c_str(), TRUE, ch, NULL, victim, TO_CHAR);
+//			Act(ToRoom.c_str(), TRUE, ch, nullptr, victim, TO_CHAR);
 	}
 }
 

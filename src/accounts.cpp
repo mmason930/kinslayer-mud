@@ -37,7 +37,7 @@ void SwitchManager::AddSwitch( std::string IP, std::string Name, time_t switchTi
 	}
 	SwitchList.push_back( new Switch( IP, Name, switchTime, accountID ) );
 }
-SwitchManager::SwitchManager() { Self = NULL; }
+SwitchManager::SwitchManager() { Self = nullptr; }
 SwitchManager::~SwitchManager()
 {
 	for( std::list<Switch*>::iterator sIter = SwitchList.begin();sIter != SwitchList.end();++sIter )
@@ -45,7 +45,7 @@ SwitchManager::~SwitchManager()
 		delete (*sIter);
 	}
 	SwitchList.clear();
-	Self = NULL;
+	Self = nullptr;
 }
 SwitchManager& SwitchManager::GetManager()
 {
@@ -241,18 +241,18 @@ int SwitchManager::TimeToWait(std::string Name, std::string Host, Switch *sw)
 		return 0;
 
 	int iTimeToWait = 0;
-	Character *currentCharacter = NULL;
-	Character *lastCharacter = NULL;
+	Character *currentCharacter = nullptr;
+	Character *lastCharacter = nullptr;
 
 	if( IsExemptFromWaiting( sw->GetIP(), sw->getName(), Host, Name ) )
 	{
 		iTimeToWait = 0;
 	}
-	else if( (lastCharacter = CharacterUtil::loadCharacter(sw->getName())) == NULL )
+	else if( (lastCharacter = CharacterUtil::loadCharacter(sw->getName())) == nullptr )
 	{//Somehow, the alt we're switching FROM no longer exists. In this case, we'll wipe the slate clean.
 		iTimeToWait = 0;
 	}
-	else if( (currentCharacter = CharacterUtil::loadCharacter(Name)) == NULL )
+	else if( (currentCharacter = CharacterUtil::loadCharacter(Name)) == nullptr )
 	{//If we get here, this means that they are trying to switch to a new character.
 		iTimeToWait = iTimeForNewAlt;
 	}
@@ -384,17 +384,17 @@ bool SwitchManager::IsExemptFromMultiplayRestriction( const std::string &userNam
 Switch *SwitchManager::GetSwitchByIP( const std::string &IP )
 {
 	std::list<Switch*> MySwitches = GetSwitchesByIP( IP );
-	return MySwitches.empty() ? NULL : SwitchList.front();
+	return MySwitches.empty() ? nullptr : SwitchList.front();
 }
 Switch *SwitchManager::GetSwitchByName( const std::string &Name )
 {
 	std::list<Switch*> MySwitches = GetSwitchesByName( Name );
-	return MySwitches.empty() ? NULL : SwitchList.front();
+	return MySwitches.empty() ? nullptr : SwitchList.front();
 }
 Switch *SwitchManager::GetSwitchByKnownAlt( const std::string &sAltName )
 {
 	std::list<Switch*> MySwitches = GetSwitchesByKnownAlt( sAltName );
-	return MySwitches.empty() ? NULL : SwitchList.front();
+	return MySwitches.empty() ? nullptr : SwitchList.front();
 }
 std::list<Switch*> SwitchManager::GetSwitchesByName( const std::string &Name )
 {
@@ -451,7 +451,7 @@ Switch *SwitchManager::GetGreatestSwitch( const std::string &Host, const std::st
 		Temp.pop_front();
 	}
 
-	Switch *Greatest = NULL;
+	Switch *Greatest = nullptr;
 	time_t greatestTime = 0;
 
 	for(auto iter = MySwitches.begin();iter != MySwitches.end();++iter)

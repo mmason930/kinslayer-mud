@@ -17,7 +17,7 @@
 
 extern Descriptor *descriptor_list;
 
-BanManager *BanManager::Self = NULL;//Initialize singleton's copy of self.
+BanManager *BanManager::Self = nullptr;//Initialize singleton's copy of self.
 
 BanManager &BanManager::GetManager()
 {
@@ -59,7 +59,7 @@ BanManager::~BanManager()
 		delete (BanList.front());
 		RemoveBan( BanList.front() );
 	}
-	Self = NULL;
+	Self = nullptr;
 }
 void BanManager::Boot()
 {
@@ -170,7 +170,7 @@ BanElement *BanManager::GetBanBySite( const std::string &Site )
 		if( !str_cmp( (*bIter)->GetSite(), Site ) )
 			return (*bIter);
 	}
-	return NULL;
+	return nullptr;
 }
 /*** Galnor, 04/27/2009 - Free all of the memory from the singleton ***/
 void BanManager::Free()
@@ -296,7 +296,7 @@ CommandHandler do_ban = DEFINE_COMMAND
 	}
 
 	//Does the ban already exist?
-	if( BanManager::GetManager().GetBanBySite( site ) != NULL ) 
+	if( BanManager::GetManager().GetBanBySite( site ) != nullptr )
 	{
 		ch->send("That site has already been banned -- unban it to change the ban type.\r\n");
 		return;
@@ -331,7 +331,7 @@ CommandHandler do_unban = DEFINE_COMMAND
 	}
 	BanElement *MyElement = BanManager::GetManager().GetBanBySite(site);
 
-	if( MyElement == NULL )//Not found!
+	if( MyElement == nullptr )//Not found!
 	{
 		ch->send("That site is not currently banned.\r\n");
 		return;

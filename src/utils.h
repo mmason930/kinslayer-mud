@@ -127,7 +127,7 @@ struct	GameTime *age(Character *ch);
 std::string	itos(int i);
 std::string	ftos(float i);
 std::string	dtos(double i);
-std::string eatwhite( std::string str );
+std::string eatwhite(const std::string &str);
 std::string StripFilePath( const std::string &sFilePath );
 
 #ifndef WIN32
@@ -300,11 +300,11 @@ const int TYPE_OUT = 2;
 #define ADD_NODE(first,last,node,prevPtr,nextPtr,prev,next) \
 	do \
 	{ \
-		if ((prev) == NULL) \
+		if ((prev) == nullptr) \
 		{ \
 			ADD_FIRST_NODE(first,last,node,prevPtr,nextPtr); \
 		} \
-		else if ((next) == NULL) \
+		else if ((next) == nullptr) \
 		{ \
 			ADD_END_NODE(first,last,node,prevPtr,nextPtr); \
 		} \
@@ -320,7 +320,7 @@ const int TYPE_OUT = 2;
 #define ADD_FIRST_NODE(first,last,node,prevPtr,nextPtr) \
 	do \
 	{ \
-		(node)->prevPtr = NULL; \
+		(node)->prevPtr = nullptr; \
 		(node)->nextPtr = (first); \
 		if (!(first)) \
 			(last) = (node); \
@@ -335,20 +335,20 @@ const int TYPE_OUT = 2;
 		if (!(first)) \
 		{ \
 			(first) = (last) = (node); \
-			(node)->nextPtr = (node)->prevPtr = NULL; \
+			(node)->nextPtr = (node)->prevPtr = nullptr; \
 		} \
 		else if ((first) == (last)) \
 		{ \
 			(first)->nextPtr = (node); \
 			(node)->prevPtr = (first); \
-			(node)->nextPtr = NULL; \
+			(node)->nextPtr = nullptr; \
 			(last) = (node); \
 		} \
 		else \
 		{ \
 			(last)->nextPtr = (node); \
 			(node)->prevPtr = (last); \
-			(node)->nextPtr = NULL; \
+			(node)->nextPtr = nullptr; \
 			(last) = (node); \
 		} \
 	} while(0)
@@ -357,23 +357,23 @@ const int TYPE_OUT = 2;
 	do \
 	{ \
 		if ((first) == (last)) \
-			(first) = (last) = NULL; \
+			(first) = (last) = nullptr; \
 		else if ((first) == (node)) \
 		{ \
 			(first) = (first)->nextPtr; \
-			(first)->prevPtr = NULL; \
+			(first)->prevPtr = nullptr; \
 		} \
 		else if ((last) == (node)) \
 		{ \
 			(last) = (last)->prevPtr; \
-			(last)->nextPtr = NULL; \
+			(last)->nextPtr = nullptr; \
 		} \
 		else \
 		{ \
 			((node)->prevPtr)->nextPtr = (node)->nextPtr; \
 			((node)->nextPtr)->prevPtr = (node)->prevPtr; \
 		} \
-		(node)->prevPtr = (node)->nextPtr = NULL; \
+		(node)->prevPtr = (node)->nextPtr = nullptr; \
 	} while(0)
 
 /* ... */
@@ -593,7 +593,7 @@ const int CLANS_MAX = 31;
 
 #define GET_EQ(ch, i)			((ch)->equipment[i])
 
-#define GET_MOB_SPEC(ch)		(IS_MOB(ch) ? MobManager::GetManager().GetIndex((unsigned int)(ch)->nr)->func : NULL)
+#define GET_MOB_SPEC(ch)		(IS_MOB(ch) ? MobManager::GetManager().GetIndex((unsigned int)(ch)->nr)->func : nullptr)
 #define GET_MOB_RNUM(mob)		((mob)->nr)
 #define GET_MOB_VNUM(mob)		(IS_MOB(mob) ? MobManager::GetManager().GetIndex(mob->nr)->vnum : -1)
 #define MEMORY(ch)				((ch)->MobData->memory)
@@ -651,7 +651,7 @@ const int CLANS_MAX = 31;
 								GET_OBJ_VAL((obj), 3) == 1)
 
 #define GET_OBJ_SPEC(obj) ((obj)->item_number >= 0 ? \
-	(obj_index[(obj)->item_number].func) : NULL)
+	(obj_index[(obj)->item_number].func) : nullptr)
 
 #define CAN_WEAR(obj, part) (IS_SET((obj)->obj_flags.wear_flags, (part)))
 

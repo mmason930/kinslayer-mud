@@ -73,7 +73,7 @@ public:
 			return rowConverter(query->getRow());
 		}
 
-		return NULL;
+		return nullptr;
 	}
 };
 

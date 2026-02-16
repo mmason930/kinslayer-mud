@@ -81,7 +81,7 @@ Character *find_npc_by_name(Character * chAtChar, const char *pszName, int iLen)
 			if (!strncmp(pszName, ch->player.short_descr, iLen))
 				return (ch);
 
-	return NULL;
+	return nullptr;
 }
 
 // const int CLASS_WARRIOR = 0;
@@ -236,7 +236,7 @@ void list_skills(Character * ch, Character *teacher)
 		sortpos = i = (*vI);
 		Weave* weave = WeaveManager::GetManager().GetWeave(i);
 
-		if( weave == NULL ) continue;
+		if( weave == nullptr ) continue;
 
 		if (strlen(buf2) >= MAX_STRING_LENGTH - 32)
 		{
@@ -993,7 +993,7 @@ SPECIAL(yurian)
 	else if(MiscUtil::random(1, 4) == 4)
 	{
 //		if(MiscUtil::random(1, 3) == 3 && FIGHTING(yurian))
-//			yurian->CastSpell(vict, NULL, SPELL_FIREBALL, 0);
+//			yurian->CastSpell(vict, nullptr, SPELL_FIREBALL, 0);
 	}
 
 	else if(MiscUtil::random(1, 4) == 4)
@@ -1043,23 +1043,23 @@ SPECIAL(taim)
 			continue;
 		if(FIGHTING(vict) != taim)
 			continue;
-		if(vict != NULL)
+		if(vict != nullptr)
 			break;
 	}
 
-	if(vict == NULL || !vict && FIGHTING(vict) != taim)
+	if(vict == nullptr || !vict && FIGHTING(vict) != taim)
 		return 0;
 
 //	if(MiscUtil::random(1, 3) == 3)
-//		if (taim->CastSpell(vict, NULL, SPELL_FIREBALL, 0) < 0)
+//		if (taim->CastSpell(vict, nullptr, SPELL_FIREBALL, 0) < 0)
 //			return FALSE;
 
 //	if(MiscUtil::random(1, 5) == 5)
-//		if (taim->CastSpell(vict, NULL, SPELL_FIREBALL, 0) < 0)
+//		if (taim->CastSpell(vict, nullptr, SPELL_FIREBALL, 0) < 0)
 //			return FALSE;
 
 //	if(MiscUtil::random(1, 5) == 5)
-//		if (taim->CastSpell(vict, NULL, SPELL_FIREBALL, 0) < 0)
+//		if (taim->CastSpell(vict, nullptr, SPELL_FIREBALL, 0) < 0)
 //			return FALSE;
 
 	switch (MiscUtil::random(1, 8))
@@ -1078,7 +1078,7 @@ SPECIAL(taim)
 			break;
 
 //		case 6:
-//			taim->CastSpell(vict, NULL, SPELL_FIREBALL, 0);
+//			taim->CastSpell(vict, nullptr, SPELL_FIREBALL, 0);
 //			break;
 		case 8:
 			if(GET_LEVEL(vict) < LVL_GOD)

@@ -1,4 +1,8 @@
 var addMissingRaresToAuction =  function(self, actor, here, args, extra) {
+
+    // Galnor - Doesn't work as of Feb 15 2026
+    return ;
+
     var auctionableRareItems = [
         1611,   // a platinum mace with steel spikes
         2406,   // a golden etched obsidian morning star

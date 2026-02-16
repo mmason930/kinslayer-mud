@@ -198,7 +198,7 @@ void JSObject::setRetoolName( flusspferd::string newName )
 	if( real->retool_name )
 		delete[] real->retool_name;
 	if( newName.empty() )
-		real->retool_name = NULL;
+		real->retool_name = nullptr;
 	else
 		real->retool_name = str_dup( newName.c_str() );
 }
@@ -210,7 +210,7 @@ void JSObject::setRetoolDesc( flusspferd::string newName )
 	if( real->retool_desc )
 		delete[] real->retool_desc;
 	if( newName.empty() )
-		real->retool_desc = NULL;
+		real->retool_desc = nullptr;
 	else
 		real->retool_desc = str_dup( newName.c_str() );
 }
@@ -222,7 +222,7 @@ void JSObject::setRetoolSDesc( flusspferd::string newName )
 	if( real->retool_sdesc )
 		delete[] real->retool_sdesc;
 	if( newName.empty() )
-		real->retool_sdesc = NULL;
+		real->retool_sdesc = nullptr;
 	else
 		real->retool_sdesc = str_dup( newName.c_str() );
 }
@@ -234,10 +234,10 @@ void JSObject::setRetoolExDesc( flusspferd::string newExDesc )
 	if( real->retool_ex_desc )
 		delete real->retool_ex_desc;
 	if( newExDesc.empty() )
-		real->retool_ex_desc = NULL;
+		real->retool_ex_desc = nullptr;
 	else {
 		real->retool_ex_desc = new ExtraDescription();
-		real->retool_ex_desc->keyword = NULL;
+		real->retool_ex_desc->keyword = nullptr;
 		real->retool_ex_desc->description = str_dup(newExDesc.c_str());
 	}
 }

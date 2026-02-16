@@ -126,20 +126,20 @@ class Gate
 	public:
 		Gate()
 		{
-			roomA = roomB = NULL;
-			creator = NULL;
+			roomA = roomB = nullptr;
+			creator = nullptr;
 			time_of_creation = 0;
 		}
-		Gate(class Room *room, class Room *to_room, class Character *creator);
+		Gate(Room *room, Room *to_room, Character *creator);
 		~Gate();
-		class Room *roomA, *roomB;
-		class Character *creator;
+		Room *roomA, *roomB;
+		Character *creator;
 
-		class Room* OtherEnd( class Room* ThisEnd );
+		Room* OtherEnd( Room* ThisEnd );
 
 		std::list<Gate*>::iterator Close();
 
-		class Time time_of_creation;
+		Time time_of_creation;
 
 };
 
@@ -159,8 +159,8 @@ public:
 	std::list<Gate*>::iterator RemoveGate( Gate* gate );
 
 	std::list< Gate* > GetGatesgetRoom( const int room_vnum );
-	std::list< Gate* > GetGatesgetRoom( class Room* room );
-	std::list< Gate* > GetGatesByCreator( class Character* creator );
+	std::list< Gate* > GetGatesgetRoom( Room* room );
+	std::list< Gate* > GetGatesByCreator( Character* creator );
 
 	size_t NumberOfGates() { return GateList.size(); }
 	void UpdateGates();
@@ -177,7 +177,7 @@ private:
 	Character* Caster;
 	Character* Target;
 public:
-	Shield() { Caster = Target = NULL; }
+	Shield() { Caster = Target = nullptr; }
 	Shield( Character* _Caster, Character* _Target ) { Caster = _Caster; Target = _Target; }
 	~Shield() {}
 

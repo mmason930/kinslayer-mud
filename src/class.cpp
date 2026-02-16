@@ -1193,7 +1193,7 @@ Room *Character::ArenaStartRoom()
 
 	Room *room = FindRoomByVnum(vnum);
 
-	if(room == NULL) {
+	if(room == nullptr) {
 
 		room = FindRoomByVnum(500);
 	}

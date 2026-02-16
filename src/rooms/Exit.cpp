@@ -97,7 +97,7 @@ void Exit::setGeneralDescription(const char *generalDescription)
 	if (this->generalDescription)
 		delete[] this->generalDescription;
 
-	this->generalDescription = (generalDescription && *generalDescription) ? str_dup(generalDescription) : NULL;
+	this->generalDescription = (generalDescription && *generalDescription) ? str_dup(generalDescription) : nullptr;
 }
 
 const char *Exit::getKeywords() const
@@ -110,7 +110,7 @@ void Exit::setKeywords(const char *keywords)
 	if (this->keywords)
 		delete[] this->keywords;
 
-	this->keywords = (keywords && *keywords) ? str_dup(keywords) : NULL;
+	this->keywords = (keywords && *keywords) ? str_dup(keywords) : nullptr;
 }
 
 sh_int Exit::getExitInfo() const

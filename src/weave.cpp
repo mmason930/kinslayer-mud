@@ -20,9 +20,9 @@
 #include "Descriptor.h"
 #include "rooms/Room.h"
 
-WeaveManager * WeaveManager::Self  = NULL;
-GateManager  * GateManager::Self   = NULL;
-ShieldManager* ShieldManager::Self = NULL;
+WeaveManager * WeaveManager::Self  = nullptr;
+GateManager  * GateManager::Self   = nullptr;
+ShieldManager* ShieldManager::Self = nullptr;
 
 /************* Class Weave *************/
 Weave::Weave()
@@ -258,13 +258,13 @@ WeaveManager::~WeaveManager()
 	{
 		delete ( (*weaveIter) );
 	}
-	Self = NULL;
+	Self = nullptr;
 }
 void WeaveManager::Free()
 {
-	if( Self != NULL )
+	if( Self != nullptr )
 		delete (Self);
-	Self = NULL;
+	Self = nullptr;
 }
 int WeaveManager::NumWeaves()
 {
@@ -329,7 +329,7 @@ Weave* WeaveManager::GetWeave( int vnum )
 {
 	unsigned int weaveVectorSize = WeaveVector.size();
 	if( weaveVectorSize == 0 )
-		return NULL;
+		return nullptr;
 
 	unsigned int bot = 0, top = weaveVectorSize-1, mid;
 	int weaveVnum;
@@ -341,13 +341,13 @@ Weave* WeaveManager::GetWeave( int vnum )
 		if( vnum == weaveVnum )
 			return WeaveVector[ mid ];
 		if( bot >= top )
-			return NULL;
+			return nullptr;
 		if( weaveVnum > vnum )
 			top = mid - 1;
 		else
 			bot = mid + 1;
 	}
-	return NULL;
+	return nullptr;
 }
 Weave* WeaveManager::GetWeave( const std::string &Name )
 {
@@ -388,7 +388,7 @@ void WeaveManager::SortWeaves()
 
 void WeaveManager::AddWeave( Weave* w )
 {
-	if( w == NULL ) return;
+	if( w == nullptr ) return;
 
 	if(w->getVnum())
 	for(std::vector<Weave*>::iterator weaveIter = WeaveVector.begin();weaveIter != WeaveVector.end();++weaveIter)
@@ -425,13 +425,13 @@ bool WeaveManager::LoadWeaves()
 
 	sql::Query query = gameDatabase->sendQuery(sql.str());
 
-	Weave *weave = NULL;;
+	Weave *weave = nullptr;;
 
 	while(query->hasNextRow()) {
 
 		sql::Row row = query->getRow();
 
-		if(weave == NULL || weave->getName() != row.getString("name")) {
+		if(weave == nullptr || weave->getName() != row.getString("name")) {
 
 			weave = new Weave();
 
@@ -575,7 +575,7 @@ int WeaveManager::GetWeaveVnum( const std::string Name )
 std::string WeaveManager::GetWeaveName( const int vnum )
 {
 	Weave* w;
-	if( (w = GetWeave(vnum)) == NULL )
+	if( (w = GetWeave(vnum)) == nullptr )
 		return std::string("!UNUSED!");
 	return w->getName();
 }
@@ -590,7 +590,7 @@ GateManager::~GateManager()
 		delete (*gIter);
 		gIter = GateList.erase(gIter);
 	}
-	Self = NULL;
+	Self = nullptr;
 }
 
 GateManager& GateManager::GetManager()
@@ -752,7 +752,7 @@ Room* Gate::OtherEnd( Room* ThisEnd )
 
 ShieldManager::ShieldManager()
 {
-	Self = NULL;
+	Self = nullptr;
 }
 ShieldManager::~ShieldManager()
 {
@@ -761,7 +761,7 @@ ShieldManager::~ShieldManager()
 		delete (*sIter);
 		sIter = ShieldList.erase( sIter );
 	}
-	Self = NULL;
+	Self = nullptr;
 }
 
 
@@ -778,7 +778,7 @@ Character* ShieldManager::ShieldedBy( Character* Target )
 		if( (*sIter)->GetTarget() == Target )
 			return (*sIter)->GetCaster();
 	}
-	return NULL;
+	return nullptr;
 }
 Character* ShieldManager::IsShielding( Character* Caster )
 {
@@ -787,7 +787,7 @@ Character* ShieldManager::IsShielding( Character* Caster )
 		if( (*sIter)->GetCaster() == Caster )
 			return (*sIter)->GetTarget();
 	}
-	return NULL;
+	return nullptr;
 }
 
 void ShieldManager::KillShieldsByTarget( Character* Target )
@@ -849,7 +849,7 @@ void ShieldManager::Free()
 {
 	if( Self )
 		delete Self;
-	Self = NULL;
+	Self = nullptr;
 }
 
 
@@ -869,7 +869,7 @@ bool Character::ShieldOutOfRange( Character* Target )
 
 bool Character::CanTeach( Weave *w )
 {
-	if( (w) == (NULL) ) return (false);
+	if( (w) == (nullptr) ) return (false);
 
 	return (
 		(MOB_FLAGGED(this, MOB_TRAINER)       && w->classSet(GET_CLASS(this))) ||

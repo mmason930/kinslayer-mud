@@ -170,7 +170,7 @@ void StringUtil::addSlashes( std::string &sBuffer, const std::string &EscChars )
 }
 void StringUtil::formatPlayername(char *name)
 {
-	if( name == NULL || !(*name) ) return;
+	if( name == nullptr || !(*name) ) return;
 
 	*name = toupper(*name);
 	for(++name;*name;++name)
@@ -257,7 +257,7 @@ const char *StringUtil::cap(const char *str)
 /* and return the # of replacements */
 int StringUtil::replace(char **str, char *pattern, char *replacement, int rep_all, int max_size)
 {
-	char *replace_buffer = NULL, *ptr = 0;
+	char *replace_buffer = nullptr, *ptr = 0;
 	int i;
 
 	if ((strlen(*str) - strlen(pattern)) + strlen(replacement) > (unsigned int) max_size)

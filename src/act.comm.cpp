@@ -40,7 +40,7 @@ extern Character *character_list;
 int is_tell_ok(Character *ch, Character *vict);
 const char *DARKNESS_CHECK(Character *ch, Character *vict);
 
-CommManager *CommManager::Self = NULL;
+CommManager *CommManager::Self = nullptr;
 CommManager::CommManager() {}
 CommManager::~CommManager() {}
 
@@ -217,7 +217,7 @@ CommandHandler do_say = DEFINE_COMMAND
 			}
 			else if(AFF_FLAGGED(vict, AFF_DEAF))
 			{
-				Act("$n appears to be talking, but you can't make out what $e is saying!", FALSE, ch, NULL, vict, TO_VICT);
+				Act("$n appears to be talking, but you can't make out what $e is saying!", FALSE, ch, nullptr, vict, TO_VICT);
 			}
 		}
 
@@ -494,10 +494,10 @@ CommandHandler do_reply = DEFINE_COMMAND
 		 *      hear tells anyway. :) -gg 2/24/98
 		 */
 
-		while (tch != NULL && (IS_NPC(tch) || tch->player.idnum != ch->last_tell))
+		while (tch != nullptr && (IS_NPC(tch) || tch->player.idnum != ch->last_tell))
 			tch = tch->next;
 
-		if (tch == NULL)
+		if (tch == nullptr)
 			ch->send("They are no longer playing.\r\n");
 
 		else if (is_tell_ok(ch, tch))
@@ -683,7 +683,7 @@ CommandHandler do_write = DEFINE_COMMAND
 			return;
 		}
 
-		ch->desc->backstr = NULL;
+		ch->desc->backstr = nullptr;
 		ch->send("Write your note.  (/s saves /h for help)\r\n");
 
 		/* ok, here we check for a message ALREADY on the paper */
@@ -737,13 +737,13 @@ CommandHandler do_page = DEFINE_COMMAND
 			return;
 		}
 
-		if ((vict = get_char_vis(ch, arg)) != NULL)
+		if ((vict = get_char_vis(ch, arg)) != nullptr)
 		{
-			Act(buf, FALSE, ch, 0, vict, TO_VICT);
+			Act(buf, FALSE, ch, nullptr, vict, TO_VICT);
 			if (PRF_FLAGGED(ch, PRF_NOREPEAT))
 				ch->send(OK);
 			else
-				Act(buf, FALSE, ch, 0, vict, TO_CHAR);
+				Act(buf, FALSE, ch, nullptr, vict, TO_CHAR);
 			return;
 		}
 		else

@@ -11,6 +11,8 @@
 
 #define __DB_C__
 
+#include <future>
+
 #include "conf.h"
 
 
@@ -69,15 +71,15 @@ extern int gamePort;
 
 Clock TheClock, TheClock2, TheClock3, TheClock4, TheClock5, TheClock6, TheClock7, TheClock8, TheClock9;
 
-class Wizard *wizlist =	NULL;
+class Wizard *wizlist =	nullptr;
 std::list<Warrant *>		Warrants;
 std::list<Legend *>			Legends;
 std::list<std::string>	   *Tips;
 std::vector<Room *>			World;
 std::vector<Character *>	MobProto;
 std::vector<Index *>		MobIndex;
-Character *character_list = NULL;				// global linked list of chars
-Object *object_list = NULL;						// global linked list of objs
+Character *character_list = nullptr;				// global linked list of chars
+Object *object_list = nullptr;						// global linked list of objs
 Index *obj_index;								// index table for object file
 std::vector<Object*> obj_proto;				//Object prototypes
 MeleeMessageList fight_messages[MAX_MESSAGES];	// fighting messages
@@ -85,20 +87,20 @@ std::list<PlayerIndex *> PlayerTable;
 GameTime time_info;								// the infomation about the time
 reset_q_type reset_q;							// queue of zones to be reset
 GameTime *mud_time_passed(time_t t2, time_t t1);
-Object *chest_head = NULL;					// Chest Log List
 std::vector<int> ItemCount;
 std::vector<std::string> MySQLTables;
 std::shared_ptr<std::vector<JSTrigger*> > globalJS_Scripts;
 class Config *Conf;
 void BootKits();
 boost::uuids::random_generator Object::uuidGenerator = boost::uuids::random_generator();
+auto nilUuidGenerator = boost::uuids::nil_generator();
 
 std::string DebugFileName;
 
 int Character::nr_alloc = 0;
 int Character::nr_dealloc = 0;
-int Object::nr_alloc = 0;
-int Object::nr_dealloc = 0;
+std::atomic<int> Object::nr_alloc{0};
+std::atomic<int> Object::nr_dealloc{0};
 int Room::nr_alloc = 0;
 int Room::nr_dealloc = 0;
 
@@ -117,11 +119,11 @@ PreciseStrike PreciseStrikeData;
 
 time_t boot_time = 0;			/* time of mud boot					*/
 
-char *credits		= NULL;		/* game credits						*/
-char *motd			= NULL;		/* message of the day - mortals		*/
-char *imotd			= NULL;		/* message of the day - immorts		*/
-char *background	= NULL;		/* background story					*/
-char *startup		= NULL;		/* startup screen					*/
+char *credits		= nullptr;		/* game credits						*/
+char *motd			= nullptr;		/* message of the day - mortals		*/
+char *imotd			= nullptr;		/* message of the day - immorts		*/
+char *background	= nullptr;		/* background story					*/
+char *startup		= nullptr;		/* startup screen					*/
 
 std::vector<int> BodyPercents;
 
@@ -140,10 +142,11 @@ void renum_zone_table(void);
 void add_follower(Character * ch, Character * leader);
 int perform_group( Character *ch, Character *vict );
 void reset_time(void);
-void SetupItemCount();
 void PlayerFileCycle();
-int BootObjects();
 void startGameSession();
+std::future<std::unordered_map<int, int>> StartSetupItemCount();
+std::future<Object::ObjectPreBootData> Object::preBootFuture;
+void FinishSetupItemCount(std::future<std::unordered_map<int, int>> &future);
 
 // external functions
 extern void load_messages(void);
@@ -379,7 +382,7 @@ void bootWorld(void)
 	ZoneManager::GetManager().BootZones();
 
 	Log("Loading objects...");
-	BootObjects();
+	Object::bootObjects();
 
 	Log("Loading rooms.");
 	Room::bootWorld(roomToExitToVnumMap);
@@ -486,13 +489,25 @@ void boot_db(void)
 	Log("Establishing MySQL Connection.");
 	SetupMySQL( true );
 
+	Log("Pre-Booting Rooms.");
+	Room::preBootWorld();
+
+	Log("Pre-Booting Object Prototypes.");
+	Object::preBootObjects();
+
+	Log("Starting Item Count Thread.");
+	auto vnumToItemCountMapFuture = StartSetupItemCount();
+
+	Log("Pre Booting PvalManager.");
+	PvalManager::get()->preBoot();
+
 	Log("Setting Up Editor Interfaces.");
 	game->setupEditorInterfaces();
 	
 	Log("Booting the Configuration.");
 	Conf = new Config();
-	Conf->Load();
-	Conf->save(); //Need to update the reboot count.
+	Conf->load();
+	Conf->saveRebootCountAsync();
 
 	Log("Running Boot Maintenance Queries...");
 	miscBootMaintenance();
@@ -504,6 +519,7 @@ void boot_db(void)
     // get() forces the ctoring
     JSManager* temp = JSManager::get();
 
+	Log("Compiling LoDash");
 	temp->loadScriptsFromFile(std::string("scripts/lib/util/LoDash-2.4.1.js"));
 
 	Log("Monitoring file modifications...");
@@ -526,7 +542,7 @@ void boot_db(void)
 
 	JSManager::get()->executeExpression("initGlobals();");
 
-	Log("Booting PvalManager.");
+	Log("Finishing booting PvalManager.");
 	PvalManager::get()->boot();
 
 	JSManager::get()->executeExpression("bootProcs();");
@@ -565,7 +581,7 @@ void boot_db(void)
 	bootWorld();
 
 	Log("Renumbering start rooms.");
-	Conf->RenumberRooms();
+	Conf->renumberRooms();
 
 	Log("Generating player index.");
 	buildPlayerIndex();
@@ -598,21 +614,21 @@ void boot_db(void)
 	Log("Reading banned site and invalid name list.");
 	BanManager::GetManager().Boot();
 
-	Log("Counting file-stored items.");
-	SetupItemCount();
+	Log("Finish counting file-stored items.");
+	FinishSetupItemCount(vnumToItemCountMapFuture);
 
 	//TheClock.Reset(true);
 	Zone *zone;
 	if (Conf->empty_world == false && game->getBasicConfigValue("Dev Mode") == "0")
 	{
-		for (i = 0; (zone = ZoneManager::GetManager().GetZoneByRnum(i)) != NULL; ++i)
+		for (i = 0; (zone = ZoneManager::GetManager().GetZoneByRnum(i)) != nullptr; ++i)
 		{
 			Log("Resetting %s (rooms %d-%d).", zone->getName().c_str(), zone->GetBottom(), zone->GetTop());
 			zone->Reset();
 		}
 	}
-	reset_q.head = reset_q.tail = NULL;
-	boot_time = time(0);
+	reset_q.head = reset_q.tail = nullptr;
+	boot_time = time(nullptr);
 
 	BootClock.turnOff();
 	Log("Boot db complete ( %.3f seconds ).", BootClock.getSeconds());
@@ -620,7 +636,7 @@ void boot_db(void)
 
 
 /* reset the time in the game from file */
-void reset_time(void)
+void reset_time()
 {
 	Weather * weather_info = 0;
 #if defined(CIRCLE_MACINTOSH)
@@ -774,7 +790,7 @@ void renum_zone_table(void)
 	char buf[128];
 
 	Zone *zone;
-	for(unsigned int i = 0;(zone = ZoneManager::GetManager().GetZoneByRnum(i)) != NULL;++i)
+	for(unsigned int i = 0;(zone = ZoneManager::GetManager().GetZoneByRnum(i)) != nullptr;++i)
 	{
 		for (cmd_no = 0;cmd_no < zone->cmd.size(); cmd_no++)
 		{
@@ -904,38 +920,65 @@ std::string ConvertNumberToKey(const int number, const unsigned int min_digits)
 	return str;
 }
 
-void SetupItemCount()
+#define Z	zone_table[zone]
+
+std::future<std::unordered_map<int, int>> StartSetupItemCount()
 {
-	sql::Query MyQuery;
-	try {
-		MyQuery = gameDatabase->sendQuery("SELECT vnum,COUNT(*) AS num FROM objects WHERE vnum >= 0 GROUP BY vnum;");
-	} catch( sql::QueryException &e ) {
-		MudLog(BRF, LVL_APPR, TRUE, "Failed to send query for item count(SetupItemCount()): %s",
-			e.getMessage().c_str());
-		return;
-	}
-	for(unsigned int i = 0;i < ItemCount.size();++i)
-		ItemCount[i] = (0);
-	while( MyQuery->hasNextRow() )
+	return std::async(std::launch::async, []() -> std::unordered_map<int, int> {
+		std::unordered_map<int, int> vnumToItemCountMap;
+		sql::Query MyQuery;
+		sql::Connection connection = dbContext->createConnection();
+		try {
+			MyQuery = connection->sendQuery("SELECT vnum,COUNT(*) AS num FROM objects WHERE vnum >= 0 GROUP BY vnum;");
+		} catch (sql::QueryException &e) {
+			MudLog(BRF, LVL_APPR, TRUE, "Failed to send query for item count(SetupItemCount()): %s",
+				   e.getMessage().c_str());
+			return vnumToItemCountMap;
+		}
+
+		while (MyQuery->hasNextRow())
+		{
+			sql::Row MyRow = MyQuery->getRow();
+			int count = MyRow.getInt("num");
+			if (count > 0)
+			{
+				int vnum = MyRow.getInt("vnum");
+				vnumToItemCountMap[vnum] = count;
+			}
+		}
+
+		return vnumToItemCountMap;
+	});
+}
+
+void FinishSetupItemCount(std::future<std::unordered_map<int, int>> &future)
+{
+	auto vnumToItemCountMap = future.get();
+
+	for (auto index = 0;index < ItemCount.size();++index)
 	{
-		sql::Row MyRow = MyQuery->getRow();
-		int count = atoi(MyRow["num"].c_str());
+		ItemCount[index] = 0;
+	}
+
+	for (auto itemCountEntry: vnumToItemCountMap)
+	{
+		int vnum = itemCountEntry.first;
+		int count = itemCountEntry.second;
+
 		if( count > 0 )
 		{
-			int rnum = real_object(atoi(MyRow["vnum"].c_str()));
+			int rnum = real_object(vnum);
 			if( rnum > -1 )
 				ItemCount[rnum] = (count);
 		}
 	}
 }
 
-#define Z	zone_table[zone]
-
 /* Galnor 4-1-2005 Kit constructor. */
 Kit::Kit()
 {
-	this->prev		= NULL;
-	this->next		= NULL;
+	this->prev		= nullptr;
+	this->next		= nullptr;
 	this->vnum		= -1;
 	this->deleted	= false;
 	this->in_db		= false;
@@ -959,7 +1002,7 @@ int Character::VnumMobile(std::string SearchName)
 		jsScriptVnum = atoi(ParamValue(SearchName, "js").c_str());
 	}
 
-	for(unsigned int i = 0;(Mob = MobManager::GetManager().GetPrototype(i)) != NULL;++i)
+	for(unsigned int i = 0;(Mob = MobManager::GetManager().GetPrototype(i)) != nullptr;++i)
 	{
 		if(jsScriptVnum != 0)
 		{
@@ -1076,7 +1119,7 @@ Object *read_object(int nr, int type, bool new_instance, bool increment_top_id)
 	if (nr < 0)
 	{
 		Log("SYSERR: Trying to create obj with negative (%d) num!", nr);
-		return NULL;
+		return nullptr;
 	}
 
 	if (type == VIRTUAL)
@@ -1084,7 +1127,7 @@ Object *read_object(int nr, int type, bool new_instance, bool increment_top_id)
 		if ((i = real_object(nr)) < 0)
 		{
 			Log("Object (V) %d does not exist in database.", nr);
-			return NULL;
+			return nullptr;
 		}
 	}
 	else
@@ -1098,7 +1141,7 @@ Object *read_object(int nr, int type, bool new_instance, bool increment_top_id)
 	obj->createdDatetime = createdDatetime;
 	obj->obj_flags.mModifiers = new std::map< sbyte,long double >();
 	if( !obj_proto[i]->action_description || strlen(obj_proto[i]->action_description) == 0 )
-		obj->action_description = NULL;
+		obj->action_description = nullptr;
 
 	obj->next = object_list;
 	object_list = obj;
@@ -1137,7 +1180,7 @@ void zone_update(void)
 		timer = 0;
 
 		/* since one minute has passed, increment zone ages */
-		for (i = 0; (zone = ZoneManager::GetManager().GetZoneByRnum(i)) != NULL; ++i)
+		for (i = 0; (zone = ZoneManager::GetManager().GetZoneByRnum(i)) != nullptr; ++i)
 		{
 			if (zone->GetAge() < zone->GetLifespan() && zone->GetResetMode())
 				zone->SetAge( zone->GetAge() + 1 );
@@ -1361,8 +1404,8 @@ void GetDirectoryList(const std::string &Directory, std::list<std::string> &File
 		FileName = data.cFileName;
 #else
 
-	DIR		*dir = NULL;
-	dirent	*de = NULL;
+	DIR		*dir = nullptr;
+	dirent	*de = nullptr;
 
 	if(!(dir = opendir(Directory.c_str())))
 		return;
@@ -1549,7 +1592,7 @@ bool Character::basicSave()
 	Query << "title = '" << sql::escapeString(this->player.title)			<< "',";
 	Query << "whois_extra = '" << sql::escapeString(this->points.whois_extra)			<< "',";
 
-	Query << "description = '" << sql::escapeString(this->player.description == NULL ? "" : this->player.description)			<< "',";
+	Query << "description = '" << sql::escapeString(this->player.description == nullptr ? "" : this->player.description)			<< "',";
 
 	if(this->player.time.logon.after(DateTime(0))) {
 		Query << "last_logon = FROM_UNIXTIME("  << this->player.time.logon.getTime()		<< "),";
@@ -1671,7 +1714,7 @@ void MySQLSaveAlias(const std::string &playername, std::map<std::string,std::str
 
 	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
 
-	if(index == NULL)
+	if(index == nullptr)
 		return;
 
 	if(update)
@@ -1692,7 +1735,7 @@ void MySQLDeleteAlias(const std::string &playername, const std::string &command)
 
 	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
 
-	if(index == NULL)
+	if(index == nullptr)
 		return;
 
 	Query	<< " DELETE FROM userAlias"
@@ -1794,7 +1837,7 @@ bool MySQLSaveRolls(const std::string &playername, const std::string &TableName,
 
 	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
 
-	if( index == NULL )
+	if( index == nullptr )
 		return false;
 
 	for(i = 0;i < StoredRolls.size() && i < Rolls.size();++i)
@@ -1858,7 +1901,7 @@ bool MySQLSaveRolls(const std::string &playername, const std::string &TableName,
 bool MySQLLoadRolls(const std::string &playername, const std::string TableName, std::vector<int> &Rolls)
 {
 	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
-	if(index == NULL)
+	if(index == nullptr)
 		return false;
 	std::string query = "SELECT level, roll FROM " + TableName + " WHERE user_id="
 		+ MiscUtil::convert<std::string>(index->id) + " ORDER BY level DESC";
@@ -2066,11 +2109,11 @@ bool Character::CreateDatabaseEntry()
 
 void Object::UnsetPrototypeSpecifics()
 {
-	this->name = NULL;
-	this->description = NULL;
-	this->ex_description = NULL;
-	this->action_description = NULL;
-	this->short_description = NULL;
+	this->name = nullptr;
+	this->description = nullptr;
+	this->ex_description = nullptr;
+	this->action_description = nullptr;
+	this->short_description = nullptr;
 }
 
 //Object Destructor
@@ -2085,19 +2128,19 @@ Object::~Object()
 		if(d->olc && d->olc->auction_data && d->olc->auction_data->GetItemToSell() == this)
 			d->olc->auction_data->SetItemToSell( 0 );
 	}
-	//Anyone targeting this object must have their otarget set to NULL.
+	//Anyone targeting this object must have their otarget set to nullptr.
 	for( Character* ch = character_list;ch;ch = ch->next )
 	{
 		if( ch->player.otarget == this )
-			ch->player.otarget = NULL;
+			ch->player.otarget = nullptr;
 	}
 	Zone *zone;
-	for(i = 0;(zone = ZoneManager::GetManager().GetZoneByRnum(i)) != NULL;++i)
+	for(i = 0;(zone = ZoneManager::GetManager().GetZoneByRnum(i)) != nullptr;++i)
 	{
 		for(s = 0;s < zone->cmd.size();++s)
 		{
 			if(zone->cmd[s]->obj == this)
-				zone->cmd[s]->obj = NULL;
+				zone->cmd[s]->obj = nullptr;
 		}
 	}
 
@@ -2113,16 +2156,16 @@ Object::~Object()
 				ResetCommand *resetCommand = (*resetCommandIterator);
 				if(resetCommand->obj == this)
 				{
-					resetCommand->obj = NULL;
+					resetCommand->obj = nullptr;
 				}
 			}
 		}
 	}
 
-	if( this->SatOnBy != NULL )
+	if( this->SatOnBy != nullptr )
 	{
-		this->SatOnBy->player.sitting_on = NULL;
-		this->SatOnBy = NULL;
+		this->SatOnBy->player.sitting_on = nullptr;
+		this->SatOnBy = nullptr;
 	}
 
 	if(this->scalp)
@@ -2171,7 +2214,7 @@ Object::~Object()
 //Galnor - Object constructor
 Object::Object()
 {
-	++Object::nr_alloc;
+	++nr_alloc;
 	memset(&this->obj_flags,	0, sizeof(this->obj_flags));
 	memset(&this->affected,		0, sizeof(this->affected));
 	this->proto				= false;
@@ -2179,34 +2222,34 @@ Object::Object()
 	this->worn_on			= 0;
 	this->item_number		= -1;
 	this->Max				= -1;
-	this->in_room			= 0;
-	this->name				= NULL;
-	this->description		= NULL;
-	this->short_description	= NULL;
-	this->action_description= NULL;
-	this->ex_description	= NULL;
-	this->carried_by		= NULL;
-	this->worn_by			= NULL;
-	this->SatOnBy			= NULL;
-	this->in_obj			= NULL;
-	this->contains			= NULL;
-	this->next_content		= NULL;
-	this->next				= NULL;
-	this->scalp				= NULL;
-	this->retool_desc		= NULL;
-	this->retool_name		= NULL;
-	this->retool_sdesc		= NULL;
-	this->retool_ex_desc	= NULL;
+	this->in_room			= nullptr;
+	this->name				= nullptr;
+	this->description		= nullptr;
+	this->short_description	= nullptr;
+	this->action_description= nullptr;
+	this->ex_description	= nullptr;
+	this->carried_by		= nullptr;
+	this->worn_by			= nullptr;
+	this->SatOnBy			= nullptr;
+	this->in_obj			= nullptr;
+	this->contains			= nullptr;
+	this->next_content		= nullptr;
+	this->next				= nullptr;
+	this->scalp				= nullptr;
+	this->retool_desc		= nullptr;
+	this->retool_name		= nullptr;
+	this->retool_sdesc		= nullptr;
+	this->retool_ex_desc	= nullptr;
 	this->deleted			= false;
 	this->needs_save		= false;
 	this->purged			= false;
 	this->Money				= 0;
 	this->createdDatetime	= DateTime();
-	this->objID				= boost::uuids::nil_generator()();
+	this->objID				= nilUuidGenerator();
 	this->decayType			= -1;
 	this->decayTimer		= -1;
 	this->decayTimerType	= -1;
-	this->js_scripts		= std::shared_ptr<std::vector<JSTrigger*> >( new std::vector< JSTrigger* > );
+	this->js_scripts		= std::make_shared<std::vector<JSTrigger*> >( );
 }
 
 bool Character::IsProto()
@@ -2218,53 +2261,90 @@ bool Object::IsProto()
 	return proto;
 }
 
-//Galnor - 01/16/2008 - Boot all the object prototypes from the database.
-int BootObjects()
+void Object::preBootObjects()
 {
-	std::stringstream QueryBuffer;
-	sql::Query MyQuery, jsAttachmentQuery;
-	sql::Row MyRow, jsAttachmentRow;
-	std::list<int> jsAttachmentList;
-	int i;
-
-	QueryBuffer << "SELECT * FROM obj_protos ORDER BY vnum ASC";
-	try {
-		MyQuery = gameDatabase->sendQuery(QueryBuffer.str());
-		jsAttachmentQuery = gameDatabase->sendQuery("SELECT * FROM js_attachments WHERE type='O' ORDER BY target_vnum ASC");
-	}
-	catch(sql::QueryException &e)
+	preBootFuture = std::async(std::launch::async, []
 	{
-		e.report();
-		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
-		exit(1);
-	}
-	top_of_objt = MyQuery->numRows() - 1;
+		sql::Query MyQuery, jsAttachmentQuery;
+		sql::Row MyRow, jsAttachmentRow;
+		std::vector<int> jsAttachments;
+
+		auto objProtoFuture = std::async(std::launch::async, [&]
+		{
+			sql::Connection connection = dbContext->createConnection();
+			return connection->sendQuery("SELECT * FROM obj_protos ORDER BY vnum ASC");
+		});
+
+		auto jsAttachmentFuture = std::async(std::launch::async, [&]
+		{
+			sql::Connection connection = dbContext->createConnection();
+			return connection->sendQuery("SELECT * FROM js_attachments WHERE type='O' ORDER BY target_vnum ASC");
+		});
+
+		MyQuery = objProtoFuture.get();
+		jsAttachmentQuery = jsAttachmentFuture.get();
+		ObjectPreBootData preBootData;
+		int numberOfObjectProtos = MyQuery->numRows();
+		preBootData.objectProtos.resize(numberOfObjectProtos);
+		preBootData.objectRnumToObjectDataMap.reserve(numberOfObjectProtos);
+
+		for (int objectRnum = 0; objectRnum < numberOfObjectProtos; ++objectRnum)
+		{
+			MyRow = MyQuery->getRow();
+			jsAttachments.clear();
+			int objectPrototypeVnum = MyRow.getInt("vnum");
+
+			while (jsAttachmentQuery->hasNextRow() && jsAttachmentQuery->peekRow().getInt("target_vnum") <
+				objectPrototypeVnum)
+				jsAttachmentQuery->skipRow();
+
+			while (jsAttachmentQuery->hasNextRow() && jsAttachmentQuery->peekRow().getInt("target_vnum") ==
+				objectPrototypeVnum)
+			{
+				int scriptVnum = jsAttachmentQuery->getRow().getInt("script_vnum");
+
+				jsAttachments.push_back(scriptVnum);
+			}
+			int objectVnum = MyRow.getInt("vnum");
+			preBootData.objectProtos[objectRnum] = new Object();
+			preBootData.objectProtos[objectRnum]->ProtoBoot(MyRow, objectRnum);
+			preBootData.objectRnumToObjectDataMap.try_emplace(objectRnum, objectVnum, jsAttachments);
+		}
+
+		return preBootData;
+	});
+}
+
+//Galnor - 01/16/2008 - Boot all the object prototypes from the database.
+void Object::bootObjects()
+{
+	ObjectPreBootData preBootData = preBootFuture.get();
+
+	top_of_objt = preBootData.objectProtos.size() - 1;
 
 	obj_proto.resize( top_of_objt + 1);
 	obj_index = new Index[top_of_objt + 1];
 	ItemCount.resize(top_of_objt + 1);
 	memset(obj_index, 0, sizeof(Index) * (top_of_objt + 1));
 
-	for(i = 0;i <= top_of_objt;++i)
+	for (int objectRnum = 0;objectRnum < top_of_objt; objectRnum++)
 	{
-		MyRow = MyQuery->getRow();
-		jsAttachmentList.clear();
-		int objectPrototypeVnum = atoi(MyRow["vnum"].c_str());
+		Object *objectProto = preBootData.objectProtos[objectRnum];
+		ObjectPreBootDataObjectData objectData = preBootData.objectRnumToObjectDataMap[objectRnum];
 
-		while(jsAttachmentQuery->hasNextRow() && jsAttachmentQuery->peekRow().getInt("target_vnum") < objectPrototypeVnum)
-			jsAttachmentQuery->skipRow();
-
-		while(jsAttachmentQuery->hasNextRow() && jsAttachmentQuery->peekRow().getInt("target_vnum") == objectPrototypeVnum)
+		// For each item
+		obj_index[objectRnum].number = objectRnum;
+		obj_index[objectRnum].vnum = objectData.vnum;
+		// Find any js scripts that are listed as attached to this mob in the db, and attach them to it
+		objectProto->js_scripts = std::make_shared<std::vector<JSTrigger*> >();
+		for(int scriptVnum : objectData.scriptVnums)
 		{
-			int scriptVnum = jsAttachmentQuery->getRow().getInt("script_vnum");
-
-			jsAttachmentList.push_back(scriptVnum);
+			JSTrigger* t = JSManager::get()->getTrigger(scriptVnum);
+			objectProto->js_scripts->push_back(t);
 		}
 
-		obj_proto[i] = new Object();
-		obj_proto[i]->ProtoBoot(MyRow, i, jsAttachmentList);
+		obj_proto[objectRnum] = objectProto;
 	}
-	return top_of_objt;
 }
 void Object::protoSave()
 {
@@ -2378,79 +2458,69 @@ void Object::ProtoDelete()
 		return;
 	}
 }
-void Object::ProtoBoot( sql::Row &MyRow, const int rnum, const std::list<int> &jsAttachmentList )
+void Object::ProtoBoot( const sql::Row &MyRow, const int rnum)
 {
 	this->proto = true;
-	obj_index[rnum].number = rnum;
 	this->item_number = rnum;
-	obj_index[rnum].vnum = atoi(MyRow[0].c_str());
 	this->name = str_dup(MyRow[1].c_str());
 	this->short_description = str_dup(MyRow[2].c_str());
 	this->description = str_dup(MyRow[3].c_str());
 	this->action_description = str_dup(MyRow[4].c_str());
-	this->obj_flags.type_flag = atoi((MyRow[5].c_str()));
-	this->obj_flags.extra_flags = atoi(MyRow[6].c_str());
-	this->obj_flags.value[0] = atoi(MyRow[7].c_str());
-	this->obj_flags.value[1] = atoi(MyRow[8].c_str());
-	this->obj_flags.value[2] = atoi(MyRow[9].c_str());
-	this->obj_flags.value[3] = atoi(MyRow[10].c_str());
-	this->obj_flags.value[4] = atoi(MyRow[11].c_str());
-	this->obj_flags.value[5] = atoi(MyRow[12].c_str());
-	this->obj_flags.value[6] = atoi(MyRow[13].c_str());
-	this->obj_flags.value[7] = atoi(MyRow[14].c_str());
-	this->obj_flags.value[8] = atoi(MyRow[15].c_str());
-	this->obj_flags.value[9] = atoi(MyRow[16].c_str());
-	this->obj_flags.value[10] = atoi(MyRow[17].c_str());
-	this->obj_flags.weight = atof(MyRow[19].c_str());
-	this->obj_flags.cost = atoi(MyRow[20].c_str());
-	this->obj_flags.cost_per_day = atoi(MyRow[21].c_str());
-	this->obj_flags.offensive = atoi(MyRow[22].c_str());
-	this->obj_flags.parry = atoi(MyRow[23].c_str());
-	this->obj_flags.dodge = atoi(MyRow[24].c_str());
-	this->obj_flags.absorb = atoi(MyRow[25].c_str());
-	this->obj_flags.clan = atoi(MyRow[26].c_str());
-	this->obj_flags.clan_weight = atoi(MyRow[27].c_str());
-	this->obj_flags.clan_offensive = atoi(MyRow[28].c_str());
-	this->obj_flags.clan_parry = atoi(MyRow[29].c_str());
-	this->obj_flags.clan_dodge = atoi(MyRow[30].c_str());
-	this->obj_flags.clan_absorb = atoi(MyRow[31].c_str());
-	this->obj_flags.clan_moves = atoi(MyRow[32].c_str());
-	this->obj_flags.clan_hit = atoi(MyRow[33].c_str());
-	this->obj_flags.clan_dmg1 = atoi(MyRow[34].c_str());
-	this->obj_flags.clan_dmg2 = atoi(MyRow[35].c_str());
-	this->Max = atoi(MyRow[36].c_str());
-	this->decayType = atoi(MyRow["decay_type"].c_str());
-	this->decayTimer = atoi(MyRow["decay_timer"].c_str());
+	this->obj_flags.type_flag = MyRow.getInt(5);
+	this->obj_flags.extra_flags = MyRow.getInt(6);
+	this->obj_flags.value[0] = MyRow.getShort(7);
+	this->obj_flags.value[1] = MyRow.getShort(8);
+	this->obj_flags.value[2] = MyRow.getShort(9);
+	this->obj_flags.value[3] = MyRow.getShort(10);
+	this->obj_flags.value[4] = MyRow.getShort(11);
+	this->obj_flags.value[5] = MyRow.getShort(12);
+	this->obj_flags.value[6] = MyRow.getShort(13);
+	this->obj_flags.value[7] = MyRow.getShort(14);
+	this->obj_flags.value[8] = MyRow.getShort(15);
+	this->obj_flags.value[9] = MyRow.getShort(16);
+	this->obj_flags.value[10] = MyRow.getShort(17);
+	this->obj_flags.weight = MyRow.getFloat(19);
+	this->obj_flags.cost = MyRow.getInt(20);
+	this->obj_flags.cost_per_day = MyRow.getInt(21);
+	this->obj_flags.offensive = MyRow.getShort(22);
+	this->obj_flags.parry = MyRow.getShort(23);
+	this->obj_flags.dodge = MyRow.getShort(24);
+	this->obj_flags.absorb = MyRow.getShort(25);
+	this->obj_flags.clan = MyRow.getShort(26);
+	this->obj_flags.clan_weight = MyRow.getShort(27);
+	this->obj_flags.clan_offensive = MyRow.getShort(28);
+	this->obj_flags.clan_parry = MyRow.getShort(29);
+	this->obj_flags.clan_dodge = MyRow.getShort(30);
+	this->obj_flags.clan_absorb = MyRow.getShort(31);
+	this->obj_flags.clan_moves = MyRow.getShort(32);
+	this->obj_flags.clan_hit = MyRow.getShort(33);
+	this->obj_flags.clan_dmg1 = MyRow.getShort(34);
+	this->obj_flags.clan_dmg2 = MyRow.getShort(35);
+	this->Max = MyRow.getShort(36);
+	this->decayType = MyRow.getInt("decay_type");
+	this->decayTimer = MyRow.getShort("decay_timer");
 	this->decayTimerType = atoi(MyRow["decay_timer_type"].c_str());
-	this->affected[0].location = atoi(MyRow[40].c_str());
-	this->affected[1].location = atoi(MyRow[41].c_str());
-	this->affected[2].location = atoi(MyRow[42].c_str());
-	this->affected[3].location = atoi(MyRow[43].c_str());
-	this->affected[4].location = atoi(MyRow[44].c_str());
-	this->affected[5].location = atoi(MyRow[45].c_str());
-	this->affected[0].modifier = atoi(MyRow[46].c_str());
-	this->affected[1].modifier = atoi(MyRow[47].c_str());
-	this->affected[2].modifier = atoi(MyRow[48].c_str());
-	this->affected[3].modifier = atoi(MyRow[49].c_str());
-	this->affected[4].modifier = atoi(MyRow[50].c_str());
-	this->affected[5].modifier = atoi(MyRow[51].c_str());
-	this->obj_flags.wear_flags = atoi(MyRow["wear"].c_str());
+	this->affected[0].location = MyRow.getInt(40);
+	this->affected[1].location = MyRow.getInt(41);
+	this->affected[2].location = MyRow.getInt(42);
+	this->affected[3].location = MyRow.getInt(43);
+	this->affected[4].location = MyRow.getInt(44);
+	this->affected[5].location = MyRow.getInt(45);
+	this->affected[0].modifier = MyRow.getInt(46);
+	this->affected[1].modifier = MyRow.getInt(47);
+	this->affected[2].modifier = MyRow.getInt(48);
+	this->affected[3].modifier = MyRow.getInt(49);
+	this->affected[4].modifier = MyRow.getInt(50);
+	this->affected[5].modifier = MyRow.getInt(51);
+	this->obj_flags.wear_flags = MyRow.getInt("wear");
 	this->ex_description = ExtraDescription::Parse( MyRow["edescription"] );
-
-	// Find any js scripts that are listed as attached to this mob in the db, and attach them to it
-	this->js_scripts = std::shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
-	for(auto scriptVnumIter = jsAttachmentList.begin();scriptVnumIter != jsAttachmentList.end();++scriptVnumIter)
-	{
-		JSTrigger* t = JSManager::get()->getTrigger((*scriptVnumIter));
-		this->js_scripts->push_back(t);
-	}
 }
 
 /* Return a list of ExtraDescription, parsed from the string that is passed */
 ExtraDescription *ExtraDescription::Parse( const std::string &eDescStr )
 {
 	std::vector< std::string > vExDescParts = StringUtil::splitToVector(eDescStr, '~');
-	ExtraDescription *eDescList = (NULL);
+	ExtraDescription *eDescList = nullptr;
 
 	while( !vExDescParts.empty() )
 	{
@@ -2747,18 +2817,18 @@ void Character::zero()
 	memset(&(this->aff_abils), 0, sizeof(this->aff_abils));
 	// struct CharPointData points
 
-	this->affected					=	NULL;
-	this->affection_list			=	NULL;
-	this->carrying					=	NULL;
-	this->desc						=	NULL;
-	this->next_in_room				=	NULL;
-	this->next						=	NULL;
-	this->next_fighting				=	NULL;
-	this->PokerData					=	NULL;
-	this->PokerTable				=	NULL;
-	this->NextSeated				=	NULL;
-	this->followers					=	NULL;
-	this->master					=	NULL;
+	this->affected					=	nullptr;
+	this->affection_list			=	nullptr;
+	this->carrying					=	nullptr;
+	this->desc						=	nullptr;
+	this->next_in_room				=	nullptr;
+	this->next						=	nullptr;
+	this->next_fighting				=	nullptr;
+	this->PokerData					=	nullptr;
+	this->PokerTable				=	nullptr;
+	this->NextSeated				=	nullptr;
+	this->followers					=	nullptr;
+	this->master					=	nullptr;
 	this->timer						=	0.0f;
 	this->command_ready				=	false;
 	this->pks						=	0;
@@ -2772,7 +2842,7 @@ void Character::zero()
 	this->js_scripts				=	std::shared_ptr<std::vector<JSTrigger*> >( new std::vector< JSTrigger* > );
 
 	for (int i = 0; i < NUM_WEARS; ++i)
-		this->equipment[i]			=	NULL;
+		this->equipment[i]			=	nullptr;
 
 	this->last_tell					=	0;
 }
@@ -3076,10 +3146,10 @@ Character::~Character()
 		}
 		else ++eIter;
 	}
-	if( this->player.sitting_on != NULL )
+	if( this->player.sitting_on != nullptr )
 	{
-		this->player.sitting_on->SatOnBy = NULL;
-		this->player.sitting_on = NULL;
+		this->player.sitting_on->SatOnBy = nullptr;
+		this->player.sitting_on = nullptr;
 	}
 
 	if (this->PlayerData)
@@ -3091,12 +3161,12 @@ Character::~Character()
 
 	//Delete all zone command references to this mob.
 	Zone *zone;
-	for(i = 0;(zone = ZoneManager::GetManager().GetZoneByRnum(i)) != NULL;++i)
+	for(i = 0;(zone = ZoneManager::GetManager().GetZoneByRnum(i)) != nullptr;++i)
 	{
 		for(s = 0;s < zone->cmd.size();++s)
 		{
 			if(zone->cmd[s]->mob == this)
-				zone->cmd[s]->mob = NULL;
+				zone->cmd[s]->mob = nullptr;
 		}
 	}
 
@@ -3112,7 +3182,7 @@ Character::~Character()
 				ResetCommand *resetCommand = (*resetCommandIterator);
 				if(resetCommand->mob == this)
 				{
-					resetCommand->mob = NULL;
+					resetCommand->mob = nullptr;
 				}
 			}
 		}
@@ -3129,7 +3199,7 @@ Character::~Character()
 			delete PokerData;
 		}
 	}
-	if( PokerTable != NULL )
+	if( PokerTable != nullptr )
 	{
 		PokerTable->IsWatching( this );
 		PokerTable->RemoveWatcher(this);
@@ -3176,7 +3246,7 @@ Character::~Character()
 		affect_remove(this, affected);
 
 	if (desc)
-		desc->character = NULL;
+		desc->character = nullptr;
 }
 
 /* release memory allocated for an obj struct */
@@ -3211,7 +3281,7 @@ int file_to_string(const char *name, char *buf)
 		tmp[strlen(tmp) - 1] = '\0'; /* take off the trailing \n */
 		strcat(tmp, "\r\n");
 
-		if(resultValue == NULL)
+		if(resultValue == nullptr)
 		{
 			sprintf(tmp, "SYSERR: Error while reading file %s.", name);
 			perror(tmp);

@@ -447,7 +447,7 @@ void aedit_parse(Descriptor * d, char *arg)
 				OLC_ACTION(d)->char_no_arg = str_dup(arg);
 			}
 			else
-				OLC_ACTION(d)->char_no_arg = NULL;
+				OLC_ACTION(d)->char_no_arg = nullptr;
 			break;
 		case AEDIT_NOVICT_OTHERS:
 			if (OLC_ACTION(d)->others_no_arg)
@@ -458,7 +458,7 @@ void aedit_parse(Descriptor * d, char *arg)
 				OLC_ACTION(d)->others_no_arg = str_dup(arg);
 			}
 			else
-				OLC_ACTION(d)->others_no_arg = NULL;
+				OLC_ACTION(d)->others_no_arg = nullptr;
 			break;
 		case AEDIT_VICT_CHAR_FOUND:
 			if (OLC_ACTION(d)->char_found)
@@ -469,7 +469,7 @@ void aedit_parse(Descriptor * d, char *arg)
 				OLC_ACTION(d)->char_found = str_dup(arg);
 			}
 			else
-				OLC_ACTION(d)->char_found = NULL;
+				OLC_ACTION(d)->char_found = nullptr;
 			break;
 		case AEDIT_VICT_OTHERS_FOUND:
 			if (OLC_ACTION(d)->others_found)
@@ -480,7 +480,7 @@ void aedit_parse(Descriptor * d, char *arg)
 				OLC_ACTION(d)->others_found = str_dup(arg);
 			}
 			else
-				OLC_ACTION(d)->others_found = NULL;
+				OLC_ACTION(d)->others_found = nullptr;
 			break;
 		case AEDIT_VICT_VICT_FOUND:
 			if (OLC_ACTION(d)->vict_found)
@@ -491,7 +491,7 @@ void aedit_parse(Descriptor * d, char *arg)
 				OLC_ACTION(d)->vict_found = str_dup(arg);
 			}
 			else
-				OLC_ACTION(d)->vict_found = NULL;
+				OLC_ACTION(d)->vict_found = nullptr;
 			break;
 		case AEDIT_VICT_NOT_FOUND:
 			if (OLC_ACTION(d)->not_found)
@@ -502,7 +502,7 @@ void aedit_parse(Descriptor * d, char *arg)
 				OLC_ACTION(d)->not_found = str_dup(arg);
 			}
 			else
-				OLC_ACTION(d)->not_found = NULL;
+				OLC_ACTION(d)->not_found = nullptr;
 			break;
 		case AEDIT_SELF_CHAR:
 			if (OLC_ACTION(d)->char_auto)
@@ -513,7 +513,7 @@ void aedit_parse(Descriptor * d, char *arg)
 				OLC_ACTION(d)->char_auto = str_dup(arg);
 			}
 			else
-				OLC_ACTION(d)->char_auto = NULL;
+				OLC_ACTION(d)->char_auto = nullptr;
 			break;
 		case AEDIT_SELF_OTHERS:
 			if (OLC_ACTION(d)->others_auto)
@@ -524,7 +524,7 @@ void aedit_parse(Descriptor * d, char *arg)
 				OLC_ACTION(d)->others_auto = str_dup(arg);
 			}
 			else
-				OLC_ACTION(d)->others_auto = NULL;
+				OLC_ACTION(d)->others_auto = nullptr;
 			break;
 		case AEDIT_VICT_CHAR_BODY_FOUND:
 			if (OLC_ACTION(d)->char_body_found)
@@ -535,7 +535,7 @@ void aedit_parse(Descriptor * d, char *arg)
 				OLC_ACTION(d)->char_body_found = str_dup(arg);
 			}
 			else
-				OLC_ACTION(d)->char_body_found = NULL;
+				OLC_ACTION(d)->char_body_found = nullptr;
 			break;
 		case AEDIT_VICT_OTHERS_BODY_FOUND:
 			if (OLC_ACTION(d)->others_body_found)
@@ -546,7 +546,7 @@ void aedit_parse(Descriptor * d, char *arg)
 				OLC_ACTION(d)->others_body_found = str_dup(arg);
 			}
 			else
-				OLC_ACTION(d)->others_body_found = NULL;
+				OLC_ACTION(d)->others_body_found = nullptr;
 			break;
 		case AEDIT_VICT_VICT_BODY_FOUND:
 			if (OLC_ACTION(d)->vict_body_found)
@@ -557,7 +557,7 @@ void aedit_parse(Descriptor * d, char *arg)
 				OLC_ACTION(d)->vict_body_found = str_dup(arg);
 			}
 			else
-				OLC_ACTION(d)->vict_body_found = NULL;
+				OLC_ACTION(d)->vict_body_found = nullptr;
 			break;
 		case AEDIT_OBJ_CHAR_FOUND:
 			if (OLC_ACTION(d)->char_obj_found)
@@ -568,7 +568,7 @@ void aedit_parse(Descriptor * d, char *arg)
 				OLC_ACTION(d)->char_obj_found = str_dup(arg);
 			}
 			else
-				OLC_ACTION(d)->char_obj_found = NULL;
+				OLC_ACTION(d)->char_obj_found = nullptr;
 			break;
 		case AEDIT_OBJ_OTHERS_FOUND:
 			if (OLC_ACTION(d)->others_obj_found)
@@ -579,7 +579,7 @@ void aedit_parse(Descriptor * d, char *arg)
 				OLC_ACTION(d)->others_obj_found = str_dup(arg);
 			}
 			else
-				OLC_ACTION(d)->others_obj_found = NULL;
+				OLC_ACTION(d)->others_obj_found = nullptr;
 			break;
 		default:
 			/* we should never get here */

@@ -38,6 +38,9 @@ extern Descriptor *descriptor_list;
 extern Object *boot_object( Object obj);
 extern Object *object_list;
 extern Character *character_list;
+extern Clock readObjectClock;
+extern Clock specialLoadClock;
+extern Clock realObjectClock;
 
 void obj_from_char(struct object_data *object);
 
@@ -54,74 +57,57 @@ Object *Object::bootLiveObject( const sql::Row &MyRow, bool recursive )
 {
 	Object *obj = nullptr;
 
-	if( atoi(MyRow["special_type"].c_str()) != SPECIAL_NONE )
+	int special_type = MyRow.getInt("special_type");
+	if( special_type != SPECIAL_NONE )
 	{
-		int special_type = atoi(MyRow["special_type"].c_str()) ;
-		/* Special */
+		specialLoadClock.turnOn();
+		boost::uuids::string_generator uuidGenerator;
 
-		std::stringstream QueryBuffer2;
-		sql::Query MyQuery;
+		//sql::Row MyRow2 = MyQuery->getRow();
+		obj = create_obj(false);
+		obj->objID = uuidGenerator(MyRow["id"].c_str());
+		std::string id = MyRow["id"];
+		obj->name = str_dup(MyRow["name"].c_str());
+		obj->short_description = str_dup(MyRow["sdesc"].c_str());
+		obj->description = str_dup(MyRow["ldesc"].c_str());
+		obj->obj_flags.value[0] = MyRow.getShort("val0");
+		obj->obj_flags.value[1] = MyRow.getShort("val1");
+		obj->obj_flags.value[2] = MyRow.getShort("val2");
+		obj->obj_flags.value[3] = MyRow.getShort("val3");
+		obj->obj_flags.value[4] = MyRow.getShort("val4");
+		obj->obj_flags.value[5] = MyRow.getShort("val5");
+		obj->obj_flags.value[6] = MyRow.getShort("val6");
+		obj->obj_flags.value[7] = MyRow.getShort("val7");
+		obj->obj_flags.value[8] = MyRow.getShort("val8");
+		obj->obj_flags.value[9] = MyRow.getShort("val9");
+		obj->obj_flags.value[10] = MyRow.getShort("val10");
+		obj->obj_flags.value[11] = MyRow.getShort("val11");
+		obj->obj_flags.extra_flags = MyRow.getShort("extra_flags");
+		obj->obj_flags.wear_flags = MyRow.getShort("wear_flags");
+		obj->obj_flags.bitvector[0] = MyRow.getLong("bitvector0");
+		obj->obj_flags.bitvector[1] = MyRow.getLong("bitvector1");
+		obj->obj_flags.bitvector[2] =MyRow.getLong("bitvector2");
+		obj->obj_flags.bitvector[3] = MyRow.getLong("bitvector3");
+		obj->obj_flags.weight = MyRow.getFloat("weight");
+		obj->obj_flags.cost = MyRow.getInt("cost");
+		obj->obj_flags.cost_per_day = MyRow.getInt("cost_per_day");
+		obj->obj_flags.offensive = MyRow.getShort("offensive");
+		obj->obj_flags.parry = MyRow.getShort("parry");
+		obj->obj_flags.dodge = MyRow.getShort("dodge");
 
-		QueryBuffer2 << "SELECT * FROM object_specials WHERE id='" << MyRow["id"] << "';";
-		try {
-			MyQuery = gameDatabase->sendQuery(QueryBuffer2.str());
-		} catch( sql::QueryException &e ) {
-			MudLog(BRF, LVL_APPR, TRUE, "Unable to load item (special data) for object ID #%d: %s",
-				MyRow["id"].c_str(), e.getMessage().c_str());
-			return nullptr;
-		}
-
-		if( MyQuery->hasNextRow() )
+		obj->scalp = new ScalpData();
+		obj->scalp->is_scalp = (special_type == SPECIAL_SCALP || special_type == SPECIAL_PLAYER_SCALP);
+		obj->scalp->player_scalp = (special_type == SPECIAL_PLAYER_SCALP);
+		obj->scalp->scalped = StringUtil::parseBoolean(MyRow["scalped"]);
+		obj->scalp->level = MyRow.getShort("level");
+		obj->scalp->race = MyRow.getShort("race");
+		obj->obj_flags.timer = MyRow.getShort("timer");
+		if (special_type == SPECIAL_CORPSE)
 		{
-			boost::uuids::string_generator uuidGenerator;
-
-			sql::Row MyRow2 = MyQuery->getRow();
-			obj = create_obj( false );
-			obj->objID = uuidGenerator(MyRow2["id"].c_str());
-			obj->name = str_dup(MyRow2["name"].c_str());
-			obj->short_description = str_dup(MyRow2["sdesc"].c_str());
-			obj->description = str_dup(MyRow2["ldesc"].c_str());
-			obj->obj_flags.value[0] = atoi(MyRow2["val0"].c_str());
-			obj->obj_flags.value[1] = atoi(MyRow2["val1"].c_str());
-			obj->obj_flags.value[2] = atoi(MyRow2["val2"].c_str());
-			obj->obj_flags.value[3] = atoi(MyRow2["val3"].c_str());
-			obj->obj_flags.value[4] = atoi(MyRow2["val4"].c_str());
-			obj->obj_flags.value[5] = atoi(MyRow2["val5"].c_str());
-			obj->obj_flags.value[6] = atoi(MyRow2["val6"].c_str());
-			obj->obj_flags.value[7] = atoi(MyRow2["val7"].c_str());
-			obj->obj_flags.value[8] = atoi(MyRow2["val8"].c_str());
-			obj->obj_flags.value[9] = atoi(MyRow2["val9"].c_str());
-			obj->obj_flags.value[10] = atoi(MyRow2["val10"].c_str());
-			obj->obj_flags.value[11] = atoi(MyRow2["val11"].c_str());
-			obj->obj_flags.extra_flags = atoi(MyRow2["extra_flags"].c_str());
-			obj->obj_flags.wear_flags = atoi(MyRow2["wear_flags"].c_str());
-			obj->obj_flags.bitvector[0] = atol(MyRow2["bitvector0"].c_str());
-			obj->obj_flags.bitvector[1] = atol(MyRow2["bitvector1"].c_str());
-			obj->obj_flags.bitvector[2] = atol(MyRow2["bitvector2"].c_str());
-			obj->obj_flags.bitvector[3] = atol(MyRow2["bitvector3"].c_str());
-			obj->obj_flags.weight = (float)atof(MyRow2["weight"].c_str());
-			obj->obj_flags.cost = atoi(MyRow2["cost"].c_str());
-			obj->obj_flags.cost_per_day = atoi(MyRow2["cost_per_day"].c_str());
-			obj->obj_flags.offensive = (sh_int)atoi(MyRow2["offensive"].c_str());
-			obj->obj_flags.parry = (sh_int)atoi(MyRow2["parry"].c_str());
-			obj->obj_flags.dodge = (sh_int)atoi(MyRow2["dodge"].c_str());
-
-			obj->scalp = new ScalpData();
-			obj->scalp->is_scalp		= (special_type == SPECIAL_SCALP || special_type == SPECIAL_PLAYER_SCALP);
-			obj->scalp->player_scalp	= (special_type == SPECIAL_PLAYER_SCALP);
-			obj->scalp->scalped = StringUtil::parseBoolean(MyRow2["scalped"]);
-			obj->scalp->level = atoi(MyRow2["level"].c_str());
-			obj->scalp->race = atoi(MyRow2["race"].c_str());
-			obj->obj_flags.timer = atoi(MyRow2["timer"].c_str());
-			if( special_type == SPECIAL_CORPSE )
-			{
-				obj->obj_flags.type_flag = ITEM_CONTAINER;
-				obj->scalp->name = MyRow2["extra_str1"];
-			}
+			obj->obj_flags.type_flag = ITEM_CONTAINER;
+			obj->scalp->name = MyRow["extra_str1"];
 		}
-		else {
-			return nullptr;//Error. Object flagged as special yet no special found... Bad!
-		}
+		specialLoadClock.turnOff();
 	}
 	else
 	{
@@ -129,23 +115,25 @@ Object *Object::bootLiveObject( const sql::Row &MyRow, bool recursive )
 		int rnum = real_object(atoi(MyRow["vnum"].c_str()));
 		if( rnum == -1 )
 			return nullptr;
+		readObjectClock.turnOn();
 		obj = read_object(rnum, REAL, false, false);
+		readObjectClock.turnOff();
 
 		boost::uuids::string_generator uuidGenerator;
 		obj->objID = uuidGenerator(MyRow["id"].c_str());
-		obj->obj_flags.bitvector[0] = atol(MyRow["bitv0"].c_str());
-		obj->obj_flags.bitvector[1] = atol(MyRow["bitv1"].c_str());
-		obj->obj_flags.bitvector[2] = atol(MyRow["bitv2"].c_str());
-		obj->obj_flags.bitvector[3] = atol(MyRow["bitv3"].c_str());
+		obj->obj_flags.bitvector[0] = MyRow.getLong("bitv0");
+		obj->obj_flags.bitvector[1] = MyRow.getLong("bitv1");
+		obj->obj_flags.bitvector[2] = MyRow.getLong("bitv2");
+		obj->obj_flags.bitvector[3] = MyRow.getLong("bitv3");
 
 		if (obj->getType() == ITEM_DRINKCON)
 		{
-			GET_OBJ_VAL(obj, 2) = atoi(MyRow["obj_extra0"].c_str());
-			GET_OBJ_VAL(obj, 1) = atoi(MyRow["obj_extra1"].c_str());
+			GET_OBJ_VAL(obj, 2) = MyRow.getShort("obj_extra0");
+			GET_OBJ_VAL(obj, 1) = MyRow.getShort("obj_extra1");
 		}
 		else if (obj->getType() == ITEM_KEY)
 		{
-			GET_OBJ_VAL(obj, 0) = atoi(MyRow["obj_extra0"].c_str());
+			GET_OBJ_VAL(obj, 0) = MyRow.getShort("obj_extra0");
 		}
 	}
 	if( MyRow["retool_name"].empty() == false )
@@ -208,6 +196,25 @@ Object *Object::loadSingleItem(const boost::uuids::uuid &objID, bool recursive)
 	return objectsLoaded[0];
 }
 
+std::string buildMainObjectLoadQuery()
+{
+	std::stringstream queryStream;
+	queryStream
+	<< " SELECT o.*,"
+	<< " (SELECT COUNT(*) FROM objects o2 WHERE o2.holder_type='O' AND o2.holder_id=o.id) AS num_holding,"
+	<< " retool.retool_name,retool.retool_sdesc,retool.retool_ldesc,retool.retool_exdesc,"
+	<< " specials.special_type,specials.name,specials.sdesc,specials.ldesc,specials.val0,specials.val1,specials.val2,"
+	<< " specials.val3,specials.val4,specials.val5,specials.val6,specials.val7,specials.val8,specials.val9,specials.val10,"
+	<< " specials.val11,specials.extra_flags,specials.wear_flags,specials.bitvector0,specials.bitvector1,"
+	<< " specials.bitvector2,specials.bitvector3,specials.weight,specials.cost,specials.cost_per_day,specials.offensive,"
+	<< " specials.parry,specials.dodge,specials.level,specials.race,specials.scalped,specials.extra_str1,specials.timer"
+	<< " FROM objects o"
+	<< " LEFT JOIN object_retools retool ON (retool.id=o.id)"
+	<< " LEFT JOIN object_specials specials ON (specials.id=o.id) ";
+
+	return queryStream.str();
+}
+
 std::vector<Object *> Object::loadMultipleItems(const std::vector<boost::uuids::uuid> &objectIds, bool recursive)
 {
 	std::stringstream queryBuffer;
@@ -220,11 +227,7 @@ std::vector<Object *> Object::loadMultipleItems(const std::vector<boost::uuids::
 	}
 
 	queryBuffer
-		<< "SELECT o.*,"
-		<< "(SELECT COUNT(*) FROM objects o2 WHERE o2.holder_type='O' AND o2.holder_id=o.id) AS num_holding,"
-		<< "retool.retool_name,retool.retool_sdesc,retool.retool_ldesc,retool.retool_exdesc "
-		<< "FROM objects o "
-		<< "LEFT JOIN object_retools retool ON retool.id=o.id "
+		<< buildMainObjectLoadQuery()
 		<< "WHERE o.id IN" << SQLUtil::buildListSQL(objectIds.begin(), objectIds.end(), true, true) << ";";
 
 	try {
@@ -250,27 +253,26 @@ std::vector<Object *> Object::loadMultipleItems(const std::vector<boost::uuids::
 	return loadedObjects;
 }
 
-std::unordered_map<boost::uuids::uuid, ObjectLoad> Object::loadItemsByTopLevelHolder(const char topLevelHolderType)
+sql::Query Object::loadItemsByTopLevelHolderQuery(const sql::Connection &connection, const char topLevelHolderType)
 {
 	std::stringstream queryBuffer;
-	sql::Query query;
-	std::unordered_map<boost::uuids::uuid, ObjectLoad> objectIdToLoadMap;
 
 	queryBuffer
-		<< "SELECT o.*,"
-		<< "(SELECT COUNT(*) FROM objects o2 WHERE o2.holder_type='O' AND o2.holder_id=o.id) AS num_holding,"
-		<< "retool.retool_name,retool.retool_sdesc,retool.retool_ldesc,retool.retool_exdesc "
-		<< "FROM objects o "
-		<< "LEFT JOIN object_retools retool ON retool.id=o.id "
-		<< "WHERE o.top_level_holder_type='R';";
+		<< buildMainObjectLoadQuery()
+		<< "WHERE o.top_level_holder_type='" << topLevelHolderType << "';";
 
-	try {
-		query = gameDatabase->sendQuery(queryBuffer.str());
-	} catch( sql::QueryException &e ) {
-		MudLog(BRF, LVL_APPR, TRUE, "Unable to load multiple items: %s", e.getMessage().c_str());
-		return objectIdToLoadMap;
-	}
+	return connection->sendQuery(queryBuffer.str());
+}
 
+std::unordered_map<boost::uuids::uuid, ObjectLoad> Object::loadItemsByTopLevelHolder(const sql::Connection &connection, const char topLevelHolderType)
+{
+	sql::Query query = loadItemsByTopLevelHolderQuery(connection, topLevelHolderType);
+	return loadItemMapFromQuery(query);
+}
+
+std::unordered_map<boost::uuids::uuid, ObjectLoad> Object::loadItemMapFromQuery(const sql::Query &query)
+{
+	std::unordered_map<boost::uuids::uuid, ObjectLoad> objectIdToLoadMap;
 	std::vector<std::string> parentObjectIds;
 
 	while( query->hasNextRow() )
@@ -333,11 +335,7 @@ std::list<std::pair<Object*, int>> Object::loadItemPairs(
     // --- Initial load ---
     std::stringstream QueryBuffer;
     QueryBuffer
-        << "SELECT o.*,"
-        << "(SELECT COUNT(*) FROM objects o2 WHERE o2.holder_type='O' AND o2.holder_id=o.id) AS num_holding,"
-        << "retool.retool_name,retool.retool_sdesc,retool.retool_ldesc,retool.retool_exdesc "
-        << "FROM objects o "
-        << "LEFT JOIN object_retools retool ON retool.id=o.id "
+        << buildMainObjectLoadQuery()
         << "WHERE o.holder_type='" << holderType << "' "
         << "AND o.holder_id='" << holderID << "';";
 
@@ -375,11 +373,7 @@ std::list<std::pair<Object*, int>> Object::loadItemPairs(
             // Build a single IN(...) query for all current holders
             std::stringstream batchQuery;
             batchQuery
-                << "SELECT o.*,"
-                << "(SELECT COUNT(*) FROM objects o2 WHERE o2.holder_type='O' AND o2.holder_id=o.id) AS num_holding,"
-                << "retool.retool_name,retool.retool_sdesc,retool.retool_ldesc,retool.retool_exdesc "
-                << "FROM objects o "
-                << "LEFT JOIN object_retools retool ON retool.id=o.id "
+                << buildMainObjectLoadQuery()
                 << "WHERE o.holder_type='O' AND o.holder_id IN (";
 
             for (std::size_t i = 0; i < holdersToLoad.size(); ++i)
@@ -813,7 +807,7 @@ void Character::itemSave()
 	//Equipment.
 	for(int equipment_position = 0; equipment_position < NUM_WEARS;++equipment_position )
 	{
-		if( this->equipment[equipment_position] != NULL )
+		if( this->equipment[equipment_position] != nullptr )
 			items.push_back(this->equipment[equipment_position]);
 	}
 	//Inventory.
@@ -1021,7 +1015,7 @@ void crashListRent(Character *ch, char *name)
 		return;
 	}
 
-	if( (vict = CharacterUtil::loadCharacter(name)) == NULL )
+	if( (vict = CharacterUtil::loadCharacter(name)) == nullptr )
 	{
 		ch->send(NOPERSON);
 		return;
@@ -1234,7 +1228,7 @@ int genReceptionist(Character * ch, Character * recep, char *cmd, char *arg, int
 
 	if (!cmd && !MiscUtil::random(0, 5))
 	{
-		do_action(recep, NULL, CommandUtil::get()->getCommandIndex(action_table[MiscUtil::random(0, 8)]), 0);
+		do_action(recep, nullptr, CommandUtil::get()->getCommandIndex(action_table[MiscUtil::random(0, 8)]), 0);
 		return FALSE;
 	}
 
@@ -1442,7 +1436,7 @@ CommandHandler  do_insert  = DEFINE_COMMAND
 		needExtraction = true;
 	}
 	ch->send("You create a tear in spacetime, and place %s inside.\r\n", obj->short_description);
-	Act("$n creates a tear in spacetime, and places $p inside.", TRUE, ch, obj, NULL, TO_ROOM);
+	Act("$n creates a tear in spacetime, and places $p inside.", TRUE, ch, obj, nullptr, TO_ROOM);
 
 	if( needExtraction ) {
 		obj->RemoveFromAll();
@@ -1486,7 +1480,7 @@ CommandHandler  do_retrieve  = DEFINE_COMMAND
 		obj_to_char(obj, ch);
 
 		ch->send("You create a tear in spacetime, reach in, and retrieve %s.\r\n", obj->short_description);
-		Act("$n creates a tear in spacetime, reaches in, and retrieves $p.", TRUE, ch, obj, NULL, TO_ROOM);
+		Act("$n creates a tear in spacetime, reaches in, and retrieves $p.", TRUE, ch, obj, nullptr, TO_ROOM);
 		return;
 	}
 	else

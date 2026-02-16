@@ -37,26 +37,26 @@ void js_enter_game_trigger(Character *self, Character *actor);
 
 Descriptor::Descriptor()
 {
-	descriptor = 0;
+	descriptor = nullptr;
 	memset( &host, 0, sizeof( host ) );
 	bad_pws = 0;
 	idle_tics = 0;
 	connected = 0;
 	wait = 0;
 	desc_num = 0;
-	showstr_head = 0;
-	showstr_vector= 0;
+	showstr_head = nullptr;
+	showstr_vector= nullptr;
 	showstr_count = 0;
 	showstr_page = 0;
-	str = 0;
+	str = nullptr;
 	max_str = 0;
-	backstr = 0;
-	character = 0;
-	original = 0;
-	snooping = 0;
-	snoop_by = 0;
-	next = 0;
-	olc = 0;
+	backstr = nullptr;
+	character = nullptr;
+	original = nullptr;
+	snooping = nullptr;
+	snoop_by = nullptr;
+	next = nullptr;
+	olc = nullptr;
 	loggedIn = false;
 }
 
@@ -193,7 +193,7 @@ void Descriptor::processInput()
 //and also send a message to the gateway to close the client connection.
 void Descriptor::disconnect()
 {
-	if(gatewayConnection != NULL && !session.empty()) {
+	if(gatewayConnection != nullptr && !session.empty()) {
 
 		gatewayConnection->send("Close " + session + "\n");
 	}
@@ -205,7 +205,7 @@ void Descriptor::disconnect()
 //but send a message to the gateway telling it to hold on to the connection.
 void Descriptor::persistentDisconnect()
 {
-	if(gatewayConnection != NULL) {
+	if(gatewayConnection != nullptr) {
 
 		gatewayConnection->send("PersistentClose " + session + "\n");
 	}
@@ -228,12 +228,12 @@ void Descriptor::cleanup()
 
 	/* Forget snooping */
 	if ( this->snooping )
-		this->snooping->snoop_by = NULL;
+		this->snooping->snoop_by = nullptr;
 
 	if ( this->snoop_by )
 	{
 		this->snoop_by->send( "Your snoop target is no longer among us.\r\n" );
-		this->snoop_by->snooping = NULL;
+		this->snoop_by->snooping = nullptr;
 	}
 
 	/*. Kill any OLC stuff .*/
@@ -277,7 +277,7 @@ void Descriptor::cleanup()
 			Act( "$n has lost $s link.", TRUE, this->character, 0, 0, TO_ROOM );
 			MudLog( NRM, MAX( LVL_IMMORT,
 				GET_INVIS_LEV( this->character ) ), TRUE, "Closing link to: %s.", GET_NAME( this->character ) );
-			this->character->desc = NULL;
+			this->character->desc = nullptr;
 		}
 
 		else
@@ -293,7 +293,7 @@ void Descriptor::cleanup()
 	/* JE 2/22/95 -- part of my unending quest to make switch stable */
 
 	if ( this->original && this->original->desc )
-		this->original->desc = NULL;
+		this->original->desc = nullptr;
 
 	if ( this->showstr_head )
 		delete[] ( this->showstr_head );
@@ -467,7 +467,7 @@ void Descriptor::processWebSocketSaveUserMacroCommand(Json::Value &commandObject
 {
 	if(this->character)
 	{
-		UserMacro *userMacro = NULL;
+		UserMacro *userMacro = nullptr;
 		unsigned short keyCode;
 		std::optional<unsigned short> location;
 		std::string replacement;
@@ -508,7 +508,7 @@ void Descriptor::processWebSocketSaveUserMacroCommand(Json::Value &commandObject
 			int userMacroId = commandObject["id"].asInt();
 			userMacro = CharacterUtil::getUserMacro(gameDatabase, userMacroId);
 
-			if(userMacro == NULL)
+			if(userMacro == nullptr)
 			{
 				MudLog(BRF, MAX(LVL_APPR, GET_INVIS_LEV(character)), TRUE, "%s attempting to save user macro that does not exist. ID: %d. Key: %d, Replacement: %s", GET_NAME(character), userMacroId, keyCode, StringUtil::vaEscape(replacement).c_str());
 				return;
@@ -613,7 +613,7 @@ void Descriptor::processWebSocketSignInCommand(Json::Value &commandObject)
 
 	if( Conf->play.switch_restriction )
 	{
-		Switch *sw = NULL;
+		Switch *sw = nullptr;
 		if(SwitchManager::GetManager().WillBeMultiplaying( this->host, username ) )
 		{
 			response["error"] = "You are already signed in to another character.";
@@ -621,7 +621,7 @@ void Descriptor::processWebSocketSignInCommand(Json::Value &commandObject)
 			return;
 		}
 
-		if( (sw = SwitchManager::GetManager().GetGreatestSwitch( this->host, username )) != NULL )
+		if( (sw = SwitchManager::GetManager().GetGreatestSwitch( this->host, username )) != nullptr )
 		{
 			if( !SwitchManager::GetManager().HasWaitedLongEnough(username, host, sw) )
 			{
@@ -638,7 +638,7 @@ void Descriptor::processWebSocketSignInCommand(Json::Value &commandObject)
 
 	Character *ch = CharacterUtil::loadCharacter(username);
 
-	if(ch == NULL || PLR_FLAGGED(ch, PLR_DELETED))
+	if(ch == nullptr || PLR_FLAGGED(ch, PLR_DELETED))
 	{
 		if(ch)
 			delete ch;
@@ -807,7 +807,7 @@ void Descriptor::processWebSocketUserCreationCommand(Json::Value &commandObject)
 		errors.push_back("The username you entered is invalid.");
 	else if (Conf->play.switch_restriction && SwitchManager::GetManager().WillBeMultiplaying(this->host, username))
 		errors.push_back("You are already logged into another character. You must log out before switching.");
-	else if (Conf->play.switch_restriction && (sw = SwitchManager::GetManager().GetGreatestSwitch(this->host, username)) != NULL)
+	else if (Conf->play.switch_restriction && (sw = SwitchManager::GetManager().GetGreatestSwitch(this->host, username)) != nullptr)
 	{
 		if (!SwitchManager::GetManager().HasWaitedLongEnough(username, host, sw))
 		{
@@ -815,12 +815,12 @@ void Descriptor::processWebSocketUserCreationCommand(Json::Value &commandObject)
 			errors.push_back("You must wait " + MiscUtil::toString(((int)Remainder.Minutes())) + " minute" + (Remainder.Minutes() == 1 ? "" : "s") + ", " + MiscUtil::toString((int)Remainder.Seconds() % 60) + " second" + (Remainder.Seconds() % 60 == 1 ? "" : "s") + " before you may log into another character.");
 		}
 	}
-	else if (playerExists(username) && (previousCharacter = CharacterUtil::loadCharacter(username)) != NULL)
+	else if (playerExists(username) && (previousCharacter = CharacterUtil::loadCharacter(username)) != nullptr)
 	{
 		if (!PLR_FLAGGED(previousCharacter, PLR_DELETED))
 			errors.push_back("A character by that name already exists.");
 		delete previousCharacter;
-		previousCharacter = NULL;
+		previousCharacter = nullptr;
 	}
 
 	if (password.length() < MIN_PWD_LENGTH || password.length() > MAX_PWD_LENGTH)
@@ -896,7 +896,7 @@ void Descriptor::processWebSocketCommands()
 		const char *inputDataBuffer = this->descriptor->getInputDataBuffer();
 		const char *endOfCommandPointer = strchr(inputDataBuffer, 0x06);
 
-		if(endOfCommandPointer != NULL)
+		if(endOfCommandPointer != nullptr)
 		{
 			std::string jsonCommand = std::string(inputDataBuffer, endOfCommandPointer - inputDataBuffer);
 			Json::Value commandObject;
@@ -988,7 +988,7 @@ void Descriptor::completeEnterGame()
 	MudLog( CMP, MAX( GET_INVIS_LEV( this->character ), LVL_APPR ), TRUE, "%s logging in at room %d.", GET_NAME( this->character ), this->character->PlayerData->load_room );
 
 	this->character->AddLogin(this->host, DateTime(), this->getGatewayDescriptorType());
-	Character *mount = NULL;
+	Character *mount = nullptr;
 
 	if ( this->character->PlayerData->mount_save > 0 )
 	{

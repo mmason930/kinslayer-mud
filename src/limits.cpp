@@ -471,7 +471,7 @@ int check_idling(Character * ch)
 
 	if(ch->player.timer >= CONFIG_IDLE_RENT_TIME)
 	{
-		bool isLinkless = (ch->desc == NULL);
+		bool isLinkless = (ch->desc == nullptr);
 		if (ch->desc)
 		{
 			STATE(ch->desc) = CON_DISCONNECT;
@@ -481,8 +481,8 @@ int check_idling(Character * ch)
 			 * -gg 3/1/98 (Happy anniversary.)
 			 */
 
-			ch->desc->character = NULL;
-			ch->desc = NULL;
+			ch->desc->character = nullptr;
+			ch->desc = nullptr;
 		}
 
 		MudLog(CMP, LVL_GOD, TRUE, "%s force-rented and extracted (idle).", GET_NAME(ch));
