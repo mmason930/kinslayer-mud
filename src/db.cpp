@@ -69,9 +69,7 @@ int Character::top_mob_id = -2; /* First MOB id(counts downward) */
 
 extern int gamePort;
 
-Clock TheClock, TheClock2, TheClock3, TheClock4, TheClock5, TheClock6, TheClock7, TheClock8, TheClock9;
-
-class Wizard *wizlist =	nullptr;
+Wizard *wizlist =	nullptr;
 std::list<Warrant *>		Warrants;
 std::list<Legend *>			Legends;
 std::list<std::string>	   *Tips;
@@ -90,7 +88,7 @@ GameTime *mud_time_passed(time_t t2, time_t t1);
 std::vector<int> ItemCount;
 std::vector<std::string> MySQLTables;
 std::shared_ptr<std::vector<JSTrigger*> > globalJS_Scripts;
-class Config *Conf;
+Config *Conf;
 void BootKits();
 boost::uuids::random_generator Object::uuidGenerator = boost::uuids::random_generator();
 auto nilUuidGenerator = boost::uuids::nil_generator();
@@ -130,18 +128,18 @@ std::vector<int> BodyPercents;
 /* local functions */
 int file_to_string(const char *name, char *buf);
 int is_zone_empty(int zone_nr);
-void assign_mobiles(void);
-void assign_objects(void);
-void assign_rooms(void);
-void assign_the_shopkeepers(void);
-void buildPlayerIndex(void);
-void destroyPlayerIndex(void);
-void bootWorld(void);
+void assign_mobiles();
+void assign_objects();
+void assign_rooms();
+void assign_the_shopkeepers();
+void buildPlayerIndex();
+void destroyPlayerIndex();
+void bootWorld();
 void renumberRoomExits(const std::map<Room *, std::map<int, int>> &roomToExitToVnumMap);
-void renum_zone_table(void);
+void renum_zone_table();
 void add_follower(Character * ch, Character * leader);
 int perform_group( Character *ch, Character *vict );
-void reset_time(void);
+void reset_time();
 void PlayerFileCycle();
 void startGameSession();
 std::future<std::unordered_map<int, int>> StartSetupItemCount();
@@ -149,7 +147,7 @@ std::future<Object::ObjectPreBootData> Object::preBootFuture;
 void FinishSetupItemCount(std::future<std::unordered_map<int, int>> &future);
 
 // external functions
-extern void load_messages(void);
+extern void load_messages();
 extern int level_exp(int level);
 void boot_the_shops();
 
@@ -474,7 +472,14 @@ void loadScreenText()
 	}
 }
 
-Clock MobClock, ObjClock, EqClock;
+Clock allZonesClock, mobLoadClock, objectLoadClock, chestLoadClock, objToObjClock, giveClock, equipClock, removeClock, doorClock, defaultClock, jsResetClock, setAgeClock;
+Clock countMobsClock, countMobsRoomClock;
+Clock allocateMobClock, logMobLoadClock, mobFollowClock, mobGroupClock, mobLoadTriggersClock;
+Clock skillsClock, skillsDefaultClock, kitLoopClock, kitLoadClock;
+Clock allocateMobTopClock, allocateMobInnerClock, allocateMobBottomClock;
+Clock kitItemPercClock, kitItemRealObjClock, kiteItemCountClock, kitItemReadObjClock, kitItemEquipObjClock, kitItemCreatorClock, kitItemLoadTriggersClock;
+Clock equipLightClock, equipAffModifyArClock, equipClanAffModifyClock;
+
 /* body of the booting system */
 void boot_db(void)
 {
@@ -503,7 +508,7 @@ void boot_db(void)
 
 	Log("Setting Up Editor Interfaces.");
 	game->setupEditorInterfaces();
-	
+
 	Log("Booting the Configuration.");
 	Conf = new Config();
 	Conf->load();
@@ -517,28 +522,25 @@ void boot_db(void)
 
     Log("Booting JS Triggers");
     // get() forces the ctoring
-    JSManager* temp = JSManager::get();
-
-	Log("Compiling LoDash");
-	temp->loadScriptsFromFile(std::string("scripts/lib/util/LoDash-2.4.1.js"));
+    JSManager* jsManager = JSManager::get();
 
 	Log("Monitoring file modifications...");
-	temp->monitorFileModifications(false, true);
+	jsManager->monitorFileModifications(false, true);
 
 	Log("Loading scripts from filesystem...");
-	temp->loadScriptsFromFilesystem("scripts", false);
-	
+	jsManager->loadScriptsFromFilesystem("scripts", false);
+
 	Log("Processing Script imports...");
-	temp->processScriptImports();
+	jsManager->processScriptImports();
 	
 	Log("Setting up monitoring threads...");
-	temp->setupMonitoringThreads();
+	jsManager->setupMonitoringThreads();
 
 	Log("Loading triggers...");
-	temp->loadTriggers();
+	jsManager->loadTriggers();
 
 	Log("Loading script map...");
-	temp->loadScriptMap();
+	jsManager->loadScriptMap();
 
 	JSManager::get()->executeExpression("initGlobals();");
 
@@ -617,7 +619,10 @@ void boot_db(void)
 	Log("Finish counting file-stored items.");
 	FinishSetupItemCount(vnumToItemCountMapFuture);
 
-	//TheClock.Reset(true);
+	allZonesClock.turnOn();
+	equipLightClock.reset(false);
+	equipAffModifyArClock.reset(false);
+	equipClanAffModifyClock.reset(false);
 	Zone *zone;
 	if (Conf->empty_world == false && game->getBasicConfigValue("Dev Mode") == "0")
 	{
@@ -627,6 +632,56 @@ void boot_db(void)
 			zone->Reset();
 		}
 	}
+	allZonesClock.turnOff();
+
+	Log("allZonesClock: %f", allZonesClock.getSeconds());
+	Log("countMobsClock: %f", countMobsClock.getSeconds());
+	Log("countMobsRoomClock: %f", countMobsRoomClock.getSeconds());
+	Log("mobLoadClock: %f", mobLoadClock.getSeconds());
+
+	Log("allocateMobClock: %f", allocateMobClock.getSeconds());
+	Log("allocateMobInnerClock: %f", allocateMobInnerClock.getSeconds());
+
+	Log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+	Log("allocateMobTopClock: %f", allocateMobTopClock.getSeconds());
+	Log("skillsClock: %f", skillsClock.getSeconds());
+	Log("skillsDefaultClock: %f", skillsDefaultClock.getSeconds());
+	Log("kitLoopClock: %f", kitLoopClock.getSeconds());
+
+	Log("kitItemPercClock: %f", kitItemPercClock.getSeconds());
+	Log("kitItemRealObjClock: %f", kitItemRealObjClock.getSeconds());
+	Log("kiteItemCountClock: %f", kiteItemCountClock.getSeconds());
+	Log("kitItemReadObjClock: %f", kitItemReadObjClock.getSeconds());
+	Log("kitItemEquipObjClock: %f", kitItemEquipObjClock.getSeconds());
+
+	Log("equipLightClock: %f", equipLightClock.getSeconds());
+	Log("equipAffModifyArClock: %f", equipAffModifyArClock.getSeconds());
+	Log("equipClanAffModifyClock: %f", equipClanAffModifyClock.getSeconds());
+
+	Log("kitItemCreatorClock: %f", kitItemCreatorClock.getSeconds());
+	Log("kitItemLoadTriggersClock;: %f", kitItemLoadTriggersClock.getSeconds());
+
+	Log("kitLoadClock: %f", kitLoadClock.getSeconds());
+	Log("allocateMobBottomClock: %f", allocateMobBottomClock.getSeconds());
+	Log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
+	Log("logMobLoadClock: %f", logMobLoadClock.getSeconds());
+	Log("mobFollowClock: %f", mobFollowClock.getSeconds());
+	Log("mobGroupClock: %f", mobGroupClock.getSeconds());
+	Log("mobLoadTriggersClock: %f", mobLoadTriggersClock.getSeconds());
+
+	Log("objectLoadClock: %f", objectLoadClock.getSeconds());
+	Log("chestLoadClock: %f", chestLoadClock.getSeconds());
+	Log("objToObjClock: %f", objToObjClock.getSeconds());
+	Log("giveClock: %f", giveClock.getSeconds());
+	Log("equipClock: %f", equipClock.getSeconds());
+	Log("removeClock: %f", removeClock.getSeconds());
+	Log("doorClock: %f", doorClock.getSeconds());
+	Log("defaultClock: %f", defaultClock.getSeconds());
+	Log("jsResetClock: %f", jsResetClock.getSeconds());
+	Log("setAgeClock;: %f", setAgeClock.getSeconds());
+//	exit(0);
+
 	reset_q.head = reset_q.tail = nullptr;
 	boot_time = time(nullptr);
 
@@ -894,6 +949,7 @@ int CountMobsTotal(int mob_no)
 /* Added by Galnor - Count mobs inside of a room */
 int CountMobsRoom(int mob_no, Room *room)
 {
+	countMobsClock.turnOn();
 	static Character *mob;
 	static int i;
 
@@ -903,6 +959,7 @@ int CountMobsRoom(int mob_no, Room *room)
 			++i;
 	}
 
+	countMobsClock.turnOff();
 	return i;
 }
 
@@ -1996,15 +2053,19 @@ bool Character::saveSkills()
 
 	batchInsertStatement.start();
 
-	for(auto skillIter = skills.begin();skillIter != skills.end();++skillIter)
+	for(short skillId = 0;skillId < MAX_SKILLS;++skillId)
 	{
-		batchInsertStatement.beginEntry();
+		auto skillPercent = getSkill(skillId);
+		if (skillPercent > -1)
+		{
+			batchInsertStatement.beginEntry();
 
-		batchInsertStatement.putInt( this->player.idnum );
-		batchInsertStatement.putInt( (*skillIter).second.getSkillId() );
-		batchInsertStatement.putInt( (*skillIter).second.getPercent() );
+			batchInsertStatement.putInt( this->player.idnum );
+			batchInsertStatement.putInt( skillId );
+			batchInsertStatement.putInt( skillPercent );
 
-		batchInsertStatement.endEntry();
+			batchInsertStatement.endEntry();
+		}
 	}
 
 	batchInsertStatement.finish();
@@ -2810,6 +2871,8 @@ void Character::zero()
 	this->PlayerData				=	0;
 	this->wait						=	0;
 	this->pulverizeCooldown			=	0;
+	this->skills.resize(MAX_SKILLS);
+	ranges::fill(this->skills, 0);
 
 	// struct CharAbilityData real_abils
 	memset(&(this->real_abils), 0, sizeof(this->real_abils));
@@ -2883,11 +2946,12 @@ void CharPointData::operator =(CharPointData &source)
 
 Character::Character(const int nr, const int type, bool full_copy)
 {
-	++Character::nr_alloc;
-	int i, p, ovnum = -1;
+	allocateMobInnerClock.turnOn();
+	allocateMobTopClock.turnOn();
+	++nr_alloc;
+	int i, ovnum = -1;
 	Character *source;
 	Object *obj;
-	std::list<int>::iterator ai;
 
 	if (type == VIRTUAL)
 	{
@@ -2896,6 +2960,7 @@ Character::Character(const int nr, const int type, bool full_copy)
 			Log("Mobile (V) %d does not exist in database.", nr);
 			this->zero();
 			this->player.idnum = Character::top_mob_id--;
+			allocateMobInnerClock.turnOff();
 			return;
 		}
 	}
@@ -2917,18 +2982,18 @@ Character::Character(const int nr, const int type, bool full_copy)
 	this->real_abils = source->real_abils;
 	this->aff_abils = source->aff_abils;
 	this->player.CopyFrom( &source->player, false );
-	this->next_in_room = 0;
-	this->next_fighting = 0;
-	this->DecayedBy = 0;
-	this->SlowedBy = 0;
-	this->BurnedBy = 0;
-	this->PlaguedBy = 0;
-	this->LoadData = 0;
-	this->PokerData = 0;
-	this->PokerTable = 0;
-	this->NextSeated = 0;
-	this->followers = 0;
-	this->master = 0;
+	this->next_in_room = nullptr;
+	this->next_fighting = nullptr;
+	this->DecayedBy = nullptr;
+	this->SlowedBy = nullptr;
+	this->BurnedBy = nullptr;
+	this->PlaguedBy = nullptr;
+	this->LoadData = nullptr;
+	this->PokerData = nullptr;
+	this->PokerTable = nullptr;
+	this->NextSeated = nullptr;
+	this->followers = nullptr;
+	this->master = nullptr;
 	this->timer = source->timer;
 	this->command_ready = false;
 	this->Restat = false;
@@ -2944,22 +3009,21 @@ Character::Character(const int nr, const int type, bool full_copy)
 	this->body_structure = source->body_structure;
 	this->cmd_no = 0;
 	this->last_tell = 0;
-	this->desc = 0;
+	this->desc = nullptr;
 	this->nr = source->nr;
-	this->was_in_room = 0;
-	this->carrying = 0;
+	this->was_in_room = nullptr;
+	this->carrying = nullptr;
 	this->affected = source->affected;
 	this->affection_list = source->affection_list;
 	this->ShieldBlock = false;
 	this->CannotFinishCharge = false;
 	this->ps_tgt = -1;
-	this->Eavesdropping = 0;
-	this->in_room = 0;
+	this->Eavesdropping = nullptr;
+	this->in_room = nullptr;
 	this->wait = 0;
 	this->player.idnum = -1;
 	this->pulverizeCooldown = 0;
 	memset(&this->equipment, 0, sizeof(this->equipment));
-	//memcpy(&this->skills, &source->skills, sizeof(this->skills));
 
 	this->next = character_list;
 	character_list = this;
@@ -2972,8 +3036,8 @@ Character::Character(const int nr, const int type, bool full_copy)
 	this->points.mana = this->points.max_mana;
 	this->points.move = this->points.max_move;
 
-	this->player.time.birth.setTime(time(0));
-	this->player.time.logon.setTime(time(0));
+	this->player.time.birth.setTime(time(nullptr));
+	this->player.time.logon.setTime(time(nullptr));
 	this->player.time.played = 0;
 
 	if(MOB_FLAGGED(this, MOB_INVIS))
@@ -2982,13 +3046,20 @@ Character::Character(const int nr, const int type, bool full_copy)
 		SET_BIT_AR(AFF_FLAGS(this), AFF_INVISIBLE);
 	}
 
-	for(p = 0;p < MAX_SKILLS;++p)
-		SET_SKILL(this, p, 99);
+	allocateMobTopClock.turnOff();
+	skillsClock.turnOn();
+
+	this->skills.resize(MAX_SKILLS);
+	ranges::fill(this->skills, 99);
+	skillsClock.turnOff();
+	skillsDefaultClock.turnOn();
 	this->SetSkillDefaults();
+	skillsDefaultClock.turnOff();
 
 	/* Serai - go through kit and equip mobs on creation */
 	if (source->MobData && source->MobData->primary_kit)
 	{
+		kitLoopClock.turnOn();
 		Kit *k = source->MobData->primary_kit;
 		//Load the equipment items.
 		for(unsigned int tt = 0; tt < (unsigned int)NUM_WEARS; ++tt)
@@ -2997,25 +3068,45 @@ Character::Character(const int nr, const int type, bool full_copy)
 			{
 				for(unsigned int kit = 0; kit < source->MobData->primary_kit->KitItems.size(); ++kit)
 				{
+					kitItemPercClock.turnOn();
 					if (source->MobData->primary_kit->KitItems[kit][tt].GetItemVnum() == NOTHING ||
 					MiscUtil::random(0, 100) > source->MobData->primary_kit->KitItems[kit][tt].GetPercent())
+					{
+						kitItemPercClock.turnOff();
 						continue;
+					}
+					kitItemPercClock.turnOff();
 
+					kitItemRealObjClock.turnOn();
 					ovnum = real_object(source->MobData->primary_kit->KitItems[kit][tt].GetItemVnum());
+					kitItemRealObjClock.turnOff();
 
+					kiteItemCountClock.turnOn();
 					if (ovnum < 0 || (obj_proto[ovnum]->Max != -1 && ItemCount[ovnum] >= obj_proto[ovnum]->Max))
+					{
+						kiteItemCountClock.turnOff();
 						continue;
+					}
+					kiteItemCountClock.turnOff();
 
 //					if(mob->CanWear((obj = read_object(ovnum, REAL, true)), tt))
 //					{
 					//FOGELMARKER
+						kitItemReadObjClock.turnOn();
 						obj = read_object(ovnum, REAL, true);
+						kitItemReadObjClock.turnOff();
+						kitItemEquipObjClock.turnOn();
 						equip_char(this, obj, tt);
+						kitItemEquipObjClock.turnOff();
+						kitItemCreatorClock.turnOn();
 						obj->creator = "kit for " + this->player.name;
+						kitItemCreatorClock.turnOff();
 
+						kitItemLoadTriggersClock.turnOn();
 						if( !obj->IsPurged() ) {
 							js_load_triggers(obj);
 						}
+						kitItemLoadTriggersClock.turnOff();
 //					}
 //					else
 //						delete obj;
@@ -3023,6 +3114,9 @@ Character::Character(const int nr, const int type, bool full_copy)
 				}
 			}
 		}
+		kitLoopClock.turnOff();
+
+		kitLoadClock.turnOn();
 		//Load the inventory items.
 		for(unsigned int i = 0;i < k->KitInventory.size();++i)
 		{
@@ -3041,9 +3135,13 @@ Character::Character(const int nr, const int type, bool full_copy)
 				js_load_triggers(obj);
 			}
 		}
+		kitLoadClock.turnOff();
 	}
+	allocateMobBottomClock.turnOn();
 	++MobManager::GetManager().GetIndex((unsigned int)i)->number;
-	this->player.idnum = Character::top_mob_id--;
+	this->player.idnum = top_mob_id--;
+	allocateMobBottomClock.turnOff();
+	allocateMobInnerClock.turnOff();
 }
 
 Character::Character(eCharType MyType)

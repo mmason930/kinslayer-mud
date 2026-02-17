@@ -86,7 +86,7 @@ flusspferd::object JS_getGlobalObject();
 flusspferd::string JS_getUserNameByUserId(int userId);
 flusspferd::value JS_getUserIdByUserName(flusspferd::string userName);
 void JS_saveTopLevelHolderItems(const std::string &holderType, const std::string &holderId, const flusspferd::array &objects);
-flusspferd::object JS_llmResponse(const flusspferd::object &requestObject);
+flusspferd::object JS_llmResponse(flusspferd::value requestObject);
 
 //const char holderType, const std::string &holderId, const std::list<Object *> &contents)
 

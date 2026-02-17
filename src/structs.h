@@ -1733,45 +1733,6 @@ enum eCharType
 	CharMob, CharPlayer, CharNone
 };
 
-class PlayerSkill
-{
-private:
-	sbyte percent;
-	short int skillId;
-public:
-
-	PlayerSkill(const int percent, const short int skillId)
-	{
-		this->percent = percent;
-		this->skillId = skillId;
-	}
-
-	void setPercent(const int percent)
-	{
-		this->percent = (sbyte)percent;
-	}
-	int getPercent()
-	{
-		return percent;
-	}
-
-	short int getSkillId()
-	{
-		return skillId;
-	}
-
-	void setSKillId(short int skillId)
-	{
-		this->skillId = skillId;
-	}
-
-	PlayerSkill()
-	{
-		percent = 0;
-		skillId = 0;
-	}
-};
-
 class Character
 //11/06/2009 - implement JSBindable interface
 	: public JSBindable, public Entity
@@ -1846,7 +1807,7 @@ public:
 	long	last_tell;				/* idnum of last tell from		*/
 	DateTime	restat_time;
 	DateTime	reset_time;
-	std::map<short int, PlayerSkill > skills;
+	std::vector<short> skills;
 	std::shared_ptr<EditorInterfaceInstance> editorInterfaceInstance;
 
 	bool purged;					/* Is this character queued for purging? */

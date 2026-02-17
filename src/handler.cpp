@@ -561,25 +561,19 @@ void affect_modify(Character *ch, sbyte loc, sbyte mod, long bitv, bool add
 	aff_apply_modify(ch, loc, mod, str);
 }
 
-void affect_modify_ar(Character *ch, sbyte loc, sbyte mod, int bitv[], bool add
-	                     )
+void affect_modify_ar(Character *ch, sbyte loc, sbyte mod, int bitv[], bool add)
 {
-	int i , j;
+	int i;
 
 	if (add)
 	{
-		for(i = 0; i < AF_ARRAY_MAX; ++i)
-			for(j = 0; j < 32; ++j)
-				if(IS_SET_AR(bitv, (i*32)+j))
-					SET_BIT_AR(AFF_FLAGS(ch), (i*32)+j);
+		for (i = 0; i < AF_ARRAY_MAX; ++i)
+			AFF_FLAGS(ch)[i] |= bitv[i];
 	}
-
 	else
 	{
-		for(i = 0; i < AF_ARRAY_MAX; i++)
-			for(j = 0; j < 32; j++)
-				if(IS_SET_AR(bitv, (i*32)+j))
-					REMOVE_BIT_AR(AFF_FLAGS(ch), (i*32)+j);
+		for (i = 0; i < AF_ARRAY_MAX; ++i)
+			AFF_FLAGS(ch)[i] &= ~bitv[i];
 
 		mod = -mod;
 	}
@@ -1043,7 +1037,7 @@ float Object::Weight()
 }
 
 /********************************************************/
-
+extern Clock equipLightClock, equipAffModifyArClock, equipClanAffModifyClock;
 void equip_char(Character * ch, Object * obj, int pos)
 {
 	int j;
@@ -1073,28 +1067,35 @@ void equip_char(Character * ch, Object * obj, int pos)
 		return;
 	}
 
-	objectMoveLogger.logObjectMove(obj->objID, std::string("Equipped to ") + ch->getUserType()->getStandardName() + std::string(" ") + ToString(ch->getUserId()));
+	//objectMoveLogger.logObjectMove(obj->objID, std::string("Equipped to ") + ch->getUserType()->getStandardName() + std::string(" ") + ToString(ch->getUserId()));
 
 	GET_EQ(ch, pos) = obj;
 	obj->worn_by = ch;
 	obj->worn_on = pos;
 
 
+	equipLightClock.turnOn();
 	if (ch->in_room)
 	{
 		if (pos == WEAR_LIGHT && obj->getType() == ITEM_LIGHT)
 			if (GET_OBJ_VAL(obj, 2))	/* if light is ON */
 				ch->in_room->setLight(ch->in_room->getLight() + 1);
 	}
+	equipLightClock.turnOff();
+
+	equipAffModifyArClock.turnOn();
 
 	for (j = 0; j < MAX_OBJ_AFFECT; ++j)
 		affect_modify_ar(ch, obj->affected[j].location, obj->affected[j].modifier, (int *) obj->obj_flags.bitvector, TRUE);
+	equipAffModifyArClock.turnOff();
 
+	equipClanAffModifyClock.turnOn();
 	if ( ch->isInClan( GET_OBJ_CLAN( obj ) ) )
 	{
 		affect_modify_ar(ch, APPLY_MOVE, GET_OBJ_CL_MVS(obj), (int *) obj->obj_flags.bitvector, TRUE);
 		affect_modify_ar(ch, APPLY_HIT, GET_OBJ_CL_HPS(obj), (int *) obj->obj_flags.bitvector, TRUE);
 	}
+	equipClanAffModifyClock.turnOff();
 
 	//affect_total(ch);
 }

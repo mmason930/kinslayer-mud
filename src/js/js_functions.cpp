@@ -1535,13 +1535,39 @@ void JS_sendToZone(int zoneNumber, flusspferd::string message)
 	sendToZone(message.c_str(), zone->GetRnum());
 }
 
-flusspferd::object JS_llmResponse(const flusspferd::object &requestObject)
+flusspferd::object JS_llmResponse(flusspferd::value requestValue)
 {
+	if (!requestValue.is_object())
+	{
+		throw flusspferd::exception("First argument to llmResponse must be an object.");
+	}
+	flusspferd::object requestObject = requestValue.to_object();
 	flusspferd::object responseObject;
+
+	if (!requestObject.has_property("model"))
+	{
+		throw flusspferd::exception("Missing property 'model'");
+	}
+	if (!requestObject.has_property("prompt"))
+	{
+		throw flusspferd::exception("Missing property 'prompt'");
+	}
+	if (!requestObject.has_property("onSuccess"))
+	{
+		throw flusspferd::exception("Missing property 'onSuccess'");
+	}
+
+
 
 	std::string model = requestObject.get_property("model").to_string().to_string();
 	std::string prompt = requestObject.get_property("prompt").to_string().to_string();
 	flusspferd::value onSuccessCallback = requestObject.get_property("onSuccess");
+
+	if (!onSuccessCallback.is_function())
+	{
+		throw flusspferd::exception("Property `onSuccess` must be a function");
+	}
+
 	std::string globalObjectKey = StringUtil::getRandomString(30);
 	flusspferd::object globalObject = flusspferd::global();
 

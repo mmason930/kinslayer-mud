@@ -879,26 +879,15 @@ bool Character::CanTeach( Weave *w )
 
 void Character::setSkill(short int skillId, int percent)
 {
-	if(percent <= 0)
-	{
-		auto skillIter = skills.find(skillId);
-		if(skillIter != skills.end())
-			skills.erase(skillIter);
-	}
-
-	skills.try_emplace(skillId, percent, skillId);
+	skills[skillId] = percent;
 }
 
 int Character::getSkill(short int skillId)
 {
-	auto skillIter = skills.find(skillId);
-	if(skillIter != skills.end())
-		return (*skillIter).second.getPercent();
-	return 0;
+	return skills[skillId];
 }
 
 bool Character::hasSkill(short int skillId)
 {
-	auto skillIter = skills.find(skillId);
-	return (skillIter != skills.end());
+	return skills[skillId] != -1;
 }

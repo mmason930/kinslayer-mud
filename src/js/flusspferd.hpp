@@ -772,8 +772,16 @@ bool native_function_wrapper_void(JSContext *cx, unsigned argc, JS::Value *vp) {
         static_cast<uintptr_t>(funcPtrVal.toDouble())
     );
 
-    auto extracted = ArgExtractor<Args...>::extract(cx, args, 0);
-    call_with_tuple(funcPtr, extracted);
+    try {
+        auto extracted = ArgExtractor<Args...>::extract(cx, args, 0);
+        call_with_tuple(funcPtr, extracted);
+    } catch (flusspferd::exception &e) {
+        JS_ReportErrorUTF8(cx, "%s", e.what());
+        return false;
+    } catch (std::exception &e) {
+        JS_ReportErrorUTF8(cx, "%s", e.what());
+        return false;
+    }
 
     args.rval().setUndefined();
     return true;
@@ -797,10 +805,18 @@ bool native_function_wrapper(JSContext *cx, unsigned argc, JS::Value *vp) {
         static_cast<uintptr_t>(funcPtrVal.toDouble())
     );
 
-    auto extracted = ArgExtractor<Args...>::extract(cx, args, 0);
-    Ret result = call_with_tuple(funcPtr, extracted);
+    try {
+        auto extracted = ArgExtractor<Args...>::extract(cx, args, 0);
+        Ret result = call_with_tuple(funcPtr, extracted);
+        args.rval().set(detail::to_jsval<Ret>::convert(cx, result));
+    } catch (flusspferd::exception &e) {
+        JS_ReportErrorUTF8(cx, "%s", e.what());
+        return false;
+    } catch (std::exception &e) {
+        JS_ReportErrorUTF8(cx, "%s", e.what());
+        return false;
+    }
 
-    args.rval().set(detail::to_jsval<Ret>::convert(cx, result));
     return true;
 }
 

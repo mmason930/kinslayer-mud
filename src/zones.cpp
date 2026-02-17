@@ -15,6 +15,12 @@ extern Index *obj_index;
 void add_follower(Character * ch, Character * leader);
 int perform_group( Character *ch, Character *vict );
 
+extern Clock allZonesClock, mobLoadClock, objectLoadClock, chestLoadClock, objToObjClock, giveClock, equipClock, removeClock, doorClock, defaultClock, jsResetClock, setAgeClock;
+extern Clock countMobsClock, countMobsRoomClock;
+extern Clock allocateMobClock, logMobLoadClock, mobFollowClock, mobGroupClock, mobLoadTriggersClock;
+extern Clock skillsClock, skillsDefaultClock, kitLoopClock, kitLoadClock;
+extern Clock allocateMobTopClock;
+
 unsigned int Zone::CountObjects( const int obj_nr )
 {
 	unsigned int count = 0, room;
@@ -33,6 +39,7 @@ unsigned int Zone::CountObjects( const int obj_nr )
 }
 unsigned int Zone::CountMobs( const int mob_nr )
 {
+	countMobsClock.turnOn();
 	static unsigned int room, i;
 	static Character *ch;
 
@@ -44,6 +51,7 @@ unsigned int Zone::CountMobs( const int mob_nr )
 				++i;
 		}
 	}
+	countMobsClock.turnOff();
 	return i;
 }
 
@@ -184,10 +192,11 @@ void Zone::Reset()
 			obj_load = FALSE;
 		}
 		if( fol && fol->IsPurged() )
-			fol = 0;
+			fol = nullptr;
 		switch (this->cmd[cmd_no]->command)
 		{
 			case 'M':
+			mobLoadClock.turnOn();
 				if (this->cmd[cmd_no]->arg2 >= MiscUtil::random(1, 100) &&
 					(this->cmd[cmd_no]->arg4 == -1 || this->cmd[cmd_no]->arg4 > (int)CountMobsRoom(this->cmd[cmd_no]->arg1, World[this->cmd[cmd_no]->arg3])) &&
 					(this->cmd[cmd_no]->arg5 == -1 || this->cmd[cmd_no]->arg5 > (int)CountMobs(this->cmd[cmd_no]->arg1)) &&
@@ -200,10 +209,14 @@ void Zone::Reset()
 					else if (this->cmd[cmd_no]->arg7 != 1)
 						fol = nullptr;
 
+					allocateMobClock.turnOn();
 					mob = new Character(this->cmd[cmd_no]->arg1, REAL, false);
+					allocateMobClock.turnOff();
+					logMobLoadClock.turnOn();
 					char logBuffer[256];
 					snprintf(logBuffer, sizeof(logBuffer), "Zone %d cmd %d", this->getVnum(), this->cmd[cmd_no]->dbID);
 					mobLoadLogger.logMobLoad(mob->getVnum(), logBuffer);
+					logMobLoadClock.turnOff();
 					//TODO: Log mob load here.
 					mob->MoveToRoom(World[this->cmd[cmd_no]->arg3]);
 					this->cmd[cmd_no]->mob = mob;
@@ -213,11 +226,17 @@ void Zone::Reset()
 					// It's not possible to get a loop.
 					if (this->cmd[cmd_no]->arg7 == 1 && fol && !fol->IsPurged())
 					{
+						mobFollowClock.turnOn();
 						add_follower(mob, fol);
+						mobFollowClock.turnOff();
+						mobGroupClock.turnOn();
 						perform_group(fol, mob);
+						mobGroupClock.turnOff();
 					}
 					if( !mob->IsPurged() ) {
+						mobLoadTriggersClock.turnOn();
 						js_load_triggers(mob);
+						mobLoadTriggersClock.turnOff();
 					}
 				}
 				else
@@ -227,9 +246,11 @@ void Zone::Reset()
 					else
 						last_cmd = 0;
 				}
+			mobLoadClock.turnOff();
 				break;
 
 			case 'O': // Load object
+			objectLoadClock.turnOn();
 				if (this->cmd[cmd_no]->arg2 >= MiscUtil::random(1, 100) &&
 				(CountObjectsRoom(cmd[cmd_no]->arg1, cmd[cmd_no]->arg3) < this->cmd[cmd_no]->arg4 || cmd[cmd_no]->arg4 == -1)&&
 				(this->cmd[cmd_no]->arg5 == -1 || CountObjects(this->cmd[cmd_no]->arg1) < (unsigned int)cmd[cmd_no]->arg5) &&
@@ -243,7 +264,13 @@ void Zone::Reset()
 						obj->MoveToRoom(cmd[cmd_no]->arg3);
 
 						if(IS_OBJ_STAT(obj, ITEM_CHEST))
+						{
+							objectLoadClock.turnOff();
+							chestLoadClock.turnOn();
 							obj->loadItems();
+							chestLoadClock.turnOff();
+							objectLoadClock.turnOn();
+						}
 
 						if( !obj->IsPurged() ) {
 							js_load_triggers(obj);
@@ -264,26 +291,35 @@ void Zone::Reset()
 
 				else
 					last_cmd = 0;
+				objectLoadClock.turnOff();
 				break;
 
 			case 'P':			// object to object
+				objToObjClock.turnOn();
 				if (cmd[cmd_no]->arg2 >= MiscUtil::random(1, 100) && (obj_proto[cmd[cmd_no]->arg1]->Max == -1 ||
 				ItemCount[cmd[cmd_no]->arg1] < obj_proto[cmd[cmd_no]->arg1]->Max))
 				{
 					if( cmd[cmd_no]->arg4 < 0 || cmd[cmd_no]->arg4 >= World.size() )
+					{
+						objToObjClock.turnOff();
 						break;
+					}
 
 					//Scan the current room to find the container.
 					Room *room = World[cmd[cmd_no]->arg4];
 					for(obj_to = room->contents;obj_to && obj_to->item_number != cmd[cmd_no]->arg3;obj_to = obj_to->next_content);
 
 					if( !obj_to )
+					{
+						objToObjClock.turnOff();
 						break;
+					}
 
 					// If weight in container + weight of item to put in > max weight, we terminate this operation.
 					if( (obj_to->Weight() - obj_to->GetTotalWeight() + (obj_proto[cmd[cmd_no]->arg1])->GetTotalWeight())
 						> obj_to->GetTotalVal0())
 					{
+						objToObjClock.turnOff();
 						break;
 					}
 					obj = read_object(cmd[cmd_no]->arg1, REAL, true);
@@ -298,8 +334,10 @@ void Zone::Reset()
 				}
 				else
 					last_cmd = 0;
+				objToObjClock.turnOff();
 				break;
 			case 'G':			/* obj_to_char ### */
+				giveClock.turnOn();
 				if (!mob)
 				{
 					if (cmd[cmd_no]->if_flag)
@@ -310,6 +348,7 @@ void Zone::Reset()
 					 *   doesn't die, or if it is purged in any way it is reloaded before here.
 					 *     - Serai
 					 */
+					giveClock.turnOff();
 					break;
 				}
 
@@ -331,12 +370,15 @@ void Zone::Reset()
 				else
 					last_cmd = 0;
 
+				giveClock.turnOff();
 				break;
 
 			case 'E':			/* object to equipment list ### */
+				equipClock.turnOn();
 				if (!mob)
 				{
 					this->LogError(cmd_no, "trying to equip non-existant mob");
+					equipClock.turnOff();
 					break;
 				}
 
@@ -365,9 +407,11 @@ void Zone::Reset()
 						}
 					}
 				}
+				equipClock.turnOff();
 				break;
 
 			case 'R': /* rem obj from room */
+				removeClock.turnOn();
 				if ((obj = ItemUtil::get()->getObjectInListByRealNumber(cmd[cmd_no]->arg2, World[cmd[cmd_no]->arg1]->contents)) != nullptr)
 				{
 					obj->RemoveFromRoom();
@@ -376,8 +420,10 @@ void Zone::Reset()
 				obj = nullptr;
 
 				last_cmd = 1;
+				removeClock.turnOff();
 				break;
 			case 'D':			/* set state of door */
+				doorClock.turnOn();
 				if (cmd[cmd_no]->arg2 < 0 || cmd[cmd_no]->arg2 >= NUM_OF_DIRS ||
 				(World[cmd[cmd_no]->arg1]->dir_option[cmd[cmd_no]->arg2] == nullptr))
 				{
@@ -404,16 +450,22 @@ void Zone::Reset()
 				}
 
 				last_cmd = 1;
+				doorClock.turnOff();
 				break;
 			default:
+				defaultClock.turnOn();
 				this->LogError(cmd_no, "unknown cmd in reset table; cmd disabled");
+				defaultClock.turnOff();
 				//cmd[cmd_no]->command = '*';
 				break;
 		}
 	}
 
+	setAgeClock.turnOn();
 	SetAge(0);
+	setAgeClock.turnOff();
 
+	jsResetClock.turnOn();
 	// handle reset triggers
 	room_vnum = GetBottom();
 	while (room_vnum <= GetTop())
@@ -426,6 +478,7 @@ void Zone::Reset()
 		}
 		++room_vnum;
 	}
+	jsResetClock.turnOff();
 }
 
 void Zone::Boot( const sql::Row &ZoneRow, std::list< sql::Row > &RowList )

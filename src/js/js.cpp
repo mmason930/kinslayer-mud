@@ -122,7 +122,7 @@ void JSManager::loadScriptsFromFilesystem(const std::string &directoryPath, cons
 	MudLog(BRF, LVL_APPR, TRUE, "Loading scripts - waiting for filesystem scan to complete.");
 	do
 	{
-		std::lock_guard<std::mutex> lock(monitorFilesystemRunOnceMutex);
+		std::lock_guard lock(monitorFilesystemRunOnceMutex);
 
 		//if(monitorFilesystemRunOnce)
 		//{
@@ -689,14 +689,25 @@ void JSManager::processScriptImports()
 
     if (!filePaths.empty())
     {
-        ParallelFileLoader loader(10);
+        ParallelFileLoader loader(16);
         loader.submit(std::move(filePaths));
         loader.wait();
+    	std::string priorityScriptPath = "scripts/lib/util/LoDash-2.4.1.js";
+    	auto priorityScriptContent = loader.take(priorityScriptPath);
+    	if (priorityScriptContent->ok())
+    	{
+    		this->loadScriptsFromContent(priorityScriptPath, priorityScriptContent->content);
+    	}
 
         // Process the loaded results.
         for (ScriptImport* scriptImport : importsToLoad)
         {
             std::string fullPath = std::string("scripts/") + scriptImport->filePath;
+
+        	if (fullPath == priorityScriptPath)
+        	{
+        		continue;
+        	}
 
             if (auto result = loader.take(fullPath))
             {
