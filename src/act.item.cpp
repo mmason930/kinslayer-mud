@@ -71,7 +71,7 @@ unsigned long int Character::Gold()
 
 int Object::getVnum()
 {
-	if( this->item_number >= 0 && this->item_number < top_of_objt )
+	if( this->item_number >= 0 && this->item_number <= top_of_objt )
 	{
 		return obj_index[this->item_number].vnum;
 	}

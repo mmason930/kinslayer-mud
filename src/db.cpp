@@ -372,7 +372,7 @@ void SaveGlobalScripts()
 	}
 }
 
-void bootWorld(void)
+void bootWorld()
 {
 	std::unordered_map<Room *, std::unordered_map<int, int>> roomToExitToVnumMap;
 
@@ -2388,7 +2388,7 @@ void Object::bootObjects()
 	ItemCount.resize(top_of_objt + 1);
 	memset(obj_index, 0, sizeof(Index) * (top_of_objt + 1));
 
-	for (int objectRnum = 0;objectRnum < top_of_objt; objectRnum++)
+	for (int objectRnum = 0;objectRnum <= top_of_objt; objectRnum++)
 	{
 		Object *objectProto = preBootData.objectProtos[objectRnum];
 		ObjectPreBootDataObjectData objectData = preBootData.objectRnumToObjectDataMap[objectRnum];

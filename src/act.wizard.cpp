@@ -1828,7 +1828,7 @@ CommandHandler do_find = DEFINE_COMMAND
 	else
 	{//Searching for item by name(possible multiple different vnums)
 		QueryBuffer << "-1";
-		for(i = 0;i < top_of_objt;++i)
+		for(i = 0;i <= top_of_objt;++i)
 		{
 			if( isname(name, obj_proto[i]->name) )
 				QueryBuffer << "," << obj_index[obj_proto[i]->item_number].vnum;

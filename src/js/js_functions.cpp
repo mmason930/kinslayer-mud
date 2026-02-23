@@ -1253,7 +1253,7 @@ flusspferd::value JS_getAllRoomsInZone( int zoneId )
 }
 flusspferd::value getObjProtoByRnum( int rnum )
 {
-	if( rnum >= 0 && rnum < top_of_objt )
+	if( rnum >= 0 && rnum <= top_of_objt )
 		return lookupValue( obj_proto[ rnum ] );
 	return lookupValue( 0 );
 }

@@ -494,7 +494,7 @@ namespace detail {
     }
 }
 
-inline int str_cmp(const char* s1, const char* s2) noexcept
+int str_cmp(const char* s1, const char* s2) noexcept
 {
 #if defined(_MSC_VER) || defined(_WIN32)
     // MSVC / Windows — _stricmp is always available
