@@ -524,14 +524,8 @@ void boot_db(void)
     // get() forces the ctoring
     JSManager* jsManager = JSManager::get();
 
-	Log("Monitoring file modifications...");
-	jsManager->monitorFileModifications(false, true);
-
-	Log("Loading scripts from filesystem...");
-	jsManager->loadScriptsFromFilesystem("scripts", false);
-
-	Log("Processing Script imports...");
-	jsManager->processScriptImports();
+	Log("Loading and compiling scripts...");
+	jsManager->bootScriptsDirectly("scripts/");
 	
 	Log("Setting up monitoring threads...");
 	jsManager->setupMonitoringThreads();
@@ -619,6 +613,9 @@ void boot_db(void)
 	Log("Finish counting file-stored items.");
 	FinishSetupItemCount(vnumToItemCountMapFuture);
 
+	Log("Preloading chest items...");
+	Object::preloadChestItems();
+
 	allZonesClock.turnOn();
 	equipLightClock.reset(false);
 	equipAffModifyArClock.reset(false);
@@ -633,6 +630,7 @@ void boot_db(void)
 		}
 	}
 	allZonesClock.turnOff();
+	Object::clearChestItemPreload();
 
 	Log("allZonesClock: %f", allZonesClock.getSeconds());
 	Log("countMobsClock: %f", countMobsClock.getSeconds());

@@ -201,6 +201,7 @@ class JSManager
 
 		std::list< JSTrigger* > triggersInRange( const int lo, const int hi );
 
+		void bootScriptsDirectly(const std::string& scriptsDirectory);
 		void setupMonitoringThreads();
 		void monitorFileModifications(bool continuous, bool useMainDatabaseConnection);
     private:

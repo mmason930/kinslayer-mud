@@ -22,21 +22,21 @@ protected:
 
 	static std::map<int, Type*> *getEnumMap()
 	{
-		static std::map<int, Type*> *enumMap = new std::map<int, Type*>();
+		static auto *enumMap = new std::map<int, Type*>();
 
 		return enumMap;
 	}
 
 	static std::list<Type*> *getEnumList()
 	{
-		static std::list<Type*> *enumList = new std::list<Type*>();
+		static auto *enumList = new std::list<Type*>();
 
 		return enumList;
 	}
 public:
 
-	static typename std::list<Type*>::const_iterator getStartIterator() { return getEnumList()->begin(); }
-	static typename std::list<Type*>::const_iterator getEndIterator() { return getEnumList()->end(); }
+	static std::list<Type*>::const_iterator getStartIterator() { return getEnumList()->begin(); }
+	static std::list<Type*>::const_iterator getEndIterator() { return getEnumList()->end(); }
 
 	std::string getStandardName() const {
 		
@@ -55,23 +55,6 @@ public:
 
 		return iter == map->end() ? nullptr : (*iter).second;
 	}
-
-	/***
-	static Type *getEnumByStandardName(const std::string &standardNameToFind, bool ignoreCase = true)
-	{
-		auto list = getEnumList();
-		for(Enum *e : (*list))
-		{
-			if(ignoreCase)
-			{
-				if(!str_cmp(e->getStandardName(), standardNameToFind))
-					return (Type*)e;
-			}
-			else if(!strcmp(e->getStandardName().c_str(), standardNameToFind.c_str()))
-				return (Type*)e;
-		}
-	}
-	***/
 
 	static void cleanup()
 	{

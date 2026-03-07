@@ -1047,6 +1047,8 @@ class Object : public JSBindable, public Entity
 		static std::atomic<int> nr_alloc;
 		static std::atomic<int> nr_dealloc;
 		static std::future<ObjectPreBootData> preBootFuture;
+		static std::unordered_map<std::string, std::vector<Object*>> s_preloadedChestItems;
+		static bool s_chestItemsPreloaded;
 		obj_vnum	item_number;							/* Where in data-base				*/
 		Room	*in_room;								/* In what room -1 when conta/carr	*/
 
@@ -1142,6 +1144,8 @@ class Object : public JSBindable, public Entity
 		static std::list< std::pair<Object*,int> > loadItemPairs( bool recursive, const char holderType, const std::string &holderID );
 		static std::list< Object* > loadItemList( bool recursive, const char holderType, const std::string &holderID );
 		void loadItems();
+		static void preloadChestItems();
+		static void clearChestItemPreload();
 		void itemSave();
 		void saveItems(char holderType, const std::string &holderID);
 		void saveItems( bool self, char holderType, const std::string &holderID, char topLevelHolderType, const std::string &topLevelHolderID, sql::BatchInsertStatement &tempObjectsBatchInsertStatement, sql::BatchInsertStatement &tempObjectRetoolsBatchInsertStatement, sql::BatchInsertStatement &tempObjectSpecialsBatchInsertStatement, bool contents );

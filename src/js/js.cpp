@@ -203,7 +203,7 @@ JSManager::JSManager()
 		mapper = std::unordered_map<int, JSTrigger*>();
 
 		triggerDepth = 0;
-		server = 0;
+		server = nullptr;
 		nextScriptEventId = 0;
 
 		monitorFilesystemRunOnce = false;
@@ -340,7 +340,6 @@ void printSubversionInfoMap(const std::map<std::string, std::string> &subversion
 
 void JSManager::monitorSubversion(const std::string &scriptPullCommand)
 {
-	sql::Connection connection = dbContext->createConnection();
 	while(monitorSubversionThreadRunning)
 	{
 		try
@@ -367,14 +366,14 @@ ScriptImport *JSManager::getScriptImport(const sql::Row &row) const
 	scriptImport->id = MiscUtil::convert<unsigned long long>(row.getString("id"));
 	scriptImport->filePath = row.getString("file_path");
 	scriptImport->queuedDatetime = DateTime(row.getTimestamp("queued_datetime"));
-	scriptImport->operation = (ScriptImportOperation*)ScriptImportOperation::getEnumByValue(row.getInt("operation"));
+	scriptImport->operation = ScriptImportOperation::getEnumByValue(row.getInt("operation"));
 
 	return scriptImport;
 }
 
 JSTrigger* JSManager::getTrigger(int vnum)
 {
-	// check to see if its loaded.
+	// check to see if it's loaded.
 	if (auto it = mapper.find(vnum); it != mapper.end())
 		return it->second;
 	else
@@ -391,7 +390,7 @@ JSTrigger* JSManager::getTrigger(int vnum)
 std::vector<JSTrigger*> JSManager::searchTrigger(std::string name)
 {
 	std::vector<JSTrigger*> results;
-	std::unordered_map<int, JSTrigger*>::const_iterator iter = mapper.begin();
+	auto iter = mapper.begin();
 	for(; iter != mapper.end(); ++iter)
 	{
 		if (isname(name, iter->second->name.c_str()))
@@ -601,6 +600,7 @@ int JSManager::checkFileModifications(const std::string& scriptsDirectory,
 {
     const std::string encodedDate = sql::encodeDate(time(nullptr));
     int numberOfImports = 0;
+	time_t now = time(nullptr);
 
     for (const auto& entry : std::filesystem::directory_iterator(directoryPath))
     {
@@ -626,7 +626,9 @@ int JSManager::checkFileModifications(const std::string& scriptsDirectory,
 
         auto it = filePathToLastModifiedMap.find(iterPathString);
         if (it == filePathToLastModifiedMap.end())
-            importOperation = ScriptImportOperation::addition;
+        {
+	        importOperation = ScriptImportOperation::addition;
+        }
         else if (it->second < lastModifiedTime)
             importOperation = ScriptImportOperation::modification;
 
@@ -726,6 +728,88 @@ void JSManager::processScriptImports()
             delete scriptImport;
         }
     }
+}
+
+void JSManager::bootScriptsDirectly(const std::string& scriptsDirectory)
+{
+	// Walk the filesystem and submit each file to the parallel reader as it's
+	// discovered. This overlaps directory traversal with file I/O — the 16
+	// reader threads start loading files while the walk is still in progress.
+	// We skip last_write_time() to avoid per-file stat() calls across the
+	// Docker VirtioFS boundary; boot time is used as the baseline instead.
+	std::vector<std::string> filePaths;
+	std::time_t bootTime = time(nullptr);
+
+	ParallelFileLoader loader(16);
+
+	for (const auto& entry : std::filesystem::recursive_directory_iterator(scriptsDirectory))
+	{
+		if (!entry.is_regular_file())
+			continue;
+
+		const std::string pathStr = entry.path().string();
+
+		if (!pathStr.ends_with(".js"))
+			continue;
+
+		filePaths.push_back(pathStr);
+		loader.submit(pathStr);
+	}
+
+	MudLog(BRF, LVL_APPR, TRUE, "Boot: found %zu script files.", filePaths.size());
+
+	// Block until all file reads are complete.
+	loader.wait();
+
+	// Compile LoDash first since other scripts depend on it.
+	std::string priorityScriptPath = scriptsDirectory + "lib/util/LoDash-2.4.1.js";
+	if (auto result = loader.take(priorityScriptPath))
+	{
+		if (result->ok())
+		{
+			this->loadScriptsFromContent(priorityScriptPath, result->content);
+		}
+		else
+		{
+			MudLog(BRF, LVL_BUILDER, TRUE, "Failed to load priority script `%s`: %s",
+			       priorityScriptPath.c_str(), result->errorMessage().c_str());
+		}
+	}
+
+	// Compile all remaining scripts.
+	for (const auto& path : filePaths)
+	{
+		if (path == priorityScriptPath)
+			continue;
+
+		if (auto result = loader.take(path))
+		{
+			if (result->ok())
+			{
+				this->loadScriptsFromContent(path, result->content);
+			}
+			else
+			{
+				MudLog(BRF, LVL_BUILDER, TRUE, "Failed to load `%s`: %s",
+				       path.c_str(), result->errorMessage().c_str());
+			}
+		}
+	}
+
+	// Use boot time as baseline for all files. The background monitoring thread
+	// will only detect files modified after this point.
+	for (const auto& path : filePaths)
+	{
+		filePathToLastModifiedMap[path] = bootTime;
+	}
+
+	// Signal that the initial filesystem scan is complete.
+	{
+		std::lock_guard<std::mutex> lock(monitorFilesystemRunOnceMutex);
+		monitorFilesystemRunOnce = true;
+	}
+
+	MudLog(BRF, LVL_APPR, TRUE, "Boot: all scripts compiled.");
 }
 
 std::list< JSTrigger* > JSManager::triggersInRange( const int lo, const int hi )

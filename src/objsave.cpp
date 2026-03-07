@@ -45,6 +45,8 @@ extern Clock realObjectClock;
 void obj_from_char(struct object_data *object);
 
 std::set< int > Room::corpseRooms;
+std::unordered_map<std::string, std::vector<Object*>> Object::s_preloadedChestItems;
+bool Object::s_chestItemsPreloaded = false;
 
 /* Extern functions */
 SPECIAL(receptionist);
@@ -176,12 +178,50 @@ std::list< Object* > Object::loadItemList( bool recursive )
 }
 void Object::loadItems()
 {
+	if (s_chestItemsPreloaded && this->IsValidChest())
+	{
+		std::string roomVnum = ToString(getRoom()->getVnum());
+		auto it = s_preloadedChestItems.find(roomVnum);
+		if (it != s_preloadedChestItems.end())
+		{
+			for (Object* obj : it->second)
+			{
+				obj_to_obj(obj, this);
+			}
+			s_preloadedChestItems.erase(it);
+			return;
+		}
+	}
+
 	std::list< Object* > objectList = this->loadItemList( true );
 	for(auto & objectIter : objectList)
 	{
 		obj_to_obj( objectIter, this );
 	}
 }
+
+void Object::preloadChestItems()
+{
+	auto chestItemMap = loadItemsByTopLevelHolder(gameDatabase, 'C');
+
+	for (const auto& [uuid, objectLoad] : chestItemMap)
+	{
+		if (objectLoad.holderType == 'C')
+		{
+			s_preloadedChestItems[objectLoad.holderId].push_back(objectLoad.obj);
+		}
+	}
+
+	s_chestItemsPreloaded = true;
+	MudLog(BRF, LVL_APPR, TRUE, "Preloaded chest items for %zu rooms.", s_preloadedChestItems.size());
+}
+
+void Object::clearChestItemPreload()
+{
+	s_preloadedChestItems.clear();
+	s_chestItemsPreloaded = false;
+}
+
 Object *Object::loadSingleItem(const boost::uuids::uuid &objID, bool recursive)
 {
 	std::vector<boost::uuids::uuid> objectIds;
