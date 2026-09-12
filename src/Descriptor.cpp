@@ -18,6 +18,7 @@
 #include "UserEmailAddress.h"
 #include "StringUtil.h"
 #include "CharacterUtil.h"
+#include "Game.h"
 #include "MobLoadLogger.h"
 
 extern kuDescriptor *gatewayConnection;
@@ -34,6 +35,28 @@ extern Character *character_list;
 extern int boot_high;
 void UpdateBootHigh( const int new_high, bool first=false );
 void js_enter_game_trigger(Character *self, Character *actor);
+
+//The MUD emits telnet control sequences (IAC and friends) and treats anything above plain ASCII as
+//garbage. `char` is signed on x86 but unsigned on ARM, so these test the high bit rather than the sign.
+static bool isHighByte(const char character)
+{
+	return ((unsigned char)character) >= 0x80;
+}
+
+static std::string stripHighBytes(const std::string &input)
+{
+	std::string output;
+
+	output.reserve(input.size());
+
+	for(auto inputCharacter = input.begin();inputCharacter != input.end();++inputCharacter)
+	{
+		if(!isHighByte(*inputCharacter))
+			output += (*inputCharacter);
+	}
+
+	return output;
+}
 
 Descriptor::Descriptor()
 {
@@ -448,7 +471,9 @@ std::string Descriptor::encodeWebSocketOutputCommand(const char *output)
 	Json::FastWriter writer;
 
 	commandObject["method"] = "Output";
-	commandObject["data"] = output;
+	//A websocket text frame must be valid UTF-8. A single stray byte - a telnet IAC sequence, for
+	//instance - makes the browser drop the connection, so strip them before they reach the client.
+	commandObject["data"] = stripHighBytes(output);
 
 	return encodeWebSocketCommand(writer.write(commandObject));
 }
@@ -591,7 +616,7 @@ void Descriptor::processWebSocketSignInCommand(Json::Value &commandObject)
 		response["error"] = "You are already signed in.";
 	else if(commandObject["username"].isNull())
 		response["error"] = "You must enter a username.";
-	else if(commandObject["password"].isNull())
+	else if(commandObject["password"].isNull() && !game->skipPasswordRequirement())
 		response["error"] = "You must enter a password.";
 
 	if(!response["error"].isNull())
@@ -649,12 +674,17 @@ void Descriptor::processWebSocketSignInCommand(Json::Value &commandObject)
 		
 	if(!ch->passwordMatches(password))
 	{
-		response["error"] = "The password you entered is incorrect.";
-		++ch->PlayerData->bad_pws;
-		ch->basicSave();
-		delete ch;
-		this->sendWebSocketCommand(writer.write(response));
-		return;
+		if(!game->skipPasswordRequirement())
+		{
+			response["error"] = "The password you entered is incorrect.";
+			++ch->PlayerData->bad_pws;
+			ch->basicSave();
+			delete ch;
+			this->sendWebSocketCommand(writer.write(response));
+			return;
+		}
+
+		MudLog( BRF, LVL_GOD, TRUE, "Password requirement skipped for %s [%s].", GET_NAME( ch ), this->host );
 	}
 
 	if ( BanManager::GetManager().IsBanned( this->host ) == BAN_SELECT && !PLR_FLAGGED( this->character, PLR_SITEOK ) )
@@ -1195,9 +1225,10 @@ void Descriptor::writeToOutput(bool swapArguments, const char *format, va_list a
 	outputBufferFormatted[bufferSize - 1] = '\0';
 
 	//Strip all straggling carriage returns or invalid characters. Prepend all newlines with carriage returns.
+	//Note: `char` is unsigned on ARM, so test the high bit explicitly rather than relying on a negative value.
 	for (char *bufferCharacter = outputBufferFormatted; *bufferCharacter; ++bufferCharacter)
 	{
-		if ( (*bufferCharacter) < 0 || (*bufferCharacter) == '\r')
+		if ( isHighByte(*bufferCharacter) || (*bufferCharacter) == '\r')
 			continue;
 		else if (*bufferCharacter == '\n')
 			finalOutput += "\r\n";

@@ -67,6 +67,7 @@ public:
 	void setupEditorInterfaces();
 
 	bool monitorRepo();
+	bool skipPasswordRequirement();
 
 	Character *getSignedInCharacterByUserId(int userId) const;
 };

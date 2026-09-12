@@ -2020,7 +2020,10 @@ CommandHandler do_rank = DEFINE_COMMAND
 		return;
 	}
 
-	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && !chUserClan->getIsCouncil())
+	//NPCs holding a clan membership act with that clan's authority. The council flag is a
+	//player-side concept - it lives on the userClan row and cannot be set on a mob prototype -
+	//so ritual mobs such as Sheriam could otherwise never rank the character they just tested.
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && !IS_NPC(ch) && !chUserClan->getIsCouncil())
 	{
 		ch->send("You are not a council member of the %s clan.\r\n", clan->Name.c_str());
 		return;

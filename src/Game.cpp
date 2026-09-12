@@ -56,6 +56,14 @@ bool Game::monitorRepo()
 	return hasBasicConfiguration("Monitor Repository") && getBasicConfigValue("Monitor Repository") == "1";
 }
 
+//When enabled, characters may sign in without supplying a password. Intended for local
+//development and automated testing only - it ships disabled, is treated as disabled when the
+//setting is absent entirely, and every login that relies on it is logged.
+bool Game::skipPasswordRequirement()
+{
+	return hasBasicConfiguration("Skip Password Requirement") && getBasicConfigValue("Skip Password Requirement") == "1";
+}
+
 std::string Game::getScriptPullCommand()
 {
 	return getBasicConfigValue("Script Pull Command");

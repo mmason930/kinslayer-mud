@@ -160,6 +160,15 @@ int JSCharacter::getRank( int iClan )
 
 	return (int)userClan->getRank();
 }
+int JSCharacter::getClanQuestPoints( int iClan )
+{
+	if( !real || real->IsPurged() ) return 0;
+	UserClan *userClan = real->getUserClan( iClan );
+
+	if( !userClan ) return 0;
+
+	return (int)userClan->getQuestPoints();
+}
 bool JSCharacter::getIsCouncil( int iClan )
 {
 	if( !real || real->IsPurged() ) return false;

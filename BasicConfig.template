@@ -14,6 +14,7 @@ BackupDirectory: /kinslayer/backups/
 Wiki Dataabase Name: kmud_wiki
 Websocket Ports: 4001
 Dev Mode: 0
+Skip Password Requirement: 0
 Player Portal Server Port: 4002
 Monitor Repository: 1
 Script Pull Command: /kinslayer/PullScripts.sh

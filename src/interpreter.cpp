@@ -20,6 +20,7 @@
 #include "mobs.h"
 #include "md5.h"
 #include "accounts.h"
+#include "Game.h"
 
 #include "js/js.h"
 
@@ -1036,27 +1037,32 @@ void Descriptor::nanny( char* arg )
 
 		this->echoOn();		/* turn echo back on */
 
-		if ( !*arg )
+		if ( !*arg && !game->skipPasswordRequirement() )
 			STATE( this ) = CON_CLOSE;
 		else
 		{
 			if(!this->character->passwordMatches(arg))
 			{
-				MudLog( BRF, LVL_GOD, TRUE, "Bad PW: %s [%s]", GET_NAME( this->character ), this->host );
-
-				++this->character->PlayerData->bad_pws;
-				this->character->basicSave();
-				if ( ++( this->bad_pws ) >= max_bad_pws )
-				{	/* 3 strikes and you're out. */
-					this->send( "Wrong password... disconnecting.\r\n" );
-					STATE( this ) = CON_CLOSE;
-				}
-				else
+				if(!game->skipPasswordRequirement())
 				{
-					this->send( "Wrong password.\r\nTry again: " );
+					MudLog( BRF, LVL_GOD, TRUE, "Bad PW: %s [%s]", GET_NAME( this->character ), this->host );
+
+					++this->character->PlayerData->bad_pws;
+					this->character->basicSave();
+					if ( ++( this->bad_pws ) >= max_bad_pws )
+					{	/* 3 strikes and you're out. */
+						this->send( "Wrong password... disconnecting.\r\n" );
+						STATE( this ) = CON_CLOSE;
+					}
+					else
+					{
+						this->send( "Wrong password.\r\nTry again: " );
+					}
+
+					return ;
 				}
 
-				return ;
+				MudLog( BRF, LVL_GOD, TRUE, "Password requirement skipped for %s [%s].", GET_NAME( this->character ), this->host );
 			}
 
 			if(this->getGatewayDescriptorType() == GatewayDescriptorType::websocket)

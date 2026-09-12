@@ -28,7 +28,6 @@ AesSedaiRank.Util = (function() {
     self.portalObjectVnum = 10600;
     self.testingChamberVnum = 10574;
     self.acceptedRingVnum = 815;
-    self.starTokenVnum = 22811;
 
     self.testRoomVnums = [null, 10576, 10577, 10578, 10579, 10580];
     self.weaveOrder = ["air", "fire", "water", "earth", "spirit"];
@@ -54,6 +53,7 @@ AesSedaiRank.Util = (function() {
     // =========================================================================
 
     self.accepted = null;       // Character ref: the Accepted being tested
+    self.acceptedRing = null;   // Object ref: her own ring, held by Sheriam until she returns
     self.summoner = null;       // Character ref: the Aes Sedai who initiated
     self.sheriam = null;        // Character ref: the Sheriam mob instance
     self.currentTest = 0;       // Which test (1-5), 0 = not in test
@@ -74,6 +74,7 @@ AesSedaiRank.Util = (function() {
 
     self.resetState = function() {
         self.accepted = null;
+        self.acceptedRing = null;
         self.summoner = null;
         self.sheriam = null;
         self.currentTest = 0;
@@ -136,21 +137,59 @@ AesSedaiRank.Util = (function() {
         }
     };
 
+    //Returns a message explaining why this character may not be tested, or null when she may.
+    self.getIneligibilityReason = function(candidate) {
+        const acceptedRank = 3;
+        const aesSedaiRank = 5;
+
+        if (!candidate.inClan(constants.CLAN_WHITE_TOWER))
+            return candidate.name + " is not a member of the White Tower.";
+
+        let rank = candidate.getRank(constants.CLAN_WHITE_TOWER);
+
+        if (rank < acceptedRank)
+            return candidate.name + " has not yet been raised to Accepted. She is not ready for this test.";
+
+        if (rank >= aesSedaiRank)
+            return candidate.name + " already wears the shawl.";
+
+        //She is ranked once for every step up to Aes Sedai, and the last step is the most
+        //expensive, so check the whole climb now rather than stalling at the raising.
+        let questPoints = candidate.getClanQuestPoints(constants.CLAN_WHITE_TOWER);
+        let required = getRankRequirement(aesSedaiRank);
+
+        //Never let a missing value quietly disable the check - that is how a candidate ends up
+        //walking the entire test only to not be raised.
+        if (typeof questPoints !== "number" || typeof required !== "number") {
+            mudLog(constants.BRF, 102, "Aes Sedai raising: quest point check skipped - questPoints=" + questPoints + " required=" + required);
+        }
+        else if (questPoints < required) {
+            return candidate.name + " has not earned enough quest points to be raised. She needs " + required + ", and has " + questPoints + ".";
+        }
+
+        return null;
+    };
+
+    //Give her back the ring she handed over. Falls back to a fresh one only if the original
+    //has gone missing, so she is never left without it.
+    self.returnRing = function(accepted) {
+        let ring = self.acceptedRing;
+
+        self.acceptedRing = null;
+
+        if (ring) {
+            ring.moveToChar(accepted);
+            return;
+        }
+
+        accepted.loadObj(self.acceptedRingVnum);
+    };
+
     self.extractPortalFromRoom = function(room) {
         let items = room.items;
         for (let i = 0; i < items.length; i++) {
             if (items[i].vnum === self.portalObjectVnum) {
                 items[i].extract();
-                return;
-            }
-        }
-    };
-
-    self.removeStarToken = function(actor) {
-        let inv = actor.inventory;
-        for (let i = 0; i < inv.length; i++) {
-            if (inv[i].vnum === self.starTokenVnum) {
-                inv[i].extract();
                 return;
             }
         }
@@ -204,6 +243,19 @@ AesSedaiRank.Util = (function() {
         ) {
             let acceptedName = vArgs[1];
             let accepted = getCharInListVis(self, acceptedName, here.people);
+
+            //Validate the candidate before any state is stored, any sister is loaded or any
+            //portal is opened, and tell the sister who presented her exactly what is wrong.
+            //Without this a stranger can walk the whole test and be handed an Ajah shawl, and
+            //a candidate short on quest points reaches the end and is silently not raised.
+            if (accepted) {
+                let rejection = Util.getIneligibilityReason(accepted);
+
+                if (rejection) {
+                    self.say(rejection);
+                    return;
+                }
+            }
 
             let targetRoom = getRoom(Util.testingChamberVnum);
             let portalHere;
@@ -307,6 +359,9 @@ AesSedaiRank.Util = (function() {
             return;
 
         let accepted = Util.accepted;
+
+        //Hold on to her own ring rather than minting a replacement later.
+        Util.acceptedRing = ring;
 
         runSequence([
             [waitPulse(2), function() {
@@ -786,6 +841,8 @@ AesSedaiRank.Util = (function() {
                 if (sheriam) {
                     sheriam.say("It is unfortunate. You were not ready, " + accepted.name + ". Perhaps in time, you may try again.");
                 }
+                //She failed the test, not the Tower - her ring is still hers.
+                Util.returnRing(accepted);
             }],
             [waitPulse(6), () => {
                 if (sheriam) {
@@ -835,7 +892,7 @@ AesSedaiRank.Util = (function() {
             [waitPulse(5), () => {
                 if (sheriam) {
                     sheriam.comm("emote produces the Great Serpent ring and places it in " + accepted.name + "'s hand.");
-                    accepted.loadObj(Util.acceptedRingVnum);
+                    Util.returnRing(accepted);
                 }
             }],
             [waitPulse(4), () => {
@@ -898,6 +955,7 @@ AesSedaiRank.Util = (function() {
         let ajahMobVnum = Util.mobIndex[ajahClanNum];
         let chamber = getRoom(Util.testingChamberVnum);
         let colorCap = capFirstLetter(ajahColor);
+        const aesSedaiRank = 5;
 
         runSequence([
             [waitPulse(3), function() {
@@ -927,13 +985,13 @@ AesSedaiRank.Util = (function() {
             [waitPulse(3), () => {
                 // Rank up in White Tower to Aes Sedai (rank 5)
                 if (sheriam) {
-                    if (accepted.getRank(constants.CLAN_WHITE_TOWER) < 5)
+                    if (accepted.getRank(constants.CLAN_WHITE_TOWER) < aesSedaiRank)
                         sheriam.comm("rank " + accepted.name + " " + constants.CLAN_WHITE_TOWER);
                 }
             }],
             [waitPulse(2), () => {
                 if (sheriam) {
-                    if (accepted.getRank(constants.CLAN_WHITE_TOWER) < 5)
+                    if (accepted.getRank(constants.CLAN_WHITE_TOWER) < aesSedaiRank)
                         sheriam.comm("rank " + accepted.name + " " + constants.CLAN_WHITE_TOWER);
                 }
             }],
@@ -944,10 +1002,22 @@ AesSedaiRank.Util = (function() {
                 }
             }],
             [waitPulse(3), () => {
+                //Only announce a raising that actually happened. The rank command can refuse for
+                //reasons this script cannot see, and a false Tower-wide announcement is worse
+                //than no announcement.
+                if (accepted.getRank(constants.CLAN_WHITE_TOWER) < aesSedaiRank) {
+                    mudLog(constants.BRF, 102, "Aes Sedai raising: " + accepted.name + " passed the test but could not be raised in the White Tower.");
+
+                    if (sheriam)
+                        sheriam.say("Something is amiss, " + accepted.name + ". Your raising cannot be entered into the books today. This will be looked into.");
+
+                    return;
+                }
+
                 gecho("** " + accepted.name + " has been raised to the shawl of an Aes Sedai!");
             }],
             [waitPulse(2), () => {
-                if (sheriam) {
+                if (sheriam && accepted.getRank(constants.CLAN_WHITE_TOWER) >= aesSedaiRank) {
                     sheriam.comm("shout " + accepted.name + " has been raised to Aes Sedai of the " + colorCap + " Ajah!");
                 }
             }],

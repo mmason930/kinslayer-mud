@@ -477,6 +477,15 @@ void RegisterJSCharacterBindings() {
         return true;
     };
     
+    g_class_registry["JSCharacter"].methods["getClanQuestPoints"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+        JSCharacter *self = static_cast<JSCharacter*>(ptr);
+        if (!self) { args.rval().setUndefined(); return true; }
+        int iClan = argc > 0 ? from_jsval_int(cx, args[0]) : 0;
+        args.rval().set(to_jsval(cx, self->getClanQuestPoints(iClan)));
+        return true;
+    };
+    
     g_class_registry["JSCharacter"].methods["isCouncil"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
         JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
