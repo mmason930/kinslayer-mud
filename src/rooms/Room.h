@@ -1,6 +1,8 @@
 #ifndef ROOM_H
 #define ROOM_H
 
+#include <future>
+
 #include "../conf.h"
 #include "../sysdep.h"
 #include "../structs.h"
@@ -20,20 +22,37 @@ protected:
 	bool deleted;											// Whether or not the room should be deleted on next zone save.
 	sbyte light;												// Number of lightsources in room
 public:
+	struct UnorderedMapRowResult
+	{
+		sql::Query query;
+		std::unordered_map<int, std::vector<sql::Row>> roomVnumToRowsMap;
+	};
+
+	struct VectorRowResult
+	{
+		sql::Query query;
+		std::vector<sql::Row> rows;
+	};
+
 	static int nr_alloc;
 	static int nr_dealloc;
 	static std::set< int > corpseRooms;
 
+	static std::future<VectorRowResult> roomQueryFuture;
+	static std::future<UnorderedMapRowResult> exitQueryFuture;
+	static std::future<UnorderedMapRowResult> jsFuture;
+	static std::future<sql::Query> objectsFuture;
+
 	char	*description;									// Shown when entered
-	struct ExtraDescription *ex_description;				// for examine/look
-	class Exit *dir_option[NUM_OF_DIRS];				// Room exits
+	ExtraDescription *ex_description;				// for examine/look
+	Exit *dir_option[NUM_OF_DIRS];				// Room exits
 	int room_flags;											// DEATH,DARK ... etc
 	SPECIAL(*func);
 	std::vector<class Character*> eavesdropping;			// Characters eavesdropping on this room
-	class Object *contents;									// List of items in room
-	class Character *people;								// List of NPC / PC in room
-	std::list<class Track *> tracks;
-	class PokerTable *PTable;
+	Object *contents;									// List of items in room
+	Character *people;								// List of NPC / PC in room
+	std::list<Track *> tracks;
+	PokerTable *PTable;
 
 	//Getter / Setters
 	room_vnum getVnum() const;
@@ -108,10 +127,11 @@ public:
 	void freeLiveRoom();
 	void deleteFromDatabase();
 
-	static void bootWorld(std::map<Room *, std::map<int, int>> &roomToExitToVnumMap);
-	static Room *boot(const sql::Row &MyRow, const std::list< sql::Row > &MyExits,
-		const std::list< sql::Row > &MyJS, const std::list< Object* > &MyObjects, std::map<Room *, std::map<int, int>> &roomToExitToVnumMap);
-	static void renumberRoomExits(const std::map<Room *, std::map<int, int>> &roomToExitToVnumMap);
+	static void preBootWorld();
+	static void bootWorld(std::unordered_map<Room *, std::unordered_map<int, int>> &roomToExitToVnumMap);
+	static Room *boot(const sql::Row &MyRow, const std::vector< sql::Row > &MyExits,
+		const std::vector< sql::Row > &MyJS, std::unordered_map<Room *, std::unordered_map<int, int>> &roomToExitToVnumMap);
+	static void renumberRoomExits(const std::unordered_map<Room *, std::unordered_map<int, int>> &roomToExitToVnumMap);
 
 	std::list< Object* > loadItemList(bool recursive);
 	void loadItems();

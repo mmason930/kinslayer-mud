@@ -10,7 +10,7 @@
 #ifndef KINSLAYER_JSCHARACTER_H
 #define KINSLAYER_JSCHARACTER_H
 
-#include <flusspferd.hpp>
+#include "flusspferd.hpp"
 #include <string>
 #include <iostream>
 
@@ -74,6 +74,7 @@ FLUSSPFERD_CLASS_DESCRIPTION(
 		("warrantByClan", bind, warrantByClan)
 		("pardonByClan", bind, pardonByClan)
 		("getRank", bind, getRank)
+		("getClanQuestPoints", bind, getClanQuestPoints)
 		("isCouncil", bind, getIsCouncil)
 		("hasSource", bind, getHasSource)
 		("resetSkills", bind, resetSkills)
@@ -365,6 +366,7 @@ public:
 	void warrantByClan( int iClan );
 	void pardonByClan( int iClan );
 	int getRank( int iClan );
+	int getClanQuestPoints( int iClan );
 	bool getIsCouncil( int iClan );
 
 	flusspferd::string getArriveMessage();

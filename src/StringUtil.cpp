@@ -139,21 +139,12 @@ std::string StringUtil::getRandomString(const int size)
 //2011-02-06 - Replaces string contents based on the value of toFind.
 void StringUtil::replace(std::string &input, const std::string &toFind, const std::string &replaceWith)
 {
-	std::string::size_type pos = 0, toFindSize = toFind.size(), replaceWithSize = replaceWith.size();
-
-	while(pos < input.size())
-	{
-		if(input.substr(pos, toFindSize) == toFind)
-		{
-			input.replace(pos, toFindSize, replaceWith);
-
-			pos += replaceWithSize;
-		}
-		else {
-
-			++pos;
-		}
-	}
+    std::string::size_type pos = 0;
+    while ((pos = input.find(toFind, pos)) != std::string::npos)
+    {
+        input.replace(pos, toFind.size(), replaceWith);
+        pos += replaceWith.size();
+    }
 }
 
 
@@ -179,7 +170,7 @@ void StringUtil::addSlashes( std::string &sBuffer, const std::string &EscChars )
 }
 void StringUtil::formatPlayername(char *name)
 {
-	if( name == NULL || !(*name) ) return;
+	if( name == nullptr || !(*name) ) return;
 
 	*name = toupper(*name);
 	for(++name;*name;++name)
@@ -266,7 +257,7 @@ const char *StringUtil::cap(const char *str)
 /* and return the # of replacements */
 int StringUtil::replace(char **str, char *pattern, char *replacement, int rep_all, int max_size)
 {
-	char *replace_buffer = NULL, *ptr = 0;
+	char *replace_buffer = nullptr, *ptr = 0;
 	int i;
 
 	if ((strlen(*str) - strlen(pattern)) + strlen(replacement) > (unsigned int) max_size)

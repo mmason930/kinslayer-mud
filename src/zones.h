@@ -52,6 +52,7 @@ private:
 	std::recursive_mutex ZoneListMutex;
 
 	std::vector< Zone* > ZoneList;
+	std::map< unsigned int, Zone* > vnumToZoneMap;
 	static ZoneManager *Self;
 public:
 	static std::recursive_mutex SingletonMutex;

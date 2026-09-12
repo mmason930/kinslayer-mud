@@ -12,6 +12,7 @@
 
 #include "conf.h"
 #include "sysdep.h"
+#include "utils/ThreadedLogFile.h"
 
 
 #ifdef CIRCLE_MACINTOSH /* Includes for the Macintosh */
@@ -126,8 +127,8 @@ public:
 extern std::list<PendingSession> pendingSessions;
 
 int GLOBAL_RESET = 0;
-SwitchManager* SwitchManager::Self = NULL;
-FILE *logfile = NULL; /* Where to send the log messages. */
+SwitchManager* SwitchManager::Self = nullptr;
+FILE *logfile = nullptr; /* Where to send the log messages. */
 
 void SetupMySQL( bool crash_on_failure );
 
@@ -145,7 +146,7 @@ int gameSessionId;
 
 /* local globals */
 kuListener *listener;
-Descriptor *descriptor_list = NULL; /* master desc list */
+Descriptor *descriptor_list = nullptr; /* master desc list */
 std::list< Character* > WaitingList;
 int circle_shutdown = 0; /* clean shutdown */
 int no_specials = 0; /* Suppress ass. of special routines */
@@ -297,6 +298,7 @@ void exportScripts()
 	}
 }
 
+
 int main( int argc, char **argv )
 {
 #if (defined WIN32 && defined _DEBUG && defined _MEM_LEAKS )
@@ -310,7 +312,7 @@ int main( int argc, char **argv )
 	// It would be nice to make this a command line option but the parser uses
 	// the log() function, maybe later. -gg
 	logfile = fdopen( STDERR_FILENO, "w" );
-	if ( logfile == NULL )
+	if ( logfile == nullptr )
 	{
 		std::cout << "error opening log file stderr: " << strerror(errno) << std::endl;
 		exit(1);
@@ -358,6 +360,11 @@ int main( int argc, char **argv )
 		}
 		pos++;
 	}
+
+	if (!subroutine.empty())
+		mudLog = new ThreadedLogFile(std::string("misc/") + subroutine);
+	else
+		mudLog = new ThreadedLogFile(STDERR);
 
 	if ( pos < argc )
 	{
@@ -503,7 +510,7 @@ int main( int argc, char **argv )
 
 void onDescriptorOpen(void *data, kuListener *listener, kuDescriptor *descriptor)
 {
-	if(gatewayConnection == NULL) {
+	if(gatewayConnection == nullptr) {
 
 		return;
 	}
@@ -538,14 +545,14 @@ void onDescriptorClose(void *data, kuListener *listener, kuDescriptor *descripto
 
 		Log("Gateway connection has been closed.");
 
-		gatewayConnection = NULL;
+		gatewayConnection = nullptr;
 	}
 
 	for(Descriptor *d = descriptor_list;d;d = d->next) {
 
 		if(d->descriptor == descriptor) {
 
-			d->descriptor = NULL;
+			d->descriptor = nullptr;
 			d->disconnect();
 			break;
 		}
@@ -554,7 +561,7 @@ void onDescriptorClose(void *data, kuListener *listener, kuDescriptor *descripto
 
 void waitForGatewayConnection() {
 
-	while(gatewayConnection == NULL) {
+	while(gatewayConnection == nullptr) {
 
 		listener->acceptNewHosts();
 
@@ -562,11 +569,9 @@ void waitForGatewayConnection() {
 
 		std::list<kuDescriptor*> descriptors = listener->getDescriptors();
 
-		for(std::list<kuDescriptor*>::iterator iter = descriptors.begin();iter != descriptors.end();++iter) {
+		for(auto desc : descriptors) {
 
-			kuDescriptor *desc = (*iter);
-
-			if(desc->hasCommand() == false) {
+				if(desc->hasCommand() == false) {
 
 				continue;
 			}
@@ -596,7 +601,7 @@ void waitForGatewayConnection() {
 			}
 		}
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
 
 	//Kick out all connections except for our gateway.
@@ -666,7 +671,7 @@ void onAfterSocketWrite(void *data, kuListener *listener, kuDescriptor *descript
 		}
 	}
 
-	if(d == NULL) {
+	if(d == nullptr) {
 		//Descriptor we are writing to, for some reason, was not found.
 
 		return;
@@ -694,7 +699,7 @@ void onSocketRead(void *data, kuDescriptor *descriptor, const std::string &input
 			break;
 	}
 
-	if(d == NULL) {
+	if(d == nullptr) {
 
 		return;
 	}
@@ -764,7 +769,7 @@ void initiateGame( int port )
 
 	UpdateBootHigh(0, true);
 
-	if(gatewayConnection != NULL) {
+	if(gatewayConnection != nullptr) {
 
 		gatewayConnection->socketWriteInstant("FinishedBooting\n");
 	}
@@ -775,7 +780,7 @@ void initiateGame( int port )
 	listener->pulse();
 
 	//Tell the gateway server that we're rebooting.
-	if(gatewayConnection != NULL) {
+	if(gatewayConnection != nullptr) {
 
 		gatewayConnection->socketWriteInstant("Reboot\n");
 	}
@@ -1009,7 +1014,7 @@ void initiateGame( int port )
 	Log("Rooms       : Total Alloc: %d, Dealloc: %d, Rem: %d",
 		Room::nr_alloc, Room::nr_dealloc, (Room::nr_alloc-Room::nr_dealloc));
 	Log("Objects     : Total Alloc: %d, Dealloc: %d, Rem: %d",
-		Object::nr_alloc, Object::nr_dealloc, (Object::nr_alloc-Object::nr_dealloc));
+		Object::nr_alloc.load(), Object::nr_dealloc.load(), Object::nr_alloc.load() -Object::nr_dealloc.load());
 	Log("Characters  : Total Alloc: %d, Dealloc: %d, Rem: %d",
 		Character::nr_alloc, Character::nr_dealloc, (Character::nr_alloc-Character::nr_dealloc));
 	Log("JSCharacter : Total Alloc: %d, Dealloc: %d, Rem: %d",
@@ -1022,6 +1027,9 @@ void initiateGame( int port )
 		sql::Row::getNumberOfAllocations(), sql::Row::getNumberOfDeallocations(), sql::Row::getRemainder());
 
 	Log( "Normal termination of game." );
+
+	mudLog->shutdown();
+	delete mudLog;
 #if (defined WIN32 && defined _DEBUG && defined _MEM_LEAKS )
 	_CrtDumpMemoryLeaks();
 #endif
@@ -1082,7 +1090,7 @@ void gameLoop()
 
 		pulseTimer.reset(true);
 
-		if(gatewayConnection == NULL) {
+		if(gatewayConnection == nullptr) {
 
 			waitForGatewayConnection();
 			gatewayConnection->socketWriteInstant("FinishedBooting\n");
@@ -1215,7 +1223,7 @@ void gameLoop()
 
 		pulseTimer.turnOff();
 
-		missed_pulses = pulseTimer.getClocks() / (1000 / PASSES_PER_SEC);
+		missed_pulses = pulseTimer.getClocks() / (1000000 / PASSES_PER_SEC);
 
 #ifdef CIRCLE_UNIX
 		/* Update tics for deadlock protection (UNIX only) */
@@ -1314,7 +1322,7 @@ void autoSave( void )
 			
 			bool hasCorpse = false;
 			//Ensure that the room has at least one corpse in it still.
-			for(object = World[ rnum ]->contents;object != NULL;object = object->next_content)
+			for(object = World[ rnum ]->contents;object != nullptr;object = object->next_content)
 			{
 				if(IS_CORPSE(object))
 				{
@@ -1490,7 +1498,7 @@ void LagMonitor::stopClock( const std::string &sRoutineName )
 {
 	timer.turnOff();
 
-	double runTime = (double)timer.getClocks() / (double)1000;
+	double runTime = (double)timer.getClocks() / (double)1000000;
 
 	if( mRoutineTimeCard.count( sRoutineName ) == 0 ) {
 		mRoutineTimeCard[ sRoutineName ].numberOfTimesRun = 1;
@@ -1963,7 +1971,7 @@ RETSIGTYPE unrestrict_game( int sig )
 /* clean up our zombie kids to avoid defunct processes */
 RETSIGTYPE reap( int sig )
 {
-	while ( waitpid( -1, NULL, WNOHANG ) > 0 )
+	while ( waitpid( -1, nullptr, WNOHANG ) > 0 )
 		;
 
 	my_signal( SIGCHLD, reap );
@@ -2048,7 +2056,7 @@ void signal_setup( void )
 	interval.tv_usec = 0;
 	itime.it_interval = interval;
 	itime.it_value = interval;
-	setitimer( ITIMER_VIRTUAL, &itime, NULL );
+	setitimer( ITIMER_VIRTUAL, &itime, nullptr );
 	my_signal( SIGVTALRM, checkpointing );
 
 	/* just to be on the safe side: */
@@ -2211,7 +2219,7 @@ void sendToAll( const char* messg, bool instant )
 {
 	Descriptor *i;
 
-	if ( messg == NULL )
+	if ( messg == nullptr )
 		return ;
 
 	for ( i = descriptor_list; i; i = i->next )
@@ -2234,7 +2242,7 @@ void sendToOutdoor( const char* messg )
 
 	for ( i = descriptor_list; i; i = i->next )
 	{
-		if ( STATE( i ) != CON_PLAYING || i->character == NULL )
+		if ( STATE( i ) != CON_PLAYING || i->character == nullptr )
 			continue;
 
 		if ( !AWAKE( i->character ) || !OUTSIDE( i->character ) )
@@ -2260,7 +2268,7 @@ void sendToRoom( const char* messg, Room *room )
 {
 	Character *i;
 
-	if ( messg == NULL )
+	if ( messg == nullptr )
 		return ;
 
 	for ( i = room->people; i; i = i->next_in_room )
@@ -2273,12 +2281,12 @@ void sendToRoom( const char* messg, Room *room )
 const char *ACTNULL = "<NULL>";
 
 #define CHECK_NULL(pointer, expression) \
- if ((pointer) == NULL) i = ACTNULL; else i = (expression);
+ if ((pointer) == nullptr) i = ACTNULL; else i = (expression);
 
 /* higher-level communication: the Act() function */
 void PerformAct( const char *orig, Character *ch, Object *obj, const void *vict_obj, Character *to, const int type, const char *bgColor, bool disorientable )
 {
-	const char * i = NULL;
+	const char * i = nullptr;
 	char lbuf[ MAX_STRING_LENGTH ], *buf;
 
 	buf = lbuf;
@@ -2401,7 +2409,7 @@ void PerformAct( const char *orig, Character *ch, Object *obj, const void *vict_
 void Act( const char *str, int hide_invisible, Character *ch, Object *obj, const void *vict_obj, int type, const char *bgColor, bool disorientable )
 {
 
-	Character * to = NULL;
+	Character * to = nullptr;
 	int to_sleeping;
 
 	if ( !str || !*str )

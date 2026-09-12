@@ -23,6 +23,7 @@
 #include "../CharacterUtil.h"
 #include "../rooms/Room.h"
 #include "../openai/OpenAIUtil.h"
+#include "../PvalManager.h"
 
 
 extern const int rev_dir[];
@@ -125,7 +126,7 @@ const char *str_str(const char *cs, const char *ct)
 	const char *s, *t;
 
 	if (!cs || !ct)
-		return NULL;
+		return nullptr;
 
 	while (*cs)
 	{
@@ -146,7 +147,7 @@ const char *str_str(const char *cs, const char *ct)
 			return s;
 	}
 
-	return NULL;
+	return nullptr;
 }
 int is_substring(const char *sub, const char *str)
 {
@@ -1025,19 +1026,20 @@ void JS_act( flusspferd::array args )
 		MudLog(NRM, LVL_BUILDER, TRUE, "JSTrigger Error : act() - Second argument is not a boolean.");
 		return;
 	}
-	if( !args.get_element(2).is_object() )
+	// Arguments 2, 3, 4 can be objects OR null
+	if( !args.get_element(2).is_object() && !args.get_element(2).is_null() )
 	{
-		MudLog(NRM, LVL_BUILDER, TRUE, "JSTrigger Error : act() - Third argument is not an object.");
+		MudLog(NRM, LVL_BUILDER, TRUE, "JSTrigger Error : act() - Third argument is not an object or null.");
 		return;
 	}
-	if( !args.get_element(3).is_object() )
+	if( !args.get_element(3).is_object() && !args.get_element(3).is_null() )
 	{
-		MudLog(NRM, LVL_BUILDER, TRUE, "JSTrigger Error : act() - Fourth argument is not an object.");
+		MudLog(NRM, LVL_BUILDER, TRUE, "JSTrigger Error : act() - Fourth argument is not an object or null.");
 		return;
 	}
-	if( !args.get_element(4).is_object() )
+	if( !args.get_element(4).is_object() && !args.get_element(4).is_null() )
 	{
-		MudLog(NRM, LVL_BUILDER, TRUE, "JSTrigger Error : act() - Fifth argument is not an object.");
+		MudLog(NRM, LVL_BUILDER, TRUE, "JSTrigger Error : act() - Fifth argument is not an object or null.");
 		return;
 	}
 	if( !args.get_element(5).is_int() )
@@ -1251,7 +1253,7 @@ flusspferd::value JS_getAllRoomsInZone( int zoneId )
 }
 flusspferd::value getObjProtoByRnum( int rnum )
 {
-	if( rnum >= 0 && rnum < top_of_objt )
+	if( rnum >= 0 && rnum <= top_of_objt )
 		return lookupValue( obj_proto[ rnum ] );
 	return lookupValue( 0 );
 }
@@ -1491,7 +1493,7 @@ flusspferd::string JS_getUserNameByUserId(int userId)
 {
 	PlayerIndex *playerIndex = CharacterUtil::getPlayerIndexByUserId(userId);
 
-	if(playerIndex == NULL)
+	if(playerIndex == nullptr)
 		return "";
 	return playerIndex->name;
 }
@@ -1500,7 +1502,7 @@ flusspferd::value JS_getUserIdByUserName(flusspferd::string userName)
 {
 	PlayerIndex *playerIndex = CharacterUtil::getPlayerIndexByUserName(userName.to_string());
 
-	if(playerIndex == NULL)
+	if(playerIndex == nullptr)
 		return flusspferd::object();
 	return flusspferd::value(playerIndex->id);
 }
@@ -1533,13 +1535,39 @@ void JS_sendToZone(int zoneNumber, flusspferd::string message)
 	sendToZone(message.c_str(), zone->GetRnum());
 }
 
-flusspferd::object JS_llmResponse(const flusspferd::object &requestObject)
+flusspferd::object JS_llmResponse(flusspferd::value requestValue)
 {
+	if (!requestValue.is_object())
+	{
+		throw flusspferd::exception("First argument to llmResponse must be an object.");
+	}
+	flusspferd::object requestObject = requestValue.to_object();
 	flusspferd::object responseObject;
+
+	if (!requestObject.has_property("model"))
+	{
+		throw flusspferd::exception("Missing property 'model'");
+	}
+	if (!requestObject.has_property("prompt"))
+	{
+		throw flusspferd::exception("Missing property 'prompt'");
+	}
+	if (!requestObject.has_property("onSuccess"))
+	{
+		throw flusspferd::exception("Missing property 'onSuccess'");
+	}
+
+
 
 	std::string model = requestObject.get_property("model").to_string().to_string();
 	std::string prompt = requestObject.get_property("prompt").to_string().to_string();
 	flusspferd::value onSuccessCallback = requestObject.get_property("onSuccess");
+
+	if (!onSuccessCallback.is_function())
+	{
+		throw flusspferd::exception("Property `onSuccess` must be a function");
+	}
+
 	std::string globalObjectKey = StringUtil::getRandomString(30);
 	flusspferd::object globalObject = flusspferd::global();
 
@@ -1610,4 +1638,14 @@ void JS_saveTopLevelHolderItems(const std::string &holderType, const std::string
 	}
 
 	Object::saveTopLevelHolderItems(holderType[0], holderId, objectsToSave);
+}
+
+int JS_numberOfPvals()
+{
+	return PvalManager::get()->size();
+}
+
+void JS_savePvalsInNeedOfSaving()
+{
+	PvalManager::get()->saveDirtyPvals();
 }

@@ -8,3 +8,4 @@ DebugGateway/
 bin/
 src/obj
 /lib/
+cmake-build-debug/

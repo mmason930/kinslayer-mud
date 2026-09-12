@@ -75,10 +75,14 @@ function initClanEquipment()
 	// dodge
 	clanEquipment.baseItems[2][constants.CLAN_YELLOW_AJAH] = "a finely woven yellow shawl of pure silk|finely woven yellow shawl pure silk|A yellow silk shawl lies here.";
 	
-	// Yellow Ajah
+	// Red Ajah
 	// dodge
 	clanEquipment.baseItems[2][constants.CLAN_RED_AJAH] = "a red-fringed shawl embroidered with vines|red fringed shawl embroidered vines|A red-fringed shawl lies here.";
-	
+
+	// White Ajah
+	// dodge
+	clanEquipment.baseItems[2][constants.CLAN_WHITE_AJAH] = "a pristine white shawl with silver-edged fringe|pristine white shawl silver edged fringe|A pristine white shawl lies here.";
+
 	// Queen's Guard
 	// dodge
 	clanEquipment.baseItems[0][constants.CLAN_ANDORAN] = "a padded leather helmet|padded leather helmet|A padded leather helmet lies here.";

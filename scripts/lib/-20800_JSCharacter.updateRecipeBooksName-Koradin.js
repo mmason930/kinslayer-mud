@@ -8,7 +8,7 @@
 	// {
 		// for (var _autoKey in this.getPval(sType.toLowerCase()+"_recipes").split("~")) { 	var Recipe = this.getPval(sType.toLowerCase()+"_recipes").split("~")[_autoKey];
 		// {	
- }
+ //}
 			// if (parseInt(Recipe) == iVnum)
 				// already_has_recipe = true;
 		// }

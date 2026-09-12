@@ -19,7 +19,7 @@
 using namespace flusspferd;
 
 // in microseconds
-const int TIMEOUT = (15)*(1000000); // Make configurable somehow?
+const int TIMEOUT = (60)*(1000000); // Make configurable somehow?
 const int TIMEOUT_SECONDS = TIMEOUT / 1000000;
 
 JSEnvironment* env;
@@ -94,8 +94,8 @@ JSBool kill_script(JSContext * cx)
     }
     else
     {//Script has run too long. Kill it.
-        JS_ReportError(cx, "This trigger has run too long.");
-        return JS_FALSE;
+        JS_ReportErrorUTF8(cx, "This trigger has run too long.");
+        return false;
     }
 #else
 	return JS_TRUE;
@@ -105,13 +105,13 @@ JSBool kill_script(JSContext * cx)
 JSBool kjsOperationalCallback(JSContext * cx)
 {
 	scriptRuntimeClock.turnOff();
-	unsigned long long secondsElapsed = scriptRuntimeClock.getClocks() / 1000;
+	unsigned long long secondsElapsed = scriptRuntimeClock.getClocks() / 1000000;
 	scriptRuntimeClock.turnOn();
 
 	if(secondsElapsed >= TIMEOUT_SECONDS)
 	{
-        JS_ReportError(cx, "This trigger has run too long.");
-        return JS_FALSE;
+        JS_ReportErrorUTF8(cx, "This trigger has run too long.");
+        return false;
 	}
 	else
 	{
@@ -134,7 +134,7 @@ void triggerOperationalCallback(flusspferd::context context)
 
 		if(context.is_valid())
 		{
-			JS_TriggerOperationCallback(Impl::get_context(context));
+			JS_RequestInterruptCallback(Impl::get_context(context));
 		}
 
 		std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -206,8 +206,10 @@ JSEnvironment::JSEnvironment()
 	flusspferd::create_native_function(g, "getZoneBottomRoomVnum", JS_getZoneBottomRoomVnum);
 	flusspferd::create_native_function(g, "getZoneTopRoomVnum", JS_getZoneTopRoomVnum);
 	flusspferd::create_native_function(g, "llmResponse", JS_llmResponse);
+	flusspferd::create_native_function(g, "numberOfPvals", JS_numberOfPvals);
+	flusspferd::create_native_function(g, "savePvalsInNeedOfSaving", JS_savePvalsInNeedOfSaving);
 
-    JS_SetOperationCallback(Impl::get_context(current_context()), &kjsOperationalCallback);
+    JS_AddInterruptCallback(Impl::get_context(current_context()), &kjsOperationalCallback);
     
 	triggerOperationalCallbackThread = std::thread( &triggerOperationalCallback, current_context() );
 
@@ -283,8 +285,6 @@ int JSEnvironment::execute(JSTrigger* trig, JSBindable *self, Character * actor,
 	else
 		instance->delstring = "";
 	return execute(instance);
-
-	return 0;
 }
 
 int JSEnvironment::execute(JSTrigger* trig, JSBindable * self, Character * actor, const char* args, Room * here)
@@ -296,13 +296,13 @@ void JSEnvironment::timeout()
 {
 	JSContext *c = raw_context();
 	if( c ) {
-		JS_TriggerOperationCallback( c );
+		JS_RequestInterruptCallback( c );
 	}
 }
 
 JSContext * JSEnvironment::raw_context() const
 {
-	static JSContext *c = NULL;
+	static JSContext *c = nullptr;
 	if( current_context().is_valid() == true ) {
 		c = Impl::get_context(current_context());
 	}
@@ -316,7 +316,7 @@ void removeTimeoutHandler()
 	struct sigaction sa;
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = SIG_IGN;
-	sigaction(SIGALRM, &sa, NULL);
+	sigaction(SIGALRM, &sa, nullptr);
 #endif
 }
 
@@ -352,7 +352,7 @@ void setupTimeout( bool setScriptEndingTime )
 	struct sigaction sa;
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = &timeout_handler;
-	sigaction(SIGALRM, &sa, NULL);
+	sigaction(SIGALRM, &sa, nullptr);
 	ualarm(MICROSECONDS_TILL_INJECTION, 0);
     timeval tt;
     gettimeofday(&tt, (struct timezone*)0);
@@ -365,7 +365,7 @@ void setupTimeout( bool setScriptEndingTime )
 	}
 
     // this only matters when signals are enabled.
-    JS_SetOperationCallback(Impl::get_context(current_context()), &kill_script);
+    JS_AddInterruptCallback(Impl::get_context(current_context()), &kill_script);
 #endif
 }
 
@@ -379,6 +379,25 @@ void JSEnvironment::cleanup(JSInstance* instance)
 	{
 		MudLog(NRM, LVL_BUILDER, TRUE, "Error in script %d cleanup : %s", instance->vnum, e.what());
 	}
+}
+
+// ES6 generator .next() returns {value: <val>, done: <bool>}.
+// This helper extracts the value and returns whether the generator is done.
+static value unwrapGeneratorResult(value result, bool &isDone)
+{
+	isDone = false;
+	if (!result.is_object()) {
+		return result;
+	}
+	object resultObj = result.to_object();
+	if (resultObj.has_property("done")) {
+		value doneVal = resultObj.get_property("done");
+		isDone = doneVal.to_boolean();
+	}
+	if (resultObj.has_property("value")) {
+		return resultObj.get_property("value");
+	}
+	return result;
 }
 
 int JSEnvironment::process_yield(std::shared_ptr<JSInstance> instance, value yielded, bool &bSpecial)
@@ -440,16 +459,34 @@ int JSEnvironment::execute_timer(std::shared_ptr<JSInstance> instance, bool succ
 {
 	assert( instance.use_count() > 0 );
 
-	static std::string sSendMethod = "send";
+	// ES6 generators use .next(val) instead of .send(val)
+	static std::string sNextMethod = "next";
   	try
     {
         setupTimeout();
     	value yielded;
-		if( instance->state.has_property(sSendMethod.c_str()) == false ) {
-			MudLog(CMP, LVL_APPR, TRUE, "Attempting to run generator's send() method where one does not exist. Script Vnum: %d", instance->vnum);
+		if( instance->state.has_property(sNextMethod.c_str()) == false ) {
+			MudLog(CMP, LVL_APPR, TRUE, "Attempting to run generator's next() method where one does not exist. Script Vnum: %d", instance->vnum);
 		}
 		else {
-	        yielded = instance->state.call(sSendMethod.c_str(), success);
+			value rawResult = instance->state.call(sNextMethod.c_str(), success);
+			bool isDone = false;
+			yielded = unwrapGeneratorResult(rawResult, isDone);
+			if (isDone) {
+				// Generator is done - equivalent of old StopIteration
+				try {
+					if( is_native<JSCharacter>(instance->self.to_object()) )
+						get_native<JSCharacter>(instance->self.to_object()).toReal()->delayed_script.reset();
+					else if( is_native<JSObject>(instance->self.to_object()) )
+						get_native<JSObject>(instance->self.to_object()).toReal()->delayed_script.reset();
+					else if( is_native<JSRoom>(instance->self.to_object()) )
+						get_native<JSRoom>(instance->self.to_object()).toReal()->delayed_script.reset();
+				} catch( flusspferd::exception &e ) {
+					return 1;
+				}
+				removeTimeout();
+				return 1;
+			}
 		}
 		bool dump = false;
 		removeTimeout();
@@ -457,23 +494,22 @@ int JSEnvironment::execute_timer(std::shared_ptr<JSInstance> instance, bool succ
     }
     catch (flusspferd::exception &e)
     {
-        if (strstr(e.what(), "[object StopIteration]")) // we don't want trivial messages.
+        if (strstr(e.what(), "[object StopIteration]"))
         {
 			try {
 				if( is_native<JSCharacter>(instance->self.to_object()) )
-		        	get_native<JSCharacter>(instance->self.to_object()).toReal()->delayed_script.reset(); // prevent leak
+		        	get_native<JSCharacter>(instance->self.to_object()).toReal()->delayed_script.reset();
 				else if( is_native<JSObject>(instance->self.to_object()) )
-		        	get_native<JSObject>(instance->self.to_object()).toReal()->delayed_script.reset(); // prevent leak
+		        	get_native<JSObject>(instance->self.to_object()).toReal()->delayed_script.reset();
 				else if( is_native<JSRoom>(instance->self.to_object()) )
-		        	get_native<JSRoom>(instance->self.to_object()).toReal()->delayed_script.reset(); // prevent leak
+		        	get_native<JSRoom>(instance->self.to_object()).toReal()->delayed_script.reset();
 			} catch( flusspferd::exception &e ) {
-				//...
 				return 1;
 			}
         }
         else
             MudLog(NRM, LVL_BUILDER, TRUE, "Error in script %d : %s", instance->vnum, e.what());
-        
+
         removeTimeout();
         return 1;
     }
@@ -507,8 +543,9 @@ int JSEnvironment::execute(std::shared_ptr<JSInstance> instance)
 				if (v.is_int()) {
                     return v.get_int();
 				}
-                else
+                else {
                     return 1; // a reasonable default value....
+				}
             }
             instance->state = v.get_object(); // this is a generator, we need to continue
         }
@@ -528,30 +565,48 @@ int JSEnvironment::execute(std::shared_ptr<JSInstance> instance)
 			printJSObject( instance->state.parent() );
 		}
 		else {
-	        value yielded = instance->state.call(sGeneratorMethod.c_str());
+			value rawResult = instance->state.call(sGeneratorMethod.c_str());
+			// ES6 generators return {value, done} - unwrap the result
+			bool isDone = false;
+			value yielded = unwrapGeneratorResult(rawResult, isDone);
+			if (isDone) {
+				// Generator is done - equivalent of old StopIteration
+				if( !instance->self.is_undefined() && !instance->self.is_null() ) {
+					try {
+						if( is_native<JSCharacter>(instance->self.to_object()) )
+							get_native<JSCharacter>(instance->self.to_object()).toReal()->delayed_script.reset();
+						else if( is_native<JSObject>(instance->self.to_object()) )
+							get_native<JSObject>(instance->self.to_object()).toReal()->delayed_script.reset();
+						else if( is_native<JSRoom>(instance->self.to_object()) )
+							get_native<JSRoom>(instance->self.to_object()).toReal()->delayed_script.reset();
+					} catch( ... ) {}
+				}
+				removeTimeout();
+				return rVal;
+			}
 			rVal = process_yield(instance, yielded, bSpecial);
 		}
 	    removeTimeout();
     }
     catch (flusspferd::exception &e)
     {
-        if (strstr(e.what(), "[object StopIteration]")) // we don't want trivial messages.
+        if (strstr(e.what(), "[object StopIteration]"))
         {
 			if( !instance->self.is_undefined() && !instance->self.is_null() ) {
 			try {
 				if( is_native<JSCharacter>(instance->self.to_object()) )
-		        	get_native<JSCharacter>(instance->self.to_object()).toReal()->delayed_script.reset(); // prevent leak
+		        	get_native<JSCharacter>(instance->self.to_object()).toReal()->delayed_script.reset();
 				else if( is_native<JSObject>(instance->self.to_object()) )
-		        	get_native<JSObject>(instance->self.to_object()).toReal()->delayed_script.reset(); // prevent leak
+		        	get_native<JSObject>(instance->self.to_object()).toReal()->delayed_script.reset();
 				else if( is_native<JSRoom>(instance->self.to_object()) )
-		        	get_native<JSRoom>(instance->self.to_object()).toReal()->delayed_script.reset(); // prevent leak
+		        	get_native<JSRoom>(instance->self.to_object()).toReal()->delayed_script.reset();
 			}
 			catch( ... ) {}
 			}
         }
         else
             MudLog(NRM, LVL_BUILDER, TRUE, "Error in script %d : %s", instance->vnum, e.what());
-        
+
         removeTimeout();
     }
 	catch( ... ) {
@@ -576,28 +631,244 @@ void macro( std::string &source, const std::string find, std::string replace )
 	***/
 }
 
-bool JSEnvironment::compile(const std::string &fileName, std::string &scriptBuffer)
+// Convert legacy-style generator functions to ES6 function* syntax.
+// In old SpiderMonkey (1.8.x), any function containing 'yield' was automatically a generator.
+// In ES6 (SpiderMonkey 131), generators must be declared with function*.
+// This function finds each 'function' keyword, determines its body, and checks if
+// yield appears at the top level of that function (not inside nested functions).
+static void convertLegacyGenerators(std::string &source)
+{
+	// Only bother if the source contains yield
+	if (source.find("yield") == std::string::npos)
+		return;
+
+	// First pass: find the opening brace position for each function keyword.
+	// Second pass: for each function, check if yield appears at brace depth 1
+	// (i.e., directly in that function's body, not in nested functions).
+
+	// We'll work backwards so inserting '*' doesn't shift positions of earlier functions.
+	// Collect positions of 'function' keywords that need conversion.
+	std::vector<size_t> funcPositions;
+	size_t len = source.size();
+
+	for (size_t i = 0; i < len; ) {
+		size_t funcPos = source.find("function", i);
+		if (funcPos == std::string::npos) break;
+
+		size_t afterFunc = funcPos + 8;
+
+		// Check it's a standalone keyword
+		bool validStart = (funcPos == 0 || (!isalnum((unsigned char)source[funcPos - 1]) && source[funcPos - 1] != '_'));
+		bool validEnd = (afterFunc >= len || (!isalnum((unsigned char)source[afterFunc]) && source[afterFunc] != '_'));
+		// Allow function* (already a generator)
+		if (afterFunc < len && source[afterFunc] == '*') {
+			i = afterFunc + 1;
+			continue;
+		}
+
+		if (!validStart || !validEnd) {
+			i = afterFunc;
+			continue;
+		}
+
+		// Skip whitespace and optional function name to find '('
+		size_t scan = afterFunc;
+		while (scan < len && (source[scan] == ' ' || source[scan] == '\t' || source[scan] == '\n' || source[scan] == '\r'))
+			scan++;
+		if (scan < len && (isalpha((unsigned char)source[scan]) || source[scan] == '_' || source[scan] == '$')) {
+			while (scan < len && (isalnum((unsigned char)source[scan]) || source[scan] == '_' || source[scan] == '$'))
+				scan++;
+			while (scan < len && (source[scan] == ' ' || source[scan] == '\t'))
+				scan++;
+		}
+
+		if (scan >= len || source[scan] != '(') {
+			i = afterFunc;
+			continue;
+		}
+
+		// Find matching ')'
+		int parenDepth = 1;
+		scan++;
+		while (scan < len && parenDepth > 0) {
+			if (source[scan] == '(') parenDepth++;
+			else if (source[scan] == ')') parenDepth--;
+			scan++;
+		}
+		if (parenDepth != 0) { i = afterFunc; continue; }
+
+		// Find opening '{'
+		while (scan < len && source[scan] != '{') scan++;
+		if (scan >= len) { i = afterFunc; continue; }
+
+		// Now scan the function body. We look for 'yield' anywhere in this
+		// function's body, but NOT inside nested function bodies.
+		// We track nested function depth to skip their bodies.
+		size_t bodyOpen = scan;
+		int braceDepth = 0;
+		int nestedFuncBraceStart = 0; // brace depth when we entered a nested function
+		int nestedFuncCount = 0;      // how many nested functions deep we are
+		bool hasYieldAtTopLevel = false;
+		size_t bodyScan = bodyOpen;
+
+		while (bodyScan < len) {
+			char c = source[bodyScan];
+
+			if (c == '{') {
+				braceDepth++;
+			} else if (c == '}') {
+				braceDepth--;
+				if (nestedFuncCount > 0 && braceDepth < nestedFuncBraceStart) {
+					nestedFuncCount--;
+					if (nestedFuncCount > 0) {
+						// Still inside an outer nested function, restore its brace start
+						// This is approximate but works for typical non-deeply-nested code
+					}
+				}
+				if (braceDepth == 0) {
+					bodyScan++;
+					break; // End of this function
+				}
+			} else if (c == '/' && bodyScan + 1 < len) {
+				if (source[bodyScan + 1] == '/') {
+					while (bodyScan < len && source[bodyScan] != '\n') bodyScan++;
+					continue;
+				} else if (source[bodyScan + 1] == '*') {
+					bodyScan += 2;
+					while (bodyScan + 1 < len && !(source[bodyScan] == '*' && source[bodyScan + 1] == '/')) bodyScan++;
+					if (bodyScan + 1 < len) bodyScan += 2;
+					continue;
+				}
+			} else if (c == '"' || c == '\'' || c == '`') {
+				char quote = c;
+				bodyScan++;
+				while (bodyScan < len && source[bodyScan] != quote) {
+					if (source[bodyScan] == '\\') bodyScan++;
+					bodyScan++;
+				}
+			} else if (c == 'f' && bodyScan + 8 <= len && source.compare(bodyScan, 8, "function") == 0) {
+				// Check for nested 'function' keyword
+				bool fStart = (bodyScan == 0 || (!isalnum((unsigned char)source[bodyScan - 1]) && source[bodyScan - 1] != '_'));
+				bool fEnd = (bodyScan + 8 >= len || (!isalnum((unsigned char)source[bodyScan + 8]) && source[bodyScan + 8] != '_')
+				             || source[bodyScan + 8] == '*');
+				if (fStart && fEnd) {
+					// Skip past this nested function's opening brace
+					size_t fScan = bodyScan + 8;
+					if (fScan < len && source[fScan] == '*') fScan++; // skip * if function*
+					// Find the opening '{' of the nested function
+					while (fScan < len && source[fScan] != '{') {
+						if (source[fScan] == '/' && fScan + 1 < len && source[fScan + 1] == '/') {
+							while (fScan < len && source[fScan] != '\n') fScan++;
+						}
+						fScan++;
+					}
+					if (fScan < len) {
+						// Skip the entire nested function body
+						int nestedDepth = 1;
+						fScan++; // past '{'
+						while (fScan < len && nestedDepth > 0) {
+							if (source[fScan] == '{') nestedDepth++;
+							else if (source[fScan] == '}') nestedDepth--;
+							else if (source[fScan] == '"' || source[fScan] == '\'' || source[fScan] == '`') {
+								char q = source[fScan];
+								fScan++;
+								while (fScan < len && source[fScan] != q) {
+									if (source[fScan] == '\\') fScan++;
+									fScan++;
+								}
+							} else if (source[fScan] == '/' && fScan + 1 < len) {
+								if (source[fScan + 1] == '/') {
+									while (fScan < len && source[fScan] != '\n') fScan++;
+									continue;
+								} else if (source[fScan + 1] == '*') {
+									fScan += 2;
+									while (fScan + 1 < len && !(source[fScan] == '*' && source[fScan + 1] == '/')) fScan++;
+									if (fScan + 1 < len) fScan += 2;
+									continue;
+								}
+							}
+							fScan++;
+						}
+						bodyScan = fScan - 1; // -1 because the outer loop will increment
+					}
+				}
+			} else if (nestedFuncCount == 0 && c == 'y') {
+				// Check for 'yield' keyword - only if not inside a nested function
+				if (bodyScan + 5 <= len && source.compare(bodyScan, 5, "yield") == 0) {
+					bool yStart = (bodyScan == 0 || (!isalnum((unsigned char)source[bodyScan - 1]) && source[bodyScan - 1] != '_'));
+					bool yEnd = (bodyScan + 5 >= len || (!isalnum((unsigned char)source[bodyScan + 5]) && source[bodyScan + 5] != '_'));
+					if (yStart && yEnd) {
+						hasYieldAtTopLevel = true;
+					}
+				}
+			}
+			bodyScan++;
+		}
+
+		if (hasYieldAtTopLevel) {
+			funcPositions.push_back(funcPos);
+		}
+
+		i = bodyScan;
+	}
+
+	// Insert '*' after 'function' for each identified position, working backwards
+	for (int idx = (int)funcPositions.size() - 1; idx >= 0; idx--) {
+		source.insert(funcPositions[idx] + 8, "*"); // Insert '*' right after "function"
+	}
+}
+
+bool JSEnvironment::compile(const std::string &fileName, const std::string &scriptBuffer)
 {
     JSScript *script;
     JSObject *scriptObj;
     jsval val;
 
     std::string formattedScriptBuffer = scriptBuffer;
-    
+
 	macro(formattedScriptBuffer, "wait ", "yield 6 * ");
 	macro(formattedScriptBuffer, "waitpulse ", "yield ");
 	macro(formattedScriptBuffer, "runTimer", "yield ");
 	macro(formattedScriptBuffer, "_block", "yield '__SPECIAL__BLOCK'");
 	macro(formattedScriptBuffer, "_noblock", "yield '__SPECIAL__NOBLOCK'");
-	
+
+	// Convert top-level 'let' to 'var' - in SM 131, top-level 'let' doesn't create
+	// global properties, but old scripts rely on 'let scriptXXX = function(...)' being
+	// accessible as global().has_property("scriptXXX")
+	{
+		size_t pos = 0;
+		while (pos < formattedScriptBuffer.size()) {
+			// Only convert 'let' at the start of a line (top-level)
+			if ((pos == 0 || formattedScriptBuffer[pos - 1] == '\n') &&
+			    formattedScriptBuffer.compare(pos, 4, "let ") == 0) {
+				formattedScriptBuffer.replace(pos, 3, "var");
+			}
+			// Advance to next line
+			size_t nl = formattedScriptBuffer.find('\n', pos);
+			if (nl == std::string::npos) break;
+			pos = nl + 1;
+		}
+	}
+
+	// Convert legacy generator functions (containing yield) to ES6 function* syntax
+	convertLegacyGenerators(formattedScriptBuffer);
+
 	try {
 		setupTimeout();
 		flusspferd::evaluate(formattedScriptBuffer, fileName.c_str(), 1);
 		removeTimeout();
+		// Debug: Log successful compilation
+		// MudLog(BRF, LVL_APPR, TRUE, "Successfully compiled: %s", fileName.c_str());
 	}
 	catch(flusspferd::exception &e)
 	{
-		MudLog(BRF, TRUE, LVL_APPR, "Error evaluating script: %s", e.what());
+		MudLog(BRF, LVL_APPR, TRUE, "Error evaluating script `%s`: %s", fileName.c_str(), e.what());
+		removeTimeout();
+	}
+	catch(std::exception &e)
+	{
+		MudLog(BRF, LVL_APPR, TRUE, "C++ exception evaluating script `%s`: %s", fileName.c_str(), e.what());
+		removeTimeout();
 	}
 
 /*
@@ -627,7 +898,7 @@ bool JSEnvironment::compile(const std::string &fileName, std::string &scriptBuff
 	}
 
 	Log("SCRIPT: %p", script);
-    if (script == NULL)
+    if (script == nullptr)
     {
         return false;
     }
@@ -636,7 +907,7 @@ bool JSEnvironment::compile(const std::string &fileName, std::string &scriptBuff
     
 	Log("SCRIPT OBJ: %p", scriptObj);
 
-	if (scriptObj == NULL) {
+	if (scriptObj == nullptr) {
         JS_DestroyScript(raw_context(), script);
         return false;
     }
@@ -694,14 +965,14 @@ bool JSEnvironment::compile(JSTrigger * trig)
 //	cout << temp << endl;
     
     script = JS_CompileScript(raw_context(), JS_GetGlobalObject(raw_context()), temp.c_str(), temp.size(), trig->js_name.c_str(), 1);
-    if (script == NULL)
+    if (script == nullptr)
     {
         trig->valid = false;
         return false;
     }
 
     scriptObj = JS_NewScriptObject(raw_context(), script);
-    if (scriptObj == NULL) {
+    if (scriptObj == nullptr) {
         JS_DestroyScript(raw_context(), script);
         trig->valid = false;
         return false;

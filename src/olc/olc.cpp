@@ -51,7 +51,7 @@ void sedit_save_to_disk();
 extern int real_shop( int vnum );
 FILE *file;
 
-struct olc_save_info *olc_save_list = NULL;
+struct olc_save_info *olc_save_list = nullptr;
 char *nrm, *grn, *cyn, *yel, *bld, *mag, *red, *blu;
 
 //Internal function prototypes.
@@ -95,7 +95,7 @@ AuctionData::AuctionData()
 {
 	this->page = 1;
 	this->sellDuration = 0;
-	this->itemToSell = NULL;
+	this->itemToSell = nullptr;
 	buyoutPrice = 0;
 	startingPrice = 0;
 	selectedItem = -1;
@@ -239,29 +239,28 @@ OLC::OLC()
 	this->script_mode		= 0;
 	this->trigger_position	= 0;
 	this->item_type			= 0;
-	this->mob				= NULL;
-	this->room				= NULL;
-	this->obj				= NULL;
-	this->warrant			= NULL;
-	this->clan				= NULL;
-	this->zone				= NULL;
-	this->shop				= NULL;
-	this->config			= NULL;
-	this->desc				= NULL;
-	this->kit				= NULL;
-	this->action			= NULL;
-	this->storage			= NULL;
-	this->sg_index_ptr		= NULL;
-	this->statgroup			= NULL;
+	this->mob				= nullptr;
+	this->room				= nullptr;
+	this->obj				= nullptr;
+	this->warrant			= nullptr;
+	this->clan				= nullptr;
+	this->zone				= nullptr;
+	this->shop				= nullptr;
+	this->config			= nullptr;
+	this->desc				= nullptr;
+	this->kit				= nullptr;
+	this->action			= nullptr;
+	this->storage			= nullptr;
+	this->sg_index_ptr		= nullptr;
+	this->statgroup			= nullptr;
 	this->sg_race			= -1;
 	this->sg_class			= -1;
 	this->sg_sex			= -1;
-	this->buf				= (NULL);
-	this->auction			= (NULL);
-	this->auction_data		= (NULL);
-	this->userEmailAddress	= NULL;
-	this->jsTrig			= (NULL);
-//	this->jsScripts			= (NULL);
+	this->buf				= nullptr;
+	this->auction			= nullptr;
+	this->auction_data		= nullptr;
+	this->userEmailAddress	= nullptr;
+	this->jsTrig			= nullptr;
 }
 
 /*------------------------------------------------------------*/
@@ -278,7 +277,7 @@ CommandHandler  do_myzones  = DEFINE_COMMAND
 		return ;
 	}
 
-	for ( i = 0;(zone=ZoneManager::GetManager().GetZoneByRnum(i))!=NULL;++i )
+	for ( i = 0;(zone=ZoneManager::GetManager().GetZoneByRnum(i))!=nullptr;++i )
 	{//For each zone in the manager
 		if ( zone->CanEdit(ch) )
 		{//If ch can edit the zone
@@ -424,14 +423,14 @@ CommandHandler  do_olc  = DEFINE_COMMAND
 
 	d = ch->desc;
 	d->olc = new OLC();
-	Zone *zone = NULL;
+	Zone *zone = nullptr;
 
 	/*
 	 * Find the zone (or help rnum).
 	 */
 	if ( subcmd != SCMD_OLC_AEDIT )
 	{
-		if ( ( zone = ZoneManager::GetManager().GetZoneByRoomVnum(num) ) == NULL )
+		if ( ( zone = ZoneManager::GetManager().GetZoneByRoomVnum(num) ) == nullptr )
 		{
 			ch->send( "Sorry, there is no zone for that number!\r\n" );
 			cleanup_olc(d, CLEANUP_ALL);
@@ -458,7 +457,7 @@ CommandHandler  do_olc  = DEFINE_COMMAND
 
 	if ( save )
 	{
-		const char * type = NULL;
+		const char * type = nullptr;
 
 		switch ( subcmd )
 		{
@@ -565,7 +564,7 @@ CommandHandler  do_olc  = DEFINE_COMMAND
 	switch ( subcmd )
 	{
 	case SCMD_OLC_KEDIT:
-		if ( ( kit = KitManager::GetManager().GetKitByVnum( num ) ) != NULL )
+		if ( ( kit = KitManager::GetManager().GetKitByVnum( num ) ) != nullptr )
 			kedit_setup_existing( d, kit );
 		else
 			kedit_setup_new( d );
@@ -760,7 +759,7 @@ void cleanup_olc( Descriptor *d, sbyte cleanup_type )
 		//Check for storage.
 		if ( OLC_STORAGE( d ) )
 			delete []( OLC_STORAGE( d ) );
-		if( d->olc->buf != NULL )
+		if( d->olc->buf != nullptr )
 			delete []d->olc->buf;
 
 		//Check for a kit
@@ -829,7 +828,7 @@ void cleanup_olc( Descriptor *d, sbyte cleanup_type )
 
 		//Do NOT delete the warrant since we are not making temporaries.
 		if ( OLC_WARRANT( d ) )
-			OLC_WARRANT( d ) = NULL;
+			OLC_WARRANT( d ) = nullptr;
 
 		//Delete the temporary warrant list.
 		while ( d->olc->WarrantList.size() )
@@ -891,7 +890,7 @@ void cleanup_olc( Descriptor *d, sbyte cleanup_type )
 		}
 
 		delete ( d->olc );
-		d->olc = NULL;
+		d->olc = nullptr;
 	}
 }
 
@@ -958,10 +957,10 @@ CommandHandler  do_mlist  = DEFINE_COMMAND
 {
 	if( !ch->desc )
 		return;
-	char arg1[ MAX_INPUT_LENGTH ], arg2[ MAX_INPUT_LENGTH ], arg3[ MAX_INPUT_LENGTH ], sortType[MAX_INPUT_LENGTH], *keyword = NULL;
+	char arg1[ MAX_INPUT_LENGTH ], arg2[ MAX_INPUT_LENGTH ], arg3[ MAX_INPUT_LENGTH ], sortType[MAX_INPUT_LENGTH], *keyword = nullptr;
 	int m1 = -1, m2 = -1, r1 = -1, r2 = -1;
 	std::stringstream OutBuf;
-	Character *Prototype = NULL;
+	Character *Prototype = nullptr;
 	std::list<std::string> SortTypes;
 	std::map<int,int> zoneLoads, openZoneLoads; // Mob Rnum to Mob Zone Load
 

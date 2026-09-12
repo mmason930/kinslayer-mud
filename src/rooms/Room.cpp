@@ -10,8 +10,17 @@
 #include "../js/js.h"
 #include "../poker.h"
 #include "Room.h"
+
+#include <ranges>
+#include <future>
+
 #include "RoomSector.h"
 #include "Exit.h"
+
+std::future<Room::VectorRowResult> Room::roomQueryFuture;
+std::future<Room::UnorderedMapRowResult> Room::exitQueryFuture;
+std::future<Room::UnorderedMapRowResult> Room::jsFuture;
+std::future<sql::Query> Room::objectsFuture;
 
 //Returns the number of lines in the room's description.
 int Room::getLinesInDescription()
@@ -55,7 +64,7 @@ Object *Room::findFirstObject(const std::function<bool(class Object *obj)> &pred
 			return obj;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 bool Room::isTrackable()
@@ -112,7 +121,7 @@ std::string Room::gateCode()
 //Reserve prototype-sensitive information.
 void Room::freeLiveRoom()
 {
-	this->PTable = NULL;
+	this->PTable = nullptr;
 	this->tracks.clear();
 }
 
@@ -249,18 +258,18 @@ void Room::zero()
 	this->vnum = NOWHERE;
 	this->zone = 0;
 	this->setSector(RoomSector::inside);
-	this->name = NULL;
-	this->description = NULL;
-	this->ex_description = NULL;
+	this->name = nullptr;
+	this->description = nullptr;
+	this->ex_description = nullptr;
 	this->light = 0;
-	this->contents = NULL;
-	this->people = NULL;
-	this->PTable = NULL;
+	this->contents = nullptr;
+	this->people = nullptr;
+	this->PTable = nullptr;
 	this->deleted = false;
-	this->eavesdroppingWarder = NULL;
+	this->eavesdroppingWarder = nullptr;
 	this->auctionVnum = -1;
 	this->room_flags = 0;
-	this->func = (NULL);
+	this->func = (nullptr);
 	this->js_scripts = std::shared_ptr<std::vector<JSTrigger*> >(new std::vector< JSTrigger* >);
 
 	memset(&this->dir_option, 0, sizeof(dir_option));
@@ -306,10 +315,10 @@ void Room::copy(const Room *source, bool deep)
 			this->dir_option[i] = new Exit();
 			*this->dir_option[i] = *source->dir_option[i];
 		}
-		else if (this->dir_option[i] != NULL)
+		else if (this->dir_option[i] != nullptr)
 		{
 			delete this->dir_option[i];
-			this->dir_option[i] = NULL;
+			this->dir_option[i] = nullptr;
 		}
 	}
 
@@ -375,7 +384,7 @@ Room::~Room()
 	//Delete the room's directions...
 	for (unsigned int i = 0; i < NUM_OF_DIRS; ++i)
 	{
-		if (this->dir_option[i] != NULL)
+		if (this->dir_option[i] != nullptr)
 			delete this->dir_option[i];
 	}
 	//Delete the room's name...
@@ -398,130 +407,179 @@ Room::~Room()
 		delete this->PTable;
 }
 
+void Room::preBootWorld()
+{
+	roomQueryFuture = std::async(std::launch::async, [&] {
+
+		std::stringstream roomQueryBuffer;
+
+		roomQueryBuffer << " SELECT *"
+						<< " FROM rooms"
+						<< " ORDER BY vnum ASC";
+
+		sql::Connection connection = dbContext->createConnection();
+		sql::Query query = connection->sendQuery(roomQueryBuffer.str());
+		std::vector<sql::Row> roomRows(query->numRows());
+
+		int index = 0;
+		while (query->hasNextRow())
+		{
+			sql::Row row = query->getRow();
+			roomRows[index] = row;
+			++index;
+		}
+
+		return VectorRowResult { query, roomRows };
+	});
+	exitQueryFuture = std::async(std::launch::async, [&] {
+
+		std::stringstream exitQueryBuffer;
+
+		exitQueryBuffer << " SELECT *"
+						<< " FROM roomExit"
+						<< " ORDER BY room_vnum ASC";
+
+		sql::Connection connection = dbContext->createConnection();
+		sql::Query query = connection->sendQuery(exitQueryBuffer.str());
+		std::unordered_map<int, std::vector<sql::Row>> roomVnumToExitRowsMap;
+
+		while (query->hasNextRow())
+		{
+			sql::Row row = query->getRow();
+			int roomVnum = row.getInt("room_vnum");
+			MiscUtil::pushToVectorMap(roomVnumToExitRowsMap, roomVnum, row);
+		}
+
+		return UnorderedMapRowResult { query, roomVnumToExitRowsMap };
+	});
+	objectsFuture = std::async(std::launch::async, [&] {
+		sql::Connection connection = dbContext->createConnection();
+		return Object::loadItemsByTopLevelHolderQuery(connection, 'R');
+	});
+	jsFuture = std::async(std::launch::async, [&] {
+
+		std::stringstream jsBuffer;
+
+		sql::Connection connection = dbContext->createConnection();
+
+		sql::Query query = connection->sendQuery("SELECT * FROM js_attachments WHERE type='R' ORDER BY target_vnum ASC,id ASC;");
+		std::unordered_map<int, std::vector<sql::Row>> romVnumToJsRowsMap;
+
+		while (query->hasNextRow())
+		{
+			sql::Row row = query->getRow();
+			int roomVnum = row.getInt("target_vnum");
+			MiscUtil::pushToVectorMap(romVnumToJsRowsMap, roomVnum, row);
+		}
+
+		return UnorderedMapRowResult { query, romVnumToJsRowsMap };
+	});
+}
+
+Clock readObjectClock, realObjectClock, specialLoadClock;
+
 void Room::bootWorld(
-	std::map<Room *, std::map<int, int>> &roomToExitToVnumMap
+	std::unordered_map<Room *, std::unordered_map<int, int>> &roomToExitToVnumMap
 )
 {
 
-	class PassiveRoomQueryReleaseJob : public Job
+	Clock roomLoopClock;
+	Clock dbClock;
+	Clock secondLoopClock;
+	readObjectClock.reset(false);
+	realObjectClock.reset(false);
+	specialLoadClock.reset(false);
+	dbClock.turnOn();
+
+	auto roomRows = roomQueryFuture.get();
+	auto roomVnumToExitsMap = exitQueryFuture.get();
+	auto objectQuery = objectsFuture.get();
+	auto roomVnumToJsRowsMap = jsFuture.get();
+
+	World.reserve(roomRows.query->numRows());
+
+	dbClock.turnOff();
+
+	Clock objectLoadClock;
+	objectLoadClock.turnOn();
+	// Load the objects from the query result
+	auto objectIdToObjectLoadMap = Object::loadItemMapFromQuery(objectQuery);
+	objectLoadClock.turnOff();
+
+
+	std::unordered_map<std::string, Room *> holderIdToRoomMap;
+
+	roomLoopClock.turnOn();
+	const std::vector<sql::Row> emptyRowVector;
+	Clock roomBootClock, roomLoopTopClock, exitPushCLock, jsPushClock, roomPushClock;
+	for (const sql::Row& roomRow: roomRows.rows)
 	{
-		sql::Query RoomQuery, ExitQuery, jsQuery, ObjectQuery;
-	public:
-		PassiveRoomQueryReleaseJob(sql::Query RoomQuery, sql::Query ExitQuery, sql::Query jsQuery, sql::Query ObjectQuery)
+		roomLoopTopClock.turnOn();
+		int roomVnum = atoi(roomRow.getString("room_vnum").c_str());
+		roomLoopTopClock.turnOff();
+
+		exitPushCLock.turnOn();
+		auto MyExitMatch = roomVnumToExitsMap.roomVnumToRowsMap.find(roomVnum);
+		const auto& MyExits = (MyExitMatch != roomVnumToExitsMap.roomVnumToRowsMap.end()) ? MyExitMatch->second : emptyRowVector;
+		exitPushCLock.turnOff();
+
+		jsPushClock.turnOn();
+		auto MyJSMatch = roomVnumToJsRowsMap.roomVnumToRowsMap.find(roomVnum);
+		const auto& MyJS = (MyJSMatch != roomVnumToJsRowsMap.roomVnumToRowsMap.end()) ? MyJSMatch->second : emptyRowVector;
+		jsPushClock.turnOff();
+
+		roomBootClock.turnOn();
+		Room *room = boot(roomRow, MyExits, MyJS, roomToExitToVnumMap);
+		roomBootClock.turnOff();
+
+		roomPushClock.turnOn();
+		if (room != nullptr)
 		{
-			this->RoomQuery = RoomQuery;
-			this->ExitQuery = ExitQuery;
-			this->jsQuery = jsQuery;
-			this->ObjectQuery = ObjectQuery;
+			World.push_back(room);
+			holderIdToRoomMap[std::to_string(room->getVnum())] = room;
 		}
-		virtual void performRoutine()
-		{
-			this->RoomQuery.reset();
-			this->ExitQuery.reset();
-			this->jsQuery.reset();
-			this->ObjectQuery.reset();
-		}
-		virtual void performPostJobRoutine()
-		{
-			//...
-		}
-	};
-
-	sql::Query RoomQuery, ExitQuery, jsQuery, ObjectQuery;
-	std::list< sql::Row > MyExits, MyJS;
-	std::list< Object* > MyObjects;
-
-	Clock clock1;
-	clock1.turnOn();
-	try {
-		std::stringstream roomQueryBuffer, exitQueryBuffer, objectQueryBuffer;
-
-		roomQueryBuffer << " SELECT *"
-			<< " FROM rooms"
-			<< " ORDER BY vnum ASC";
-
-		exitQueryBuffer << " SELECT *"
-			<< " FROM roomExit"
-			<< " ORDER BY room_vnum ASC";
-
-		objectQueryBuffer << " SELECT id, holder_id"
-			<< " FROM objects"
-			<< " WHERE holder_type='R'"
-			<< " AND holder_id IN(SELECT vnum FROM rooms)"
-			<< " ORDER BY (holder_id+0) ASC";
-
-		RoomQuery = gameDatabase->sendQuery(roomQueryBuffer.str());
-		ExitQuery = gameDatabase->sendQuery(exitQueryBuffer.str());
-		ObjectQuery = gameDatabase->sendQuery(objectQueryBuffer.str());
-		jsQuery = gameDatabase->sendQuery("SELECT * FROM js_attachments WHERE type='R' ORDER BY target_vnum ASC,id ASC;");
+		roomPushClock.turnOff();
 	}
-	catch (sql::QueryException &e) {
-		MudLog(BRF, LVL_APPR, TRUE, "Could not send query in Room::bootWorld() : %s", e.getMessage().c_str());
-		exit(1);
-	}
+	roomLoopClock.turnOff();
 
-	while (RoomQuery->hasNextRow())
+
+	secondLoopClock.turnOn();
+	for (const auto& val : objectIdToObjectLoadMap | views::values)
 	{
-		sql::Row MyRow = RoomQuery->getRow();
-		MyExits.clear();
-		MyJS.clear();
-		MyObjects.clear();
+		auto objectLoad = val;
 
-		while (ExitQuery->hasNextRow() && ExitQuery->peekRow()["room_vnum"] == MyRow["vnum"])
-			MyExits.push_back(ExitQuery->getRow());
-
-		while (ObjectQuery->hasNextRow() && ObjectQuery->peekRow()["holder_id"] == MyRow["vnum"])
+		if (objectLoad.holderType == 'R')
 		{
-			boost::uuids::string_generator uuidGenerator;
-			boost::uuids::uuid objID = uuidGenerator(ObjectQuery->getRow()["id"].c_str());
-			Object *obj = Object::loadSingleItem(objID, false);
-			if (obj != NULL) {
-				MyObjects.push_back(obj);
+			auto holderRoom = holderIdToRoomMap.find(objectLoad.holderId);
+			if (holderRoom != holderIdToRoomMap.end())
+			{
+				objectLoad.obj->MoveToRoom(holderRoom->second, false);
 			}
 		}
-		while (jsQuery->hasNextRow() && jsQuery->peekRow()["target_vnum"] == MyRow["vnum"])
-			MyJS.push_back(jsQuery->getRow());
-
-		Room *r = Room::boot(MyRow, MyExits, MyJS, MyObjects, roomToExitToVnumMap);
-
-		if (r != NULL)
-			World.push_back(r);
 	}
+	secondLoopClock.turnOff();
 
-	/***
-	* Cleanup of these resources is a monumental task. As such, it would be better to run it behind the
-	* scenes with a separate thread. First, we copy the four boost::shared_ptr's into this class.
-	* We then reset them so they bring their reference count down to 1. Once this happens, we can run
-	* the thread and exit this function.
-	*
-	***/
+	Log("DB Time: %f", dbClock.getSeconds());
+	Log("objectLoadClock: %f", objectLoadClock.getSeconds());
+	Log("readObjectClock: %f", readObjectClock.getSeconds());
+	Log("realObjectClock: %f", realObjectClock.getSeconds());
+	Log("specialLoadClock: %f", specialLoadClock.getSeconds());
+	Log("Second Loop Time: %f", secondLoopClock.getSeconds());
 
-	MyExits.clear();
-	MyJS.clear();
+	Log("roomLoopClock: %f", roomLoopClock.getSeconds());
+	Log("roomBootClock: %f", roomBootClock.getSeconds());
+	Log("roomLoopTopClock: %f", roomLoopTopClock.getSeconds());
+	Log("exitPushCLock: %f", exitPushCLock.getSeconds());
+	Log("jsPushClock: %f", jsPushClock.getSeconds());
+	Log("roomPushClock: %f", roomPushClock.getSeconds());
 
-	//We want a guarantee that the resources will be released.
-	assert(RoomQuery.use_count() == 1);
-	assert(ExitQuery.use_count() == 1);
-	assert(jsQuery.use_count() == 1);
-	assert(ObjectQuery.use_count() == 1);
-
-	Job *cleanupJob = new PassiveRoomQueryReleaseJob(RoomQuery, ExitQuery, jsQuery, ObjectQuery);
-
-	//Drop use count down to 1.
-	RoomQuery.reset();
-	ExitQuery.reset();
-	jsQuery.reset();
-	ObjectQuery.reset();
-
-	//And deploy the thread...
-	ThreadedJobManager::get().addJob(cleanupJob);
+	//exit(0);
 }
 
 Room *Room::boot(const sql::Row &roomRow,
-	const std::list< sql::Row > &exitRows,
-	const std::list< sql::Row > &jsRows,
-	const std::list< Object* > &objectRows,
-	std::map<Room *, std::map<int, int>> &roomToExitToVnumMap
+	const std::vector< sql::Row > &exitRows,
+	const std::vector< sql::Row > &jsRows,
+	std::unordered_map<Room *, std::unordered_map<int, int>> &roomToExitToVnumMap
 )
 {
 	static bool hasRoomExitIndexes = false;
@@ -536,13 +594,14 @@ Room *Room::boot(const sql::Row &roomRow,
 	static int EXIT_DIR_INDEX;
 
 	Room *newRoom = new Room();
+
 	Zone *zone;
-	if ((zone = ZoneManager::GetManager().GetZoneByVnum(MiscUtil::convert<unsigned int>(roomRow["znum"]))) == NULL)
+	if ((zone = ZoneManager::GetManager().GetZoneByVnum(MiscUtil::convert<unsigned int>(roomRow["znum"]))) == nullptr)
 	{
 		MudLog(BRF, LVL_APPR, TRUE,
 			"Attempting to load room with invalid zone vnum. Room: %d. Zone: %d.", atoi(roomRow["vnum"].c_str()),
 			MiscUtil::convert<unsigned int>(roomRow["znum"]));
-		return (NULL);
+		return (nullptr);
 	}
 
 	newRoom->name = str_dup(roomRow["name"].c_str());
@@ -570,21 +629,21 @@ Room *Room::boot(const sql::Row &roomRow,
 
 	if(!exitRows.empty())
 	{
-		std::map<int, int> exitToVnumMap;
-		for (std::list< sql::Row >::const_iterator eRow = exitRows.begin(); eRow != exitRows.end(); ++eRow)
+		std::unordered_map<int, int> exitToVnumMap;
+		for (const auto & exitRow : exitRows)
 		{
-			int dir = atoi((*eRow)[EXIT_DIR_INDEX].c_str());
+			int dir = atoi(exitRow[EXIT_DIR_INDEX].c_str());
 
 			if (dir >= 0 && dir < NUM_OF_DIRS)
 			{
-				int exitVnum = atoi((*eRow)[EXIT_TO_ROOM_INDEX].c_str());
+				int exitVnum = atoi(exitRow[EXIT_TO_ROOM_INDEX].c_str());
 				newRoom->dir_option[dir] = new Exit();
-				newRoom->dir_option[dir]->setGeneralDescription((*eRow)[EXIT_GENERAL_DESCRIPTION_INDEX].c_str());
-				newRoom->dir_option[dir]->setKeywords((*eRow)[EXIT_KEYWORD_INDEX].c_str());
-				newRoom->dir_option[dir]->setExitInfo(atoi((*eRow)[EXIT_EXIT_INFO_INDEX].c_str()));
-				newRoom->dir_option[dir]->setPickRequirement((sbyte)(atoi((*eRow)[EXIT_PICK_REQ_INDEX].c_str())));
-				newRoom->dir_option[dir]->setHiddenLevel((sbyte)(atoi((*eRow)[EXIT_HIDDEN_LEVEL_INDEX].c_str())));
-				newRoom->dir_option[dir]->setKey(atoi((*eRow)[EXIT_KEY_VNUM_INDEX].c_str()));
+				newRoom->dir_option[dir]->setGeneralDescription(exitRow[EXIT_GENERAL_DESCRIPTION_INDEX].c_str());
+				newRoom->dir_option[dir]->setKeywords(exitRow[EXIT_KEYWORD_INDEX].c_str());
+				newRoom->dir_option[dir]->setExitInfo(atoi(exitRow[EXIT_EXIT_INFO_INDEX].c_str()));
+				newRoom->dir_option[dir]->setPickRequirement((sbyte)(atoi(exitRow[EXIT_PICK_REQ_INDEX].c_str())));
+				newRoom->dir_option[dir]->setHiddenLevel((sbyte)(atoi(exitRow[EXIT_HIDDEN_LEVEL_INDEX].c_str())));
+				newRoom->dir_option[dir]->setKey(atoi(exitRow[EXIT_KEY_VNUM_INDEX].c_str()));
 				newRoom->dir_option[dir]->setToRoom(nullptr);
 				
 				// We need to keep this in a separate map, because Exit::toRoom is a pointer to a Room
@@ -595,21 +654,18 @@ Room *Room::boot(const sql::Row &roomRow,
 			roomToExitToVnumMap[newRoom] = exitToVnumMap;
 		}
 	}
-	newRoom->js_scripts = std::shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
-	for (std::list< sql::Row >::const_iterator jsIter = jsRows.begin(); jsIter != jsRows.end(); ++jsIter)
+	newRoom->js_scripts = std::make_shared<std::vector<JSTrigger*> >();
+	for (const auto & jsRow : jsRows)
 	{
-		int vnum = atoi((*jsIter)["script_vnum"].c_str());
+		int vnum = jsRow.getInt("script_vnum");
 		JSTrigger* t = JSManager::get()->getTrigger(vnum);
 		newRoom->js_scripts->push_back(t);
 	}
 
-	if (!objectRows.empty())
-		newRoom->loadItems(objectRows);
-
 	return (newRoom);
 }
 
-void Room::renumberRoomExits(const std::map<Room *, std::map<int, int>> &roomToExitToVnumMap)
+void Room::renumberRoomExits(const std::unordered_map<Room *, std::unordered_map<int, int>> &roomToExitToVnumMap)
 {
 	for(const auto &outerIter : roomToExitToVnumMap)
 	{
@@ -642,7 +698,7 @@ void Room::addToBatch(sql::BatchInsertStatement &roomInsert, sql::BatchInsertSta
 
 	for (unsigned int dir = 0; dir < NUM_OF_DIRS; ++dir)
 	{
-		if (this->dir_option[dir] == NULL || this->dir_option[dir]->getToRoom() == NULL)
+		if (this->dir_option[dir] == nullptr || this->dir_option[dir]->getToRoom() == nullptr)
 			continue;
 		Exit *exit = this->dir_option[dir];
 		exitInsert.beginEntry();
@@ -702,7 +758,7 @@ void Room::setName(const char *name)
 	if(this->name)
 		delete[] this->name;
 
-	this->name = name ? str_dup(name) : NULL;
+	this->name = name ? str_dup(name) : nullptr;
 }
 
 RoomSector *Room::getSector() const

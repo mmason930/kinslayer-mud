@@ -2,27 +2,33 @@ function bootProcs()
 {
 	mudLog(constants.BRF, 102, "bootProcs() is running...");
 	if( !global.questsHaveBeenBooted ) {
+		mudLog(constants.BRF, 102, "Start of quests...");
 		loadAllQuests();
+		mudLog(constants.BRF, 102, "End of quests...");
 		global.questsHaveBeenBooted = true;
 	}
-	if( !global.pvalsHaveBeenBooted ) {
-		loadAllPvals();
-		global.pvalsHaveBeenBooted = true;
-	}
 	if( !global.achievementsHaveBeenBooted ) {
+		mudLog(constants.BRF, 102, "Start of achievements...");
 		loadAllAchievements();
+		mudLog(constants.BRF, 102, "End of achievements...");
 		global.achievementsHaveBeenBooted = true;
 	}
 	if( !global.recipesHaveBeenBooted ) {
+		mudLog(constants.BRF, 102, "Start of recipes...");
 		loadAllRecipes();
+		mudLog(constants.BRF, 102, "End of recipes...");
 		global.recipesHaveBeenBooted = true;
 	}
 	if( !global.gateKeepersHaveBeenBooted ) {
+		mudLog(constants.BRF, 102, "Start of gatekeepers...");
 		loadAllGateKeepers();
+		mudLog(constants.BRF, 102, "End of gatekeepers...");
 		global.gateKeepersHaveBeenBooted = true;
 	}
 	if( !global.helpManager ) {
+		mudLog(constants.BRF, 102, "Start of help manager...");
 		global.helpManager = new HelpManager();
+		mudLog(constants.BRF, 102, "End of help manager...");
 	}
 	
 	if( !global.webSocketCommandProcessor ) {
@@ -30,6 +36,7 @@ function bootProcs()
 	}
 
 	if( !global.hasAddedUsersToRegisteredUsersUsergroup ) {
+		mudLog(constants.BRF, 102, "Start of adding users to registered usergroup...");
 	//Newly registered users need to be added to the "Registered Users" usergroup in order to have basic forum permissions.
 	//We will do this here every time the MUD boots up.
 		var sql = "";
@@ -87,11 +94,14 @@ function bootProcs()
 			
 			sqlQuery( sql );
 		}
+
+		mudLog(constants.BRF, 102, "End of adding users to registered usergroup...");
 		
 		global.hasAddedUsersToRegisteredUsersUsergroup = true;
 	}
 	if(!global.hasUpdatedPostUsernames) {
-	
+
+		mudLog(constants.BRF, 102, "Start of forum username update...");
 		sql = "UPDATE"
 			+ "  phpbb_posts,"
 			+ "  userArchive "
@@ -110,12 +120,15 @@ function bootProcs()
 			+ "  phpbb_posts.poster_id=users.user_id;";
 			
 		sqlQuery(sql);
-		
+
+		mudLog(constants.BRF, 102, "End of forum username update...");
 		mudLog(constants.CMP, 102, "[BootProcs] Forum post usernames updated.");
 		global.hasUpdatedPostUsernames = true;
 	}
-	
+
+	mudLog(constants.BRF, 102, "Start of OLC...");
 	bootOLC();
+	mudLog(constants.BRF, 102, "End of OLC...");
 }
 
 

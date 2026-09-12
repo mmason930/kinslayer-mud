@@ -1,20 +1,18 @@
-
 # KinslayerMUD Makefile
 #
 
 # C/C++ compiler to use
 CC = g++
-#  -Wignored-qualifiers -Wextra
+
+# SpiderMonkey 131 flags (use pkg-config if available)
+MOZJS_CFLAGS = $(shell pkg-config --cflags mozjs-131 2>/dev/null || echo "-I/usr/local/include/mozjs-131")
+MOZJS_LIBS = $(shell pkg-config --libs mozjs-131 2>/dev/null || echo "-lmozjs-131")
+
 # Any special flags you want to pass to the compiler
 MYFLAGS = \
--O0 -std=c++20 -Wformat-security -Wformat -Wpointer-arith \
--Wcast-align -Wredundant-decls -Wcatch-value -Werror \
--DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10
-
-#-Werror
-
-#flags for profiling (see hacker.doc for more information)
-PROFILE =
+-O2 -std=c++23 -Wformat-security -Wformat -Wpointer-arith \
+-Wcast-align -Wredundant-decls \
+$(MOZJS_CFLAGS)
 
 ##############################################################################
 # Do Not Modify Anything Below This Line (unless you know what you're doing) #
@@ -22,12 +20,11 @@ PROFILE =
 
 BINDIR = ../bin
 
-CPPFLAGS = -ggdb3 $(MYFLAGS) $(PROFILE)
+CPPFLAGS = -ggdb3 $(MYFLAGS)
 
 LIBS = \
--lsqlDatabase -lflusspferd -lstdc++ -lboost_regex -lmozjs \
--lmysqlclient -lboost_thread -lboost_filesystem -lcrypt \
--lssl -lcrypto -lboost_system -lpthread -ldl
+-lsqlDatabase -lstdc++ -lboost_regex -lboost_filesystem $(MOZJS_LIBS) \
+-lmysqlclient  -lcrypt -lssl -lcrypto -lpthread -ldl
 
 OBJDIR = obj
 
@@ -102,19 +99,25 @@ OBJFILES =	accounts.o \
 			interpreter.o \
 			items/ItemUtil.o \
 			olc/jedit.o \
+			js/flusspferd.o \
 			js/js.o \
 			js/js_constants.o \
 			js/js_functions.o \
 			js/js_interpreter.o \
 			js/js_utils.o \
 			js/JSCharacter.o \
+			js/JSCharacter_bindings.o \
 			js/JSObject.o \
+			js/JSObject_bindings.o \
 			jsoncpp/json_reader.o \
 			jsoncpp/json_value.o \
 			jsoncpp/json_writer.o \
 			js/JSQuery.o \
+			js/JSQuery_bindings.o \
 			js/JSRoom.o \
+			js/JSRoom_bindings.o \
 			js/JSRow.o \
+			js/JSRow_bindings.o \
 			kedit.o \
 			ku/kuClient.o \
 			ku/kuDescriptor.o \
@@ -143,6 +146,7 @@ OBJFILES =	accounts.o \
 			playerportal/PlayerPortalDescriptorStatus.o \
 			playerportal/PlayerPortalServer.o \
 			poker.o \
+			PvalManager.o \
 			olc/redit.o \
 			rooms/Exit.o \
 			rooms/Room.o \

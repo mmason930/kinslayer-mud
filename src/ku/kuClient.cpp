@@ -9,7 +9,7 @@ kuClient::kuClient()
 	connected = false;
 	hasHost = HOSTERR;
 	port = 0;
-	hostData = NULL;
+	hostData = nullptr;
 	hostName.clear();
 }
 
@@ -140,7 +140,7 @@ void kuClient::disconnect() {
 	connected = false;
 	hasHost = HOSTERR;
 	port = 0;
-	hostData = NULL;
+	hostData = nullptr;
 	hostName.clear();
 }
 

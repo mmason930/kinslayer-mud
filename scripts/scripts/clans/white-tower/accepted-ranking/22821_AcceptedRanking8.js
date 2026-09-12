@@ -1,5 +1,5 @@
 var script22821 = function(self, actor, here, args, extra) {
-	const vArgs = getArgList();
+	const vArgs = getArgList(args);
 
 	if( !str_cmp(vArgs[0], "enter") &&
 		(!str_cmp(vArgs[1], "portal") || !str_cmp(vArgs[1], "portal."))

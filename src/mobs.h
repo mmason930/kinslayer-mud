@@ -48,7 +48,7 @@ public:
 	void UpdateLiveMobilesFromPrototype( Character *Prototype );
 	void UpdateLiveMobile( Character *Live, Character *Prototype );
 	void AddPrototype( Character *Proto, const int vnum );
-	Character *BootPrototype( sql::Row &MyRow );
+	Character *BootPrototype( sql::Row &MyRow, const std::vector<sql::Row> &jsRows );
 	Character *GetPrototype( const unsigned int rnum );
 	Character *GetPrototype( Character *LiveMob );
 	Character *GetPrototypeByVnum( const unsigned int vnum );

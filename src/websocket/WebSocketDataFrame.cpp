@@ -91,7 +91,7 @@ WebSocketDataFrame *WebSocketDataFrame::parse(const std::string &input, unsigned
 	bytesRead = 0;
 
 	if(input.size() < 2)
-		return NULL;
+		return nullptr;
 
 	int readPos = 0;
 	bool fin = ((unsigned char)input[ readPos ]) & (1);
@@ -119,7 +119,7 @@ WebSocketDataFrame *WebSocketDataFrame::parse(const std::string &input, unsigned
 	{//If length == 126, then the actual payload length is the next 2 bytes interpreted as unsigned integers.
 
 		if(readPos + 2 > input.size())
-			return NULL;
+			return nullptr;
 		
 		payloadLength = 0;
 		
@@ -132,7 +132,7 @@ WebSocketDataFrame *WebSocketDataFrame::parse(const std::string &input, unsigned
 	{//If length == 127, then the actual payload length is the next 8 bytes interpreted as an unsiged 64-bit integer.
 
 		if(readPos + 8 > input.size())
-			return NULL;
+			return nullptr;
 
 		payloadLength = 0;
 
@@ -153,7 +153,7 @@ WebSocketDataFrame *WebSocketDataFrame::parse(const std::string &input, unsigned
 	if(mask)
 	{
 		if(readPos + 4 > input.size())
-			return NULL;
+			return nullptr;
 
 		maskingKey[0] = (unsigned char)input[readPos    ];
 		maskingKey[1] = (unsigned char)input[readPos + 1];
@@ -164,7 +164,7 @@ WebSocketDataFrame *WebSocketDataFrame::parse(const std::string &input, unsigned
 	}
 
 	if(readPos + payloadLength > input.size())
-		return NULL;
+		return nullptr;
 
 	std::string payloadData = input.substr(readPos, payloadLength);
 
@@ -179,7 +179,7 @@ WebSocketDataFrame *WebSocketDataFrame::parse(const std::string &input, unsigned
 		}
 	}
 	else
-		return NULL;
+		return nullptr;
 
 	readPos += payloadLength;
 	bytesRead = readPos;

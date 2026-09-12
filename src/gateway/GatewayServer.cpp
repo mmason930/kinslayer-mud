@@ -33,7 +33,7 @@ GatewayServer::GatewayServer()
 	this->lastPingResponseFromGameServer = DateTime(0);
 	this->lastPingSentToGameServer = DateTime(0);
 	this->serverPort = 0;
-	this->motherConnectionToServer = NULL;
+	this->motherConnectionToServer = nullptr;
 	this->restartOnShutdown = false;
 	this->mudProcessId = 0;
 	this->mudStatus = MudStatus::notRunning;
@@ -66,7 +66,7 @@ GatewayListener *GatewayServer::getGatewayListener(kuListener *listener)
 			return gatewayListener;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void closeDescriptorCallback(void *data, kuListener *listener, kuDescriptor *descriptor)
@@ -226,20 +226,20 @@ void GatewayServer::setup()
 
 void GatewayServer::disconnectMotherConnectionFromGameServer()
 {
-	if(motherConnectionToServer != NULL) {
+	if(motherConnectionToServer != nullptr) {
 
 		motherConnectionToServer->disconnect();
 		delete motherConnectionToServer;
 	}
 
-	motherConnectionToServer = NULL;
+	motherConnectionToServer = nullptr;
 }
 
 void GatewayServer::attemptConnectionWithGameServer()
 {
 	//Setup mother connection to the game server.
 
-	if(motherConnectionToServer != NULL) {
+	if(motherConnectionToServer != nullptr) {
 
 		delete motherConnectionToServer;
 	}
@@ -250,7 +250,7 @@ void GatewayServer::attemptConnectionWithGameServer()
 	if(motherConnectionToServer->isConnected() == false) {
 
 		delete motherConnectionToServer;
-		motherConnectionToServer = NULL;
+		motherConnectionToServer = nullptr;
 	}
 	else {
 
@@ -331,7 +331,7 @@ void GatewayServer::bindListener()
 
 bool GatewayServer::isConnectedToGameServer()
 {
-	if(motherConnectionToServer == NULL) {
+	if(motherConnectionToServer == nullptr) {
 
 		return false;
 	}
@@ -481,8 +481,8 @@ void GatewayServer::disconnectDescriptorFromGameAndGateway(GatewayDescriptor *ga
 	debugBoolean = true;
 
 	gatewayDescriptor->getClientConnection()->socketClose();
-	gatewayDescriptor->setServerConnection(NULL);
-	gatewayDescriptor->setClientConnection(NULL);
+	gatewayDescriptor->setServerConnection(nullptr);
+	gatewayDescriptor->setClientConnection(nullptr);
 	gatewayDescriptor->setStatus(GatewayDescriptorStatus::disconnected);
 }
 
@@ -497,10 +497,10 @@ void GatewayServer::handleGameShutdown()
 		descriptor->setStatus(GatewayDescriptorStatus::awaitingConnection);
 		kuClient *connectionToGame = descriptor->getServerConnection();
 
-		if(connectionToGame != NULL) {
+		if(connectionToGame != nullptr) {
 
 			delete connectionToGame;
-			descriptor->setServerConnection(NULL);
+			descriptor->setServerConnection(nullptr);
 		}
 
 		++iter;
@@ -679,7 +679,7 @@ void GatewayServer::run()
 					}
 				}
 			}
-			else if(descriptor->getStatus() == GatewayDescriptorStatus::awaitingConnection && getMotherConnectionToServer() != NULL && !this->mudIsDown()) {
+			else if(descriptor->getStatus() == GatewayDescriptorStatus::awaitingConnection && getMotherConnectionToServer() != nullptr && !this->mudIsDown()) {
 
 				kuClient *gameClient = getMotherConnectionToServer();
 
@@ -699,7 +699,7 @@ void GatewayServer::run()
 				descriptor->setStatus(GatewayDescriptorStatus::retrievingSession);
 			}
 //			else if(descriptor->getStatus() == GatewayDescriptorStatus::handshaking) {
-			else if(descriptor->getStatus() == GatewayDescriptorStatus::handshaking && getMotherConnectionToServer() != NULL && !this->mudIsDown()) {
+			else if(descriptor->getStatus() == GatewayDescriptorStatus::handshaking && getMotherConnectionToServer() != nullptr && !this->mudIsDown()) {
 
 				try {
 					std::string dataFromWebSocketClient = descriptor->pullFromClient();
@@ -742,7 +742,7 @@ void GatewayServer::run()
 				++descriptorIter;
 		}
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
 }
 
@@ -793,7 +793,7 @@ void GatewayServer::removeDescriptor(kuDescriptor *descriptor)
 
 		if( (*iter)->getClientConnection() == descriptor ) {
 
-			if( (*iter)->getServerConnection() != NULL ) {
+			if( (*iter)->getServerConnection() != nullptr ) {
 
 				(*iter)->getServerConnection()->disconnect();
 			}
@@ -809,7 +809,7 @@ void GatewayServer::removeDescriptor(kuDescriptor *descriptor)
 
 void GatewayServer::pingGameServer()
 {
-	if(motherConnectionToServer != NULL && (lastPingSentToGameServer.getTime() == 0 || lastPingSentToGameServer.compareTo(lastPingResponseFromGameServer) <= 0)) {
+	if(motherConnectionToServer != nullptr && (lastPingSentToGameServer.getTime() == 0 || lastPingSentToGameServer.compareTo(lastPingResponseFromGameServer) <= 0)) {
 
 		std::cout << makeTimestamp() << " Pinging game server." << std::endl;
 

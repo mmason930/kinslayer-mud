@@ -20,6 +20,7 @@
 #include "mobs.h"
 #include "md5.h"
 #include "accounts.h"
+#include "Game.h"
 
 #include "js/js.h"
 
@@ -158,8 +159,8 @@ void Character::CancelTimer( bool show )
 	this->command_ready	= false;
 	this->CannotFinishCharge = false;
 	this->ps_tgt = -1;
-	GET_TARGET(this) = NULL;
-	GET_TARGET2(this) = NULL;
+	GET_TARGET(this) = nullptr;
+	GET_TARGET2(this) = nullptr;
 
 	if (this->delayed_command == "delayed_javascript" && this->delayed_script)
 	{
@@ -173,8 +174,8 @@ void Character::CancelTimer( bool show )
 	{
 		this->ShieldBlock = false;
 		this->WaitState( PULSE_VIOLENCE / 2 );
-		Act("You lower your shield, having failed to anticipate an attack.", FALSE, this, NULL, NULL, TO_CHAR);
-		Act("$n lowers $s shield, becoming vulnerable once more.", FALSE, this, NULL, NULL, TO_ROOM);
+		Act("You lower your shield, having failed to anticipate an attack.", FALSE, this, nullptr, nullptr, TO_CHAR);
+		Act("$n lowers $s shield, becoming vulnerable once more.", FALSE, this, nullptr, nullptr, TO_ROOM);
 		return;
 	}
 	if ( show && !isKJS )
@@ -350,7 +351,7 @@ char *delete_doubledollar( char *str )
 	char * read, *write;
 
 	/* If the string has no dollar signs, return immediately */
-	if ( ( write = strchr( str, '$' ) ) == NULL )
+	if ( ( write = strchr( str, '$' ) ) == nullptr )
 		return str;
 
 	/* Start from the location of the first dollar sign */
@@ -390,7 +391,7 @@ char *OneArgument( char *argument, char *first_arg, bool conv_case )
 	{
 		Log( "SYSERR: OneArgument received a NULL pointer!" );
 		*first_arg = '\0';
-		return NULL;
+		return nullptr;
 	}
 
 	do
@@ -537,7 +538,7 @@ int special( Character *ch, char *cmd, char *arg )
 	int j;
 
 	/* special in room? */
-	if ( GET_ROOM_SPEC( ch->in_room ) != NULL )
+	if ( GET_ROOM_SPEC( ch->in_room ) != nullptr )
 	{
 		if ( GET_ROOM_SPEC( ch->in_room ) ( ch, ch->in_room, cmd, arg ) )
 		{
@@ -547,7 +548,7 @@ int special( Character *ch, char *cmd, char *arg )
 	/* special in equipment list? */
 	for ( j = 0; j < NUM_WEARS;++j )
 	{
-		if ( GET_EQ( ch, j ) && GET_OBJ_SPEC( GET_EQ( ch, j ) ) != NULL )
+		if ( GET_EQ( ch, j ) && GET_OBJ_SPEC( GET_EQ( ch, j ) ) != nullptr )
 		{
 			if ( GET_OBJ_SPEC( GET_EQ( ch, j ) ) ( ch, GET_EQ( ch, j ), cmd, arg ) )
 			{
@@ -568,7 +569,7 @@ int special( Character *ch, char *cmd, char *arg )
 	/* special in mobile present? */
 	for ( k = ch->in_room->people; k; k = k->next_in_room )
 	{
-		if ( GET_MOB_SPEC( k ) != NULL )
+		if ( GET_MOB_SPEC( k ) != nullptr )
 		{
 			if ( GET_MOB_SPEC( k ) ( ch, k, cmd, arg ) )
 				return 1;
@@ -585,7 +586,7 @@ int special( Character *ch, char *cmd, char *arg )
 	/* special in object present? */
 	for ( i = ch->in_room->contents; i; i = i->next_content )
 	{
-		if ( GET_OBJ_SPEC( i ) != NULL )
+		if ( GET_OBJ_SPEC( i ) != nullptr )
 		{
 			if ( GET_OBJ_SPEC( i ) ( ch, i, cmd, arg ) )
 				return 1;
@@ -626,7 +627,7 @@ const int UNSWITCH = 3;
 int performDupeCheck( Descriptor *d )
 {
 	Descriptor * k, *next_k;
-	Character *target = NULL, *ch, *next_ch;
+	Character *target = nullptr, *ch, *next_ch;
 	int mode = 0;
 
 	int id = d->character->player.idnum;
@@ -655,10 +656,10 @@ int performDupeCheck( Descriptor *d )
 			}
 
 			if ( k->character )
-				k->character->desc = NULL;
+				k->character->desc = nullptr;
 
-			k->character = NULL;
-			k->original = NULL;
+			k->character = nullptr;
+			k->original = nullptr;
 		}
 
 		else if ( k->character && ( k->character->player.idnum == id ) )
@@ -670,9 +671,9 @@ int performDupeCheck( Descriptor *d )
 				mode = USURP;
 			}
 
-			k->character->desc = NULL;
-			k->character = NULL;
-			k->original = NULL;
+			k->character->desc = nullptr;
+			k->character = nullptr;
+			k->original = nullptr;
 			k->send( "\r\nMultiple login detected -- disconnecting.\r\n" );
 			STATE( k ) = CON_CLOSE;
 		}
@@ -728,7 +729,7 @@ int performDupeCheck( Descriptor *d )
 	delete d->character; /* get rid of the old char */
 	d->character = target;
 	d->character->desc = d;
-	d->original = NULL;
+	d->original = nullptr;
 	d->character->player.timer = 0;
 	REMOVE_BIT( PLR_FLAGS( d->character ), Q_BIT(PLR_MAILING) );
 	REMOVE_BIT( PLR_FLAGS( d->character ), Q_BIT(PLR_WRITING) );
@@ -925,9 +926,9 @@ void Descriptor::nanny( char* arg )
 			//Below, we check to see if the player has waited the required time.
 			if( Conf->play.switch_restriction &&
 			(
-				(sw = SwitchManager::GetManager().GetGreatestSwitch( this->host, tmp_name )) != NULL
-	//			(sw = SwitchManager::GetManager().GetSwitchByIP( this->host )) != NULL		||
-	//			(sw = SwitchManager::GetManager().GetSwitchByKnownAlt(tmp_name)) != NULL
+				(sw = SwitchManager::GetManager().GetGreatestSwitch( this->host, tmp_name )) != nullptr
+	//			(sw = SwitchManager::GetManager().GetSwitchByIP( this->host )) != nullptr		||
+	//			(sw = SwitchManager::GetManager().GetSwitchByKnownAlt(tmp_name)) != nullptr
 			))
 			{
 				if( !SwitchManager::GetManager().HasWaitedLongEnough(tmp_name,host,sw) )
@@ -940,8 +941,8 @@ void Descriptor::nanny( char* arg )
 				//This player was on the switch list, but has waited the required time.
 				//SwitchManager::GetManager().RemoveSwitchByIP( this->host );
 			}
-			Character *loadedCharacter = NULL;
-			if ( playerExists(tmp_name) && (loadedCharacter = CharacterUtil::loadCharacter(tmp_name)) != NULL )
+			Character *loadedCharacter = nullptr;
+			if ( playerExists(tmp_name) && (loadedCharacter = CharacterUtil::loadCharacter(tmp_name)) != nullptr )
 			{
 				if ( PLR_FLAGGED(loadedCharacter, PLR_DELETED) )
 				{
@@ -1036,27 +1037,32 @@ void Descriptor::nanny( char* arg )
 
 		this->echoOn();		/* turn echo back on */
 
-		if ( !*arg )
+		if ( !*arg && !game->skipPasswordRequirement() )
 			STATE( this ) = CON_CLOSE;
 		else
 		{
 			if(!this->character->passwordMatches(arg))
 			{
-				MudLog( BRF, LVL_GOD, TRUE, "Bad PW: %s [%s]", GET_NAME( this->character ), this->host );
-
-				++this->character->PlayerData->bad_pws;
-				this->character->basicSave();
-				if ( ++( this->bad_pws ) >= max_bad_pws )
-				{	/* 3 strikes and you're out. */
-					this->send( "Wrong password... disconnecting.\r\n" );
-					STATE( this ) = CON_CLOSE;
-				}
-				else
+				if(!game->skipPasswordRequirement())
 				{
-					this->send( "Wrong password.\r\nTry again: " );
+					MudLog( BRF, LVL_GOD, TRUE, "Bad PW: %s [%s]", GET_NAME( this->character ), this->host );
+
+					++this->character->PlayerData->bad_pws;
+					this->character->basicSave();
+					if ( ++( this->bad_pws ) >= max_bad_pws )
+					{	/* 3 strikes and you're out. */
+						this->send( "Wrong password... disconnecting.\r\n" );
+						STATE( this ) = CON_CLOSE;
+					}
+					else
+					{
+						this->send( "Wrong password.\r\nTry again: " );
+					}
+
+					return ;
 				}
 
-				return ;
+				MudLog( BRF, LVL_GOD, TRUE, "Password requirement skipped for %s [%s].", GET_NAME( this->character ), this->host );
 			}
 
 			if(this->getGatewayDescriptorType() == GatewayDescriptorType::websocket)

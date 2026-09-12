@@ -28,13 +28,13 @@ Clock individualHitClockDamage;
 #define PERFORM_VIOLENCE_LOGGING 0
 
 /* Structures */
-Character *combat_list = NULL;	/* head of l-list of fighting chars */
-Character *next_combat_list = NULL;
+Character *combat_list = nullptr;	/* head of l-list of fighting chars */
+Character *next_combat_list = nullptr;
 
 /* External structures */
-extern struct GameTime time_info;
+extern GameTime time_info;
 
-extern struct MeleeMessageList fight_messages[ MAX_MESSAGES ];
+extern MeleeMessageList fight_messages[ MAX_MESSAGES ];
 extern Object *object_list;
 extern int auto_save;		/* see config.c -- not used in this file */
 extern int max_exp_gain;	/* see config.c */
@@ -50,14 +50,14 @@ int mana_damage( Character *ch, Character *vict, int damage );
 /* External procedures */
 int RandomBodyPart();
 /* local functions */
-void check_fighting( void );
+void check_fighting();
 void perform_group_gain( Character * ch, int base, Character * victim );
 void dam_message( int dam, Character * ch, Character * victim, int w_type, int BodyPart );
-void load_messages( void );
+void load_messages();
 void group_gain( Character * ch, Character * victim );
 void solo_gain( Character * ch, Character * victim );
 char *replace_string( const char *str, const char *weapon_singular, const char *weapon_plural, int BodyPart );
-void perform_violence( void );
+void perform_violence();
 void gain_wp( Character *ch, Character *vict );
 void check_legend( Character *ch );
 int level_exp( int level );
@@ -86,7 +86,7 @@ bool isInArena(Character *ch)
 }
 
 /************ PK Manager & Co *************/
-PKManager *PKManager::Self = (NULL);
+PKManager *PKManager::Self = (nullptr);
 
 PKManager::PKManager()
 {
@@ -113,12 +113,12 @@ PKManager::~PKManager() {}
 
 PKManager &PKManager::GetManager()
 {
-	if( Self == NULL ) Self = new PKManager();
+	if( Self == nullptr ) Self = new PKManager();
 	return (*Self);
 }
 void PKManager::Free()
 {
-	if( Self != NULL ) delete (Self);
+	if( Self != nullptr ) delete (Self);
 }
 
 void PKManager::RegisterKill( Character *Killer, Character *Victim, const unsigned int &wtrans, const time_t &when, const int kill_id )
@@ -264,8 +264,8 @@ void Character::InterruptTimer()
 	//if ( this->ShieldBlock )
 	//{
 	//	this->ShieldBlock = false;
-	//	act("You lower your shield, having failed to anticipate an attack.", FALSE, this, NULL, NULL, TO_CHAR);
-	//	act("$n lowers $s shield, becoming vulnerable once more.", FALSE, this, NULL, NULL, TO_ROOM);
+	//	act("You lower your shield, having failed to anticipate an attack.", FALSE, this, nullptr, nullptr, TO_CHAR);
+	//	act("$n lowers $s shield, becoming vulnerable once more.", FALSE, this, nullptr, nullptr, TO_ROOM);
 	//	WAIT_STATE(this, PULSE_VIOLENCE / 2);
 	//}
 	//else
@@ -552,10 +552,10 @@ void Character::StopFighting()
 		next_combat_list = next_fighting;
 
 	REMOVE_FROM_LIST( this, combat_list, next_fighting );
-	next_fighting = NULL;
+	next_fighting = nullptr;
 
 	temp = FIGHTING( this );
-	FIGHTING( this ) = NULL;
+	FIGHTING( this ) = nullptr;
 //	if ( temp && FIGHTING( temp ) == this )
 //		temp->StopFighting();
 
@@ -620,16 +620,16 @@ void Character::MakeCorpse()
 		corpse->scalp->player_scalp = true;
 	corpse->scalp->is_scalp = (false);
 
-	if ( this->GetPrototype() != NULL && this->GetPrototype()->MobData->Food )
+	if ( this->GetPrototype() != nullptr && this->GetPrototype()->MobData->Food )
 	{
 		corpse->scalp->Food				= new FoodUnit;
 		corpse->scalp->Food->quantity	= this->GetPrototype()->MobData->Food->quantity;
 		corpse->scalp->Food->vnum		= this->GetPrototype()->MobData->Food->vnum;
 	}
 	else
-		corpse->scalp->Food = NULL;
+		corpse->scalp->Food = nullptr;
 
-	if( this->GetPrototype() != NULL && this->GetPrototype()->MobData->Skin )
+	if( this->GetPrototype() != nullptr && this->GetPrototype()->MobData->Skin )
 	{
 		corpse->scalp->Skin             = new SkinningUnit;
 		corpse->scalp->Skin->required   = this->GetPrototype()->MobData->Skin->required;
@@ -637,9 +637,9 @@ void Character::MakeCorpse()
 		corpse->scalp->Skin->skinned    - this->GetPrototype()->MobData->Skin->skinned;
 	}
 	else
-		corpse->scalp->Skin = NULL;
+		corpse->scalp->Skin = nullptr;
 
-	if(this->GetPrototype() != NULL && GET_RACE(GetPrototype()) != RACE_OTHER) {
+	if(this->GetPrototype() != nullptr && GET_RACE(GetPrototype()) != RACE_OTHER) {
 
 		corpse->scalp->blood = MAX(70,GET_WEIGHT(GetPrototype()) / 5);
 	}
@@ -670,11 +670,11 @@ void Character::MakeCorpse()
 	/* transfer character's inventory to the corpse */
 	corpse->contains = carrying;
 
-	for ( o = corpse->contains; o != NULL; o = o->next_content )
+	for ( o = corpse->contains; o != nullptr; o = o->next_content )
 		o->in_obj = corpse;
 
 	corpseClock2.turnOn();
-	object_list_new_owner( corpse, NULL );
+	object_list_new_owner( corpse, nullptr );
 	corpseClock2.turnOff();
 
 	corpseClock4.turnOn();
@@ -689,7 +689,7 @@ void Character::MakeCorpse()
 	}
 	corpseClock4.turnOff();
 
-	carrying = NULL;
+	carrying = nullptr;
 	IS_CARRYING_N( this ) = 0;
 
 	corpseClock5.turnOn();
@@ -734,10 +734,10 @@ Clock dieClock14A, dieClock14B, dieClock14C;
 void Character::Die( Character *killer )
 {//TODO: Review
 
-	if(killer == NULL)
+	if(killer == nullptr)
 		killer = this;
 
-	if(killer != NULL)
+	if(killer != nullptr)
 	{
 		dieClock1.turnOn();
 		if ( (killer != this) && (IS_NPC(this) || this->desc) && !isInArena(this) && !isInArena(killer) )
@@ -804,7 +804,7 @@ void Character::Die( Character *killer )
 
 		killer->StopFighting();
 		dieClock4.turnOff();
-	}//END OF if(killer != NULL)
+	}//END OF if(killer != nullptr)
 	dieClock5.turnOn();
 	js_death_trigger( this, killer );
 	dieClock5.turnOff();
@@ -1121,20 +1121,20 @@ void dam_message( int dam, Character * ch, Character * victim, int w_type, int B
 	/* damage message to onlookers */
 	buf = replace_string( dam_weapons[ msgnum ].to_room,
 	                      attack_hit_text[ w_type ].singular, attack_hit_text[ w_type ].plural, BodyPart );
-	Act( buf, FALSE, ch, NULL, victim, TO_NOTVICT, NULL, true );
+	Act( buf, FALSE, ch, nullptr, victim, TO_NOTVICT, nullptr, true );
 
 	/* damage message to damager */
 	ch->send( COLOR_GREEN( ch, CL_COMPLETE ) );
 	buf = replace_string( dam_weapons[ msgnum ].to_char,
 	                      attack_hit_text[ w_type ].singular, attack_hit_text[ w_type ].plural, BodyPart );
-	Act( buf, FALSE, ch, NULL, victim, TO_CHAR, COLOR_GREEN(ch, CL_COMPLETE), true );
+	Act( buf, FALSE, ch, nullptr, victim, TO_CHAR, COLOR_GREEN(ch, CL_COMPLETE), true );
 	ch->send( COLOR_NORMAL( ch, CL_COMPLETE ) );
 
 	/* damage message to damagee */
 	victim->send( (msgnum == 0 ? "" : COLOR_RED( victim, CL_COMPLETE )) );
 	buf = replace_string( dam_weapons[ msgnum ].to_victim,
 	                      attack_hit_text[ w_type ].singular, attack_hit_text[ w_type ].plural, BodyPart );
-	Act( buf, FALSE, ch, NULL, victim, TO_VICT | TO_SLEEP, (msgnum == 0 ? "" : COLOR_RED( victim, CL_COMPLETE )), true );
+	Act( buf, FALSE, ch, nullptr, victim, TO_VICT | TO_SLEEP, (msgnum == 0 ? "" : COLOR_RED( victim, CL_COMPLETE )), true );
 	victim->send( COLOR_NORMAL( victim, CL_COMPLETE ) );
 }
 
@@ -1465,13 +1465,13 @@ int damage( Character * ch, Character * victim, int dam, int attacktype, int Bod
 			}
 
 			if ( ch != victim && MOB_FLAGGED( victim, MOB_WIMPY ) )
-				do_flee( victim, NULL, 0, 0 );
+				do_flee( victim, nullptr, 0, 0 );
 		}
 		if ( !IS_NPC( victim ) && victim->PlayerData->wimp_level && ( victim != ch ) &&
 		        GET_HIT( victim ) < victim->PlayerData->wimp_level && GET_HIT( victim ) > 0 )
 		{
 			victim->send( "You wimp out, and attempt to flee!\r\n" );
-			do_flee( victim, NULL, 0, 0 );
+			do_flee( victim, nullptr, 0, 0 );
 		}
 		break;
 	}
@@ -1788,18 +1788,18 @@ void Character::HitAllFighting()
 
 void Character::PerformFear( Character *victim )
 {
-	struct affected_type af;
+	affected_type af;
 
-	if ( victim == NULL )
+	if ( victim == nullptr )
 		return ;
 
 	if ( AFF_FLAGGED( victim, AFF_PARANOIA ) || victim->getUserClan( CLAN_BLADEMASTERS ) )
 		return ;
 
 	Act( "You stare into $n's eyeless face, unable to pull your eyes away as you feel your bones freeze.",
-	     TRUE, this, NULL, victim, TO_VICT );
-	Act( "You stare into $N's eyes and watch $M shake with fear.", TRUE, this, NULL, victim, TO_CHAR );
-	Act( "$N begins to shiver in paranoia as $E stares into the eyeless face of $n.", TRUE, this, NULL, victim, TO_NOTVICT );
+	     TRUE, this, nullptr, victim, TO_VICT );
+	Act( "You stare into $N's eyes and watch $M shake with fear.", TRUE, this, nullptr, victim, TO_CHAR );
+	Act( "$N begins to shiver in paranoia as $E stares into the eyeless face of $n.", TRUE, this, nullptr, victim, TO_NOTVICT );
 
 	af.type = SKILL_NOTICE;
 	af.duration = 2;
@@ -1811,7 +1811,7 @@ void Character::PerformFear( Character *victim )
 
 void Character::PerformPoison( Character *victim )
 {
-	struct affected_type af;
+	affected_type af;
 
 	if ( !victim )
 		return ;
@@ -1822,9 +1822,9 @@ void Character::PerformPoison( Character *victim )
 	if ( this->in_room != victim->in_room )
 		return ;
 
-	Act( "You slash into $N's body deeply, injecting poison from your weapon into $S body!", TRUE, this, NULL, victim, TO_CHAR );
-	Act( "$n slashes into deeply into your body, injecting a tainted poison inside of you!", TRUE, this, NULL, victim, TO_VICT );
-	Act( "$n slashes into $N deeply, injecting poison into $S body!", TRUE, this, NULL, victim, TO_NOTVICT );
+	Act( "You slash into $N's body deeply, injecting poison from your weapon into $S body!", TRUE, this, nullptr, victim, TO_CHAR );
+	Act( "$n slashes into deeply into your body, injecting a tainted poison inside of you!", TRUE, this, nullptr, victim, TO_VICT );
+	Act( "$n slashes into $N deeply, injecting poison into $S body!", TRUE, this, nullptr, victim, TO_NOTVICT );
 
 	af.type = SKILL_NOTICE;
 	af.duration = 2;
@@ -1952,7 +1952,7 @@ void perform_violence( void )
 				else
 					prob = GET_SKILL( ch, SKILL_ATTACK );
 				hitClock.turnOn();
-				if ( percent < prob && FIGHTING( ch ) != NULL )
+				if ( percent < prob && FIGHTING( ch ) != nullptr )
 					hit( ch, FIGHTING( ch ), TYPE_UNDEFINED );
 				hitClock.turnOff();
 
@@ -1967,7 +1967,7 @@ void perform_violence( void )
 				hitClock.turnOn();
 				percent = MiscUtil::random( 1, 100 );
 				prob = ch->GetSkillLevel(SKILL_SHADOW_RAGE) * 13;
-				if ( percent < prob && FIGHTING(ch) != NULL )
+				if ( percent < prob && FIGHTING(ch) != nullptr )
 					hit( ch, FIGHTING(ch), TYPE_UNDEFINED );
 				GET_SHADOW(ch) = MAX(GET_SHADOW(ch) - 2, 0);
 				hitClock.turnOff();
@@ -1975,7 +1975,7 @@ void perform_violence( void )
 
 		}
 		/* XXX: Need to see if they can handle "" instead of NULL. */
-		if ( MOB_FLAGGED( ch, MOB_SPEC ) && MobManager::GetManager().GetIndex((u_int)ch->nr)->func != NULL ) {
+		if ( MOB_FLAGGED( ch, MOB_SPEC ) && MobManager::GetManager().GetIndex((u_int)ch->nr)->func != nullptr ) {
 			char sEmpty[12];
 			*sEmpty = '\0';
 			specialClock.turnOn();
@@ -2037,7 +2037,7 @@ Character *Character::RandomFighting()
 	int n = 0;
 
 	if ( FIGHTING( this ) )
-		return NULL;
+		return nullptr;
 	else
 		n = MiscUtil::random( 1, this->NumFighting() );
 

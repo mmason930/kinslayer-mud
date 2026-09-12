@@ -81,7 +81,7 @@ public:
 
 	PathNode()
 	{
-		TheRoom = NULL;
+		TheRoom = nullptr;
 		dir_to_here = 0;
 	}
 	PathNode( Room *R, const int dir )

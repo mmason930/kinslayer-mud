@@ -75,11 +75,11 @@ int JScriptParse(Descriptor *d, const std::string &arg)
 		case 'X':
 			d->send("You exit the editor.\r\n");
 			OLC_SCRIPT_EDIT_MODE( d ) = 0;
-			if( d->olc->mob != NULL )
+			if( d->olc->mob != nullptr )
 				medit_disp_menu( d ) ;
-			else if( d->olc->room != NULL )
+			else if( d->olc->room != nullptr )
 				redit_disp_menu( d );
-			else if( d->olc->obj != NULL )
+			else if( d->olc->obj != nullptr )
 				oedit_disp_menu( d );
 			else
 				d->send("Error! Unknown origin point in javascript attachment editor.\r\n");
@@ -170,7 +170,7 @@ CommandHandler do_jedit = DEFINE_COMMAND
 	ch->desc->olc = new OLC();
 	OLC_ZONE(ch->desc) = 0;
 
-	if( ch->desc == (NULL) )
+	if( ch->desc == (nullptr) )
 	{//Okay, this should never happen, but...
 		return;//Don't even print a message out, since there is no descriptor.
 	}
@@ -211,12 +211,12 @@ CommandHandler  do_jstat  = DEFINE_COMMAND
 	sprintbit(jsTrig->allowed_flags, (const char**)JS::js_allow     , buf2, (", "), (yel), (nrm));
 
 	std::string scriptName;
-	const char *fileName = NULL;
-	Script *script = NULL;
+	const char *fileName = nullptr;
+	Script *script = nullptr;
 
 	if(jsTrig->scriptId == -1)
 		scriptName = std::string(red) + bld + "<No Script>" + nrm;
-	else if( (script = JSManager::get()->getScript(jsTrig->scriptId)) == NULL)
+	else if( (script = JSManager::get()->getScript(jsTrig->scriptId)) == nullptr)
 		scriptName = std::string(red) + bld + "<Invalid Script>" + nrm;
 	else
 	{
@@ -230,7 +230,7 @@ CommandHandler  do_jstat  = DEFINE_COMMAND
 	sBuffer << grn << "4" << nrm << " Allowed Flags   : " << yel << buf2                     << nrm << std::endl;
 	sBuffer << grn << "5" << nrm << " Arguments       : " << yel << jsTrig->args             << nrm << std::endl;
 	sBuffer << grn << "6" << nrm << " Numeric Argument: " << yel << jsTrig->narg             << nrm << std::endl;
-	sBuffer << grn << "7" << nrm << " Script ID       : " << yel << jsTrig->scriptId << nrm << " - " << grn << scriptName << " : " << red << (fileName == NULL ? "" : fileName) << nrm << std::endl;
+	sBuffer << grn << "7" << nrm << " Script ID       : " << yel << jsTrig->scriptId << nrm << " - " << grn << scriptName << " : " << red << (fileName == nullptr ? "" : fileName) << nrm << std::endl;
 	sBuffer << grn << "D" << nrm << " Delete          : " << grn << StringUtil::allUpper(StringUtil::yesNo(jsTrig->deleted)).c_str() << nrm << std::endl;
 
 	d->sendRaw( sBuffer.str().c_str() );
@@ -451,12 +451,12 @@ void JeditDispMenu( Descriptor *d )
 	sprintbit(jsTrig->allowed_flags, (const char**)JS::js_allow     , buf2, (", "), (yel), (nrm));
 	sprintbit(jsTrig->option_flags , (const char**)JS::js_options	, buf3, (", "), (yel), (nrm));
 	std::string scriptName;
-	const char *fileName = NULL;
-	Script *script = NULL;
+	const char *fileName = nullptr;
+	Script *script = nullptr;
 
 	if(jsTrig->scriptId == -1)
 		scriptName = std::string(red) + bld + "<No Script>" + nrm;
-	else if( (script = JSManager::get()->getScript(jsTrig->scriptId)) == NULL)
+	else if( (script = JSManager::get()->getScript(jsTrig->scriptId)) == nullptr)
 		scriptName = std::string(red) + bld + "<Invalid Script>" + nrm;
 	else
 	{
@@ -471,7 +471,7 @@ void JeditDispMenu( Descriptor *d )
 	sBuffer << grn << "4" << nrm << " Allowed Flags   : " << yel << buf2                   << nrm << std::endl;
 	sBuffer << grn << "5" << nrm << " Arguments       : " << yel << jsTrig->args           << nrm << std::endl;
 	sBuffer << grn << "6" << nrm << " Numeric Argument: " << yel << jsTrig->narg           << nrm << std::endl;
-	sBuffer << grn << "7" << nrm << " Script ID       : " << yel << jsTrig->scriptId << nrm << " - " << grn << scriptName << " : " << red << (fileName == NULL ? "" : fileName) << nrm << std::endl;
+	sBuffer << grn << "7" << nrm << " Script ID       : " << yel << jsTrig->scriptId << nrm << " - " << grn << scriptName << " : " << red << (fileName == nullptr ? "" : fileName) << nrm << std::endl;
 	sBuffer << grn << "D" << nrm << " Delete          : " << (jsTrig->deleted ? red : grn) << StringUtil::allUpper(StringUtil::yesNo(jsTrig->deleted)).c_str() << nrm << std::endl;
 	sBuffer << grn << "Q" << nrm << " Quit"               << std::endl;
 
@@ -683,7 +683,7 @@ void JeditParse( Descriptor *d, const std::string &arg )
 
 		int scriptId = atoi(arg.c_str());
 
-		if(scriptId != -1 && JSManager::get()->getScript(scriptId) == NULL)
+		if(scriptId != -1 && JSManager::get()->getScript(scriptId) == nullptr)
 		{
 			d->send("There is no script #%d in the game.\r\nTry another, enter -1 to detach the script, or 'Q' to exit: ");
 			break;

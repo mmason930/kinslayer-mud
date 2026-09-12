@@ -15,7 +15,7 @@
 
 #include "js/js.h"
 
-MobManager *MobManager::Self = NULL;
+MobManager *MobManager::Self = nullptr;
 extern Character *character_list;
 extern Descriptor *descriptor_list;
 extern Shop *shop_index;
@@ -23,8 +23,8 @@ extern int top_shop;
 
 int real_trigger(int vnum);
 void SetupMySQL( bool crash_on_failure );
-void assign_the_shopkeepers(void);
-void assign_mobiles(void);
+void assign_the_shopkeepers();
+void assign_mobiles();
 
 MobManager::MobManager()
 {
@@ -36,18 +36,18 @@ MobManager::~MobManager()
 		delete (MyMobProto[i]);
 		delete (MyMobIndex[i]);
 	}
-	Self = NULL;
+	Self = nullptr;
 }
 
 MobManager &MobManager::GetManager()
 {
-	if( Self == NULL ) Self = new MobManager();
+	if( Self == nullptr ) Self = new MobManager();
 	return (*Self);
 }
 
 void MobManager::Free()
 {
-	if( Self != NULL )
+	if( Self != nullptr )
 		delete (Self);
 }
 void MobManager::Reload()
@@ -92,7 +92,7 @@ void MobManager::Reload()
 				continue;
 			}
 			Character *mob;
-			if( (mob = MobManager::GetManager().GetPrototypeByVnum( z->cmd[ s ]->arg1 )) != NULL ) {
+			if( (mob = MobManager::GetManager().GetPrototypeByVnum( z->cmd[ s ]->arg1 )) != nullptr ) {
 				//Command is still valid.
 				z->cmd[ s ]->arg1 = mob->nr;
 				++s;
@@ -124,30 +124,40 @@ void MobManager::BootPrototypes()
 		MudLog(BRF, LVL_APPR, TRUE, "MobManager::BootPrototypes : %s", e.getMessage().c_str());
 		return;
 	}
-	
-	Clock MyClock;
-	MyClock.reset(true);
+
+	sql::Query jsQuery = gameDatabase->sendQuery("SELECT * FROM js_attachments WHERE type='M'");
+	std::map<int, std::vector<sql::Row>> mobVnumToJsQueryRowsMap;
+	while (jsQuery->hasNextRow())
+	{
+		sql::Row jsRow = jsQuery->getRow();
+		int mobVnum = jsRow.getInt("target_vnum");
+		MiscUtil::pushToVectorMap(mobVnumToJsQueryRowsMap, mobVnum, jsRow);
+	}
+
 	while( MyQuery1->hasNextRow() )
 	{
 		MyRow = MyQuery1->getRow();
-		BootPrototype( MyRow );
+
+		int roomVnum = MyRow.getInt("vnum");
+		auto jsRowsMatch = mobVnumToJsQueryRowsMap.find(roomVnum);
+		std::vector<sql::Row> jsRows = jsRowsMatch == mobVnumToJsQueryRowsMap.end() ? std::vector<sql::Row>() : jsRowsMatch->second;
+
+		BootPrototype( MyRow, jsRows );
 	}
-	MyClock.turnOff();
-	MyClock.print();
 }
 /* The mother of the booting methods for mobs... */
-Character *MobManager::BootPrototype( sql::Row &MyRow )
+Character *MobManager::BootPrototype( sql::Row &MyRow, const std::vector<sql::Row> &jsRows )
 {
 	Character *NewMob = new Character();
 	NewMob->MobData = new MobOnlyData();
 
 	NewMob->proto					= true;
 	NewMob->player.name				= MyRow["alias"];
-	NewMob->player.short_descr		= (MyRow["sdesc"].size()?str_dup(MyRow["sdesc"].c_str()):(NULL));
-	NewMob->player.long_descr		= (MyRow["ldesc"].size()?str_dup(MyRow["ldesc"].c_str()):(NULL));
-	NewMob->player.description		= (MyRow["ddesc"].size()?str_dup(MyRow["ddesc"].c_str()):(NULL));
-	NewMob->player.ArriveMessage	= (MyRow["arrive_message"].size()?str_dup(MyRow["arrive_message"].c_str()):(NULL));
-	NewMob->player.LeaveMessage		= (MyRow["leave_message"].size()?str_dup(MyRow["leave_message"].c_str()):(NULL));
+	NewMob->player.short_descr		= (MyRow["sdesc"].size()?str_dup(MyRow["sdesc"].c_str()):(nullptr));
+	NewMob->player.long_descr		= (MyRow["ldesc"].size()?str_dup(MyRow["ldesc"].c_str()):(nullptr));
+	NewMob->player.description		= (MyRow["ddesc"].size()?str_dup(MyRow["ddesc"].c_str()):(nullptr));
+	NewMob->player.ArriveMessage	= (MyRow["arrive_message"].size()?str_dup(MyRow["arrive_message"].c_str()):(nullptr));
+	NewMob->player.LeaveMessage		= (MyRow["leave_message"].size()?str_dup(MyRow["leave_message"].c_str()):(nullptr));
 	NewMob->player.act				= atoi(MyRow["mob_flags"].c_str());
 	NewMob->player.affected_by[0]	= atoi(MyRow["aff_flags0"].c_str());
 	NewMob->player.affected_by[1]	= atoi(MyRow["aff_flags1"].c_str());
@@ -180,7 +190,7 @@ Character *MobManager::BootPrototype( sql::Row &MyRow )
 	NewMob->player.height			= (198);
 
 	//check to see if this mob is in a clan
-	if( ClanUtil::getClan(atoi(MyRow["clan"].c_str())) != NULL )
+	if( ClanUtil::getClan(atoi(MyRow["clan"].c_str())) != nullptr )
 	{
 		UserClan *userClan = UserClan::setupNewInstance(NewMob->getUserId(), MyRow.getInt("clan"));
 		userClan->setRank(MyRow.getInt("rank"));
@@ -227,10 +237,8 @@ Character *MobManager::BootPrototype( sql::Row &MyRow )
 // Find any js scripts that are listed as attached to this mob in the db, and attach them to it
     NewMob->js_scripts = std::shared_ptr<std::vector<JSTrigger*> >(new std::vector<JSTrigger*>());
     try {
-        sql::Query q = gameDatabase->sendQuery("SELECT * FROM js_attachments WHERE type='M' AND target_vnum='" + MyRow["vnum"] + "'");
-        while( q->hasNextRow() )
+        for (const auto& row: jsRows)
         {
-            sql::Row row = q->getRow();
 			int vnum = atoi(row["script_vnum"].c_str());
 			JSTrigger* t = JSManager::get()->getTrigger(vnum);
             NewMob->js_scripts->push_back(t);
@@ -243,8 +251,8 @@ Character *MobManager::BootPrototype( sql::Row &MyRow )
 	if( !this->MyMobIndex.size() || this->MyMobIndex.back()->vnum < atoi(MyRow["vnum"].c_str()) )
 	{
 		Index *index = new Index();
-		index->func = NULL;
-		index->farg = NULL;
+		index->func = nullptr;
+		index->farg = nullptr;
 		index->in_db = true;
 		index->number = this->MyMobIndex.size();
 		index->vnum = atoi(MyRow["vnum"].c_str());
@@ -269,7 +277,7 @@ void MobManager::SavePrototypes( const unsigned int zone_vnum )
 	Zone *zone = ZoneManager::GetManager().GetZoneByVnum( zone_vnum );
 	bool fail;
 
-	if( zone == NULL )
+	if( zone == nullptr )
 		return;
 
 	std::list<std::string> MyQueries;
@@ -372,7 +380,7 @@ std::list<std::string> MobManager::GrabSaveQuery( const unsigned int mob_rnum )
 	std::stringstream AssistsBuffer;
 
 	Character *m = MyMobProto[mob_rnum];
-	UserClan *userClan = m->userClans.empty() ? NULL : m->userClans.front();
+	UserClan *userClan = m->userClans.empty() ? nullptr : m->userClans.front();
 
 	for(std::list<int>::iterator aIter = m->MobData->assists.begin();aIter != m->MobData->assists.end();++aIter)
 	{
@@ -533,7 +541,7 @@ std::list<std::string> MobManager::GrabDeleteQuery( const unsigned int mob_rnum 
 	std::list<std::string> MyQueries;
 	std::stringstream QueryBuffer;
 
-	if( (MyIndex = GetIndex(mob_rnum)) == NULL || (MyProto = GetPrototype(mob_rnum)) == NULL )
+	if( (MyIndex = GetIndex(mob_rnum)) == nullptr || (MyProto = GetPrototype(mob_rnum)) == nullptr )
 		return MyQueries;
 	if( MyIndex->in_db == false )//Mob doesn't even exist in the DB yet. Might as well return nothing.
 		return MyQueries;
@@ -588,7 +596,7 @@ void MobManager::AddPrototype( Character *Proto, const int vnum )
 
 	index->vnum = vnum;
 	index->number = 0;
-	index->func = NULL;
+	index->func = nullptr;
 	Proto->nr = rmob_num;
 	MyMobIndex.insert(IndexIterator, index);
 	MyMobProto.insert(MobIterator  , Proto);
@@ -611,7 +619,7 @@ void MobManager::AddPrototype( Character *Proto, const int vnum )
 	 */
 
 	Zone *zone;
-	for (unsigned int i = 0; (zone = ZoneManager::GetManager().GetZoneByRnum(i)) != NULL;i++)
+	for (unsigned int i = 0; (zone = ZoneManager::GetManager().GetZoneByRnum(i)) != nullptr;i++)
 	{
 		for (cmd_no = 0; cmd_no < zone->cmd.size(); ++cmd_no)
 		{
@@ -678,7 +686,7 @@ void MobManager::DeletePrototypeFromDatabase( const unsigned int mob_rnum )
 	}
 	//If we made it this far, we know the mob was removed successfully.
 	Index *MobIndex = GetIndex(mob_rnum);
-	if( MobIndex != NULL )
+	if( MobIndex != nullptr )
 		MobIndex->in_db = false;
 }
 
@@ -717,21 +725,21 @@ int MobManager::VirtualMobile( const unsigned int rnum )
 Character *MobManager::GetPrototype( const unsigned int rnum )
 {
 	if( rnum >= MyMobProto.size() )
-		return NULL;
+		return nullptr;
 	return MyMobProto[rnum];
 }
 
 Index *MobManager::GetIndex( const unsigned int rnum )
 {
 	if( rnum > MyMobIndex.size() )
-		return NULL;
+		return nullptr;
 	return MyMobIndex[rnum];
 }
 
 Character *MobManager::GetPrototype( Character *LiveMob )
 {
 	if( LiveMob->nr < 0 || (unsigned int)LiveMob->nr >= MyMobProto.size() )
-		return (NULL);
+		return (nullptr);
 	return (MyMobProto[LiveMob->nr]);
 }
 
@@ -747,7 +755,7 @@ void MobManager::UpdateLiveMobilesFromPrototype( const unsigned int rnum )
 }
 void MobManager::UpdateLiveMobilesFromPrototype( Character *Prototype )
 {
-	if( Prototype == NULL ) return;
+	if( Prototype == nullptr ) return;
 	for( Character *mob = character_list;mob;mob = mob->next )
 	{
 		if( IS_MOB(mob) && mob->nr == Prototype->nr ) {
@@ -798,12 +806,12 @@ void MobManager::CopyPrototype( Character *Destination, Character *Source )
 	if(Destination->MobData->Food)
 	{
 		delete Destination->MobData->Food;
-		Destination->MobData->Food = NULL;
+		Destination->MobData->Food = nullptr;
 	}
 	if(Destination->MobData->Skin)
 	{
 		delete Destination->MobData->Skin;
-		Destination->MobData->Skin = NULL;
+		Destination->MobData->Skin = nullptr;
 	}
 
 	if(Destination->MobData)
@@ -845,7 +853,7 @@ int Character::getVnum() const
 {
 	Index *index;
 
-	if( this->nr < 0 || (index = MobManager::GetManager().GetIndex((unsigned int)this->nr)) == NULL )
+	if( this->nr < 0 || (index = MobManager::GetManager().GetIndex((unsigned int)this->nr)) == nullptr )
 		return (0);
 	return index->vnum;
 }

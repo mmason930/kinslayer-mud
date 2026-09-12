@@ -134,7 +134,7 @@ CommandHandler do_saveall = DEFINE_COMMAND
 	if(!strn_cmp(arg1, "Zones", strlen(arg1)))
 	{
 		Zone *zone;
-		for(i = 0;(zone=ZoneManager::GetManager().GetZoneByRnum(i)) != NULL;++i)
+		for(i = 0;(zone=ZoneManager::GetManager().GetZoneByRnum(i)) != nullptr;++i)
 			zone->save();
 		ch->send("All zones have been saved.\r\n");
 		MudLog(CMP, LVL_GOD, TRUE, "%s saved all zones.", GET_NAME(ch));
@@ -206,7 +206,7 @@ CommandHandler do_saveall = DEFINE_COMMAND
   ***/
 CommandHandler do_noreply = DEFINE_COMMAND
 {
-	for(Character *teller = character_list;teller != NULL;teller = teller->next)
+	for(Character *teller = character_list;teller != nullptr;teller = teller->next)
 	{
 		if( teller->last_tell == ch->player.idnum && GET_LEVEL(teller) < GET_LEVEL(ch) )
 			teller->last_tell = 0;
@@ -499,7 +499,7 @@ CommandHandler do_copy = DEFINE_COMMAND
 	else if( !strn_cmp(type, "mob", strlen(type)) )
 	{
 		Zone *zone;
-		if( (zone = ZoneManager::GetManager().GetZoneByRoomVnum( vnum2 )) == NULL )
+		if( (zone = ZoneManager::GetManager().GetZoneByRoomVnum( vnum2 )) == nullptr )
 		{
 			ch->send("There is no zone which can contain that room!\r\n");
 			return;
@@ -519,13 +519,13 @@ CommandHandler do_copy = DEFINE_COMMAND
 
 		//Add to save list.
 		Zone *z = ZoneManager::GetManager().GetZoneByRoomVnum(vnum2);
-		if( z != NULL )
+		if( z != nullptr )
 			olc_add_to_save_list( z->getVnum(), OLC_SAVE_ROOM );
 	}
 	else if( !strn_cmp(type, "room", strlen(type)) )
 	{
 		Zone *zone;
-		if( (zone = ZoneManager::GetManager().GetZoneByRoomVnum( vnum2 )) == NULL )
+		if( (zone = ZoneManager::GetManager().GetZoneByRoomVnum( vnum2 )) == nullptr )
 		{
 			ch->send("There is no zone which can contain that room!\r\n");
 			return;
@@ -585,8 +585,8 @@ CommandHandler do_copyover = DEFINE_COMMAND
 	}
 		else
 		{
-			execl(mudname, mudname, NULL);
-			sprintf(buf, "Copyover failed:  execl(%s, %s, NULL) with error code %d.", mudname, mudname, errno);
+			execl(mudname, mudname, nullptr);
+			sprintf(buf, "Copyover failed:  execl(%s, %s, nullptr) with error code %d.", mudname, mudname, errno);
 		}
 
 		if (chdir("lib") == -1)
@@ -933,7 +933,7 @@ CommandHandler do_ipfind = DEFINE_COMMAND
 
 	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(nameString);
 
-	if(index == NULL)
+	if(index == nullptr)
 	{
 		ch->send(NOPERSON);
 		return;
@@ -1144,6 +1144,45 @@ CommandHandler do_extra = DEFINE_COMMAND
 				ch->send("Switch added.");
 			}
 		}
+		else if (!str_cmp(vArgs.at(0), "query"))
+		{
+			std::string sql = "SELECT * FROM pvals";
+			sql::Query query = gameDatabase->sendQuery(sql);
+
+			while (query->hasNextRow())
+			{
+				sql::Row row = query->getRow();
+				/**
+				*	while( rs.hasNextRow ) {
+		const row = rs.getRow;
+		const sOwnerType = row.get("owner_type");
+		const sOwnerID = row.get("owner_id");
+		const sValue = row.get("value");
+		const sKey = row.get("sKey");
+		const sFullKey = sOwnerType + "~=~" + sOwnerID + "~=~" + sKey;
+
+		const oValueObject = {};
+		oValueObject.value = sValue;
+		oValueObject.needsSave = false;
+
+//		mudLog(constants.BRF, 100, sFullKey);
+		global.pvals[ sFullKey ] = oValueObject;
+		**/
+			}
+		}
+		else if ( !str_cmp(vArgs.at(0), "str_cmp"))
+		{
+			int iterations = atoi(vArgs.at(1).c_str());
+			Clock strCmpClock;
+			strCmpClock.turnOn();
+			for (int iter = 0;iter < iterations; iter++)
+			{
+				int res = str_cmp("sifjdisfjdsifjdsifjdisfdsifdsigbdfsjrjwe9irj34fEWFIERFGIJERIF", "sifjdisfjdsifjdsifjdisfdsifdsigbdfsjrjwe9irj34fEWFIERFGIJERIE");
+			}
+			strCmpClock.turnOff();
+
+			ch->send("Total seconds: %f", strCmpClock.getSeconds());
+		}
 		else if( !str_cmp(vArgs.at(0), "tic") ) {
 			//Subtract the progress to the next tic.
 			pulse -= pulse % (SECS_PER_MUD_HOUR * PASSES_PER_SEC);
@@ -1273,7 +1312,7 @@ CommandHandler do_disable = DEFINE_COMMAND
 				std::string username = StringUtil::cap(StringUtil::allLower(std::string(arg3)));
 				std::string commandText = std::string(arg4);
 				std::list<UserDisabledCommand*> userDisabledCommands;
-				std::list<UserDisabledCommand*> *userDisabledCommandsPtr = NULL;
+				std::list<UserDisabledCommand*> *userDisabledCommandsPtr = nullptr;
 				PlayerIndex *playerIndex;
 				std::list<UserDisabledCommand*>::iterator iter;
 				UserDisabledCommand *userDisabledCommand;
@@ -1283,7 +1322,7 @@ CommandHandler do_disable = DEFINE_COMMAND
 
 					playerIndex = CharacterUtil::getPlayerIndexByUserName(username);
 
-					if(playerIndex == NULL)
+					if(playerIndex == nullptr)
 					{
 						ch->send(NOPERSON);
 						return;
@@ -1393,7 +1432,7 @@ CommandHandler do_enable = DEFINE_COMMAND
 			std::string username = StringUtil::cap(StringUtil::allLower(std::string(arg3)));
 			std::string commandText = std::string(arg4);
 			std::list<UserDisabledCommand*> userDisabledCommands;
-			std::list<UserDisabledCommand*> *userDisabledCommandsPtr = NULL;
+			std::list<UserDisabledCommand*> *userDisabledCommandsPtr = nullptr;
 			PlayerIndex *playerIndex;
 			std::list<UserDisabledCommand*>::iterator iter;
 			UserDisabledCommand *userDisabledCommand;
@@ -1403,7 +1442,7 @@ CommandHandler do_enable = DEFINE_COMMAND
 
 				playerIndex = CharacterUtil::getPlayerIndexByUserName(username);
 
-				if(playerIndex == NULL)
+				if(playerIndex == nullptr)
 				{
 					ch->send(NOPERSON);
 					return;
@@ -1466,7 +1505,7 @@ CommandHandler do_pardon = DEFINE_COMMAND
 
 	if(!(victim = get_char_vis(ch, arg)))
 	{
-		if( (victim = CharacterUtil::loadCharacter(arg)) == NULL )
+		if( (victim = CharacterUtil::loadCharacter(arg)) == nullptr )
 		{
 			ch->send(NOPERSON);
 			return;
@@ -1569,7 +1608,7 @@ CommandHandler do_warrant = DEFINE_COMMAND
 
 	if(!(victim = get_char_vis(ch, arg)))
 	{
-		if( (victim = CharacterUtil::loadCharacter(arg)) == NULL )
+		if( (victim = CharacterUtil::loadCharacter(arg)) == nullptr )
 		{
 			ch->send(NOPERSON);
 			return;
@@ -1667,7 +1706,7 @@ CommandHandler do_zap = DEFINE_COMMAND
 
 	if(!(victim = get_char_vis(ch, arg)))
 	{
-		if( (victim = CharacterUtil::loadCharacter(arg)) == NULL )
+		if( (victim = CharacterUtil::loadCharacter(arg)) == nullptr )
 		{
 			ch->send(NOPERSON);
 			return;
@@ -1684,7 +1723,7 @@ CommandHandler do_zap = DEFINE_COMMAND
 
 	if(amount >= GET_LEVEL(victim))
 	{
-		Act("Your argument MUST be lower than $S level.", FALSE, ch, NULL, victim, TO_CHAR);
+		Act("Your argument MUST be lower than $S level.", FALSE, ch, nullptr, victim, TO_CHAR);
 		CLEANUP(victim, load);
 		return;
 	}
@@ -1789,7 +1828,7 @@ CommandHandler do_find = DEFINE_COMMAND
 	else
 	{//Searching for item by name(possible multiple different vnums)
 		QueryBuffer << "-1";
-		for(i = 0;i < top_of_objt;++i)
+		for(i = 0;i <= top_of_objt;++i)
 		{
 			if( isname(name, obj_proto[i]->name) )
 				QueryBuffer << "," << obj_index[obj_proto[i]->item_number].vnum;
@@ -1811,7 +1850,7 @@ CommandHandler do_find = DEFINE_COMMAND
 		sql::Row MyRow = MyQuery->getRow();
 		Object *obj = Object::bootLiveObject( MyRow );
 
-		if( obj == NULL )
+		if( obj == nullptr )
 			continue;
 		if( MyRow["special_type"] != "0" && !isname(name,obj->getName()) )
 			continue;
@@ -1949,7 +1988,7 @@ CommandHandler do_rank = DEFINE_COMMAND
 
 	if(!(victim = get_char_vis(ch, arg1)))
 	{
-		if( (victim = CharacterUtil::loadCharacter(arg1)) == NULL )
+		if( (victim = CharacterUtil::loadCharacter(arg1)) == nullptr )
 		{
 			ch->send(NOPERSON);
 			return;
@@ -1981,7 +2020,10 @@ CommandHandler do_rank = DEFINE_COMMAND
 		return;
 	}
 
-	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && !chUserClan->getIsCouncil())
+	//NPCs holding a clan membership act with that clan's authority. The council flag is a
+	//player-side concept - it lives on the userClan row and cannot be set on a mob prototype -
+	//so ritual mobs such as Sheriam could otherwise never rank the character they just tested.
+	if(GET_LEVEL(ch) < COUNCIL_COMMANDS_MINIMUM_IMMORTAL_LEVEL && !IS_NPC(ch) && !chUserClan->getIsCouncil())
 	{
 		ch->send("You are not a council member of the %s clan.\r\n", clan->Name.c_str());
 		return;
@@ -2066,7 +2108,7 @@ CommandHandler do_demote = DEFINE_COMMAND
 
 	if(!(victim = get_char_vis(ch, arg1)))
 	{
-		if( (victim = CharacterUtil::loadCharacter(arg1)) == NULL )
+		if( (victim = CharacterUtil::loadCharacter(arg1)) == nullptr )
 		{
 			ch->send(NOPERSON);
 			return;
@@ -2158,7 +2200,7 @@ CommandHandler do_council = DEFINE_COMMAND
 
 	if(!(victim = get_char_vis(ch, player_name)))
 	{
-		if(!playerExists(player_name) || (victim = CharacterUtil::loadCharacter(player_name)) == NULL)
+		if(!playerExists(player_name) || (victim = CharacterUtil::loadCharacter(player_name)) == nullptr)
 		{
 			ch->send(NOPERSON);
 			return;
@@ -2222,7 +2264,7 @@ CommandHandler do_council = DEFINE_COMMAND
 
 		if(load)
 		{
-			flusspferd::get_native<JSCharacter>(victimJavaScriptObject).setReal(NULL);
+			flusspferd::get_native<JSCharacter>(victimJavaScriptObject).setReal(nullptr);
 			victim->RemoveFromRoom();
 		}
 	}
@@ -2238,7 +2280,7 @@ CommandHandler do_council = DEFINE_COMMAND
 CommandHandler do_clan = DEFINE_COMMAND
 {
 	char playername[MAX_INPUT_LENGTH], clanstr[MAX_INPUT_LENGTH];
-	Character *victim = NULL;
+	Character *victim = nullptr;
 	UserClan *userClan;
 	bool loaded = false;
 	std::string syntax = "Clan <Player Name> <Clan Name or Number>";
@@ -2257,7 +2299,7 @@ CommandHandler do_clan = DEFINE_COMMAND
 	}
 
 	int clanId = 0;
-	Clan *clan = NULL;
+	Clan *clan = nullptr;
 	if(!(clanId = GetClanByString(clanstr)) || !(clan = ClanUtil::getClan(clanId)))
 	{
 		ch->send("Invalid clan. Enter a valid clan name or clan number. You can see all clans by using the VIEW CLANS command.\r\n");
@@ -2338,7 +2380,7 @@ CommandHandler do_clan = DEFINE_COMMAND
 
 		if(loaded)
 		{
-			flusspferd::get_native<JSCharacter>(victimJavaScriptObject).setReal(NULL);
+			flusspferd::get_native<JSCharacter>(victimJavaScriptObject).setReal(nullptr);
 			victim->RemoveFromRoom();
 		}
 	}
@@ -2355,8 +2397,8 @@ CommandHandler do_declan = DEFINE_COMMAND
 	char playername[MAX_INPUT_LENGTH], clanstr[MAX_INPUT_LENGTH];
 	int clanId;
 	bool loaded = false;
-	Character *victim = NULL;
-	Clan *clan = NULL;
+	Character *victim = nullptr;
+	Clan *clan = nullptr;
 	std::string syntax = "Syntax: Declan <Player Name> <Clan Name or Number>";
 	std::list<int> clanIdsUserWasRemovedFrom;
 
@@ -2500,7 +2542,7 @@ CommandHandler do_declan = DEFINE_COMMAND
 		
 		if(loaded)
 		{
-			flusspferd::get_native<JSCharacter>(victimJavaScriptObject).setReal(NULL);
+			flusspferd::get_native<JSCharacter>(victimJavaScriptObject).setReal(nullptr);
 			victim->RemoveFromRoom();
 		}
 	}
@@ -2525,7 +2567,7 @@ CommandHandler do_reset = DEFINE_COMMAND
 
 	if(!(victim = get_char_vis(ch, argument)))
 	{
-		if( (victim = CharacterUtil::loadCharacter(argument)) == NULL )
+		if( (victim = CharacterUtil::loadCharacter(argument)) == nullptr )
 		{
 			ch->send(NOPERSON);
 			return;
@@ -2621,7 +2663,7 @@ CommandHandler do_dig = DEFINE_COMMAND
 	mzone = ch->in_room->getZone();
 	tzone = ZoneManager::GetManager().GetZoneByRoomVnum(tvnum);
 
-	if (tzone == NULL)
+	if (tzone == nullptr)
 	{
 		ch->send("You cannot link to a non-existing zone!\r\n");
 		return;
@@ -2649,7 +2691,7 @@ CommandHandler do_dig = DEFINE_COMMAND
 		{
 			MudLog(BRF, MAX(LVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "SYSERR: do_dig: Player already had olc structure.");
 			cleanup_olc(d, CLEANUP_ALL);
-			d->olc = NULL;
+			d->olc = nullptr;
 		}
 
 		d->olc = new OLC();
@@ -2726,7 +2768,7 @@ CommandHandler do_award = DEFINE_COMMAND
 	char targetUserName[MAX_INPUT_LENGTH], clanName[MAX_INPUT_LENGTH], questPointAmountString[MAX_INPUT_LENGTH];
 	short int questPointAmount, clanId;
 	int targetUserId;
-	ClanQuestPointTransaction *clanQuestPointTransaction = NULL;
+	ClanQuestPointTransaction *clanQuestPointTransaction = nullptr;
 
 	HalfChop(argument, targetUserName, argument);
 	HalfChop(argument, clanName, argument);
@@ -2804,13 +2846,13 @@ CommandHandler do_award = DEFINE_COMMAND
 		ch->send("Could not award quest points.\r\n%s\r\n", e.what());
 	}
 
-	if(clanQuestPointTransaction != NULL)
+	if(clanQuestPointTransaction != nullptr)
 	{//The operation succeeded.
 		ch->send("You award %s %d quest points.\r\n", targetUserPlayerIndex->name.c_str(), clanQuestPointTransaction->getAmount(), clanQuestPointTransaction->getId());
 		MudLog(BRF, MAX(GET_LEVEL(ch), LVL_APPR), TRUE, "%s has awarded %s %d quest points. Transaction ID: %d Reason given: `%s`", GET_NAME(ch), targetUserPlayerIndex->name.c_str(), clanQuestPointTransaction->getAmount(), clanQuestPointTransaction->getId(), clanQuestPointTransaction->getReason().c_str());
 
 		Character *targetUser = CharacterUtil::getOnlineCharacterById(targetUserId);
-		if(targetUser != NULL)
+		if(targetUser != nullptr)
 		{
 			Clan *clan = ClanUtil::getClan(clanId);
 			targetUser->send("You have been awarded %d quest points in %s.\r\n", clanQuestPointTransaction->getAmount(), clan->Name.c_str());
@@ -3182,7 +3224,7 @@ void do_stat_room(Character * ch)
 
 	sprintbit((long)rm->room_flags, (const char**)room_bits, buf2);
 	sprintf(buf, "SpecProc: %s, Flags: %s\r\n",
-	        (rm->func == NULL) ? "None" : "Exists", buf2);
+	        (rm->func == nullptr) ? "None" : "Exists", buf2);
 
 	ch->send(buf);
 
@@ -3847,7 +3889,7 @@ CommandHandler do_statfind = DEFINE_COMMAND
 		}
 		else
 		{
-			if( (victim = CharacterUtil::loadCharacter(buf2)) != NULL )
+			if( (victim = CharacterUtil::loadCharacter(buf2)) != nullptr )
 			{
 				if (GET_LEVEL(victim) > GET_LEVEL(ch))
 					ch->send("Sorry, you can't do that.\r\n");
@@ -3860,7 +3902,7 @@ CommandHandler do_statfind = DEFINE_COMMAND
 			{
 				ch->send("There is no such player.\r\n");
 			}
-			victim = NULL;
+			victim = nullptr;
 		}
 	}
 	else if (IsAbbrev(buf1, "object"))
@@ -3880,7 +3922,7 @@ CommandHandler do_statfind = DEFINE_COMMAND
 
 					object = Object::loadSingleItem(objectId, false);
 					
-					if(object != NULL)
+					if(object != nullptr)
 					{
 						do_stat_object(ch, object);
 
@@ -3944,8 +3986,8 @@ void Character::stopSnooping()
 					GET_NAME(this->desc->snooping->character));
 			}
 		}
-		this->desc->snooping->snoop_by = NULL;
-		this->desc->snooping = NULL;
+		this->desc->snooping->snoop_by = nullptr;
+		this->desc->snooping = nullptr;
 		if( this->hasPermissionToSnoop() ) this->ToggleSnoop();
 	}
 }
@@ -3986,8 +4028,8 @@ CommandHandler do_deny = DEFINE_COMMAND
 	MudLog(BRF, MAX(GET_LEVEL(ch), LVL_APPR), TRUE, "%s has denied %s permission to snoop.",
 		GET_NAME(ch), GET_NAME(Snooper));
 
-	ch->desc->snoop_by = NULL;
-	Snooper->desc->snooping = NULL;
+	ch->desc->snoop_by = nullptr;
+	Snooper->desc->snooping = nullptr;
 };
 
 //Grant snooper permission to snoop.
@@ -4068,7 +4110,7 @@ CommandHandler do_snoop = DEFINE_COMMAND
 		MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(ch)), TRUE, "%s begins snooping %s.", GET_NAME(ch), GET_NAME(victim));
 
 		if (ch->desc->snooping)
-			ch->desc->snooping->snoop_by = NULL;
+			ch->desc->snooping->snoop_by = nullptr;
 
 		ch->desc->snooping = victim->desc;
 		victim->desc->snoop_by = ch->desc;
@@ -4105,7 +4147,7 @@ CommandHandler do_switch = DEFINE_COMMAND
 		ch->desc->original = ch;
 
 		victim->desc = ch->desc;
-		ch->desc = NULL;
+		ch->desc = nullptr;
 	}
 };
 
@@ -4121,10 +4163,10 @@ CommandHandler do_return = DEFINE_COMMAND
 			STATE(ch->desc->original->desc) = CON_DISCONNECT;
 
 		ch->desc->character = ch->desc->original;
-		ch->desc->original = NULL;
+		ch->desc->original = nullptr;
 
 		ch->desc->character->desc = ch->desc;
-		ch->desc = NULL;
+		ch->desc = nullptr;
 	}
 };
 
@@ -4299,8 +4341,8 @@ CommandHandler do_purge = DEFINE_COMMAND
 				if (vict->desc)
 				{
 					STATE(vict->desc) = CON_CLOSE;
-					vict->desc->character = NULL;
-					vict->desc = NULL;
+					vict->desc->character = nullptr;
+					vict->desc = nullptr;
 				}
 			}
 
@@ -4426,7 +4468,7 @@ CommandHandler do_advance = DEFINE_COMMAND
 
 	if(!(victim = get_char_vis(ch, name)))
 	{
-		if( (victim = CharacterUtil::loadCharacter(name)) == NULL )
+		if( (victim = CharacterUtil::loadCharacter(name)) == nullptr )
 		{
 			ch->send(NOPERSON);
 			return;
@@ -4803,7 +4845,7 @@ CommandHandler do_last = DEFINE_COMMAND
 		return;
 	}
 
-	if( (vict = CharacterUtil::loadCharacter(::arg)) == NULL || !Character::LoadLogins(Logins,vict->player.name,1))
+	if( (vict = CharacterUtil::loadCharacter(::arg)) == nullptr || !Character::LoadLogins(Logins,vict->player.name,1))
 	{
 		ch->send("Error loading player.");
 		return;
@@ -4852,7 +4894,7 @@ CommandHandler do_force = DEFINE_COMMAND
 		else
 		{
 			ch->send(OK);
-			Act(buf1, TRUE, ch, NULL, vict, TO_VICT);
+			Act(buf1, TRUE, ch, nullptr, vict, TO_VICT);
 
 			MudLog(NRM, MAX(LVL_GOD, GET_INVIS_LEV(ch)), TRUE,
 			       "(GC) %s forced %s to %s", GET_NAME(ch), GET_NAME(vict), to_force);
@@ -4877,7 +4919,7 @@ CommandHandler do_force = DEFINE_COMMAND
 			if (GET_LEVEL(vict) >= GET_LEVEL(ch))
 				continue;
 
-			Act(buf1, TRUE, ch, NULL, vict, TO_VICT);
+			Act(buf1, TRUE, ch, nullptr, vict, TO_VICT);
 			CommandUtil::get()->interpretCommand(vict, to_force);
 		}
 	}
@@ -4892,7 +4934,7 @@ CommandHandler do_force = DEFINE_COMMAND
 			if (STATE(i) != CON_PLAYING || !(vict = i->character) || GET_LEVEL(vict) >= GET_LEVEL(ch))
 				continue;
 
-			Act(buf1, TRUE, ch, NULL, vict, TO_VICT);
+			Act(buf1, TRUE, ch, nullptr, vict, TO_VICT);
 			CommandUtil::get()->interpretCommand(vict, to_force);
 		}
 	}
@@ -4903,7 +4945,7 @@ CommandHandler do_force = DEFINE_COMMAND
 		for( Character *vict = character_list;vict;vict = vict->next )
 		{
 			if( GET_LEVEL(vict) >= GET_LEVEL(ch) ) continue;
-			Act(buf1, TRUE, ch, NULL, vict, TO_VICT);
+			Act(buf1, TRUE, ch, nullptr, vict, TO_VICT);
 			CommandUtil::get()->interpretCommand(vict, to_force);
 		}
 	}
@@ -5255,7 +5297,7 @@ CommandHandler do_reroll = DEFINE_COMMAND
 
 	if(!(vict = get_char_vis(ch, name)))
 	{
-		if( (vict = CharacterUtil::loadCharacter(name)) == NULL )
+		if( (vict = CharacterUtil::loadCharacter(name)) == nullptr )
 		{
 			ch->send(NOPERSON);
 			return;
@@ -5362,7 +5404,7 @@ CommandHandler do_wizutil = DEFINE_COMMAND
 	}
 	else if (!(vict = get_char_vis(ch, ::arg)))
 	{
-		if( (vict = CharacterUtil::loadCharacter(::arg)) == NULL )
+		if( (vict = CharacterUtil::loadCharacter(::arg)) == nullptr )
 		{
 			ch->send("There is no such player.\r\n");
 			return;
@@ -5631,7 +5673,7 @@ CommandHandler do_wshow = DEFINE_COMMAND
 			}
 			else if (*value && IsNumber(value))
 			{
-				if( (zone = ZoneManager::GetManager().GetZoneByVnum(atoi(value))) != NULL )
+				if( (zone = ZoneManager::GetManager().GetZoneByVnum(atoi(value))) != nullptr )
 					zone->PrintToBuffer(Buffer);
 				else
 					Buffer = "That is not a valid zone.\r\n";
@@ -5663,7 +5705,7 @@ CommandHandler do_wshow = DEFINE_COMMAND
 				return;
 			}
 
-			if( (vict = CharacterUtil::loadCharacter(value)) == NULL)
+			if( (vict = CharacterUtil::loadCharacter(value)) == nullptr)
 			{
 				ch->send("There is no such player.\r\n");
 				return;
@@ -5821,7 +5863,7 @@ CommandHandler do_wshow = DEFINE_COMMAND
 				return;
 			}
 
-			if( (vict = CharacterUtil::loadCharacter(value)) == NULL )
+			if( (vict = CharacterUtil::loadCharacter(value)) == nullptr )
 			{
 				ch->send("There is no such player.\r\n");
 				return;
@@ -5868,8 +5910,8 @@ CommandHandler do_wshow = DEFINE_COMMAND
 			break;
 
 		case 11: // zoneperms
-			vict = NULL;
-			if( (vict = CharacterUtil::loadCharacter(value)) == NULL )
+			vict = nullptr;
+			if( (vict = CharacterUtil::loadCharacter(value)) == nullptr )
 				ch->send(NOPERSON);
 			else if(vict->player.level > GET_LEVEL(ch))
 				ch->send("You aren't big brother... yet...\r\n");
@@ -6169,7 +6211,7 @@ CommandHandler do_wshow = DEFINE_COMMAND
 				PlayerIndex *userPlayerIndex;
 
 				userPlayerIndex = CharacterUtil::getPlayerIndexByUserId(clanQuestPointTransaction->getUserId());
-				if(userPlayerIndex != NULL)
+				if(userPlayerIndex != nullptr)
 					userName = userPlayerIndex->name;
 				else
 					userName = "<Unknown>";
@@ -6192,7 +6234,7 @@ CommandHandler do_wshow = DEFINE_COMMAND
 				else
 				{//Issued by a mob.
 					Character *issuedByUserCharacter = MobManager::GetManager().GetPrototypeByVnum(clanQuestPointTransaction->getIssuedByUserId());
-					if(issuedByUserCharacter != NULL)
+					if(issuedByUserCharacter != nullptr)
 						issuedByUserName = GET_NAME(issuedByUserCharacter);
 					else
 						issuedByUserName = "<Unknown>";
@@ -6918,7 +6960,7 @@ int perform_set(Character *ch, Character *vict, int mode, char *val_arg, int fil
 
 CommandHandler do_set = DEFINE_COMMAND
 {
-	Character *vict = NULL, *cbuf = NULL;
+	Character *vict = nullptr, *cbuf = nullptr;
 	char field[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH],
 	val_arg[MAX_INPUT_LENGTH];
 	int mode = -1, retval;
@@ -6980,7 +7022,7 @@ CommandHandler do_set = DEFINE_COMMAND
 	else if (is_file)
 	{
 		// try to load the player off disk
-		if( (cbuf = CharacterUtil::loadCharacter(name)) != NULL)
+		if( (cbuf = CharacterUtil::loadCharacter(name)) != nullptr)
 		{
 
 			if (GET_LEVEL(cbuf) >= GET_LEVEL(ch))
@@ -7023,14 +7065,14 @@ CommandHandler do_set = DEFINE_COMMAND
 CommandHandler do_retool = DEFINE_COMMAND
 {
 	char field[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH], mode[MAX_INPUT_LENGTH];
-	char **sBufPtr = NULL;
+	char **sBufPtr = nullptr;
 	Object *obj;
 	bool isExDesc = false;
 
 	HalfChop( argument, mode, buf );
 	HalfChop( buf, name, buf );
 
-	if( (obj = ItemUtil::get()->getObjectInListVis( ch, name, ch->carrying )) == NULL ) {
+	if( (obj = ItemUtil::get()->getObjectInListVis( ch, name, ch->carrying )) == nullptr ) {
 		ch->send("Retool what? You don't see %s %s anywhere.\r\n", AN(name), name);
 		return;
 	}
@@ -7058,12 +7100,12 @@ CommandHandler do_retool = DEFINE_COMMAND
 	{
 		if( (*sBufPtr) )
 			delete[] (*sBufPtr);
-		(*sBufPtr) = NULL;
+		(*sBufPtr) = nullptr;
 
 		if(isExDesc)
 		{//Special case. We must clear the structure.
 			delete obj->retool_ex_desc;
-			obj->retool_ex_desc = NULL;
+			obj->retool_ex_desc = nullptr;
 		}
 	}
 	else if( !(*sBufPtr ) )
@@ -7173,7 +7215,7 @@ CommandHandler do_jmap = DEFINE_COMMAND
 	
 	std::function<Script *(const char *)> getScriptByIdentifier = [&](const char *scriptIdentifier) -> Script *
 	{
-		Script *script = NULL;
+		Script *script = nullptr;
 
 		//If the script identifier begins with a digit, it must be an ID. JavaScript methods cannot begin with a digit.
 		if(isdigit(*scriptIdentifier))
@@ -7181,24 +7223,24 @@ CommandHandler do_jmap = DEFINE_COMMAND
 			if(!MiscUtil::isInt(scriptIdentifier))
 			{
 				ch->send("The script ID must be a valid integer.\r\n");
-				return NULL;
+				return nullptr;
 			}
 			else if(!(script = JSManager::get()->getScript(atoi(scriptIdentifier))))
 			{
 				ch->send("There is no script #%s.\r\n", scriptIdentifier);
-				return NULL;
+				return nullptr;
 			}
 		}
 		else if(!(script = JSManager::get()->getScriptByMethodName(scriptIdentifier, true)))
 		{
 			ch->send("There is no script with the method `%s`.\r\n", scriptIdentifier);
-			return NULL;
+			return nullptr;
 		}
 
 		if(!script)
 		{//We should not be able to get here, but just in case...
 			ch->send("No script could be found matching your criteria.\r\n");
-			return NULL;
+			return nullptr;
 		}
 
 		return script;
@@ -7225,7 +7267,7 @@ CommandHandler do_jmap = DEFINE_COMMAND
 			std::string attachedOrDetached = methodExists ? (std::string(grn) + "[Attached]" + nrm) : (std::string(bld) + red + "[Detached]" + nrm);
 			const char *fileName = JSManager::get()->getFunctionFilename(script->getMethodName());
 
-			outputBuffer << cyn << std::setw(6) << std::right << script->getId() << nrm << ") " << attachedOrDetached << " " << yel << script->getMethodName().c_str() << nrm << " : " << red << (fileName == NULL ? "" : fileName) << nrm << std::endl;
+			outputBuffer << cyn << std::setw(6) << std::right << script->getId() << nrm << ") " << attachedOrDetached << " " << yel << script->getMethodName().c_str() << nrm << " : " << red << (fileName == nullptr ? "" : fileName) << nrm << std::endl;
 		}
 
 		std::string outputBufferString = outputBuffer.str();
@@ -7249,7 +7291,7 @@ CommandHandler do_jmap = DEFINE_COMMAND
 
 		Script *scriptWithSameMethodName = JSManager::get()->getScriptByMethodName(methodName, true);
 
-		if(scriptWithSameMethodName != NULL)
+		if(scriptWithSameMethodName != nullptr)
 		{
 			ch->send("Script #%d already exists in the map with the method name you provided.\r\n", scriptWithSameMethodName->getId());
 			return;
@@ -7280,7 +7322,7 @@ CommandHandler do_jmap = DEFINE_COMMAND
 	else if(!strn_cmp(arg1, "delete", strlen(arg1)))
 	{
 		const char *scriptIdentifier = arg2;
-		Script *scriptToDelete = NULL;
+		Script *scriptToDelete = nullptr;
 
 		if(!*scriptIdentifier)
 		{
@@ -7319,7 +7361,7 @@ CommandHandler do_jmap = DEFINE_COMMAND
 			return;
 		}
 
-		if(JSManager::get()->getScriptByMethodName(newMethodName, true) != NULL)
+		if(JSManager::get()->getScriptByMethodName(newMethodName, true) != nullptr)
 		{
 			ch->send("A script with the method `%s` already exists in the map.\r\n", newMethodName);
 			return;

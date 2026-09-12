@@ -111,7 +111,7 @@ ASPELL(spell_regen)
 {
 	if (IS_MOB(victim))
 	{
-		Act("You try to reduce $N's fatigue, but nothing seems to happen.", true, ch, NULL, victim, TO_CHAR);
+		Act("You try to reduce $N's fatigue, but nothing seems to happen.", true, ch, nullptr, victim, TO_CHAR);
 		return;
 	}
 	if (ch != victim)
@@ -122,9 +122,9 @@ ASPELL(spell_regen)
 					ToVict = weave->getAttribute("ToVict");
 
 		GET_MOVE(victim) = MIN(GET_MAX_MOVE(victim), MAX(GET_MOVE(victim), perc*GET_MAX_MOVE(victim)));
-		Act(ToChar.c_str(), TRUE, ch, NULL, victim, TO_CHAR);
-		Act(ToVict.c_str(), TRUE, ch, NULL, victim, TO_VICT);
-		Act(ToRoom.c_str(), TRUE, ch, NULL, victim, TO_NOTVICT);
+		Act(ToChar.c_str(), TRUE, ch, nullptr, victim, TO_CHAR);
+		Act(ToVict.c_str(), TRUE, ch, nullptr, victim, TO_VICT);
+		Act(ToRoom.c_str(), TRUE, ch, nullptr, victim, TO_NOTVICT);
 	}
 	else
 		ch->send("You can't cast that on yourself!\r\n");
@@ -160,7 +160,7 @@ ASPELL(spell_create_water)
 	GET_OBJ_VAL(obj, 3) = 0;
 
 	ch->send("You weave flows into %s to fill it with some water.\r\n", obj->GetSDesc());
-	Act("$n waves $s hands around $p, which now seems slightly heftier.", TRUE, ch, obj, NULL, TO_NOTVICT);
+	Act("$n waves $s hands around $p, which now seems slightly heftier.", TRUE, ch, obj, nullptr, TO_NOTVICT);
 }
 
 ASPELL(spell_locate_object)
@@ -245,15 +245,15 @@ ASPELL(spell_tornado)
 	PermDist =	atoi(weave->getAttribute("DistFactor").c_str()) *
 			(GET_SKILL(ch, weave->getVnum()) / atoi(weave->getAttribute("DistThreshhold").c_str()));
 
-	for(vict = ch->in_room->people;vict != NULL;vict = vict_next)
+	for(vict = ch->in_room->people;vict != nullptr;vict = vict_next)
 	{
 		vict_next = vict->next_in_room;//We'll be altering the list, so grab the next in the list first.
 
 		if( vict == ch || IS_NPC(vict) ) continue; //Tornado will not throw the caster(or MOBs 03/09/2009).
-		if( RIDDEN_BY(vict) != NULL ) continue; //Skip over the horse. We'll move them when the rider gets moved.
+		if( RIDDEN_BY(vict) != nullptr ) continue; //Skip over the horse. We'll move them when the rider gets moved.
 
 		vict->send("The raging gusts of the tornado pick you up and throw you aside.\r\n");
-		Act("$n is picked up by the raging gusts of the tornado.", TRUE, vict, NULL, NULL, TO_ROOM);
+		Act("$n is picked up by the raging gusts of the tornado.", TRUE, vict, nullptr, nullptr, TO_ROOM);
 
 		dist = PermDist;//Constant needs changing
 
@@ -271,7 +271,7 @@ ASPELL(spell_tornado)
 					i = 0;
 
 				//Does this exit even exist?
-				if( cur_room->dir_option[i] != NULL && cur_room->dir_option[i]->getToRoom() != NULL )
+				if( cur_room->dir_option[i] != nullptr && cur_room->dir_option[i]->getToRoom() != nullptr )
 				{
 					//Is the exit closed off?
 					if( cur_room->dir_option[i]->isClosed() )
@@ -287,14 +287,14 @@ ASPELL(spell_tornado)
 		vict->RemoveFromRoom();
 		vict->MoveToRoom( cur_room );
 		vict->InterruptTimer();
-		if( MOUNT(vict) != NULL )
+		if( MOUNT(vict) != nullptr )
 		{
 			MOUNT(vict)->RemoveFromRoom();
 			MOUNT(vict)->MoveToRoom( cur_room );
 		}
 		look_at_room(vict, 1);
 
-		Act("$n falls from midair, landing with a loud thud.", TRUE, vict, NULL, NULL, TO_ROOM);
+		Act("$n falls from midair, landing with a loud thud.", TRUE, vict, nullptr, nullptr, TO_ROOM);
 	}
 }
 
@@ -422,7 +422,7 @@ ASPELL(spell_teleport)
 
 ASPELL(spell_ward_weapon)
 {
-	if (ch == NULL || obj == NULL)
+	if (ch == nullptr || obj == nullptr)
 		return;
 
 	if ((obj->getType() == ITEM_WEAPON))
@@ -450,20 +450,20 @@ ASPELL(spell_eavesdrop)
 	}
 	if (ch != victim && ch->in_room != victim->in_room)
 	{
-		if (victim->in_room->getEavesdroppingWarder() != NULL)
+		if (victim->in_room->getEavesdroppingWarder() != nullptr)
 		{
-			Act("You try to eavesdrop on $N, but the room is warded!", TRUE, ch, NULL, victim, TO_CHAR);
+			Act("You try to eavesdrop on $N, but the room is warded!", TRUE, ch, nullptr, victim, TO_CHAR);
 			victim->in_room->getEavesdroppingWarder()->send("Someone is attempting to listen in on your conversation!\r\n");
 		}
 		else if (ch->in_room->getDistanceToRoom(victim->in_room) <= atoi(weave->getAttribute("MaxDistance").c_str()))
 		{
 			ch->Eavesdropping = victim->in_room;
 			victim->in_room->eavesdropping.push_back(ch);
-			Act("You begin to eavesdrop on $N.", TRUE, ch, NULL, victim, TO_CHAR);
+			Act("You begin to eavesdrop on $N.", TRUE, ch, nullptr, victim, TO_CHAR);
 		}
 		else
 		{
-			Act("Your target could not be found.", TRUE, ch, NULL, victim, TO_CHAR);
+			Act("Your target could not be found.", TRUE, ch, nullptr, victim, TO_CHAR);
 		}
 	}
 	else
@@ -486,7 +486,7 @@ ASPELL(spell_circle_of_silence)
 
 ASPELL(spell_flare)
 {
-//	Act( weave->getAttribute( "ToChar" ).c_str(), TRUE, ch, NULL, victim, TO_CHAR);
+//	Act( weave->getAttribute( "ToChar" ).c_str(), TRUE, ch, nullptr, victim, TO_CHAR);
 	DisplayWeaveMessages(weave, ch, victim);
 
 	if( IS_HUMAN( ch ) )
@@ -582,8 +582,8 @@ ASPELL( spell_quicksand )
 	else
 	{
 		GET_MANA(ch) = GET_MANA(ch) + atof( weave->getAttribute("Cost").c_str() );
-		Act("$N sees the ground below him begin to sink, and quickly jumps out of the way!", FALSE, ch, NULL, victim, TO_CHAR);
-		Act("$N sees the ground below him begin to sink, and quickly jumps out of the way!", FALSE, ch, NULL, victim, TO_NOTVICT);
-		Act("You feel the ground beneath your feet begin to shift, so you quickly jump to safer ground!", FALSE, ch, NULL, victim, TO_VICT);
+		Act("$N sees the ground below him begin to sink, and quickly jumps out of the way!", FALSE, ch, nullptr, victim, TO_CHAR);
+		Act("$N sees the ground below him begin to sink, and quickly jumps out of the way!", FALSE, ch, nullptr, victim, TO_NOTVICT);
+		Act("You feel the ground beneath your feet begin to shift, so you quickly jump to safer ground!", FALSE, ch, nullptr, victim, TO_VICT);
 	}
 }

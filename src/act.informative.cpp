@@ -32,8 +32,8 @@
 
 /* extern variables */
 extern Wizard *wizlist;
-extern struct GameTime time_info;
-extern struct Index *obj_index;
+extern GameTime time_info;
+extern Index *obj_index;
 extern const char *weekdays[];
 extern const char *month_name[];
 extern const char *pc_race_types[];
@@ -58,7 +58,7 @@ int level_exp(int level);
 bool isInArena(Character *ch);
 bool JS_isArenaInFFAMode();
 
-struct GameTime *real_time_passed(time_t t2, time_t t1);
+GameTime *real_time_passed(time_t t2, time_t t1);
 extern const char * weather_patterns[];
 extern const char * weather_storm_names[];
 extern const char * weather_event_names[];
@@ -225,7 +225,7 @@ void Character::ListLegends()
 		if(i > 8 && GET_LEVEL(this) < LVL_GRGOD)
 			break;
 
-		if( (victim = CharacterUtil::loadCharacter((*l)->name)) != NULL )
+		if( (victim = CharacterUtil::loadCharacter((*l)->name)) != nullptr )
 		{
 			if(GET_LEVEL(this) >= LVL_GRGOD)
 				this->send("~  %d. %s the %s. - %d\r\n", i, GET_NAME(victim), victim->RaceName().c_str(), GET_WP(victim));
@@ -278,7 +278,7 @@ void do_auto_scan(Character *ch, bool typed); // RHOLLOR 05.15.09
 CommandHandler do_scan = DEFINE_COMMAND
 {
    int exit=-1;
-   Room *room = NULL;
+   Room *room = nullptr;
    char arg[MAX_INPUT_LENGTH];
    std::stringstream TotalCommand;
    TotalCommand << "scan" << argument;
@@ -420,7 +420,7 @@ CommandHandler do_view = DEFINE_COMMAND
 		else
 			c = ClanUtil::getClan(clan_num);
 
-		if(c == NULL || c->hidden_level > GET_LEVEL(ch))
+		if(c == nullptr || c->hidden_level > GET_LEVEL(ch))
 			ch->send("There is no such clan.\r\n");
 
 		ch->send(" --%s Members--\r\n", c->Name.c_str());
@@ -673,7 +673,7 @@ CommandHandler do_search = DEFINE_COMMAND
 				ch->send("You found %s!\r\n", obj->GetSDesc());
 
 				sprintf(buf, "%s found %s.", GET_NAME(ch), obj->GetSDesc());
-				Act(buf, TRUE, ch, NULL, NULL, TO_NOTVICT);
+				Act(buf, TRUE, ch, nullptr, nullptr, TO_NOTVICT);
 
 				return;
 			}
@@ -1180,7 +1180,7 @@ void listOneCharacter(Character *i, Character *ch)
 		else			/* NIL fighting pointer */
 			strcat(buf, " is here struggling with thin air");
 	}
-	if(GET_POS(i) == POS_SITTING && i->player.sitting_on != NULL)
+	if(GET_POS(i) == POS_SITTING && i->player.sitting_on != nullptr)
 		sprintf(buf + strlen(buf), " on %s", i->player.sitting_on->GetSDesc());
 
 	if(RIDDEN_BY(i) == ch)
@@ -1514,7 +1514,7 @@ void Character::lookAtGate( class Gate* gate )
 {
 	Room* OtherRoom = gate->OtherEnd(this->in_room);//Get the other side of the gate.
 
-	if( OtherRoom == NULL )//This really should never happen, but...
+	if( OtherRoom == nullptr )//This really should never happen, but...
 		this->send("You can't make out what is on the other end of the gate.\r\n");
 	else
 		this->send("On the other side of the gate, you see: %s\r\n", OtherRoom->getName());
@@ -1564,7 +1564,7 @@ void do_auto_scan(Character *ch, bool typed) {
 				*/
 				Character *Target;
 				for(Target = room->people;Target && RIDDEN_BY(Target);Target = Target->next_in_room);
-				if (Target != NULL) {
+				if (Target != nullptr) {
 					for(Character *peep = Target; peep; peep = peep->next_in_room)
 					{
 						if (CAN_SEE(ch, peep))
@@ -1706,7 +1706,7 @@ void lookInDirection(Character * ch, int dir)
 
 void lookInObject(Character * ch, char *arg, Object *obj)
 {
-	Character *dummy = NULL;
+	Character *dummy = nullptr;
 	int amt, bits;
 
 	if ( (!arg || !*arg)  && !obj)
@@ -1770,7 +1770,7 @@ char *findExtraDescription(char *word, struct ExtraDescription * listy)
 		if (isname(word, i->keyword))
 			return (i->description);
 
-	return NULL;
+	return nullptr;
 }
 
 /*
@@ -1788,9 +1788,9 @@ void lookAtTarget(Character * ch, char *arg)
 {
 	int bits, found = FALSE, j;
 	char temp_arg[MAX_INPUT_LENGTH], *ptr;
-	Character *found_char = NULL;
-	Object *obj = NULL, *found_obj = NULL;
-	Gate *found_gate = NULL;
+	Character *found_char = nullptr;
+	Object *obj = nullptr, *found_obj = nullptr;
+	Gate *found_gate = nullptr;
 	char *desc;
 
 	if (!ch->desc)
@@ -1825,14 +1825,14 @@ void lookAtTarget(Character * ch, char *arg)
 			}
 		}
 	}
-	if( found_gate != NULL )
+	if( found_gate != nullptr )
 	{
 		ch->lookAtGate( found_gate );
 		return;
 	}
 
 	/* Is the target a character? */
-	if (found_char != NULL)
+	if (found_char != nullptr)
 	{
 		lookAtCharacter(found_char, ch);
 
@@ -1847,7 +1847,7 @@ void lookAtTarget(Character * ch, char *arg)
 	}
 
 	/* Does the argument match an extra desc in the room? */
-	if ((desc = findExtraDescription(arg, ch->in_room->ex_description)) != NULL)
+	if ((desc = findExtraDescription(arg, ch->in_room->ex_description)) != nullptr)
 	{
 		page_string(ch->desc, desc, FALSE);
 		return;
@@ -1856,7 +1856,7 @@ void lookAtTarget(Character * ch, char *arg)
 	/* Does the argument match an extra desc in the char's equipment? */
 	for (j = 0; j < NUM_WEARS && !found; j++)
 		if (GET_EQ(ch, j) && CAN_SEE_OBJ(ch, GET_EQ(ch, j)))
-			if ((desc = findExtraDescription(arg, GET_EQ(ch, j)->GetExDesc())) != NULL)
+			if ((desc = findExtraDescription(arg, GET_EQ(ch, j)->GetExDesc())) != nullptr)
 			{
 				ch->send(desc);
 				found = TRUE;
@@ -1866,7 +1866,7 @@ void lookAtTarget(Character * ch, char *arg)
 	for (obj = ch->carrying; obj && !found; obj = obj->next_content)
 	{
 		if (CAN_SEE_OBJ(ch, obj))
-			if ((desc = findExtraDescription(arg, obj->GetExDesc())) != NULL)
+			if ((desc = findExtraDescription(arg, obj->GetExDesc())) != nullptr)
 			{
 				ch->send(desc);
 				found = TRUE;
@@ -1877,7 +1877,7 @@ void lookAtTarget(Character * ch, char *arg)
 	/* Does the argument match an extra desc of an object in the room? */
 	for (obj = ch->in_room->contents; obj && !found; obj = obj->next_content)
 		if (CAN_SEE_OBJ(ch, obj))
-			if ((desc = findExtraDescription(arg, obj->ex_description)) != NULL)
+			if ((desc = findExtraDescription(arg, obj->ex_description)) != nullptr)
 			{
 				ch->send(desc);
 				found = TRUE;
@@ -2359,7 +2359,7 @@ void print_wizards(Character *ch, int level, bool all)
 		if(cur->level == level)
 		{
 			
-			if( (imm = CharacterUtil::loadCharacter(cur->name)) != NULL )
+			if( (imm = CharacterUtil::loadCharacter(cur->name)) != nullptr )
 			{
 				if(all || !PLR_FLAGGED(imm, PLR_NOWIZLIST))
 					Immortals.push_back( imm );
@@ -2470,7 +2470,7 @@ void performMortalWhere(Character * ch, char *arg)
 			if (!show_on_who_list(d))
 				continue;
 
-			if ((i = (d->original ? d->original : d->character)) == NULL)
+			if ((i = (d->original ? d->original : d->character)) == nullptr)
 				continue;
 
 			if (!i->in_room || !CAN_SEE(ch, i))

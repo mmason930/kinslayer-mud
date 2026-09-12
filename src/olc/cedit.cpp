@@ -159,22 +159,22 @@ void cedit_setup(Descriptor *d)
 	if (CONFIG_LOGNAME)
 		OLC_CONFIG(d)->operation.LOGNAME     = str_dup(CONFIG_LOGNAME);
 	else
-		OLC_CONFIG(d)->operation.LOGNAME     = NULL;
+		OLC_CONFIG(d)->operation.LOGNAME     = nullptr;
 
 	if (CONFIG_WELC_MESSG)
 		OLC_CONFIG(d)->operation.WELC_MESSG  = str_dup(CONFIG_WELC_MESSG);
 	else
-		OLC_CONFIG(d)->operation.WELC_MESSG  = NULL;
+		OLC_CONFIG(d)->operation.WELC_MESSG  = nullptr;
 
 	if (CONFIG_START_MESSG)
 		OLC_CONFIG(d)->operation.START_MESSG = str_dup(CONFIG_START_MESSG);
 	else
-		OLC_CONFIG(d)->operation.START_MESSG = NULL;
+		OLC_CONFIG(d)->operation.START_MESSG = nullptr;
 
 	if (Conf->operation.NEWBIE_MSG)
 		OLC_CONFIG(d)->operation.NEWBIE_MSG = str_dup(Conf->operation.NEWBIE_MSG);
 	else
-		OLC_CONFIG(d)->operation.NEWBIE_MSG = NULL;
+		OLC_CONFIG(d)->operation.NEWBIE_MSG = nullptr;
 
 	cedit_disp_menu(d);
 }
@@ -244,35 +244,35 @@ void cedit_save_internally(Descriptor *d)
 	if (OLC_CONFIG(d)->operation.LOGNAME)
 		CONFIG_LOGNAME		= OLC_CONFIG(d)->operation.LOGNAME;
 	else
-		CONFIG_LOGNAME		= NULL;
+		CONFIG_LOGNAME		= nullptr;
 
 	if (CONFIG_WELC_MESSG)
 		delete [] CONFIG_WELC_MESSG;
 	if (OLC_CONFIG(d)->operation.WELC_MESSG)
 		CONFIG_WELC_MESSG	= OLC_CONFIG(d)->operation.WELC_MESSG;
 	else
-		CONFIG_WELC_MESSG	= NULL;
+		CONFIG_WELC_MESSG	= nullptr;
 
 	if (CONFIG_START_MESSG)
 		delete [] CONFIG_START_MESSG;
 	if (OLC_CONFIG(d)->operation.START_MESSG)
 		CONFIG_START_MESSG = OLC_CONFIG(d)->operation.START_MESSG;
 	else
-		CONFIG_START_MESSG = NULL;
+		CONFIG_START_MESSG = nullptr;
 
 	if (Conf->operation.NEWBIE_MSG)
 		delete [] Conf->operation.NEWBIE_MSG;
 	if (OLC_CONFIG(d)->operation.NEWBIE_MSG)
 		Conf->operation.NEWBIE_MSG = OLC_CONFIG(d)->operation.NEWBIE_MSG;
 	else
-		Conf->operation.NEWBIE_MSG = NULL;
+		Conf->operation.NEWBIE_MSG = nullptr;
 
 	//add_to_save_list(NOWHERE, SL_CFG);
 }
 
 /******************************************************************************/
 
-void Config::RenumberRooms()
+void Config::renumberRooms()
 {
 	this->room_nums.human_start.ptr		= FindRoomByVnum(this->room_nums.human_start.vnum);
 	this->room_nums.trolloc_start.ptr	= FindRoomByVnum(this->room_nums.trolloc_start.vnum);
@@ -282,7 +282,7 @@ void Config::RenumberRooms()
 	this->room_nums.frozen_start.ptr	= FindRoomByVnum(this->room_nums.frozen_start.vnum);
 }
 
-void Config::Load()
+void Config::load()
 {
 	char line[2048], tag[32], strip[512];
 	int n = 0;
@@ -518,6 +518,30 @@ void Config::Load()
 	}
 }
 
+void Config::saveRebootCount(const sql::Connection &connection)
+{
+	std::stringstream queryStream;
+	queryStream << " UPDATE `config` SET"
+				<< " `value`='" << Conf->getReboots() << "'"
+				<< " WHERE `name`='Reboots';";
+
+	connection->sendRawQuery(queryStream.str());
+}
+
+void Config::saveRebootCountAsync()
+{
+	std::thread([&] {
+		try {
+			sql::Connection connection = dbContext->createConnection();
+			saveRebootCount(connection);
+		}
+		catch (sql::QueryException &e) {
+			e.report();
+			MudLog(BRF, LVL_IMPL, TRUE, "Failed to save reboot count: %s", e.message.c_str());
+		}
+	}).detach();
+}
+
 void Config::save()
 {
 	int i = 0;
@@ -567,7 +591,7 @@ void Config::save()
 			<< "('Wizlock','" << circle_restrict << "'),"
 			<< "('Max Hit Exp','" << Conf->play.max_hit_exp << "'),"
 			<< "('Hit Exp Mult','" << Conf->play.hit_exp_mult << "'),"
-			<< "('Reboots','" << Conf->GetReboots() << "'),"
+			<< "('Reboots','" << Conf->getReboots() << "'),"
 			<< "('Restat','" << Conf->play.restat_time.getTime() << "'),"
 			<< "('Reset','" << Conf->play.reset_time.getTime() << "'),"
 			<< "('EXP Mult','" << Conf->play.ExpMultiplier << "'),"
@@ -1297,7 +1321,6 @@ std::string GetTip(int n)
 
 void cedit_parse(Descriptor *d, char *arg)
 {
-	//	char *oldtext = NULL;
 	delete_doubledollar(arg);
 	Weave *weave;
 	switch (OLC_MODE(d))
@@ -1455,7 +1478,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				d->send("Your input must be numeric.\r\nTry again: ");
 				return;
 			}
-			if( AuctionManager::GetManager().GetAuction( atoi(arg) ) != NULL )
+			if( AuctionManager::GetManager().GetAuction( atoi(arg) ) != nullptr )
 			{
 				d->send("An auction with that vnum already exists. Try editing it.\r\n");
 				CeditAuctionMenu(d);
@@ -1472,7 +1495,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				return;
 			}
 			Auction *a = AuctionManager::GetManager().GetAuction( atoi(arg) );
-			if( (a == NULL) )
+			if( (a == nullptr) )
 			{
 				d->send("No auction with that vnum exists. Try adding it.\r\n");
 				CeditAuctionMenu(d);
@@ -1490,7 +1513,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				return;
 			}
 			Auction *a = AuctionManager::GetManager().GetAuction( atoi(arg) );
-			if( a == NULL )
+			if( a == nullptr )
 			{
 				d->send("That auction does not exist.");
 				CeditAuctionMenu(d);
@@ -1512,7 +1535,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				CeditAuctionRaces( d );
 				break;
 			case 'Q':
-				if( AuctionManager::GetManager().GetAuction( d->olc->auction->getVnum() ) == NULL )
+				if( AuctionManager::GetManager().GetAuction( d->olc->auction->getVnum() ) == nullptr )
 				{//Auction does not exist in the manager. Let's add it.
 					AuctionManager::GetManager().AddAuction( d->olc->auction );
 				}
@@ -1552,7 +1575,7 @@ void cedit_parse(Descriptor *d, char *arg)
 				return;
 			}
 			Clan *clan = ClanUtil::getClan( atoi(arg) );
-			if( clan == NULL )
+			if( clan == nullptr )
 			{
 				d->send("That clan does not exist.\r\nTry again: ");
 				return;
@@ -2022,7 +2045,7 @@ void cedit_parse(Descriptor *d, char *arg)
 			} else if( atoi(arg) < 0 ) {
 				d->send("Your input must not be negative.\r\nTry again: ");
 				return;
-			} else if( WeaveManager::GetManager().GetWeave( atoi(arg) ) != NULL ) {
+			} else if( WeaveManager::GetManager().GetWeave( atoi(arg) ) != nullptr ) {
 				d->send("A weave with that vnum already exists.\r\nTry again: ");
 				return;
 			} else {
@@ -2033,13 +2056,13 @@ void cedit_parse(Descriptor *d, char *arg)
 			}
 			break;
 		case CEDIT_ADD_WEAVE_NAME:
-			if( WeaveManager::GetManager().GetWeave(arg) != (NULL) ) {
+			if( WeaveManager::GetManager().GetWeave(arg) != (nullptr) ) {
 				d->send("A skill with that name already exists.\r\nPlease enter a name for this skill: ");
 				return;
 			} else {
 				d->olc->weave->setName( arg );
 				WeaveManager::GetManager().AddWeave( d->olc->weave );
-				d->olc->weave = (NULL);
+				d->olc->weave = (nullptr);
 				d->send("Weave added.\r\n");
 				WeaveManager::GetManager().saveWeaves();
 				CeditWeaveMenu(d);
@@ -2049,7 +2072,7 @@ void cedit_parse(Descriptor *d, char *arg)
 			if( !MiscUtil::isNumber( arg ) ) {
 				d->send("You must enter a numerical argument.\r\nTry again: ");
 				return;
-			} else if( (weave = WeaveManager::GetManager().GetWeave(atoi(arg))) == NULL ) {
+			} else if( (weave = WeaveManager::GetManager().GetWeave(atoi(arg))) == nullptr ) {
 				d->send("No weave by that vnum.");
 				CeditWeaveMenu(d);
 			} else {
@@ -3245,14 +3268,14 @@ void cedit_parse(Descriptor *d, char *arg)
 /*
  * End of parse_cedit()
  */
-void reassign_rooms(void)
+void reassign_rooms()
 {
-	void assign_rooms(void);
+	void assign_rooms();
 	unsigned int i;
 
 	/* remove old funcs */
 	for (i = 0; i < World.size(); ++i)
-		World[i]->func = NULL;
+		World[i]->func = nullptr;
 
 	/* reassign spec_procs */
 	assign_rooms();

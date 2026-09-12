@@ -1,6 +1,7 @@
 #ifndef KINSLAYER_MUD_OPENAIUTIL_H
 #define KINSLAYER_MUD_OPENAIUTIL_H
 
+#include <functional>
 #include "OpenAIClient.h"
 
 class OpenAIUtil

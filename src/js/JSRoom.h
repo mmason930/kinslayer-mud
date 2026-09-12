@@ -13,7 +13,7 @@
 #ifndef KINSLAYER_JSROOM_H
 #define KINSLAYER_JSROOM_H
 
-#include <flusspferd.hpp>
+#include "flusspferd.hpp"
 
 #include <string>
 #include <iostream>

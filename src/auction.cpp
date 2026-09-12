@@ -33,7 +33,7 @@ void AuctionDispMenu( Descriptor *d );
  *                                                                                        *
  ******************************************************************************************/
 
-AuctionManager *AuctionManager::Self = (NULL);
+AuctionManager *AuctionManager::Self = (nullptr);
 
 /* Constructor for the Auction Manager. This is private and only called via AuctionManager::GetManager() */
 AuctionManager::AuctionManager()
@@ -57,16 +57,16 @@ AuctionManager::~AuctionManager()
 /* Return a reference to the AuctionManager. If one does not exist, it will create it and then return. */
 AuctionManager &AuctionManager::GetManager()
 {
-	if( Self == NULL )
+	if( Self == nullptr )
 		Self = new AuctionManager();
 	return (*Self);
 }
 /* Delete the Auction Manager. Cleanup goes in the destructor. This is the public accessor for destruction */
 void AuctionManager::Free()
 {
-	if( Self != NULL )
+	if( Self != nullptr )
 		delete (Self);
-	Self = (NULL);
+	Self = (nullptr);
 }
 /* Given the sql::Row MyRow, load data into Auction object and return it. */
 Auction *AuctionManager::BootOneAuction( sql::Row MyRow )
@@ -102,7 +102,7 @@ void AuctionManager::save()
 /* Return the auction whose vnum is equal to _vnum. Otherwise, return NULL if no match is found. */
 Auction *AuctionManager::GetAuction( const int _vnum )
 {
-	return (MyAuctions.find( _vnum ) == MyAuctions.end() ? (NULL) : (MyAuctions[_vnum]));
+	return (MyAuctions.find( _vnum ) == MyAuctions.end() ? (nullptr) : (MyAuctions[_vnum]));
 }
 
 /* Return an ordered copy of the auctions stored in the manager */
@@ -432,7 +432,7 @@ std::bitset<64> Auction::bs_dClans()
 std::string Auction::aRacesStr( Character *ch )
 {
 	char rBuf[1024*16];
-	if( ch != NULL )
+	if( ch != nullptr )
 		get_char_cols( ch );
 	sprintbit(this->bs_aRaces().to_ulong(), pc_race_types, rBuf, ", ", cyn, nrm);
 	return rBuf;
@@ -441,7 +441,7 @@ std::string Auction::aRacesStr( Character *ch )
  * Color preferences are determined only if 'ch' is passed */
 std::string Auction::dClansStr( Character *ch )
 {
-	if( ch != NULL )
+	if( ch != nullptr )
 		get_char_cols( ch );
 	std::string cBuf;
 	for(Clan *c = ClanList;c;c=c->Next)
@@ -467,7 +467,7 @@ bool Auction::placeAuction( Character *ch, AuctionData *ad )
 	std::stringstream QueryBuffer, QueryBuffer2;
 	Object *obj = ad->GetItemToSell();
 
-	if( obj == NULL || obj->carried_by != ch )
+	if( obj == nullptr || obj->carried_by != ch )
 		return false;//Item somehow vanished in the duration of the editor. Stolen & rented? Purged?
 	obj_from_char(obj);
 
@@ -873,7 +873,7 @@ void AuctionDispSellMenu( Descriptor *d )
 
 	d->send("~~Sell an Item~~\r\n\r\n");
 	d->send("%sI%s)tem to Sell   : %s%s%s\r\n", grn, nrm, cyn,
-		(itemToSell == NULL ? "<NONE>" : itemToSell->GetSDesc()), nrm);
+		(itemToSell == nullptr ? "<NONE>" : itemToSell->GetSDesc()), nrm);
 	d->send("%sD%s)uration       : %s%s%s\r\n", grn, nrm, cyn, DurationStr.str().c_str(), nrm);
 	d->send("%sB%s)uyout Price   : %s%s%s\r\n", grn, nrm, cyn,
 		d->character->GoldString(d->olc->auction_data->GetBuyoutPrice(), false).c_str(), nrm);
@@ -1320,9 +1320,9 @@ void AuctionParse( Descriptor *d, const std::string &arg )
 		int nr = atoi( arg.c_str() );
 		Object *o;
 		for( o = d->character->carrying;o && --nr > 0;o = o->next_content );
-		if( o == NULL )
+		if( o == nullptr )
 			d->send("That item does not exist.\r\n");
-		else if( o->contains != NULL )
+		else if( o->contains != nullptr )
 			d->send("You must select an item which is not carrying other items.\r\n");
 		else
 			d->olc->auction_data->SetItemToSell(o);

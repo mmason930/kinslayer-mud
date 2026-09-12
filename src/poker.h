@@ -48,10 +48,10 @@ private:
 	int Pot, MinimumRaise, stakes, current_bet, num_init_players;
 
 	PokerState State;
-	class Room* InRoom;
+	Room* InRoom;
 public:
 	bool DealerIsGone;
-	PokerTable( class Room* _InRoom );
+	PokerTable( Room* _InRoom );
 	~PokerTable();
 
 	bool ProcessGameInput( PokerPlayer* Player, std::string Command, std::string Argument );
@@ -65,7 +65,7 @@ public:
 	bool GameIsOver();
 	PokerPlayer* NextUp();
 	PokerPlayer* TableHost();
-	void AddPlayer( class Character*   _Player );
+	void AddPlayer( Character*   _Player );
 	void AddPlayer( PokerPlayer* _Player );
 	void MinRaise( const int _MinRaise );
 
@@ -77,12 +77,12 @@ public:
 	void RemoveWatcher( Character *ch );
 	bool IsWatching( Character *ch );
 
-	const int MinRaise( void );
+	const int MinRaise();
 	void NextGameStep();
 	void SetupDeck();
 	void DealCards();
 	void SetupTurns( PokerPlayer* From, bool exclude );
-	void PrintBoard( Character *ch = NULL, const int wait_time = 8 );
+	void PrintBoard( Character *ch = nullptr, const int wait_time = 8 );
 	void EmptyTurnCycle() { while( !TurnCycle.empty() ) TurnCycle.pop(); }
 	void RemoveCardFromDeck( Card* _Card );
 	void PrintCommunityCards();
@@ -90,7 +90,7 @@ public:
 	void SendToPlayers( const char* message, ... );
 	void SendToWatchers( const char* message, ... );
 	void SendToTable( const char* message, ... );
-	void RemovePlayer( class Character* ch );
+	void RemovePlayer( Character* ch );
 	void RemovePlayer( PokerPlayer* Player );
 	void SetState( PokerState _State ) { State = _State; }
 	void ClearCards() { CommunityCards.clear(); }
@@ -115,12 +115,12 @@ public:
 		for(int i = 1;i < (int)_Name.size();++i) _Name[i] = tolower( _Name[i] );
 		return _Name;
 	}
-	void AddBan( class Character* _Who ) { BanList.push_back( _Who->player.name ); }
+	void AddBan( Character* _Who ) { BanList.push_back( _Who->player.name ); }
 	void AddBan( std::string _Name ) { BanList.push_back( NameFormat( _Name ) ); }
-	void RemoveBan( class Character* _Who ) {BanList.remove( _Who->player.name ); }
+	void RemoveBan( Character* _Who ) {BanList.remove( _Who->player.name ); }
 	void RemoveBan( const std::string &_Name ) { BanList.remove( NameFormat( _Name ) ); }
 
-	bool IsBanned( class Character* _Who ) { return (std::find(BanList.begin(), BanList.end(), _Who->player.name) != BanList.end()); }
+	bool IsBanned( Character* _Who ) { return (std::find(BanList.begin(), BanList.end(), _Who->player.name) != BanList.end()); }
 	bool IsBanned( const std::string &_Name ) { return (std::find(BanList.begin(), BanList.end(), NameFormat( _Name )) != BanList.end()); }
 
 	void PrintBanList();
@@ -147,7 +147,7 @@ class PokerPlayer
 {
 private:
 	std::vector< Card* > Hand;
-	class Character* Player;
+	Character* Player;
 	int chips;
 	bool folded;
 	int seat, bet, pot_size;

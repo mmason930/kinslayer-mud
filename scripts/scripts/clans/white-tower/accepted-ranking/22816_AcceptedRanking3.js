@@ -1,5 +1,12 @@
 var script22816 = function(self, actor, here, args, extra) {
 	let novice = getSval(self,22815,"novice");
+
+	//Set by 22815 when a sister presents a novice for testing. Without it this Sheriam is not
+	//running a test, so the keyword does nothing - including for the Sheriam in her study.
+	if( !novice ) {
+		return;
+	}
+
 	let targetRoom = getRoom(10575);
 	let portalHere;
 	let portalThere;
@@ -8,8 +15,8 @@ var script22816 = function(self, actor, here, args, extra) {
 	targetRoom
 		.getCharacters(function(characterInRoom) { return characterInRoom.isMob(); })
 		.forEach(function(mob) {
-			targetRoomPerson.moveToRoom(getRoom(25));
-			targetRoomPerson.extract();
+			mob.moveToRoom(getRoom(25));
+			mob.extract();
 		});
 
 	targetRoom.loadMob(2607);

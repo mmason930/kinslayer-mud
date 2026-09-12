@@ -187,7 +187,7 @@ int ItemUtil::performGetFromRoom(Character *ch, Object *obj, bool vaultSave)
 		if(!IS_OBJ_STAT((obj), ITEM_INVISIBLE) || GET_LEVEL(ch) >= LVL_IMMORT)
 		{//RHOLLOR 05.03.09 remove messg when invis
 			Act( "You get $p.", FALSE, ch, obj, 0, TO_CHAR );
-			Act( "$n gets $p.", TRUE, ch, obj, 0, TO_ROOM, NULL, true);
+			Act( "$n gets $p.", TRUE, ch, obj, 0, TO_ROOM, nullptr, true);
 		}
 		return 1;
 	}

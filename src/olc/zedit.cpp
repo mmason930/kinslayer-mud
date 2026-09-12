@@ -129,12 +129,12 @@ void zedit_new_zone(Character *ch, int vzone_num)
 		ch->send("999 is the highest zone allowed.\r\n");
 		return;
 	}
-	else if(ZoneManager::GetManager().GetZoneByVnum(vzone_num) != NULL)
+	else if(ZoneManager::GetManager().GetZoneByVnum(vzone_num) != nullptr)
 	{
 		ch->send("That zone already exists.\r\n");
 		return;
 	}
-	else if(ZoneManager::GetManager().GetZoneByRoomVnum(vzone_num*100) != NULL )
+	else if(ZoneManager::GetManager().GetZoneByRoomVnum(vzone_num*100) != nullptr )
 	{
 		ch->send("A zone exists that contains the minumum room vnum(%d).\r\n", (vzone_num*100));
 		return;
@@ -171,7 +171,7 @@ void zedit_save_internally(Descriptor *d)
 	unsigned int subcmd = 0;
 	Zone *zone = ZoneManager::GetManager().GetZoneByRnum( OLC_ZNUM(d) );
 
-	if( zone == NULL )
+	if( zone == nullptr )
 	{
 		MudLog(LVL_APPR, BRF, TRUE, "zedit_save_internally : Could not find zone #%d", OLC_ZNUM(d));
 		return;
@@ -311,7 +311,7 @@ CommandHandler do_zlist = DEFINE_COMMAND
 	memset((char *)buf2, 0, sizeof(buf2));
 	memset((char *)buf , 0, sizeof(buf) );
 	//Zone commands...
-	for( int znr = 0;(z=ZoneManager::GetManager().GetZoneByRnum(znr)) != NULL;++znr)
+	for( int znr = 0;(z=ZoneManager::GetManager().GetZoneByRnum(znr)) != nullptr;++znr)
 	{
 		if (!global && znr != ch->in_room->getZoneNumber())
 			continue;
@@ -437,15 +437,15 @@ CommandHandler do_zlist = DEFINE_COMMAND
 	//Look through the kits.
 	if( toupper(*arg1) == 'K' )
 	{
-		for( int znr = 0;(z=ZoneManager::GetManager().GetZoneByRnum(znr)) != NULL;++znr)
+		for( int znr = 0;(z=ZoneManager::GetManager().GetZoneByRnum(znr)) != nullptr;++znr)
 		{
 			for(s = 0;s < z->cmd.size();++s)
 			{
-				Kit *k = NULL;
+				Kit *k = nullptr;
 				if( z->cmd[ s ]->command != 'M' )
 					continue;
 				Character *mob = MobManager::GetManager().GetPrototype( z->cmd[s]->arg1 );
-				if( mob->IsPurged() || !IS_NPC(mob) || ((k = mob->MobData->primary_kit) == NULL) )
+				if( mob->IsPurged() || !IS_NPC(mob) || ((k = mob->MobData->primary_kit) == nullptr) )
 					continue;
 				//Look through inventory.
 				for(unsigned int i = 0;i < k->KitInventory.size();++i)
@@ -1187,7 +1187,7 @@ void zedit_parse(Descriptor *d, char *arg)
 			 * quiz.
 			 */
 			OLC_CMD(d)->command = toupper(*arg);
-			if (!OLC_CMD(d)->command || (strchr("MOPEDGR", OLC_CMD(d)->command) == NULL))
+			if (!OLC_CMD(d)->command || (strchr("MOPEDGR", OLC_CMD(d)->command) == nullptr))
 			{
 				d->send("Invalid choice, try again : ");
 			}

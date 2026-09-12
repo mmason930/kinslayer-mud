@@ -51,7 +51,7 @@ void MobLoadLogger::threadHandler()
 
 	while(running)
 	{
-		threadMobLoadLogEntries = NULL;
+		threadMobLoadLogEntries = nullptr;
 		{
 			std::lock_guard<std::mutex> lock(mobLoadLogEntriesMutex);
 			if(this->mobLoadLogEntries->size() > 0)
@@ -61,7 +61,7 @@ void MobLoadLogger::threadHandler()
 			}
 		}
 
-		if(threadMobLoadLogEntries != NULL)
+		if(threadMobLoadLogEntries != nullptr)
 		{
 			std::ofstream logFile("MobLoad.log", std::fstream::app);
 

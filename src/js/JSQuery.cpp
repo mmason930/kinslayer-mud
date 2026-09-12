@@ -4,8 +4,13 @@
 
 #include "js_interpreter.h"
 
+// Forward declaration of binding registration function
+void RegisterJSQueryBindings();
+
 void JSEnvironment::LoadJSQuery()
 {
+	// class_name is now defined by FLUSSPFERD_CLASS_DESCRIPTION macro
+	RegisterJSQueryBindings();  // Register methods and properties first
 	load_class<JSQuery>();
 }
 
@@ -21,10 +26,6 @@ int JSQuery::getIndexByField( flusspferd::string field )
 flusspferd::string JSQuery::getFieldByIndex( int index )
 {
 	return real->MyQuery->getFieldByIndex( index );
-}
-void JSQuery::reverseRows()
-{
-	return real->MyQuery->reverseRows();
 }
 void JSQuery::resetRowQueue()
 {

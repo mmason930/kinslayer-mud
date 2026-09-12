@@ -1,8 +1,23 @@
 var script22833 = function(self, actor, here, args, extra) {
+	//Only the novice this Sheriam is currently testing may drive the closing stage. Set by
+	//22815 when a sister presents her; absent on any Sheriam not running a test.
+	let expectedNovice = getSval(self, 22815, "novice");
+
+	if( !expectedNovice || str_cmp(expectedNovice.name, actor.name) ) {
+		return;
+	}
+
+	//Set by 22832 once she has actually stepped out of the third arch.
+	if( !getSval(actor, 22833, "raised") ) {
+		return;
+	}
+
+	setSval(actor, 22833, "raised", 0);
+
 	wait 30;
 
 	let novice = actor;
-	self.comm("give all novice");
+	self.comm("give all " + novice.name);
 	wait 6;
 
 	here.echo("Sheriam says, 'Let us return to the Hall.'");

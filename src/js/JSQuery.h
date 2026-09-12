@@ -13,7 +13,7 @@
 #ifndef KINSLAYER_JSQUERY_H
 #define KINSLAYER_JSQUERY_H
 
-#include <flusspferd.hpp>
+#include "flusspferd.hpp"
 
 #include <string>
 #include <iostream>
@@ -48,7 +48,6 @@ FLUSSPFERD_CLASS_DESCRIPTION(
         ("skipRow", bind, skipRow)
 		("getIndexByField", bind, getIndexByField)
 		("getFieldByIndex", bind, getFieldByIndex)
-		("reverseRows", bind, reverseRows)
 		("resetRowQueue", bind, resetRowQueue)
 		)
     (properties,

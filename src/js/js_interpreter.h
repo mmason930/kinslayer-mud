@@ -13,8 +13,8 @@
 #ifndef KINSLAYER_JS_INTERPRETER_H
 #define KINSLAYER_JS_INTERPRETER_H
 
-#include <flusspferd.hpp>
-#include <flusspferd/spidermonkey/context.hpp>
+#include "flusspferd.hpp"
+#include "flusspferd_context.hpp"
 
 #include "JSCharacter.h"
 #include "JSObject.h"
@@ -51,7 +51,7 @@ struct JSInstance
     std::string delstring;
     bool first_run;
     flusspferd::root_object state;
-    flusspferd::value self;
+    flusspferd::root_value self;
     JSInstance();
     ~JSInstance();
 };
@@ -71,7 +71,7 @@ class JSEnvironment
         // used for executing scripts delayed by timers
         int execute_timer(std::shared_ptr<JSInstance> instance, bool success);
 		flusspferd::value executeExpression( const std::string &expression );
-		bool compile(const std::string &fileName, std::string &scriptBuffer);// true if compile succeeded, false otherwise.
+		bool compile(const std::string &fileName, const std::string &scriptBuffer);// true if compile succeeded, false otherwise.
         void gc(); // garbage collect.
 		__int64 timeSinceLastGC();
 		__int64 getGC_Count();
