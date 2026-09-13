@@ -17,10 +17,9 @@ PlayerPortalDescriptor::PlayerPortalDescriptor(kuDescriptor *descriptor, PlayerP
 
 PlayerPortalDescriptor::~PlayerPortalDescriptor()
 {
-	if(!this->descriptor->socketIsClosed())
-		this->descriptor->disconnect();
-
-	delete this->descriptor;
+	// The listener owns the socket descriptor. Closing it must not call back
+	// into the server while its list of portal descriptors is being destroyed.
+	close();
 }
 
 PlayerPortalServer *PlayerPortalDescriptor::getServer()

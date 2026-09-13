@@ -13,7 +13,7 @@ private:
 public:
 
 	PlayerPortalCommandProcessor();
-	~PlayerPortalCommandProcessor();
+	virtual ~PlayerPortalCommandProcessor();
 
 	virtual void process(PlayerPortalDescriptor *descriptor, Json::Value command) = 0;
 };

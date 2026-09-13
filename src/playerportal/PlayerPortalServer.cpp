@@ -18,6 +18,9 @@ PlayerPortalServer::PlayerPortalServer(kuListener *listener)
 
 PlayerPortalServer::~PlayerPortalServer()
 {
+	listener->setCloseDescriptorCallback(nullptr);
+	listener->setDataForCloseDescriptorCallback(nullptr);
+
 	for (PlayerPortalDescriptor *descriptor : descriptors)
 	{
 		delete descriptor;
@@ -28,7 +31,7 @@ PlayerPortalServer::~PlayerPortalServer()
 		delete commandProcessorPair.second;
 	}
 
-	listener->close();
+	// The listener closes and deletes its socket descriptors and listening socket.
 	delete listener;
 }
 
@@ -94,13 +97,14 @@ void PlayerPortalServer::closeDescriptor(PlayerPortalDescriptor *playerPortalDes
 
 	this->descriptors.remove(playerPortalDescriptor);
 	this->kuDescriptorUidToPlayerPortalDescriptorMap.erase(playerPortalDescriptor->getUid());
+	delete playerPortalDescriptor;
 }
 
 void PlayerPortalServer::onDescriptorClose(kuDescriptor *descriptor)
 {
-	PlayerPortalDescriptor *playerPortalDescriptor = this->kuDescriptorUidToPlayerPortalDescriptorMap[descriptor->getUid()];
-
-	this->closeDescriptor(playerPortalDescriptor);
+	auto iter = kuDescriptorUidToPlayerPortalDescriptorMap.find(descriptor->getUid());
+	if (iter != kuDescriptorUidToPlayerPortalDescriptorMap.end())
+		closeDescriptor(iter->second);
 }
 
 void onPlayerPortalServerSocketClose(void *data, kuListener *listener, kuDescriptor *descriptor)

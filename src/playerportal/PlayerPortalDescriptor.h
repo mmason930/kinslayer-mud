@@ -13,6 +13,7 @@ class PlayerPortalDescriptorStatus;
 class PlayerPortalDescriptor
 {
 protected:
+	// Borrowed from kuListener, which deletes the socket after close callbacks.
 	kuDescriptor *descriptor;
 	PlayerPortalServer *server;
 	PlayerPortalDescriptorStatus *status;
