@@ -12,7 +12,7 @@ manager.helpFiles = {
     3: {id: 3, parentId: 1, name: 'Broken', description: '(function(){throw Error("bad page")})()'},
     4: {id: 4, parentId: 1, name: 'Markup', description: '\'<img src=x onerror="bad()">\''}
 };
-var actor = {isValid: true, hp: 23};
+var actor = {isValid: true, level: 1, hp: 23};
 function request(command, player) {
     command.requestId = 42;
     return JSON.parse(manager.getBrowserResponse(JSON.stringify(command), player === undefined ? actor : player));

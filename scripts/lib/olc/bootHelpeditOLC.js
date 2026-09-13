@@ -94,6 +94,10 @@ function bootHelpeditOLC()
 			actor.getOLC().switchToMode("MODE_EDIT_FILE_DESCRIPTION");
 			return;
 		}
+		else if (fLetter == "L") {
+			actor.getOLC().switchToMode("MODE_EDIT_FILE_LEVEL");
+			return;
+		}
 		else if (fLetter == "K") {
 			actor.getOLC().switchToMode("MODE_EDIT_FILE_KEYWORDS");
 			return;
@@ -112,12 +116,30 @@ function bootHelpeditOLC()
 		actor.send( grn + "S" + nrm + ") Syntax: " + helpFile.syntax );
 		actor.send( grn + "E" + nrm + ") Description: " + helpFile.description );
 		actor.send( grn + "K" + nrm + ") Keywords: " + helpFile.keywords );
+		actor.send( grn + "L" + nrm + ") Minimum Level: " + (helpFile.minimumLevel || 0) + " (0 = everyone; parent restrictions also apply)" );
 		actor.send( grn + "C" + nrm + ") Children");
 		actor.send(" ");
 //		actor.send( grn + "D" + nrm + ") Delete File");
 		actor.send( grn + "Q" + nrm + ") Save and Quit" );
 	}
 	oConfig.modes.push( mode );
+/** MINIMUM LEVEL **/
+	mode = {};
+	mode.mode = "MODE_EDIT_FILE_LEVEL";
+	mode.parser = function(actor, fLetter, vArgs) {
+		var input = vArgs.join(" ");
+		var level = Number(input);
+		if(!/^\d+$/.test(input) || !global.helpManager.isValidMinimumLevel(level)) {
+			actor.send("Enter a whole number from 0 to 105 (0 = everyone).");
+			return;
+		}
+		actor.getOLC().helpFile.minimumLevel = level;
+		actor.getOLC().switchToMode("MODE_EDIT_FILE");
+	};
+	mode.display = function(actor) {
+		actor.send("Minimum level (0-105; 0 = everyone). Parent restrictions also apply:");
+	};
+	oConfig.modes.push(mode);
 /** DELETE FILE **/
 	mode = new Object();
 	mode.mode = "MODE_DELETE_FILE";
@@ -228,6 +250,8 @@ function bootHelpeditOLC()
 		else if (fLetter == "A") {
 		
 			var newHelpFile = global.helpManager.createHelpFile(actor.getOLC().helpFile.id);
+			newHelpFile.createdByUserId = actor.id;
+			newHelpFile.createdDatetime = new Date();
 			actor.getOLC().helpFile = newHelpFile;
 			actor.getOLC().switchToMode("MODE_EDIT_FILE");
 		}

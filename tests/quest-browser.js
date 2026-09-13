@@ -4,10 +4,12 @@ var loadAllQuests = null;
 var Quest = {allQuests: []};
 load('scripts/lib/quest-engine/-501_Quest.Task.js');
 load('scripts/lib/QuestBrowser.js');
-var values = {QUEST_1: 1, QUEST_2: 0, QUEST_3: -1, QUEST_4: 1};
+function getMobName(vnum) { return vnum === 100 ? 'a helpful captain' : ''; }
+var values = {QUEST_1: 1, QUEST_1_GIVER: 100, QUEST_2: 0, QUEST_3: -1, QUEST_4: 1};
 var actor = {isValid: true, vnum: -1, name: 'Tester', quest: function(key) { return values[key] || 0; }};
 function quest(id) {
     return {id: id, name: 'Quest ' + id, qvalStr: 'QUEST_' + id, summary: '"Hello " + actor.name', tasks: [],
+        giverVnum: function(actor) { return actor.quest(this.qvalStr + "_GIVER"); },
         hasBegun: function(actor) { return actor.quest(this.qvalStr) > 0; }};
 }
 var first = quest(1), secret = quest(2), complete = quest(3), broken = quest(4);
@@ -23,6 +25,11 @@ assertEq(!!request([], {isValid: true, vnum: 100}).error, true);
 assertEq(!!request([], actor, 'complete').error, true);
 var list = request([]);
 assertEq(list.requestId, 42);
+assertEq(list.quests[0].issuer, 'a helpful captain');
+assertEq(list.quests[1].issuer, '');
+values.QUEST_1_GIVER = 999;
+assertEq(request([]).quests[0].issuer, '');
+values.QUEST_1_GIVER = 100;
 assertEq(JSON.stringify(list.quests.map(function(q) { return q.id; })), '[1,4]');
 assertEq(list.quests[0].tasks, undefined); // Do not evaluate task code for untracked quests.
 var result = request([1,2,3,4], actor, 'snapshot', 1);

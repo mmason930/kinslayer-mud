@@ -9,6 +9,7 @@
 ************************************************************************ */
 
 #include "conf.h"
+#include "utils/Pathfinding.h"
 
 #include "structs.h"
 #include "spells.h"
@@ -196,6 +197,27 @@ CommandHandler do_saveall = DEFINE_COMMAND
 	{
 		ch->send("Invalid option. Possible Types: Zones, Mobs, Rooms, Objects, OLC.\r\n");
 		return;
+	}
+};
+
+CommandHandler do_helpedit = DEFINE_COMMAND
+{
+	if(IS_NPC(ch) || GET_LEVEL(ch) < LVL_IMMORT || !ch->desc)
+		return;
+	try
+	{
+		flusspferd::object actor = lookupValue(ch).to_object();
+		if(actor.call("getOLC").to_boolean())
+		{
+			ch->send("Finish your current editor first.\r\n");
+			return;
+		}
+		actor.call("setupOLC", "helpedit");
+	}
+	catch(const flusspferd::exception &error)
+	{
+		ch->send("The help editor could not be opened.\r\n");
+		MudLog(BRF, LVL_IMMORT, TRUE, "Could not open help editor: %s", error.what());
 	}
 };
 
@@ -6067,6 +6089,7 @@ CommandHandler do_wshow = DEFINE_COMMAND
 					<< std::setprecision(3) << std::setw(11) << std::showpoint << std::fixed << std::right << entry.runTime
 					<< ",  " << std::setw(11) << std::setprecision(3) << std::showpoint << std::fixed << std::right << (average) << std::endl;
 			}
+			buffer << describePathfindingStats();
 			ch->send("%s", buffer.str().c_str());
 			break;
 		}

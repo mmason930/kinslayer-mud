@@ -247,6 +247,15 @@ void RegisterJSRoomBindings() {
         return true;
     };
     
+    g_class_registry["JSRoom"].methods["routeTo"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+        JSRoom *self = static_cast<JSRoom*>(ptr);
+        if (!self) { args.rval().setUndefined(); return true; }
+        JSRoom *destination = argc > 0 ? get_js_room(cx, args[0]) : nullptr;
+        args.rval().set(to_jsval(cx, self->routeTo(destination)));
+        return true;
+    };
+
     g_class_registry["JSRoom"].methods["setDoorFlags"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
         JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         JSRoom *self = static_cast<JSRoom*>(ptr);

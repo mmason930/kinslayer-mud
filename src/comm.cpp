@@ -13,6 +13,7 @@
 #include "conf.h"
 #include "sysdep.h"
 #include "utils/ThreadedLogFile.h"
+#include "utils/GameLoopTiming.h"
 
 
 #ifdef CIRCLE_MACINTOSH /* Includes for the Macintosh */
@@ -1062,33 +1063,29 @@ void endGameSession()
 
 void gameLoop()
 {
-	int missed_pulses = 0, aliased;
-	time_t last_db_alert_time = 0;
 	Descriptor *d, *next_d;
-	
 	Clock heartbeatClock;
-	Clock pulseTimer;
+	const auto loopStart = GameTickSchedule::Clock::now();
+	GameTickSchedule tickSchedule(loopStart, std::chrono::microseconds(OPT_USEC), 2 * PASSES_PER_SEC);
+	DatabaseHealthSchedule databaseHealth(loopStart);
 
 	rebootNotified15 = rebootNotified10 = rebootNotified5 = rebootNotified1 = false;
-
-	pulseTimer.reset(false);
 
 	bootTime = time( 0 );
 	pulse = 0;
 
 	while ( !circle_shutdown )
 	{
-		std::this_thread::sleep_for( std::chrono::microseconds( OPT_USEC ) );
+		std::this_thread::sleep_until(tickSchedule.nextDeadline());
+		if (circle_shutdown)
+			break;
 
-		//Make sure we're still connected to the database...
-		if( !gameDatabase->isConnected() && (time(0) - last_db_alert_time) > 15 )
-		{
-			MudLog(BRF, LVL_APPR, TRUE, "Disconnected from database... Attempting reconnection.");
-			SetupMySQL( false );
-			last_db_alert_time = time(0);
-		}
-
-		pulseTimer.reset(true);
+		databaseHealth.poll(GameTickSchedule::Clock::now(),
+			[] { return gameDatabase && gameDatabase->isConnected(); },
+			[] {
+				MudLog(BRF, LVL_APPR, TRUE, "Disconnected from database... Attempting reconnection.");
+				SetupMySQL(false);
+			});
 
 		if(gatewayConnection == nullptr) {
 
@@ -1145,21 +1142,6 @@ void gameLoop()
 			}
 		}
 
-		++missed_pulses;
-
-		if ( missed_pulses <= 0 )
-		{
-			Log( "SYSERR: **BAD** MISSED_PULSES NONPOSITIVE (%d), TIME GOING BACKWARDS!!", missed_pulses );
-			missed_pulses = 1;
-		}
-
-		/* If we missed more than 30 seconds worth of pulses, just do 30 secs */
-		if ( missed_pulses > ( 2 * PASSES_PER_SEC ) )
-		{
-			Log( "SYSERR: Missed %d seconds worth of pulses. Heartbeat ran for %.3f seconds.", missed_pulses / PASSES_PER_SEC, heartbeatClock.getSeconds() );
-			missed_pulses = 2 * PASSES_PER_SEC;
-		}
-
 		for(d = descriptor_list;d;d = d->next)
 		{
 			d->flushOutputBuffer();
@@ -1194,10 +1176,15 @@ void gameLoop()
 				d->disconnect();
 		}
 
-		heartbeatClock.reset(false);
-		heartbeatClock.turnOn();
+		// Include DB, gateway, command and socket work in the elapsed tick count.
+		// Work inside heartbeat is accounted for on the next loop iteration.
+		const auto dueTicks = tickSchedule.consume(GameTickSchedule::Clock::now());
+		if (dueTicks.dropped > 0)
+			Log("SYSERR: Dropped %lld overdue pulses (catch-up limited to two seconds). Previous heartbeat batch ran for %.3f seconds.", dueTicks.dropped, heartbeatClock.getSeconds());
+
+		heartbeatClock.reset(true);
 		/* Now execute the heartbeat functions */
-		while ( missed_pulses-- ) {
+		for (int tick = 0; tick < dueTicks.count && !circle_shutdown; ++tick) {
 
 			try {
 				heartbeat( ++pulse );
@@ -1220,10 +1207,6 @@ void gameLoop()
 		/* Roll pulse over after 10 hours */
 		if ( pulse >= ( 600 * 60 * PASSES_PER_SEC ) )
 			pulse = 0;
-
-		pulseTimer.turnOff();
-
-		missed_pulses = pulseTimer.getClocks() / (1000000 / PASSES_PER_SEC);
 
 #ifdef CIRCLE_UNIX
 		/* Update tics for deadlock protection (UNIX only) */

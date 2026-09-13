@@ -8,16 +8,6 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-/*
- * You can define or not define TRACK_THOUGH_DOORS, depending on whether
- * or not you want track to find paths which lead through closed or
- * hidden doors. A setting of '#if 0' means to not go through the doors
- * while '#if 1' will pass through doors to find the target.
- */
-#if 1
-#define TRACK_THROUGH_DOORS 1
-#endif
-
 #include "conf.h"
 
 
@@ -27,6 +17,10 @@
 #include "rooms/Room.h"
 #include "rooms/RoomSector.h"
 #include "rooms/Exit.h"
+#include "utils/Pathfinding.h"
+#include <chrono>
+#include <iomanip>
+#include <sstream>
 
 
 /* Externals */
@@ -34,343 +28,165 @@ extern Character *character_list;
 extern const char *dirs[];
 
 
-/* local functions */
-void bfs_enqueue( Room *room, int dir, int depth = 0 );
-void bfs_dequeue( void );
-void bfs_clear_queue( void );
-int find_first_step( Room *src, Room *target );
-
-struct bfs_queue_struct
+// Pathfinding runs synchronously on the game thread. No callbacks or persistent
+// route cache: each search reads the current exits and survives OLC changes.
+namespace {
+struct PathVisit
 {
-	Room *room;
-	char dir;
-	int depth;
-	struct bfs_queue_struct *next;
+    Room *room;
+    int firstStep;
+    int depth;
+    std::size_t parent;
+    int direction;
+};
+std::vector<PathVisit> pathVisits;
+std::uint64_t pathGeneration = 0;
+std::array<PathfindingStats, static_cast<unsigned>(PathfindingApi::Count)> pathStats;
+
+struct SearchMeasurement
+{
+    PathfindingStats &stats;
+    Room *source;
+    Room *target;
+    std::uint64_t visited = 0;
+    std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+
+    ~SearchMeasurement()
+    {
+        const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::steady_clock::now() - start).count();
+        ++stats.calls;
+        stats.roomsVisited += visited;
+        stats.maxRoomsVisited = std::max(stats.maxRoomsVisited, visited);
+        stats.totalNanoseconds += elapsed;
+        if (static_cast<std::uint64_t>(elapsed) >= stats.maxNanoseconds)
+        {
+            stats.maxNanoseconds = elapsed;
+            stats.slowestSource = source ? source->getVnum() : -1;
+            stats.slowestTarget = target ? target->getVnum() : -1;
+        }
+    }
 };
 
-static struct bfs_queue_struct *queue_head = 0, *queue_tail = 0;
-
-/* Utility macros */
-#define MARK(room) (SET_BITK(ROOM_FLAGS(room), (1<<ROOM_BFS_MARK)))
-#define UNMARK(room) (REMOVE_BIT(ROOM_FLAGS(room), (1<<ROOM_BFS_MARK)))
-#define IS_MARKED(room) (ROOM_FLAGGED(room, ROOM_BFS_MARK))
-#define TOROOM(x, y) ((x)->dir_option[(y)]->getToRoom())
-
-#define VALID_EDGE(x, y)  ((x)->dir_option[(y)] && (TOROOM((x), y)) && (!ROOM_FLAGGED(TOROOM((x), y), ROOM_NOTRACK)) && (!IS_MARKED(TOROOM((x), y))))
-#define VALID_EDGE2(x, y) ((x)->dir_option[(y)] && (TOROOM((x), y)) && (!IS_MARKED(TOROOM((x), y))))
-
-std::string DistanceString( int dist )
+RoomRoute searchRooms(Room *source, Room *target, bool respectNoTrack,
+    PathfindingApi api, std::list<int> *path = nullptr)
 {
-	if ( dist == 0 || dist == 1 )
-		return "";
-	else if ( dist == 2 )
-		return "far";
-	else if ( dist == 3 )
-		return "very far";
-	else if ( dist == 4 )
-		return "very very far";
-	else if ( dist == 5 )
-		return "extremely far";
-	else
-		return "somewhere";
+    SearchMeasurement measurement{pathStats[static_cast<unsigned>(api)], source, target};
+    if (!source || !target)
+        return {BFS_ERROR, -1};
+    if (source == target)
+        return {BFS_ALREADY_THERE, 0};
+
+    // The only full-world reset is at 64-bit generation rollover.
+    if (++pathGeneration == 0)
+    {
+        for (Room *room : World)
+            room->pathfindingGeneration = 0;
+        ++pathGeneration;
+    }
+    pathVisits.clear();
+    if (pathVisits.capacity() < World.size())
+        pathVisits.reserve(World.size());
+    source->pathfindingGeneration = pathGeneration;
+    pathVisits.push_back({source, BFS_ERROR, 0, 0, -1});
+
+    for (std::size_t head = 0; head < pathVisits.size(); ++head)
+    {
+        // Copy: discovering a room may grow the vector and invalidate references.
+        const PathVisit current = pathVisits[head];
+        ++measurement.visited;
+        if (current.room == target)
+        {
+            if (path)
+                for (std::size_t node = head; node != 0; node = pathVisits[node].parent)
+                    path->push_front(pathVisits[node].direction);
+            return {current.firstStep, current.depth};
+        }
+        for (int direction = 0; direction < NUM_OF_DIRS; ++direction)
+        {
+            Exit *exit = current.room->dir_option[direction];
+            Room *neighbor = exit ? exit->getToRoom() : nullptr;
+            // Preserve legacy policy: only NPC hunting excludes ROOM_NOTRACK.
+            // Existing path APIs traverse closed/hidden/disabled exits too.
+            if (!neighbor || neighbor->pathfindingGeneration == pathGeneration ||
+                (respectNoTrack && ROOM_FLAGGED(neighbor, ROOM_NOTRACK)))
+                continue;
+            neighbor->pathfindingGeneration = pathGeneration;
+            pathVisits.push_back({neighbor, head == 0 ? direction : current.firstStep,
+                current.depth + 1, head, direction});
+        }
+    }
+    return {BFS_NO_PATH, -1};
+}
+} // namespace
+
+const std::array<PathfindingStats, static_cast<unsigned>(PathfindingApi::Count)> &getPathfindingStats()
+{
+    return pathStats;
 }
 
-class PathNode
+std::string describePathfindingStats()
 {
-public:
-
-	PathNode()
-	{
-		TheRoom = nullptr;
-		dir_to_here = 0;
-	}
-	PathNode( Room *R, const int dir )
-	{
-		TheRoom = R;
-		dir_to_here = dir;
-	}
-
-	Room *TheRoom;
-	int dir_to_here;
-};
-
-std::queue< std::stack< PathNode >* > PathQueue;
-
-void ClearPathQueue()
-{
-	while( !PathQueue.empty() )
-	{
-		std::stack< PathNode > *Path = PathQueue.front();
-		while( !Path->empty() )
-		{
-			UNMARK( Path->top().TheRoom );
-			Path->pop();
-		}
-		delete PathQueue.front();
-		PathQueue.pop();
-	}
+    static const char *names[] = {"firstStep", "distanceTo", "pathToRoom", "NPC hunt", "routeTo"};
+    std::ostringstream out;
+    out << "\r\nPathfinding (since boot; included in the routine totals above):\r\n"
+        << "API              Calls   Rooms visited   Max rooms   Total ms   Avg ms   Max ms   Slowest from/to\r\n";
+    for (unsigned i = 0; i < static_cast<unsigned>(PathfindingApi::Count); ++i)
+    {
+        const auto &stats = pathStats[i];
+        const double milliseconds = stats.totalNanoseconds / 1000000.0;
+        out << std::left << std::setw(12) << names[i] << std::right
+            << std::setw(10) << stats.calls << std::setw(16) << stats.roomsVisited
+            << std::setw(12) << stats.maxRoomsVisited << std::fixed << std::setprecision(3)
+            << std::setw(11) << milliseconds
+            << std::setw(9) << (stats.calls ? milliseconds / stats.calls : 0.0)
+            << std::setw(9) << stats.maxNanoseconds / 1000000.0
+            << "   " << stats.slowestSource << "/" << stats.slowestTarget << "\r\n";
+    }
+    return out.str();
 }
 
-std::list<int> Room::pathToRoom( Room *OtherRoom )
+std::string DistanceString(int dist)
 {
-	std::list<int> ThePath;
-	std::stack< PathNode > *CurrentPath;
-	int i;
-
-	//No distance between here and the destination.
-	if( OtherRoom == this ) return ThePath;
-
-	for(i = 0;i < World.size();++i)
-		UNMARK(World[i]);
-
-	for(i = 0;i < NUM_OF_DIRS;++i)
-	{
-		if( VALID_EDGE2(this, i) )
-		{
-			CurrentPath = new std::stack< PathNode >;
-			CurrentPath->push( PathNode(this->dir_option[i]->getToRoom(), i) );
-			PathQueue.push( CurrentPath );
-
-			MARK(this->dir_option[i]->getToRoom());
-		}
-	}
-
-	MARK(this);
-
-	while( !PathQueue.empty() )
-	{
-		CurrentPath = PathQueue.front();
-		//We have found our destination.
-		if( CurrentPath->top().TheRoom == OtherRoom )
-		{
-			while( !CurrentPath->empty() )
-			{
-				ThePath.push_front(CurrentPath->top().dir_to_here);
-				CurrentPath->pop();
-			}
-			ClearPathQueue();//This will invalidate CurrentPath!
-			return ThePath;
-		}
-		else
-		{
-			PathQueue.pop();
-			for( i = 0;i < NUM_OF_DIRS;++i )
-			{
-				if( VALID_EDGE2(CurrentPath->top().TheRoom, i) )
-				{
-					MARK(CurrentPath->top().TheRoom->dir_option[i]->getToRoom());
-					std::stack< PathNode > *NewStack = new std::stack< PathNode >( *CurrentPath );
-					NewStack->push(PathNode(CurrentPath->top().TheRoom->dir_option[i]->getToRoom(), i));
-					PathQueue.push( NewStack );
-				}
-			}
-			delete CurrentPath;
-		}
-	}
-	return ThePath;
+    if (dist == 0 || dist == 1) return "";
+    if (dist == 2) return "far";
+    if (dist == 3) return "very far";
+    if (dist == 4) return "very very far";
+    if (dist == 5) return "extremely far";
+    return "somewhere";
 }
 
-int Room::findFirstStep( Room *OtherRoom )
+std::list<int> Room::pathToRoom(Room *otherRoom)
 {
-	int curr_dir, curr_room;
-
-	if ( !OtherRoom )
-	{
-		Log( "Illegal value %p or %p passed to find_first_step. (%s)", static_cast<void*>(this), static_cast<void*>(OtherRoom), __FILE__ );
-		return BFS_ERROR;
-	}
-
-	if ( this == OtherRoom )
-		return BFS_ALREADY_THERE;
-
-	/* clear marks first, some OLC systems will save the mark. */
-	for ( curr_room = 0; (unsigned int)curr_room < World.size(); ++curr_room )
-		UNMARK( ( World[ curr_room ] ) );
-
-	MARK( this );
-
-	/* first, enqueue the first steps, saving which direction we're going. */
-	for ( curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++ )
-	{
-		if ( VALID_EDGE2( this, curr_dir ) )
-		{
-			MARK( TOROOM( this, curr_dir ) );
-			bfs_enqueue( TOROOM( this, curr_dir ), curr_dir );
-		}
-	}
-	/* now, do the classic BFS. */
-	while ( queue_head )
-	{
-		if ( queue_head->room == OtherRoom )
-		{
-			curr_dir = queue_head->dir;
-			bfs_clear_queue();
-			return curr_dir;
-		}
-
-		else
-		{
-			for ( curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++ )
-			{
-				if ( VALID_EDGE2( queue_head->room, curr_dir ) )
-				{
-					MARK( TOROOM( queue_head->room, curr_dir ) );
-					bfs_enqueue( TOROOM( queue_head->room, curr_dir ), queue_head->dir );
-				}
-			}
-			bfs_dequeue();
-		}
-	}
-	return BFS_NO_PATH;
-}
-int Room::getDistanceToRoom( Room* OtherRoom )
-{
-	int curr_dir, curr_room, curr_depth;
-
-	if ( this == OtherRoom )
-		return 0;
-
-	/* clear marks first, some OLC systems will save the mark. */
-	for ( curr_room = 0; (unsigned int)curr_room < World.size(); ++curr_room )
-		UNMARK( ( World[ curr_room ] ) );
-
-	MARK( this );
-
-	/* first, enqueue the first steps, saving which direction we're going. */
-	for ( curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++ )
-	{
-		if ( VALID_EDGE2( this, curr_dir ) )
-		{
-			MARK( (this)->dir_option[(curr_dir)]->getToRoom() );
-			bfs_enqueue( (this)->dir_option[(curr_dir)]->getToRoom(), curr_dir, 1 );
-		}
-	}
-	/* now, do the classic BFS. */
-	while ( queue_head )
-	{
-		if ( queue_head->room == OtherRoom )
-		{
-			curr_depth = queue_head->depth;
-			bfs_clear_queue();
-			return curr_depth;
-		}
-
-		else
-		{
-			for ( curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++ )
-			{
-				if ( VALID_EDGE2( queue_head->room, curr_dir ) )
-				{
-					MARK( (queue_head->room)->dir_option[(curr_dir)]->getToRoom() );
-					bfs_enqueue( (queue_head->room)->dir_option[(curr_dir)]->getToRoom(), queue_head->dir, queue_head->depth+1 );
-				}
-			}
-			bfs_dequeue();
-		}
-	}
-	return -1;
+    std::list<int> path;
+    searchRooms(this, otherRoom, false, PathfindingApi::FullPath, &path);
+    return path;
 }
 
-void bfs_enqueue( Room *room, int dir, int depth )
+int Room::findFirstStep(Room *otherRoom)
 {
-	struct bfs_queue_struct * curr;
-
-	CREATE( curr, struct bfs_queue_struct, 1 );
-	curr->room = room;
-	curr->dir = dir;
-	curr->next = 0;
-	curr->depth = depth;
-
-	if ( queue_tail )
-	{
-		queue_tail->next = curr;
-		queue_tail = curr;
-	}
-
-	else
-		queue_head = queue_tail = curr;
+    if (!otherRoom)
+        Log("Illegal value %p or %p passed to find_first_step. (%s)",
+            static_cast<void*>(this), static_cast<void*>(otherRoom), __FILE__);
+    return searchRooms(this, otherRoom, false, PathfindingApi::FirstStep).firstStep;
 }
 
-
-void bfs_dequeue( void )
+int Room::getDistanceToRoom(Room *otherRoom)
 {
-	struct bfs_queue_struct * curr;
-
-	curr = queue_head;
-
-	if ( !( queue_head = queue_head->next ) )
-		queue_tail = 0;
-
-	delete ( curr );
+    return searchRooms(this, otherRoom, false, PathfindingApi::Distance).distance;
 }
 
-
-void bfs_clear_queue( void )
+RoomRoute Room::routeToRoom(Room *otherRoom)
 {
-	while ( queue_head )
-		bfs_dequeue();
+    return searchRooms(this, otherRoom, false, PathfindingApi::Route);
 }
 
-
-/*
- * find_first_step: given a source room and a target room, find the first
- * step on the shortest path from the source to the target.
- *
- * Intended usage: in mobileActivity, give a mob a dir to go if they're
- * tracking another mob or a PC.  Or, a 'track' skill for PCs.
- */
-int find_first_step( Room *src, Room *target )
+int find_first_step(Room *source, Room *target)
 {
-	int curr_dir, curr_room;
-
-	if ( !src || !target )
-	{
-		Log( "Illegal value %p or %p passed to find_first_step. (%s)", static_cast<void*>(src), static_cast<void*>(target), __FILE__ );
-		return BFS_ERROR;
-	}
-
-	if ( src == target )
-		return BFS_ALREADY_THERE;
-
-	/* clear marks first, some OLC systems will save the mark. */
-	for ( curr_room = 0; (unsigned int)curr_room < World.size(); ++curr_room )
-		UNMARK( ( World[ curr_room ] ) );
-
-	MARK( src );
-
-	/* first, enqueue the first steps, saving which direction we're going. */
-	for ( curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++ )
-	{
-		if ( VALID_EDGE( src, curr_dir ) )
-		{
-			MARK( TOROOM( src, curr_dir ) );
-			bfs_enqueue( TOROOM( src, curr_dir ), curr_dir );
-		}
-	}
-	/* now, do the classic BFS. */
-	while ( queue_head )
-	{
-		if ( queue_head->room == target )
-		{
-			curr_dir = queue_head->dir;
-			bfs_clear_queue();
-			return curr_dir;
-		}
-
-		else
-		{
-			for ( curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++ )
-			{
-				if ( VALID_EDGE( queue_head->room, curr_dir ) )
-				{
-					MARK( TOROOM( queue_head->room, curr_dir ) );
-					bfs_enqueue( TOROOM( queue_head->room, curr_dir ), queue_head->dir );
-				}
-			}
-			bfs_dequeue();
-		}
-	}
-	return BFS_NO_PATH;
+    if (!source || !target)
+        Log("Illegal value %p or %p passed to find_first_step. (%s)",
+            static_cast<void*>(source), static_cast<void*>(target), __FILE__);
+    return searchRooms(source, target, true, PathfindingApi::Hunt).firstStep;
 }
 
 

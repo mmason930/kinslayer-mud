@@ -306,6 +306,7 @@ extern CommandHandler  do_invis ;
 extern CommandHandler  do_ipfind ;
 extern CommandHandler  do_jedit ;
 extern CommandHandler  do_jmap ;
+extern CommandHandler  do_helpedit ;
 extern CommandHandler  do_jstat ;
 extern CommandHandler  do_jattach ;
 extern CommandHandler  do_insert ;

@@ -311,8 +311,12 @@ Raid.Util = (function() {
                 headMob.say("Victory is mine!");
             }
         } else {
-            let firstStepToEndRoom = headMobRoom.firstStep(endRoom);
-            let distanceToEndRoom = headMobRoom.distanceTo(endRoom);
+            // Scripts may reload before the new game binary is restarted.
+            const route = typeof headMobRoom.routeTo === "function"
+                ? headMobRoom.routeTo(endRoom)
+                : {firstStep: headMobRoom.firstStep(endRoom), distance: headMobRoom.distanceTo(endRoom)};
+            let firstStepToEndRoom = route.firstStep;
+            let distanceToEndRoom = route.distance;
             let directionMoved = firstStepToEndRoom;
 
             // Small chance of going the wrong way.

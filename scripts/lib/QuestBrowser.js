@@ -14,7 +14,7 @@ global.questBrowser = {
             Quest.allQuests.forEach(function(quest) {
                 // Do not expose available/unaccepted quests, even if their ID is supplied.
                 if (!quest.hasBegun(actor)) return;
-                var item = {id: quest.id, name: quest.name};
+                var item = {id: quest.id, name: quest.name, issuer: getMobName(quest.giverVnum(actor)) || ""};
                 if (command.ids.indexOf(quest.id) !== -1) {
                     try {
                         item.tasks = [];

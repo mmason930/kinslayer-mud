@@ -9,7 +9,7 @@ let script9 = function(self, actor, here, args, extra) {
 	let id;
 
 	if (searchTerm.length > 0) {
-		let file = global.helpManager.getSearchedFile(searchTerm);
+		let file = global.helpManager.getSearchedFile(searchTerm, actor);
 		if (!file) {
 			actor.send(red + "Your search did not return any results." + nrm);
 			return;

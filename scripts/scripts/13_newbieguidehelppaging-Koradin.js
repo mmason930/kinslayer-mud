@@ -13,7 +13,7 @@ var script13 = function(self, actor, here, args, extra) {
 	{
 		var file = global.helpManager.getCurrentFile(actor);
 		
-		if(file.parentId == null) { // At the Table of Contents, close the book
+		if(!file || file.parentId == null) { // At the Table of Contents, close the book
 			actor.send("You close the newbie guide carefully and put it away.");
 			act("$n closes $s newbie guide carefully and puts it away.",true,actor,null,null,constants.TO_ROOM);
 			actor.detach(13);
@@ -28,7 +28,7 @@ var script13 = function(self, actor, here, args, extra) {
 	
 	var file = global.helpManager.getCurrentFile(actor);
 	var fileId = file == null ? null : file.id;
-	var childrenFiles = global.helpManager.getHelpFilesByParentId(fileId);
+	var childrenFiles = global.helpManager.getVisibleHelpFilesByParentId(fileId, actor);
 	
 	if (isNaN(vArgs[0]) || vArgs[0] < 1 || vArgs[0] > childrenFiles.length)
 	{

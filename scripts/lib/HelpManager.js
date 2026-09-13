@@ -7,6 +7,7 @@ function HelpManager()
 
 HelpManager.prototype.createWebSocketMessageForHelpFile = function(helpFile, response)
 {
+	var parentHelpFile = null;
 	if(helpFile.id != null)
 	{
 		parentHelpFile = global.helpManager.getHelpFileById(helpFile.parentId);
@@ -22,12 +23,41 @@ HelpManager.prototype.createWebSocketMessageForHelpFile = function(helpFile, res
 	response.name = helpFile.name;
 	response.syntax = helpFile.syntax;
 	response.keywords = helpFile.keywords;
+	response.minimumLevel = helpFile.minimumLevel || 0;
 	response.description = helpFile.description;
 	response.children = childrenHelpFilesForMessage;
 	response.created = helpFile.createdDatetime.strftime("%b %d %Y %H:%M:%S");
 	response.lastModified = helpFile.lastModifiedDatetime.strftime("%b %d %Y %H:%M:%S");
 	response.parent = (parentHelpFile == null) ? (null) : ({helpFileId: parentHelpFile.id, name: parentHelpFile.name});
 	response.helpFileId = helpFile.id;
+};
+
+// Restrictions apply to a page and all descendants. Cycles/missing parents fail closed.
+HelpManager.prototype.isValidMinimumLevel = function(level)
+{
+	return typeof level === "number" && isFinite(level) && level % 1 === 0 && level >= 0 && level <= 105;
+};
+
+HelpManager.prototype.canViewHelpFile = function(actor, file)
+{
+	if(!actor || !actor.isValid || !file || typeof actor.level !== "number") return false;
+	var visited = {};
+	while(file)
+	{
+		if(visited[file.id]) return false;
+		visited[file.id] = true;
+		var minimum = file.minimumLevel === undefined ? 0 : file.minimumLevel;
+		if(!this.isValidMinimumLevel(minimum) || !(actor.level >= minimum)) return false;
+		if(file.parentId == null) return true;
+		file = this.getHelpFileById(file.parentId);
+	}
+	return false;
+};
+
+HelpManager.prototype.getVisibleHelpFilesByParentId = function(id, actor)
+{
+	var manager = this;
+	return this.getHelpFilesByParentId(id).filter(function(file) { return manager.canViewHelpFile(actor, file); });
 };
 
 // The web client receives metadata and rendered text, never executable help source.
@@ -44,6 +74,7 @@ HelpManager.prototype.getBrowserResponse = function(json, actor)
 		{
 			if(!Object.prototype.hasOwnProperty.call(this.helpFiles, id)) continue;
 			var file = this.helpFiles[id];
+			if(!this.canViewHelpFile(actor, file)) continue;
 			response.topics.push({id: file.id, parentId: file.parentId == null ? null : Number(file.parentId),
 				name: file.name, keywords: file.keywords || ""});
 		}
@@ -52,8 +83,8 @@ HelpManager.prototype.getBrowserResponse = function(json, actor)
 		command.helpFileId > 0 && command.helpFileId % 1 === 0)
 	{
 		var file = this.getHelpFileById(command.helpFileId);
-		if(!file)
-			response.error = "This help file no longer exists. Refresh the topic list.";
+		if(!this.canViewHelpFile(actor, file))
+			response.error = "This help file is unavailable. Refresh the topic list.";
 		else
 		{
 			response.article = {id: file.id, name: file.name, syntax: file.syntax || "", description: ""};
@@ -75,6 +106,7 @@ HelpManager.prototype.getBrowserResponse = function(json, actor)
 
 HelpManager.prototype.renderBrowserDescription = function(actor, file)
 {
+	if(!this.canViewHelpFile(actor, file)) return "";
 	// Help descriptions are trusted, staff-authored expressions, as in getHelpPage.
 	// Keep these colors local so browser rendering cannot change another script's colors.
 	var nrm = "\x1b[0m", bld = "\x1b[1m", red = "\x1b[31m", grn = "\x1b[32m",
@@ -120,6 +152,7 @@ HelpManager.prototype.loadHelpFilesFromDatabase = function()
 		helpFile.description = row.get("description");
 		helpFile.parentId = row.get("parent_id");
 		helpFile.keywords = row.get("keywords");
+		helpFile.minimumLevel = row.getInteger("minimum_level");
 		helpFile.createdByUserId = row.getInteger("created_by_user_id");
 		helpFile.createdDatetime = row.getTimestamp("created_datetime");
 		helpFile.lastModifiedByUserId = row.getInteger("last_modified_by_user_id");
@@ -135,6 +168,7 @@ HelpManager.prototype.createHelpFile = function(parentId)
 	{
 		id: null,
 		name: "New Help File",
+		minimumLevel: 0,
 		parentId: parentId
 	};
 	
@@ -150,6 +184,8 @@ HelpManager.prototype.createHelpFile = function(parentId)
 
 HelpManager.prototype.saveHelpFileToDatabase = function(helpFile)
 {
+	if(!this.isValidMinimumLevel(helpFile.minimumLevel))
+		throw Error("Minimum level must be a whole number from 0 to 105.");
 	if(helpFile.isNew())
 	{
 		var sql = " INSERT INTO helpFile("
@@ -158,6 +194,7 @@ HelpManager.prototype.saveHelpFileToDatabase = function(helpFile)
 				+ "   `description`,"
 				+ "   `parent_id`,"
 				+ "   `keywords`,"
+				+ "   `minimum_level`,"
 				+ "   `created_by_user_id`,"
 				+ "   `created_datetime`,"
 				+ "   `last_modified_by_user_id`,"
@@ -168,6 +205,7 @@ HelpManager.prototype.saveHelpFileToDatabase = function(helpFile)
 				+ sqlEscapeQuoteString(helpFile.description) + ","
 				+ helpFile.parentId + ","
 				+ sqlEscapeQuoteString(helpFile.keywords) + ","
+				+ helpFile.minimumLevel + ","
 				+ helpFile.createdByUserId + ","
 				+ sqlEncodeQuoteDate(helpFile.createdDatetime) + ","
 				+ helpFile.lastModifiedByUserId + ","
@@ -186,6 +224,7 @@ HelpManager.prototype.saveHelpFileToDatabase = function(helpFile)
 				+ "   description = " + sqlEscapeQuoteString(helpFile.description) + ","
 				+ "   parent_id = " + helpFile.parentId + ","
 				+ "   keywords = " + sqlEscapeQuoteString(helpFile.keywords) + ","
+				+ "   minimum_level = " + helpFile.minimumLevel + ","
 				+ "   created_by_user_id = " + helpFile.createdByUserId + ","
 				+ "   created_datetime = " + sqlEncodeQuoteDate(helpFile.createdDatetime) + ","
 				+ "   last_modified_by_user_id = " + helpFile.lastModifiedByUserId + ","
@@ -205,7 +244,8 @@ HelpManager.prototype.reload = function()
 HelpManager.prototype.getCurrentFile = function(actor)
 {
 	var id = getSval(actor, 9, "help");
-	return this.getHelpFileById(id);
+	var file = this.getHelpFileById(id);
+	return this.canViewHelpFile(actor, file) ? file : null;
 }
 
 HelpManager.prototype.setCurrentFile = function(actor, id)
@@ -215,7 +255,7 @@ HelpManager.prototype.setCurrentFile = function(actor, id)
 
 HelpManager.prototype.getHelpFileById = function(id)
 {
-	return this.helpFiles[ id ];
+	return Object.prototype.hasOwnProperty.call(this.helpFiles, id) ? this.helpFiles[id] : null;
 }
 
 HelpManager.prototype.getHelpFileByName = function(name)
@@ -250,58 +290,43 @@ HelpManager.prototype.getHelpFilesByParentId = function(id)
 
 HelpManager.prototype.getHelpPage = function(actor, file, hideFooter)
 {
-	getCharCols(actor);
-	let parent = null;
-	let pID = null;
-	if (file) {
-		parent = this.getHelpFileById(file.parentId);
-		if (parent)
-			pID = parent.id;
+	if(file && !this.canViewHelpFile(actor, file)) {
+		actor.send("This help file is unavailable.");
+		this.setCurrentFile(actor, null);
+		return;
 	}
-	let singleFile = false;
+	getCharCols(actor);
+	var parent = file ? this.getHelpFileById(file.parentId) : null;
+	var children = this.getVisibleHelpFilesByParentId(file ? file.id : null, actor);
 	actor.send(" ");
 	actor.send("Kinslayer Newbie Guide - " + cyn + (file ? file.name : "Table of Contents") + nrm);
 	actor.send("________________________________________________________________________________");
 	actor.send(" ");
-	if (this.getHelpFilesByParentId(pID).length === 0) { // File has no children, it's the lowest you can go
-		singleFile = true;
-	}
-	if (!file) { // File doesn't exist, return table of contents
-		let helpTopics = this.getHelpFilesByParentId(null);
-		for (let i = 0; i < helpTopics.length; i++) {
-			actor.send("["+cyn+(i+1)+nrm+"] "+helpTopics[i].name);
-		}
-	}
-	else {
-		if (file.syntax) { // File contains a command with syntax
-			actor.send("Command: "+file.syntax);
+	if(file) {
+		if(file.syntax) {
+			actor.send("Command: " + file.syntax);
 			actor.send(" ");
 		}
-		if (file.description) { // File has a description
-			let desc = eval(file.description);
-			actor.send(desc);
+		if(file.description) {
+			actor.send(eval(file.description));
 			actor.send(" ");
 		}
-		if (singleFile === false) { // File has children
-			let children = this.getHelpFilesByParentId(file.id);
-			for (var i = 0; i < children.length; i++) {
-				actor.send("["+cyn+(i+1)+nrm+"] "+children[i].name);
-			}
-		}
 	}
-		
+	for(var i = 0; i < children.length; ++i)
+		actor.send("[" + cyn + (i+1) + nrm + "] " + children[i].name);
 	if(hideFooter == null || hideFooter === false) {
 		actor.send("________________________________________________________________________________");
 		actor.send(" ");
-		actor.send((singleFile === false ? "["+cyn+"#"+nrm+"] Select Topic           " : "") + "["+cyn+"B"+nrm+"] Back"+ (parent ? " to "+parent.name : "")+"        ["+cyn+"C"+nrm+"] Close Guide");
+		actor.send((children.length ? "["+cyn+"#"+nrm+"] Select Topic           " : "") + "["+cyn+"B"+nrm+"] Back"+ (parent ? " to "+parent.name : "")+"        ["+cyn+"C"+nrm+"] Close Guide");
 	}
-}
+};
 
-HelpManager.prototype.getSearchedFile = function(term)
+HelpManager.prototype.getSearchedFile = function(term, actor)
 {
 	term = term.toLowerCase();
 	for (var _autoKey in this.helpFiles) {
-		var helpFile = this.helpFiles[_autoKey];	
+		var helpFile = this.helpFiles[_autoKey];
+		if(!this.canViewHelpFile(actor, helpFile)) continue;
 		if(helpFile.keywords != null && helpFile.keywords.length > 0)
 		{// File has keywords
 			if(helpFile.keywords.toLowerCase().split(/,\s*/).indexOf(term) !== -1)

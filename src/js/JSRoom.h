@@ -58,6 +58,7 @@ FLUSSPFERD_CLASS_DESCRIPTION(
 		("doorIsRammable", bind, doorIsRammable)
 		("distanceTo", bind, distanceTo)
 		("firstStep", bind, firstStep)
+		("routeTo", bind, routeTo)
 		("setDoorFlags", bind, setDoorFlags)
 		("attach", bind, attach)
 		("detach", bind, detach)
@@ -131,6 +132,7 @@ public:
 	int countJS( flusspferd::value tVnum );
 	int distanceTo( JSRoom *d );
 	int firstStep( JSRoom *d);
+	flusspferd::object routeTo(JSRoom *destination);
 	void digTo( int dir, JSRoom *d, bool bothSides, bool temporary );
 	void killExit( int dir, bool bothSides );
 	void enableExit( int dir, bool bothSides );

@@ -2,6 +2,7 @@
 #define ROOM_H
 
 #include <future>
+#include "../utils/Pathfinding.h"
 
 #include "../conf.h"
 #include "../sysdep.h"
@@ -46,6 +47,8 @@ public:
 	char	*description;									// Shown when entered
 	ExtraDescription *ex_description;				// for examine/look
 	Exit *dir_option[NUM_OF_DIRS];				// Room exits
+	// Transient search metadata; never serialized or copied from another room.
+	std::uint64_t pathfindingGeneration = 0;
 	int room_flags;											// DEATH,DARK ... etc
 	SPECIAL(*func);
 	std::vector<class Character*> eavesdropping;			// Characters eavesdropping on this room
@@ -95,6 +98,7 @@ public:
 	int getNumberOfExits();
 	int getDistanceToRoom(Room* OtherRoom);
 	int findFirstStep(Room* OtherRoom);
+	RoomRoute routeToRoom(Room *otherRoom);
 	std::list<int> pathToRoom(Room *OtherRoom);
 
 	void setDoorBit(int dir, int bit);

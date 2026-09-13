@@ -17,7 +17,12 @@ var script9852 = function(self, actor, here, args, extra) {
 			person.loadObj(9850);
 			person.comm("Save");
 		}
-		for ( var i = 0; i < 4 && i <= self.room.distanceTo(destination); i++ ) {
+		for ( var i = 0; i < 4; i++ ) {
+			var route = typeof self.room.routeTo === "function"
+				? self.room.routeTo(destination)
+				: {firstStep: self.room.firstStep(destination), distance: self.room.distanceTo(destination)};
+			if (i > route.distance) break;
+			var direction = route.firstStep;
 			if ( self.room == destination ) {
 				if ( self.room == A ) {
 					setSval(self,9850,"DESTINATION",getSval(self,9850,"POINT_B"));
@@ -32,11 +37,14 @@ var script9852 = function(self, actor, here, args, extra) {
 					setSval(self,9850,"DESTINATION",getSval(self,9850,"POINT_A"));
 				}
 			}
-			if ( self.room.doorExists(self.room.firstStep(destination)) == true ) {
-				self.comm("pick "+self.room.doorName(self.room.firstStep(destination)));
+			var usedDoor = self.room.doorExists(direction) == true;
+			if ( usedDoor ) {
+				self.comm("pick "+self.room.doorName(direction));
 				self.comm("open "+self.room.doorName(self.room.firstStep(destination)));
 			}
-			self.comm(dirToText(self.room.firstStep(destination)));
+			// Commands can move us or change exits; refresh after pick/open.
+			if (usedDoor) direction = self.room.firstStep(destination);
+			self.comm(dirToText(direction));
 			for (var _autoKey in self.room.people) {
 				var person = self.room.people[_autoKey];
 				if ( person.vnum == -1 && person.quest("CHECK_Just Think...") == 0 && person.race == constants.RACE_HUMAN && person.affectedBy(constants.AFF_NOQUIT) == false) {

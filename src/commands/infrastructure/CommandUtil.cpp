@@ -119,6 +119,7 @@ CommandUtil::CommandUtil()
 	addCommand(new CommandInfo("guilds", "gu", POS_RESTING, std::bind(&GuildUtil::guildsCommandHandler, GuildUtil::get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4), 0, 0, 0.0, 0));
 	
 	addCommand(new CommandInfo("hamstring", "ham", POS_FIGHTING, do_hamstring, 1, 0, 4.2f, 0));
+	addCommand(new CommandInfo("helpedit", "helpedit", POS_DEAD, do_helpedit, LVL_IMMORT, 0, 0.0, 0));
 	addCommand(new CommandInfo("hide", "hid", POS_STANDING, do_hide, 0, 0, 0.0, 0));
 	addCommand(new CommandInfo("hit", "h", POS_FIGHTING, do_hit, 0, SCMD_HIT, 0.0, 0));
 	addCommand(new CommandInfo("hold", "ho", POS_RESTING, do_grab, 1, 0, 0.0, 0));

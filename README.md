@@ -46,6 +46,53 @@ docker compose down game
 You will be able to connect to the MUD using telnet or a MUD client by connecting to 127.0.0.1 on port 2222
 
 Alternatively, if you clone the [kinslayer-mud-client](https://github.com/mmason930/kinslayer-mud-client) repository, you can connect to the game by running the client locally on your machine. Each user account's password is set to `iwontsay`.
+## Main-loop timing and database recovery
+
+The game targets seven ticks per second using absolute monotonic deadlines.
+Time spent processing commands, sockets, database work, and heartbeats counts
+toward the next tick instead of being added to a full tick's sleep. Partial
+ticks carry forward. After a long stall, at most two seconds of heartbeats run
+in one batch; older overdue ticks are dropped and logged to bound catch-up work.
+
+The main database connection is checked at most once per second of loop time,
+including when no queries run. A failed check triggers the existing reconnect
+routine, with retries no more often than every 15 seconds during an outage.
+Normal query error handling is unchanged. Idle disconnect detection takes about
+a second plus any main-thread/network delay; ping and reconnect remain synchronous.
+
+Run the deterministic scheduling/recovery tests without starting the game or a
+database: `sh tests/run-game-loop-timing.sh`. Set
+`TIMING_TEST_CXXFLAGS=-fsanitize=address,undefined` to run with sanitizers.
+
+## Pathfinding and performance counters
+
+The four native path searches share a BFS implementation with reusable queue
+storage and per-room generation stamps. Full paths are reconstructed once from
+predecessors. Searches keep their original direction ordering and traversal
+policies: NPC hunting excludes `ROOM_NOTRACK`; the room/JavaScript APIs do not.
+These APIs still traverse closed, hidden, and disabled exits as before. Actual
+movement and the client mini-map apply their own rules. Routes are not cached
+between calls, so changed exits are visible on the next search.
+
+JavaScript can call `room.routeTo(destination)` to obtain both `firstStep` and
+`distance` from one search. Same-room results are `{-2, 0}`, unreachable results
+are `{-3, -1}`, and invalid destinations produce `{-1, -1}` (listed as
+`firstStep, distance`). The existing APIs remain available. Raid movement and
+the Alder quest movement scripts use the combined call, with a fallback for
+older binaries during deployment. Quest routes are refreshed after commands
+that might run movement or exit-editing triggers.
+
+`show lag` (existing level 104+ access) includes cumulative per-API search counts,
+rooms visited, maximum rooms visited, total/average/maximum time, and the source
+and destination vnums of the slowest search. Times are milliseconds. Pathfinding
+time is already included in the enclosing heartbeat/input routine; do not add
+these counters to those totals. Counters reset on process restart.
+
+Run `sh tests/run-pathfinding.sh` and `js153 tests/pathfinding-scripts.js` from the
+game directory. `PATH_TEST_CXXFLAGS=-fsanitize=address,undefined` instruments the
+C++ regressions. Rebuild all game objects when deploying: `Room` now has transient
+search metadata, and the JavaScript room binding has a new method.
+
 ## SpiderMonkey 153 and JIT
 
 The game builds against **SpiderMonkey 153.0.4** (`mozjs-153`). The Docker image
@@ -120,3 +167,43 @@ docker exec -e JS_TEST_CXXFLAGS=-fsanitize=address,undefined \
 
 The installed SpiderMonkey library itself is not sanitizer-instrumented by that
 command. Full engine instrumentation/GC zeal requires a matching debug engine build.
+
+## Help access and client sidebar
+
+Apply `migrations/20260913_180000_01--Help-file-minimum-level.sql` once to the game
+schema **before deploying the updated scripts**:
+
+```sql
+ALTER TABLE `helpFile`
+  ADD COLUMN `minimum_level` TINYINT UNSIGNED NOT NULL DEFAULT 0;
+```
+
+Existing files remain public. The migration runner in `DatabaseMigrationUtil` is
+not implemented, so this migration must be applied manually. Deploy the game
+scripts, rebuild the game and restart it to load the levels and register the new
+`helpedit` command. Deploy `kinslayer-web` for the portal editor field and
+`kinslayer-mud-client` for the sidebar changes; refresh any open browser tabs.
+No change to the separate website's `websiteHelpFile` table is needed.
+
+Help files accept a minimum level from **0–105**; 0 means everyone, 100 means
+immortals. A page also inherits all ancestor restrictions. The highest minimum
+in the ancestry applies, with no holylight bypass. Missing parents and cycles
+are inaccessible until corrected. Player help search, numbered guide navigation,
+browser topic metadata and direct article requests all use the same game-side
+access check. Restricted descriptions are not evaluated. Existing staff editors
+can still edit all files: the web portal socket now checks level 100 itself,
+and the new level-100 `helpedit` command opens the existing in-game editor. Choose
+**L** in its file menu to set the minimum. New child files now receive creator
+metadata so they can be saved successfully.
+
+`Browse Quests` includes `issuer`, taken from `getMobName(quest.giverVnum(actor))`
+just like the journal. An absent or deleted issuer produces an empty string.
+The client displays this in the active list, pins and details, and remembers a
+resizable desktop sidebar width in browser storage. Help caches are cleared on
+disconnect or character change.
+
+Validation: `js153 tests/help-browser.js`, `js153 tests/help-access.js`, and
+`js153 tests/quest-browser.js`. The companion repositories contain Playwright
+checks for sidebar resizing/issuers, help navigation/access changes and the web
+help editor. The SQL migration can be tested against a temporary copy of the
+help table without touching persistent data.

@@ -194,6 +194,17 @@ int JSRoom::firstStep( JSRoom *d )
 		return real->findFirstStep( d->toReal() );
 	return -1;
 }
+flusspferd::object JSRoom::routeTo(JSRoom *destination)
+{
+	RoomRoute route{BFS_ERROR, -1};
+	if (real && destination && destination->toReal())
+		route = real->routeToRoom(destination->toReal());
+	flusspferd::object result = flusspferd::create_object();
+	result.set_property("firstStep", route.firstStep);
+	result.set_property("distance", route.distance);
+	return result;
+}
+
 void JSRoom::echoaround(JSCharacter& ch, std::string message)
 {
 	if( real ) {
