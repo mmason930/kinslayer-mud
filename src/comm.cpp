@@ -2111,6 +2111,18 @@ void Character::LogOutput( const std::string &buffer )
 	fclose( outfile );
 }
 
+void SendChat(Character *to, const char *channel, const char *format, ...)
+{
+    if(!to || !to->desc) return;
+    char message[LARGE_BUFSIZE];
+    va_list args;
+    va_start(args, format);
+    vsnprintf(message, sizeof(message), format, args);
+    va_end(args);
+    to->desc->sendRaw(message);
+    to->desc->sendWebSocketChat(channel, message);
+}
+
 void Character::send( const char *messg, va_list args )
 {
 	if ( this->desc && messg && *messg )
@@ -2284,7 +2296,7 @@ const char *ACTNULL = "<NULL>";
  if ((pointer) == nullptr) i = ACTNULL; else i = (expression);
 
 /* higher-level communication: the Act() function */
-void PerformAct( const char *orig, Character *ch, Object *obj, const void *vict_obj, Character *to, const int type, const char *bgColor, bool disorientable )
+void PerformAct( const char *orig, Character *ch, Object *obj, const void *vict_obj, Character *to, const int type, const char *bgColor, bool disorientable, const char *chatChannel )
 {
 	const char * i = nullptr;
 	char lbuf[ MAX_STRING_LENGTH ], *buf;
@@ -2393,6 +2405,7 @@ void PerformAct( const char *orig, Character *ch, Object *obj, const void *vict_
 	if ( to->desc )
 	{
 		to->desc->sendRaw(StringUtil::cap(lbuf));
+		if(chatChannel) to->desc->sendWebSocketChat(chatChannel, StringUtil::cap(lbuf));
 
 		if(disorientable && to->disorientRoll())
 			to->desc->sendRaw(StringUtil::cap(lbuf));
@@ -2406,7 +2419,7 @@ void PerformAct( const char *orig, Character *ch, Object *obj, const void *vict_
 		!PLR_FLAGGED((ch), PLR_WRITING))
 	#endif
 
-void Act( const char *str, int hide_invisible, Character *ch, Object *obj, const void *vict_obj, int type, const char *bgColor, bool disorientable )
+void Act( const char *str, int hide_invisible, Character *ch, Object *obj, const void *vict_obj, int type, const char *bgColor, bool disorientable, const char *chatChannel )
 {
 
 	Character * to = nullptr;
@@ -2433,14 +2446,14 @@ void Act( const char *str, int hide_invisible, Character *ch, Object *obj, const
 	if ( type == TO_CHAR )
 	{
 		if ( ch && ( SENDOK( ch ) || IS_NPC( ch ) ) )
-			PerformAct( str, ch, obj, vict_obj, ch, type, bgColor, disorientable );
+			PerformAct( str, ch, obj, vict_obj, ch, type, bgColor, disorientable, chatChannel );
 		return ;
 	}
 
 	if ( type == TO_VICT )
 	{
 		if ( ( to = ( Character * ) vict_obj ) && SENDOK( to ) )
-			PerformAct( str, ch, obj, vict_obj, to, type, bgColor, disorientable );
+			PerformAct( str, ch, obj, vict_obj, to, type, bgColor, disorientable, chatChannel );
 		return ;
 	}
 
@@ -2466,7 +2479,7 @@ void Act( const char *str, int hide_invisible, Character *ch, Object *obj, const
 			continue;
 		if ( type != TO_ROOM && to == vict_obj )
 			continue;
-		PerformAct( str, ch, obj, vict_obj, to, type, bgColor, disorientable );
+		PerformAct( str, ch, obj, vict_obj, to, type, bgColor, disorientable, chatChannel );
 	}
 }
 

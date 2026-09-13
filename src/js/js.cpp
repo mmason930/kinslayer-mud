@@ -33,6 +33,7 @@
 using namespace std;
 using namespace tr1;
 
+extern JSEnvironment *env;
 extern Descriptor *descriptor_list;
 extern sql::Connection gameDatabase;
 
@@ -696,7 +697,7 @@ void JSManager::processScriptImports()
         loader.wait();
     	std::string priorityScriptPath = "scripts/lib/util/LoDash-2.4.1.js";
     	auto priorityScriptContent = loader.take(priorityScriptPath);
-    	if (priorityScriptContent->ok())
+		if (priorityScriptContent && priorityScriptContent->ok())
     	{
     		this->loadScriptsFromContent(priorityScriptPath, priorityScriptContent->content);
     	}
@@ -708,6 +709,7 @@ void JSManager::processScriptImports()
 
         	if (fullPath == priorityScriptPath)
         	{
+			delete scriptImport;
         		continue;
         	}
 
@@ -930,7 +932,14 @@ JSManager::~JSManager()
 	if (this->server)
 		delete server;
 
+	// Destroy suspended instances and callback roots while their context lives.
+	scripts.clear();
+	for (ScriptEvent *event : scriptEvents) delete event;
+	scriptEvents.clear();
+	clearJSValueCache();
 	delete env;
+	env = nullptr;
+	::env = nullptr;
 }
 
 Script *JSManager::getScript(int scriptId)
@@ -975,9 +984,7 @@ void JSManager::runTimeouts()
 		try
 		{
 			setupTimeout();
-			// Retrieve the event object from the global (rooted) rather than using
-			// scriptEvent->arguments which is an unrooted flusspferd::object that
-			// may have been GC'd between ScriptEvent creation and now.
+			// The owning local wrapper protects the event across callback execution.
 			flusspferd::object eventObj = flusspferd::global().get_property(scriptEvent->propertyName).get_object();
 			flusspferd::value args = eventObj.get_property("arguments");
 			eventObj.call("callback", args);
@@ -987,6 +994,8 @@ void JSManager::runTimeouts()
 		{
 			MudLog(NRM, LVL_BUILDER, TRUE, "Error in the runTimeouts() callback: %s", e.what());
 		}
+
+		removeTimeout();
 
 		//Failure above should not prevent the next operation from occurring. Therefore we throw it into its own try/catch block.
 		try

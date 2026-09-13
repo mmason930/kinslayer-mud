@@ -1,6 +1,6 @@
 /**
  * JSRoom_bindings.cpp - Method and property bindings for JSRoom
- * Updated for SpiderMonkey 131 API.
+ * Updated for SpiderMonkey 153 API.
  */
 
 #include "../conf.h"
@@ -14,24 +14,23 @@ namespace {
 inline JS::Value to_jsval(JSContext *cx, int v) { return JS::Int32Value(v); }
 inline JS::Value to_jsval(JSContext *cx, bool v) { return JS::BooleanValue(v); }
 inline JS::Value to_jsval(JSContext *cx, double v) { return JS::DoubleValue(v); }
-inline JS::Value to_jsval(JSContext *cx, const flusspferd::string &v) { return v.val; }
-inline JS::Value to_jsval(JSContext *cx, const flusspferd::value &v) { return v.val; }
-inline JS::Value to_jsval(JSContext *cx, const flusspferd::object &v) { return v.val; }
-inline JS::Value to_jsval(JSContext *cx, const flusspferd::array &v) { return v.val; }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::string &v) { return v.get_js_value(); }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::value &v) { return v.get_js_value(); }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::object &v) { return v.get_js_value(); }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::array &v) { return v.get_js_value(); }
 
 inline int from_jsval_int(JSContext *cx, JS::HandleValue v) {
-    if (v.isInt32()) return v.toInt32();
-    double d; JS::ToNumber(cx, v, &d); return static_cast<int>(d);
+    return flusspferd::detail::from_jsval<int>::convert(cx, v);
 }
 inline bool from_jsval_bool(JSContext *cx, JS::HandleValue v) {
     return JS::ToBoolean(v);
 }
 inline std::string from_jsval_string(JSContext *cx, JS::HandleValue v) {
     JSString *str = JS::ToString(cx, v);
-    if (!str) return "";
+    if (!str) flusspferd::throw_js_failure("ToString");
     JS::RootedString rstr(cx, str);
     JS::UniqueChars cstr = JS_EncodeStringToUTF8(cx, rstr);
-    if (!cstr) return "";
+    if (!cstr) flusspferd::throw_js_failure("encode string");
     return std::string(cstr.get());
 }
 inline flusspferd::string from_jsval_fstring(JSContext *cx, JS::HandleValue v) {
@@ -45,7 +44,8 @@ inline JSRoom* get_js_room(JSContext *cx, JS::HandleValue v) {
     if (!v.isObject()) return nullptr;
     ::JSObject *obj = &v.toObject();
     const JSClass *cls = JS::GetClass(obj);
-    if (!cls || strcmp(cls->name, "JSRoom") != 0) return nullptr;
+    if (cls != &flusspferd::ClassTraits<JSRoom >::jsclass)
+        throw flusspferd::exception("Expected JSRoom");
     return static_cast<JSRoom*>(flusspferd::sm_get_private(obj));
 }
 
@@ -53,7 +53,8 @@ inline JSCharacter* get_js_character(JSContext *cx, JS::HandleValue v) {
     if (!v.isObject()) return nullptr;
     ::JSObject *obj = &v.toObject();
     const JSClass *cls = JS::GetClass(obj);
-    if (!cls || strcmp(cls->name, "JSCharacter") != 0) return nullptr;
+    if (cls != &flusspferd::ClassTraits<JSCharacter >::jsclass)
+        throw flusspferd::exception("Expected JSCharacter");
     return static_cast<JSCharacter*>(flusspferd::sm_get_private(obj));
 }
 

@@ -19,9 +19,9 @@ add_compile_options(
 
 add_compile_definitions(BOOST_PARAMETER_MAX_ARITY=10)
 
-# SpiderMonkey 131
+# SpiderMonkey 153
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(MOZJS REQUIRED mozjs-131)
+pkg_check_modules(MOZJS REQUIRED mozjs-153)
 
 # Boost
 find_package(Boost REQUIRED COMPONENTS regex thread filesystem)

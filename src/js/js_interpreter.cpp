@@ -48,7 +48,7 @@ JSInstance::JSInstance()
 
 JSInstance::~JSInstance()
 {
-    env->cleanup(this);
+    if (env) env->cleanup(this);
 }
 
 void printJSObject( flusspferd::object obj )
@@ -104,19 +104,9 @@ JSBool kill_script(JSContext * cx)
 
 JSBool kjsOperationalCallback(JSContext * cx)
 {
-	scriptRuntimeClock.turnOff();
-	unsigned long long secondsElapsed = scriptRuntimeClock.getClocks() / 1000000;
-	scriptRuntimeClock.turnOn();
-
-	if(secondsElapsed >= TIMEOUT_SECONDS)
-	{
-        JS_ReportErrorUTF8(cx, "This trigger has run too long.");
-        return false;
-	}
-	else
-	{
-		return JS_TRUE;
-	}
+    // Returning false without a pending exception terminates execution even
+    // when script code surrounds an infinite loop with try/catch.
+    return !flusspferd::execution_timed_out();
 }
 
 bool keepTriggerOperationalCallbackFunctionAlive = true;
@@ -412,6 +402,7 @@ int JSEnvironment::process_yield(std::shared_ptr<JSInstance> instance, value yie
 		if (is_native<JSCharacter>(o))
 		{
 			Character * ch = get_native<JSCharacter>(o).toReal();
+			if (!ch || ch->IsPurged()) return 0;
 			ch->delayed_script = instance;
 			value time = get_native<JSCharacter>(o).get_property("__timer");
 			ch->SetupTimer("delayed_javascript", time.to_number());
@@ -476,11 +467,11 @@ int JSEnvironment::execute_timer(std::shared_ptr<JSInstance> instance, bool succ
 				// Generator is done - equivalent of old StopIteration
 				try {
 					if( is_native<JSCharacter>(instance->self.to_object()) )
-						get_native<JSCharacter>(instance->self.to_object()).toReal()->delayed_script.reset();
+						{ auto *real = get_native<JSCharacter>(instance->self.to_object()).toReal(); if (real) real->delayed_script.reset(); }
 					else if( is_native<JSObject>(instance->self.to_object()) )
-						get_native<JSObject>(instance->self.to_object()).toReal()->delayed_script.reset();
+						{ auto *real = get_native<JSObject>(instance->self.to_object()).toReal(); if (real) real->delayed_script.reset(); }
 					else if( is_native<JSRoom>(instance->self.to_object()) )
-						get_native<JSRoom>(instance->self.to_object()).toReal()->delayed_script.reset();
+						{ auto *real = get_native<JSRoom>(instance->self.to_object()).toReal(); if (real) real->delayed_script.reset(); }
 				} catch( flusspferd::exception &e ) {
 					return 1;
 				}
@@ -498,11 +489,11 @@ int JSEnvironment::execute_timer(std::shared_ptr<JSInstance> instance, bool succ
         {
 			try {
 				if( is_native<JSCharacter>(instance->self.to_object()) )
-		        	get_native<JSCharacter>(instance->self.to_object()).toReal()->delayed_script.reset();
+				{ auto *real = get_native<JSCharacter>(instance->self.to_object()).toReal(); if (real) real->delayed_script.reset(); }
 				else if( is_native<JSObject>(instance->self.to_object()) )
-		        	get_native<JSObject>(instance->self.to_object()).toReal()->delayed_script.reset();
+				{ auto *real = get_native<JSObject>(instance->self.to_object()).toReal(); if (real) real->delayed_script.reset(); }
 				else if( is_native<JSRoom>(instance->self.to_object()) )
-		        	get_native<JSRoom>(instance->self.to_object()).toReal()->delayed_script.reset();
+				{ auto *real = get_native<JSRoom>(instance->self.to_object()).toReal(); if (real) real->delayed_script.reset(); }
 			} catch( flusspferd::exception &e ) {
 				return 1;
 			}
@@ -574,11 +565,11 @@ int JSEnvironment::execute(std::shared_ptr<JSInstance> instance)
 				if( !instance->self.is_undefined() && !instance->self.is_null() ) {
 					try {
 						if( is_native<JSCharacter>(instance->self.to_object()) )
-							get_native<JSCharacter>(instance->self.to_object()).toReal()->delayed_script.reset();
+							{ auto *real = get_native<JSCharacter>(instance->self.to_object()).toReal(); if (real) real->delayed_script.reset(); }
 						else if( is_native<JSObject>(instance->self.to_object()) )
-							get_native<JSObject>(instance->self.to_object()).toReal()->delayed_script.reset();
+							{ auto *real = get_native<JSObject>(instance->self.to_object()).toReal(); if (real) real->delayed_script.reset(); }
 						else if( is_native<JSRoom>(instance->self.to_object()) )
-							get_native<JSRoom>(instance->self.to_object()).toReal()->delayed_script.reset();
+							{ auto *real = get_native<JSRoom>(instance->self.to_object()).toReal(); if (real) real->delayed_script.reset(); }
 					} catch( ... ) {}
 				}
 				removeTimeout();
@@ -595,11 +586,11 @@ int JSEnvironment::execute(std::shared_ptr<JSInstance> instance)
 			if( !instance->self.is_undefined() && !instance->self.is_null() ) {
 			try {
 				if( is_native<JSCharacter>(instance->self.to_object()) )
-		        	get_native<JSCharacter>(instance->self.to_object()).toReal()->delayed_script.reset();
+				{ auto *real = get_native<JSCharacter>(instance->self.to_object()).toReal(); if (real) real->delayed_script.reset(); }
 				else if( is_native<JSObject>(instance->self.to_object()) )
-		        	get_native<JSObject>(instance->self.to_object()).toReal()->delayed_script.reset();
+				{ auto *real = get_native<JSObject>(instance->self.to_object()).toReal(); if (real) real->delayed_script.reset(); }
 				else if( is_native<JSRoom>(instance->self.to_object()) )
-		        	get_native<JSRoom>(instance->self.to_object()).toReal()->delayed_script.reset();
+				{ auto *real = get_native<JSRoom>(instance->self.to_object()).toReal(); if (real) real->delayed_script.reset(); }
 			}
 			catch( ... ) {}
 			}
@@ -633,7 +624,7 @@ void macro( std::string &source, const std::string find, std::string replace )
 
 // Convert legacy-style generator functions to ES6 function* syntax.
 // In old SpiderMonkey (1.8.x), any function containing 'yield' was automatically a generator.
-// In ES6 (SpiderMonkey 131), generators must be declared with function*.
+// In ES6 (SpiderMonkey 153), generators must be declared with function*.
 // This function finds each 'function' keyword, determines its body, and checks if
 // yield appears at the top level of that function (not inside nested functions).
 static void convertLegacyGenerators(std::string &source)
@@ -832,7 +823,7 @@ bool JSEnvironment::compile(const std::string &fileName, const std::string &scri
 	macro(formattedScriptBuffer, "_block", "yield '__SPECIAL__BLOCK'");
 	macro(formattedScriptBuffer, "_noblock", "yield '__SPECIAL__NOBLOCK'");
 
-	// Convert top-level 'let' to 'var' - in SM 131, top-level 'let' doesn't create
+	// Convert top-level 'let' to 'var' - in modern JS, top-level 'let' doesn't create
 	// global properties, but old scripts rely on 'let scriptXXX = function(...)' being
 	// accessible as global().has_property("scriptXXX")
 	{

@@ -38,6 +38,7 @@ namespace flusspferd
 flusspferd::value lookupValue(JSBindable * b);
 std::string lookupName(JSBindable * b);
 void deleteValue( JSBindable * addr );
+void clearJSValueCache();
 
 
 /******

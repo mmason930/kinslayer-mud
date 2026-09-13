@@ -8,13 +8,13 @@ ARG BOOST_VERSION_DOT="1.90.0"
 # Install pre-requisites
 RUN apt update
 RUN apt install libmysqlclient-dev cmake g++ gcc gdb gdbserver wget git-all dos2unix cron nano \
-    autoconf2.13 python3 python3-pip llvm clang pkg-config curl openssh-server rsync valgrind -y
+    autoconf2.13 python3 python3-pip llvm-19 clang-19 lld-19 pkg-config curl patch openssh-server rsync valgrind -y
 
 # Install Rust via rustup (need newer version than Ubuntu packages provide)
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 RUN rustup update stable
-RUN cargo install cbindgen
+RUN cargo install --locked cbindgen --version 0.29.4
 
 # sqlDatabase
 RUN git clone https://github.com/kinslayermud/kinslayer-sqlDatabase /kinslayer-sqlDatabase
@@ -22,17 +22,11 @@ WORKDIR /kinslayer-sqlDatabase/mysql/
 RUN chmod ug+x ./install.sh
 RUN ./install.sh
 
-# SpiderMonkey 131 (from Firefox ESR)
-WORKDIR /
-RUN wget https://archive.mozilla.org/pub/firefox/releases/131.0/source/firefox-131.0.source.tar.xz
-RUN tar -xf firefox-131.0.source.tar.xz
-WORKDIR /firefox-131.0/js/src
-RUN mkdir _build
-WORKDIR /firefox-131.0/js/src/_build
-RUN ../configure --disable-jemalloc --disable-debug --enable-optimize --without-intl-api
-RUN make -j${GCC_THREADS}
-RUN make install
-RUN ldconfig
+# SpiderMonkey 153.0.4, built from the pinned Mozilla source release.
+COPY build-spidermonkey.sh /tmp/build-spidermonkey.sh
+COPY patches/mozjs-153-*.patch /tmp/patches/
+RUN GCC_THREADS=${GCC_THREADS:-4} bash /tmp/build-spidermonkey.sh \
+    && rm -rf /tmp/kinslayer-mozjs-153 /tmp/build-spidermonkey.sh /tmp/patches
 
 # Boost
 WORKDIR /
@@ -50,7 +44,7 @@ RUN rm -rf /kinslayer-cpp-httplib
 WORKDIR /
 RUN ulimit -S -c unlimited
 RUN ldconfig
-RUN rm -rf /boost_${BOOST_VERSION} /boost_${BOOST_VERSION}.tar.gz /firefox-131.0 /firefox-131.0.source.tar.xz /kinslayer-sqlDatabase
+RUN rm -rf /boost_${BOOST_VERSION} /boost_${BOOST_VERSION}.tar.gz /kinslayer-sqlDatabase
 
 COPY crontab /etc/cron.d/
 

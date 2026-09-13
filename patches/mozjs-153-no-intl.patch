@@ -1,0 +1,18 @@
+--- a/js/src/irregexp/moz.build
++++ b/js/src/irregexp/moz.build
+@@ -40,6 +40,7 @@
+     "RegExpAPI.cpp",
+     "RegExpShim.cpp",
+     "util/UnicodeShim.cpp",
++    "util/ZoneShimFFI.cpp",
+ ]
+ SOURCES += [
+     "imported/regexp-ast-printer.cc",
+@@ -57,7 +58,6 @@
+     UNIFIED_SOURCES += [
+         "imported/property-sequences.cc",
+         "imported/special-case.cc",
+-        "util/ZoneShimFFI.cpp",
+     ]
+ 
+ if CONFIG["JS_JITSPEW"]:

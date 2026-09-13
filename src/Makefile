@@ -4,9 +4,10 @@
 # C/C++ compiler to use
 CC = g++
 
-# SpiderMonkey 131 flags (use pkg-config if available)
-MOZJS_CFLAGS = $(shell pkg-config --cflags mozjs-131 2>/dev/null || echo "-I/usr/local/include/mozjs-131")
-MOZJS_LIBS = $(shell pkg-config --libs mozjs-131 2>/dev/null || echo "-lmozjs-131")
+# Require the current SpiderMonkey development package; do not fall back to 131.
+MOZJS_PACKAGE = mozjs-153
+MOZJS_CFLAGS = $(shell pkg-config --cflags $(MOZJS_PACKAGE))
+MOZJS_LIBS = $(shell pkg-config --libs $(MOZJS_PACKAGE))
 
 # Any special flags you want to pass to the compiler
 MYFLAGS = \
@@ -195,20 +196,20 @@ OBJFILESGATEWAY = DateTime.o gateway/GatewayDescriptor.o gateway/GatewayDescript
 OBJFILESGATEWAY := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILESGATEWAY))
 
 
-$(OBJDIR)/%.d: %.cpp
-	$(SHELL) -ec '$(CC) -MM $(CPPFLAGS) $< | \
-	sed '\''s,\($*\)\.o[ :]*,$(OBJDIR)\/\1.o $@ : ,g'\'' > $@'
-
 .PHONY: default all kinslayer gateway clean full
 
 default: kinslayer
 
--include $(OBJFILES:.o)
--include $(OBJFILESGATEWAY:.o)
+-include $(OBJFILES:.o=.d)
+-include $(OBJFILESGATEWAY:.o=.d)
+
+# Also rebuild pre-existing objects from before dependency-file generation was
+# enabled: changing wrapper layout must never link against the previous ABI.
+$(OBJFILES): js/flusspferd.hpp js/flusspferd_class_macros.hpp
 
 $(OBJDIR)/%.o: %.cpp
 	@mkdir -p $(@D)
-	$(CC) $(CPPFLAGS) -c	$<	-o $@
+	$(CC) $(CPPFLAGS) -MMD -MP -c	$<	-o $@
 
 all:
 	@mkdir -p ../bin

@@ -1582,9 +1582,13 @@ flusspferd::object JS_llmResponse(flusspferd::value requestValue)
 				flusspferd::object resultObject = flusspferd::create_object();
 				resultObject.set_property("response", result.responses);
 
-				globalObjectPostCompletion.call(globalObjectKey, resultObject);
-
+				flusspferd::object callback = globalObjectPostCompletion.get_property(globalObjectKey).to_object();
 				globalObjectPostCompletion.delete_property(globalObjectKey);
+				try {
+					callback.call_function(globalObjectPostCompletion, resultObject);
+				} catch (const flusspferd::exception &e) {
+					MudLog(NRM, LVL_BUILDER, TRUE, "Error in response callback: %s", e.what());
+				}
 			});
 
 	return responseObject;
@@ -1597,8 +1601,7 @@ void JS_setTimeout(unsigned int pulses, flusspferd::value callback, flusspferd::
 	if(!arguments.is_array())
 		arguments = flusspferd::object();
 	
-	ScriptEvent *scriptEvent = new ScriptEvent(pulses, callback, arguments, JSManager::get()->getNextScriptEventId());
-	JSManager::get()->addScriptEvent(scriptEvent);
+	auto scriptEvent = std::make_unique<ScriptEvent>(pulses ? pulses : 1, callback, arguments, JSManager::get()->getNextScriptEventId());
 
 	//We must root the callback and its arguments.
 
@@ -1608,6 +1611,8 @@ void JS_setTimeout(unsigned int pulses, flusspferd::value callback, flusspferd::
 	scriptEventObject.set_property("arguments", arguments);
 
 	flusspferd::global().set_property(scriptEvent->propertyName, scriptEventObject);
+	JSManager::get()->addScriptEvent(scriptEvent.get());
+	scriptEvent.release();
 }
 
 flusspferd::object JS_createDatetime(const DateTime &dateTime)

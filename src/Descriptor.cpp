@@ -13,6 +13,8 @@
 #include "stats.h"
 #include "Descriptor.h"
 #include "rooms/Room.h"
+#include "rooms/Exit.h"
+#include "rooms/RoomSector.h"
 #include "rooms/RoomSector.h"
 #include "UserMacro.h"
 #include "UserEmailAddress.h"
@@ -20,6 +22,8 @@
 #include "CharacterUtil.h"
 #include "Game.h"
 #include "MobLoadLogger.h"
+#include "js/js.h"
+#include "js/js_utils.h"
 
 extern kuDescriptor *gatewayConnection;
 extern Descriptor *descriptor_list;
@@ -33,8 +37,6 @@ extern char *imotd;
 extern char *motd;
 extern Character *character_list;
 extern int boot_high;
-void UpdateBootHigh( const int new_high, bool first=false );
-void js_enter_game_trigger(Character *self, Character *actor);
 
 //The MUD emits telnet control sequences (IAC and friends) and treats anything above plain ASCII as
 //garbage. `char` is signed on x86 but unsigned on ARM, so these test the high bit rather than the sign.
@@ -397,10 +399,59 @@ void Descriptor::sendWebSocketCommands(const int pulse)
 				continue;
 
 			descriptor->sendWebSocketPlayersOnlineCommand(playersOnline);
+			descriptor->sendWebSocketMiniMapCommand();
 		}
 	}
 }
 
+
+// Chat is copied only at the existing recipient's delivery point, after all
+// game visibility, language, ignore and channel checks have been applied.
+void Descriptor::sendWebSocketChat(const char *channel, const std::string &message)
+{
+    if(getGatewayDescriptorType() != GatewayDescriptorType::websocket || !loggedIn ||
+        connected != CON_PLAYING || !character || character->IsPurged()) return;
+    Json::Value response;
+    response["method"] = "Chat";
+    response["channel"] = channel;
+    response["text"] = stripHighBytes(message);
+    response["timestamp"] = static_cast<double>(time(nullptr)) * 1000;
+    Json::FastWriter writer;
+    sendWebSocketCommand(writer.write(response));
+}
+
+void Descriptor::processWebSocketQuestCommand(const Json::Value &command)
+{
+    Json::Value response;
+    response["method"] = "Browse Quests";
+    if(command["requestId"].isInt()) response["requestId"] = command["requestId"];
+    if(!loggedIn || connected != CON_PLAYING || !character || character->IsPurged() || original)
+        response["error"] = "Sign in as your character to view quests.";
+    else
+    {
+        time_t now = time(nullptr);
+        if(questRequestSecond != now) { questRequestSecond = now; questRequestCount = 0; }
+        if(++questRequestCount > 8)
+            response["error"] = "Please wait a moment before refreshing quests.";
+        else
+        {
+            try
+            {
+                Json::FastWriter writer;
+                auto manager = JSManager::get()->executeExpression("global.questBrowser").to_object();
+                auto result = manager.call("getBrowserResponse", writer.write(command), lookupValue(character));
+                if(result.is_string()) { sendWebSocketCommand(result.to_std_string()); return; }
+            }
+            catch(const std::exception &e)
+            {
+                MudLog(BRF, LVL_APPR, TRUE, "Quest browser failed: %s", e.what());
+            }
+            response["error"] = "Quests are temporarily unavailable. Please try Refresh.";
+        }
+    }
+    Json::FastWriter writer;
+    sendWebSocketCommand(writer.write(response));
+}
 
 void Descriptor::sendWebSocketDisplaySignInLightboxMessage()
 {
@@ -419,6 +470,7 @@ void Descriptor::sendWebSocketUsernameCommand(const std::string &username, const
 
 	commandObject["method"] = "Username";
 	commandObject["username"] = username;
+	commandObject["macros"] = Json::Value(Json::arrayValue);
 	commandObject["macros"] = Json::Value();
 
 	for(auto userMacroIter = userMacros.begin();userMacroIter != userMacros.end();++userMacroIter)
@@ -463,6 +515,88 @@ void Descriptor::sendWebSocketPlayersOnlineCommand(const int playersOnline)
 	}
 
 	sendWebSocketCommand(writer.write(commandObject));
+}
+
+// A small, bounded snapshot of the live world, using the same hidden-exit rule
+// as EXITS. Do not cache world pointers: doors, light and exits can change live.
+void Descriptor::sendWebSocketMiniMapCommand()
+{
+	Json::Value map;
+	map["method"] = "Mini Map";
+	map["rooms"] = Json::Value(Json::arrayValue);
+	map["exits"] = Json::Value(Json::arrayValue);
+	map["currentRoomId"] = Json::Value::null;
+	if(!loggedIn || connected != CON_PLAYING || !character || character->IsPurged() || !character->in_room)
+		map["message"] = "Enter the game to see nearby rooms.";
+	else if(!AWAKE(character))
+		map["message"] = "You cannot see your surroundings while asleep.";
+	else if(AFF_FLAGGED(character, AFF_BLIND) || (character->dizzy_time && TAINT_CALC(character)))
+		map["message"] = "You cannot make out your surroundings.";
+	else if(character->in_room->isDark() && !CAN_SEE_IN_DARK(character))
+		map["message"] = "It is too dark to see.";
+	else
+	{
+		constexpr int radius = 2, maxRooms = 25;
+		map["currentRoomId"] = character->in_room->getVnum();
+		map["radius"] = radius;
+		std::set<Room *> included, queued;
+		std::vector<std::pair<Room *, int>> frontier;
+		auto canSeeRoom = [&](Room *room) { return !room->isDark() || CAN_SEE_IN_DARK(character); };
+		auto addRoom = [&](Room *room)
+		{
+			Json::Value entry;
+			entry["id"] = room->getVnum();
+			entry["name"] = canSeeRoom(room) ? room->getName() : "Dark room";
+			entry["terrain"] = canSeeRoom(room) ? room->getSector()->getStandardName() : "Unknown";
+			map["rooms"].append(entry);
+			included.insert(room);
+		};
+		addRoom(character->in_room);
+		queued.insert(character->in_room);
+		frontier.push_back({character->in_room, 0});
+		for(size_t i = 0; i < frontier.size(); ++i)
+		{
+			Room *room = frontier[i].first;
+			int distance = frontier[i].second;
+			for(int direction = 0; direction < NUM_OF_DIRS; ++direction)
+			{
+				Exit *exit = room->dir_option[direction];
+				if(!exit || exit->isDisabled() || !exit->getToRoom() ||
+					(exit->getHiddenLevel() && exit->isClosed()))
+					continue;
+				Room *nextRoom = exit->getToRoom();
+				if(!included.count(nextRoom))
+				{
+					if(distance >= radius || included.size() >= maxRooms) continue;
+					addRoom(nextRoom);
+				}
+				Json::Value link;
+				link["from"] = room->getVnum();
+				link["to"] = nextRoom->getVnum();
+				link["direction"] = direction;
+				link["closed"] = exit->isClosed();
+				const int opposite[] = {SOUTH, WEST, NORTH, EAST, DOWN, UP};
+				Exit *reverse = nextRoom->dir_option[opposite[direction]];
+				link["oneWay"] = !reverse || reverse->getToRoom() != room || reverse->isDisabled() ||
+					(reverse->getHiddenLevel() && reverse->isClosed());
+				map["exits"].append(link);
+				// Include the far side of an obvious door, but do not explore beyond
+				// closed doors or dark rooms. An alternate open route can still reach it.
+				if(distance < radius && !exit->isClosed() && canSeeRoom(nextRoom) && !queued.count(nextRoom))
+				{
+					queued.insert(nextRoom);
+					frontier.push_back({nextRoom, distance + 1});
+				}
+			}
+		}
+	}
+	Json::FastWriter writer;
+	std::string snapshot = writer.write(map);
+	if(snapshot != lastMiniMap)
+	{
+		lastMiniMap = snapshot;
+		sendWebSocketCommand(snapshot);
+	}
 }
 
 std::string Descriptor::encodeWebSocketOutputCommand(const char *output)
@@ -914,6 +1048,8 @@ void Descriptor::processWebSocketUserCreationCommand(Json::Value &commandObject)
 	StatManager::GetManager().RollStats(this->character);
 	this->newbieMenuFinish();
 	this->completeEnterGame();
+	// New characters need the same identity event as returning players.
+	this->sendWebSocketUsernameCommand(GET_NAME(this->character), std::list<UserMacro *>());
 
 	Json::FastWriter writer;
 	this->sendWebSocketCommand(writer.write(response));
@@ -944,6 +1080,40 @@ void Descriptor::processWebSocketCommands()
 			if(method == "Input")
 			{
 				this->commandQueue.push_back(commandObject["data"].asString());
+			}
+			else if(method == "Browse Quests")
+			{
+				processWebSocketQuestCommand(commandObject);
+			}
+			else if(method == "Browse Help")
+			{
+				Json::Value response;
+				response["method"] = "Browse Help";
+				if(commandObject["requestId"].isInt())
+					response["requestId"] = commandObject["requestId"];
+				if(!loggedIn || connected != CON_PLAYING || !character || character->IsPurged())
+					response["error"] = "Sign in to browse the help files.";
+				else
+				{
+					try
+					{
+						// Expose only the read-only help API on the game connection.
+						auto manager = JSManager::get()->executeExpression("global.helpManager").to_object();
+						auto result = manager.call("getBrowserResponse", jsonCommand, lookupValue(character));
+						if(result.is_string())
+						{
+							sendWebSocketCommand(result.to_std_string());
+							continue;
+						}
+					}
+					catch(const std::exception &e)
+					{
+						MudLog(BRF, LVL_APPR, TRUE, "Help browser failed: %s", e.what());
+					}
+					response["error"] = "Help is temporarily unavailable. Please try again.";
+				}
+				Json::FastWriter writer;
+				sendWebSocketCommand(writer.write(response));
 			}
 			else if(method == "Save User Macro")
 			{

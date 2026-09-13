@@ -2,7 +2,7 @@
  * JSCharacter_bindings.cpp - Method and property bindings for JSCharacter
  * 
  * This file registers all JSCharacter methods and properties with the JavaScript engine.
- * Updated for SpiderMonkey 131 API.
+ * Updated for SpiderMonkey 153 API.
  */
 
 #include "../conf.h"
@@ -19,30 +19,29 @@ namespace {
 inline JS::Value to_jsval(JSContext *cx, int v) { return JS::Int32Value(v); }
 inline JS::Value to_jsval(JSContext *cx, bool v) { return JS::BooleanValue(v); }
 inline JS::Value to_jsval(JSContext *cx, double v) { return JS::DoubleValue(v); }
-inline JS::Value to_jsval(JSContext *cx, const flusspferd::string &v) { return v.val; }
-inline JS::Value to_jsval(JSContext *cx, const flusspferd::value &v) { return v.val; }
-inline JS::Value to_jsval(JSContext *cx, const flusspferd::object &v) { return v.val; }
-inline JS::Value to_jsval(JSContext *cx, const flusspferd::array &v) { return v.val; }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::string &v) { return v.get_js_value(); }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::value &v) { return v.get_js_value(); }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::object &v) { return v.get_js_value(); }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::array &v) { return v.get_js_value(); }
 
 inline int from_jsval_int(JSContext *cx, JS::HandleValue v) {
-    if (v.isInt32()) return v.toInt32();
-    double d; JS::ToNumber(cx, v, &d); return static_cast<int>(d);
+    return flusspferd::detail::from_jsval<int>::convert(cx, v);
 }
 inline bool from_jsval_bool(JSContext *cx, JS::HandleValue v) {
     return JS::ToBoolean(v);
 }
 inline double from_jsval_double(JSContext *cx, JS::HandleValue v) {
-    double d; JS::ToNumber(cx, v, &d); return d;
+    return flusspferd::detail::from_jsval<double>::convert(cx, v);
 }
 inline float from_jsval_float(JSContext *cx, JS::HandleValue v) {
     return static_cast<float>(from_jsval_double(cx, v));
 }
 inline std::string from_jsval_string(JSContext *cx, JS::HandleValue v) {
     JSString *str = JS::ToString(cx, v);
-    if (!str) return "";
+    if (!str) flusspferd::throw_js_failure("ToString");
     JS::RootedString rstr(cx, str);
     JS::UniqueChars cstr = JS_EncodeStringToUTF8(cx, rstr);
-    if (!cstr) return "";
+    if (!cstr) flusspferd::throw_js_failure("encode string");
     return std::string(cstr.get());
 }
 inline const char* from_jsval_cstr(JSContext *cx, JS::HandleValue v, std::string &storage) {
@@ -64,7 +63,8 @@ inline JSCharacter* get_js_character(JSContext *cx, JS::HandleValue v) {
     if (!v.isObject()) return nullptr;
     JSObject *obj = &v.toObject();
     const JSClass *cls = JS::GetClass(obj);
-    if (!cls || strcmp(cls->name, "JSCharacter") != 0) return nullptr;
+    if (cls != &flusspferd::ClassTraits<JSCharacter >::jsclass)
+        throw flusspferd::exception("Expected JSCharacter");
     return static_cast<JSCharacter*>(flusspferd::sm_get_private(obj));
 }
 
@@ -73,7 +73,8 @@ inline JSRoom* get_js_room(JSContext *cx, JS::HandleValue v) {
     if (!v.isObject()) return nullptr;
     JSObject *obj = &v.toObject();
     const JSClass *cls = JS::GetClass(obj);
-    if (!cls || strcmp(cls->name, "JSRoom") != 0) return nullptr;
+    if (cls != &flusspferd::ClassTraits<JSRoom >::jsclass)
+        throw flusspferd::exception("Expected JSRoom");
     return static_cast<JSRoom*>(flusspferd::sm_get_private(obj));
 }
 
@@ -82,7 +83,8 @@ inline class JSObject* get_js_object(JSContext *cx, JS::HandleValue v) {
     if (!v.isObject()) return nullptr;
     ::JSObject *obj = &v.toObject();
     const JSClass *cls = JS::GetClass(obj);
-    if (!cls || strcmp(cls->name, "JSObject") != 0) return nullptr;
+    if (cls != &flusspferd::ClassTraits<class JSObject >::jsclass)
+        throw flusspferd::exception("Expected JSObject");
     return static_cast<class JSObject*>(flusspferd::sm_get_private(obj));
 }
 
@@ -1174,209 +1176,165 @@ void RegisterJSCharacterBindings() {
     // --- Missing setters (int parameter) ---
     g_class_registry["JSCharacter"].setters["invis"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setInvis(val.toInt32());
+        if (self) self->setInvis(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["taint"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setTaint(val.toInt32());
+        if (self) self->setTaint(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["shadowPoints"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setShadow_Points(val.toInt32());
+        if (self) self->setShadow_Points(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["maxShadow"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setMax_Shadow_Points(val.toInt32());
+        if (self) self->setMax_Shadow_Points(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["strain"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setStrain(val.toInt32());
+        if (self) self->setStrain(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["damRollMod"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setDamroll_Mod(val.toInt32());
+        if (self) self->setDamroll_Mod(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["mood"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setMood(val.toInt32());
+        if (self) self->setMood(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["stance"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setStance(val.toInt32());
+        if (self) self->setStance(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["strength"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setStrength(val.toInt32());
+        if (self) self->setStrength(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["intelligence"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setIntelligence(val.toInt32());
+        if (self) self->setIntelligence(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["wisdom"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setWisdom(val.toInt32());
+        if (self) self->setWisdom(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["dexterity"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setDexterity(val.toInt32());
+        if (self) self->setDexterity(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["constitution"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setConstitution(val.toInt32());
+        if (self) self->setConstitution(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["hunger"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setHunger(val.toInt32());
+        if (self) self->setHunger(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["thirst"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setThirst(val.toInt32());
+        if (self) self->setThirst(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["drunk"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setDrunk(val.toInt32());
+        if (self) self->setDrunk(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["wimpy"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setWimpy(val.toInt32());
+        if (self) self->setWimpy(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["deathWait"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setDeathWait(val.toInt32());
+        if (self) self->setDeathWait(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["warnings"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setWarnings(val.toInt32());
+        if (self) self->setWarnings(from_jsval_int(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["masterWeapon"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setMasterWeapon(val.toInt32());
+        if (self) self->setMasterWeapon(from_jsval_int(cx, val));
         return true;
     };
     // --- Missing setters (bool parameter) ---
     g_class_registry["JSCharacter"].setters["isBashed"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self) self->setIsBashed(val.toBoolean());
+        if (self) self->setIsBashed(from_jsval_bool(cx, val));
         return true;
     };
     // --- Missing setters (JSCharacter* parameter) ---
     g_class_registry["JSCharacter"].setters["fighting"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self && val.isObject()) {
-            JSObject *obj = &val.toObject();
-            void *priv = sm_get_private(obj);
-            if (priv) self->setFightingVar(static_cast<JSCharacter*>(priv));
-        }
+        if (self) self->setFightingVar(get_js_character(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["mount"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self && val.isObject()) {
-            JSObject *obj = &val.toObject();
-            void *priv = sm_get_private(obj);
-            if (priv) self->setMount(static_cast<JSCharacter*>(priv));
-        }
+        if (self) self->setMount(get_js_character(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["riddenBy"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self && val.isObject()) {
-            JSObject *obj = &val.toObject();
-            void *priv = sm_get_private(obj);
-            if (priv) self->setRiddenBy(static_cast<JSCharacter*>(priv));
-        }
+        if (self) self->setRiddenBy(get_js_character(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["target"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self && val.isObject()) {
-            JSObject *obj = &val.toObject();
-            void *priv = sm_get_private(obj);
-            if (priv) self->setTarget(static_cast<JSCharacter*>(priv));
-        }
+        if (self) self->setTarget(get_js_character(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["marked"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self && val.isObject()) {
-            JSObject *obj = &val.toObject();
-            void *priv = sm_get_private(obj);
-            if (priv) self->setMarked(static_cast<JSCharacter*>(priv));
-        }
+        if (self) self->setMarked(get_js_character(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["hunting"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self && val.isObject()) {
-            JSObject *obj = &val.toObject();
-            void *priv = sm_get_private(obj);
-            if (priv) self->setHunting(static_cast<JSCharacter*>(priv));
-        }
+        if (self) self->setHunting(get_js_character(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["decayedBy"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self && val.isObject()) {
-            JSObject *obj = &val.toObject();
-            void *priv = sm_get_private(obj);
-            if (priv) self->setDecayedBy(static_cast<JSCharacter*>(priv));
-        }
+        if (self) self->setDecayedBy(get_js_character(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["burnedBy"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self && val.isObject()) {
-            JSObject *obj = &val.toObject();
-            void *priv = sm_get_private(obj);
-            if (priv) self->setBurnedBy(static_cast<JSCharacter*>(priv));
-        }
+        if (self) self->setBurnedBy(get_js_character(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["plaguedBy"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self && val.isObject()) {
-            JSObject *obj = &val.toObject();
-            void *priv = sm_get_private(obj);
-            if (priv) self->setPlaguedBy(static_cast<JSCharacter*>(priv));
-        }
+        if (self) self->setPlaguedBy(get_js_character(cx, val));
         return true;
     };
     // --- Missing setters (JSObject* parameter) ---
     g_class_registry["JSCharacter"].setters["otarget"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self && val.isObject()) {
-            JSObject *obj = &val.toObject();
-            void *priv = sm_get_private(obj);
-            if (priv) self->setOTarget(static_cast<::JSObject*>(priv));
-        }
+        if (self) self->setOTarget(get_js_object(cx, val));
         return true;
     };
     g_class_registry["JSCharacter"].setters["sittingOn"] = [](void *ptr, JSContext *cx, JS::HandleValue val) -> bool {
         JSCharacter *self = static_cast<JSCharacter*>(ptr);
-        if (self && val.isObject()) {
-            JSObject *obj = &val.toObject();
-            void *priv = sm_get_private(obj);
-            if (priv) self->setSittingOn(static_cast<::JSObject*>(priv));
-        }
+        if (self) self->setSittingOn(get_js_object(cx, val));
         return true;
     };
 
@@ -1400,6 +1358,7 @@ void RegisterJSCharacterBindings() {
             args.rval().setNull();
         } else {
             JSString *str = JS_NewStringCopyZ(cx, result.c_str());
+            if (!str) return false;
             args.rval().setString(str);
         }
         return true;

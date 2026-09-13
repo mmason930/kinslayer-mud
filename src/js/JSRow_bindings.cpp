@@ -1,6 +1,6 @@
 /**
  * JSRow_bindings.cpp - Method and property bindings for JSRow
- * Updated for SpiderMonkey 131 API.
+ * Updated for SpiderMonkey 153 API.
  */
 
 #include "../conf.h"
@@ -12,12 +12,11 @@ namespace {
 
 inline JS::Value to_jsval(JSContext *cx, int v) { return JS::Int32Value(v); }
 inline JS::Value to_jsval(JSContext *cx, bool v) { return JS::BooleanValue(v); }
-inline JS::Value to_jsval(JSContext *cx, const flusspferd::string &v) { return v.val; }
-inline JS::Value to_jsval(JSContext *cx, const flusspferd::value &v) { return v.val; }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::string &v) { return v.get_js_value(); }
+inline JS::Value to_jsval(JSContext *cx, const flusspferd::value &v) { return v.get_js_value(); }
 
 inline int from_jsval_int(JSContext *cx, JS::HandleValue v) {
-    if (v.isInt32()) return v.toInt32();
-    double d; JS::ToNumber(cx, v, &d); return static_cast<int>(d);
+    return flusspferd::detail::from_jsval<int>::convert(cx, v);
 }
 inline flusspferd::string from_jsval_fstring(JSContext *cx, JS::HandleValue v) {
     return flusspferd::string(v.get());

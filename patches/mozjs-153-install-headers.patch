@@ -1,0 +1,13 @@
+--- a/js/src/build/Makefile.in
++++ b/js/src/build/Makefile.in
+@@ -18,6 +18,10 @@
+ install:: ../../../mozglue/baseprofiler/public/ProfilingCategoryList.h
+ 	$(SYSINSTALL) $^ $(DESTDIR)$(includedir)/$(JS_LIBRARY_NAME)/js
+ 	$(SYSINSTALL) $^ $(DESTDIR)$(includedir)/$(JS_LIBRARY_NAME)
++	$(SYSINSTALL) $^ $(DESTDIR)$(includedir)/$(JS_LIBRARY_NAME)/mozilla
+ 
++install:: ../../public/PrefsGenerated.h
++	$(SYSINSTALL) $^ $(DESTDIR)$(includedir)/$(JS_LIBRARY_NAME)/js
++
+ ######################################################
+ # BEGIN SpiderMonkey header installation

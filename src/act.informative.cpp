@@ -1271,7 +1271,7 @@ CommandHandler do_exits = DEFINE_COMMAND
 			{
 				if( EXIT(ch,door)->isDisabled() )
 					continue;
-				if (GET_LEVEL(ch) >= LVL_IMMORT)
+				if (GET_LEVEL(ch) >= LVL_IMMORT && PRF_FLAGGED(ch, PRF_HOLYLIGHT))
 					sprintf(buf2, "%-5s - [%5d] %s\r\n", dirs[door], EXIT(ch, door)->getToRoom()->getVnum(), EXIT(ch, door)->getToRoom()->getName());
 				else
 				{

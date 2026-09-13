@@ -1,5 +1,5 @@
 /**
- * flusspferd_class_macros.hpp - Class registration macros for SpiderMonkey 131
+ * flusspferd_class_macros.hpp - Class registration macros for SpiderMonkey 153
  */
 
 #ifndef KINSLAYER_FLUSSPFERD_CLASS_MACROS_HPP
@@ -73,6 +73,7 @@ struct ClassTraits {
 
     // Destructor
     static void destructor(JS::GCContext *gcx, JSObject *obj);
+    static void trace(JSTracer *trc, JSObject *obj);
 };
 
 // ============================================================================
@@ -101,7 +102,7 @@ struct ClassTraits {
         &flusspferd::ClassTraits<className>::destructor, /* finalize */             \
         nullptr,                            /* call */                               \
         nullptr,                            /* construct */                          \
-        nullptr,                            /* trace */                              \
+        &flusspferd::ClassTraits<className>::trace, /* trace */                              \
     };                                                                               \
     template<>                                                                       \
     inline JSClass flusspferd::ClassTraits<className>::jsclass = {                  \
@@ -114,6 +115,12 @@ struct ClassTraits {
 // ============================================================================
 // ClassTraits implementations (inline)
 // ============================================================================
+
+template<typename T>
+void ClassTraits<T>::trace(JSTracer *trc, JSObject *obj) {
+    T *native = static_cast<T*>(sm_get_private(obj));
+    if (native) native->trace(trc);
+}
 
 template<typename T>
 void ClassTraits<T>::destructor(JS::GCContext *gcx, JSObject *obj) {
@@ -252,21 +259,24 @@ void ClassTraits<T>::define_methods_on_prototype() {
 
         // Create a function with reserved slots for storing method/class names
         JSFunction *func = js::NewFunctionWithReserved(g_cx, universal_method_dispatch, 0, 0, methodName.c_str());
-        if (!func) continue;
+        if (!func) throw_js_failure("register method");
 
         JS::RootedObject funcObjReal(g_cx, JS_GetFunctionObject(func));
 
         // Store method name in function native reserved slot 0
         JSString *nameStr = JS_NewStringCopyUTF8Z(g_cx, JS::ConstUTF8CharsZ(methodName.c_str()));
+        if (!nameStr) throw_js_failure("register name");
         js::SetFunctionNativeReserved(funcObjReal.get(), 0, JS::StringValue(nameStr));
 
         // Store class name in function native reserved slot 1
         JSString *classStr = JS_NewStringCopyUTF8Z(g_cx, JS::ConstUTF8CharsZ(class_name()));
+        if (!classStr) throw_js_failure("register name");
         js::SetFunctionNativeReserved(funcObjReal.get(), 1, JS::StringValue(classStr));
 
         // Define the method on the prototype
         JS::RootedValue funcVal(g_cx, JS::ObjectValue(*funcObjReal));
-        JS_DefineProperty(g_cx, proto, methodName.c_str(), funcVal, JSPROP_ENUMERATE);
+        if (!JS_DefineProperty(g_cx, proto, methodName.c_str(), funcVal, JSPROP_ENUMERATE))
+            throw_js_failure("define method");
     }
 }
 
@@ -291,35 +301,38 @@ void ClassTraits<T>::define_properties_on_prototype() {
 
         if (hasGetter) {
             JSFunction *getterFunc = js::NewFunctionWithReserved(g_cx, property_getter_dispatch, 0, 0, nullptr);
-            if (!getterFunc) continue;
+            if (!getterFunc) throw_js_failure("register getter");
             getterObj.set(JS_GetFunctionObject(getterFunc));
 
             JSString *nameStr = JS_NewStringCopyUTF8Z(g_cx, JS::ConstUTF8CharsZ(propName.c_str()));
+        if (!nameStr) throw_js_failure("register name");
             js::SetFunctionNativeReserved(getterObj, 0, JS::StringValue(nameStr));
             JSString *classStr = JS_NewStringCopyUTF8Z(g_cx, JS::ConstUTF8CharsZ(class_name()));
+        if (!classStr) throw_js_failure("register name");
             js::SetFunctionNativeReserved(getterObj, 1, JS::StringValue(classStr));
         }
 
         if (hasSetter) {
             JSFunction *setterFunc = js::NewFunctionWithReserved(g_cx, property_setter_dispatch, 1, 0, nullptr);
-            if (!setterFunc) continue;
+            if (!setterFunc) throw_js_failure("register setter");
             setterObj.set(JS_GetFunctionObject(setterFunc));
 
             JSString *nameStr = JS_NewStringCopyUTF8Z(g_cx, JS::ConstUTF8CharsZ(propName.c_str()));
+        if (!nameStr) throw_js_failure("register name");
             js::SetFunctionNativeReserved(setterObj, 0, JS::StringValue(nameStr));
             JSString *classStr = JS_NewStringCopyUTF8Z(g_cx, JS::ConstUTF8CharsZ(class_name()));
+        if (!classStr) throw_js_failure("register name");
             js::SetFunctionNativeReserved(setterObj, 1, JS::StringValue(classStr));
         }
 
-        JS_DefineProperty(g_cx, proto, propName.c_str(), getterObj, setterObj, JSPROP_ENUMERATE);
+        if (!JS_DefineProperty(g_cx, proto, propName.c_str(), getterObj, setterObj, JSPROP_ENUMERATE))
+            throw_js_failure("define accessor");
     }
 }
 
 template<typename T>
 void ClassTraits<T>::ensure_registered() {
-    static bool registered = false;
-    if (registered) return;
-    registered = true;
+    if (prototype && prototype->get()) return;
 
     if (!g_cx || !g_global) return;
 
@@ -343,9 +356,13 @@ void ClassTraits<T>::ensure_registered() {
     proto = JS_InitClass(g_cx, global, &jsclass, nullptr, class_name(),
                         constructor_stub, 0, nullptr, nullptr, nullptr, nullptr);
     
+    if (!proto) throw_js_failure("initialize native class");
     if (proto) {
         *prototype = proto;
-        info.prototype = proto;
+        info.release_prototype = [] {
+            delete prototype;
+            prototype = nullptr;
+        };
         
         // Define methods on prototype
         define_methods_on_prototype();
@@ -418,6 +435,7 @@ object create_native_object(Args&&... args) {
     T *native = new T(std::forward<Args>(args)...);
 
     // Set the private data
+    native->attach_object(obj);
     sm_set_private(obj, native);
 
     return object(obj);

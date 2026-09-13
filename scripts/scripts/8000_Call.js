@@ -57,8 +57,16 @@ var script8000 = function(self, actor, here, args, extra) {
 		gateKeeper.comm("open " + mainGateRoom.doorName(dir) );
 		function performCloseGate( vArgs ) {
 			var gateKeeper = vArgs[ 0 ];
-			gateKeeper.comm("close " + gateKeeper.room.doorName(dir) );
-			gateKeeper.comm("lock " + gateKeeper.room.doorName(dir) );
+			var commands = [ "close", "lock" ];
+			for( var i = 0; i < commands.length; ++i ) {
+				// The keeper may be purged or moved while waiting, or by a command trigger.
+				if( !gateKeeper || !gateKeeper.isValid )
+					return;
+				var room = gateKeeper.room;
+				if( !room || room.vnum != mainGateRoom.vnum || !room.doorExists(dir) )
+					return;
+				gateKeeper.comm(commands[i] + " " + room.doorName(dir) );
+			}
 		}
 		setTimeout(gateKeeperObject.pulsesToWaitForClose ? gateKeeperObject.pulsesToWaitForClose : 1, performCloseGate, [ gateKeeper ]);
 		return true;

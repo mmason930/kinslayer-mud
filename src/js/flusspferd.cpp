@@ -1,5 +1,5 @@
 /**
- * flusspferd.cpp - SpiderMonkey 131 compatibility shim implementation
+ * flusspferd.cpp - SpiderMonkey 153 compatibility shim implementation
  */
 
 #include "flusspferd.hpp"
@@ -13,6 +13,9 @@
 #include <js/Exception.h>
 #include <cstring>
 #include <sstream>
+#include <cstdlib>
+#include <cstdio>
+#include <mysql/sqlDatabase.h>
 
 namespace flusspferd {
 
@@ -28,89 +31,61 @@ std::map<std::string, void*> g_function_storage;
 
 // Note: g_class_registries is a macro alias defined in flusspferd.hpp
 
-// Thread-local storage for last exception message
-static thread_local std::string g_last_exception_message;
-static thread_local bool g_has_last_exception = false;
-
-// Global class definition for the global object
 static JSClass global_class = {
-    "global",
-    JSCLASS_GLOBAL_FLAGS,
-    &JS::DefaultGlobalClassOps
+    "global", JSCLASS_GLOBAL_FLAGS, &JS::DefaultGlobalClassOps
 };
 
-// ============================================================================
-// Error reporting and exception handling
-// ============================================================================
-
-static void clear_last_exception() {
-    g_last_exception_message.clear();
-    g_has_last_exception = false;
+namespace {
+thread_local unsigned execution_depth = 0;
+thread_local std::chrono::steady_clock::time_point execution_deadline;
 }
 
-// Helper to check for pending exception and throw it
-static void check_and_throw_pending_exception(const std::string &funcName) {
-    if (!g_cx) return;
+execution_scope::execution_scope(std::chrono::milliseconds budget) {
+    if (execution_depth++ == 0) execution_deadline = std::chrono::steady_clock::now() + budget;
+}
+execution_scope::~execution_scope() { --execution_depth; }
+bool execution_timed_out() {
+    return execution_depth && std::chrono::steady_clock::now() >= execution_deadline;
+}
 
-    if (JS_IsExceptionPending(g_cx)) {
-        JS::RootedValue exc(g_cx);
-        if (JS_GetPendingException(g_cx, &exc)) {
-            JS_ClearPendingException(g_cx);
-            clear_last_exception();
-
-            if (exc.isObject()) {
-                JS::RootedObject excObj(g_cx, &exc.toObject());
-                const JSClass *cls = JS::GetClass(excObj);
-
-                // Check for StopIteration
-                if (cls && cls->name && strcmp(cls->name, "StopIteration") == 0) {
-                    throw exception("[object StopIteration]");
-                }
-
-                // For Error objects, extract the message and other properties
-                JS::RootedValue msgVal(g_cx);
-                if (JS_GetProperty(g_cx, excObj, "message", &msgVal) && msgVal.isString()) {
-                    JS::RootedString msgStr(g_cx, msgVal.toString());
-                    JS::UniqueChars msgChars = JS_EncodeStringToUTF8(g_cx, msgStr);
-                    if (msgChars) {
-                        std::string errorMsg;
-                        if (cls && cls->name) {
-                            errorMsg = cls->name;
-                            errorMsg += ": ";
-                        }
-                        errorMsg += msgChars.get();
-
-                        // Try to get lineNumber and fileName for better diagnostics
-                        JS::RootedValue lineVal(g_cx);
-                        if (JS_GetProperty(g_cx, excObj, "lineNumber", &lineVal) && lineVal.isInt32()) {
-                            errorMsg += " (line ";
-                            errorMsg += std::to_string(lineVal.toInt32());
-                            errorMsg += ")";
-                        }
-
-                        throw exception(errorMsg);
-                    }
-                }
-            }
-
-            // Fallback: convert exception to string
-            JS::RootedString str(g_cx, JS::ToString(g_cx, exc));
-            if (str) {
-                JS::UniqueChars chars = JS_EncodeStringToUTF8(g_cx, str);
-                if (chars) {
-                    throw exception(chars.get());
-                }
-            }
-            throw exception("uncaught exception: [unknown]");
+[[noreturn]] void throw_js_failure(const std::string &operation) {
+    JS::RootedValue thrown(g_cx);
+    bool pending = JS_IsExceptionPending(g_cx) && JS_GetPendingException(g_cx, &thrown);
+    std::string message = operation + " failed";
+    if (pending) {
+        JS_ClearPendingException(g_cx);
+        JS::RootedString str(g_cx, JS::ToString(g_cx, thrown));
+        if (str) {
+            JS::UniqueChars text = JS_EncodeStringToUTF8(g_cx, str);
+            if (text) message += std::string(": ") + text.get();
         }
+        // Formatting must neither replace the original thrown value nor leave
+        // another exception pending when the caller handles the C++ exception.
+        JS_ClearPendingException(g_cx);
     }
+    throw js_exception(message, value(thrown), pending);
+}
 
-    // Check captured exception from error reporter
-    if (g_has_last_exception) {
-        std::string msg = g_last_exception_message;
-        clear_last_exception();
-        throw exception(msg);
+bool handle_native_exception(JSContext *cx) noexcept {
+    try {
+        throw;
+    } catch (const js_exception &e) {
+        if (e.has_thrown) {
+            JS::RootedValue thrown(cx, e.thrown.get_js_value());
+            JS_SetPendingException(cx, thrown);
+        } else {
+            JS_ClearPendingException(cx); // Preserve uncatchable interruption.
+        }
+    } catch (const std::bad_alloc &) {
+        JS_ReportOutOfMemory(cx);
+    } catch (sql::Exception &e) {
+        if (!JS_IsExceptionPending(cx)) JS_ReportErrorUTF8(cx, "%s", e.message.c_str());
+    } catch (const std::exception &e) {
+        if (!JS_IsExceptionPending(cx)) JS_ReportErrorUTF8(cx, "%s", e.what());
+    } catch (...) {
+        if (!JS_IsExceptionPending(cx)) JS_ReportErrorASCII(cx, "Unknown native exception");
     }
+    return false;
 }
 
 // ============================================================================
@@ -119,62 +94,69 @@ static void check_and_throw_pending_exception(const std::string &funcName) {
 
 value::value(const std::string &s) {
     if (!g_cx) {
-        val = JS::UndefinedValue();
+        assign(JS::UndefinedValue());
         return;
     }
     JSString *str = JS_NewStringCopyUTF8N(g_cx, JS::UTF8Chars(s.c_str(), s.length()));
-    val = str ? JS::StringValue(str) : JS::UndefinedValue();
+    if (!str) throw_js_failure("create string");
+    assign(JS::StringValue(str));
 }
 
 value::value(const char *s) {
     if (!g_cx || !s) {
-        val = JS::UndefinedValue();
+        assign(JS::UndefinedValue());
         return;
     }
     JSString *str = JS_NewStringCopyUTF8Z(g_cx, JS::ConstUTF8CharsZ(s));
-    val = str ? JS::StringValue(str) : JS::UndefinedValue();
+    if (!str) throw_js_failure("create string");
+    assign(JS::StringValue(str));
 }
 
 bool value::is_function() const {
-    if (!val.isObject()) return false;
-    JSObject *obj = &val.toObject();
+    if (!get_js_value().isObject()) return false;
+    JSObject *obj = &get_js_value().toObject();
     return obj && JS_ObjectIsFunction(obj);
 }
 
 double value::to_number() const {
     if (!g_cx) return 0.0;
+    JS::RootedValue input(g_cx, get_js_value());
+    execution_scope execution;
     double d;
-    if (JS::ToNumber(g_cx, JS::HandleValue::fromMarkedLocation(&val), &d)) {
+    if (JS::ToNumber(g_cx, input, &d)) {
         return d;
     }
-    return 0.0;
+    throw_js_failure("ToNumber");
 }
 
 std::string value::to_std_string() const {
+    execution_scope execution;
     if (!g_cx) return "";
-    if (!val.isString()) {
-        JS::RootedValue v(g_cx, val);
+    if (!get_js_value().isString()) {
+        JS::RootedValue v(g_cx, get_js_value());
         JS::RootedString str(g_cx, JS::ToString(g_cx, v));
-        if (!str) return "";
+        if (!str) throw_js_failure("ToString");
         JS::UniqueChars chars = JS_EncodeStringToUTF8(g_cx, str);
-        return chars ? std::string(chars.get()) : "";
+        if (!chars) throw_js_failure("encode string");
+        return std::string(chars.get());
     }
     
-    JS::RootedString str(g_cx, val.toString());
+    JS::RootedString str(g_cx, get_js_value().toString());
     JS::UniqueChars chars = JS_EncodeStringToUTF8(g_cx, str);
-    return chars ? std::string(chars.get()) : "";
+    if (!chars) throw_js_failure("encode string");
+    return std::string(chars.get());
 }
 
 string value::to_string() const {
-    return string(val);
+    return string(*this);
 }
 
 object value::to_object() const {
-    return object(val);
+    return object(*this);
 }
 
 object value::get_object() const {
-    return object(val);
+    return object(*this);
 }
 
 // ============================================================================
@@ -184,33 +166,39 @@ object value::get_object() const {
 string::string(const std::string &s) : value() {
     if (!g_cx) return;
     JSString *str = JS_NewStringCopyUTF8N(g_cx, JS::UTF8Chars(s.c_str(), s.length()));
-    val = str ? JS::StringValue(str) : JS::UndefinedValue();
+    if (!str) throw_js_failure("create string");
+    assign(JS::StringValue(str));
 }
 
 string::string(const char *s) : value() {
     if (!g_cx || !s) return;
     JSString *str = JS_NewStringCopyUTF8Z(g_cx, JS::ConstUTF8CharsZ(s));
-    val = str ? JS::StringValue(str) : JS::UndefinedValue();
+    if (!str) throw_js_failure("create string");
+    assign(JS::StringValue(str));
 }
 
 string::string(JSString *str) : value() {
-    val = str ? JS::StringValue(str) : JS::UndefinedValue();
+    if (!str) throw_js_failure("create string");
+    assign(JS::StringValue(str));
 }
 
 std::string string::to_std_string() const {
+    execution_scope execution;
     if (!g_cx) return "";
-    if (!val.isString()) {
+    if (!get_js_value().isString()) {
         // Value might not be a JS string type (e.g., number passed to sqlEsc) -
         // convert it using JS::ToString, matching value::to_std_string() behavior
-        JS::RootedValue v(g_cx, val);
+        JS::RootedValue v(g_cx, get_js_value());
         JS::RootedString str(g_cx, JS::ToString(g_cx, v));
-        if (!str) return "";
+        if (!str) throw_js_failure("ToString");
         JS::UniqueChars chars = JS_EncodeStringToUTF8(g_cx, str);
-        return chars ? std::string(chars.get()) : "";
+        if (!chars) throw_js_failure("encode string");
+        return std::string(chars.get());
     }
-    JS::RootedString str(g_cx, val.toString());
+    JS::RootedString str(g_cx, get_js_value().toString());
     JS::UniqueChars chars = JS_EncodeStringToUTF8(g_cx, str);
-    return chars ? std::string(chars.get()) : "";
+    if (!chars) throw_js_failure("encode string");
+    return std::string(chars.get());
 }
 
 const char *string::c_str() const {
@@ -225,10 +213,10 @@ const char *string::c_str() const {
 // ============================================================================
 
 bool object::is_array() const {
-    if (!g_cx || !val.isObject()) return false;
+    if (!g_cx || !get_js_value().isObject()) return false;
     bool isArray = false;
-    JS::RootedObject obj(g_cx, &val.toObject());
-    JS::IsArrayObject(g_cx, obj, &isArray);
+    JS::RootedObject obj(g_cx, &get_js_value().toObject());
+    if (!JS::IsArrayObject(g_cx, obj, &isArray)) throw_js_failure("IsArrayObject");
     return isArray;
 }
 
@@ -237,6 +225,7 @@ value object::get_property(const std::string &name) const {
 }
 
 value object::get_property(const char *name) const {
+    execution_scope execution;
     if (!g_cx || !g_global || is_null()) return value();
     
     JSAutoRealm ar(g_cx, g_global->get());
@@ -245,7 +234,7 @@ value object::get_property(const char *name) const {
     if (JS_GetProperty(g_cx, obj, name, &v)) {
         return value(v);
     }
-    return value();
+    throw_js_failure("get property or element");
 }
 
 void object::set_property(const std::string &name, const value &v) {
@@ -253,12 +242,13 @@ void object::set_property(const std::string &name, const value &v) {
 }
 
 void object::set_property(const char *name, const value &v) {
+    execution_scope execution;
     if (!g_cx || !g_global || is_null()) return;
     
     JSAutoRealm ar(g_cx, g_global->get());
     JS::RootedObject obj(g_cx, get_object_ptr());
-    JS::RootedValue jv(g_cx, v.val);
-    JS_SetProperty(g_cx, obj, name, jv);
+    JS::RootedValue jv(g_cx, v.get_js_value());
+    if (!JS_SetProperty(g_cx, obj, name, jv)) throw_js_failure("set property");
 }
 
 bool object::has_property(const std::string &name) const {
@@ -266,6 +256,7 @@ bool object::has_property(const std::string &name) const {
 }
 
 bool object::has_property(const char *name) const {
+    execution_scope execution;
     if (!g_cx || !g_global || is_null()) return false;
     
     JSAutoRealm ar(g_cx, g_global->get());
@@ -274,7 +265,7 @@ bool object::has_property(const char *name) const {
     if (JS_HasProperty(g_cx, obj, name, &found)) {
         return found;
     }
-    return false;
+    throw_js_failure("has property");
 }
 
 void object::delete_property(const std::string &name) {
@@ -282,18 +273,20 @@ void object::delete_property(const std::string &name) {
 }
 
 void object::delete_property(const char *name) {
+    execution_scope execution;
     if (!g_cx || !g_global || is_null()) return;
     
     JSAutoRealm ar(g_cx, g_global->get());
     JS::RootedObject obj(g_cx, get_object_ptr());
     JS::ObjectOpResult result;
-    JS_DeleteProperty(g_cx, obj, name, result);
+    if (!JS_DeleteProperty(g_cx, obj, name, result)) throw_js_failure("delete property");
+    if (!result.ok()) throw exception("Cannot delete property");
 }
 
 value object::call(const std::string &name) {
     if (!g_cx || !g_global || is_null()) return value();
     
-    clear_last_exception();
+    execution_scope execution;
     
     JSAutoRealm ar(g_cx, g_global->get());
     JS::RootedObject obj(g_cx, get_object_ptr());
@@ -303,20 +296,20 @@ value object::call(const std::string &name) {
         return value(rval);
     }
     
-    check_and_throw_pending_exception(name);
+    throw_js_failure(name);
     throw exception("Could not call function: " + name);
 }
 
 value object::call(const std::string &name, const value &arg) {
     if (!g_cx || !g_global || is_null()) return value();
     
-    clear_last_exception();
+    execution_scope execution;
     
     JSAutoRealm ar(g_cx, g_global->get());
     JS::RootedObject obj(g_cx, get_object_ptr());
     JS::RootedValue rval(g_cx);
     JS::RootedValueVector argv(g_cx);
-    if (!argv.append(arg.val)) {
+    if (!argv.append(arg.get_js_value())) {
         throw exception("Failed to create argument array");
     }
     
@@ -324,20 +317,20 @@ value object::call(const std::string &name, const value &arg) {
         return value(rval);
     }
     
-    check_and_throw_pending_exception(name);
+    throw_js_failure(name);
     throw exception("Could not call function: " + name);
 }
 
 value object::call(const std::string &name, const value &arg1, const value &arg2) {
     if (!g_cx || !g_global || is_null()) return value();
     
-    clear_last_exception();
+    execution_scope execution;
     
     JSAutoRealm ar(g_cx, g_global->get());
     JS::RootedObject obj(g_cx, get_object_ptr());
     JS::RootedValue rval(g_cx);
     JS::RootedValueVector argv(g_cx);
-    if (!argv.append(arg1.val) || !argv.append(arg2.val)) {
+    if (!argv.append(arg1.get_js_value()) || !argv.append(arg2.get_js_value())) {
         throw exception("Failed to create argument array");
     }
     
@@ -345,8 +338,19 @@ value object::call(const std::string &name, const value &arg1, const value &arg2
         return value(rval);
     }
     
-    check_and_throw_pending_exception(name);
+    throw_js_failure(name);
     throw exception("Could not call function: " + name);
+}
+
+value object::call_function(const object &receiver, const value &arg) {
+    execution_scope execution;
+    JS::RootedObject thisObj(g_cx, receiver.get_object_ptr());
+    JS::RootedValue function(g_cx, get_js_value());
+    JS::RootedValue argument(g_cx, arg.get_js_value());
+    JS::RootedValue result(g_cx);
+    if (!JS_CallFunctionValue(g_cx, thisObj, function, JS::HandleValueArray(argument), &result))
+        throw_js_failure("call function");
+    return value(result);
 }
 
 object object::prototype() const {
@@ -356,7 +360,7 @@ object object::prototype() const {
     if (JS_GetPrototype(g_cx, obj, &proto)) {
         return object(proto);
     }
-    return object();
+    throw_js_failure("get prototype");
 }
 
 object object::parent() const {
@@ -383,7 +387,7 @@ uint32_t array::length() const {
     
     JS::RootedObject obj(g_cx, get_object_ptr());
     uint32_t len = 0;
-    JS::GetArrayLength(g_cx, obj, &len);
+    if (!JS::GetArrayLength(g_cx, obj, &len)) throw_js_failure("array length");
     return len;
 }
 
@@ -391,10 +395,11 @@ void array::set_length(uint32_t len) {
     if (!g_cx || is_null()) return;
     
     JS::RootedObject obj(g_cx, get_object_ptr());
-    JS::SetArrayLength(g_cx, obj, len);
+    if (!JS::SetArrayLength(g_cx, obj, len)) throw_js_failure("set array length");
 }
 
 value array::get_element(uint32_t index) const {
+    execution_scope execution;
     if (!g_cx || is_null()) return value();
     
     JS::RootedObject obj(g_cx, get_object_ptr());
@@ -402,15 +407,16 @@ value array::get_element(uint32_t index) const {
     if (JS_GetElement(g_cx, obj, index, &v)) {
         return value(v);
     }
-    return value();
+    throw_js_failure("get property or element");
 }
 
 void array::set_element(uint32_t index, const value &v) {
+    execution_scope execution;
     if (!g_cx || is_null()) return;
     
     JS::RootedObject obj(g_cx, get_object_ptr());
-    JS::RootedValue jv(g_cx, v.val);
-    JS_SetElement(g_cx, obj, index, jv);
+    JS::RootedValue jv(g_cx, v.get_js_value());
+    if (!JS_SetElement(g_cx, obj, index, jv)) throw_js_failure("set element");
 }
 
 void array::push(const value &v) {
@@ -430,7 +436,7 @@ root_value::root_value() {
 
 root_value::root_value(const value &v) {
     if (g_cx) {
-        rooted = std::make_unique<JS::PersistentRootedValue>(g_cx, v.val);
+        rooted = std::make_unique<JS::PersistentRootedValue>(g_cx, v.get_js_value());
     }
 }
 
@@ -438,7 +444,7 @@ root_value::~root_value() = default;
 
 root_value &root_value::operator=(const value &v) {
     if (rooted) {
-        *rooted = v.val;
+        *rooted = v.get_js_value();
     }
     return *this;
 }
@@ -498,10 +504,12 @@ context context::create() {
     // Initialize SpiderMonkey if not already done
     static bool initialized = false;
     if (!initialized) {
-        // Disable JIT backend - use interpreter only.
-        // Our compatibility shim uses unrooted JS::Value in many places,
-        // which is unsafe with the JIT's exact GC rooting requirements.
-        JS::DisableJitBackend();
+        // JIT is enabled by default. This process-wide fallback is deliberately
+        // read before JS_Init; changing it requires a process restart.
+        const char *disableJit = std::getenv("KINSLAYER_DISABLE_JIT");
+        const bool jitEnabled = !(disableJit && std::strcmp(disableJit, "1") == 0);
+        if (!jitEnabled) JS::DisableJitBackend();
+        std::fprintf(stderr, "%s: JIT %s\n", JS_GetImplementationVersion(), jitEnabled ? "enabled" : "disabled");
         if (!JS_Init()) {
             return context();
         }
@@ -534,6 +542,8 @@ void context::destroy() {
     if (owns_context && cx) {
         JS_DestroyContext(cx);
         cx = nullptr;
+        g_cx = nullptr;
+        JS_ShutDown();
     }
 }
 
@@ -541,7 +551,8 @@ void context::destroy() {
 // current_context_scope implementation
 // ============================================================================
 
-current_context_scope::current_context_scope(const context &ctx) : realm_(nullptr) {
+current_context_scope::current_context_scope(const context &ctx) : context_(ctx), realm_(nullptr) {
+    if (!ctx.is_valid()) throw exception("Failed to initialize SpiderMonkey context");
     g_cx = ctx.get();
 
     // Create the global object if it doesn't exist
@@ -568,7 +579,16 @@ current_context_scope::current_context_scope(const context &ctx) : realm_(nullpt
 }
 
 current_context_scope::~current_context_scope() {
+    // All application-owned wrappers must be released before the realm owner.
     delete realm_;
+    for (auto &entry : g_class_registry) {
+        if (entry.second.release_prototype) entry.second.release_prototype();
+    }
+    delete g_global;
+    g_global = nullptr;
+    g_class_registry.clear();
+    g_function_storage.clear();
+    context_.destroy();
 }
 
 // ============================================================================
@@ -583,8 +603,9 @@ property_iterator::property_iterator(JSContext *c, JSObject *o)
       ids(new JS::PersistentRooted<JS::IdVector>(c, JS::IdVector(c))), 
       current_index(0), at_end(false) {
     if (!JS_Enumerate(cx, *obj, &(*ids))) {
-        at_end = true;
-        return;
+        delete ids;
+        delete obj;
+        throw_js_failure("enumerate properties");
     }
     if (ids->length() == 0) {
         at_end = true;
@@ -677,6 +698,7 @@ value evaluate(const std::string &code, const char *filename, int lineno) {
 value evaluate(const char *code, const char *filename, int lineno) {
     if (!g_cx || !g_global) return value();
     
+    execution_scope execution;
     // Enter the global's realm
     JSAutoRealm ar(g_cx, g_global->get());
     
@@ -685,14 +707,14 @@ value evaluate(const char *code, const char *filename, int lineno) {
     
     JS::SourceText<mozilla::Utf8Unit> srcBuf;
     if (!srcBuf.init(g_cx, code, strlen(code), JS::SourceOwnership::Borrowed)) {
-        check_and_throw_pending_exception("evaluate");
+        throw_js_failure("evaluate");
         throw exception("Failed to initialize source buffer");
     }
     
     JS::RootedValue rval(g_cx);
     
     if (!JS::Evaluate(g_cx, options, srcBuf, &rval)) {
-        check_and_throw_pending_exception("evaluate");
+        throw_js_failure("evaluate");
         throw exception("JavaScript evaluation failed");
     }
     
@@ -709,6 +731,7 @@ object create_object() {
     if (!g_cx || !g_global) return object();
     JSAutoRealm ar(g_cx, g_global->get());
     JSObject *obj = JS_NewPlainObject(g_cx);
+    if (!obj) throw_js_failure("create object");
     return object(obj);
 }
 
@@ -716,9 +739,8 @@ array create_array() {
     if (!g_cx || !g_global) return array();
     JSAutoRealm ar(g_cx, g_global->get());
     JSObject *arr = JS::NewArrayObject(g_cx, 0);
-    if (!arr) return array();
+    if (!arr) throw_js_failure("create array");
     array result(arr);
-    result.set_auto_root();
     return result;
 }
 
@@ -726,9 +748,8 @@ array create_array(uint32_t length) {
     if (!g_cx || !g_global) return array();
     JSAutoRealm ar(g_cx, g_global->get());
     JSObject *arr = JS::NewArrayObject(g_cx, length);
-    if (!arr) return array();
+    if (!arr) throw_js_failure("create array");
     array result(arr);
-    result.set_auto_root();
     return result;
 }
 
@@ -740,27 +761,31 @@ namespace detail {
 
 JS::Value to_jsval<std::string>::convert(JSContext *cx, const std::string &v) {
     JSString *str = JS_NewStringCopyUTF8N(cx, JS::UTF8Chars(v.c_str(), v.length()));
-    return str ? JS::StringValue(str) : JS::UndefinedValue();
+    if (!str) throw_js_failure("create string");
+    return JS::StringValue(str);
 }
 
 JS::Value to_jsval<const char*>::convert(JSContext *cx, const char* const &v) {
     if (!v) return JS::NullValue();
     JSString *str = JS_NewStringCopyUTF8Z(cx, JS::ConstUTF8CharsZ(v));
-    return str ? JS::StringValue(str) : JS::UndefinedValue();
+    if (!str) throw_js_failure("create string");
+    return JS::StringValue(str);
 }
 
 std::string from_jsval<std::string>::convert(JSContext *cx, const JS::Value &v) {
     if (!v.isString()) {
         JS::RootedValue rv(cx, v);
         JS::RootedString str(cx, JS::ToString(cx, rv));
-        if (!str) return "";
+        if (!str) throw_js_failure("ToString");
         JS::UniqueChars chars = JS_EncodeStringToUTF8(cx, str);
-        return chars ? std::string(chars.get()) : "";
+        if (!chars) throw_js_failure("encode string");
+        return std::string(chars.get());
     }
     
     JS::RootedString str(cx, v.toString());
     JS::UniqueChars chars = JS_EncodeStringToUTF8(cx, str);
-    return chars ? std::string(chars.get()) : "";
+    if (!chars) throw_js_failure("encode string");
+    return std::string(chars.get());
 }
 
 } // namespace detail
@@ -769,7 +794,7 @@ std::string from_jsval<std::string>::convert(JSContext *cx, const JS::Value &v) 
 // Property getter/setter dispatchers for native classes
 // ============================================================================
 
-bool property_getter_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) {
+bool property_getter_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) try {
     JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
 
     if (!args.thisv().isObject()) {
@@ -778,14 +803,10 @@ bool property_getter_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) {
     }
 
     JS::RootedObject thisObj(cx, &args.thisv().toObject());
-    void *priv = sm_get_private(thisObj);
-    if (!priv) {
-        args.rval().setUndefined();
-        return true;
-    }
+    void *priv = nullptr;
 
     // Get property name from callee's reserved slot 0
-    JSObject *callee = &args.callee();
+    JS::RootedObject callee(cx, &args.callee());
     const JS::Value &propNameVal = js::GetFunctionNativeReserved(callee, 0);
     if (!propNameVal.isString()) {
         args.rval().setUndefined();
@@ -794,10 +815,7 @@ bool property_getter_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) {
 
     JS::RootedString propNameStr(cx, propNameVal.toString());
     JS::UniqueChars propName = JS_EncodeStringToUTF8(cx, propNameStr);
-    if (!propName) {
-        args.rval().setUndefined();
-        return true;
-    }
+    if (!propName) return false;
 
     // Get class name from callee's reserved slot 1
     const JS::Value &classNameVal = js::GetFunctionNativeReserved(callee, 1);
@@ -808,16 +826,23 @@ bool property_getter_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) {
 
     JS::RootedString classNameStr(cx, classNameVal.toString());
     JS::UniqueChars className = JS_EncodeStringToUTF8(cx, classNameStr);
-    if (!className) {
-        args.rval().setUndefined();
-        return true;
-    }
+    if (!className) return false;
 
     // Look up getter in registry
     auto classIt = g_class_registry.find(className.get());
     if (classIt == g_class_registry.end()) {
         args.rval().setUndefined();
         return true;
+    }
+
+    if (JS::GetClass(thisObj) != classIt->second.jsclass) {
+        JS_ReportErrorASCII(cx, "Incompatible native receiver");
+        return false;
+    }
+    priv = sm_get_private(thisObj);
+    if (!priv) {
+        JS_ReportErrorASCII(cx, "Native object has no private data");
+        return false;
     }
 
     auto getterIt = classIt->second.getters.find(propName.get());
@@ -829,9 +854,11 @@ bool property_getter_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) {
     // Call the getter
     JS::MutableHandleValue rval = args.rval();
     return getterIt->second(priv, cx, rval);
+} catch (...) {
+    return handle_native_exception(cx);
 }
 
-bool property_setter_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) {
+bool property_setter_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) try {
     JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
 
     if (!args.thisv().isObject()) {
@@ -840,14 +867,10 @@ bool property_setter_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) {
     }
 
     JS::RootedObject thisObj(cx, &args.thisv().toObject());
-    void *priv = sm_get_private(thisObj);
-    if (!priv) {
-        args.rval().setUndefined();
-        return true;
-    }
+    void *priv = nullptr;
 
     // Get property name from callee's reserved slot 0
-    JSObject *callee = &args.callee();
+    JS::RootedObject callee(cx, &args.callee());
     const JS::Value &propNameVal = js::GetFunctionNativeReserved(callee, 0);
     if (!propNameVal.isString()) {
         args.rval().setUndefined();
@@ -856,10 +879,7 @@ bool property_setter_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) {
 
     JS::RootedString propNameStr(cx, propNameVal.toString());
     JS::UniqueChars propName = JS_EncodeStringToUTF8(cx, propNameStr);
-    if (!propName) {
-        args.rval().setUndefined();
-        return true;
-    }
+    if (!propName) return false;
 
     // Get class name from callee's reserved slot 1
     const JS::Value &classNameVal = js::GetFunctionNativeReserved(callee, 1);
@@ -870,16 +890,23 @@ bool property_setter_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) {
 
     JS::RootedString classNameStr(cx, classNameVal.toString());
     JS::UniqueChars className = JS_EncodeStringToUTF8(cx, classNameStr);
-    if (!className) {
-        args.rval().setUndefined();
-        return true;
-    }
+    if (!className) return false;
 
     // Look up setter in registry
     auto classIt = g_class_registry.find(className.get());
     if (classIt == g_class_registry.end()) {
         args.rval().setUndefined();
         return true;
+    }
+
+    if (JS::GetClass(thisObj) != classIt->second.jsclass) {
+        JS_ReportErrorASCII(cx, "Incompatible native receiver");
+        return false;
+    }
+    priv = sm_get_private(thisObj);
+    if (!priv) {
+        JS_ReportErrorASCII(cx, "Native object has no private data");
+        return false;
     }
 
     auto setterIt = classIt->second.setters.find(propName.get());
@@ -891,18 +918,20 @@ bool property_setter_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) {
     // Call the setter with the value argument
     if (argc > 0) {
         JS::HandleValue val = args[0];
-        setterIt->second(priv, cx, val);
+        if (!setterIt->second(priv, cx, val)) return false;
     }
 
     args.rval().setUndefined();
     return true;
+} catch (...) {
+    return handle_native_exception(cx);
 }
 
 // ============================================================================
 // Universal method dispatcher for native classes
 // ============================================================================
 
-bool universal_method_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) {
+bool universal_method_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) try {
     JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
 
     // Get 'this' object
@@ -914,14 +943,10 @@ bool universal_method_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) {
     JS::RootedObject thisObj(cx, &args.thisv().toObject());
 
     // Get the private data (native object pointer)
-    void *priv = sm_get_private(thisObj);
-    if (!priv) {
-        JS_ReportErrorASCII(cx, "No private data on object");
-        return false;
-    }
+    void *priv = nullptr;
 
     // Get the method name from the callee's function native reserved slot
-    JSObject *callee = &args.callee();
+    JS::RootedObject callee(cx, &args.callee());
     const JS::Value &methodNameVal = js::GetFunctionNativeReserved(callee, 0);
 
     if (!methodNameVal.isString()) {
@@ -957,6 +982,16 @@ bool universal_method_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) {
         return false;
     }
     
+    if (JS::GetClass(thisObj) != classIt->second.jsclass) {
+        JS_ReportErrorASCII(cx, "Incompatible native receiver");
+        return false;
+    }
+    priv = sm_get_private(thisObj);
+    if (!priv) {
+        JS_ReportErrorASCII(cx, "Native object has no private data");
+        return false;
+    }
+
     auto methodIt = classIt->second.methods.find(methodName.get());
     if (methodIt == classIt->second.methods.end()) {
         JS_ReportErrorASCII(cx, "Method '%s' not found", methodName.get());
@@ -965,6 +1000,8 @@ bool universal_method_dispatch(JSContext *cx, unsigned argc, JS::Value *vp) {
     
     // Call the method
     return methodIt->second(priv, cx, argc, vp);
+} catch (...) {
+    return handle_native_exception(cx);
 }
 
 } // namespace flusspferd

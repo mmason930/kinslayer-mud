@@ -1,13 +1,29 @@
 /**
- * flusspferd.hpp - SpiderMonkey 131 compatibility shim
+ * flusspferd.hpp - SpiderMonkey 153 compatibility shim
  * 
- * This header provides a Flusspferd-compatible API using SpiderMonkey 131.
+ * This header provides a Flusspferd-compatible API using SpiderMonkey 153.
  * It allows existing code that was written for Flusspferd to work with modern SpiderMonkey.
  */
 
 #ifndef KINSLAYER_FLUSSPFERD_HPP
 #define KINSLAYER_FLUSSPFERD_HPP
 
+// The pinned source patch lets embedders keep standard C++ new/delete. Without
+// it, public JS allocation/profiler headers install Mozilla's global overrides.
+#define MOZALLOC_NO_GLOBAL_NEW_DELETE 1
+// The public profiler headers need platform definitions absent from pkg-config.
+#if defined(_WIN32)
+#ifndef XP_WIN
+#define XP_WIN 1
+#endif
+#elif defined(__unix__) || defined(__APPLE__)
+#ifndef XP_UNIX
+#define XP_UNIX 1
+#endif
+#endif
+
+#include <js-config.h>
+static_assert(MOZJS_MAJOR_VERSION == 153, "Kinslayer requires SpiderMonkey 153 headers");
 #include <jsapi.h>
 #include <jsfriendapi.h>
 #include <js/Initialization.h>
@@ -17,6 +33,8 @@
 #include <js/Object.h>
 #include <js/Class.h>
 #include <js/ValueArray.h>
+#include <js/TracingAPI.h>
+#include <chrono>
 #include <string>
 #include <stdexcept>
 #include <functional>
@@ -26,7 +44,7 @@
 #include <memory>
 
 // ============================================================================
-// SpiderMonkey 131 compatibility typedefs and macros
+// SpiderMonkey 153 compatibility typedefs and macros
 // These provide backward compatibility with SpiderMonkey 1.8.x API
 // ============================================================================
 
@@ -44,7 +62,7 @@ typedef double jsdouble;
 #define JS_FALSE false
 #endif
 
-// Value conversion macros (SpiderMonkey 1.8.x -> 131)
+// Value conversion macros (SpiderMonkey 1.8.x -> 153)
 #define JSVAL_IS_INT(v) ((v).isInt32())
 #define JSVAL_TO_INT(v) ((v).toInt32())
 #define INT_TO_JSVAL(i) (JS::Int32Value(i))
@@ -67,7 +85,8 @@ typedef double jsdouble;
 
 // Compatibility functions for old SpiderMonkey API
 inline JSBool JS_ValueToBoolean(JSContext *cx, JS::Value v, JSBool *bp) {
-    *bp = JS::ToBoolean(JS::HandleValue::fromMarkedLocation(&v));
+    JS::RootedValue input(cx, v);
+    *bp = JS::ToBoolean(input);
     return true;
 }
 
@@ -93,7 +112,7 @@ inline void JS_NewNumberValue(JSContext *cx, double d, JS::Value *vp) {
     *vp = JS::DoubleValue(d);
 }
 
-// JS_GetPrivate takes only the object in SpiderMonkey 131
+// JS_GetPrivate takes only the object in SpiderMonkey 153
 // But old code passed (cx, obj) - we ignore the cx
 inline void* JS_GetPrivate_compat(JSContext *cx, JSObject *obj) {
     JS::Value v = JS::GetReservedSlot(obj, 0);
@@ -125,7 +144,7 @@ extern JS::PersistentRootedObject *g_global;
 
 // ============================================================================
 // Wrapper functions to avoid template lookup issues
-// In SpiderMonkey 131, private data uses reserved slots with PrivateValue
+// In SpiderMonkey 153, private data uses reserved slots with PrivateValue
 // ============================================================================
 
 // Private data is stored in reserved slot 0 using PrivateValue
@@ -160,47 +179,88 @@ public:
 // value class - wraps JS::Value
 // ============================================================================
 class value {
+private:
+    // Copies share immutable rooted storage. Only the GC updates its pointer;
+    // assigning a wrapper replaces its storage without changing other copies.
+    // Scalars need no root and remain usable before context initialization.
+    std::shared_ptr<JS::PersistentRootedValue> rooted_;
+    JS::Value scalar_ = JS::UndefinedValue();
+protected:
+    void assign(const JS::Value &v) {
+        if (v.isGCThing()) {
+            if (!g_cx) throw exception("JavaScript value without a context");
+            rooted_ = std::make_shared<JS::PersistentRootedValue>(g_cx, v);
+            scalar_ = JS::UndefinedValue();
+        } else {
+            rooted_.reset();
+            scalar_ = v;
+        }
+    }
 public:
-    JS::Value val;
-    
-    value() : val(JS::UndefinedValue()) {}
-    value(const JS::Value &v) : val(v) {}
-    value(int i) : val(JS::Int32Value(i)) {}
-    value(long l) : val(JS::DoubleValue(static_cast<double>(l))) {}
-    value(unsigned long l) : val(JS::DoubleValue(static_cast<double>(l))) {}
-    value(long long l) : val(JS::DoubleValue(static_cast<double>(l))) {}
-    value(unsigned long long l) : val(JS::DoubleValue(static_cast<double>(l))) {}
-    value(double d) : val(JS::DoubleValue(d)) {}
-    value(bool b) : val(JS::BooleanValue(b)) {}
+    const JS::Value &get_js_value() const {
+        return rooted_ ? rooted_->get() : scalar_;
+    }
+
+    value() = default;
+    value(const JS::Value &v) { assign(v); }
+    value(int i) { assign(JS::Int32Value(i)); }
+    value(long l) { assign(JS::DoubleValue(static_cast<double>(l))); }
+    value(unsigned long l) { assign(JS::DoubleValue(static_cast<double>(l))); }
+    value(long long l) { assign(JS::DoubleValue(static_cast<double>(l))); }
+    value(unsigned long long l) { assign(JS::DoubleValue(static_cast<double>(l))); }
+    value(double d) { assign(JS::DoubleValue(d)); }
+    value(bool b) { assign(JS::BooleanValue(b)); }
     value(const std::string &s);
     value(const char *s);
-    value(JSObject *obj) : val(obj ? JS::ObjectValue(*obj) : JS::NullValue()) {}
+    value(JSObject *obj) { assign(obj ? JS::ObjectValue(*obj) : JS::NullValue()); }
     
-    bool is_undefined() const { return val.isUndefined(); }
-    bool is_null() const { return val.isNull(); }
-    bool is_undefined_or_null() const { return val.isNullOrUndefined(); }
-    bool is_boolean() const { return val.isBoolean(); }
+    bool is_undefined() const { return get_js_value().isUndefined(); }
+    bool is_null() const { return get_js_value().isNull(); }
+    bool is_undefined_or_null() const { return get_js_value().isNullOrUndefined(); }
+    bool is_boolean() const { return get_js_value().isBoolean(); }
     bool is_bool() const { return is_boolean(); }
-    bool is_int() const { return val.isInt32(); }
-    bool is_double() const { return val.isDouble(); }
-    bool is_number() const { return val.isNumber(); }
-    bool is_string() const { return val.isString(); }
-    bool is_object() const { return val.isObject(); }
+    bool is_int() const { return get_js_value().isInt32(); }
+    bool is_double() const { return get_js_value().isDouble(); }
+    bool is_number() const { return get_js_value().isNumber(); }
+    bool is_string() const { return get_js_value().isString(); }
+    bool is_object() const { return get_js_value().isObject(); }
     bool is_function() const;
     
-    int get_int() const { return val.toInt32(); }
+    int get_int() const { return get_js_value().toInt32(); }
     bool get_bool() const { return to_boolean(); }
     double get_double() const { return to_number(); }
     double to_number() const;
-    bool to_boolean() const { return JS::ToBoolean(JS::HandleValue::fromMarkedLocation(&val)); }
+    bool to_boolean() const { JS::RootedValue v(g_cx, get_js_value()); return JS::ToBoolean(v); }
     std::string to_std_string() const;
     string to_string() const;  // Forward declared, implemented after string class
     object to_object() const;
     object get_object() const;
     
-    operator JS::Value() const { return val; }
-    operator JS::HandleValue() const { return JS::HandleValue::fromMarkedLocation(&val); }
+    operator JS::Value() const { return get_js_value(); }
 };
+
+// Preserve the original JS exception (including non-Error values) across C++
+// unwinding, and preserve uncatchable termination when no exception is pending.
+class js_exception : public exception {
+public:
+    value thrown;
+    bool has_thrown;
+    js_exception(const std::string &message, const value &v, bool pending)
+        : exception(message), thrown(v), has_thrown(pending) {}
+};
+[[noreturn]] void throw_js_failure(const std::string &operation);
+bool handle_native_exception(JSContext *cx) noexcept;
+
+// Each outer entry gets a deadline; nested calls retain it. The interrupt
+// callback reads this only on the JS thread.
+class execution_scope {
+public:
+    explicit execution_scope(std::chrono::milliseconds budget = std::chrono::seconds(60));
+    ~execution_scope();
+    execution_scope(const execution_scope&) = delete;
+    execution_scope &operator=(const execution_scope&) = delete;
+};
+bool execution_timed_out();
 
 // ============================================================================
 // string class - wraps JSString*
@@ -234,14 +294,15 @@ class object : public value {
 public:
     object() : value(JS::NullValue()) {}
     object(const JS::Value &v) : value(v) {}
+    object(const value &v) : value(v) {}
     object(JSObject *obj) : value(obj) {}
     
-    bool is_null() const { return val.isNullOrUndefined(); }
+    bool is_null() const { return get_js_value().isNullOrUndefined(); }
     bool is_valid() const { return !is_null(); }
     bool is_array() const;
     
     JSObject *get_object_ptr() const { 
-        return val.isObject() ? &val.toObject() : nullptr; 
+        return get_js_value().isObject() ? &get_js_value().toObject() : nullptr;
     }
     
     // Property access
@@ -256,6 +317,7 @@ public:
     
     // Method calls
     value call(const std::string &name);
+    value call_function(const object &receiver, const value &arg);
     value call(const std::string &name, const value &arg);
     value call(const std::string &name, const value &arg1, const value &arg2);
     
@@ -272,47 +334,11 @@ public:
 // array class - wraps JSObject* (array)
 // ============================================================================
 class array : public object {
-    // Auto-rooting: arrays created via create_array() hold a persistent root
-    // to prevent GC collection during construction (push loops etc.)
-    JS::PersistentRootedValue *auto_root_ = nullptr;
 public:
     array() : object() {}
     array(const JS::Value &v) : object(v) {}
     array(JSObject *obj) : object(obj) {}
     array(const object &o) : object(o) {}
-
-    // Copy: don't transfer root (original stays rooted, copy is short-lived)
-    array(const array &other) : object(other), auto_root_(nullptr) {}
-    array &operator=(const array &other) {
-        if (this != &other) {
-            object::operator=(other);
-            delete auto_root_;
-            auto_root_ = nullptr;
-        }
-        return *this;
-    }
-
-    // Move: transfer root ownership
-    array(array &&other) noexcept : object(other.val), auto_root_(other.auto_root_) {
-        other.auto_root_ = nullptr;
-    }
-    array &operator=(array &&other) noexcept {
-        if (this != &other) {
-            val = other.val;
-            delete auto_root_;
-            auto_root_ = other.auto_root_;
-            other.auto_root_ = nullptr;
-        }
-        return *this;
-    }
-
-    ~array() { delete auto_root_; }
-
-    void set_auto_root() {
-        if (g_cx && !auto_root_ && !is_null()) {
-            auto_root_ = new JS::PersistentRootedValue(g_cx, val);
-        }
-    }
 
     uint32_t length() const;
     uint32_t size() const { return length(); }
@@ -361,7 +387,7 @@ public:
     
     // Forward object methods
     value get_property(const std::string &name) const { return get().get_property(name); }
-    void set_property(const std::string &name, const value &v) { /* need mutable access */ }
+    void set_property(const std::string &name, const value &v) { get().set_property(name, v); }
     bool has_property(const std::string &name) const { return get().has_property(name); }
     value call(const std::string &name) { return get().call(name); }
     value call(const std::string &name, const value &arg) { return get().call(name, arg); }
@@ -398,6 +424,7 @@ public:
 // ============================================================================
 class current_context_scope {
 private:
+    context context_;
     JSAutoRealm *realm_;
 public:
     explicit current_context_scope(const context &ctx);
@@ -420,7 +447,7 @@ public:
     unsigned arg_count() const { return args.length(); }
     value arg(unsigned i) const { return value(args.get(i)); }
     object this_object() const { return object(args.thisv().toObjectOrNull()); }
-    void set_return(const value &v) { args.rval().set(v.val); }
+    void set_return(const value &v) { args.rval().set(v.get_js_value()); }
 };
 
 // ============================================================================
@@ -470,7 +497,7 @@ array create_array(uint32_t length);
 // ============================================================================
 struct NativeClassInfo {
     const JSClass *jsclass;
-    JSObject *prototype;
+    std::function<void()> release_prototype;
     std::map<std::string, std::function<bool(void*, JSContext*, unsigned, JS::Value*)>> methods;
     std::map<std::string, std::function<bool(void*, JSContext*, JS::MutableHandleValue)>> getters;
     std::map<std::string, std::function<bool(void*, JSContext*, JS::HandleValue)>> setters;
@@ -503,30 +530,31 @@ public:
     
 protected:
     call_context *current_call_context;
-    object js_object_;  // The JavaScript object wrapper
+    JS::Heap<JSObject*> js_object_; // Traced by the owning JSClass, never a self-root.
     
 public:
     native_object_base() : current_call_context(nullptr), js_object_() {}
     
     // Constructor that takes the JS object wrapper (for Flusspferd compatibility)
     explicit native_object_base(const object &self) 
-        : current_call_context(nullptr), js_object_(self) {}
+        : current_call_context(nullptr), js_object_(self.get_object_ptr()) {}
     
     virtual ~native_object_base() {}
     
     // Get the associated JavaScript object
-    object &js_object() { return js_object_; }
-    const object &js_object() const { return js_object_; }
+    object js_object() const { return object(js_object_.get()); }
+    void attach_object(JSObject *self) { js_object_ = self; }
+    void trace(JSTracer *trc) { JS::TraceEdge(trc, &js_object_, "native owner"); }
     
     // Property access helpers (inline implementation for template)
     value get_property(const std::string &name) const {
-        if (js_object_.is_null()) return value();
-        return js_object_.get_property(name);
+        if (!js_object_) return value();
+        return js_object().get_property(name);
     }
     
     void set_property(const std::string &name, const value &v) {
-        if (js_object_.is_null()) return;
-        js_object_.set_property(name, v);
+        if (!js_object_) return;
+        js_object().set_property(name, v);
     }
     
     void set_call_context(call_context *ctx) { current_call_context = ctx; }
@@ -607,28 +635,28 @@ struct to_jsval<const char*> {
 template<>
 struct to_jsval<value> {
     static JS::Value convert(JSContext *cx, const value &v) {
-        return v.val;
+        return v.get_js_value();
     }
 };
 
 template<>
 struct to_jsval<object> {
     static JS::Value convert(JSContext *cx, const object &v) {
-        return v.val;
+        return v.get_js_value();
     }
 };
 
 template<>
 struct to_jsval<array> {
     static JS::Value convert(JSContext *cx, const array &v) {
-        return v.val;
+        return v.get_js_value();
     }
 };
 
 template<>
 struct to_jsval<string> {
     static JS::Value convert(JSContext *cx, const string &v) {
-        return v.val;
+        return v.get_js_value();
     }
 };
 
@@ -641,35 +669,45 @@ struct from_jsval {
 template<>
 struct from_jsval<int> {
     static int convert(JSContext *cx, const JS::Value &v) {
-        return v.isInt32() ? v.toInt32() : static_cast<int>(v.toNumber());
+        JS::RootedValue input(cx, v);
+        int32_t result;
+        if (!JS::ToInt32(cx, input, &result)) throw_js_failure("ToInt32");
+        return result;
     }
 };
 
 template<>
 struct from_jsval<unsigned int> {
     static unsigned int convert(JSContext *cx, const JS::Value &v) {
-        return static_cast<unsigned int>(v.isInt32() ? v.toInt32() : v.toNumber());
+        JS::RootedValue input(cx, v);
+        uint32_t result;
+        if (!JS::ToUint32(cx, input, &result)) throw_js_failure("ToUint32");
+        return result;
     }
 };
 
 template<>
 struct from_jsval<double> {
     static double convert(JSContext *cx, const JS::Value &v) {
-        return v.toNumber();
+        JS::RootedValue input(cx, v);
+        double result;
+        if (!JS::ToNumber(cx, input, &result)) throw_js_failure("ToNumber");
+        return result;
     }
 };
 
 template<>
 struct from_jsval<float> {
     static float convert(JSContext *cx, const JS::Value &v) {
-        return static_cast<float>(v.toNumber());
+        return static_cast<float>(from_jsval<double>::convert(cx, v));
     }
 };
 
 template<>
 struct from_jsval<bool> {
     static bool convert(JSContext *cx, const JS::Value &v) {
-        return JS::ToBoolean(JS::HandleValue::fromMarkedLocation(&v));
+        JS::RootedValue input(cx, v);
+        return JS::ToBoolean(input);
     }
 };
 
@@ -775,12 +813,8 @@ bool native_function_wrapper_void(JSContext *cx, unsigned argc, JS::Value *vp) {
     try {
         auto extracted = ArgExtractor<Args...>::extract(cx, args, 0);
         call_with_tuple(funcPtr, extracted);
-    } catch (flusspferd::exception &e) {
-        JS_ReportErrorUTF8(cx, "%s", e.what());
-        return false;
-    } catch (std::exception &e) {
-        JS_ReportErrorUTF8(cx, "%s", e.what());
-        return false;
+    } catch (...) {
+        return handle_native_exception(cx);
     }
 
     args.rval().setUndefined();
@@ -809,12 +843,8 @@ bool native_function_wrapper(JSContext *cx, unsigned argc, JS::Value *vp) {
         auto extracted = ArgExtractor<Args...>::extract(cx, args, 0);
         Ret result = call_with_tuple(funcPtr, extracted);
         args.rval().set(detail::to_jsval<Ret>::convert(cx, result));
-    } catch (flusspferd::exception &e) {
-        JS_ReportErrorUTF8(cx, "%s", e.what());
-        return false;
-    } catch (std::exception &e) {
-        JS_ReportErrorUTF8(cx, "%s", e.what());
-        return false;
+    } catch (...) {
+        return handle_native_exception(cx);
     }
 
     return true;
@@ -847,7 +877,7 @@ object create_native_function(const std::string &name, Ret(*func)(Args...)) {
 
     // Create the function with reserved slots for storing the function pointer
     JSFunction *jsFunc = js::NewFunctionWithReserved(g_cx, wrapper, sizeof...(Args), 0, name.c_str());
-    if (!jsFunc) return object();
+    if (!jsFunc) throw_js_failure("create native function");
 
     JSObject *funcObj = JS_GetFunctionObject(jsFunc);
 
