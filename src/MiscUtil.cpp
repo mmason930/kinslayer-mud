@@ -3,6 +3,9 @@
 #include "MiscUtil.h"
 
 #include <boost/regex.hpp>
+#include <random>
+
+inline thread_local std::minstd_rand rng{std::random_device{}()};
 
 /*** Galnor - 01/14/2010 - Get the current string's color, if there is one set ***/
 void MiscUtil::findBufferColor( const char *buf, char *destBuffer )
@@ -76,25 +79,25 @@ bool MiscUtil::isInt(const std::string &str)
 	return (isInt(str.c_str()));
 }
 
-
 /* creates a random number in interval [from;to] */
 int MiscUtil::random(int low, int high)
 {
 	if (low > high)
-		low ^= high ^= low ^= high;
-	return ((rand() % (high - low + 1)) + low);
+		std::swap(low, high);
+	return std::uniform_int_distribution<int>(low, high)(rng);
 }
 
 /* simulates dice roll */
 int MiscUtil::dice(int number, int size)
 {
-	int sum = 0;
-
 	if (size <= 0 || number <= 0)
 		return 0;
 
+	std::uniform_int_distribution<int> dist(1, size);
+	int sum = 0;
+
 	while (number-- > 0)
-		sum += ((rand() % size) + 1);
+		sum += dist(rng);
 
 	return sum;
 }

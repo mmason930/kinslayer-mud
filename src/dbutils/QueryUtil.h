@@ -4,6 +4,7 @@
 #include <mysql/sqlDatabase.h>
 #include <functional>
 #include <optional>
+#include <map>
 #include "../DateTime.h"
 
 class QueryUtil
@@ -25,7 +26,7 @@ public:
 	std::optional<DateTime> getNullableDateTime(const sql::Row &row, const std::string &columnName) const;
 
 	template <typename ReturnType, typename MapKeyType>
-	std::map<MapKeyType, ReturnType> loadDataObjectMapFromDatabase(sql::Connection connection, const std::string &tableName, const std::string &whereCriteria, const std::function<ReturnType(const sql::Row row)> &rowConverter, const std::function<MapKeyType(const ReturnType returnType)> &keyRetrievalFunction)
+	std::map<MapKeyType, ReturnType> loadDataObjectMapFromDatabase(const sql::Connection& connection, const std::string &tableName, const std::string &whereCriteria, const std::function<ReturnType(const sql::Row row)> &rowConverter, const std::function<MapKeyType(const ReturnType returnType)> &keyRetrievalFunction)
 	{
 		std::map<MapKeyType, ReturnType> map;
 		std::stringstream queryBuffer;
@@ -50,13 +51,13 @@ public:
 	}
 
 	template <typename ReturnType, typename MapKeyType>
-	std::map<MapKeyType, ReturnType> loadDataObjectMapFromDatabase(sql::Connection connection, const std::string &tableName, const std::function<ReturnType(const sql::Row row)> &rowConverter, const std::function<MapKeyType(const ReturnType returnType)> &keyRetrievalFunction)
+	std::map<MapKeyType, ReturnType> loadDataObjectMapFromDatabase(const sql::Connection& connection, const std::string &tableName, const std::function<ReturnType(const sql::Row row)> &rowConverter, const std::function<MapKeyType(const ReturnType returnType)> &keyRetrievalFunction)
 	{
 		return loadDataObjectMapFromDatabase(connection, tableName, std::string(""), rowConverter, keyRetrievalFunction);
 	}
 
 	template <typename ReturnType>
-	ReturnType loadDataObjectFromDatabase(sql::Connection connection, const std::string &tableName, const std::string &whereCriteria, const std::function<ReturnType(const sql::Row row)> &rowConverter)
+	ReturnType loadDataObjectFromDatabase(const sql::Connection& connection, const std::string &tableName, const std::string &whereCriteria, const std::function<ReturnType(const sql::Row row)> &rowConverter)
 	{
 	
 		std::stringstream queryBuffer;
@@ -72,7 +73,7 @@ public:
 			return rowConverter(query->getRow());
 		}
 
-		return NULL;
+		return nullptr;
 	}
 };
 

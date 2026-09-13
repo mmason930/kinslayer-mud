@@ -245,7 +245,7 @@ CommandHandler  do_cast  = DEFINE_COMMAND
 		ch->send("You are not in touch with the True Source.\r\n");
 		return;
 	}
-	if( AFF_FLAGGED(ch, AFF_SHIELD) || ShieldManager::GetManager().ShieldedBy(ch) != NULL )
+	if( AFF_FLAGGED(ch, AFF_SHIELD) || ShieldManager::GetManager().ShieldedBy(ch) != nullptr )
 	{
 		ch->send("Your connection to the True Source is blocked!\r\n");
 		return;
@@ -295,14 +295,14 @@ CommandHandler  do_cast  = DEFINE_COMMAND
 		cvict = ch->player.target;
 		ovict = ch->player.otarget;
 
-		if( cvict != NULL )
+		if( cvict != nullptr )
 		{
 			if( weave->targetSet("CharRoom") && ch->in_room == cvict->in_room && CAN_SEE(ch, cvict) )
 				target = true;
 			else if( weave->targetSet("CharWorld") && CAN_SEE(ch, cvict))
 				target = true;
 		}
-		else if( ovict != NULL )
+		else if( ovict != nullptr )
 		{
 			if( weave->targetSet("ObjInv") && ovict->carried_by == ch )
 				target = true;
@@ -388,9 +388,9 @@ CommandHandler  do_cast  = DEFINE_COMMAND
 		ovict = ch->player.otarget;
 		if( cvict && AFF_FLAGGED(cvict, AFF_SLICE) )
 		{
-			Act(WeaveManager::GetManager().GetWeave("Slice")->getAttribute("SliceToChar").c_str(), TRUE, cvict, NULL, ch, TO_CHAR);
-			Act(WeaveManager::GetManager().GetWeave("Slice")->getAttribute("SliceToVict").c_str(), TRUE, cvict, NULL, ch, TO_VICT);
-			Act(WeaveManager::GetManager().GetWeave("Slice")->getAttribute("SliceToRoom").c_str(), TRUE, cvict, NULL, ch, TO_NOTVICT);
+			Act(WeaveManager::GetManager().GetWeave("Slice")->getAttribute("SliceToChar").c_str(), TRUE, cvict, nullptr, ch, TO_CHAR);
+			Act(WeaveManager::GetManager().GetWeave("Slice")->getAttribute("SliceToVict").c_str(), TRUE, cvict, nullptr, ch, TO_VICT);
+			Act(WeaveManager::GetManager().GetWeave("Slice")->getAttribute("SliceToRoom").c_str(), TRUE, cvict, nullptr, ch, TO_NOTVICT);
 			affect_from_char(cvict, 0, AFF_SLICE);
 			return;
 		}
@@ -423,7 +423,7 @@ void sendElementMessages( Character *ch, Weave *weave )
 			if(  pos > 0 )
 				elements.replace( pos, 1, " and" );
 
-			Act(elements.c_str(), FALSE, temp, NULL, ch, TO_CHAR);
+			Act(elements.c_str(), FALSE, temp, nullptr, ch, TO_CHAR);
 		}
 }
 
@@ -458,7 +458,7 @@ Character *randomTarget( Character *ch )
 		}
 	}
 
-	return ( NULL ); /* should never get here */
+	return nullptr; /* should never get here */
 }
 
 
@@ -476,7 +476,7 @@ void Character::AddStrain( int strain )
 void Character::AddChannelingStrain( bool Failure, int spell )
 {
 	Weave* weave = WeaveManager::GetManager().GetWeave(spell);
-	if( weave == NULL )
+	if( weave == nullptr )
 	{
 		MudLog(BRF, LVL_APPR, TRUE, "SYSERR - Character::AddChannelingStrain(): Weave #%d does not exist.", spell);
 		return;

@@ -19,8 +19,13 @@ class JSEnvironment;
 int JSCharacter::numberAllocated = 0;
 int JSCharacter::numberDeallocated = 0;
 
+// Forward declaration of the binding registration function
+void RegisterJSCharacterBindings();
+
 void JSEnvironment::LoadJSCharacter()
 {
+	// class_name is now defined by FLUSSPFERD_CLASS_DESCRIPTION macro
+	RegisterJSCharacterBindings();  // Register methods and properties first
 	load_class<JSCharacter>();
 }
 
@@ -154,6 +159,15 @@ int JSCharacter::getRank( int iClan )
 	if( !userClan ) return false;
 
 	return (int)userClan->getRank();
+}
+int JSCharacter::getClanQuestPoints( int iClan )
+{
+	if( !real || real->IsPurged() ) return 0;
+	UserClan *userClan = real->getUserClan( iClan );
+
+	if( !userClan ) return 0;
+
+	return (int)userClan->getQuestPoints();
 }
 bool JSCharacter::getIsCouncil( int iClan )
 {

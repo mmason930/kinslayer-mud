@@ -1,4 +1,3 @@
-#include <httplib.h>
 #include "OpenAIClient.h"
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
@@ -145,11 +144,10 @@ std::string OpenAIClient::generateResponsesRequestBody(
 	return fastWriter.write(payload);
 }
 
-httplib::Headers OpenAIClient::generateRequestHeaders() const {
-	httplib::Headers headers{
+std::vector<std::pair<std::string, std::string>> OpenAIClient::generateRequestHeaders() const {
+	return {
 			{"Authorization", "Bearer " + apiKey_},
 			{"Content-Type",  "application/json"},
 			{"Host", "api.openai.com"}
 	};
-	return headers;
 }

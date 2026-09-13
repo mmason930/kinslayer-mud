@@ -30,6 +30,58 @@ HelpManager.prototype.createWebSocketMessageForHelpFile = function(helpFile, res
 	response.helpFileId = helpFile.id;
 };
 
+// The web client receives metadata and rendered text, never executable help source.
+HelpManager.prototype.getBrowserResponse = function(json, actor)
+{
+	var command = JSON.parse(json);
+	var response = {method: "Browse Help", requestId: command.requestId};
+	if(!actor || !actor.isValid)
+		response.error = "Sign in to browse the help files.";
+	else if(command.action === "index")
+	{
+		response.topics = [];
+		for(var id in this.helpFiles)
+		{
+			if(!Object.prototype.hasOwnProperty.call(this.helpFiles, id)) continue;
+			var file = this.helpFiles[id];
+			response.topics.push({id: file.id, parentId: file.parentId == null ? null : Number(file.parentId),
+				name: file.name, keywords: file.keywords || ""});
+		}
+	}
+	else if(command.action === "article" && typeof command.helpFileId === "number" &&
+		command.helpFileId > 0 && command.helpFileId % 1 === 0)
+	{
+		var file = this.getHelpFileById(command.helpFileId);
+		if(!file)
+			response.error = "This help file no longer exists. Refresh the topic list.";
+		else
+		{
+			response.article = {id: file.id, name: file.name, syntax: file.syntax || "", description: ""};
+			try
+			{
+				response.article.description = this.renderBrowserDescription(actor, file);
+			}
+			catch(error)
+			{
+				mudLog(constants.BRF, 100, "Could not render help file #" + file.id + ": " + error);
+				response.article.error = "This help page could not be displayed. Please report it to a staff member.";
+			}
+		}
+	}
+	else
+		response.error = "Invalid help request.";
+	return JSON.stringify(response);
+};
+
+HelpManager.prototype.renderBrowserDescription = function(actor, file)
+{
+	// Help descriptions are trusted, staff-authored expressions, as in getHelpPage.
+	// Keep these colors local so browser rendering cannot change another script's colors.
+	var nrm = "\x1b[0m", bld = "\x1b[1m", red = "\x1b[31m", grn = "\x1b[32m",
+		yel = "\x1b[33m", blu = "\x1b[34m", mag = "\x1b[35m", cyn = "\x1b[36m", whi = "\x1b[37m";
+	return file.description ? String(eval(file.description) || "") : "";
+};
+
 HelpManager.prototype.addHelpFileInternally = function(helpFile)
 {
 	if(this.helpFiles[ helpFile.id ])

@@ -146,24 +146,24 @@ void parse_action(int command, char *str, Descriptor *d)
 				j++;
 			}
 
-			if ((s = strtok(str, "'")) == NULL)
+			if ((s = strtok(str, "'")) == nullptr)
 			{
 				d->send("Invalid format.\r\n");
 				return;
 			}
-			else if ((s = strtok(NULL, "'")) == NULL)
+			else if ((s = strtok(nullptr, "'")) == nullptr)
 			{
 				d->send("Target string must be enclosed in single quotes.\r\n");
 				return;
 			}
 
-			else if ((t = strtok(NULL, "'")) == NULL)
+			else if ((t = strtok(nullptr, "'")) == nullptr)
 			{
 				d->send("No replacement string.\r\n");
 				return;
 			}
 
-			else if ((t = strtok(NULL, "'")) == NULL)
+			else if ((t = strtok(nullptr, "'")) == nullptr)
 			{
 				d->send("Replacement string must be enclosed in single quotes.\r\n");
 				return;
@@ -217,7 +217,7 @@ void parse_action(int command, char *str, Descriptor *d)
 			i = 1;
 			total_len = 1;
 
-			if ((s = *d->str) == NULL)
+			if ((s = *d->str) == nullptr)
 			{
 				d->send("Buffer is empty.\r\n");
 				return;
@@ -227,13 +227,13 @@ void parse_action(int command, char *str, Descriptor *d)
 			{
 
 				while (s && (i < line_low))
-					if ((s = strchr(s, '\n')) != NULL)
+					if ((s = strchr(s, '\n')) != nullptr)
 					{
 						++i;
 						++s;
 					}
 
-				if ((i < line_low) || (s == NULL))
+				if ((i < line_low) || (s == nullptr))
 				{
 					d->send("Line(s) out of range; not deleting.\r\n");
 					return;
@@ -242,14 +242,14 @@ void parse_action(int command, char *str, Descriptor *d)
 				t = s;
 
 				while (s && (i < line_high))
-					if ((s = strchr(s, '\n')) != NULL)
+					if ((s = strchr(s, '\n')) != nullptr)
 					{
 						++i;
 						++total_len;
 						++s;
 					}
 
-				if ((s) && ((s = strchr(s, '\n')) != NULL))
+				if ((s) && ((s = strchr(s, '\n')) != nullptr))
 				{
 					++s;
 
@@ -329,13 +329,13 @@ void parse_action(int command, char *str, Descriptor *d)
 			s = *d->str;
 
 			while (s && (i < line_low))
-				if ((s = strchr(s, '\n')) != NULL)
+				if ((s = strchr(s, '\n')) != nullptr)
 				{
 					++i;
 					++s;
 				}
 
-			if ((i < line_low) || (s == NULL))
+			if ((i < line_low) || (s == nullptr))
 			{
 				d->send("Line(s) out of range; no buffer listing.\r\n");
 				return;
@@ -344,7 +344,7 @@ void parse_action(int command, char *str, Descriptor *d)
 			t = s;
 
 			while (s && (i <= line_high))
-				if ((s = strchr(s, '\n')) != NULL)
+				if ((s = strchr(s, '\n')) != nullptr)
 				{
 					++i;
 					++total_len;
@@ -377,7 +377,7 @@ void parse_action(int command, char *str, Descriptor *d)
 		case PARSE_LIST_NUM:
 		{
 			std::stringstream outputStringStream; //This will be used to generate the buffer.
-			char *outputCString = NULL;//We will use this when we call page_string below.
+			char *outputCString = nullptr;//We will use this when we call page_string below.
 
 			if (*str != '\0')
 
@@ -419,7 +419,7 @@ void parse_action(int command, char *str, Descriptor *d)
 			//Counts the number of lines in the buffer.
 			while (s && (i < line_low))
 			{
-				if ((s = strchr(s, '\n')) != NULL)
+				if ((s = strchr(s, '\n')) != nullptr)
 				{
 					++i;
 					++s;
@@ -427,7 +427,7 @@ void parse_action(int command, char *str, Descriptor *d)
 			}
 
 			//Range checks.
-			if ((i < line_low) || (s == NULL))
+			if ((i < line_low) || (s == nullptr))
 			{
 				d->send("Line(s) out of range; no buffer listing.\r\n");
 				return;
@@ -438,7 +438,7 @@ void parse_action(int command, char *str, Descriptor *d)
 			//Now, go through every line and process the output.
 			while (s && (i <= line_high))
 			{
-				if ((s = strchr(s, '\n')) != NULL)
+				if ((s = strchr(s, '\n')) != nullptr)
 				{
 					++i;
 					++total_len;
@@ -497,7 +497,7 @@ void parse_action(int command, char *str, Descriptor *d)
 			i = 1;
 			*buf = '\0';
 
-			if ((s = *d->str) == NULL)
+			if ((s = *d->str) == nullptr)
 			{
 				d->send("Buffer is empty, nowhere to insert.\r\n");
 				return;
@@ -506,13 +506,13 @@ void parse_action(int command, char *str, Descriptor *d)
 			if (line_low > 0)
 			{
 				while (s && (i < line_low))
-					if ((s = strchr(s, '\n')) != NULL)
+					if ((s = strchr(s, '\n')) != nullptr)
 					{
 						++i;
 						++s;
 					}
 
-				if ((i < line_low) || (s == NULL))
+				if ((i < line_low) || (s == nullptr))
 				{
 					d->send("Line number out of range; insert aborted.\r\n");
 					return;
@@ -567,7 +567,7 @@ void parse_action(int command, char *str, Descriptor *d)
 			i = 1;
 			*buf = '\0';
 
-			if ((s = *d->str) == NULL)
+			if ((s = *d->str) == nullptr)
 			{
 				d->send("Buffer is empty, nothing to change.\r\n");
 				return;
@@ -580,7 +580,7 @@ void parse_action(int command, char *str, Descriptor *d)
 				 */
 
 				while (s && (i < line_low))
-					if ((s = strchr(s, '\n')) != NULL)
+					if ((s = strchr(s, '\n')) != nullptr)
 					{
 						++i;
 						++s;
@@ -590,7 +590,7 @@ void parse_action(int command, char *str, Descriptor *d)
 				 * Make sure that there was a THAT line in the text.
 				 */
 
-				if ((i < line_low) || (s == NULL))
+				if ((i < line_low) || (s == nullptr))
 				{
 					d->send("Line number out of range; change aborted.\r\n");
 					return;
@@ -624,7 +624,7 @@ void parse_action(int command, char *str, Descriptor *d)
 
 				strcat(buf, buf2);
 
-				if ((s = strchr(s, '\n')) != NULL)
+				if ((s = strchr(s, '\n')) != nullptr)
 				{
 
 					/*
@@ -733,7 +733,7 @@ void string_add(Descriptor *d, char *str)
 				if (*(d->str))
 				{
 					delete [](*(d->str));
-					*(d->str) = NULL;
+					*(d->str) = nullptr;
 					d->send("Current buffer cleared.\r\n");
 				}
 				else
@@ -859,10 +859,10 @@ void string_add(Descriptor *d, char *str)
 				*d->str = d->backstr;
 			}
 			else
-				*d->str = NULL;
+				*d->str = nullptr;
 
-			d->backstr = NULL;
-			d->str = NULL;
+			d->backstr = nullptr;
+			d->str = nullptr;
 		}
 		/*
 		 * This fix causes the editor to NULL out empty messages -- M. Scott
@@ -924,7 +924,7 @@ void string_add(Descriptor *d, char *str)
 				if (*d->str && strlen(*d->str) == 0)
 				{
 					delete (*d->str);
-					*d->str = NULL;
+					*d->str = nullptr;
 				}
 			}
 			else
@@ -933,8 +933,8 @@ void string_add(Descriptor *d, char *str)
 				if (d->backstr)
 					*d->str = d->backstr;
 				else
-					*d->str = NULL;
-				d->backstr = NULL;
+					*d->str = nullptr;
+				d->backstr = nullptr;
 				d->sendRaw("Message aborted.\r\n");
 			}
 		}
@@ -947,8 +947,8 @@ void string_add(Descriptor *d, char *str)
 		if (d->backstr)
 			delete [](d->backstr);
 
-		d->backstr = NULL;
-		d->str = NULL;
+		d->backstr = nullptr;
+		d->str = nullptr;
 	}
 
 	//Add a newline only if able -Galnor, 03/20/2009
@@ -1080,7 +1080,7 @@ char *next_page(char *str)
 		*/
 		if (*str == '\0')
 		{
-			return NULL;
+			return nullptr;
 		}
 		/*
 		* If we're at the start of the next page, return this fact.
@@ -1213,7 +1213,7 @@ void show_string(Descriptor *d, char *input)
 		if (d->showstr_head)
 		{
 			delete[] (d->showstr_head);
-			d->showstr_head = NULL;
+			d->showstr_head = nullptr;
 		}
 
 		return;
@@ -1263,7 +1263,7 @@ void show_string(Descriptor *d, char *input)
 		if (d->showstr_head)
 		{
 			delete[] (d->showstr_head);
-			d->showstr_head = NULL;
+			d->showstr_head = nullptr;
 		}
 	}
 	/* Or if we have more to show.... */

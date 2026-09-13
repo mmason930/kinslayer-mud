@@ -90,10 +90,10 @@ int Character::FindAssistPriority(Character *test)
 
 Character *Character::FindFirstAssist()
 {
-	Character *buddy = NULL, *cur;
+	Character *buddy = nullptr, *cur;
 
 	if(!MOB_FLAGGED(this, MOB_HELPER))
-		return NULL;
+		return nullptr;
 
 	for(cur = this->in_room->people;cur;cur = cur->next_in_room)
 	{
@@ -183,7 +183,7 @@ void mobileActivity(void)
 			if (ch->in_room->contents && !MiscUtil::random(0, 10))
 			{
 				max = 1;
-				best_obj = NULL;
+				best_obj = nullptr;
 
 				for (obj = ch->in_room->contents; obj; obj = obj->next_content)
 				{
@@ -194,7 +194,7 @@ void mobileActivity(void)
 					}
 				}
 
-				if (best_obj != NULL)
+				if (best_obj != nullptr)
 				{
 					best_obj->RemoveFromRoom();
 					obj_to_char(best_obj, ch);

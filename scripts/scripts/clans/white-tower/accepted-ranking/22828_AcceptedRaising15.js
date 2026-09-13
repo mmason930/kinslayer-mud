@@ -8,6 +8,9 @@ var script22828 = function(self, actor, here, args, extra) {
 		act("As you step through the third arch, the Light consumes you, and one whispered thought passes through your mind...The way back will come but once. Be steadfast.", false, actor, null, null, constants.TO_CHAR); 
 		act("As " + actor.name + " steps through the third arch, the Light consumes her.", false, actor, null, null, constants.TO_ROOM);
 		
+		//Consumed by 22832, so the closing stage cannot be reached by typing its keyword.
+		setSval(actor, 22832, "thirdArch", 1);
+
 		let rand = random(1,1);
 		if( rand === 1 ) {
 			actor.moveToRoom(getRoom(22857));

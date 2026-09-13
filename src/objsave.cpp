@@ -8,6 +8,8 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
+#include <ranges>
+
 #include "conf.h"
 
 
@@ -24,6 +26,7 @@
 #include "CharacterUtil.h"
 #include "UserLogoutType.h"
 #include "Descriptor.h"
+#include "SQLUtil.h"
 #include "rooms/Room.h"
 
 #include "commands/infrastructure/CommandInfo.h"
@@ -35,10 +38,15 @@ extern Descriptor *descriptor_list;
 extern Object *boot_object( Object obj);
 extern Object *object_list;
 extern Character *character_list;
+extern Clock readObjectClock;
+extern Clock specialLoadClock;
+extern Clock realObjectClock;
 
 void obj_from_char(struct object_data *object);
 
 std::set< int > Room::corpseRooms;
+std::unordered_map<std::string, std::vector<Object*>> Object::s_preloadedChestItems;
+bool Object::s_chestItemsPreloaded = false;
 
 /* Extern functions */
 SPECIAL(receptionist);
@@ -49,100 +57,85 @@ int find_eq_pos(Character *ch, Object *obj, char *arg, bool msg);
 
 Object *Object::bootLiveObject( const sql::Row &MyRow, bool recursive )
 {
-	Object *obj = (NULL);
+	Object *obj = nullptr;
 
-	if( atoi(MyRow["special_type"].c_str()) != SPECIAL_NONE )
+	int special_type = MyRow.getInt("special_type");
+	if( special_type != SPECIAL_NONE )
 	{
-		int special_type = atoi(MyRow["special_type"].c_str()) ;
-		/* Special */
+		specialLoadClock.turnOn();
+		boost::uuids::string_generator uuidGenerator;
 
-		std::stringstream QueryBuffer2;
-		sql::Query MyQuery;
+		//sql::Row MyRow2 = MyQuery->getRow();
+		obj = create_obj(false);
+		obj->objID = uuidGenerator(MyRow["id"].c_str());
+		std::string id = MyRow["id"];
+		obj->name = str_dup(MyRow["name"].c_str());
+		obj->short_description = str_dup(MyRow["sdesc"].c_str());
+		obj->description = str_dup(MyRow["ldesc"].c_str());
+		obj->obj_flags.value[0] = MyRow.getShort("val0");
+		obj->obj_flags.value[1] = MyRow.getShort("val1");
+		obj->obj_flags.value[2] = MyRow.getShort("val2");
+		obj->obj_flags.value[3] = MyRow.getShort("val3");
+		obj->obj_flags.value[4] = MyRow.getShort("val4");
+		obj->obj_flags.value[5] = MyRow.getShort("val5");
+		obj->obj_flags.value[6] = MyRow.getShort("val6");
+		obj->obj_flags.value[7] = MyRow.getShort("val7");
+		obj->obj_flags.value[8] = MyRow.getShort("val8");
+		obj->obj_flags.value[9] = MyRow.getShort("val9");
+		obj->obj_flags.value[10] = MyRow.getShort("val10");
+		obj->obj_flags.value[11] = MyRow.getShort("val11");
+		obj->obj_flags.extra_flags = MyRow.getShort("extra_flags");
+		obj->obj_flags.wear_flags = MyRow.getShort("wear_flags");
+		obj->obj_flags.bitvector[0] = MyRow.getLong("bitvector0");
+		obj->obj_flags.bitvector[1] = MyRow.getLong("bitvector1");
+		obj->obj_flags.bitvector[2] =MyRow.getLong("bitvector2");
+		obj->obj_flags.bitvector[3] = MyRow.getLong("bitvector3");
+		obj->obj_flags.weight = MyRow.getFloat("weight");
+		obj->obj_flags.cost = MyRow.getInt("cost");
+		obj->obj_flags.cost_per_day = MyRow.getInt("cost_per_day");
+		obj->obj_flags.offensive = MyRow.getShort("offensive");
+		obj->obj_flags.parry = MyRow.getShort("parry");
+		obj->obj_flags.dodge = MyRow.getShort("dodge");
 
-		QueryBuffer2 << "SELECT * FROM object_specials WHERE id='" << MyRow["id"] << "';";
-		try {
-			MyQuery = gameDatabase->sendQuery(QueryBuffer2.str());
-		} catch( sql::QueryException &e ) {
-			MudLog(BRF, LVL_APPR, TRUE, "Unable to load item (special data) for object ID #%d: %s",
-				MyRow["id"].c_str(), e.getMessage().c_str());
-			return (NULL);
-		}
-
-		if( MyQuery->hasNextRow() )
+		obj->scalp = new ScalpData();
+		obj->scalp->is_scalp = (special_type == SPECIAL_SCALP || special_type == SPECIAL_PLAYER_SCALP);
+		obj->scalp->player_scalp = (special_type == SPECIAL_PLAYER_SCALP);
+		obj->scalp->scalped = StringUtil::parseBoolean(MyRow["scalped"]);
+		obj->scalp->level = MyRow.getShort("level");
+		obj->scalp->race = MyRow.getShort("race");
+		obj->obj_flags.timer = MyRow.getShort("timer");
+		if (special_type == SPECIAL_CORPSE)
 		{
-			boost::uuids::string_generator uuidGenerator;
-
-			sql::Row MyRow2 = MyQuery->getRow();
-			obj = create_obj( false );
-			obj->objID = uuidGenerator(MyRow2["id"].c_str());
-			obj->name = str_dup(MyRow2["name"].c_str());
-			obj->short_description = str_dup(MyRow2["sdesc"].c_str());
-			obj->description = str_dup(MyRow2["ldesc"].c_str());
-			obj->obj_flags.value[0] = atoi(MyRow2["val0"].c_str());
-			obj->obj_flags.value[1] = atoi(MyRow2["val1"].c_str());
-			obj->obj_flags.value[2] = atoi(MyRow2["val2"].c_str());
-			obj->obj_flags.value[3] = atoi(MyRow2["val3"].c_str());
-			obj->obj_flags.value[4] = atoi(MyRow2["val4"].c_str());
-			obj->obj_flags.value[5] = atoi(MyRow2["val5"].c_str());
-			obj->obj_flags.value[6] = atoi(MyRow2["val6"].c_str());
-			obj->obj_flags.value[7] = atoi(MyRow2["val7"].c_str());
-			obj->obj_flags.value[8] = atoi(MyRow2["val8"].c_str());
-			obj->obj_flags.value[9] = atoi(MyRow2["val9"].c_str());
-			obj->obj_flags.value[10] = atoi(MyRow2["val10"].c_str());
-			obj->obj_flags.value[11] = atoi(MyRow2["val11"].c_str());
-			obj->obj_flags.extra_flags = atoi(MyRow2["extra_flags"].c_str());
-			obj->obj_flags.wear_flags = atoi(MyRow2["wear_flags"].c_str());
-			obj->obj_flags.bitvector[0] = atol(MyRow2["bitvector0"].c_str());
-			obj->obj_flags.bitvector[1] = atol(MyRow2["bitvector1"].c_str());
-			obj->obj_flags.bitvector[2] = atol(MyRow2["bitvector2"].c_str());
-			obj->obj_flags.bitvector[3] = atol(MyRow2["bitvector3"].c_str());
-			obj->obj_flags.weight = (float)atof(MyRow2["weight"].c_str());
-			obj->obj_flags.cost = atoi(MyRow2["cost"].c_str());
-			obj->obj_flags.cost_per_day = atoi(MyRow2["cost_per_day"].c_str());
-			obj->obj_flags.offensive = (sh_int)atoi(MyRow2["offensive"].c_str());
-			obj->obj_flags.parry = (sh_int)atoi(MyRow2["parry"].c_str());
-			obj->obj_flags.dodge = (sh_int)atoi(MyRow2["dodge"].c_str());
-
-			obj->scalp = new ScalpData();
-			obj->scalp->is_scalp		= (special_type == SPECIAL_SCALP || special_type == SPECIAL_PLAYER_SCALP);
-			obj->scalp->player_scalp	= (special_type == SPECIAL_PLAYER_SCALP);
-			obj->scalp->scalped = StringUtil::parseBoolean(MyRow2["scalped"]);
-			obj->scalp->level = atoi(MyRow2["level"].c_str());
-			obj->scalp->race = atoi(MyRow2["race"].c_str());
-			obj->obj_flags.timer = atoi(MyRow2["timer"].c_str());
-			if( special_type == SPECIAL_CORPSE )
-			{
-				obj->obj_flags.type_flag = ITEM_CONTAINER;
-				obj->scalp->name = MyRow2["extra_str1"];
-			}
+			obj->obj_flags.type_flag = ITEM_CONTAINER;
+			obj->scalp->name = MyRow["extra_str1"];
 		}
-		else {
-			return (0);//Error. Object flagged as special yet no special found... Bad!
-		}
+		specialLoadClock.turnOff();
 	}
 	else
 	{
 		/* Normal */
 		int rnum = real_object(atoi(MyRow["vnum"].c_str()));
 		if( rnum == -1 )
-			return (NULL);
+			return nullptr;
+		readObjectClock.turnOn();
 		obj = read_object(rnum, REAL, false, false);
+		readObjectClock.turnOff();
 
 		boost::uuids::string_generator uuidGenerator;
 		obj->objID = uuidGenerator(MyRow["id"].c_str());
-		obj->obj_flags.bitvector[0] = atol(MyRow["bitv0"].c_str());
-		obj->obj_flags.bitvector[1] = atol(MyRow["bitv1"].c_str());
-		obj->obj_flags.bitvector[2] = atol(MyRow["bitv2"].c_str());
-		obj->obj_flags.bitvector[3] = atol(MyRow["bitv3"].c_str());
+		obj->obj_flags.bitvector[0] = MyRow.getLong("bitv0");
+		obj->obj_flags.bitvector[1] = MyRow.getLong("bitv1");
+		obj->obj_flags.bitvector[2] = MyRow.getLong("bitv2");
+		obj->obj_flags.bitvector[3] = MyRow.getLong("bitv3");
 
 		if (obj->getType() == ITEM_DRINKCON)
 		{
-			GET_OBJ_VAL(obj, 2) = atoi(MyRow["obj_extra0"].c_str());
-			GET_OBJ_VAL(obj, 1) = atoi(MyRow["obj_extra1"].c_str());
+			GET_OBJ_VAL(obj, 2) = MyRow.getShort("obj_extra0");
+			GET_OBJ_VAL(obj, 1) = MyRow.getShort("obj_extra1");
 		}
 		else if (obj->getType() == ITEM_KEY)
 		{
-			GET_OBJ_VAL(obj, 0) = atoi(MyRow["obj_extra0"].c_str());
+			GET_OBJ_VAL(obj, 0) = MyRow.getShort("obj_extra0");
 		}
 	}
 	if( MyRow["retool_name"].empty() == false )
@@ -185,96 +178,289 @@ std::list< Object* > Object::loadItemList( bool recursive )
 }
 void Object::loadItems()
 {
-	std::list< Object* > ObjList = this->loadItemList( false );
-	for( std::list<Object*>::iterator oIter = ObjList.begin();oIter != ObjList.end();++oIter )
+	if (s_chestItemsPreloaded && this->IsValidChest())
 	{
-		(*oIter)->loadItems();
-		obj_to_obj( (*oIter), this );
+		std::string roomVnum = ToString(getRoom()->getVnum());
+		auto it = s_preloadedChestItems.find(roomVnum);
+		if (it != s_preloadedChestItems.end())
+		{
+			for (Object* obj : it->second)
+			{
+				obj_to_obj(obj, this);
+			}
+			s_preloadedChestItems.erase(it);
+			return;
+		}
 	}
-}
-Object *Object::loadSingleItem(const boost::uuids::uuid &oID, bool recursive)
-{
-	std::stringstream QueryBuffer;
-	sql::Query MyQuery;
-	Object *obj;
 
-	QueryBuffer
-		<< "SELECT o.*,"
-		<< "(SELECT COUNT(*) FROM objects o2 WHERE o2.holder_type='O' AND o2.holder_id=o.id) AS num_holding,"
-		<< "retool.retool_name,retool.retool_sdesc,retool.retool_ldesc,retool.retool_exdesc "
-		<< "FROM objects o "
-		<< "LEFT JOIN object_retools retool ON retool.id=o.id "
-		<< "WHERE o.id='" << oID << "';";
-	try {
-		MyQuery = gameDatabase->sendQuery(QueryBuffer.str());
-	} catch( sql::QueryException &e ) {
-		MudLog(BRF, LVL_APPR, TRUE, "Unable to load single item #%d: %s",
-			ToString(oID).c_str(), e.getMessage().c_str());
-		return NULL;
+	std::list< Object* > objectList = this->loadItemList( true );
+	for(auto & objectIter : objectList)
+	{
+		obj_to_obj( objectIter, this );
 	}
-	if( MyQuery->hasNextRow() )
-		obj = Object::bootLiveObject( MyQuery->getRow(), (false) );
-	else
-		obj = 0;
-	if( obj && recursive )
-		obj->loadItems();
-	return (obj);
 }
+
+void Object::preloadChestItems()
+{
+	auto chestItemMap = loadItemsByTopLevelHolder(gameDatabase, 'C');
+
+	for (const auto& [uuid, objectLoad] : chestItemMap)
+	{
+		if (objectLoad.holderType == 'C')
+		{
+			s_preloadedChestItems[objectLoad.holderId].push_back(objectLoad.obj);
+		}
+	}
+
+	s_chestItemsPreloaded = true;
+	MudLog(BRF, LVL_APPR, TRUE, "Preloaded chest items for %zu rooms.", s_preloadedChestItems.size());
+}
+
+void Object::clearChestItemPreload()
+{
+	s_preloadedChestItems.clear();
+	s_chestItemsPreloaded = false;
+}
+
+Object *Object::loadSingleItem(const boost::uuids::uuid &objID, bool recursive)
+{
+	std::vector<boost::uuids::uuid> objectIds;
+	objectIds.push_back(objID);
+	auto objectsLoaded = loadMultipleItems(objectIds, recursive);
+
+	if (objectsLoaded.empty())
+	{
+		return nullptr;
+	}
+
+	return objectsLoaded[0];
+}
+
+std::string buildMainObjectLoadQuery()
+{
+	std::stringstream queryStream;
+	queryStream
+	<< " SELECT o.*,"
+	<< " (SELECT COUNT(*) FROM objects o2 WHERE o2.holder_type='O' AND o2.holder_id=o.id) AS num_holding,"
+	<< " retool.retool_name,retool.retool_sdesc,retool.retool_ldesc,retool.retool_exdesc,"
+	<< " specials.special_type,specials.name,specials.sdesc,specials.ldesc,specials.val0,specials.val1,specials.val2,"
+	<< " specials.val3,specials.val4,specials.val5,specials.val6,specials.val7,specials.val8,specials.val9,specials.val10,"
+	<< " specials.val11,specials.extra_flags,specials.wear_flags,specials.bitvector0,specials.bitvector1,"
+	<< " specials.bitvector2,specials.bitvector3,specials.weight,specials.cost,specials.cost_per_day,specials.offensive,"
+	<< " specials.parry,specials.dodge,specials.level,specials.race,specials.scalped,specials.extra_str1,specials.timer"
+	<< " FROM objects o"
+	<< " LEFT JOIN object_retools retool ON (retool.id=o.id)"
+	<< " LEFT JOIN object_specials specials ON (specials.id=o.id) ";
+
+	return queryStream.str();
+}
+
+std::vector<Object *> Object::loadMultipleItems(const std::vector<boost::uuids::uuid> &objectIds, bool recursive)
+{
+	std::stringstream queryBuffer;
+	sql::Query query;
+	std::vector<Object *> loadedObjects;
+
+	if (objectIds.empty())
+	{
+		return loadedObjects;
+	}
+
+	queryBuffer
+		<< buildMainObjectLoadQuery()
+		<< "WHERE o.id IN" << SQLUtil::buildListSQL(objectIds.begin(), objectIds.end(), true, true) << ";";
+
+	try {
+		query = gameDatabase->sendQuery(queryBuffer.str());
+	} catch( sql::QueryException &e ) {
+		MudLog(BRF, LVL_APPR, TRUE, "Unable to load multiple items: %s", e.getMessage().c_str());
+		return loadedObjects;
+	}
+
+	std::vector<std::string> parentObjectIds;
+
+	while( query->hasNextRow() )
+	{
+		Object *obj = bootLiveObject( query->getRow(), false);
+		if (obj != nullptr) {
+			if (recursive) {
+				obj->loadItems();
+			}
+			loadedObjects.push_back(obj);
+		}
+	}
+
+	return loadedObjects;
+}
+
+sql::Query Object::loadItemsByTopLevelHolderQuery(const sql::Connection &connection, const char topLevelHolderType)
+{
+	std::stringstream queryBuffer;
+
+	queryBuffer
+		<< buildMainObjectLoadQuery()
+		<< "WHERE o.top_level_holder_type='" << topLevelHolderType << "';";
+
+	return connection->sendQuery(queryBuffer.str());
+}
+
+std::unordered_map<boost::uuids::uuid, ObjectLoad> Object::loadItemsByTopLevelHolder(const sql::Connection &connection, const char topLevelHolderType)
+{
+	sql::Query query = loadItemsByTopLevelHolderQuery(connection, topLevelHolderType);
+	return loadItemMapFromQuery(query);
+}
+
+std::unordered_map<boost::uuids::uuid, ObjectLoad> Object::loadItemMapFromQuery(const sql::Query &query)
+{
+	std::unordered_map<boost::uuids::uuid, ObjectLoad> objectIdToLoadMap;
+	std::vector<std::string> parentObjectIds;
+
+	while( query->hasNextRow() )
+	{
+		sql::Row row = query->getRow();
+		Object *obj = bootLiveObject( row, false);
+
+		if (obj != nullptr) {
+
+			ObjectLoad objectLoad;
+
+			objectLoad.obj = obj;
+			objectLoad.holderType = row.getChar("holder_type");
+			objectLoad.holderId = row.getString("holder_id");
+			objectLoad.topLevelHolderType = row.getChar("top_level_holder_type");
+			objectLoad.topLevelHolderId = row.getString("top_level_holder_id");
+
+			objectIdToLoadMap[objectLoad.obj->objID] = objectLoad;
+		}
+	}
+
+	// Move all loaded objects into its parents
+	for (const auto& val : objectIdToLoadMap | std::views::values)
+	{
+		ObjectLoad objectLoad = val;
+		if (objectLoad.holderType == 'O')
+		{
+			boost::uuids::string_generator generator;
+			boost::uuids::uuid parentObjectId = generator(objectLoad.holderId);
+			auto parentObjectLoad = objectIdToLoadMap.find(parentObjectId);
+			if (parentObjectLoad != objectIdToLoadMap.end())
+			{
+				obj_to_obj( objectLoad.obj, parentObjectLoad->second.obj );
+			}
+		}
+	}
+
+	return objectIdToLoadMap;
+}
+
 std::list< Object* > Object::loadItemList( bool recursive, const char holderType, const std::string &holderID )
 {
 	std::list< std::pair<Object*,int> > ItemPairs = Object::loadItemPairs( recursive, holderType, holderID );
 	std::list< Object* > ItemList;
 
 	//We want the same data, minus the position.
-	for(std::list< std::pair<Object*,int> >::iterator ipIter = ItemPairs.begin();ipIter != ItemPairs.end();++ipIter)
+	for(auto & ItemPair : ItemPairs)
 	{
-		ItemList.push_back( (*ipIter).first );
+		ItemList.push_back( ItemPair.first );
 	}
 	return ItemList;
 }
 
-std::list< std::pair<Object*,int> > Object::loadItemPairs(
-	bool recursive, const char holderType, const std::string &holderID )
+std::list<std::pair<Object*, int>> Object::loadItemPairs(
+    bool recursive, const char holderType, const std::string& holderID)
 {
-	std::list< std::pair<Object*,int> > ObjList;
+    std::list<std::pair<Object*, int>> objectPairList;
+    std::unordered_map<boost::uuids::uuid, Object*> objectIdObjectMap;
 
-	std::stringstream QueryBuffer;
-	sql::Query MyQuery;
+    // --- Initial load ---
+    std::stringstream QueryBuffer;
+    QueryBuffer
+        << buildMainObjectLoadQuery()
+        << "WHERE o.holder_type='" << holderType << "' "
+        << "AND o.holder_id='" << holderID << "';";
 
-	QueryBuffer
-		<< "SELECT o.*,"
-		<< "(SELECT COUNT(*) FROM objects o2 WHERE o2.holder_type='O' AND o2.holder_id=o.id) AS num_holding,"
-		<< "retool.retool_name,retool.retool_sdesc,retool.retool_ldesc,retool.retool_exdesc "
-		<< "FROM objects o "
-		<< "LEFT JOIN object_retools retool ON retool.id=o.id "
-		<< "WHERE o.holder_type='" << holderType << "' "
-		<< "AND o.holder_id='" << holderID << "';";
-	try {
-		MyQuery = gameDatabase->sendQuery(QueryBuffer.str());
-	} catch( sql::QueryException &e ) {
-		MudLog(BRF, LVL_APPR, TRUE, "Unable to load items held by ID %d(%c): %s",
-			holderType, holderID.c_str(), e.getMessage().c_str());
-		return (ObjList);
-	}
-	while( MyQuery->hasNextRow() )
-	{
-		sql::Row MyRow = MyQuery->getRow();
-		Object *obj = Object::bootLiveObject( MyRow, (false) );
-		if( obj != NULL )
-			ObjList.push_back( std::pair<Object*,int>(obj, atoi(MyRow["pos"].c_str())) );
-	}
-	if( recursive )
-	{
-		for( std::list< std::pair<Object*,int> >::iterator oIter = ObjList.begin();oIter != ObjList.end();++oIter )
-		{
-			std::list< Object* > ObjList2 = (*oIter).first->loadItemList( true );
-			for( std::list< Object* >::iterator oIter2 = ObjList2.begin();oIter2 != ObjList2.end();++oIter2 )
-			{
-				ObjList.push_back( std::pair<Object*,int>((*oIter2), (-1)) );
-			}
-		}
-	}
-	return (ObjList);
+    sql::Query MyQuery;
+    try {
+        MyQuery = gameDatabase->sendQuery(QueryBuffer.str());
+    } catch (sql::QueryException& e) {
+        MudLog(BRF, LVL_APPR, TRUE, "Unable to load items held by ID %d(%c): %s",
+            holderType, holderID.c_str(), e.getMessage().c_str());
+        return objectPairList;
+    }
+
+    // Track which objects have children to load
+    std::vector<Object*> holdersToLoad;
+
+    while (MyQuery->hasNextRow())
+    {
+        sql::Row MyRow = MyQuery->getRow();
+        Object* obj = bootLiveObject(MyRow, false);
+        if (obj != nullptr)
+        {
+            objectPairList.push_back({obj, atoi(MyRow["pos"].c_str())});
+            objectIdObjectMap[obj->objID] = obj;
+
+            if (atoi(MyRow["num_holding"].c_str()) > 0)
+                holdersToLoad.push_back(obj);
+        }
+    }
+
+    if (recursive)
+    {
+        // Bulk-load descendants level by level until nothing left
+        while (!holdersToLoad.empty())
+        {
+            // Build a single IN(...) query for all current holders
+            std::stringstream batchQuery;
+            batchQuery
+                << buildMainObjectLoadQuery()
+                << "WHERE o.holder_type='O' AND o.holder_id IN (";
+
+            for (std::size_t i = 0; i < holdersToLoad.size(); ++i)
+            {
+                if (i > 0) batchQuery << ',';
+                batchQuery << "'" << holdersToLoad[i]->objID << "'";
+            }
+            batchQuery << ");";
+
+            sql::Query batchResult;
+            try {
+                batchResult = gameDatabase->sendQuery(batchQuery.str());
+            } catch (sql::QueryException& e) {
+                MudLog(BRF, LVL_APPR, TRUE, "Unable to bulk-load descendant items: %s",
+                    e.getMessage().c_str());
+                break;
+            }
+
+            std::vector<Object*> nextHolders;
+
+            while (batchResult->hasNextRow())
+            {
+                sql::Row row = batchResult->getRow();
+                Object* obj = bootLiveObject(row, false);
+                if (obj == nullptr)
+                    continue;
+
+                objectIdObjectMap[obj->objID] = obj;
+
+                // Place this object into its parent container
+                std::string parentId = row["holder_id"];
+                // Convert parentId string to uuid and find the parent
+                boost::uuids::string_generator gen;
+                auto parentUuid = gen(parentId);
+                auto parentIt = objectIdObjectMap.find(parentUuid);
+                if (parentIt != objectIdObjectMap.end())
+                    obj_to_obj(obj, parentIt->second);
+
+                if (atoi(row["num_holding"].c_str()) > 0)
+                    nextHolders.push_back(obj);
+            }
+
+            holdersToLoad = std::move(nextHolders);
+        }
+    }
+
+    return objectPairList;
 }
 std::list< Object* > Room::loadItemList( bool recursive )
 {
@@ -282,10 +468,8 @@ std::list< Object* > Room::loadItemList( bool recursive )
 }
 void Room::loadItems( const std::list< Object* > &lItems )
 {
-	for( std::list< Object* >::const_iterator oIter = lItems.begin();oIter != lItems.end();++oIter )
+	for(auto obj : lItems)
 	{
-		Object *obj = (*oIter);
-
 		obj->loadItems();
 		obj->MoveToRoom(this, false);
 	}
@@ -365,7 +549,6 @@ void Object::saveMultipleHolderItems(const std::map<std::pair<char, std::string>
 {
 	std::stringstream queryBuffer;
 	auto holdTypeAndIdIter = holderTypeAndIdToContentsMap.begin();
-	Clock clockA, clockB, clockC1, clockC2, clockD1, clockD2, clockD3, clockD4, clockD5;
 
 	try
 	{
@@ -443,9 +626,7 @@ void Object::saveMultipleHolderItems(const std::map<std::pair<char, std::string>
 			for(auto iter = (*holdTypeAndIdIter).second.begin();iter != (*holdTypeAndIdIter).second.end();++iter)
 			{
 				Object *object = (*iter);
-				clockC1.turnOn();
 				object->saveItems( true, (*holdTypeAndIdIter).first.first, (*holdTypeAndIdIter).first.second, (*holdTypeAndIdIter).first.first, (*holdTypeAndIdIter).first.second, tempObjectsBatchInsertStatement, tempObjectRetoolsBatchInsertStatement, tempObjectSpecialsBatchInsertStatement, true );
-				clockC1.turnOff();
 			}
 		}
 		
@@ -567,7 +748,7 @@ void Object::saveHolderItems(const char holderType, const std::string &holderId,
 
 		if(deleteHolderContents) {
 
-			//Delete all items currently cotained by this holder.
+			//Delete all items currently contained by this holder.
 			query	<<	"DELETE"
 					<<	"  objects.*,"
 					<<	"  object_specials.*,"
@@ -666,7 +847,7 @@ void Character::itemSave()
 	//Equipment.
 	for(int equipment_position = 0; equipment_position < NUM_WEARS;++equipment_position )
 	{
-		if( this->equipment[equipment_position] != NULL )
+		if( this->equipment[equipment_position] != nullptr )
 			items.push_back(this->equipment[equipment_position]);
 	}
 	//Inventory.
@@ -874,7 +1055,7 @@ void crashListRent(Character *ch, char *name)
 		return;
 	}
 
-	if( (vict = CharacterUtil::loadCharacter(name)) == NULL )
+	if( (vict = CharacterUtil::loadCharacter(name)) == nullptr )
 	{
 		ch->send(NOPERSON);
 		return;
@@ -1087,7 +1268,7 @@ int genReceptionist(Character * ch, Character * recep, char *cmd, char *arg, int
 
 	if (!cmd && !MiscUtil::random(0, 5))
 	{
-		do_action(recep, NULL, CommandUtil::get()->getCommandIndex(action_table[MiscUtil::random(0, 8)]), 0);
+		do_action(recep, nullptr, CommandUtil::get()->getCommandIndex(action_table[MiscUtil::random(0, 8)]), 0);
 		return FALSE;
 	}
 
@@ -1295,7 +1476,7 @@ CommandHandler  do_insert  = DEFINE_COMMAND
 		needExtraction = true;
 	}
 	ch->send("You create a tear in spacetime, and place %s inside.\r\n", obj->short_description);
-	Act("$n creates a tear in spacetime, and places $p inside.", TRUE, ch, obj, NULL, TO_ROOM);
+	Act("$n creates a tear in spacetime, and places $p inside.", TRUE, ch, obj, nullptr, TO_ROOM);
 
 	if( needExtraction ) {
 		obj->RemoveFromAll();
@@ -1339,7 +1520,7 @@ CommandHandler  do_retrieve  = DEFINE_COMMAND
 		obj_to_char(obj, ch);
 
 		ch->send("You create a tear in spacetime, reach in, and retrieve %s.\r\n", obj->short_description);
-		Act("$n creates a tear in spacetime, reaches in, and retrieves $p.", TRUE, ch, obj, NULL, TO_ROOM);
+		Act("$n creates a tear in spacetime, reaches in, and retrieves $p.", TRUE, ch, obj, nullptr, TO_ROOM);
 		return;
 	}
 	else

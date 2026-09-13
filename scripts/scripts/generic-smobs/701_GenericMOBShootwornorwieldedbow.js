@@ -1,4 +1,5 @@
 var script701 = function(self, actor, here, args, extra) {
+
 	var ch = self;
 	
 	// See if bow is in inventory

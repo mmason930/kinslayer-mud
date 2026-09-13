@@ -8,12 +8,13 @@ Gateway Port: 2222
 Secondary Gateway Port: 666
 Gateway HOST: localhost
 MUD Root Directory: /kinslayer/
-Restart On Shutdown: 1
+Restart On Shutdown: ${RESTART_ON_SHUTDOWN}
 MUD Executable Path: bin/kinslayer
 BackupDirectory: /kinslayer/backups/
 Wiki Dataabase Name: kmud_wiki
 Websocket Ports: 4001
 Dev Mode: 0
+Skip Password Requirement: 0
 Player Portal Server Port: 4002
 Monitor Repository: 1
 Script Pull Command: /kinslayer/PullScripts.sh

@@ -1,4 +1,4 @@
-﻿function keyCount(o) {
+function keyCount(o) {
 	return Object.keys(o).length;
 }
 

@@ -1,0 +1,15 @@
+--- a/memory/mozalloc/mozalloc.h
++++ b/memory/mozalloc/mozalloc.h
+@@ -123,7 +123,12 @@
+ #    define MOZALLOC_EXPORT_NEW MOZ_ALWAYS_INLINE_EVEN_DEBUG
+ #  endif
+ 
++// Public JS headers include this file for InfallibleAllocPolicy. Allow an
++// embedding application to retain its own global C++ allocation operators.
++// Engine builds leave this unset and keep Mozilla's allocation behavior.
++#  ifndef MOZALLOC_NO_GLOBAL_NEW_DELETE
+ #  include "mozilla/cxxalloc.h"
++#  endif
+ #  ifdef __clang__
+ #    pragma clang diagnostic pop
+ #  endif

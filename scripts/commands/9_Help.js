@@ -10,15 +10,12 @@ let script9 = function(self, actor, here, args, extra) {
 
 	if (searchTerm.length > 0) {
 		let file = global.helpManager.getSearchedFile(searchTerm);
-		let msg;
 		if (!file) {
-			msg = red + "Your search did not return any results. Showing Table of Contents:";
+			actor.send(red + "Your search did not return any results." + nrm);
+			return;
 		}
-		else {
-			msg = bld + cyn + "Your search returned the following page:";
-			id = file.id;
-		}
-		actor.send(msg + nrm);
+		actor.send(bld + cyn + "Your search returned the following page:" + nrm);
+		id = file.id;
 		hideFooter = true;
 	}
 	else {

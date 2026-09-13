@@ -16,14 +16,13 @@
 void userEmailAddressEditorDisplayMainMenu(Descriptor *descriptor)
 {
 	get_char_cols( descriptor->character );
-	OLC *olc = descriptor->olc;
+	const OLC *olc = descriptor->olc;
 	int counter = 1;
 
 	descriptor->send("Nr  Email Address           Confirmed   Created Date  Confirmed Date\r\n");
 	descriptor->send("----------------------------------------------------------------------\r\n");
-	for(auto iter = olc->userEmailAddresses.begin();iter != olc->userEmailAddresses.end();++iter)
+	for(auto userEmailAddress : olc->userEmailAddresses)
 	{
-		UserEmailAddress *userEmailAddress = (*iter);
 		bool isConfirmed = userEmailAddress->getConfirmed();
 		std::string isConfirmedString = StringUtil::yesNo(isConfirmed);
 		std::string createdDateString = DateTime::parse("%Y-%m-%d", userEmailAddress->getCreatedDatetime());
@@ -82,7 +81,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 			break;
 		}
 
-		UserEmailAddress *userEmailAddress = NULL;
+		UserEmailAddress *userEmailAddress = nullptr;
 		for(auto iter = olc->userEmailAddresses.begin();emailNumber >= 0;--emailNumber, ++iter)
 		{
 			userEmailAddress = (*iter);
@@ -98,7 +97,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 
 		UserEmailAddressConfirmation *userEmailAddressConfirmation = CharacterUtil::getUserEmailAddressConfirmationByUserEmailAddressId(gameDatabase, userEmailAddress->getId());
 
-		if(userEmailAddressConfirmation == NULL)
+		if(userEmailAddressConfirmation == nullptr)
 		{//For some reason there is no confirmation code in the database for this email. Let's create one right now.
 			userEmailAddressConfirmation = new UserEmailAddressConfirmation();
 			userEmailAddressConfirmation->setUserEmailAddressId(userEmailAddress->getId());
@@ -126,10 +125,9 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 
 		//Confirm that the email does not already exist in the user's list.
 		bool alreadyRegistered = false;
-		for(auto iter = olc->userEmailAddresses.begin();iter != olc->userEmailAddresses.end();++iter)
+		for(auto userEmailAddress : olc->userEmailAddresses)
 		{
-			UserEmailAddress *userEmailAddress = (*iter);
-			if(!str_cmp(userEmailAddress->getEmailAddress(), arg))
+				if(!str_cmp(userEmailAddress->getEmailAddress(), arg))
 			{
 				descriptor->send("%s%sThis email address is already registered to this account.%s\r\n", bld, red, nrm);
 				userEmailAddressEditorDisplayMainMenu(descriptor);
@@ -167,7 +165,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 			CharacterUtil::putUserEmailAddress(gameDatabase, olc->userEmailAddress);
 			olc->userEmailAddresses.push_back(olc->userEmailAddress);
 
-			UserEmailAddressConfirmation *userEmailAddressConfirmation = new UserEmailAddressConfirmation();
+			auto *userEmailAddressConfirmation = new UserEmailAddressConfirmation();
 			userEmailAddressConfirmation->setUserEmailAddressId(olc->userEmailAddress->getId());
 			userEmailAddressConfirmation->setConfirmationKey(StringUtil::getRandomString(20));
 
@@ -176,7 +174,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 			CharacterUtil::sendUserEmailAddressConfirmationEmail(gameDatabase, descriptor->character, olc->userEmailAddress, userEmailAddressConfirmation);
 			delete userEmailAddressConfirmation;
 		}
-		olc->userEmailAddress = NULL;
+		olc->userEmailAddress = nullptr;
 		userEmailAddressEditorDisplayMainMenu(descriptor);
 		break;
 	}
@@ -190,7 +188,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 			break;
 		}
 
-		UserEmailAddress *userEmailAddress = NULL;
+		UserEmailAddress *userEmailAddress = nullptr;
 		for(auto iter = olc->userEmailAddresses.begin();emailNumber >= 0;--emailNumber, ++iter)
 		{
 			userEmailAddress = (*iter);
@@ -207,7 +205,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 		UserEmailAddress *userEmailAddress = olc->userEmailAddress;//Altering this object should update the email object in the user's cache list as well.
 
 		//If the confirmation is null, then no email confirmation exists with this verification code.
-		if(userEmailAddressConfirmation == NULL || userEmailAddress->getId() != userEmailAddressConfirmation->getUserEmailAddressId())
+		if(userEmailAddressConfirmation == nullptr || userEmailAddress->getId() != userEmailAddressConfirmation->getUserEmailAddressId())
 		{
 			descriptor->send("%s%sThe verification code you entered is incorrect.%s\r\n", bld, red, nrm);
 		}
@@ -225,7 +223,7 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 
 		//Send them back to the main menu.
 		userEmailAddressEditorDisplayMainMenu(descriptor);
-		olc->userEmailAddress = NULL;//Do not free this. It is in the olc email cache list.
+		olc->userEmailAddress = nullptr;//Do not free this. It is in the olc email cache list.
 		break;
 	}
 	default:
@@ -236,15 +234,13 @@ void parseUserEmailAddressEditor(Descriptor *descriptor, const std::string &arg)
 
 CommandHandler do_email = DEFINE_COMMAND
 {
-	char buf1[MAX_STRING_LENGTH];
-
 	ch->desc->olc = new OLC();
-	OLC_ZONE(ch->desc) = 0;
+	OLC_ZONE(ch->desc) = nullptr;
 	STATE(ch->desc) = CON_EMAIL;
 
 	ch->desc->olc->userEmailAddresses = CharacterUtil::getUserEmailAddresses(gameDatabase, ch->getUserId());
 	userEmailAddressEditorDisplayMainMenu(ch->desc);
 
-	Act("$n begins editing $s account settings.", TRUE, ch, 0, 0, TO_ROOM);
+	Act("$n begins editing $s account settings.", TRUE, ch, nullptr, nullptr, TO_ROOM);
 	SET_BITK(PLR_FLAGS(ch), Q_BIT(PLR_WRITING));
 };

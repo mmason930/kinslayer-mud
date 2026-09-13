@@ -1,20 +1,19 @@
-
 # KinslayerMUD Makefile
 #
 
 # C/C++ compiler to use
 CC = g++
-#  -Wignored-qualifiers -Wextra
+
+# Require the current SpiderMonkey development package; do not fall back to 131.
+MOZJS_PACKAGE = mozjs-153
+MOZJS_CFLAGS = $(shell pkg-config --cflags $(MOZJS_PACKAGE))
+MOZJS_LIBS = $(shell pkg-config --libs $(MOZJS_PACKAGE))
+
 # Any special flags you want to pass to the compiler
 MYFLAGS = \
--O0 -std=c++20 -Wformat-security -Wformat -Wpointer-arith \
--Wcast-align -Wredundant-decls -Wcatch-value -Werror \
--DJS_C_STRINGS_ARE_UTF8 -DBOOST_PARAMETER_MAX_ARITY=10
-
-#-Werror
-
-#flags for profiling (see hacker.doc for more information)
-PROFILE =
+-O2 -std=c++23 -Wformat-security -Wformat -Wpointer-arith \
+-Wcast-align -Wredundant-decls \
+$(MOZJS_CFLAGS)
 
 ##############################################################################
 # Do Not Modify Anything Below This Line (unless you know what you're doing) #
@@ -22,12 +21,11 @@ PROFILE =
 
 BINDIR = ../bin
 
-CPPFLAGS = -ggdb3 $(MYFLAGS) $(PROFILE)
+CPPFLAGS = -ggdb3 $(MYFLAGS)
 
 LIBS = \
--lsqlDatabase -lflusspferd -lstdc++ -lboost_regex -lmozjs \
--lmysqlclient -lboost_thread -lboost_filesystem -lcrypt \
--lssl -lcrypto -lboost_system -lpthread -ldl
+-lsqlDatabase -lstdc++ -lboost_regex -lboost_filesystem $(MOZJS_LIBS) \
+-lmysqlclient  -lcrypt -lssl -lcrypto -lpthread -ldl
 
 OBJDIR = obj
 
@@ -102,19 +100,25 @@ OBJFILES =	accounts.o \
 			interpreter.o \
 			items/ItemUtil.o \
 			olc/jedit.o \
+			js/flusspferd.o \
 			js/js.o \
 			js/js_constants.o \
 			js/js_functions.o \
 			js/js_interpreter.o \
 			js/js_utils.o \
 			js/JSCharacter.o \
+			js/JSCharacter_bindings.o \
 			js/JSObject.o \
+			js/JSObject_bindings.o \
 			jsoncpp/json_reader.o \
 			jsoncpp/json_value.o \
 			jsoncpp/json_writer.o \
 			js/JSQuery.o \
+			js/JSQuery_bindings.o \
 			js/JSRoom.o \
+			js/JSRoom_bindings.o \
 			js/JSRow.o \
+			js/JSRow_bindings.o \
 			kedit.o \
 			ku/kuClient.o \
 			ku/kuDescriptor.o \
@@ -143,6 +147,7 @@ OBJFILES =	accounts.o \
 			playerportal/PlayerPortalDescriptorStatus.o \
 			playerportal/PlayerPortalServer.o \
 			poker.o \
+			PvalManager.o \
 			olc/redit.o \
 			rooms/Exit.o \
 			rooms/Room.o \
@@ -191,20 +196,20 @@ OBJFILESGATEWAY = DateTime.o gateway/GatewayDescriptor.o gateway/GatewayDescript
 OBJFILESGATEWAY := $(patsubst %.o,$(OBJDIR)/%.o,$(OBJFILESGATEWAY))
 
 
-$(OBJDIR)/%.d: %.cpp
-	$(SHELL) -ec '$(CC) -MM $(CPPFLAGS) $< | \
-	sed '\''s,\($*\)\.o[ :]*,$(OBJDIR)\/\1.o $@ : ,g'\'' > $@'
-
 .PHONY: default all kinslayer gateway clean full
 
 default: kinslayer
 
--include $(OBJFILES:.o)
--include $(OBJFILESGATEWAY:.o)
+-include $(OBJFILES:.o=.d)
+-include $(OBJFILESGATEWAY:.o=.d)
+
+# Also rebuild pre-existing objects from before dependency-file generation was
+# enabled: changing wrapper layout must never link against the previous ABI.
+$(OBJFILES): js/flusspferd.hpp js/flusspferd_class_macros.hpp
 
 $(OBJDIR)/%.o: %.cpp
 	@mkdir -p $(@D)
-	$(CC) $(CPPFLAGS) -c	$<	-o $@
+	$(CC) $(CPPFLAGS) -MMD -MP -c	$<	-o $@
 
 all:
 	@mkdir -p ../bin

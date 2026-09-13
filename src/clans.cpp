@@ -21,7 +21,7 @@
 #include "ClanUtil.h"
 #include "CharacterUtil.h"
 
-Clan *ClanList = NULL, *ClanEnd = NULL;
+Clan *ClanList = nullptr, *ClanEnd = nullptr;
 
 void affect_modify_ar(Character *ch, sbyte loc, sbyte mod, int bitv[], bool add);
 
@@ -272,7 +272,7 @@ void MySQLSaveQuest(const std::string &playername, const Quest *quest, bool upda
 
 	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
 
-	if(index == NULL)
+	if(index == nullptr)
 		return;
 
 	if(update)
@@ -301,8 +301,8 @@ Quest *MySQLGrabQuest(const std::string &playername, const std::string &questnam
 
 	PlayerIndex *index = CharacterUtil::getPlayerIndexByUserName(playername);
 
-	if(index == NULL)
-		return NULL;
+	if(index == nullptr)
+		return nullptr;
 
 	Query =	"SELECT quest_name, value FROM quests WHERE user_id = '" + MiscUtil::convert<std::string>(index->id) +
 		"' AND quest_name = '" + sql::escapeString(questname) + "'";
@@ -312,11 +312,11 @@ Quest *MySQLGrabQuest(const std::string &playername, const std::string &questnam
 	}
 	catch( sql::QueryException &e ) {
 		MudLog(BRF, LVL_IMPL, TRUE, e.message.c_str());
-		return NULL;
+		return nullptr;
 	}
 	if( !MyQuery->numRows() )
 	{
-		return NULL;
+		return nullptr;
 	}
 	Quest *quest = new Quest(MyRow[0], atoi(MyRow[1].c_str()));
 
@@ -394,7 +394,7 @@ Warrant *Clan::GetWarrant()
 			return (*iter);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 Warrant *WarrantByVnum(int vnum)
@@ -407,7 +407,7 @@ Warrant *WarrantByVnum(int vnum)
 			return (*iter);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 Warrant *WarrantByVnum(std::list<Warrant *> List, int vnum)
@@ -420,7 +420,7 @@ Warrant *WarrantByVnum(std::list<Warrant *> List, int vnum)
 			return (*iter);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -515,10 +515,11 @@ int GetSharedClan( Character *p1, Character *p2 )
 
 Quest *Character::GetQuest(const std::string &QuestName )
 {
-	for(std::list<Quest *>::iterator quest = this->quests.begin();quest != this->quests.end();++quest)
+	for(auto & quest : this->quests)
+	for(auto & quest : this->quests)
 	{
-		if( !str_cmp( QuestName, (*quest)->name ) )
-			return (*quest);
+		if( !str_cmp( QuestName, quest->name ) )
+			return quest;
 	}
 	return 0;
 }
@@ -544,7 +545,7 @@ Quest::Quest(Character *ch, const std::string &QuestName, const short value)
 
 bool Character::isInClan(const int clanId)
 {
-	return getUserClan(clanId) != NULL;
+	return getUserClan(clanId) != nullptr;
 }
 
 UserClan *Character::getUserClan(short clanId)
@@ -557,5 +558,6 @@ bool Character::hasWolfbrotherBonuses()
 {
 	UserClan *userClan = this->getUserClan(CLAN_WOLFBROTHER);
 
-	return userClan != NULL && userClan->getRank() >= 5;
+	return userClan != nullptr && userClan->getRank() >= 5;
+	return userClan != nullptr && userClan->getRank() >= 5;
 }

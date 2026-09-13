@@ -23,7 +23,7 @@ ClanQuestPointTransaction *ClanUtil::getClanQuestPointTransaction(sql::Connectio
 		return getClanQuestPointTransaction(query->getRow());
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 ClanQuestPointTransaction *ClanUtil::getClanQuestPointTransaction(const sql::Row &row)
@@ -92,8 +92,8 @@ ClanQuestPointTransaction *ClanUtil::performQuestPointTransaction(sql::Connectio
 
 	//Attempt to perform the transaction to a user who is online.
 	Character *character = CharacterUtil::getOnlineCharacterById(userId);
-	Character *issuedByUser = NULL;
-	UserClan *userClan = NULL;
+	Character *issuedByUser = nullptr;
+	UserClan *userClan = nullptr;
 
 	bool characterLoadedFromDatabase = false;
 
@@ -102,14 +102,14 @@ ClanQuestPointTransaction *ClanUtil::performQuestPointTransaction(sql::Connectio
 		throw Exception("A clan quest point transaction with an amount of zero is not allowed.");
 	}
 
-	if(character == NULL)
+	if(character == nullptr)
 	{//If the user is not online, attempt to load them from the database.
 
 		characterLoadedFromDatabase = true;
 		character = CharacterUtil::loadCharacter(userId);
 	}
 
-	if(character == NULL)
+	if(character == nullptr)
 	{//If we do not have a valid pointer to the character, then they simply do not exist.
 
 		throw Exception( std::string("The target character(userId = `" + MiscUtil::toString(userId) + "`) does not exist").c_str() );
@@ -125,7 +125,7 @@ ClanQuestPointTransaction *ClanUtil::performQuestPointTransaction(sql::Connectio
 		issuedByUser = CharacterUtil::loadCharacter(issuedByUserId);
 	}
 
-	if(issuedByUser == NULL)
+	if(issuedByUser == nullptr)
 	{
 		if(characterLoadedFromDatabase)
 			delete character;
@@ -135,7 +135,7 @@ ClanQuestPointTransaction *ClanUtil::performQuestPointTransaction(sql::Connectio
 
 	userClan = character->getUserClan( clanId );
 
-	if(userClan == NULL)
+	if(userClan == nullptr)
 	{
 		if(characterLoadedFromDatabase)
 			delete character;
@@ -196,7 +196,7 @@ Clan *ClanUtil::getClan(const int clanId)
 			return clan;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 std::list<UserClan *> ClanUtil::getUserClans(sql::Connection connection, int userId)
@@ -287,7 +287,7 @@ UserClan *ClanUtil::getUserClanFromList(const std::list<UserClan *> &userClans, 
 		if((*userClanIter)->getClanId() == clanId)
 			return (*userClanIter);
 	}
-	return NULL;
+	return nullptr;
 }
 
 void ClanUtil::removeUserClansFromDatabase(sql::Connection connection, std::list<int> userClanIdList)

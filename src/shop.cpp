@@ -339,7 +339,7 @@ char *times_message(Object *obj, char *name, int num)
 
 	else
 	{
-		if ((ptr = strchr(name, '.')) == NULL)
+		if ((ptr = strchr(name, '.')) == nullptr)
 			ptr = name;
 
 		else
@@ -438,7 +438,7 @@ int buy_price(Object *obj, int shop_nr)
 void shopping_buy(char *arg, Character *ch, Character *keeper, int shop_nr)
 {
 	char tempstr[200], buf[MAX_STRING_LENGTH];
-	Object *obj, *last_obj = NULL;
+	Object *obj, *last_obj = nullptr;
 	int goldamt = 0, buynum, bought = 0;
 
 	if (!(is_ok(keeper, ch, shop_nr)))
@@ -861,7 +861,7 @@ void Shop::BootTypes( FILE* file )
 	{
 		char *returnValue = fgets( Buffer, sizeof(Buffer), file );
 
-		if(returnValue == NULL)
+		if(returnValue == nullptr)
 		{
 			Log("SYSERR: Shop::BootTypes : Unknown error occurred while reading file.");
 			exit(1);
@@ -891,7 +891,7 @@ void Shop::BootProducing( FILE* file )
 	{
 		char *returnValue = fgets( Buffer, sizeof(Buffer), file );
 
-		if(returnValue == NULL)
+		if(returnValue == nullptr)
 		{
 			Log("SYSERROR: Shop::BootProducing() : Unknown error occurred while reading file.");
 			exit(1);
@@ -1004,7 +1004,7 @@ void boot_the_shops()
 	}
 }
 
-void assign_the_shopkeepers(void)
+void assign_the_shopkeepers()
 {
 	int index;
 
@@ -1018,7 +1018,7 @@ void assign_the_shopkeepers(void)
 	{
 		Index *MI;
 		if(shop_index[ index ].keeper == -1 ||
-		(MI= MobManager::GetManager().GetIndex(shop_index[ index ].keeper)) == NULL)
+		(MI= MobManager::GetManager().GetIndex(shop_index[ index ].keeper)) == nullptr)
 			continue;
 		if (MI->func)
 			SHOP_FUNC(index) = MI->func;

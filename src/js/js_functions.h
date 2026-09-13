@@ -86,7 +86,7 @@ flusspferd::object JS_getGlobalObject();
 flusspferd::string JS_getUserNameByUserId(int userId);
 flusspferd::value JS_getUserIdByUserName(flusspferd::string userName);
 void JS_saveTopLevelHolderItems(const std::string &holderType, const std::string &holderId, const flusspferd::array &objects);
-flusspferd::object JS_llmResponse(const flusspferd::object &requestObject);
+flusspferd::object JS_llmResponse(flusspferd::value requestObject);
 
 //const char holderType, const std::string &holderId, const std::list<Object *> &contents)
 
@@ -97,5 +97,8 @@ flusspferd::string JS_sqlEncodeQuoteDate(flusspferd::object dateTime);
 void JS_sendToZone(int zoneNumber, flusspferd::string message);
 void JS_setTimeout(unsigned int pulses, flusspferd::value callback, flusspferd::object arguments);
 flusspferd::object JS_createDatetime(const DateTime &dateTime);
+
+int JS_numberOfPvals();
+void JS_savePvalsInNeedOfSaving();
 
 #endif

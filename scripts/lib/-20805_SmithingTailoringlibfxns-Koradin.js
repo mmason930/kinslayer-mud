@@ -191,10 +191,12 @@ function getCondition( actor, type )
 		var cond8 = ["wimpy","disappointment flashes across your face.",0,1];
 		var cond9 = ["harmless","you mutter in disgust.",0,0];
 	}
-	else
+	else {
 		return null;
-	if (skill < 10)
+	}
+	if (skill < 10) {
 		return null;
+	}
 	var conditionFound = false;
 	var results = [null,cond9,cond8,cond7,cond6,cond5,cond4,cond3,cond2,cond1];
 	var skill_tier = Math.floor(skill/10);
@@ -350,10 +352,11 @@ function getCondition( actor, type )
 	for (m = 0; m < aChance.length; m++)
 	{
 		//actor.room.echo(obj);
-		if (roll < aChance[m][1])
+		if (roll < aChance[m][1]) {
 			return aChance[m][0];
+		}
 	}
-	
+
 	return null;
 }
 function awardPracs( actor, type, material, item )

@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <sstream>
+#include <format>
 #include "DateTime.h"
 
 class MiscUtil {
@@ -54,12 +55,22 @@ public:
 	static bool isValidEmailAddress(const std::string &emailAddress);
 
 	template<typename T>
-	static std::string toString(T convertible)
+	static std::string toString(const T& value)
 	{
-		std::stringstream buffer;
-		buffer << convertible;
-		return buffer.str();
+		if constexpr (std::is_arithmetic_v<T>)
+			return std::to_string(value);
+		else if constexpr (std::formattable<T, char>)
+			return std::format("{}", value);
+		else
+		{
+			// Fallback for types with operator<< but no std::formatter
+			// (e.g. boost::uuids::uuid)
+			std::ostringstream buffer;
+			buffer << value;
+			return buffer.str();
+		}
 	}
+
 
 	template<typename T>
 	static std::list<T> makeSingleObjectList(T element)
@@ -79,9 +90,17 @@ public:
 			container = new std::vector<ValueType>();
 			map[key] = container;
 		}
-		
+
 		container->push_back(value);
 	}
+	template<typename MapType>
+	static void pushToVectorMap(MapType& map,
+								const typename MapType::key_type& key,
+								const typename MapType::mapped_type::value_type& value)
+	{
+		map[key].push_back(value);
+	}
+
 	template<typename KeyType, typename ValueType>
 	static void popFromVectorMap(std::map<KeyType, std::vector<ValueType> *> map, const KeyType &key)
 	{

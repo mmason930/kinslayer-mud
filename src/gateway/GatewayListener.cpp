@@ -2,11 +2,11 @@
 
 GatewayListener::GatewayListener()
 {
-	listener = NULL;
+	listener = nullptr;
 }
 GatewayListener::~GatewayListener()
 {
-	if(listener != NULL)
+	if(listener != nullptr)
 		delete listener;
 }
 

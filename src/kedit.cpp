@@ -31,7 +31,7 @@ const int KEDIT_DEBUG = 1;
 #endif
 
 // externs
-KitManager *KitManager::Self = NULL;
+KitManager *KitManager::Self = nullptr;
 
 // local functions
 void kedit_disp_menu(Descriptor *);
@@ -53,7 +53,7 @@ KitManager::~KitManager()
 }
 KitManager &KitManager::GetManager()
 {
-	if( Self == NULL )
+	if( Self == nullptr )
 		Self = new KitManager();
 	return (*Self);
 }
@@ -71,7 +71,7 @@ Kit *KitManager::GetKitByVnum( const int vnum )
 		if( (*kIter)->vnum == vnum )
 			return (*kIter);
 	}
-	return (NULL);
+	return (nullptr);
 }
 void KitManager::AddKit( Kit *k )
 {
@@ -659,7 +659,7 @@ void kedit_save_internally(Descriptor *d)
 {
 	Kit *OldKit;
 
-	if( (OldKit = KitManager::GetManager().GetKitByVnum( d->olc->kit->vnum )) == NULL )
+	if( (OldKit = KitManager::GetManager().GetKitByVnum( d->olc->kit->vnum )) == nullptr )
 	{//Not in the list.
 		OldKit = new Kit();
 		OldKit->CopyFrom( d->olc->kit );

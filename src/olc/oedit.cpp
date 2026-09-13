@@ -121,7 +121,7 @@ void oedit_setup_existing(Descriptor *d, int real_num)
 	                            obj_proto[real_num]->description : "undefined");
 
 	obj->action_description = (obj_proto[real_num]->action_description ?
-	                           str_dup(obj_proto[real_num]->action_description) : NULL);
+	                           str_dup(obj_proto[real_num]->action_description) : nullptr);
 
 	//Extra descriptions if necessary.
 	if (obj_proto[real_num]->ex_description)
@@ -132,9 +132,9 @@ void oedit_setup_existing(Descriptor *d, int real_num)
 
 		for (thist = obj_proto[real_num]->ex_description; thist; thist = thist->next)
 		{
-			temp->keyword = (thist->keyword && *thist->keyword) ? str_dup(thist->keyword) : NULL;
+			temp->keyword = (thist->keyword && *thist->keyword) ? str_dup(thist->keyword) : nullptr;
 			temp->description = (thist->description && *thist->description) ?
-			                    str_dup(thist->description) : NULL;
+			                    str_dup(thist->description) : nullptr;
 
 			if (thist->next)
 			{
@@ -147,7 +147,7 @@ void oedit_setup_existing(Descriptor *d, int real_num)
 			}
 
 			else
-				temp->next = NULL;
+				temp->next = nullptr;
 		}
 	}
 
@@ -215,10 +215,10 @@ void oedit_save_internally(Descriptor *d)
 				obj->retool_sdesc = swap->retool_sdesc;
 			}
 		}
-		swap->retool_desc = NULL;
-		swap->retool_name = NULL;
-		swap->retool_ex_desc = NULL;
-		swap->retool_sdesc = NULL;
+		swap->retool_desc = nullptr;
+		swap->retool_name = nullptr;
+		swap->retool_ex_desc = nullptr;
+		swap->retool_sdesc = nullptr;
 		free_obj(swap);
 
 		boost::uuids::uuid id = obj_proto[robj_num]->objID;
@@ -246,7 +246,7 @@ void oedit_save_internally(Descriptor *d)
 					OLC_OBJ(d)->item_number = robj_num;
 					new_obj_index[robj_num].vnum = OLC_NUM(d);
 					new_obj_index[robj_num].number = 0;
-					new_obj_index[robj_num].func = NULL;
+					new_obj_index[robj_num].func = nullptr;
 
 					Object *newObjectPrototype = new Object();
 					*newObjectPrototype = *(OLC_OBJ(d));
@@ -276,14 +276,14 @@ void oedit_save_internally(Descriptor *d)
 			OLC_OBJ(d)->item_number = robj_num;
 			new_obj_index[robj_num].vnum = OLC_NUM(d);
 			new_obj_index[robj_num].number = 0;
-			new_obj_index[robj_num].func = NULL;
+			new_obj_index[robj_num].func = nullptr;
 			
 			ItemCount.push_back(0);
 			
 			Object *newObjectPrototype = new Object();
 			*newObjectPrototype = *(OLC_OBJ(d));
 			obj_proto.push_back(newObjectPrototype);
-			newObjectPrototype->in_room = NULL;
+			newObjectPrototype->in_room = nullptr;
 		}
 
 		//Free and replace old tables.
@@ -300,7 +300,7 @@ void oedit_save_internally(Descriptor *d)
 		}
 
 		//Renumber zone table.
-		for (i = 0;(zone = ZoneManager::GetManager().GetZoneByRnum(i)) != NULL;++i)
+		for (i = 0;(zone = ZoneManager::GetManager().GetZoneByRnum(i)) != nullptr;++i)
 			for (cmd_no = 0;cmd_no < zone->cmd.size(); ++cmd_no)
 				switch (zone->cmd[cmd_no]->command)
 				{
@@ -1347,7 +1347,7 @@ void oedit_parse(Descriptor *d, char *arg)
 				case '4':
 					OLC_MODE(d) = OEDIT_ACTDESC;
 					d->send("Enter action description: (/s saves /h for help)\r\n\r\n");
-					d->backstr = NULL;
+					d->backstr = nullptr;
 
 					if (OLC_OBJ(d)->action_description)
 					{
@@ -2015,7 +2015,7 @@ void oedit_parse(Descriptor *d, char *arg)
 						{
 							if(*tmp_desc == OLC_DESC(d))
 							{
-								*tmp_desc = NULL;
+								*tmp_desc = nullptr;
 								break;
 							}
 						}
@@ -2031,7 +2031,7 @@ void oedit_parse(Descriptor *d, char *arg)
 				case 2:
 					OLC_MODE(d) = OEDIT_EXTRADESC_DESCRIPTION;
 					d->send("Enter the extra description: (/s saves /h for help)\r\n\r\n");
-					d->backstr = NULL;
+					d->backstr = nullptr;
 					if (OLC_DESC(d)->description)
 					{
 						d->send(OLC_DESC(d)->description);

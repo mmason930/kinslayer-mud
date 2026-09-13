@@ -71,7 +71,7 @@ unsigned long int Character::Gold()
 
 int Object::getVnum()
 {
-	if( this->item_number >= 0 && this->item_number < top_of_objt )
+	if( this->item_number >= 0 && this->item_number <= top_of_objt )
 	{
 		return obj_index[this->item_number].vnum;
 	}
@@ -190,7 +190,7 @@ int Character::Draw()
 			if (!this->CanDraw( GET_EQ( this, i) ->contains))
 				return 1;
 			this->send( "You draw %s from %s.\r\n", GET_EQ( this, i ) ->contains->GetSDesc(), GET_EQ( this, i ) ->GetSDesc() );
-			Act( "$n draws $p from $P.", TRUE, this, GET_EQ( this, i ) ->contains, GET_EQ( this, i ), TO_ROOM, NULL, true);
+			Act( "$n draws $p from $P.", TRUE, this, GET_EQ( this, i ) ->contains, GET_EQ( this, i ), TO_ROOM, nullptr, true);
 			break;
 		}
 	}
@@ -250,19 +250,19 @@ int Character::Sheath()
 			if ( IS_OBJ_STAT( GET_EQ( this, i ), ITEM_DAGGER_SHEATH ) && GET_OBJ_VAL( weapon, 0 ) == WEAPON_SHORT_BLADE )
 			{
 				this->send( "You slide %s into %s.\r\n", weapon->GetSDesc(), GET_EQ( this, i ) ->GetSDesc() );
-				Act( "$n slides $p into $P.", TRUE, this, weapon, GET_EQ( this, i ), TO_ROOM, NULL, true);
+				Act( "$n slides $p into $P.", TRUE, this, weapon, GET_EQ( this, i ), TO_ROOM, nullptr, true);
 				break;
 			}
 			else if ( IS_OBJ_STAT( GET_EQ( this, i ), ITEM_SWORD_SHEATH ) && GET_OBJ_VAL( weapon, 0 ) == WEAPON_LONG_BLADE )
 			{
 				this->send( "You sheath %s into %s.\r\n", weapon->GetSDesc(), GET_EQ( this, i ) ->GetSDesc() );
-				Act( "$n sheaths $p into $P.", TRUE, this, weapon, GET_EQ( this, i ), TO_ROOM, NULL, true);
+				Act( "$n sheaths $p into $P.", TRUE, this, weapon, GET_EQ( this, i ), TO_ROOM, nullptr, true);
 				break;
 			}
 			else if ( IS_OBJ_STAT( GET_EQ( this, i ), ITEM_SPEAR_SHEATH ) && GET_OBJ_VAL( weapon, 0 ) == WEAPON_SPEAR )
 			{
 				this->send( "You sheath %s into %s.\r\n", weapon->GetSDesc(), GET_EQ( this, i ) ->GetSDesc() );
-				Act( "$n sheaths $p into $P.", TRUE, this, weapon, GET_EQ( this, i ), TO_ROOM, NULL, true);
+				Act( "$n sheaths $p into $P.", TRUE, this, weapon, GET_EQ( this, i ), TO_ROOM, nullptr, true);
 				break;
 			}
 		}
@@ -345,7 +345,7 @@ void perform_put( Character * ch, Object * obj, Object * cont )
 		if(!IS_OBJ_STAT((obj), ITEM_INVISIBLE) || GET_LEVEL(ch) >= LVL_IMMORT)
 		{//RHOLLOR 05.03.09 remove msg for invis items
             Act( "You put $p in $P.", FALSE, ch, obj, cont, TO_CHAR );
-            Act( "$n puts $p in $P.", TRUE, ch, obj, cont, TO_ROOM, NULL, true);
+            Act( "$n puts $p in $P.", TRUE, ch, obj, cont, TO_ROOM, nullptr, true);
 		}
 
 		if ( IS_OBJ_STAT( cont, ITEM_CHEST ) )
@@ -497,7 +497,7 @@ void perform_get_from_container( Character * ch, Object * obj, Object * cont, in
 			if(!IS_OBJ_STAT((obj), ITEM_INVISIBLE) || GET_LEVEL(ch) >= LVL_IMMORT)
 			{//RHOLLOR 05.03.09 remove message when invis...
                 Act( "You get $p from $P.", FALSE, ch, obj, cont, TO_CHAR );
-                Act( "$n gets $p from $P.", TRUE, ch, obj, cont, TO_ROOM, NULL, true);
+                Act( "$n gets $p from $P.", TRUE, ch, obj, cont, TO_ROOM, nullptr, true);
 			}
 
 			if ( IS_OBJ_STAT( cont, ITEM_CHEST ) )
@@ -830,7 +830,7 @@ void perform_give( Character *ch, Character *vict, Object *obj )
 	if(!IS_OBJ_STAT((obj), ITEM_INVISIBLE) || GET_LEVEL(vict) >= LVL_IMMORT)
 	{
 		Act( "$n gives you $p.", FALSE, ch, obj, vict, TO_VICT );
-		Act( "$n gives $p to $N.", TRUE, ch, obj, vict, TO_NOTVICT, NULL, true);
+		Act( "$n gives $p to $N.", TRUE, ch, obj, vict, TO_NOTVICT, nullptr, true);
 	}
 
 	perform_give_extra( ch, vict, obj );
@@ -844,19 +844,19 @@ Character *give_find_vict( Character *ch, char *arg )
 	if ( !*arg )
 	{
 		ch->send( "To who?\r\n" );
-		return NULL;
+		return nullptr;
 	}
 
 	else if ( !( vict = get_char_room_vis( ch, arg ) ) )
 	{
 		ch->send( NOPERSON );
-		return NULL;
+		return nullptr;
 	}
 
 	else if ( vict == ch )
 	{
 		ch->send( "What's the point of that?\r\n" );
-		return NULL;
+		return nullptr;
 	}
 
 	else
@@ -1255,7 +1255,7 @@ CommandHandler  do_pour  = DEFINE_COMMAND
 {
 	char arg1[ MAX_INPUT_LENGTH ];
 	char arg2[ MAX_INPUT_LENGTH ];
-	Object *from_obj = NULL, *to_obj = NULL;
+	Object *from_obj = nullptr, *to_obj = nullptr;
 	int amount;
 
 	TwoArguments( argument, arg1, arg2 );
@@ -2246,7 +2246,7 @@ CommandHandler  do_auction  = DEFINE_COMMAND
 		return;
 
 	/* Check to ensure that the current room has a valid auction */
-	if( (a = AuctionManager::GetManager().GetAuction( ch->in_room->getAuctionVnum() )) == NULL )
+	if( (a = AuctionManager::GetManager().GetAuction( ch->in_room->getAuctionVnum() )) == nullptr )
 	{
 		ch->send(YouCantDoThatHere);
 		return;

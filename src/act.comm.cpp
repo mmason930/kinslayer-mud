@@ -40,7 +40,7 @@ extern Character *character_list;
 int is_tell_ok(Character *ch, Character *vict);
 const char *DARKNESS_CHECK(Character *ch, Character *vict);
 
-CommManager *CommManager::Self = NULL;
+CommManager *CommManager::Self = nullptr;
 CommManager::CommManager() {}
 CommManager::~CommManager() {}
 
@@ -213,11 +213,11 @@ CommandHandler do_say = DEFINE_COMMAND
 		{
 			if(vict != ch && GET_POS(vict) > POS_SLEEPING && (!AFF_FLAGGED(vict, AFF_DEAF) || GET_LEVEL(ch) >= LVL_IMMORT || GET_LEVEL(vict) >= LVL_IMMORT))
 			{
-				vict->send("%s %s '%s'\r\n", StringUtil::cap(PERS(ch, vict)), SayType.c_str(), ch->ScrambleSpeech(argument, vict).c_str());
+				SendChat(vict, "say", "%s %s '%s'\r\n", StringUtil::cap(PERS(ch, vict)), SayType.c_str(), ch->ScrambleSpeech(argument, vict).c_str());
 			}
 			else if(AFF_FLAGGED(vict, AFF_DEAF))
 			{
-				Act("$n appears to be talking, but you can't make out what $e is saying!", FALSE, ch, NULL, vict, TO_VICT);
+				Act("$n appears to be talking, but you can't make out what $e is saying!", FALSE, ch, nullptr, vict, TO_VICT);
 			}
 		}
 
@@ -225,7 +225,7 @@ CommandHandler do_say = DEFINE_COMMAND
 		{
 			if(GET_POS(vict) > POS_SLEEPING)
 			{
-				vict->send("%s %s '%s'\r\n", StringUtil::cap(PERS(ch, vict)), SayType.c_str(), ch->ScrambleSpeech(argument, vict).c_str());
+				SendChat(vict, "say", "%s %s '%s'\r\n", StringUtil::cap(PERS(ch, vict)), SayType.c_str(), ch->ScrambleSpeech(argument, vict).c_str());
 			}
 		}
 
@@ -234,7 +234,7 @@ CommandHandler do_say = DEFINE_COMMAND
 		else
 		{
 			SayType.resize(SayType.size() - 1);
-			ch->send("You %s '%s'\r\n", SayType.c_str(), argument);
+			SendChat(ch, "say", "You %s '%s'\r\n", SayType.c_str(), argument);
 		}
 	}
 	else
@@ -319,7 +319,7 @@ CommandHandler do_speak = DEFINE_COMMAND
 				if (STATE(pt) == CON_PLAYING && pt->character && pt->character != ch &&
 				        (GET_RACE(pt->character) == race || race == -1))
 				{
-					Act(buf, FALSE, ch, 0, pt->character, TO_VICT | TO_SLEEP);
+					Act(buf, FALSE, ch, 0, pt->character, TO_VICT | TO_SLEEP, nullptr, false, "speak");
 				}
 			}
 
@@ -330,7 +330,7 @@ CommandHandler do_speak = DEFINE_COMMAND
 					{
 						sprintf(buf, "%s%s$n speaks loudly to all creation '%s'%s",COLOR_BOLD(ch, CL_SPARSE),
 						        COLOR_CYAN(ch, CL_SPARSE), speech, COLOR_NORMAL(ch, CL_SPARSE));
-						Act(buf, FALSE, ch, 0, pt->character, TO_VICT | TO_SLEEP);
+						Act(buf, FALSE, ch, 0, pt->character, TO_VICT | TO_SLEEP, nullptr, false, "speak");
 					}
 
 					else
@@ -338,7 +338,7 @@ CommandHandler do_speak = DEFINE_COMMAND
 
 						sprintf(buf, "%s%s$n speaks loudly to %s '%s'%s", COLOR_BOLD(ch, CL_SPARSE),
 						        COLOR_CYAN(ch, CL_SPARSE), to[race], speech, COLOR_NORMAL(ch, CL_SPARSE));
-						Act(buf, FALSE, ch, 0, pt->character, TO_VICT | TO_SLEEP);
+						Act(buf, FALSE, ch, 0, pt->character, TO_VICT | TO_SLEEP, nullptr, false, "speak");
 					}
 				}
 
@@ -347,7 +347,7 @@ CommandHandler do_speak = DEFINE_COMMAND
 		if (PRF_FLAGGED(ch, PRF_NOREPEAT))
 			ch->send(OK);
 		else
-			ch->send("%s%sYou speak loudly to %s '%s'%s\r\n",
+			SendChat(ch, "speak", "%s%sYou speak loudly to %s '%s'%s\r\n",
 			         COLOR_BOLD(ch, CL_SPARSE), COLOR_CYAN(ch, CL_NORMAL), race == -1 ? "all creation" : to[race],
 			         speech, COLOR_NORMAL(ch, CL_NORMAL));
 	}
@@ -375,7 +375,7 @@ void Character::SendTell(Character *target, char *arg)
 {
 	target->send(COLOR_RED(target, CL_NORMAL));
 	sprintf(buf, "$n tells you, '%s'", (char*)this->ScrambleSpeech(arg, target).c_str());
-	Act(buf, FALSE, this, 0, target, TO_VICT | TO_SLEEP);
+	Act(buf, FALSE, this, 0, target, TO_VICT | TO_SLEEP, nullptr, false, "tell");
 	target->send(COLOR_NORMAL(target, CL_NORMAL));
 
 	if(!IS_NPC(target) && NEWB_FLAGGED(target, NEW_TELL) && !IS_NPC(this))
@@ -391,7 +391,7 @@ void Character::SendTell(Character *target, char *arg)
 	{
 		CommManager::GetManager().SaveComm(std::string("tell"), arg, this, this->in_room->getVnum(), target);
 		sprintf(buf, "You tell $N, '%s'", arg);
-		Act(buf, FALSE, this, 0, target, TO_CHAR);
+		Act(buf, FALSE, this, 0, target, TO_CHAR, nullptr, false, "tell");
 
 		if(IS_NPC(target) && !IS_NPC(this))
 			MudLog(CMP, MAX(GET_LEVEL(this), LVL_GOD), TRUE, "%s tells %s '%s' in room %d.",
@@ -494,10 +494,10 @@ CommandHandler do_reply = DEFINE_COMMAND
 		 *      hear tells anyway. :) -gg 2/24/98
 		 */
 
-		while (tch != NULL && (IS_NPC(tch) || tch->player.idnum != ch->last_tell))
+		while (tch != nullptr && (IS_NPC(tch) || tch->player.idnum != ch->last_tell))
 			tch = tch->next;
 
-		if (tch == NULL)
+		if (tch == nullptr)
 			ch->send("They are no longer playing.\r\n");
 
 		else if (is_tell_ok(ch, tch))
@@ -538,21 +538,21 @@ CommandHandler do_spec_comm = DEFINE_COMMAND
 	else
 	{
 		sprintf(buf, "$n %s you, '%s'", action_plur, ch->ScrambleSpeech(buf2, vict).c_str());
-		Act(buf, FALSE, ch, 0, vict, TO_VICT);
+		Act(buf, FALSE, ch, 0, vict, TO_VICT, nullptr, false, subcmd == SCMD_WHISPER ? "whisper" : "ask");
 
 		if (PRF_FLAGGED(ch, PRF_NOREPEAT))
 			ch->send(OK);
 		else
 		{
 			sprintf(buf, "You %s %s, '%s'\r\n", action_sing, GET_NAME(vict), buf2);
-			Act(buf, FALSE, ch, 0, 0, TO_CHAR);
+			Act(buf, FALSE, ch, 0, 0, TO_CHAR, nullptr, false, subcmd == SCMD_WHISPER ? "whisper" : "ask");
 
 			if(IS_NPC(vict) && !IS_NPC(ch))
 				MudLog(CMP, MAX(GET_LEVEL(ch), LVL_GOD), TRUE, "%s %s %s '%s' in room %d.",
 				GET_NAME(ch), action_plur, GET_NAME(vict), buf2, ch->in_room->getVnum());
 
 		}
-		Act(action_others, FALSE, ch, 0, vict, TO_NOTVICT);
+		Act(action_others, FALSE, ch, 0, vict, TO_NOTVICT, nullptr, false, subcmd == SCMD_WHISPER ? "whisper" : "ask");
 	}
 };
 
@@ -683,7 +683,7 @@ CommandHandler do_write = DEFINE_COMMAND
 			return;
 		}
 
-		ch->desc->backstr = NULL;
+		ch->desc->backstr = nullptr;
 		ch->send("Write your note.  (/s saves /h for help)\r\n");
 
 		/* ok, here we check for a message ALREADY on the paper */
@@ -730,20 +730,20 @@ CommandHandler do_page = DEFINE_COMMAND
 
 				for (d = descriptor_list; d; d = d->next)
 					if (STATE(d) == CON_PLAYING && d->character)
-						Act(buf, FALSE, ch, 0, d->character, TO_VICT);
+						Act(buf, FALSE, ch, 0, d->character, TO_VICT, nullptr, false, "page");
 			}
 			else
 				ch->send("You will never be godly enough to do that!\r\n");
 			return;
 		}
 
-		if ((vict = get_char_vis(ch, arg)) != NULL)
+		if ((vict = get_char_vis(ch, arg)) != nullptr)
 		{
-			Act(buf, FALSE, ch, 0, vict, TO_VICT);
+			Act(buf, FALSE, ch, nullptr, vict, TO_VICT, nullptr, false, "page");
 			if (PRF_FLAGGED(ch, PRF_NOREPEAT))
 				ch->send(OK);
 			else
-				Act(buf, FALSE, ch, 0, vict, TO_CHAR);
+				Act(buf, FALSE, ch, nullptr, vict, TO_CHAR, nullptr, false, "page");
 			return;
 		}
 		else
@@ -907,7 +907,7 @@ CommandHandler do_gen_comm = DEFINE_COMMAND
 			        argument, NORMAL);
 		else
 			sprintf(buf1, "You %s, '%s'", com_msgs[subcmd][1], argument);
-		Act(buf1, FALSE, ch, 0, 0, TO_CHAR | TO_SLEEP);
+		Act(buf1, FALSE, ch, 0, 0, TO_CHAR | TO_SLEEP, nullptr, false, com_msgs[subcmd][1]);
 		CommManager::GetManager().SaveComm(com_msgs[subcmd][1], argument, ch, ch->in_room->getVnum());
 	}
 
@@ -998,7 +998,7 @@ CommandHandler do_gen_comm = DEFINE_COMMAND
 			//	i->send(color_on); // original code
 				i->send(commColor); // new code for colors
 
-			Act(buf, FALSE, ch, 0, i->character, TO_VICT | TO_SLEEP);
+			Act(buf, FALSE, ch, 0, i->character, TO_VICT | TO_SLEEP, nullptr, false, com_msgs[subcmd][1]);
 
 			if (COLOR_LEV(i->character) >= CL_NORMAL)
 				i->send(NORMAL);

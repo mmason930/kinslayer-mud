@@ -76,8 +76,8 @@ public:
 
 	std::list< Object* > loadItemList( bool recursive );
 
-	std::string aRacesStr( Character *ch=NULL );
-	std::string dClansStr( Character *ch=NULL );
+	std::string aRacesStr( Character *ch=nullptr );
+	std::string dClansStr( Character *ch=nullptr );
 
 	std::bitset<16> bs_aRaces();
 	std::bitset<64> bs_dClans();

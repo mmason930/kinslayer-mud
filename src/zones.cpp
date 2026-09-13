@@ -15,6 +15,12 @@ extern Index *obj_index;
 void add_follower(Character * ch, Character * leader);
 int perform_group( Character *ch, Character *vict );
 
+extern Clock allZonesClock, mobLoadClock, objectLoadClock, chestLoadClock, objToObjClock, giveClock, equipClock, removeClock, doorClock, defaultClock, jsResetClock, setAgeClock;
+extern Clock countMobsClock, countMobsRoomClock;
+extern Clock allocateMobClock, logMobLoadClock, mobFollowClock, mobGroupClock, mobLoadTriggersClock;
+extern Clock skillsClock, skillsDefaultClock, kitLoopClock, kitLoadClock;
+extern Clock allocateMobTopClock;
+
 unsigned int Zone::CountObjects( const int obj_nr )
 {
 	unsigned int count = 0, room;
@@ -33,6 +39,7 @@ unsigned int Zone::CountObjects( const int obj_nr )
 }
 unsigned int Zone::CountMobs( const int mob_nr )
 {
+	countMobsClock.turnOn();
 	static unsigned int room, i;
 	static Character *ch;
 
@@ -44,6 +51,7 @@ unsigned int Zone::CountMobs( const int mob_nr )
 				++i;
 		}
 	}
+	countMobsClock.turnOff();
 	return i;
 }
 
@@ -63,7 +71,7 @@ void Zone::CopyFrom( Zone *Source )
 	SetResetMode(Source->GetResetMode());
 	setVnum(Source->getVnum());
 	SetRnum(Source->GetRnum());
-	this->weather = NULL;
+	this->weather = nullptr;
 
 	SetSunrise(Source->GetSunrise());
 	SetSunset(Source->GetSunset());
@@ -164,8 +172,8 @@ void Zone::Reset()
 {
 	int last_cmd = 0;
 	unsigned int cmd_no;
-	Character *mob = NULL, *fol = NULL;
-	Object *obj = NULL, *obj_to;
+	Character *mob = nullptr, *fol = nullptr;
+	Object *obj = nullptr, *obj_to;
 	unsigned int room_vnum;
 	int room_rnum;
 	int mob_load = FALSE; /* ### */
@@ -184,11 +192,11 @@ void Zone::Reset()
 			obj_load = FALSE;
 		}
 		if( fol && fol->IsPurged() )
-			fol = 0;
+			fol = nullptr;
 		switch (this->cmd[cmd_no]->command)
 		{
-			case 'M':			// read a mobile
-
+			case 'M':
+			mobLoadClock.turnOn();
 				if (this->cmd[cmd_no]->arg2 >= MiscUtil::random(1, 100) &&
 					(this->cmd[cmd_no]->arg4 == -1 || this->cmd[cmd_no]->arg4 > (int)CountMobsRoom(this->cmd[cmd_no]->arg1, World[this->cmd[cmd_no]->arg3])) &&
 					(this->cmd[cmd_no]->arg5 == -1 || this->cmd[cmd_no]->arg5 > (int)CountMobs(this->cmd[cmd_no]->arg1)) &&
@@ -196,18 +204,20 @@ void Zone::Reset()
 				{
 					// Serai - Sets the previously loaded mob to be the leader
 					//  And when loading a mob with the defualt arg7 (-1) it kills fol.
-					if (this->cmd[cmd_no]->arg7 == 1 && fol == NULL)
+					if (this->cmd[cmd_no]->arg7 == 1 && fol == nullptr)
 						fol = mob;
 					else if (this->cmd[cmd_no]->arg7 != 1)
-						fol = NULL;
+						fol = nullptr;
 
-				//MobClock.On();
+					allocateMobClock.turnOn();
 					mob = new Character(this->cmd[cmd_no]->arg1, REAL, false);
+					allocateMobClock.turnOff();
+					logMobLoadClock.turnOn();
 					char logBuffer[256];
 					snprintf(logBuffer, sizeof(logBuffer), "Zone %d cmd %d", this->getVnum(), this->cmd[cmd_no]->dbID);
 					mobLoadLogger.logMobLoad(mob->getVnum(), logBuffer);
+					logMobLoadClock.turnOff();
 					//TODO: Log mob load here.
-				//MobClock.Off();
 					mob->MoveToRoom(World[this->cmd[cmd_no]->arg3]);
 					this->cmd[cmd_no]->mob = mob;
 					last_cmd = 1;
@@ -216,11 +226,17 @@ void Zone::Reset()
 					// It's not possible to get a loop.
 					if (this->cmd[cmd_no]->arg7 == 1 && fol && !fol->IsPurged())
 					{
+						mobFollowClock.turnOn();
 						add_follower(mob, fol);
+						mobFollowClock.turnOff();
+						mobGroupClock.turnOn();
 						perform_group(fol, mob);
+						mobGroupClock.turnOff();
 					}
 					if( !mob->IsPurged() ) {
+						mobLoadTriggersClock.turnOn();
 						js_load_triggers(mob);
+						mobLoadTriggersClock.turnOff();
 					}
 				}
 				else
@@ -230,9 +246,11 @@ void Zone::Reset()
 					else
 						last_cmd = 0;
 				}
+			mobLoadClock.turnOff();
 				break;
 
-			case 'O':			/* read an object */
+			case 'O': // Load object
+			objectLoadClock.turnOn();
 				if (this->cmd[cmd_no]->arg2 >= MiscUtil::random(1, 100) &&
 				(CountObjectsRoom(cmd[cmd_no]->arg1, cmd[cmd_no]->arg3) < this->cmd[cmd_no]->arg4 || cmd[cmd_no]->arg4 == -1)&&
 				(this->cmd[cmd_no]->arg5 == -1 || CountObjects(this->cmd[cmd_no]->arg1) < (unsigned int)cmd[cmd_no]->arg5) &&
@@ -246,7 +264,13 @@ void Zone::Reset()
 						obj->MoveToRoom(cmd[cmd_no]->arg3);
 
 						if(IS_OBJ_STAT(obj, ITEM_CHEST))
+						{
+							objectLoadClock.turnOff();
+							chestLoadClock.turnOn();
 							obj->loadItems();
+							chestLoadClock.turnOff();
+							objectLoadClock.turnOn();
+						}
 
 						if( !obj->IsPurged() ) {
 							js_load_triggers(obj);
@@ -258,7 +282,7 @@ void Zone::Reset()
 					else
 					{
 						obj = read_object(cmd[cmd_no]->arg1, REAL, true);
-						obj->in_room = 0;
+						obj->in_room = nullptr;
 						last_cmd = 1;
 						obj_load = TRUE;
 					}
@@ -267,26 +291,35 @@ void Zone::Reset()
 
 				else
 					last_cmd = 0;
+				objectLoadClock.turnOff();
 				break;
 
 			case 'P':			// object to object
+				objToObjClock.turnOn();
 				if (cmd[cmd_no]->arg2 >= MiscUtil::random(1, 100) && (obj_proto[cmd[cmd_no]->arg1]->Max == -1 ||
 				ItemCount[cmd[cmd_no]->arg1] < obj_proto[cmd[cmd_no]->arg1]->Max))
 				{
 					if( cmd[cmd_no]->arg4 < 0 || cmd[cmd_no]->arg4 >= World.size() )
+					{
+						objToObjClock.turnOff();
 						break;
+					}
 
 					//Scan the current room to find the container.
 					Room *room = World[cmd[cmd_no]->arg4];
 					for(obj_to = room->contents;obj_to && obj_to->item_number != cmd[cmd_no]->arg3;obj_to = obj_to->next_content);
 
 					if( !obj_to )
+					{
+						objToObjClock.turnOff();
 						break;
+					}
 
 					// If weight in container + weight of item to put in > max weight, we terminate this operation.
 					if( (obj_to->Weight() - obj_to->GetTotalWeight() + (obj_proto[cmd[cmd_no]->arg1])->GetTotalWeight())
 						> obj_to->GetTotalVal0())
 					{
+						objToObjClock.turnOff();
 						break;
 					}
 					obj = read_object(cmd[cmd_no]->arg1, REAL, true);
@@ -301,8 +334,10 @@ void Zone::Reset()
 				}
 				else
 					last_cmd = 0;
+				objToObjClock.turnOff();
 				break;
 			case 'G':			/* obj_to_char ### */
+				giveClock.turnOn();
 				if (!mob)
 				{
 					if (cmd[cmd_no]->if_flag)
@@ -313,6 +348,7 @@ void Zone::Reset()
 					 *   doesn't die, or if it is purged in any way it is reloaded before here.
 					 *     - Serai
 					 */
+					giveClock.turnOff();
 					break;
 				}
 
@@ -334,12 +370,15 @@ void Zone::Reset()
 				else
 					last_cmd = 0;
 
+				giveClock.turnOff();
 				break;
 
 			case 'E':			/* object to equipment list ### */
+				equipClock.turnOn();
 				if (!mob)
 				{
 					this->LogError(cmd_no, "trying to equip non-existant mob");
+					equipClock.turnOff();
 					break;
 				}
 
@@ -368,21 +407,25 @@ void Zone::Reset()
 						}
 					}
 				}
+				equipClock.turnOff();
 				break;
 
 			case 'R': /* rem obj from room */
-				if ((obj = ItemUtil::get()->getObjectInListByRealNumber(cmd[cmd_no]->arg2, World[cmd[cmd_no]->arg1]->contents)) != NULL)
+				removeClock.turnOn();
+				if ((obj = ItemUtil::get()->getObjectInListByRealNumber(cmd[cmd_no]->arg2, World[cmd[cmd_no]->arg1]->contents)) != nullptr)
 				{
 					obj->RemoveFromRoom();
 					obj->Extract(true);
 				}
-				obj = 0;
+				obj = nullptr;
 
 				last_cmd = 1;
+				removeClock.turnOff();
 				break;
 			case 'D':			/* set state of door */
+				doorClock.turnOn();
 				if (cmd[cmd_no]->arg2 < 0 || cmd[cmd_no]->arg2 >= NUM_OF_DIRS ||
-				(World[cmd[cmd_no]->arg1]->dir_option[cmd[cmd_no]->arg2] == NULL))
+				(World[cmd[cmd_no]->arg1]->dir_option[cmd[cmd_no]->arg2] == nullptr))
 				{
 					this->LogError(cmd_no, "door does not exist");
 				}
@@ -407,16 +450,22 @@ void Zone::Reset()
 				}
 
 				last_cmd = 1;
+				doorClock.turnOff();
 				break;
 			default:
+				defaultClock.turnOn();
 				this->LogError(cmd_no, "unknown cmd in reset table; cmd disabled");
+				defaultClock.turnOff();
 				//cmd[cmd_no]->command = '*';
 				break;
 		}
 	}
 
+	setAgeClock.turnOn();
 	SetAge(0);
+	setAgeClock.turnOff();
 
+	jsResetClock.turnOn();
 	// handle reset triggers
 	room_vnum = GetBottom();
 	while (room_vnum <= GetTop())
@@ -429,6 +478,7 @@ void Zone::Reset()
 		}
 		++room_vnum;
 	}
+	jsResetClock.turnOff();
 }
 
 void Zone::Boot( const sql::Row &ZoneRow, std::list< sql::Row > &RowList )
@@ -476,7 +526,7 @@ void ZoneManager::SaveZones()
 }
 void ZoneManager::Free()
 {
-	if( Self != NULL )
+	if( Self != nullptr )
 		delete Self;
 }
 
@@ -581,7 +631,7 @@ void Zone::PrintToBuffer( std::string &Buffer )
 	Buffer += TBuff;
 }
 
-ZoneManager *ZoneManager::Self = NULL;
+ZoneManager *ZoneManager::Self = nullptr;
 ZoneManager::~ZoneManager()
 {
 	{
@@ -594,7 +644,7 @@ ZoneManager::~ZoneManager()
 	{
 	
 	std::lock_guard<std::recursive_mutex > lock(ZoneManager::SingletonMutex);
-	Self = NULL;
+	Self = nullptr;
 	}
 }
 ZoneManager &ZoneManager::GetManager()
@@ -612,13 +662,14 @@ Zone *ZoneManager::AddNewZone( const unsigned int vnum )
 	for( zIter = ZoneList.begin();zIter != ZoneList.end();++zIter )
 	{
 		if( (*zIter)->getVnum() == vnum )
-			return NULL;
+			return nullptr;
 		else if( (*zIter)->getVnum() > vnum ) //insert before...
 			break;
 	}
 	//If we have made it this far, we have found an iterator after which point the zone must go.
 	Zone *NewZone = new Zone( vnum );
 	ZoneList.insert( zIter, NewZone );
+	vnumToZoneMap[vnum] = NewZone;
 
 	RenumberZones();//This will reset all of the rnums of the zones to their proper value.
 
@@ -628,17 +679,13 @@ Zone *ZoneManager::AddNewZone( const unsigned int vnum )
 Zone *ZoneManager::GetZoneByVnum( const unsigned int vnum )
 {
 	std::lock_guard<std::recursive_mutex > lock(this->ZoneListMutex);
-	for(unsigned int i = 0;i < ZoneList.size();++i)
-	{
-		if( ZoneList[i]->getVnum() == vnum )
-			return ZoneList[i];
-	}
-	return (0);
+	auto matchedZone = vnumToZoneMap.find(vnum);
+	return matchedZone != vnumToZoneMap.end() ? matchedZone->second : nullptr;
 }
 Zone *ZoneManager::GetZoneByRnum( const unsigned int rnum )
 {
 	std::lock_guard<std::recursive_mutex > lock(this->ZoneListMutex);
-	return (rnum >= 0 && rnum < ZoneList.size()) ? (ZoneList[rnum]) : (NULL);
+	return (rnum >= 0 && rnum < ZoneList.size()) ? (ZoneList[rnum]) : nullptr;
 }
 Zone *ZoneManager::GetZoneByRoomVnum( const unsigned int rvnum )
 {
@@ -648,7 +695,7 @@ Zone *ZoneManager::GetZoneByRoomVnum( const unsigned int rvnum )
 		if( rvnum >= ZoneList[i]->GetBottom() && rvnum <= ZoneList[i]->GetTop() )
 			return ZoneList[i];
 	}
-	return NULL;
+	return nullptr;
 }
 size_t ZoneManager::NumZones()
 {
@@ -695,9 +742,7 @@ void ZoneManager::LoadThreadedZoneBatch( sql::Connection connection, const int z
 		if( MyQuery->numRows() > 0 )
 		{
 			int lowZoneID = atoi(MyQuery->peekRow()["id"].c_str());
-			MyQuery->reverseRows();
-			int highZoneID = atoi(MyQuery->peekRow()["id"].c_str());
-			MyQuery->reverseRows();
+			int highZoneID = atoi(MyQuery->lastRow()["id"].c_str());
 
 			//Using this range, obtain the matching zone commands.
 			Query.str("");
@@ -751,7 +796,7 @@ void ZoneManager::BootZones()
 	std::list< std::thread* > threadPool;
 
 	query = gameDatabase->sendQuery("SELECT COUNT(*) AS size FROM zoneIndex;");
-	zoneIndexTableSize = atoi(query->getRow()[ "size" ].c_str());
+	zoneIndexTableSize = query->getRow().getInt( "size" );
 
 	int zoneIndexOffset = 0;
 	int zoneIndexFetchSize = zoneIndexTableSize / SIZE_OF_THREAD_POOL + 1;
@@ -771,12 +816,12 @@ void ZoneManager::BootZones()
 		threadPool.pop_front();
 	}
 
-	Zone *zoneBefore = NULL;
-	Zone *zone = NULL;
+	Zone *zoneBefore = nullptr;
+	Zone *zone = nullptr;
 	//Validate the zone table.
 	for(size_t zoneIndex = 1;zoneIndex < ZoneManager::GetManager().NumZones();++zoneIndex)
 	{
-		if( zoneBefore == NULL )
+		if( zoneBefore == nullptr )
 			zoneBefore = ZoneManager::GetManager().GetZoneByRnum( zoneIndex - 1 );
 		else
 			zoneBefore = zone;

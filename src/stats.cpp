@@ -70,11 +70,11 @@ StatManager::StatManager()
 
 StatManager::~StatManager()
 {
-	Self = NULL;
+	Self = nullptr;
 }
 void StatManager::Free()
 {
-	if( Self != NULL )
+	if( Self != nullptr )
 		delete (Self);
 }
 

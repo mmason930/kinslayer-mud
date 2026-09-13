@@ -3,9 +3,9 @@ var script177 = function(self, actor, here, args, extra) {
 };
 
 var script178 = function(self, actor, here, args, extra) {
-	if( actor.vnum === -1 && random(1,100) <= 15 && self.canSee(actor) ) {
+	if( actor.vnum === -1 && random(1,100) <= 100 && self.canSee(actor) ) {
 		llmResponse({
-			model: "gpt-4.1-nano",
+			model: "gpt-4.1-mini",
 			prompt: "You're an NPC in a game. Your name is: " + self.name + ", you are in a room named " + here.name
 				+ ". A player named " + actor.name + " just entered your room. Provide me the dialog you'd say."
 				+ " Provide only the dialog, nothing else, and not in quotes. Max 1-2 sentence. Include begging or"

@@ -156,7 +156,7 @@ Character *faceoff(Character *attacker, Character *prey)
 
 	for(target = prey->in_room->people;target;target = target->next_in_room)
 	{
-		if( (target->master == NULL && prey->master == NULL) || !AFF_FLAGGED(target,AFF_GROUP) )
+		if( (target->master == nullptr && prey->master == nullptr) || !AFF_FLAGGED(target,AFF_GROUP) )
 			continue;
 
 		if(CAN_SEE(attacker, target) && (target->master == prey->master || target == prey->master || target->master == prey))
@@ -454,9 +454,9 @@ CommandHandler do_bash = DEFINE_COMMAND
 			}
 			if(too_scared(ch, SKILL_BASH))
 			{
-				Act("You lock eyes with $N and take a moment to shake off your fear before swinging your weapon!", TRUE, ch, NULL, vict, TO_CHAR);
-				Act("$n pauses briefly before continuing $s attack as you stare at $m mockingly!", TRUE, ch, NULL, vict, TO_VICT);
-				Act("$N turns $S eyeless gaze to $n, who panics briefly before continuing $s attack!", TRUE, ch, NULL, vict, TO_NOTVICT);
+				Act("You lock eyes with $N and take a moment to shake off your fear before swinging your weapon!", TRUE, ch, nullptr, vict, TO_CHAR);
+				Act("$n pauses briefly before continuing $s attack as you stare at $m mockingly!", TRUE, ch, nullptr, vict, TO_VICT);
+				Act("$N turns $S eyeless gaze to $n, who panics briefly before continuing $s attack!", TRUE, ch, nullptr, vict, TO_NOTVICT);
 				ch->timer += .5f;
 			}
 			ch->command_ready = true;
@@ -470,11 +470,11 @@ CommandHandler do_bash = DEFINE_COMMAND
 			else
 			{
 				perform_bash(ch, GET_TARGET(ch));
-				GET_TARGET(ch) = NULL;
+				GET_TARGET(ch) = nullptr;
 				if(GET_SKILL(ch, SKILL_DUALBASH) && GET_TARGET2(ch) && !IS_BASHED(GET_TARGET2(ch)) && FIGHTING(GET_TARGET2(ch)) == ch && GET_TARGET2(ch)->in_room == ch->in_room)
 				{
 					perform_bash(ch, GET_TARGET2(ch));
-					GET_TARGET2(ch) = NULL;
+					GET_TARGET2(ch) = nullptr;
 				}
 			}
 		}
@@ -546,9 +546,9 @@ void perform_backstab(Character *ch, Character *vict)
 	{
 		if(too_scared(ch, SKILL_BACKSTAB))
 		{
-			Act("You fall to the ground in fear as $N's eyeless stare falls upon you!", TRUE, ch, NULL, vict, TO_CHAR);
-			Act("You take a long look at $n, who falls to the ground convulsing.", TRUE, ch, NULL, vict, TO_VICT);
-			Act("$n drops to the ground shaking violently as $N locks eyes with $m.", TRUE, ch, NULL, vict, TO_NOTVICT);
+			Act("You fall to the ground in fear as $N's eyeless stare falls upon you!", TRUE, ch, nullptr, vict, TO_CHAR);
+			Act("You take a long look at $n, who falls to the ground convulsing.", TRUE, ch, nullptr, vict, TO_VICT);
+			Act("$n drops to the ground shaking violently as $N locks eyes with $m.", TRUE, ch, nullptr, vict, TO_NOTVICT);
 
 			ch->setBashState( PULSE_VIOLENCE * 2, false );
 		}
@@ -565,7 +565,7 @@ void perform_backstab(Character *ch, Character *vict)
 			apply_severewound(ch, vict);
 		return;
 	}
-	GET_TARGET(ch) = NULL;
+	GET_TARGET(ch) = nullptr;
 	if((p = faceoff(ch, vict)) && FIGHTING(ch) && !PreFighting)
 	{
 		ch->StopFighting();
@@ -673,7 +673,7 @@ void perform_charge(Character *ch, Character *victim, int type)
 	/* Find the defense of the victim */
 	offense = ch->ChargeOffenseRoll(skill);
 	defense = victim->ChargeDefenseRoll(skill);
-	GET_TARGET(ch) = NULL;
+	GET_TARGET(ch) = nullptr;
 
 	/* The attacker fails. */
 	if(defense > offense || (IS_NPC(victim) && MOB_FLAGGED(victim, MOB_AWARE)))
@@ -839,9 +839,9 @@ CommandHandler do_charge = DEFINE_COMMAND
 
 	if(!ch->command_ready)
 	{
-		Act("You begin charging towards $N.", TRUE, ch, NULL, victim, TO_CHAR);
-		Act("$n begins charging towards you.", TRUE, ch, NULL, victim, TO_VICT);
-		Act("$n begins charging towards $N.", TRUE, ch, NULL, victim, TO_NOTVICT);
+		Act("You begin charging towards $N.", TRUE, ch, nullptr, victim, TO_CHAR);
+		Act("$n begins charging towards you.", TRUE, ch, nullptr, victim, TO_VICT);
+		Act("$n begins charging towards $N.", TRUE, ch, nullptr, victim, TO_NOTVICT);
 		ch->command_ready = true;
 		ch->timer = ChargeData.Timer;
 	}
@@ -849,9 +849,9 @@ CommandHandler do_charge = DEFINE_COMMAND
 	{
 		if(too_scared(ch, SKILL_CHARGE))
 		{
-			Act("Suddenly $N stares deeply into the eyes of your horse, who veers off course out of fear!", TRUE, ch, NULL, victim, TO_CHAR);
-			Act("You turn your eyeless gaze to $n's horse, causing it to sharply change course!", TRUE, ch, NULL, victim, TO_VICT);
-			Act("$N locks eyes with the horse of $n, who bucks wildly and runs in a different direction!", TRUE, ch, NULL, victim, TO_NOTVICT);
+			Act("Suddenly $N stares deeply into the eyes of your horse, who veers off course out of fear!", TRUE, ch, nullptr, victim, TO_CHAR);
+			Act("You turn your eyeless gaze to $n's horse, causing it to sharply change course!", TRUE, ch, nullptr, victim, TO_VICT);
+			Act("$N locks eyes with the horse of $n, who bucks wildly and runs in a different direction!", TRUE, ch, nullptr, victim, TO_NOTVICT);
 			WAIT_STATE(ch, ChargeData.O_PulsesLagOnMiss);
 			if((p = faceoff(ch, victim)) && FIGHTING(ch) && !PreFighting)
 			{
@@ -924,7 +924,7 @@ CommandHandler do_source = DEFINE_COMMAND
 		ch->send("You have to embrace saidar, not seize it!\r\n");
 		return;
 	}
-	if( AFF_FLAGGED(ch, AFF_SHIELD) || ShieldManager::GetManager().ShieldedBy(ch) != NULL)
+	if( AFF_FLAGGED(ch, AFF_SHIELD) || ShieldManager::GetManager().ShieldedBy(ch) != nullptr)
 	{
 		ch->send("You fumble for access to the True Source, but you're blocked off!\r\n");
 		return;
@@ -1414,8 +1414,8 @@ CommandHandler do_flee = DEFINE_COMMAND
 				}
 				if( MOUNT(ch) && GET_MOVE(MOUNT(ch)) < MOUNT(ch)->NeededToMove(fleeDir) )
 				{
-					Act("You attempt to flee, but $N is too exhausted to move.", false, ch, NULL, MOUNT(ch), TO_CHAR);
-					Act("$n attempts to flee, but $N is too exhausted to move.", false, ch, NULL, MOUNT(ch), TO_ROOM);
+					Act("You attempt to flee, but $N is too exhausted to move.", false, ch, nullptr, MOUNT(ch), TO_CHAR);
+					Act("$n attempts to flee, but $N is too exhausted to move.", false, ch, nullptr, MOUNT(ch), TO_ROOM);
 					return;
 				}
 				if( can_move(ch, fleeDir, FALSE, true) )
@@ -1644,7 +1644,7 @@ void perform_kick(Character *ch, Character *vict)
 			vict->InterruptTimer();
 	}
 
-	GET_TARGET(ch) = NULL;
+	GET_TARGET(ch) = nullptr;
 	WAIT_STATE(ch, PULSE_VIOLENCE);
 
 	if(FIGHTING(ch) && (p = faceoff(ch, vict)) && !PreFighting)
@@ -1694,7 +1694,7 @@ CommandHandler do_kick = DEFINE_COMMAND
 		return;
 	}
 	/* Added by Galnor on 05/07/2009 - fixes some crashes we had */
-	if( vict == NULL )
+	if( vict == nullptr )
 	{
 		ch->send(NOPERSON);
 		return;
@@ -1713,9 +1713,9 @@ CommandHandler do_kick = DEFINE_COMMAND
 
 	if(too_scared(ch, SKILL_KICK))
 	{
-		Act("Your eyes meet $N's as you attempt to kick $M, unnerving you and causing you to fall down!", TRUE, ch, NULL, vict, TO_CHAR);
-		Act("You stare down $n as $e attempts to kick you, causing $m to fall to the ground!", TRUE, ch, NULL, vict, TO_VICT);
-		Act("$n tries to kick $N, but changes $s mind after making eye contact!", TRUE, ch, NULL, vict, TO_NOTVICT);
+		Act("Your eyes meet $N's as you attempt to kick $M, unnerving you and causing you to fall down!", TRUE, ch, nullptr, vict, TO_CHAR);
+		Act("You stare down $n as $e attempts to kick you, causing $m to fall to the ground!", TRUE, ch, nullptr, vict, TO_VICT);
+		Act("$n tries to kick $N, but changes $s mind after making eye contact!", TRUE, ch, nullptr, vict, TO_NOTVICT);
 		WAIT_STATE(ch, PULSE_VIOLENCE);
 		if((p = faceoff(ch, vict)) && FIGHTING(ch) && !PreFighting)
 		{
@@ -1744,7 +1744,7 @@ void perform_precisestrike(Character *ch, Character *vict)
 	if( !FIGHTING(ch) )
 		vict = faceoff(ch, vict);
 
-	GET_TARGET(ch) = NULL;
+	GET_TARGET(ch) = nullptr;
 	
 	if (!ch->rollPrecStrike( vict ))
 		damage(ch, vict, 0, SKILL_PRECISESTRIKE, -1);
@@ -1893,7 +1893,7 @@ CommandHandler do_precisestrike = DEFINE_COMMAND
 		return;
 	}
 
-	if( vict == NULL )
+	if( vict == nullptr )
 	{
 		ch->send(NOPERSON);
 		ch->ps_tgt = -1;
@@ -1931,9 +1931,9 @@ CommandHandler do_precisestrike = DEFINE_COMMAND
 	{
 		if(too_scared(ch, SKILL_PRECISESTRIKE))
 		{
-			Act("You prepare to strike at $N, but briefly hesitate in fear as you see $S eyeless gaze upon you!", TRUE, ch, NULL, vict, TO_CHAR);
-			Act("$n begins to approach you, but hesitates briefly as you stare $m down!", TRUE, ch, NULL, vict, TO_VICT);
-			Act("$n begins to attack $N, but delays $s approach out of fear from $N's eyeless stare!", TRUE, ch, NULL, vict, TO_NOTVICT);
+			Act("You prepare to strike at $N, but briefly hesitate in fear as you see $S eyeless gaze upon you!", TRUE, ch, nullptr, vict, TO_CHAR);
+			Act("$n begins to approach you, but hesitates briefly as you stare $m down!", TRUE, ch, nullptr, vict, TO_VICT);
+			Act("$n begins to attack $N, but delays $s approach out of fear from $N's eyeless stare!", TRUE, ch, nullptr, vict, TO_NOTVICT);
 			ch->timer += .5f;
 		}
 		ch->command_ready = true;
@@ -2062,14 +2062,14 @@ CommandHandler do_shieldblock = DEFINE_COMMAND
 	{
 		ch->command_ready = true;
 		ch->ShieldBlock = true;
-		Act("You raise your shield and brace yourself in preparation for an oncoming attack.", FALSE, ch, NULL, vict, TO_CHAR);
-		Act("$n hefts $s shield and takes up a defensive stance.", FALSE, ch, NULL, vict, TO_NOTVICT);
+		Act("You raise your shield and brace yourself in preparation for an oncoming attack.", FALSE, ch, nullptr, vict, TO_CHAR);
+		Act("$n hefts $s shield and takes up a defensive stance.", FALSE, ch, nullptr, vict, TO_NOTVICT);
 	}
 	else
 	{
 		ch->ShieldBlock = false;
-		Act("You lower your shield, having failed to anticipate an attack.", FALSE, ch, NULL, vict, TO_CHAR);
-		Act("$n lowers $s shield, becoming vulnerable once more.", FALSE, ch, NULL, vict, TO_NOTVICT);
+		Act("You lower your shield, having failed to anticipate an attack.", FALSE, ch, nullptr, vict, TO_CHAR);
+		Act("$n lowers $s shield, becoming vulnerable once more.", FALSE, ch, nullptr, vict, TO_NOTVICT);
 		WAIT_STATE(ch, PULSE_VIOLENCE / 2);
 	}
 };
@@ -2102,9 +2102,9 @@ void apply_severewound(Character *ch, Character *vict)
 		affect_from_char(vict, 0, AFF_SEVERE_WOUND);
 	affect_to_char( vict, &af );
 
-	Act("You have been severely wounded, you can no longer move around as quickly!", FALSE, vict, NULL, ch, TO_CHAR);
-	Act("$n has been heavily wounded, noticeably slowing $s movement speed!", FALSE, vict, NULL, ch, TO_VICT);
-	Act("$N deeply wounds $n, who appears to no longer move as quickly!", FALSE, vict, NULL, ch, TO_NOTVICT);
+	Act("You have been severely wounded, you can no longer move around as quickly!", FALSE, vict, nullptr, ch, TO_CHAR);
+	Act("$n has been heavily wounded, noticeably slowing $s movement speed!", FALSE, vict, nullptr, ch, TO_VICT);
+	Act("$N deeply wounds $n, who appears to no longer move as quickly!", FALSE, vict, nullptr, ch, TO_NOTVICT);
 }
 
 /* 6/28/09 by Fogel - Hamstring, a skill for Blademasters. Decreases the victim's dodge bonus and movement regen. */
@@ -2144,7 +2144,7 @@ CommandHandler do_hamstring = DEFINE_COMMAND
 		return;
 	}
 	
-	if( vict == NULL )
+	if( vict == nullptr )
 	{
 		ch->send(NOPERSON);
 		return;
@@ -2247,14 +2247,14 @@ void perform_whirlwind(Character *ch)
 
 	if (GET_SKILL(ch, SKILL_WHIRLWIND) > MiscUtil::random(0, 125))
 	{
-		Act( "You perform Apple Blossoms in the Wind, quickly slashing all of your opponents!", TRUE, ch, NULL, vict, TO_CHAR );
-		Act( "$n spins quickly as $e lashes out at $s opponents with Apple Blossoms in the Wind.", TRUE, ch, NULL, vict, TO_NOTVICT );
+		Act( "You perform Apple Blossoms in the Wind, quickly slashing all of your opponents!", TRUE, ch, nullptr, vict, TO_CHAR );
+		Act( "$n spins quickly as $e lashes out at $s opponents with Apple Blossoms in the Wind.", TRUE, ch, nullptr, vict, TO_NOTVICT );
 		for ( vict = ch->in_room->people; vict; vict = temp )
 		{
 			temp = vict->next_in_room;
 			if ( FIGHTING( vict ) == ch || vict == FIGHTING( ch ) )
 			{
-				Act( "$n quickly slashes at you before pivoting to face $s next opponent.", TRUE, ch, NULL, vict, TO_VICT );
+				Act( "$n quickly slashes at you before pivoting to face $s next opponent.", TRUE, ch, nullptr, vict, TO_VICT );
 				damage(ch, vict, 5, SKILL_WHIRLWIND, -1);
 				/*if(vict->timer && room_visibility(ch, vict) && MiscUtil::random(0, 200) > GET_SKILL(ch, SKILL_WHIRLWIND))*/
 				vict->InterruptTimer();
@@ -2265,8 +2265,8 @@ void perform_whirlwind(Character *ch)
 	}
 	else
 	{
-		Act( "You spin around attempting to perform Apple Blossoms in the Wind, but fall flat on your face!", TRUE, ch, NULL, vict, TO_CHAR );
-		Act( "$n falls to the ground as $s spinning attack fails to hit anyone!", TRUE, ch, NULL, vict, TO_ROOM );
+		Act( "You spin around attempting to perform Apple Blossoms in the Wind, but fall flat on your face!", TRUE, ch, nullptr, vict, TO_CHAR );
+		Act( "$n falls to the ground as $s spinning attack fails to hit anyone!", TRUE, ch, nullptr, vict, TO_ROOM );
 		WAIT_STATE(ch, PULSE_VIOLENCE * .5);
 	}
 
@@ -2294,7 +2294,7 @@ CommandHandler do_invert = DEFINE_COMMAND
 		return;
 	}
 
-	if( AFF_FLAGGED(ch, AFF_SHIELD) || ShieldManager::GetManager().ShieldedBy(ch) != NULL )
+	if( AFF_FLAGGED(ch, AFF_SHIELD) || ShieldManager::GetManager().ShieldedBy(ch) != nullptr )
 	{
 		ch->send("Your connection to the True Source is blocked!\r\n");
 		return;
@@ -2302,7 +2302,7 @@ CommandHandler do_invert = DEFINE_COMMAND
 
 	if( ch->InvertNextWeave )
 	{
-		Act( weave->getAttribute( "ToCharFail" ).c_str(), TRUE, ch, NULL, ch, TO_CHAR);
+		Act( weave->getAttribute( "ToCharFail" ).c_str(), TRUE, ch, nullptr, ch, TO_CHAR);
 		return;
 	}
 
@@ -2317,7 +2317,7 @@ CommandHandler do_invert = DEFINE_COMMAND
 		}
 		ch->InvertNextWeave = true;
 		ch->points.mana = MAX(0, ch->points.mana - mag_manacost(ch, WeaveManager::GetManager().GetWeave("Invert")->getVnum()));
-		Act( weave->getAttribute( "ToChar" ).c_str(), TRUE, ch, NULL, ch, TO_CHAR);
+		Act( weave->getAttribute( "ToChar" ).c_str(), TRUE, ch, nullptr, ch, TO_CHAR);
 	}
 };
 
@@ -2391,8 +2391,8 @@ void perform_shadowstep(Character *ch, Character *vict)
 			}
 		}
 
-		Act( "You step back into the shadows.", TRUE, ch, NULL, vict, TO_CHAR );
-		Act( "$n steps into the shadows, disengaging from combat.", TRUE, ch, NULL, ch, TO_NOTVICT );
+		Act( "You step back into the shadows.", TRUE, ch, nullptr, vict, TO_CHAR );
+		Act( "$n steps into the shadows, disengaging from combat.", TRUE, ch, nullptr, ch, TO_NOTVICT );
 	
 		if ( MiscUtil::random( 1, 101 ) < GET_SKILL( ch, SKILL_HIDE ) && !ROOM_FLAGGED(ch->in_room, ROOM_NOHIDE))
 			SET_BIT_AR( AFF_FLAGS( ch ), AFF_HIDE );
@@ -2447,14 +2447,14 @@ void perform_pulverize(Character *ch)
 
 	if (GET_SKILL(ch, SKILL_PULVERIZE) > MiscUtil::random(0, 200))
 	{
-		Act( "You violently stomp the ground, stunning nearby opponents!", TRUE, ch, NULL, vict, TO_CHAR );
-		Act( "$n violently stomps the ground, sending $s opponents flying!", TRUE, ch, NULL, vict, TO_NOTVICT );
+		Act( "You violently stomp the ground, stunning nearby opponents!", TRUE, ch, nullptr, vict, TO_CHAR );
+		Act( "$n violently stomps the ground, sending $s opponents flying!", TRUE, ch, nullptr, vict, TO_NOTVICT );
 		for ( vict = ch->in_room->people; vict; vict = temp )
 		{
 			temp = vict->next_in_room;
 			if ( FIGHTING( vict ) == ch || vict == FIGHTING( ch ) )
 			{
-				Act( "$n violently stomps the ground, the force of which sends you sprawling!", TRUE, ch, NULL, vict, TO_VICT );
+				Act( "$n violently stomps the ground, the force of which sends you sprawling!", TRUE, ch, nullptr, vict, TO_VICT );
 				damage(ch, vict, 1, SKILL_PULVERIZE, -1);
 				/*if(vict->timer && room_visibility(ch, vict) && MiscUtil::random(0, 200) > GET_SKILL(ch, SKILL_WHIRLWIND))*/
 				FLEE_LAG(vict) += FleeData.PulsesPerEngagedFlee * 2;
@@ -2467,9 +2467,9 @@ void perform_pulverize(Character *ch)
 	}
 	else
 	{
-		Act( "You try to stomp the ground, but your opponents jump out of the way!", TRUE, ch, NULL, vict, TO_CHAR );
-		Act( "You jump out of the way as $n tries to stun you by stomping the ground in front of $m!", TRUE, ch, NULL, vict, TO_VICT );
-		Act( "$n stomps the ground, but doesn't manage to stun anyone around $m.", TRUE, ch, NULL, vict, TO_NOTVICT);
+		Act( "You try to stomp the ground, but your opponents jump out of the way!", TRUE, ch, nullptr, vict, TO_CHAR );
+		Act( "You jump out of the way as $n tries to stun you by stomping the ground in front of $m!", TRUE, ch, nullptr, vict, TO_VICT );
+		Act( "$n stomps the ground, but doesn't manage to stun anyone around $m.", TRUE, ch, nullptr, vict, TO_NOTVICT);
 		WAIT_STATE(ch, PULSE_VIOLENCE * .5);
 	}
 

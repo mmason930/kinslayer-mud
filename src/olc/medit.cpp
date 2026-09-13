@@ -119,8 +119,8 @@ void medit_setup_new(Descriptor *d)
 
 #if defined(OASIS_MPROG)
 
-	OLC_MPROGL(d) = NULL;
-	OLC_MPROG(d) = NULL;
+	OLC_MPROGL(d) = nullptr;
+	OLC_MPROG(d) = nullptr;
 #endif
 
 	OLC_MOB(d) = mob;
@@ -190,7 +190,7 @@ void medit_save_internally(Descriptor *d)
 	else
 	{
 		MobManager::GetManager().AddPrototype(OLC_MOB(d),OLC_NUM(d));
-		OLC_MOB(d) = NULL;
+		OLC_MOB(d) = nullptr;
 	}
 
 	olc_add_to_save_list(zone->getVnum(), OLC_SAVE_MOB);
@@ -721,11 +721,11 @@ void medit_disp_menu(Descriptor *d)
 	}
 
 	std::string clanName = "<None>";
-	UserClan *userClan = mob->userClans.empty() ? NULL : mob->userClans.front();
+	UserClan *userClan = mob->userClans.empty() ? nullptr : mob->userClans.front();
 	if(mob->userClans.empty() == false)
 	{
 		Clan *clan = ClanUtil::getClan(userClan->getClanId());
-		if(clan != NULL)
+		if(clan != nullptr)
 			clanName = clan->Name;
 	}
 
@@ -914,7 +914,7 @@ void medit_parse(Descriptor *d, char *arg)
 					case 5:
 						OLC_MODE(d) = MEDIT_D_DESC;
 						d->send("Enter mob description: (/s saves /h for help)\r\n\r\n");
-						d->backstr = NULL;
+						d->backstr = nullptr;
 
 						if (OLC_MOB(d)->player.description)
 						{
@@ -1293,7 +1293,7 @@ void medit_parse(Descriptor *d, char *arg)
 			if (arg && *arg)
 				OLC_MOB(d)->player.ArriveMessage = str_dup(arg);
 			else
-				OLC_MOB(d)->player.ArriveMessage = NULL;
+				OLC_MOB(d)->player.ArriveMessage = nullptr;
 			break;
 		case MEDIT_EXIT:
 			if (OLC_MOB(d)->player.LeaveMessage)
@@ -1302,7 +1302,7 @@ void medit_parse(Descriptor *d, char *arg)
 			if (arg && *arg)
 				OLC_MOB(d)->player.LeaveMessage = str_dup(arg);
 			else
-				OLC_MOB(d)->player.LeaveMessage = NULL;
+				OLC_MOB(d)->player.LeaveMessage = nullptr;
 			break;
 			/*-------------------------------------------------------------------*/
 		case MEDIT_D_DESC:
@@ -1348,12 +1348,12 @@ void medit_parse(Descriptor *d, char *arg)
 		case MEDIT_KITS:
 			if ( (i = atoi(arg)) == 0)
 			{
-				OLC_MOB(d)->MobData->primary_kit = NULL;
+				OLC_MOB(d)->MobData->primary_kit = nullptr;
 				break;
 			}
 			else
 			{
-				if ( (OLC_MOB(d)->MobData->primary_kit = KitManager::GetManager().GetKitByVnum(i)) == NULL)
+				if ( (OLC_MOB(d)->MobData->primary_kit = KitManager::GetManager().GetKitByVnum(i)) == nullptr)
 					d->send("That kit does not exist!  What kit? (0 for nothing) : ");
 				else
 					break;
@@ -1430,7 +1430,7 @@ void medit_parse(Descriptor *d, char *arg)
 					if(OLC_MOB(d)->MobData->Food)
 					{
 						delete OLC_MOB(d)->MobData->Food;
-						OLC_MOB(d)->MobData->Food = NULL;
+						OLC_MOB(d)->MobData->Food = nullptr;
 					}
 					d->send("Food unit deleted.\r\n");
 					break;
@@ -1499,7 +1499,7 @@ void medit_parse(Descriptor *d, char *arg)
 					if(OLC_MOB(d)->MobData->Skin)
 					{
 						delete OLC_MOB(d)->MobData->Skin;
-						OLC_MOB(d)->MobData->Skin = NULL;
+						OLC_MOB(d)->MobData->Skin = nullptr;
 					}
 					d->send("Skin unit deleted.\r\n");
 					break;
@@ -1564,8 +1564,8 @@ void medit_parse(Descriptor *d, char *arg)
 				CREATE(temp, struct mob_prog_data, 1);
 				temp->next = OLC_MPROGL(d);
 				temp->type = -1;
-				temp->arglist = NULL;
-				temp->comlist = NULL;
+				temp->arglist = nullptr;
+				temp->comlist = nullptr;
 				OLC_MPROG(d) = temp;
 				OLC_MPROGL(d) = temp;
 				OLC_MODE(d) = MEDIT_CHANGE_MPROG;
@@ -1605,7 +1605,7 @@ void medit_parse(Descriptor *d, char *arg)
 				delete[] (OLC_MPROG(d)->arglist);
 				delete[] (OLC_MPROG(d)->comlist);
 				delete[] (OLC_MPROG(d));
-				OLC_MPROG(d) = NULL;
+				OLC_MPROG(d) = nullptr;
 				OLC_VAL(d) = 1;
 			}
 
@@ -1629,7 +1629,7 @@ void medit_parse(Descriptor *d, char *arg)
 					*/
 
 					OLC_MODE(d) = MEDIT_MPROG_COMLIST;
-					d->backstr = NULL;
+					d->backstr = nullptr;
 
 					if (OLC_MPROG(d)->comlist)
 					{

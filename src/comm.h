@@ -18,7 +18,8 @@ void sendToAll(const char *messg, bool instant=false);
 void sendToRoom(const char *messg, Room *room);
 void sendToOutdoor(const char *messg);
 
-void Act(const char *str, int hide_invisible, Character *ch, Object *obj, const void *vict_obj, int type, const char *bgColor=0, bool disorientable=false);
+void SendChat(Character *to, const char *channel, const char *format, ...);
+void Act(const char *str, int hide_invisible, Character *ch, Object *obj, const void *vict_obj, int type, const char *bgColor=0, bool disorientable=false, const char *chatChannel=nullptr);
 
 const int TO_ROOM = 1;
 const int TO_VICT = 2;

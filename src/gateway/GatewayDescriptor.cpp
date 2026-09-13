@@ -7,9 +7,9 @@
 
 GatewayDescriptor::GatewayDescriptor()
 {
-	serverConnection = NULL;
-	clientConnection = NULL;
-	gatewayListener = NULL;
+	serverConnection = nullptr;
+	clientConnection = nullptr;
+	gatewayListener = nullptr;
 }
 GatewayDescriptor::~GatewayDescriptor()
 {
@@ -107,7 +107,7 @@ std::string GatewayDescriptor::pullFromClient()
 			unsigned int bytesRead = 0;
 			WebSocketDataFrame *webSocketDataFrame = WebSocketDataFrame::parse(input, bytesRead);
 
-			if(webSocketDataFrame != NULL)
+			if(webSocketDataFrame != nullptr)
 			{
 				if(webSocketDataFrame->getOpCode() == 0x8)
 				{
@@ -144,7 +144,7 @@ std::string GatewayDescriptor::pullFromServer()
 
 bool GatewayDescriptor::connect(const std::string host, const int port)
 {
-	if(this->serverConnection != NULL) {
+	if(this->serverConnection != nullptr) {
 
 		delete this->serverConnection;
 	}

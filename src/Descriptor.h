@@ -15,6 +15,9 @@ protected:
 	GatewayDescriptorType *gatewayDescriptorType;
 	std::string emailAddress;
 	std::string outputBuffer; //Output buffer for this pulse.
+	time_t questRequestSecond = 0;
+	unsigned int questRequestCount = 0;
+	std::string lastMiniMap; //Send nearby-room updates only when the snapshot changes.
 
 public:
 	Descriptor();
@@ -78,6 +81,9 @@ public:
 
 	void sendWebSocketUsernameCommand(const std::string &username, const std::list<class UserMacro *> &userMacros);
 	void sendWebSocketPlayersOnlineCommand(const int playersOnline);
+	void sendWebSocketMiniMapCommand();
+	void sendWebSocketChat(const char *channel, const std::string &message);
+	void processWebSocketQuestCommand(const Json::Value &command);
 	void sendWebSocketDisplaySignInLightboxMessage();
 	void sendWebSocketErrorMessage(Json::Value &command, const std::string &errorMessage);
 	std::string encodeWebSocketOutputCommand(const char *output);

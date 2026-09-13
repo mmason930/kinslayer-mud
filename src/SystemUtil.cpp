@@ -37,7 +37,7 @@ bool SystemUtil::processExists(const unsigned int processId)
 		return false;
 	}
 
-	while((ent = readdir(dir)) != NULL) {
+	while((ent = readdir(dir)) != nullptr) {
 		// if endptr is not a null character, the directory is not
 		// entirely numeric, so ignore it
 		long lpid = strtol(ent->d_name, &endptr, 10);
@@ -56,7 +56,7 @@ bool SystemUtil::processExists(const unsigned int processId)
 		FILE* fp = fopen(buf, "r");
 
 		if (fp) {
-			if (fgets(buf, sizeof(buf), fp) != NULL) {
+			if (fgets(buf, sizeof(buf), fp) != nullptr) {
 				// check the first token in the file, the program name
 				char* first = strtok(buf, " ");
 				if (!strcmp(first, name)) {

@@ -48,7 +48,7 @@ void ObjectMoveLogger::threadHandler()
 
 	while(running)
 	{
-		threadObjectMoveLogEntries = NULL;
+		threadObjectMoveLogEntries = nullptr;
 		{
 			std::lock_guard<std::mutex> lock(objectMoveLogEntriesMutex);
 			if(this->objectMoveLogEntries->size() > 0)
@@ -58,7 +58,7 @@ void ObjectMoveLogger::threadHandler()
 			}
 		}
 
-		if(threadObjectMoveLogEntries != NULL)
+		if(threadObjectMoveLogEntries != nullptr)
 		{
 			std::ofstream logFile("ObjectMove.log", std::fstream::app);
 

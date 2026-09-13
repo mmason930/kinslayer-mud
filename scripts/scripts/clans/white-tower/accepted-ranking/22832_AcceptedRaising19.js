@@ -1,4 +1,12 @@
 var script22832 = function(self, actor, here, args, extra) {
+	//Only a novice who actually walked the third arch may be raised. The marker is set in
+	//22828 and consumed here, so typing the keyword on its own does nothing.
+	if( !getSval(actor, 22832, "thirdArch") ) {
+		return;
+	}
+
+	setSval(actor, 22832, "thirdArch", 0);
+
 	_block;
 	wait 4;
 
@@ -6,11 +14,12 @@ var script22832 = function(self, actor, here, args, extra) {
 	novice.send("The Light burns you to the bone, searing you to the soul. There seems to be nothing. Nothing but the light. And the pain. Finally, you step out of the Light, back into the domed chamber.");
 	act("$N steps out of the arch for the final time.", false, novice, null, novice, constants.TO_ROOM);
 	here.loadMob(1151);
+	setSval(actor, 22833, "raised", 1);
 	actor.comm("periodone");
 	wait 6;
 
 	novice.send("You kneel before the Amyrlin, and she slowly empties the last chalice over your head. 'You are washed clean of " + novice.name + ". You are washed clean of all ties that bind you to the world. You come to us washed clean, in heart and soul. You are " + novice.name + ", Accepted of the White Tower.");
-	act(novice.name + " kneels before the Amyrlin, who slowly empties the last chalice over her head. 'You are washed clean of '" + novice.name + "'You are washed clean of all ties that bind you to the world. You come to us washed clean, in heart and soul. You are ' + novice.name + ', Accepted of the White Tower.", false, novice, null, null, constants.TO_ROOM);
+	act(novice.name + " kneels before the Amyrlin, who slowly empties the last chalice over her head. 'You are washed clean of " + novice.name + ". You are washed clean of all ties that bind you to the world. You come to us washed clean, in heart and soul. You are " + novice.name + ", Accepted of the White Tower.", false, novice, null, null, constants.TO_ROOM);
 	wait 8;
 
 	novice.send("The last drop splashes onto your hair. 'You are sealed to us, now.' The Amyrlin says. She thrusts the chalice at the Red sister and produces a ring in the shape of a serpent biting its own tail. She places it on the third finger of your left hand.");

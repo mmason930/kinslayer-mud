@@ -136,3 +136,8 @@ std::string getUniqueName()
     s = s + MiscUtil::convert<std::string>(count);
     return s;
 }
+
+void clearJSValueCache()
+{
+    mapper.clear();
+}

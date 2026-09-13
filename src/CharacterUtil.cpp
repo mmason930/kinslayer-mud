@@ -17,7 +17,7 @@ extern Character *character_list;
 
 Character *CharacterUtil::loadCharacter(const int userId)
 {
-	Character *character = NULL;
+	Character *character = nullptr;
 
 	std::stringstream queryBuffer;
 	sql::Query query;
@@ -96,11 +96,11 @@ Character *CharacterUtil::loadCharacter(const int userId)
 	catch( sql::QueryException &e )
 	{
 		MudLog(BRF, LVL_APPR, TRUE, "CharacterUtil::loadCharacter : %s", e.getMessage().c_str());
-		return NULL;
+		return nullptr;
 	}
 	if( query->numRows() <= 0 )
 	{
-		return NULL;
+		return nullptr;
 	}
 	
 	character = new Character(CharPlayer);
@@ -217,11 +217,11 @@ Character *CharacterUtil::loadCharacter(const int userId)
 Character *CharacterUtil::loadCharacter(const std::string &username)
 {
 	PlayerIndex *playerIndex = CharacterUtil::getPlayerIndexByUserName(username);
-	if(playerIndex != NULL)
+	if(playerIndex != nullptr)
 	{
 		return loadCharacter(playerIndex->id);
 	}
-	return NULL;
+	return nullptr;
 }
 
 void CharacterUtil::changeUserPassword(sql::Connection connection, const int userId, const std::string &userPassword)
@@ -237,7 +237,7 @@ void CharacterUtil::changeUserPassword(sql::Connection connection, const int use
 
 Character *CharacterUtil::getOnlineCharacterById(const int userId)
 {
-	Character *character = NULL;
+	Character *character = nullptr;
 
 	for(character = character_list;character;character = character->next)
 	{
@@ -245,7 +245,7 @@ Character *CharacterUtil::getOnlineCharacterById(const int userId)
 			return character;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -256,7 +256,7 @@ PlayerIndex *CharacterUtil::getPlayerIndexByUserName(const std::string &userName
 		if(!str_cmp((*iter)->name, userName))
 			return (*iter);
 	}
-	return NULL;
+	return nullptr;
 }
 
 PlayerIndex *CharacterUtil::getPlayerIndexByUserId(const int userId)
@@ -266,7 +266,7 @@ PlayerIndex *CharacterUtil::getPlayerIndexByUserId(const int userId)
 		if((*iter)->id == userId)
 			return (*iter);
 	}
-	return NULL;
+	return nullptr;
 }
 
 UserEmailAddress *CharacterUtil::getUserEmailAddress(sql::Connection connection, const int userEmailAddressId)
@@ -284,7 +284,7 @@ UserEmailAddress *CharacterUtil::getUserEmailAddress(sql::Connection connection,
 		return getUserEmailAddress(row);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 UserEmailAddress *CharacterUtil::getUserEmailAddress(sql::Row &row)
@@ -373,7 +373,7 @@ UserEmailAddressConfirmation *CharacterUtil::getUserEmailAddressConfirmation(sql
 		return getUserEmailAddressConfirmation(row);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 UserEmailAddressConfirmation *CharacterUtil::getUserEmailAddressConfirmation(sql::Row row)
@@ -430,7 +430,7 @@ UserEmailAddressConfirmation *CharacterUtil::getUserEmailAddressConfirmationByUs
 		return getUserEmailAddressConfirmation(row);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void CharacterUtil::sendUserEmailAddressConfirmationEmail(sql::Connection connection, Character *character, const UserEmailAddress *userEmailAddress, const UserEmailAddressConfirmation *userEmailAddressConfirmation)
@@ -511,7 +511,7 @@ UserMacro *CharacterUtil::getUserMacroMeetingCriteria(sql::Connection connection
 		return getUserMacro(row);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 UserMacro *CharacterUtil::getUserMacro(sql::Connection connection, int userMacroId)

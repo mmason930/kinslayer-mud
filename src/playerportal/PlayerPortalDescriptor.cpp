@@ -91,7 +91,7 @@ void PlayerPortalDescriptor::processInput()
 			unsigned int bytesRead = 0;
 			WebSocketDataFrame *webSocketDataFrame = WebSocketDataFrame::parse(this->descriptor->getInputBuffer(), bytesRead);
 			
-			if (webSocketDataFrame != NULL)
+			if (webSocketDataFrame != nullptr)
 			{
 				if (webSocketDataFrame->getOpCode() == 0x8)
 				{
@@ -112,7 +112,7 @@ void PlayerPortalDescriptor::processInput()
 		{
 			const char *inputBufferData = inputBuffer.c_str(), *commandEnd, *commandStart = inputBufferData;
 
-			while ((commandEnd = strchr(commandStart, 0x06)) != NULL)
+			while ((commandEnd = strchr(commandStart, 0x06)) != nullptr)
 			{
 				std::string jsonCommand = std::string(commandStart, commandEnd - commandStart);
 				Json::Value command;

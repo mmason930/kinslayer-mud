@@ -93,7 +93,7 @@ CommandHandler do_locate = DEFINE_COMMAND
 	
 	std::function<bool(Object *obj)> objectComparatorFunction = [&](Object *obj) -> bool
 	{
-		if (obj == NULL)
+		if (obj == nullptr)
 			return false;
 		
 		if (currentObjectValueEntry->vnum != -1)
@@ -181,7 +181,7 @@ CommandHandler do_locate = DEFINE_COMMAND
 	optionToOperationMap["wearing"] =
 	[&](const std::string &option, const std::string &value) -> bool
 	{
-		if (wearing.get() == NULL)
+		if (wearing.get() == nullptr)
 			wearing.reset(new std::list<ObjectValueEntry>());
 
 		ObjectValueEntry objectValueEntry;
@@ -279,7 +279,7 @@ CommandHandler do_locate = DEFINE_COMMAND
 			if (abs.exists() && !ob.matches(target->Absorb()))
 				continue;
 
-			if (wearing.get() != NULL)
+			if (wearing.get() != nullptr)
 			{
 				bool allFound = true;
 				for (ObjectValueEntry objectValueEntry : (*(wearing.get())))
@@ -300,7 +300,7 @@ CommandHandler do_locate = DEFINE_COMMAND
 		}
 	}
 
-	if (typeObj && position == -1 && wearing.get() == NULL && !gold.exists())
+	if (typeObj && position == -1 && wearing.get() == nullptr && !gold.exists())
 	{
 		for (Object *obj = object_list; obj; obj = obj->next)
 		{
@@ -329,7 +329,7 @@ CommandHandler do_locate = DEFINE_COMMAND
 		}
 	}
 
-	if (typeRoom && position == -1 && wearing.get() == NULL && !cost.exists() && !gold.exists() && !ob.exists() && !pb.exists() && !db.exists() && !abs.exists())
+	if (typeRoom && position == -1 && wearing.get() == nullptr && !cost.exists() && !gold.exists() && !ob.exists() && !pb.exists() && !db.exists() && !abs.exists())
 	{
 		for (Room *room : World)
 		{
@@ -355,7 +355,7 @@ CommandHandler do_locate = DEFINE_COMMAND
 		if (position != -1)
 		{
 			Character *target = dynamic_cast<Character *>(entity);
-			if (target == NULL || GET_POS(target) != position)
+			if (target == nullptr || GET_POS(target) != position)
 				continue;
 		}
 

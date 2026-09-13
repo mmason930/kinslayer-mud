@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <httplib.h>
+#include <utility>
 
 struct OpenAIResponsesResult {
 
@@ -39,7 +39,7 @@ private:
 
 	std::string extractAssistantText(const std::string& responseBody) const;
 
-	httplib::Headers generateRequestHeaders() const;
+	std::vector<std::pair<std::string, std::string>> generateRequestHeaders() const;
 };
 
 #endif //KINSLAYER_MUD_OPENAICLIENT_H

@@ -664,7 +664,7 @@ void CommandUtil::interpretCommand(Character *ch, char *argument)
 	{//command trigger took over
 		return ;
 	}
-
+	
 	//This will get set to true in an override command. Always set false once we bypass the above check.
 	ch->ignoreCommandTrigger = false;
 	CommandInfo *commandInfo = nullptr;
@@ -697,7 +697,8 @@ void CommandUtil::interpretCommand(Character *ch, char *argument)
 	&& strcmp(commandInfo->command.c_str(), "look"))
 		REMOVE_BIT_AR( AFF_FLAGS( ch ), AFF_HIDE );
 
-	if(commandInfo == nullptr) {}
+	if(commandInfo == nullptr) {
+	}
 
 	else if ( PLR_FLAGGED( ch, PLR_FROZEN ) && GET_LEVEL( ch ) < LVL_IMPL )
 	{

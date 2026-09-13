@@ -1,4 +1,4 @@
-﻿if (_)
+if (_)
 MapUtil = (function() {
 	/// functions for map tool
 	return {

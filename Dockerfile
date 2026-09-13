@@ -2,12 +2,19 @@ FROM ubuntu:24.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG GCC_THREADS
-ARG BOOST_VERSION="1_84_0"
-ARG BOOST_VERSION_DOT="1.84.0"
+ARG BOOST_VERSION="1_90_0"
+ARG BOOST_VERSION_DOT="1.90.0"
 
 # Install pre-requisites
 RUN apt update
-RUN apt install libmysqlclient-dev cmake g++ gcc wget git-all dos2unix cron nano -y
+RUN apt install libmysqlclient-dev cmake g++ gcc gdb gdbserver wget git-all dos2unix cron nano \
+    autoconf2.13 python3 python3-pip llvm-19 clang-19 lld-19 pkg-config curl patch openssh-server rsync valgrind -y
+
+# Install Rust via rustup (need newer version than Ubuntu packages provide)
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+RUN rustup update stable
+RUN cargo install --locked cbindgen --version 0.29.4
 
 # sqlDatabase
 RUN git clone https://github.com/kinslayermud/kinslayer-sqlDatabase /kinslayer-sqlDatabase
@@ -15,12 +22,11 @@ WORKDIR /kinslayer-sqlDatabase/mysql/
 RUN chmod ug+x ./install.sh
 RUN ./install.sh
 
-# Spidermonkey
-RUN git clone https://github.com/kinslayermud/kinslayer-spidermonkey /kinslayer-spidermonkey
-WORKDIR /kinslayer-spidermonkey/src
-RUN ./configure
-RUN make -j${GCC_THREADS}
-RUN make install
+# SpiderMonkey 153.0.4, built from the pinned Mozilla source release.
+COPY build-spidermonkey.sh /tmp/build-spidermonkey.sh
+COPY patches/mozjs-153-*.patch /tmp/patches/
+RUN GCC_THREADS=${GCC_THREADS:-4} bash /tmp/build-spidermonkey.sh \
+    && rm -rf /tmp/kinslayer-mozjs-153 /tmp/build-spidermonkey.sh /tmp/patches
 
 # Boost
 WORKDIR /
@@ -30,14 +36,6 @@ WORKDIR /boost_${BOOST_VERSION}
 RUN ./bootstrap.sh
 RUN ./b2 install -j ${GCC_THREADS} ; exit 0
 
-# Flusspferd
-RUN git clone https://github.com/kinslayermud/kinslayer-flusspferd /kinslayer-flusspferd
-WORKDIR /kinslayer-flusspferd/src
-RUN mkdir obj
-RUN mkdir ../lib
-RUN make -j${GCC_THREADS}
-RUN make install
-
 # cpp-httplib
 RUN git clone https://github.com/yhirose/cpp-httplib /kinslayer-cpp-httplib
 RUN cp /kinslayer-cpp-httplib/httplib.h /usr/local/include/
@@ -46,7 +44,7 @@ RUN rm -rf /kinslayer-cpp-httplib
 WORKDIR /
 RUN ulimit -S -c unlimited
 RUN ldconfig
-RUN rm -rf /boost_${BOOST_VERSION} /boost_${BOOST_VERSION}.tar.gz /kinslayer-spidermonkey /kinslayer-sqlDatabase /kinslayer-flusspferd
+RUN rm -rf /boost_${BOOST_VERSION} /boost_${BOOST_VERSION}.tar.gz /kinslayer-sqlDatabase
 
 COPY crontab /etc/cron.d/
 

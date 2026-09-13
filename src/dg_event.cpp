@@ -15,15 +15,14 @@
 /*
 ** define statics
 */
-class event_info *event_list = NULL;
-void trig_wait_event( void *go );
+event_info *event_list = nullptr;
 
 event_info::event_info()
 {
 	this->time_remaining = 0;
-	this->func = NULL;
-	this->info = NULL;
-	this->next = NULL;
+	this->func = nullptr;
+	this->info = nullptr;
+	this->next = nullptr;
 }
 event_info::~event_info()
 {
@@ -32,7 +31,7 @@ event_info::~event_info()
 /*
 ** Add an event to the current list
 */
-class event_info *add_event(int time, EVENT(*func), void *info)
+event_info *add_event(int time, EVENT(*func), void *info)
 {
 	event_info *this_data, *prev, *curr;
 
@@ -42,7 +41,7 @@ class event_info *add_event(int time, EVENT(*func), void *info)
 	this_data->info = info;
 
 	/* sort the event into the list in next-to-fire order */
-	if (event_list==NULL)
+	if (event_list==nullptr)
 		event_list = this_data;
 
 	else if (this_data->time_remaining <= event_list->time_remaining)
@@ -69,9 +68,9 @@ class event_info *add_event(int time, EVENT(*func), void *info)
 	return this_data;
 }
 
-void remove_event(class event_info *event)
+void remove_event(event_info *event)
 {
-	class event_info *curr;
+	event_info *curr;
 
 	if (event_list == event)
 	{
@@ -93,10 +92,10 @@ void remove_event(class event_info *event)
 	delete (event);
 }
 
-void process_events(void)
+void process_events()
 {
-	class event_info *e = event_list;
-	class event_info *del;
+	event_info *e = event_list;
+	event_info *del;
 
 	while (e)
 	{

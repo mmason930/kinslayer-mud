@@ -24,8 +24,8 @@ class JSEnvironment;
 class Script;
 struct JSInstance;
 
-#include <flusspferd.hpp>
-#include <flusspferd/spidermonkey/context.hpp>
+#include "flusspferd.hpp"
+#include "flusspferd_context.hpp"
 #include <thread>
 #include <mutex>
 
@@ -71,7 +71,7 @@ public:
 				return scriptImportOperation;
 		}
 
-		return NULL;
+		return nullptr;
 	}
 
 	char getCharCode()
@@ -118,8 +118,8 @@ class JSManager
 		bool monitorSubversionThreadRunning;
 		std::thread *monitorSubversionThread;
 		
-		void monitorSubversion(sql::Connection context, const std::string &scriptPullCommand);
-		int checkFileModifications(const std::string scriptsDirectory, const std::string &directoryPath, sql::BatchInsertStatement &batchInsertStatement);
+		void monitorSubversion(const std::string &scriptPullCommand);
+		int checkFileModifications(const std::string &scriptsDirectory, const std::string &directoryPath, sql::BatchInsertStatement &batchInsertStatement);
 
 		std::mutex monitorFilesystemRunOnceMutex;
 		bool monitorFilesystemRunOnce;
@@ -197,11 +197,13 @@ class JSManager
 		void loadTriggers();
 		void loadScriptsFromFilesystem(const std::string &directoryPath, const bool continuously);
 		bool loadScriptsFromFile(const std::string &filePath);
+		bool loadScriptsFromContent(const std::string& filePath, const std::string &scriptContent);
 
 		std::list< JSTrigger* > triggersInRange( const int lo, const int hi );
 
+		void bootScriptsDirectly(const std::string& scriptsDirectory);
 		void setupMonitoringThreads();
-		void monitorFileModifications(bool continuous);
+		void monitorFileModifications(bool continuous, bool useMainDatabaseConnection);
     private:
 		std::unordered_map<int, JSTrigger*> mapper;
 		std::map<int, Script*> scriptMap;

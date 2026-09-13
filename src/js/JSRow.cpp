@@ -3,8 +3,13 @@
 
 #include "js_interpreter.h"
 
+// Forward declaration of binding registration function
+void RegisterJSRowBindings();
+
 void JSEnvironment::LoadJSRow()
 {
+	// class_name is now defined by FLUSSPFERD_CLASS_DESCRIPTION macro
+	RegisterJSRowBindings();  // Register methods and properties first
 	load_class<JSRow>();
 }
 int sqlJSRow::numberAllocated = 0;

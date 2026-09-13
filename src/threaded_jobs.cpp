@@ -8,7 +8,7 @@
 
 #include "threaded_jobs.h"
 
-ThreadedJobManager* ThreadedJobManager::pSelf = NULL;
+ThreadedJobManager* ThreadedJobManager::pSelf = nullptr;
 
 ThreadedJobManager::ThreadedJobManager()
 {
@@ -44,7 +44,7 @@ void ThreadedJobManager::free()
 		delete lFinishedJobs.front();
 		lFinishedJobs.pop_front();
 	}
-	pSelf = NULL;
+	pSelf = nullptr;
 }
 
 /***

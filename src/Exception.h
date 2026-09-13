@@ -25,7 +25,7 @@ protected:
 	void setWhat(const char *s)
 	{
 		if(!s)
-			s = NULL;
+			s = nullptr;
 		else
 		{
 			this->s = new char[ strlen(s) + 1 ];
@@ -42,7 +42,7 @@ protected:
 public:
 	Exception()
 	{
-		s = NULL;
+		s = nullptr;
 	}
 	Exception(const char *s)
 	{

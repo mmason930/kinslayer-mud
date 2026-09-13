@@ -36,7 +36,7 @@ extern Descriptor *descriptor_list;
 extern char *class_abbrevs[];
 extern int max_filesize;
 extern class Ideas *idea_list;
-extern struct Index *obj_index;
+extern Index *obj_index;
 
 /* extern procedures */
 void list_skills( Character * ch, Character *teacher );
@@ -634,7 +634,7 @@ CommandHandler  do_scalp  = DEFINE_COMMAND
 		scalpo->scalp->is_scalp	= (true);
 		scalpo->scalp->race	= corpse->scalp->race;
 		scalpo->scalp->level	= corpse->scalp->level;
-		scalpo->scalp->Food	= NULL;
+		scalpo->scalp->Food	= nullptr;
 		scalpo->scalp->player_scalp = corpse->scalp->player_scalp;
 
 		if ( corpse->scalp->level > 40 )
@@ -744,7 +744,7 @@ CommandHandler  do_ride  = DEFINE_COMMAND
 			MOUNT( ch ) = riding;
 			RIDDEN_BY( riding ) = ch;
 			Act( "You begin riding $N.", FALSE, ch, 0, victim, TO_CHAR );
-			Act( "$n begins riding $N.", FALSE, ch, 0, victim, TO_NOTVICT, NULL, true );
+			Act( "$n begins riding $N.", FALSE, ch, 0, victim, TO_NOTVICT, nullptr, true );
 			Act( "$n begins to ride on your back.", FALSE, ch, 0, victim, TO_VICT );
 			char str[16];
 			strcpy(str,"self");
@@ -760,9 +760,9 @@ CommandHandler  do_dismount  = DEFINE_COMMAND
 	{
 		Act( "You stop riding $N.", FALSE, ch, 0, MOUNT( ch ), TO_CHAR );
 		Act( "$n dismounts from you.", FALSE, ch, 0, MOUNT( ch ), TO_VICT );
-		Act( "$n stops riding $N.", FALSE, ch, 0, MOUNT( ch ), TO_NOTVICT, NULL, true );
-		RIDDEN_BY( MOUNT( ch ) ) = NULL;
-		MOUNT( ch ) = NULL;
+		Act( "$n stops riding $N.", FALSE, ch, 0, MOUNT( ch ), TO_NOTVICT, nullptr, true );
+		RIDDEN_BY( MOUNT( ch ) ) = nullptr;
+		MOUNT( ch ) = nullptr;
 	}
 
 	else
@@ -912,7 +912,7 @@ CommandHandler  do_hide  = DEFINE_COMMAND
 	}
 	else
 	{
-		if ( MOUNT( ch ) != NULL )
+		if ( MOUNT( ch ) != nullptr )
 		{
 			ch->send( "You can't do that while riding!\r\n" );
 			return ;
@@ -933,7 +933,7 @@ CommandHandler  do_hide  = DEFINE_COMMAND
 CommandHandler  do_steal  = DEFINE_COMMAND
 {
 	Character * vict;
-	Object *obj = NULL;
+	Object *obj = nullptr;
 	char vict_name[ MAX_INPUT_LENGTH ], obj_name[ MAX_INPUT_LENGTH ];
 
 	if ( ROOM_FLAGGED( ch->in_room, ROOM_PEACEFUL ) )
@@ -967,7 +967,7 @@ CommandHandler  do_steal  = DEFINE_COMMAND
 CommandHandler  do_practice  = DEFINE_COMMAND
 {
 	OneArgument( argument, ::arg );
-	list_skills( ch, NULL );
+	list_skills( ch, nullptr );
 };
 
 CommandHandler  do_visible  = DEFINE_COMMAND
@@ -1478,17 +1478,17 @@ CommandHandler  do_change  = DEFINE_COMMAND
 		if ( !str_cmp( arg2, "defensive" ) )
 		{
 			ch->stance = STANCE_DEFENSIVE;
-			Act( "$n flows into a defensive battle stance.", TRUE, ch, NULL, 0, TO_ROOM, NULL, true );
+			Act( "$n flows into a defensive battle stance.", TRUE, ch, nullptr, nullptr, TO_ROOM, nullptr, true );
 		}
 		else if ( !str_cmp( arg2, "normal" ) )
 		{
 			ch->stance = STANCE_NORMAL;
-			Act( "$n moves into a standard battle stance.", TRUE, ch, NULL, 0, TO_ROOM, NULL, true );
+			Act( "$n moves into a standard battle stance.", TRUE, ch, nullptr, nullptr, TO_ROOM, nullptr, true );
 		}
 		else if ( !str_cmp( arg2, "offensive" ) )
 		{
 			ch->stance = STANCE_OFFENSIVE;
-			Act( "$n takes up an offensive battle stance.", TRUE, ch, NULL, 0, TO_ROOM, NULL, true );
+			Act( "$n takes up an offensive battle stance.", TRUE, ch, nullptr, nullptr, TO_ROOM, nullptr, true );
 		}
 		else
 		{
@@ -1550,7 +1550,7 @@ CommandHandler  do_change  = DEFINE_COMMAND
 	{
 		if ( ch->desc )
 		{
-			Act( "$n begins editing $s description.", FALSE, ch, NULL, NULL, TO_ROOM );
+			Act( "$n begins editing $s description.", FALSE, ch, nullptr, nullptr, TO_ROOM );
 			ch->send( "Enter the new text you'd like others to see when they look at you.\r\n" );
 			ch->send( "(/s saves /h for help)\r\n" );
 			ch->desc->str = &ch->player.description;

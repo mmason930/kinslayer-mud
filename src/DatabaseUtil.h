@@ -1,7 +1,10 @@
 #ifndef DATABASE_UTIL_UTIL_H
 #define DATABASE_UTIL_UTIL_H
 
+#include <list>
 #include <mysql/sqlDatabase.h>
+
+#include "MiscUtil.h"
 
 class DatabaseUtil
 {
@@ -9,10 +12,10 @@ private:
 protected:
 public:
 	//Throws: sql::QueryException
-	static std::string getSingleResultFromQuery(sql::Connection &connection, const std::string &queryBuffer);
+	static std::string getSingleResultFromQuery(const sql::Connection& connection, const std::string &queryBuffer);
 	
 	template<typename _T>
-	static std::string buildListSQL(std::list<_T> collection, bool quoteElements, bool onEmptyAddNull)
+	static std::string buildListSQL(const std::list<_T> &collection, const bool quoteElements, const bool onEmptyAddNull)
 	{
 		if (onEmptyAddNull && collection.empty())
 			return "(null)";
@@ -30,9 +33,7 @@ public:
 
 			if (quoteElements)
 			{
-				std::stringstream toStringConverterStream;
-				toStringConverterStream << (*iter);
-				sql << sql::escapeQuoteString(toStringConverterStream.str());
+				sql << sql::escapeQuoteString(MiscUtil::toString((*iter)));
 			}
 			else
 				sql << (*iter);

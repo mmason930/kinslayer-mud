@@ -1,3 +1,5 @@
+#include <list>
+
 extern const char *dirs[];
 extern const char *room_bits[];
 extern const char *exit_bits[];

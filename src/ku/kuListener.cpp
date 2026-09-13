@@ -11,16 +11,16 @@
 
 kuListener::kuListener(const int port, e_SocketType socketType)
 {
-	closeDescriptorCallback = NULL;
-	dataForCloseDescriptorCallback = NULL;
-	openDescriptorCallback = NULL;
-	dataForOpenDescriptorCallback = NULL;
-	beforeSocketWriteCallback = NULL;
-	dataForBeforeSocketWriteCallback = NULL;
-	afterSocketWriteCallback = NULL;
-	dataForAfterSocketWriteCallback = NULL;
-	dataForSocketReadCallback = NULL;
-	socketReadCallback = NULL;
+	closeDescriptorCallback = nullptr;
+	dataForCloseDescriptorCallback = nullptr;
+	openDescriptorCallback = nullptr;
+	dataForOpenDescriptorCallback = nullptr;
+	beforeSocketWriteCallback = nullptr;
+	dataForBeforeSocketWriteCallback = nullptr;
+	afterSocketWriteCallback = nullptr;
+	dataForAfterSocketWriteCallback = nullptr;
+	dataForSocketReadCallback = nullptr;
+	socketReadCallback = nullptr;
 	this->socketType = socketType;
 	nulltime.tv_sec = 0;
 	nulltime.tv_usec = 0;
@@ -217,7 +217,7 @@ std::list< kuDescriptor * > kuListener::acceptNewHosts()
 		if( lND.second == true ) {
 			lNewDescriptors.push_back( lND.first );
 
-			if(this->openDescriptorCallback != NULL) {
+			if(this->openDescriptorCallback != nullptr) {
 
 				this->openDescriptorCallback(this->dataForOpenDescriptorCallback, this, lND.first);
 			}
@@ -260,7 +260,7 @@ void kuListener::pulse()
 	{
 		if( (*iter).second->socketIsClosed() )
 		{
-			if( this->closeDescriptorCallback != NULL ) {
+			if( this->closeDescriptorCallback != nullptr ) {
 				this->closeDescriptorCallback(this->dataForCloseDescriptorCallback, this, (*iter).second);
 			}
 			delete (*iter).second;
@@ -401,7 +401,7 @@ void kuListener::setDataForSocketReadCallback( void *data )
 
 void kuListener::handleCloseDescriptor(kuDescriptor *descriptor)
 {
-	if(closeDescriptorCallback != NULL) {
+	if(closeDescriptorCallback != nullptr) {
 
 		closeDescriptorCallback(dataForCloseDescriptorCallback, this, descriptor);
 	}
@@ -409,7 +409,7 @@ void kuListener::handleCloseDescriptor(kuDescriptor *descriptor)
 
 void kuListener::handleBeforeSocketWriteCallback(kuDescriptor *descriptor)
 {
-	if(beforeSocketWriteCallback != NULL) {
+	if(beforeSocketWriteCallback != nullptr) {
 
 		beforeSocketWriteCallback(dataForBeforeSocketWriteCallback, this, descriptor);
 	}
@@ -417,7 +417,7 @@ void kuListener::handleBeforeSocketWriteCallback(kuDescriptor *descriptor)
 
 void kuListener::handleAfterSocketWriteCallback(kuDescriptor *descriptor, const std::string &output)
 {
-	if(afterSocketWriteCallback != NULL) {
+	if(afterSocketWriteCallback != nullptr) {
 
 		afterSocketWriteCallback(dataForAfterSocketWriteCallback, this, descriptor, output);
 	}
@@ -425,7 +425,7 @@ void kuListener::handleAfterSocketWriteCallback(kuDescriptor *descriptor, const 
 
 void kuListener::handleSocketReadCallback(kuDescriptor *descriptor, const std::string &input)
 {
-	if(socketReadCallback != NULL) {
+	if(socketReadCallback != nullptr) {
 
 		socketReadCallback(dataForSocketReadCallback, this, descriptor, input);
 	}

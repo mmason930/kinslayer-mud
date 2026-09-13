@@ -17,14 +17,16 @@
 
 #include "StringUtil.h"
 #include "Descriptor.h"
+#include "utils/ThreadedLogFile.h"
 
 extern Descriptor *descriptor_list;
 extern struct TimeData time_info;
 extern std::string subroutine;
+ThreadedLogFile *mudLog;
 
 /* local functions */
-struct GameTime *real_time_passed(time_t t2, time_t t1);
-struct GameTime *mud_time_passed(time_t t2, time_t t1);
+GameTime *real_time_passed(time_t t2, time_t t1);
+GameTime *mud_time_passed(time_t t2, time_t t1);
 
 #ifndef WIN32
 std::string Execute( const char *command )
@@ -64,7 +66,7 @@ __int64 AvailableSystemMemory()
 {
 	char buffer[1024];
 	FILE *processPipe = popen("/usr/bin/free", "r");
-	if(processPipe == NULL)
+	if(processPipe == nullptr)
 	{
 		return -1;
 	}
@@ -74,7 +76,7 @@ __int64 AvailableSystemMemory()
 	{
 		char *returnValue = fgets(buffer, 1023, processPipe);
 
-		if(returnValue == NULL)
+		if(returnValue == nullptr)
 		{
 			Log("SYSERROR: AvailableSystemMemory() : Error while reading from pipe.");
 			return 0;
@@ -418,25 +420,24 @@ std::string ParamValue( const std::string &Buffer, const std::string &Param ) {
 	return (std::string(""));
 }
 
-std::string eatwhite( std::string str )
+std::string eatwhite(const std::string &str)
 {
-	std::string::size_type i;
-	while( (i = str.find(" ")) != std::string::npos )
-		str.erase(i,i+1);
-	return str;
+	auto start = str.find_first_not_of(' ');
+	if (start == std::string::npos)
+		return "";
+	return str.substr(start);
 }
 
 /* Create a duplicate of a string using C++ array alloation(use strdup() for C) */
 char *str_dup(const char *source)
 {
-	char *new_z;
+	if (!source)
+		return nullptr;
 
-	if(!source)
-		return NULL;
-
-	new_z = new char[strlen(source) + 1];
-
-	return (strcpy(new_z, source));
+	size_t len = strlen(source) + 1;
+	char *new_z = new char[len];
+	memcpy(new_z, source, len);
+	return new_z;
 }
 
 /* Return a string with 'n' counts of 'ch' */
@@ -467,6 +468,50 @@ int strcmp(const char *str1, const std::string &str2)
 }
 
 //Rewritten by Galnor on June 27th, 2006.
+// --- Compile-time lookup table fallback ---
+inline constexpr auto make_upper_table() {
+    std::array<unsigned char, 256> t{};
+    for (int i = 0; i < 256; ++i)
+        t[i] = static_cast<unsigned char>(
+            (i >= 'a' && i <= 'z') ? i - 32 : i);
+    return t;
+}
+
+inline constexpr auto upper_table = make_upper_table();
+
+namespace detail {
+    inline int table_str_cmp(const char* s1, const char* s2) noexcept {
+        while (true) {
+            const auto c1 = upper_table[static_cast<unsigned char>(*s1)];
+            const auto c2 = upper_table[static_cast<unsigned char>(*s2)];
+            if (int diff = c1 - c2; diff != 0)
+                return diff;
+            if (c1 == '\0')
+                return 0;
+            ++s1;
+            ++s2;
+        }
+    }
+}
+
+int str_cmp(const char* s1, const char* s2) noexcept
+{
+#if defined(_MSC_VER) || defined(_WIN32)
+    // MSVC / Windows — _stricmp is always available
+    return _stricmp(s1, s2);
+#elif defined(__has_include)
+    #if __has_include(<strings.h>)
+        // POSIX (Linux, macOS, BSDs) — strcasecmp
+        return strcasecmp(s1, s2);
+    #else
+        return detail::table_str_cmp(s1, s2);
+    #endif
+#else
+    return detail::table_str_cmp(s1, s2);
+#endif
+}
+
+/***
 int str_cmp(const char *str1, const char *str2)
 {
 	int ck;
@@ -479,6 +524,7 @@ int str_cmp(const char *str1, const char *str2)
 	}
 	return 0;
 }
+***/
 int str_cmp(const std::string &str1, const char *str2)
 {
 	return str_cmp(str1.c_str(), str2);
@@ -560,17 +606,24 @@ void BasicMudLog(const char *format, ...)
 	static std::mutex logMutex;
 
 	va_list args;
-	time_t ct = time(0);
-	char *time_s = asctime(localtime(&ct));
+	auto now = std::chrono::system_clock::now();
+	auto us = std::chrono::duration_cast<std::chrono::microseconds>(
+				  now.time_since_epoch()) % 1000000;
 
-	time_s[strlen(time_s) - 1] = '\0';
+	auto time_t_now = std::chrono::system_clock::to_time_t(now);
+	std::tm tm_buf{};
+	localtime_r(&time_t_now, &tm_buf);
 
-	if (logfile == NULL)
+	// Format the timestamp
+	char time_s[64];
+	std::strftime(time_s, sizeof(time_s), "%b %d %Y %H:%M:%S", &tm_buf);
+
+	if (logfile == nullptr)
 		abort();
 
 	{//Lock mutex
 		std::lock_guard<std::mutex> lock(logMutex);
-		fprintf(logfile, "%-15.15s :: ", time_s + 4);
+		fprintf(logfile, "%s.%06d :: ", time_s, static_cast<int>(us.count()));
 
 		va_start(args, format);
 		vfprintf(logfile, format, args);
@@ -605,48 +658,32 @@ int Touch(const std::string &Path)
  */
 void MudLog(int type, int level, int file, const char *str, ...)
 {
-	FILE *logger;
-	char buf[MAX_PRIMARY_BUFFER_LENGTH], format[MAX_STRING_LENGTH], tp;
+	char format[MAX_STRING_LENGTH];
 	Descriptor *i;
 	va_list args;
 
 	va_start(args, str);
 	vsnprintf(format, sizeof(format), str, args);
-	//vsprintf(format, str, args);
 	va_end(args);
 
 	if (file)
 	{
 		Log("%s", format);
-		auto referenceTimestamp = time(0);
-
-		std::string fileName = STDERR;
-		if(subroutine.empty() == false)
-			fileName = std::string("misc/") + subroutine;
-
-		fileName += std::string(".") + MiscUtil::formatDateYYYYmmdd(DateTime(referenceTimestamp));
-		fileName = StringUtil::allLower(fileName);
-
-		if(!(logger = fopen(fileName.c_str(), "a+")))
-		{
-			Log("ERROR OPENING MudLog FILE!");
-			return;
-		}
-		fprintf(logger, "%s :: %s\n", Time::FormatDate("%m-%d-%Y, %H:%M:%S", referenceTimestamp).c_str(), format);
-		fclose(logger);
+		mudLog->addMessage(format);
 	}
 
-	if (level < 0)
+	if (level < LVL_IMMORT)
 		return;
 
+	char buf[MAX_PRIMARY_BUFFER_LENGTH];
 	sprintf(buf, "[ %s ]\r\n", format);
 
-	for (i = descriptor_list; i; i = i->next)
+	for (Descriptor* i = descriptor_list; i; i = i->next)
 	{
 		if (STATE(i) == CON_PLAYING && !PLR_FLAGGED(i->character, PLR_WRITING))
 		{
-			tp = ((PRF_FLAGGED(i->character, PRF_LOG1) ? 1 : 0) +
-			      (PRF_FLAGGED(i->character, PRF_LOG2) ? 2 : 0));
+			const char tp = ((PRF_FLAGGED(i->character, PRF_LOG1) ? 1 : 0) +
+						(PRF_FLAGGED(i->character, PRF_LOG2) ? 2 : 0));
 
 			if ((GET_LEVEL(i->character) >= level) && (tp >= type))
 			{
@@ -789,7 +826,7 @@ int get_line(FILE * fl, char *buf)
 		++lines;
 		char *returnValue = fgets(temp, 256, fl);
 
-		if(returnValue == NULL)
+		if(returnValue == nullptr)
 		{
 			Log("SYSERR: get_line(): Error while reading file.");
 			return 0;
@@ -884,7 +921,7 @@ void format_text(char **ptr_string, int mode, Descriptor *d, int maxlen)
 {
 
 	int total_chars, cap_next = TRUE, cap_next_next = FALSE;
-	char *flow, *start = NULL, temp;
+	char *flow, *start = nullptr, temp;
 	/* warning: do not edit messages with max_str's of over this value */
 	char formated[MAX_STRING_LENGTH];
 

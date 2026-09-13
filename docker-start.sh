@@ -45,6 +45,7 @@ sed -i 's|${DB_USERNAME}|'"$DB_USERNAME"'|' lib/misc/BasicConfig
 sed -i 's|${DB_PASSWORD}|'"$DB_PASSWORD"'|' lib/misc/BasicConfig
 sed -i 's|${DB_SCHEMA}|'"$DB_SCHEMA"'|' lib/misc/BasicConfig
 sed -i 's|${DB_HOSTNAME}|'"$DB_HOSTNAME"'|' lib/misc/BasicConfig
+sed -i 's|${RESTART_ON_SHUTDOWN}|'"${RESTART_ON_SHUTDOWN:-1}"'|' lib/misc/BasicConfig
 if [[ ! -z "$SENDGRID_API_KEY" ]]; then
 	sed -i 's|${SENDGRID_API_KEY}|'"$SENDGRID_API_KEY"'|' lib/misc/BasicConfig
 fi
@@ -57,6 +58,22 @@ fi
 ### does require privileged access when running the container, otherwise attepting
 ### to modify this file will fail.
 echo "core.%p.%t" > /proc/sys/kernel/core_pattern
+
+### SSH/dev target: start sshd + gateway, skip build, keep container alive for CLion
+if [[ "$TARGET" == "ssh" ]]; then
+	mkdir -p /run/sshd
+	echo 'root:dev' | chpasswd
+	echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+	/usr/sbin/sshd
+
+	ldconfig
+	echo "Starting gateway..."
+	/kinslayer/bin/gateway &
+
+	echo "Container ready. Gateway running. SSH available on port 22."
+	sleep 999999d
+	exit
+fi
 
 ### Perform clean build if specified.
 if [[ "$FULL_PARTIAL" == "full" ]]; then

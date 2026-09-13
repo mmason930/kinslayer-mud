@@ -340,7 +340,7 @@ WebSocketClientHeader *WebSocketClientHeader::allocateByInitialClientPacket(cons
 	if(packet.size() >= 4 && packet[ packet.size() - 1 ] == '\n' && packet[ packet.size() - 2 ] == '\r' && packet[ packet.size() - 3 ] == '\n' && packet[ packet.size() - 4 ] == '\r')
 		return new WebSocketClientHeaderIETF_HYBI17();
 
-	return NULL;
+	return nullptr;
 }
 
 bool WebSocketClientHeader::isComplete(const std::string &buffer)
