@@ -4,16 +4,18 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG GCC_THREADS
 ARG BOOST_VERSION="1_90_0"
 ARG BOOST_VERSION_DOT="1.90.0"
+ARG RUST_VERSION="1.93.0"
 
 # Install pre-requisites
 RUN apt update
 RUN apt install libmysqlclient-dev cmake g++ gcc gdb gdbserver wget git-all dos2unix cron nano \
     autoconf2.13 python3 python3-pip llvm-19 clang-19 lld-19 pkg-config curl patch openssh-server rsync valgrind -y
 
-# Install Rust via rustup (need newer version than Ubuntu packages provide)
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+# Pin Rust: 1.98's new Linux targets break Firefox 153 target detection
+# (Mozilla bug 2053518). Keep fresh builds on the validated toolchain.
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain ${RUST_VERSION}
 ENV PATH="/root/.cargo/bin:${PATH}"
-RUN rustup update stable
+ENV RUSTUP_TOOLCHAIN="${RUST_VERSION}"
 RUN cargo install --locked cbindgen --version 0.29.4
 
 # sqlDatabase

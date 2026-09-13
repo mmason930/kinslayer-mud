@@ -86,10 +86,10 @@ Object *Object::bootLiveObject( const sql::Row &MyRow, bool recursive )
 		obj->obj_flags.value[11] = MyRow.getShort("val11");
 		obj->obj_flags.extra_flags = MyRow.getShort("extra_flags");
 		obj->obj_flags.wear_flags = MyRow.getShort("wear_flags");
-		obj->obj_flags.bitvector[0] = MyRow.getLong("bitvector0");
-		obj->obj_flags.bitvector[1] = MyRow.getLong("bitvector1");
-		obj->obj_flags.bitvector[2] =MyRow.getLong("bitvector2");
-		obj->obj_flags.bitvector[3] = MyRow.getLong("bitvector3");
+		obj->obj_flags.bitvector[0] = MyRow.getLongLong("bitvector0");
+		obj->obj_flags.bitvector[1] = MyRow.getLongLong("bitvector1");
+		obj->obj_flags.bitvector[2] =MyRow.getLongLong("bitvector2");
+		obj->obj_flags.bitvector[3] = MyRow.getLongLong("bitvector3");
 		obj->obj_flags.weight = MyRow.getFloat("weight");
 		obj->obj_flags.cost = MyRow.getInt("cost");
 		obj->obj_flags.cost_per_day = MyRow.getInt("cost_per_day");
@@ -123,10 +123,10 @@ Object *Object::bootLiveObject( const sql::Row &MyRow, bool recursive )
 
 		boost::uuids::string_generator uuidGenerator;
 		obj->objID = uuidGenerator(MyRow["id"].c_str());
-		obj->obj_flags.bitvector[0] = MyRow.getLong("bitv0");
-		obj->obj_flags.bitvector[1] = MyRow.getLong("bitv1");
-		obj->obj_flags.bitvector[2] = MyRow.getLong("bitv2");
-		obj->obj_flags.bitvector[3] = MyRow.getLong("bitv3");
+		obj->obj_flags.bitvector[0] = MyRow.getLongLong("bitv0");
+		obj->obj_flags.bitvector[1] = MyRow.getLongLong("bitv1");
+		obj->obj_flags.bitvector[2] = MyRow.getLongLong("bitv2");
+		obj->obj_flags.bitvector[3] = MyRow.getLongLong("bitv3");
 
 		if (obj->getType() == ITEM_DRINKCON)
 		{

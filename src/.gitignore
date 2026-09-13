@@ -1,0 +1,10 @@
+# Ignore generated build output, not source files required by clean checkouts.
+/CMakeFiles/
+/.cmake/
+/CMakeCache.txt
+/compile_commands.json
+/cmake_install.cmake
+/CTestTestfile.cmake
+/Testing/
+/obj/
+/obj-jit/

@@ -3577,7 +3577,7 @@ void MySQLDeleteAll(const std::string &playername)
 {
 	return;//Temporarily disabled.
 	std::string Query;
-	std::vector<std::string> TableList = gameDatabase->getTableList();
+	auto TableList = gameDatabase->getTableList();
 	long id=-1;
 
 	sql::Query MyQuery;
@@ -3593,7 +3593,7 @@ void MySQLDeleteAll(const std::string &playername)
 		id = atoi(MyQuery->getRow()["user_id"].c_str());
 	}
 
-	for(std::vector<std::string>::iterator sIter = TableList.begin();sIter != TableList.end();++sIter)
+	for(auto sIter = TableList.begin();sIter != TableList.end();++sIter)
 	{
 		if( (*sIter) == "users" )
 			Query = "DELETE FROM " + (*sIter) + " WHERE username = '" + playername + "'";

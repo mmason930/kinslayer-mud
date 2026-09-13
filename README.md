@@ -52,7 +52,12 @@ The game builds against **SpiderMonkey 153.0.4** (`mozjs-153`). The Docker image
 builds the library from Mozilla's [153.0.4 source release](https://archive.mozilla.org/pub/firefox/releases/153.0.4/),
 with the source SHA-256 pinned in `build-spidermonkey.sh`. That script is also
 usable inside an existing development container. It needs Clang/LLVM 19 or newer,
-Rust 1.90 or newer, and cbindgen 0.29.4; the Dockerfile installs these dependencies.
+Rust 1.93.0, and cbindgen 0.29.4; the Dockerfile installs these dependencies.
+Rust is pinned rather than tracking `stable`: Rust 1.98 adds Linux target triples
+that Firefox 153's configure script cannot disambiguate on x86_64
+([Mozilla bug 2053518](https://bugzilla.mozilla.org/show_bug.cgi?id=2053518)).
+For a manual build, install `rustup toolchain install 1.93.0 --profile minimal`
+and run the build script with `RUSTUP_TOOLCHAIN=1.93.0`.
 The engine remains optimized, with jemalloc and Intl disabled as before.
 The pinned source needs a small build-list fix for `--without-intl-api`:
 `patches/mozjs-153-no-intl.patch` includes the existing regexp C++ callback that

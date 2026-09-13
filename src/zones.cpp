@@ -742,7 +742,11 @@ void ZoneManager::LoadThreadedZoneBatch( sql::Connection connection, const int z
 		if( MyQuery->numRows() > 0 )
 		{
 			int lowZoneID = atoi(MyQuery->peekRow()["id"].c_str());
-			int highZoneID = atoi(MyQuery->lastRow()["id"].c_str());
+			// Use the published SQL library API and restore the cursor before loading zones.
+			for(unsigned int rowIndex = 1; rowIndex < MyQuery->numRows(); ++rowIndex)
+				MyQuery->skipRow();
+			int highZoneID = atoi(MyQuery->peekRow()["id"].c_str());
+			MyQuery->resetRowQueue();
 
 			//Using this range, obtain the matching zone commands.
 			Query.str("");
