@@ -3,6 +3,7 @@
 ### Parse arguments to this script
 TARGET="$1"
 FULL_PARTIAL="$2"
+GCC_THREADS="${GCC_THREADS:-4}"
 echo "TARGET: $TARGET"
 echo "FULL OR PARTIAL: $FULL_PARTIAL"
 
@@ -59,8 +60,27 @@ fi
 ### to modify this file will fail.
 echo "core.%p.%t" > /proc/sys/kernel/core_pattern
 
-### SSH/dev target: start sshd + gateway, skip build, keep container alive for CLion
+# Build failures must stop startup instead of launching a stale executable.
+set -e
+
+# Keep objects inside the container so an image upgrade cannot reuse objects
+# compiled against the previous Ubuntu/Boost toolchain on the source mount.
+BUILD_OBJDIR=/tmp/kinslayer-obj
+
+### Perform clean build if specified, including in SSH/dev mode.
+if [[ "$FULL_PARTIAL" == "full" ]]; then
+	make clean -C /kinslayer/src OBJDIR="$BUILD_OBJDIR"
+fi
+
+### SSH/dev target: start sshd + gateway.
 if [[ "$TARGET" == "ssh" ]]; then
+	# With automatic MUD startup disabled, CLion controls the game build.
+	# Otherwise build the game too, before the gateway can launch it.
+	BUILD_TARGET=all
+	if [[ "${RESTART_ON_SHUTDOWN:-1}" == "0" ]]; then
+		BUILD_TARGET=gateway
+	fi
+	make "$BUILD_TARGET" -C /kinslayer/src -j"$GCC_THREADS" OBJDIR="$BUILD_OBJDIR"
 	mkdir -p /run/sshd
 	echo 'root:dev' | chpasswd
 	echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
@@ -75,26 +95,20 @@ if [[ "$TARGET" == "ssh" ]]; then
 	exit
 fi
 
-### Perform clean build if specified.
-if [[ "$FULL_PARTIAL" == "full" ]]; then
-	make clean -C /kinslayer/src
-fi
-
 ### Perform the build and run the target process
 if [[ "$TARGET" == "kinslayer" ]]; then
 	echo "Building MUD..."
-	make -C /kinslayer/src -j"$GCC_THREADS"
+	make kinslayer -C /kinslayer/src -j"$GCC_THREADS" OBJDIR="$BUILD_OBJDIR"
 	echo "Starting MUD..."
 	ldconfig
-	./bin/kinslayer
+	exec ./bin/kinslayer
 elif [[ "$TARGET" == "gateway" ]]; then
 	echo "Building gateway..."
-	make -C /kinslayer/src -j"$GCC_THREADS"
-	make gateway -C /kinslayer/src -j"$GCC_THREADS"
+	make all -C /kinslayer/src -j"$GCC_THREADS" OBJDIR="$BUILD_OBJDIR"
 	echo "Starting gateway..."
 	ldconfig
-	./bin/gateway
+	exec ./bin/gateway
 else
 	echo "Invalid target."
-	exit
+	exit 1
 fi

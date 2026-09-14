@@ -5,18 +5,45 @@ Note that in order to use Docker Compose, you'll need to clone the following rep
 
 All commands in this document should be executed from the kinslayer-loader directory.
 
+## Build or upgrade the game image
+
+The game image uses Ubuntu 26.04, GCC 15, and Ubuntu's Boost 1.90 packages.
+SpiderMonkey remains pinned to 153.0.4 with LLVM 19 and Rust 1.93.0.
+The image contains the build dependencies; Compose mounts this repository at
+`/kinslayer`, and the entrypoint compiles the executables there.
+
+After pulling these changes, build the new image and recreate the game container:
+
+```sh
+docker compose build game
+docker compose up -d --no-deps --force-recreate game
+docker compose logs -f game
+```
+
+Recreating the container interrupts the running game. Startup keeps its object
+files in `/tmp/kinslayer-obj` inside the container, so objects from the previous
+Ubuntu image cannot be reused accidentally. The first startup compiles from
+scratch; subsequent starts of the same container can build incrementally.
+`GCC_THREADS` controls compilation parallelism (default 4).
+
 ## Start game container
-The simplest way to star the container is to run the following:
+The simplest way to start the container is to run the following:
 ```
 docker compose up game
 ```
 
-By default, the container will perform a clean build of the game, resulting in a full compilation of the game code.
+The loader's default `ssh` target starts SSH and the gateway. With
+`RESTART_ON_SHUTDOWN=0`, it builds only the gateway and leaves the game build and
+launch to CLion. After upgrading the image, reset CLion's CMake cache and perform
+a clean rebuild before launching the game. With `RESTART_ON_SHUTDOWN=1` (the
+entrypoint default), startup builds both executables and the gateway starts the
+game automatically.
 
-Becuase this is time consuming, you can alternatively run the container and perform a partial build:
+To run the gateway and game without SSH, use the `gateway` target and set
+`RESTART_ON_SHUTDOWN=1`. For example, with the existing game container stopped:
 
 ```
-docker compose run --service-ports game gateway partial
+docker compose run --service-ports -e RESTART_ON_SHUTDOWN=1 game gateway partial
 ```
 
 Note that running docker compose run may change the name of the running container(from game.kinslayermud.org below). You can run docker container ls to get the actual name of the container if you need it for subsequent commands.
@@ -25,14 +52,14 @@ Note that running docker compose run may change the name of the running containe
 While the container is running, you can perform a partial build by running:
 
 ```
-docker exec -it game.kinslayermud.org bash -c 'make -j${GCC_THREADS} -C /kinslayer/src'
+docker exec -it game.kinslayermud.org bash -c 'make all -j${GCC_THREADS:-4} -C /kinslayer/src OBJDIR=/tmp/kinslayer-obj'
 ```
 
 ## Full build
 While the container is running, you can perform a full build by running:
 
 ```
-docker exec -it game.kinslayermud.org bash -c 'make clean -C /kinslayer/src && make -j${GCC_THREADS} -C /kinslayer/src'
+docker exec -it game.kinslayermud.org bash -c 'make clean -C /kinslayer/src OBJDIR=/tmp/kinslayer-obj && make all -j${GCC_THREADS:-4} -C /kinslayer/src OBJDIR=/tmp/kinslayer-obj'
 ```
  
 ## Stop game container

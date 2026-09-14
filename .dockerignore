@@ -1,0 +1,8 @@
+# This image builds the toolchain; Compose mounts the game checkout at runtime.
+# Keep game data, credentials, core dumps, and build output out of the build context.
+**
+!Dockerfile
+!build-spidermonkey.sh
+!patches/
+!patches/mozjs-153-*.patch
+!crontab
