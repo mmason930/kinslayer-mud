@@ -15,6 +15,8 @@
 #include "../websocket/WebSocketException.h"
 
 #ifndef WIN32
+#include <cerrno>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #endif
@@ -529,6 +531,17 @@ void GatewayServer::run()
 	bool isTerminated = false;
 
 	while(!isTerminated) {
+#ifndef WIN32
+		// Reap the MUD and any adopted children without blocking the gateway.
+		// This also works when the gateway itself is container PID 1.
+		while (true)
+		{
+			const pid_t reaped = waitpid(-1, nullptr, WNOHANG);
+			if (reaped > 0 || (reaped < 0 && errno == EINTR))
+				continue;
+			break;
+		}
+#endif
 
 		for(auto gatewayListenerIter = listeners.begin();gatewayListenerIter != listeners.end();++gatewayListenerIter)
 		{
@@ -879,46 +892,25 @@ void GatewayServer::attemptMudStart()
 #else
 	commandBuffer << this->getMudRootDirectoryPath() << mudExecutablePath;
 
-	pid_t temporaryProcessId, childProcessId;
+	const std::string executable = commandBuffer.str();
+	const pid_t childProcessId = fork();
 
-	temporaryProcessId = fork();
-
-	if(temporaryProcessId == 0)
-	{//This is the child
-		childProcessId = fork();
-		if(childProcessId == 0)
-		{//This is the actual child, which we will use to spawn the MUD process.
-//			std::cout << "**MUD PROCESS** Child process starting MUD..." << std::endl;
-			int retval = execlp(commandBuffer.str().c_str(), commandBuffer.str().c_str(), 0);
-
-//			std::cout << "**MUD PROCESS** Child process finished starting MUD..." << std::endl;
-//			std::cout << "**MUD PROCESS** Return Value: " << retval << std::endl;
-//			std::cout << "**MUD PROCESS** Errno: " << strerror(errno) << std::endl;
-			exit(1);
-		}
-		else if(childProcessId > 0)
-		{//This is the parent process, which we will terminate to assign the MUD process's parent to the "init" process.
-		 //The gateway process which we will keep alive will spawn on the second fork call.
-//			std::cout << "**TEMPORARY PROCESS** Exiting immediately..." << std::endl;
-			exit(0);
-		}
-		else
-		{//Error, could not fork.
-			std::cout << makeTimestamp() << " ERROR: Could not fork!" << std::endl;
-		}
+	if (childProcessId == 0)
+	{
+		execlp(executable.c_str(), executable.c_str(), static_cast<char *>(nullptr));
+		perror("Could not execute MUD");
+		// Never run gateway exit handlers or flush its inherited streams here.
+		_exit(127);
 	}
-	else if(temporaryProcessId > 0)
-	{//Here we have the actual gateway process, which will safely exit out of this function and proceed functioning.
-	 //First we will wait for the temporary process to terminate so that we can reap it, eliminating the dangling zombie process.
-		int status;
-		waitpid(childProcessId, &status, 0);
+	else if (childProcessId > 0)
+	{
+		// Keep the MUD as our child; the main loop collects its exit status.
+		this->mudProcessId = static_cast<unsigned int>(childProcessId);
 	}
 	else
-	{//Error, could not fork.
-		std::cout << makeTimestamp() << " ERROR: Could not fork!" << std::endl;
+	{
+		std::cout << makeTimestamp() << " ERROR: Could not fork: " << strerror(errno) << std::endl;
 	}
-	
-//	std::cout << "**GATEWAY PROCESS** Proceeding..." << std::endl;
 
 #endif
 }

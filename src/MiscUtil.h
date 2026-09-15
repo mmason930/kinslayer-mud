@@ -6,6 +6,7 @@
 #include <map>
 #include <sstream>
 #include <format>
+#include <boost/uuid/uuid_io.hpp>
 #include "DateTime.h"
 
 class MiscUtil {
@@ -53,6 +54,13 @@ public:
 	static std::string formatDateYYYYdmmdddHHcMMcSS(const DateTime &dateTime);
 	static std::string formatDateYYYYmmdd(const DateTime &dateTime);
 	static bool isValidEmailAddress(const std::string &emailAddress);
+
+	// UUIDs also satisfy the C++23 range formatter. Persist their canonical
+	// identifier, never a formatted/truncated list of bytes.
+	static std::string toString(const boost::uuids::uuid& value)
+	{
+		return boost::uuids::to_string(value);
+	}
 
 	template<typename T>
 	static std::string toString(const T& value)

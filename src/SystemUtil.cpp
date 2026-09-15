@@ -4,7 +4,7 @@
 #ifdef WIN32
 #else
 #include <unistd.h>
-#include <dirent.h>
+#include <fstream>
 #endif
 
 bool SystemUtil::processExists(const unsigned int processId)
@@ -27,50 +27,22 @@ bool SystemUtil::processExists(const unsigned int processId)
 	}
 	return false;
 #else
-	DIR* dir;
-	struct dirent* ent;
-	char* endptr;
-	char buf[512];
-
-	if (!(dir = opendir("/proc"))) {
-		perror("Can't open /proc");
+	if (processId == 0)
 		return false;
-	}
 
-	while((ent = readdir(dir)) != nullptr) {
-		// if endptr is not a null character, the directory is not
-		// entirely numeric, so ignore it
-		long lpid = strtol(ent->d_name, &endptr, 10);
-		if (*endptr != '\0') {
-			continue;
-		}
-
-		// try to open the cmdline file
-		snprintf(buf, sizeof(buf), "/proc/%ld/cmdline", lpid);
-		if(lpid == processId)
+	// A zombie still has a /proc entry, but has already finished shutting down.
+	// Read only this PID instead of scanning every process on the host.
+	std::ifstream status("/proc/" + std::to_string(processId) + "/status");
+	std::string line;
+	while (std::getline(status, line))
+	{
+		if (line.compare(0, 6, "State:") == 0)
 		{
-			closedir(dir);
-			return true;
+			const auto state = line.find_first_not_of(" \t", 6);
+			return state != std::string::npos && line[state] != 'Z'
+				&& line[state] != 'X' && line[state] != 'x';
 		}
-		/***
-		FILE* fp = fopen(buf, "r");
-
-		if (fp) {
-			if (fgets(buf, sizeof(buf), fp) != nullptr) {
-				// check the first token in the file, the program name
-				char* first = strtok(buf, " ");
-				if (!strcmp(first, name)) {
-					fclose(fp);
-					closedir(dir);
-					return (pid_t)lpid;
-				}
-			}
-			fclose(fp);
-		}
-		***/
 	}
-	
-	closedir(dir);
 	return false;
 #endif
 }
@@ -104,16 +76,16 @@ std::string SystemUtil::processCommand(const std::string &command)
 		return "";
 	}
 
-	while(!feof(pipe))
-	{
-		size_t bytesRead = fread(temporaryBuffer, sizeof(char), sizeof(temporaryBuffer) - 1, pipe);
+	size_t bytesRead;
+	while ((bytesRead = fread(temporaryBuffer, sizeof(char), sizeof(temporaryBuffer), pipe)) > 0)
+		buffer.append(temporaryBuffer, bytesRead);
 
-		temporaryBuffer[ bytesRead ] = '\0';
-
-		buffer += temporaryBuffer;
-	}
-
-	fclose(pipe);
+	// popen owns a child process as well as a stream. fclose leaks that child.
+#ifdef WIN32
+	_pclose(pipe);
+#else
+	pclose(pipe);
+#endif
 
 	return buffer;
 }

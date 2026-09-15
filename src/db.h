@@ -173,7 +173,7 @@ public:
 /* global buffering system */
 
 #ifdef __DB_C__
-char	buf[MAX_STRING_LENGTH];
+char	buf[MAX_PRIMARY_BUFFER_LENGTH];
 char	buf1[MAX_STRING_LENGTH];
 char	buf2[MAX_STRING_LENGTH];
 char	arg[MAX_STRING_LENGTH];
