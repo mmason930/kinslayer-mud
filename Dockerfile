@@ -3,7 +3,7 @@ FROM ubuntu:26.04
 ARG DEBIAN_FRONTEND=noninteractive
 ARG GCC_THREADS=4
 ARG RUST_VERSION="1.93.0"
-ARG SQL_DATABASE_REVISION="145099d91714b9e5f08e6645b84429897068be8a"
+ARG SQL_DATABASE_REVISION="b033beb7a3006d882a0d3d14c69e3f776cc6e19d"
 ARG CPP_HTTPLIB_REVISION="278c2979e8c68468960c3073e28e1c51b098d6a4"
 
 # Ubuntu 26.04 supplies Boost 1.90 and LLVM 19 on both amd64 and arm64.
@@ -26,7 +26,7 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 ENV RUSTUP_TOOLCHAIN="${RUST_VERSION}"
 RUN cargo install --locked cbindgen --version 0.29.4
 
-# sqlDatabase's install script lacks set -e; do not let a compile failure be hidden.
+# Build the validated SQL library revision; installation stops on build failure.
 RUN git clone https://github.com/kinslayermud/kinslayer-sqlDatabase /tmp/kinslayer-sqlDatabase \
     && cd /tmp/kinslayer-sqlDatabase \
     && git checkout --detach "${SQL_DATABASE_REVISION}" \
