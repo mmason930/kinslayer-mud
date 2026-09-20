@@ -121,7 +121,7 @@ var addMissingRaresToAuction = function(self, actor, here, args, extra) {
             "JOIN auctionItem a ON a.object_id=o.id AND a.auction_id=o.holder_id " +
             "AND a.owner_id=CASE a.auction_id WHEN 1 THEN 37000 WHEN 2 THEN 37001 END " +
             "WHERE o.vnum IN (" + vnums.join(",") + ") AND o.holder_type='A' AND o.top_level_holder_type='A' " +
-            "AND o.holder_id=o.top_level_holder_id AND a.active=0 AND a.end_time>0 AND a.end_time<=" + now +
+            "AND o.holder_id=o.top_level_holder_id AND a.active=0 AND a.retrieved=0 AND a.end_time>0 AND a.end_time<=" + now +
             " AND NOT EXISTS (SELECT 1 FROM auctionBid b WHERE b.ai_id=a.id)" +
             " AND NOT EXISTS (SELECT 1 FROM auctionItem x WHERE x.object_id=o.id AND " +
             "(x.active=1 OR x.end_time=0 OR (x.retrieved=0 AND (x.owner_id NOT IN (37000,37001) OR " +
@@ -137,7 +137,7 @@ var addMissingRaresToAuction = function(self, actor, here, args, extra) {
                 "retrieved=IF(id=" + listingId + ",0,1)," +
                 "end_time=IF(id=" + listingId + "," + (now + duration) + ",end_time)," +
                 "timestamp=IF(id=" + listingId + "," + now + ",timestamp) " +
-                "WHERE object_id=" + quote(id) + " AND owner_id IN (37000,37001) AND active=0 AND end_time>0");
+                "WHERE object_id=" + quote(id) + " AND owner_id IN (37000,37001) AND active=0 AND retrieved=0 AND end_time>0");
             ++completed;
             log("renewed unsold house listing " + listingId + " for " + id);
         }

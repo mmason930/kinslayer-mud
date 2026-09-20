@@ -8,7 +8,8 @@ const vm = require('node:vm');
 const {randomUUID} = require('node:crypto');
 const container = process.env.AUCTION_TEST_MYSQL_CONTAINER;
 if (!container) throw Error('Set AUCTION_TEST_MYSQL_CONTAINER to a LOCAL test container');
-const database = 'auction_regression_' + process.pid;
+const database = 'auction_regression_' + process.pid + '_' + randomUUID().replaceAll('-', '');
+let created = false;
 let lastInsertId = 0;
 function sql(statement, useDatabase = true) {
   const output = execFileSync('docker', ['exec', '-i', container, 'sh', '-c',
@@ -88,6 +89,7 @@ function active() {return sql('SELECT * FROM auctionItem WHERE active=1');}
 function test(name, fn) {reset();fn();console.log('PASS: '+name);}
 try {
   sql(`CREATE DATABASE ${database}`,false);
+  created = true;
   sql(`CREATE TABLE objects(id varchar(36) PRIMARY KEY,vnum int,holder_type char(1),holder_id varchar(36),top_level_holder_type char(1),top_level_holder_id varchar(36),pos int,bitv0 bigint,obj_str text) ENGINE=MyISAM`);
   sql('CREATE TABLE users(user_id int PRIMARY KEY,last_logon datetime) ENGINE=MyISAM');
   sql('CREATE TABLE obj_protos(vnum int PRIMARY KEY,extra_flags int) ENGINE=MyISAM');
@@ -116,6 +118,11 @@ try {
     const player=fixtureObject('A','1');auction(player,{owner:10});auction(player);
     const before=sql('SELECT * FROM auctionItem ORDER BY id');
     run();assert.deepEqual(sql('SELECT * FROM auctionItem ORDER BY id'),before);
+  });
+  test('already retrieved house listings are never reopened',()=>{
+    const id=fixtureObject('A','1');auction(id,{retrieved:1});
+    const before=sql('SELECT * FROM auctionItem');run();
+    assert.deepEqual(sql('SELECT * FROM auctionItem'),before);assert.equal(active().length,0);
   });
   test('reclaim only eligible offline auctionable rares, preserving flags and descriptions',()=>{
     const reclaimed=[fixtureObject('P','10'),fixtureObject('S','10'),fixtureObject('C','500')];
@@ -167,5 +174,5 @@ try {
     state.failQuery=()=>false;run();assert.equal(active().length,1);assert.equal(state.stores,1);
   });
 } finally {
-  sql(`DROP DATABASE IF EXISTS ${database}`,false);
+  if (created) sql(`DROP DATABASE ${database}`,false);
 }
