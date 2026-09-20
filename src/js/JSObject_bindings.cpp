@@ -168,6 +168,16 @@ void RegisterJSObjectBindings() {
         return true;
     };
     
+    g_class_registry["JSObject"].methods["storeAndExtract"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
+        JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+        class JSObject *self = static_cast<class JSObject*>(ptr);
+        if (!self || argc < 2) { args.rval().setBoolean(false); return true; }
+        flusspferd::string holderType = from_jsval_string(cx, args[0]);
+        flusspferd::string holderId = from_jsval_string(cx, args[1]);
+        args.rval().setBoolean(self->storeAndExtract(holderType, holderId));
+        return true;
+    };
+
     g_class_registry["JSObject"].methods["open"] = [](void *ptr, JSContext *cx, unsigned argc, JS::Value *vp) -> bool {
         JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
         class JSObject *self = static_cast<class JSObject*>(ptr);

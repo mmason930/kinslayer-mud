@@ -1150,9 +1150,9 @@ class Object : public JSBindable, public Entity
 		void saveItems(char holderType, const std::string &holderID);
 		void saveItems( bool self, char holderType, const std::string &holderID, char topLevelHolderType, const std::string &topLevelHolderID, sql::BatchInsertStatement &tempObjectsBatchInsertStatement, sql::BatchInsertStatement &tempObjectRetoolsBatchInsertStatement, sql::BatchInsertStatement &tempObjectSpecialsBatchInsertStatement, bool contents );
 
-		static void saveItemToTopLevelHolder(const char holderType, const std::string &holderId, Object *obj);
+		static bool saveItemToTopLevelHolder(const char holderType, const std::string &holderId, Object *obj);
 		static void saveTopLevelHolderItems(const char holderType, const std::string &holderId, const std::list<Object *> &contents);
-		static void saveHolderItems(const char holderType, const std::string &holderId, const char topLevelHolderType, const std::string &topLevelHolderId, const std::list<Object *> &contents, bool deleteHolderContents=false);
+		static bool saveHolderItems(const char holderType, const std::string &holderId, const char topLevelHolderType, const std::string &topLevelHolderId, const std::list<Object *> &contents, bool deleteHolderContents=false);
 		static void addFieldsToBatchInsertStatement(sql::BatchInsertStatement &objectBatchInsertStatement, sql::BatchInsertStatement &objectRetoolBatchInsertStatement, sql::BatchInsertStatement &objectSpecialBatchInsertStatement);
 
 		static Object *bootLiveObject( const sql::Row &MyRow, bool recursive = false );

@@ -526,13 +526,13 @@ void Character::loadItems()
  * ~~Originally By  : Galnor, 2011-06-12
  * ~~Last Updated By: 
  ******/
-void Object::saveItemToTopLevelHolder(const char holderType, const std::string &holderId, Object *obj)
+bool Object::saveItemToTopLevelHolder(const char holderType, const std::string &holderId, Object *obj)
 {
 	std::list<Object *> items;
 
 	items.push_back(obj);
 
-	Object::saveHolderItems(holderType, holderId, holderType, holderId, items, false);
+	return Object::saveHolderItems(holderType, holderId, holderType, holderId, items, false);
 }
 
 void Object::saveTopLevelHolderItems(const char holderType, const std::string &holderId, const std::list<Object *> &contents)
@@ -741,7 +741,7 @@ void Object::addFieldsToBatchInsertStatement(sql::BatchInsertStatement &objectBa
  *
  * ~~Originally By  : Galnor, 2011-06-12
  ******/
-void Object::saveHolderItems(const char holderType, const std::string &holderId, const char topLevelHolderType, const std::string &topLevelHolderId, const std::list<Object *> &contents, bool deleteHolderContents)
+bool Object::saveHolderItems(const char holderType, const std::string &holderId, const char topLevelHolderType, const std::string &topLevelHolderId, const std::list<Object *> &contents, bool deleteHolderContents)
 {
 	try {
 		std::stringstream query;
@@ -827,7 +827,9 @@ void Object::saveHolderItems(const char holderType, const std::string &holderId,
 	catch(sql::QueryException &e) {
 
 		MudLog(BRF, LVL_APPR, TRUE, "Could not save items. Holder Type='%c', Holder Id='%s' : %s", holderType, holderId.c_str(), e.getMessage().c_str());
+		return false;
 	}
+	return true;
 }
 
 /******

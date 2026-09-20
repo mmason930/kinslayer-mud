@@ -44,6 +44,7 @@ FLUSSPFERD_CLASS_DESCRIPTION(
 		("moveToObj", bind, move_to_obj)
 		("loadObj", bind, load_obj)
 		("extract", bind, extract)
+		("storeAndExtract", bind, storeAndExtract)
 		("open", bind, open)
 		("close", bind, close)
 		("lock", bind, lock)
@@ -203,6 +204,7 @@ public:
 	flusspferd::string getID();
 
 	void extract();
+	bool storeAndExtract(flusspferd::string holderType, flusspferd::string holderId);
 
 	bool canOpen();
 	bool canLock();

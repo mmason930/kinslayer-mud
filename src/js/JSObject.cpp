@@ -125,6 +125,18 @@ void JSObject::extract()
 	real->Extract(true);
 }
 
+// A stored object still exists and must remain in the global rare-item count.
+// Keep the live object available if persistence fails.
+bool JSObject::storeAndExtract(flusspferd::string holderType, flusspferd::string holderId)
+{
+	if (!real || real->IsProto() || real->IsPurged() || holderType.size() != 1 || holderId.size() == 0)
+		return false;
+	if (!Object::saveItemToTopLevelHolder(holderType.c_str()[0], holderId.to_string(), real))
+		return false;
+	real->Extract(false);
+	return true;
+}
+
 bool JSObject::canOpen()
 {
 	return (real ? real->CanOpen() : false);
