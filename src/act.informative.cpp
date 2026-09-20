@@ -470,16 +470,32 @@ CommandHandler do_view = DEFINE_COMMAND
 	}
 	else if( !str_cmp(buf1, "clans") )
 	{/* Display all of the clans visible to the commander */
-		Clan *clan;
-		int i;
-
-		for(i = 1, clan = ClanList;clan;clan = clan->Next, ++i)
+		constexpr size_t columns = 3;
+		std::vector<std::string> entries;
+		std::vector<size_t> widths;
+		size_t columnWidths[columns] = {};
+		int index = 1;
+		for(Clan *clan = ClanList; clan; clan = clan->Next, ++index)
 		{
-			if(clan->hidden_level <= GET_LEVEL(ch))
-			{
-				ch->send("#%d %s\r\n", GET_LEVEL(ch) < LVL_GRGOD ? i : clan->vnum, clan->Name.c_str());
-			}
+			if(clan->hidden_level > GET_LEVEL(ch))
+				continue;
+			std::string entry = "#" + std::to_string(GET_LEVEL(ch) < LVL_GRGOD ? index : clan->vnum) + " " + clan->Name;
+			size_t width = StringUtil::strlenIgnoreColors(entry.c_str());
+			size_t column = entries.size() % columns;
+			if(width > columnWidths[column]) columnWidths[column] = width;
+			entries.push_back(entry);
+			widths.push_back(width);
 		}
+		std::string output;
+		for(size_t entry = 0; entry < entries.size(); ++entry)
+		{
+			output += entries[entry];
+			if(entry % columns == columns - 1 || entry + 1 == entries.size())
+				output += "\r\n";
+			else
+				output.append(columnWidths[entry % columns] - widths[entry] + 3, ' ');
+		}
+		ch->send("%s", output.c_str());
 	}
 	else if( !str_cmp(buf1, "warrants"))
 	{
@@ -1845,6 +1861,22 @@ void lookAtTarget(Character * ch, char *arg)
 
 		return;
 	}
+
+    // An exact item selection must inspect that item, including its custom
+    // descriptions, without accidentally matching a similarly named object.
+    if (arg[0] == '@' && found_obj) {
+        std::istringstream words(found_obj->getName() ? found_obj->getName() : "");
+        std::string word;
+        while (words >> word) {
+            if ((desc = findExtraDescription(word.data(), found_obj->GetExDesc())) != nullptr) {
+                ch->send(desc);
+                found = TRUE;
+                break;
+            }
+        }
+        showObjectToCharacter(found_obj, ch, found ? 6 : 5, 1);
+        return;
+    }
 
 	/* Does the argument match an extra desc in the room? */
 	if ((desc = findExtraDescription(arg, ch->in_room->ex_description)) != nullptr)

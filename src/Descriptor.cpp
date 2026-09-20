@@ -19,6 +19,9 @@
 #include "UserMacro.h"
 #include "UserEmailAddress.h"
 #include "StringUtil.h"
+#include "utils/CommandInput.h"
+#include "utils/JsonCommand.h"
+#include "utils/ClientSession.h"
 #include "CharacterUtil.h"
 #include "Game.h"
 #include "MobLoadLogger.h"
@@ -103,8 +106,24 @@ void Descriptor::processInput()
 	if(character && character->wait > 0)
 		return;
 
+    clientPurchaseRequest = Json::Value();
+    struct ClearPurchaseQuote {
+        Json::Value &value;
+        ~ClearPurchaseQuote() { value = Json::Value(); }
+    } clearPurchaseQuote{clientPurchaseRequest};
 	std::string command = commandQueue.front();
 	commandQueue.pop_front();
+    if (command.rfind("\1client:", 0) == 0) {
+        Json::Reader reader;
+        Json::Value request;
+        if (!reader.parse(command.substr(8), request)) return;
+        command = resolveClientAction(request);
+        if (request["action"] == "buy") clientPurchaseRequest = request;
+        if (command.empty()) {
+            send("That selection is no longer available. Refresh the panel and try again.\r\n");
+            return;
+        }
+    }
 	
 	int aliased = 0;
 	hadInput = true;
@@ -140,17 +159,13 @@ void Descriptor::processInput()
 	if(loggingCharacter && STATE(this) != CON_PASSWORD)
 		loggingCharacter->LogOutput(command + "\n");
 
-	if(command.length() > MAX_INPUT_LENGTH) {
-
+	// Legacy command parsers use MAX_INPUT_LENGTH-byte argument arrays.
+	// Bound the escaped text, including its terminator, before copying it.
+	bool truncated = false;
+	command = prepareLegacyCommand(command, STATE(this) != CON_PASSWORD,
+		MAX_INPUT_LENGTH - 1, truncated);
+	if (truncated)
 		send("Input too long... Truncated.\r\n");
-
-		command.resize(MAX_INPUT_LENGTH);
-	}
-
-	if(STATE(this) != CON_PASSWORD) {
-
-		StringUtil::replace(command, "$", "$$");
-	}
 
 	if(snoop_by && snoop_by->descriptor && snoop_by->character && snoop_by->character->hasPermissionToSnoop()) {
 
@@ -750,7 +765,7 @@ void Descriptor::processWebSocketSignInCommand(Json::Value &commandObject)
 		response["error"] = "You are already signed in.";
 	else if(commandObject["username"].isNull())
 		response["error"] = "You must enter a username.";
-	else if(commandObject["password"].isNull() && !game->skipPasswordRequirement())
+	else if(commandObject["password"].isNull() && !commandObject["resumeToken"].isString() && !game->skipPasswordRequirement())
 		response["error"] = "You must enter a password.";
 
 	if(!response["error"].isNull())
@@ -806,7 +821,15 @@ void Descriptor::processWebSocketSignInCommand(Json::Value &commandObject)
 		return;
 	}
 		
-	if(!ch->passwordMatches(password))
+    const bool resuming = commandObject["resumeToken"].isString();
+    if (resuming && !ClientSession::accepts(commandObject["resumeToken"].asString(), GET_NAME(ch), GET_PASSWD(ch))) {
+        response["error"] = "Your session has expired. Please sign in again.";
+        response["resumeExpired"] = true;
+        delete ch;
+        sendWebSocketCommand(writer.write(response));
+        return;
+    }
+	if(!resuming && !ch->passwordMatches(password))
 	{
 		if(!game->skipPasswordRequirement())
 		{
@@ -821,11 +844,11 @@ void Descriptor::processWebSocketSignInCommand(Json::Value &commandObject)
 		MudLog( BRF, LVL_GOD, TRUE, "Password requirement skipped for %s [%s].", GET_NAME( ch ), this->host );
 	}
 
-	if ( BanManager::GetManager().IsBanned( this->host ) == BAN_SELECT && !PLR_FLAGGED( this->character, PLR_SITEOK ) )
+	if ( BanManager::GetManager().IsBanned( this->host ) == BAN_SELECT && !PLR_FLAGGED( ch, PLR_SITEOK ) )
 	{
 		response["error"] = "Sorry, this char has not been cleared for login from your site!";
 		STATE( this ) = CON_CLOSE;
-		MudLog( NRM, LVL_GOD, TRUE, "Connection attempt for %s denied from %s", GET_NAME( this->character ), this->host );
+		MudLog( NRM, LVL_GOD, TRUE, "Connection attempt for %s denied from %s", GET_NAME( ch ), this->host );
 		this->sendWebSocketCommand(writer.write(response));
 		delete ch;
 		return;
@@ -836,7 +859,7 @@ void Descriptor::processWebSocketSignInCommand(Json::Value &commandObject)
 	this->bad_pws = 0;
 
 	//We need to convert the password entered to MD5.
-	if( !ch->PasswordUpdated() )
+	if( !resuming && !ch->PasswordUpdated() )
 	{
 		ch->player.passwd = str_dup(MD5::getHashFromString(password.c_str()).c_str());
 		ch->PasswordUpdated( true );
@@ -1007,7 +1030,7 @@ void Descriptor::processWebSocketUserCreationCommand(Json::Value &commandObject)
 
 	if (commandObject["classValue"].isNull() || !commandObject["classValue"].isInt())
 		errors.push_back("Please select a class.");
-	else if (!isClassOpen(commandObject["classValue"].asInt(), commandObject["raceValue"].asInt()))
+	else if (commandObject["raceValue"].isInt() && !isClassOpen(commandObject["classValue"].asInt(), commandObject["raceValue"].asInt()))
 		errors.push_back("The class you selected is invalid.");
 	
 	if (BanManager::GetManager().IsBanned(this->host) >= BAN_NEW)
@@ -1066,74 +1089,91 @@ void Descriptor::processWebSocketCommands()
 		{
 			std::string jsonCommand = std::string(inputDataBuffer, endOfCommandPointer - inputDataBuffer);
 			Json::Value commandObject;
-			Json::Reader reader;
-
-			if(!reader.parse(jsonCommand, commandObject, false))
-			{
-				MudLog(BRF, LVL_APPR, TRUE, "Could not process websocket command. Input: %s", StringUtil::vaEscape(jsonCommand).c_str());
-				break;
-			}
 
 			this->descriptor->eraseInput(0, (endOfCommandPointer - inputDataBuffer) + 1);
-			
-			std::string method = commandObject["method"].asString();
-			if(method == "Input")
+
+			if(!readJsonCommand(jsonCommand, commandObject))
 			{
-				this->commandQueue.push_back(commandObject["data"].asString());
+				MudLog(BRF, LVL_APPR, TRUE, "Could not process websocket command. Input: %s", StringUtil::vaEscape(jsonCommand).c_str());
+				continue;
 			}
-			else if(method == "Browse Quests")
+
+			try
 			{
-				processWebSocketQuestCommand(commandObject);
-			}
-			else if(method == "Browse Help")
-			{
-				Json::Value response;
-				response["method"] = "Browse Help";
-				if(commandObject["requestId"].isInt())
-					response["requestId"] = commandObject["requestId"];
-				if(!loggedIn || connected != CON_PLAYING || !character || character->IsPurged())
-					response["error"] = "Sign in to browse the help files.";
-				else
+				std::string method = commandObject["method"].asString();
+				if(method == "Input")
 				{
-					try
-					{
-						// Expose only the read-only help API on the game connection.
-						auto manager = JSManager::get()->executeExpression("global.helpManager").to_object();
-						auto result = manager.call("getBrowserResponse", jsonCommand, lookupValue(character));
-						if(result.is_string())
-						{
-							sendWebSocketCommand(result.to_std_string());
-							continue;
-						}
-					}
-					catch(const std::exception &e)
-					{
-						MudLog(BRF, LVL_APPR, TRUE, "Help browser failed: %s", e.what());
-					}
-					response["error"] = "Help is temporarily unavailable. Please try again.";
+					if (!commandObject["data"].isString())
+						continue;
+                    // Internal item-action queue markers cannot be supplied as game input.
+                    auto input = commandObject["data"].asString();
+                    if (input.find('\1') == std::string::npos) this->commandQueue.push_back(input);
 				}
-				Json::FastWriter writer;
-				sendWebSocketCommand(writer.write(response));
+                else if(method == "Client Tools") {
+                    processClientTools(commandObject);
+                }
+                else if(method == "Client Ping") {
+                    Json::Value pong; pong["method"] = "Client Pong";
+                    sendWebSocketCommand(Json::FastWriter().write(pong));
+                }
+				else if(method == "Browse Quests")
+				{
+					processWebSocketQuestCommand(commandObject);
+				}
+				else if(method == "Browse Help")
+				{
+					Json::Value response;
+					response["method"] = "Browse Help";
+					if(commandObject["requestId"].isInt())
+						response["requestId"] = commandObject["requestId"];
+					if(!loggedIn || connected != CON_PLAYING || !character || character->IsPurged())
+						response["error"] = "Sign in to browse the help files.";
+					else
+					{
+						try
+						{
+							// Expose only the read-only help API on the game connection.
+							auto manager = JSManager::get()->executeExpression("global.helpManager").to_object();
+							auto result = manager.call("getBrowserResponse", jsonCommand, lookupValue(character));
+							if(result.is_string())
+							{
+								sendWebSocketCommand(result.to_std_string());
+								continue;
+							}
+						}
+						catch(const std::exception &e)
+						{
+							MudLog(BRF, LVL_APPR, TRUE, "Help browser failed: %s", e.what());
+						}
+						response["error"] = "Help is temporarily unavailable. Please try again.";
+					}
+					Json::FastWriter writer;
+					sendWebSocketCommand(writer.write(response));
+				}
+				else if(method == "Save User Macro")
+				{
+					processWebSocketSaveUserMacroCommand(commandObject);
+				}
+				else if(method == "Delete User Macro")
+				{
+					processWebSocketDeleteUserMacroCommand(commandObject);
+				}
+				else if(method == "Sign In")
+				{
+					processWebSocketSignInCommand(commandObject);
+				}
+				else if (method == "User Creation Details")
+				{
+					processWebSocketUserRegistrationDetailsCommand(commandObject);
+				}
+				else if (method == "User Creation")
+				{
+					processWebSocketUserCreationCommand(commandObject);
+				}
 			}
-			else if(method == "Save User Macro")
+			catch (const std::exception &e)
 			{
-				processWebSocketSaveUserMacroCommand(commandObject);
-			}
-			else if(method == "Delete User Macro")
-			{
-				processWebSocketDeleteUserMacroCommand(commandObject);
-			}
-			else if(method == "Sign In")
-			{
-				processWebSocketSignInCommand(commandObject);
-			}
-			else if (method == "User Creation Details")
-			{
-				processWebSocketUserRegistrationDetailsCommand(commandObject);
-			}
-			else if (method == "User Creation")
-			{
-				processWebSocketUserCreationCommand(commandObject);
+				MudLog(BRF, LVL_APPR, TRUE, "Could not process websocket command: %s", e.what());
 			}
 		}
 		else

@@ -32,6 +32,7 @@
 #include "commands/infrastructure/CommandInfo.h"
 
 #include "items/ItemUtil.h"
+#include "items/SavedObjectValidation.h"
 
 extern Index *obj_index;
 extern Descriptor *descriptor_list;
@@ -55,19 +56,66 @@ SPECIAL(cryogenicist);
 //Local functions
 int find_eq_pos(Character *ch, Object *obj, char *arg, bool msg);
 
+namespace
+{
+SavedObjectQuarantine savedObjectQuarantine;
+
+void validateSavedObject(const sql::Row &row)
+{
+	const std::string id = row["id"];
+	if (savedObjectQuarantine.ids.contains(id))
+		return;
+	if (parseSavedObjectId(id) && (row.getChar("holder_type") != 'O'
+		|| parseSavedObjectId(row["holder_id"])))
+		return;
+
+	Log("SYSERR: Quarantining saved object id='%s', vnum='%s', holder='%s'. Invalid UUID; database records will be preserved.",
+		id.c_str(), row["vnum"].c_str(), row["holder_id"].c_str());
+	savedObjectQuarantine.add(id, [](const std::string &parentId)
+	{
+		std::vector<std::string> children;
+		auto query = gameDatabase->sendQuery("SELECT id FROM objects WHERE holder_type='O' AND holder_id="
+			+ sql::escapeQuoteString(parentId));
+		while (query->hasNextRow())
+			children.push_back(query->getRow()["id"]);
+		return children;
+	});
+}
+
+void validateSavedObjects(const sql::Query &query)
+{
+	// Validate all rows before creating any objects, since children can appear
+	// before their malformed parent in a bulk room/chest query.
+	while (query->hasNextRow())
+		validateSavedObject(query->getRow());
+	query->resetRowQueue();
+}
+
+std::string preserveQuarantinedObjects()
+{
+	if (savedObjectQuarantine.ids.empty())
+		return "";
+	return " AND objects.id NOT IN " + SQLUtil::buildListSQL(
+		savedObjectQuarantine.ids.begin(), savedObjectQuarantine.ids.end(), true, false);
+}
+}
+
 Object *Object::bootLiveObject( const sql::Row &MyRow, bool recursive )
 {
+	validateSavedObject(MyRow);
+	if (savedObjectQuarantine.ids.contains(MyRow["id"]))
+		return nullptr;
+	const auto savedId = parseSavedObjectId(MyRow["id"]);
 	Object *obj = nullptr;
 
 	int special_type = MyRow.getInt("special_type");
 	if( special_type != SPECIAL_NONE )
 	{
 		specialLoadClock.turnOn();
-		boost::uuids::string_generator uuidGenerator;
 
 		//sql::Row MyRow2 = MyQuery->getRow();
 		obj = create_obj(false);
-		obj->objID = uuidGenerator(MyRow["id"].c_str());
+		obj->objID = *savedId;
 		std::string id = MyRow["id"];
 		obj->name = str_dup(MyRow["name"].c_str());
 		obj->short_description = str_dup(MyRow["sdesc"].c_str());
@@ -121,8 +169,7 @@ Object *Object::bootLiveObject( const sql::Row &MyRow, bool recursive )
 		obj = read_object(rnum, REAL, false, false);
 		readObjectClock.turnOff();
 
-		boost::uuids::string_generator uuidGenerator;
-		obj->objID = uuidGenerator(MyRow["id"].c_str());
+		obj->objID = *savedId;
 		obj->obj_flags.bitvector[0] = MyRow.getLongLong("bitv0");
 		obj->obj_flags.bitvector[1] = MyRow.getLongLong("bitv1");
 		obj->obj_flags.bitvector[2] = MyRow.getLongLong("bitv2");
@@ -278,6 +325,7 @@ std::vector<Object *> Object::loadMultipleItems(const std::vector<boost::uuids::
 	}
 
 	std::vector<std::string> parentObjectIds;
+	validateSavedObjects(query);
 
 	while( query->hasNextRow() )
 	{
@@ -314,6 +362,7 @@ std::unordered_map<boost::uuids::uuid, ObjectLoad> Object::loadItemMapFromQuery(
 {
 	std::unordered_map<boost::uuids::uuid, ObjectLoad> objectIdToLoadMap;
 	std::vector<std::string> parentObjectIds;
+	validateSavedObjects(query);
 
 	while( query->hasNextRow() )
 	{
@@ -383,14 +432,15 @@ std::list<std::pair<Object*, int>> Object::loadItemPairs(
     try {
         MyQuery = gameDatabase->sendQuery(QueryBuffer.str());
     } catch (sql::QueryException& e) {
-        MudLog(BRF, LVL_APPR, TRUE, "Unable to load items held by ID %d(%c): %s",
-            holderType, holderID.c_str(), e.getMessage().c_str());
+        MudLog(BRF, LVL_APPR, TRUE, "Unable to load items held by ID %s(%c): %s",
+            holderID.c_str(), holderType, e.getMessage().c_str());
         return objectPairList;
     }
 
     // Track which objects have children to load
     std::vector<Object*> holdersToLoad;
 
+    validateSavedObjects(MyQuery);
     while (MyQuery->hasNextRow())
     {
         sql::Row MyRow = MyQuery->getRow();
@@ -434,6 +484,7 @@ std::list<std::pair<Object*, int>> Object::loadItemPairs(
 
             std::vector<Object*> nextHolders;
 
+            validateSavedObjects(batchResult);
             while (batchResult->hasNextRow())
             {
                 sql::Row row = batchResult->getRow();
@@ -600,7 +651,8 @@ void Object::saveMultipleHolderItems(const std::map<std::pair<char, std::string>
 					<<	" LEFT JOIN object_specials ON objects.id=object_specials.id "
 					<<	" LEFT JOIN object_retools ON objects.id=object_retools.id "
 					<<	" WHERE objects.top_level_holder_type=tempTopLevelHolder.holder_type"
-					<<	" AND objects.top_level_holder_id=tempTopLevelHolder.holder_id";
+					<<	" AND objects.top_level_holder_id=tempTopLevelHolder.holder_id"
+					<< preserveQuarantinedObjects();
 			
 			gameDatabase->sendRawQuery(queryBuffer.str());
 		}
@@ -645,7 +697,7 @@ void Object::saveMultipleHolderItems(const std::map<std::pair<char, std::string>
 			"  objects.holder_id='',"
 			"  objects.holder_type='' "
 			"WHERE objects.holder_type='O' "
-			"AND   objects.holder_id=tempObjects.id;"
+			"AND   objects.holder_id=tempObjects.id" + preserveQuarantinedObjects()
 		);
 
 		//Delete the items we're about to update, if they exist.
@@ -758,7 +810,8 @@ bool Object::saveHolderItems(const char holderType, const std::string &holderId,
 					<<	"LEFT JOIN object_specials ON objects.id=object_specials.id "
 					<<	"LEFT JOIN object_retools ON objects.id=object_retools.id "
 					<<	"WHERE objects.top_level_holder_type='" << holderType << "' "
-					<<	"AND objects.top_level_holder_id='" << sql::escapeString(holderId) << "';";
+					<<	"AND objects.top_level_holder_id='" << sql::escapeString(holderId) << "'"
+					<< preserveQuarantinedObjects() << ";";
 			
 			gameDatabase->sendRawQuery(query.str());
 		}
@@ -803,7 +856,7 @@ bool Object::saveHolderItems(const char holderType, const std::string &holderId,
 			"  objects.holder_id='',"
 			"  objects.holder_type='' "
 			"WHERE objects.holder_type='O' "
-			"AND   objects.holder_id=tempObjects.id;"
+			"AND   objects.holder_id=tempObjects.id" + preserveQuarantinedObjects()
 		);
 
 		//Delete the items we're about to update, if they exist.

@@ -15,6 +15,8 @@ protected:
 	GatewayDescriptorType *gatewayDescriptorType;
 	std::string emailAddress;
 	std::string outputBuffer; //Output buffer for this pulse.
+	time_t toolsRequestSecond = 0;
+	unsigned toolsRequestCount = 0;
 	time_t questRequestSecond = 0;
 	unsigned int questRequestCount = 0;
 	std::string lastMiniMap; //Send nearby-room updates only when the snapshot changes.
@@ -46,6 +48,7 @@ public:
 	class Descriptor *next;			// Link to next descriptor
 	class OLC *olc;					// OLC info - defined in olc.h
 	std::list<std::string> commandQueue;
+    Json::Value clientPurchaseRequest; // Scoped to one structured buy command.
 	bool hadInput;
 	bool hadOutput;
 
@@ -84,6 +87,8 @@ public:
 	void sendWebSocketMiniMapCommand();
 	void sendWebSocketChat(const char *channel, const std::string &message);
 	void processWebSocketQuestCommand(const Json::Value &command);
+	void processClientTools(const Json::Value &command);
+	std::string resolveClientAction(const Json::Value &command);
 	void sendWebSocketDisplaySignInLightboxMessage();
 	void sendWebSocketErrorMessage(Json::Value &command, const std::string &errorMessage);
 	std::string encodeWebSocketOutputCommand(const char *output);

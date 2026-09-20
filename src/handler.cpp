@@ -19,6 +19,7 @@
 
 #include "StringUtil.h"
 #include "UserLogoutType.h"
+#include "utils/ClientSession.h"
 #include "Descriptor.h"
 #include "UserClan.h"
 #include "UserType.h"
@@ -28,6 +29,7 @@
 #include "editor-interface/EditorInterfaceInstance.h"
 
 #include "items/ItemUtil.h"
+#include "items/ObjectSelection.h"
 
 #include "js/js.h"
 
@@ -1561,6 +1563,11 @@ void Character::Extract( UserLogoutType *userLogoutType, bool fullDelete, bool p
 
 	if(!IS_NPC(this) && userLogoutType != nullptr && userLogoutType != UserLogoutType::notRealLogout) {
 	
+        if (userLogoutType != UserLogoutType::reboot && userLogoutType != UserLogoutType::linklessIdle) {
+            ClientSession::revoke(GET_NAME(this));
+            if (desc && desc->getGatewayDescriptorType() == GatewayDescriptorType::websocket)
+                desc->sendWebSocketCommand("{\"method\":\"Client Logout\"}");
+        }
 		std::stringstream sqlBuffer;
 
 		std::string roomString = in_room ? MiscUtil::convert<std::string>(in_room->getVnum()) : "NULL";
@@ -1771,7 +1778,7 @@ int generic_find(char *arg, int bitvector, Character * ch,
 	if (IS_SET(bitvector, FIND_OBJ_EQUIP))
 	{
 		for (found = FALSE, i = 0; i < NUM_WEARS && !found; i++)
-			if (GET_EQ(ch, i) && isname(name, GET_EQ(ch, i)->getName()))
+			if (GET_EQ(ch, i) && ((name[0] == '@' && canSelectObject(ch, GET_EQ(ch, i)) && exactObjectSelector(name, GET_EQ(ch, i))) || (name[0] != '@' && isname(name, GET_EQ(ch, i)->getName()))))
 			{
 				*tar_obj = GET_EQ(ch, i);
 				found = TRUE;

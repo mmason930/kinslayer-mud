@@ -95,6 +95,7 @@ set(KINSLAYER_ONLY_SOURCES
     src/DatabaseUtil.cpp
     src/db.cpp
     src/dbutils/QueryUtil.cpp
+    src/ClientTools.cpp
     src/Descriptor.cpp
     src/dg_event.cpp
     src/dotmode/DotMode.cpp

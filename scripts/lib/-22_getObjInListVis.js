@@ -20,6 +20,11 @@ function getObjInListVis(ch, objName, list, nr)
     for(var i = 0;i < list.length;i++)
     {
         if( type == 0 ) {
+            // Exact client selectors remain constrained to this supplied list.
+            if (objName.charAt(0) === "@") {
+                if (list[i].isValid && !list[i].hidden && String(list[i].id) === objName.slice(1) && ch.canSee(list[i])) return list[i];
+                continue;
+            }
             if( isName(objName, list[i].namelist) && --nr.val <= 0 )
                 return list[i];
         }

@@ -63,12 +63,9 @@ std::string PvalManager::getPval(const std::string &ownerType, const std::string
 	return "";
 }
 
-void PvalManager::setPval(const std::string &ownerType, const std::string &ownerID, const std::string &key, const std::string &value, bool instant)
+bool PvalManager::setPval(const std::string &ownerType, const std::string &ownerID, const std::string &key, const std::string &value, bool instant)
 {
 	std::string fullKey = makeFullKey(ownerType, ownerID, key);
-	PvalEntry &entry = pvals[fullKey];
-	entry.value = value;
-	entry.needsDelete = false;
 
 	if (instant) {
 		std::string truncatedKey = key.substr(0, MAX_KEY_LENGTH);
@@ -81,11 +78,15 @@ void PvalManager::setPval(const std::string &ownerType, const std::string &owner
 			gameDatabase->sendQuery(query);
 		} catch (sql::QueryException &e) {
 			MudLog(BRF, LVL_APPR, TRUE, "PvalManager::setPval : %s", e.getMessage().c_str());
+			return false;
 		}
-		entry.needsSave = false;
-	} else {
-		entry.needsSave = true;
 	}
+	// Only publish an immediate write to the cache after the database accepts it.
+	PvalEntry &entry = pvals[fullKey];
+	entry.value = value;
+	entry.needsDelete = false;
+	entry.needsSave = !instant;
+	return true;
 }
 
 void PvalManager::deletePval(const std::string &ownerType, const std::string &ownerID, const std::string &key, bool instant)

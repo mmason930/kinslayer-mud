@@ -20,6 +20,8 @@ kuClient::~kuClient()
 
 int kuClient::receive( std::stringstream &buf )
 {
+	if (!connected || !kuSocketCanSelect(sock))
+		return -1;
 	char buffer[2048];
 	timeval nulltime = {0,0};
 	int retval = 0;
@@ -34,8 +36,8 @@ int kuClient::receive( std::stringstream &buf )
 
 	if(select(this->sock + 1, &inset, &outset, &excset, &nulltime) < 0)
 	{
-		return -1;
 		disconnect();
+		return -1;
 	}
 
 	if(!(FD_ISSET(this->sock, &inset)))
@@ -67,7 +69,7 @@ bool kuClient::send(const std::string &data)
 {
 	int i = 0;
 
-	if( (i = ::send(this->sock, data.c_str(), data.size(), 0)) < 0)
+	if( (i = ::send(this->sock, data.c_str(), data.size(), KU_SEND_FLAGS)) < 0)
 	{
 		disconnect();
 		return false;
@@ -116,6 +118,12 @@ bool kuClient::connect(const std::string &h, const int p)
 	{
 		disconnect();
 		hasHost = HOSTERR;
+		return false;
+	}
+
+	if (!kuSocketCanSelect(sock))
+	{
+		disconnect();
 		return false;
 	}
 

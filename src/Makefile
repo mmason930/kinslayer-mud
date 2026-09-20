@@ -29,7 +29,8 @@ LIBS = \
 
 OBJDIR = obj
 
-OBJFILES =	accounts.o \
+OBJFILES =	ClientTools.o \
+			accounts.o \
 			act.comm.o \
 			act.informative.o \
 			act.item.o \

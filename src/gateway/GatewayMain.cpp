@@ -1,6 +1,9 @@
 #include "GatewayServer.h"
 
 #include <fstream>
+#ifndef WIN32
+#include <csignal>
+#endif
 #include <ctime>
 #include <iostream>
 #include <map>
@@ -12,6 +15,9 @@
 
 int main( void )
 {
+#ifndef WIN32
+	std::signal(SIGPIPE, SIG_IGN);
+#endif
 	GatewayServer gatewayServer;
 
 	time_t currentTime = time(0);

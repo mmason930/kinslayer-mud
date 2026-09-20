@@ -13,6 +13,7 @@ ThreadedLogFile::ThreadedLogFile(const std::string &filePath)
 
 ThreadedLogFile::~ThreadedLogFile()
 {
+	shutdown();
 }
 
 void ThreadedLogFile::addMessage(const std::string &message)
@@ -42,7 +43,7 @@ void ThreadedLogFile::processMessages()
 {
 	const int FILE_NAME_BUFFER_SIZE = 256;
 	const int TIMESTAMP_BUFFER_SIZE = 64;
-	char currentFileName[FILE_NAME_BUFFER_SIZE];
+	std::string currentFileName;
 	char nextFileName[FILE_NAME_BUFFER_SIZE];
 
 	{
@@ -62,11 +63,16 @@ void ThreadedLogFile::processMessages()
 	for(auto entry : *flushQueue)
 	{
 		time_t submittedTime = entry.submittedTimeval.tv_sec;
-		tm* submittedTm = localtime(&submittedTime);
+		tm submittedTm{};
+#ifdef WIN32
+		localtime_s(&submittedTm, &submittedTime);
+#else
+		localtime_r(&submittedTime, &submittedTm);
+#endif
+		if (strftime(nextFileName, FILE_NAME_BUFFER_SIZE, filePath.c_str(), &submittedTm) == 0)
+			continue;
 
-		strftime(nextFileName, FILE_NAME_BUFFER_SIZE, filePath.c_str(), submittedTm);
-
-		if(strcmp(currentFileName, nextFileName))
+		if(currentFileName != nextFileName)
 		{//Date changed. Close current file and open next.
 
 			if(currentOutputStream.is_open())
@@ -87,6 +93,7 @@ void ThreadedLogFile::processMessages()
 				Log("ERROR : ThreadedLogFile : Failed to open log file `%s` : ", nextFileName);
 				continue;//Try again next time?
 			}
+			currentFileName = nextFileName;
 		}
 
 		//Write to file.
@@ -121,5 +128,11 @@ void ThreadedLogFile::terminate()
 void ThreadedLogFile::shutdown()
 {
 	terminate();
-	logThread->join();
+	if (logThread)
+	{
+		if (logThread->joinable())
+			logThread->join();
+		delete logThread;
+		logThread = nullptr;
+	}
 }

@@ -5,6 +5,7 @@
 #include "../StringUtil.h"
 #include "../CharacterUtil.h"
 #include "../utils.h"
+#include "../utils/JsonCommand.h"
 
 PlayerPortalDescriptor::PlayerPortalDescriptor(kuDescriptor *descriptor, PlayerPortalServer *server)
 {
@@ -115,17 +116,24 @@ void PlayerPortalDescriptor::processInput()
 			{
 				std::string jsonCommand = std::string(commandStart, commandEnd - commandStart);
 				Json::Value command;
-				Json::Reader reader;
 
 				//MudLog(BRF, LVL_APPR, TRUE, "Command: %s", std::string(commandStart, commandEnd - commandStart).c_str());
-				if (!reader.parse(jsonCommand, command, false))
+				if (!readJsonCommand(jsonCommand, command))
 				{
 					MudLog(BRF, LVL_APPR, TRUE, "Could not process player portal websocket command. Input: %s", StringUtil::vaEscape(jsonCommand).c_str());
 					
 				}
 				else
 				{
-					processCommand(command);
+					try
+					{
+						processCommand(command);
+					}
+					catch (const std::exception &e)
+					{
+						Log("Could not process player portal command: %s", e.what());
+					}
+
 				}
 				commandStart = commandEnd + 1;
 			}
@@ -137,6 +145,8 @@ void PlayerPortalDescriptor::processInput()
 
 void PlayerPortalDescriptor::processCommand(const Json::Value &command)
 {
+	if (!command.isObject())
+		return;
 	Json::Value methodValue = command["method"];
 
 	if (methodValue.isNull() || !methodValue.isString())

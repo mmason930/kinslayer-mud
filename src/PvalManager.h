@@ -31,7 +31,7 @@ public:
 	void preBoot();
 	void boot();
 	std::string getPval(const std::string &ownerType, const std::string &ownerID, const std::string &key);
-	void setPval(const std::string &ownerType, const std::string &ownerID, const std::string &key, const std::string &value, bool instant);
+	bool setPval(const std::string &ownerType, const std::string &ownerID, const std::string &key, const std::string &value, bool instant);
 	void deletePval(const std::string &ownerType, const std::string &ownerID, const std::string &key, bool instant);
 	void saveDirtyPvals();
 	int size();

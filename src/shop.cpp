@@ -15,6 +15,7 @@
 #define __SHOP_C__
 
 #include "conf.h"
+#include <boost/uuid/uuid_io.hpp>
 
 #include "comm.h"
 #include "handler.h"
@@ -32,6 +33,8 @@
 #include "rooms/Room.h"
 
 #include <map>
+#include <iomanip>
+#include <sstream>
 #include <vector>
 
 #include "commands/infrastructure/CommandInfo.h"
@@ -463,6 +466,18 @@ void shopping_buy(char *arg, Character *ch, Character *keeper, int shop_nr)
 	if (!(obj = get_purchase_obj(ch, arg, keeper, shop_nr, shopItemEntries, TRUE)))
 		return;
 
+    // Revalidate after command scripts and special procedures have run too.
+    if (ch->desc && !ch->desc->clientPurchaseRequest.isNull()) {
+        const auto &quote = ch->desc->clientPurchaseRequest;
+        const std::string id = std::to_string(obj->getVnum()) + ":" + boost::uuids::to_string(obj->objID);
+        if (quote["id"].asString() != id || quote["price"].asInt() != buy_price(obj, shop_nr) ||
+            quote["shopId"].asInt() != SHOP_NUM(shop_nr) || quote["room"].asInt() != ch->in_room->getVnum() ||
+            quote["quantity"].asInt() != buynum) {
+            ch->send("The shop selection changed. Refresh the shop panel and try again.\r\n");
+            return;
+        }
+    }
+
 	if ((buy_price(obj, shop_nr) > ch->points.gold) && !IS_GOD(ch))
 	{
 		sprintf(buf, shop_index[shop_nr].missing_cash2.c_str(), GET_NAME(ch));
@@ -703,40 +718,37 @@ void shopping_value(char *arg, Character *ch, Character *keeper, int shop_nr)
 	return;
 }
 
-char *list_object(Character *ch, Object * obj, int cnt, int index, int shop_nr)
+char *list_object(Character *ch, Object *obj, int cnt, int index, int shop_nr)
 {
-	static char buf[512];
-	char buf2[300], buf3[200];
-
-	if (cnt == -1)
-		strcpy(buf2, "Unlimited   ");
-	else
-		sprintf(buf2, "%5d       ", cnt);
-
-	sprintf(buf, " %2d)  %s", index, buf2);
-
-	/* Compile object name and information */
-	strcpy(buf3, obj->GetSDesc());
-
-	if ((obj->getType() == ITEM_DRINKCON) && (GET_OBJ_VAL(obj, 1)))
+	static std::string result;
+	std::string name = obj->GetSDesc() ? obj->GetSDesc() : "an unnamed object";
+	if (obj->getType() == ITEM_DRINKCON && GET_OBJ_VAL(obj, 1))
 	{
-		int liquidType = GET_OBJ_VAL(obj, 2);
-
-		if(liquidType < 0 || liquidType >= NUM_LIQ_TYPES)
+		const int liquidType = GET_OBJ_VAL(obj, 2);
+		if (liquidType < 0 || liquidType >= NUM_LIQ_TYPES)
 			MudLog(BRF, LVL_APPR, TRUE, "Object #%d in shop #%d has invalid liquid type of %d.", obj->getVnum(), shop_nr, liquidType);
 		else
-			sprintf(END_OF(buf3), " of %s", drinks[liquidType]);
+			name += std::string(" of ") + drinks[liquidType];
 	}
 
-	sprintf(buf2, "%-46s %-2lu %-2lu %-2lu\r\n", buf3, CalcGold(buy_price(obj, shop_nr)),
-	        CalcSilver(buy_price(obj, shop_nr)), CalcCopper(buy_price(obj, shop_nr)));
-	strcat(buf, StringUtil::cap(buf2));
-	return (buf);
+	std::ostringstream output;
+	output << ' ' << std::setw(2) << index << ")  ";
+	if (cnt == -1)
+		output << "Unlimited   ";
+	else
+		output << std::setw(5) << cnt << "       ";
+	output << std::left << std::setw(46) << StringUtil::cap(name) << ' '
+		<< std::setw(2) << CalcGold(buy_price(obj, shop_nr)) << ' '
+		<< std::setw(2) << CalcSilver(buy_price(obj, shop_nr)) << ' '
+		<< std::setw(2) << CalcCopper(buy_price(obj, shop_nr)) << "\r\n";
+	result = output.str();
+	return result.data();
 }
 
 void shopping_list(char *arg, Character *ch, Character *keeper, int shopId)
 {
-	char buf[MAX_STRING_LENGTH], name[MAX_INPUT_LENGTH];
+	std::string buf;
+	char name[MAX_INPUT_LENGTH];
 	Object *obj, *last_obj = 0;
 	int cnt = 0, index = 0;
 
@@ -744,8 +756,8 @@ void shopping_list(char *arg, Character *ch, Character *keeper, int shopId)
 		return;
 
 	OneArgument(arg, name);
-	strcpy(buf, " ##   Available   Item                                           G  S  C\r\n");
-	strcat(buf, "-------------------------------------------------------------------------\r\n");
+	buf = " ##   Available   Item                                           G  S  C\r\n";
+	buf += "-------------------------------------------------------------------------\r\n";
 
 	auto shopItemEntries = getShopItemEntries(ch, keeper, shopId);
 	int counter = 0;
@@ -753,7 +765,7 @@ void shopping_list(char *arg, Character *ch, Character *keeper, int shopId)
 	for(auto itemEntry: shopItemEntries) {
 		++counter;
 		if (!(*name) || isname(name, itemEntry.obj->name)) {
-			strcat(buf, list_object(ch, itemEntry.obj, itemEntry.numberAvailable, counter, shopId));
+			buf += list_object(ch, itemEntry.obj, itemEntry.numberAvailable, counter, shopId);
 		}
 	}
 
@@ -763,13 +775,13 @@ void shopping_list(char *arg, Character *ch, Character *keeper, int shopId)
 	{
 
 		if (*name)
-			strcpy(buf, "Presently, none of those are for sale.\r\n");
+			buf = "Presently, none of those are for sale.\r\n";
 
 		else
-			strcpy(buf, "Currently, there is nothing for sale.\r\n");
+			buf = "Currently, there is nothing for sale.\r\n";
 	}
 
-	page_string(ch->desc, buf, 1);
+	page_string(ch->desc, buf.data(), 1);
 }
 
 
@@ -1246,4 +1258,66 @@ void show_shops(Character * ch, char *arg)
 
 		list_detailed_shop(ch, shop_nr);
 	}
+}
+
+// Structured catalog shares the native shop inventory and pricing functions.
+#include "ClientTools.h"
+#include <boost/uuid/uuid_io.hpp>
+static Character *clientShopKeeper(Character *ch, int &shop) {
+    if (!ch || !ch->in_room || !AWAKE(ch) || AFF_FLAGGED(ch, AFF_BLIND) ||
+        (ch->dizzy_time && TAINT_CALC(ch)) || (ch->in_room->isDark() && !CAN_SEE_IN_DARK(ch))) return nullptr;
+    for (auto keeper = ch->in_room->people; keeper; keeper = keeper->next_in_room) {
+        if (!IS_NPC(keeper) || !AWAKE(keeper) || !CAN_SEE(ch, keeper)) continue;
+        for (int i = 0; i < top_shop; ++i) {
+            if (SHOP_KEEPER(i) != keeper->nr) continue;
+            if (!ok_shop_room(i, ch->in_room->getVnum())) break;
+            shop = i;
+            return keeper;
+        }
+    }
+    return nullptr;
+}
+Json::Value clientShopSnapshot(Character *ch) {
+    Json::Value result;
+    result["items"] = Json::Value(Json::arrayValue);
+    int shop = -1;
+    auto keeper = clientShopKeeper(ch, shop);
+    if (!keeper) { result["message"] = "No visible shopkeeper here."; return result; }
+    result["keeper"] = GET_NAME(keeper);
+    result["id"] = SHOP_NUM(shop);
+    if (!is_open(keeper, shop, FALSE)) { result["message"] = "This shop is closed."; return result; }
+    if (!CAN_SEE(keeper, ch) || (!IS_GOD(ch) && GET_RACE(ch) != GET_RACE(keeper))) {
+        result["message"] = "This shopkeeper cannot trade with you."; return result;
+    }
+    auto entries = getShopItemEntries(ch, keeper, shop);
+    for (const auto &entry : entries) {
+        Json::Value row;
+        row["id"] = std::to_string(entry.obj->getVnum()) + ":" + boost::uuids::to_string(entry.obj->objID);
+        row["name"] = entry.obj->GetSDesc();
+        row["price"] = buy_price(entry.obj, shop);
+        row["weight"] = entry.obj->Weight();
+        int quantity = entry.numberAvailable;
+        if (quantity != -1) {
+            quantity = 0;
+            for (auto obj = keeper->carrying; obj; obj = obj->next_content)
+                if (CAN_SEE_OBJ(ch, obj) && GET_OBJ_COST(obj) > 0 && obj->getVnum() == entry.obj->getVnum()) ++quantity;
+        }
+        row["quantity"] = quantity;
+        result["items"].append(row);
+    }
+    return result;
+}
+std::string clientShopCommand(Character *ch, const Json::Value &request) {
+    if (!request["shopId"].isInt() || !request["quantity"].isInt() || !request["price"].isInt() || !request["id"].isString()) return "";
+    int quantity = request["quantity"].asInt(), shop = -1;
+    auto keeper = clientShopKeeper(ch, shop);
+    if (!keeper || SHOP_NUM(shop) != request["shopId"].asInt() || quantity < 1 || quantity > 20 ||
+        !is_open(keeper, shop, FALSE) || !CAN_SEE(keeper, ch) || (!IS_GOD(ch) && GET_RACE(ch) != GET_RACE(keeper))) return "";
+    auto entries = getShopItemEntries(ch, keeper, shop);
+    for (const auto &entry : entries) {
+        std::string id = std::to_string(entry.obj->getVnum()) + ":" + boost::uuids::to_string(entry.obj->objID);
+        if (id == request["id"].asString() && buy_price(entry.obj, shop) == request["price"].asInt())
+            return "buy " + std::to_string(quantity) + " #" + std::to_string(entry.listItemNumber);
+    }
+    return "";
 }

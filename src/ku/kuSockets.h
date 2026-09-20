@@ -54,5 +54,22 @@
 
 #endif /*** / WIN32 ***/
 
+
+// select() uses a fixed-size descriptor bitmap on POSIX systems.
+inline bool kuSocketCanSelect(SOCKET socket)
+{
+#ifdef WIN32
+	return socket != INVALID_SOCKET;
+#else
+	return socket >= 0 && socket < FD_SETSIZE;
+#endif
+}
+
+#ifdef MSG_NOSIGNAL
+constexpr int KU_SEND_FLAGS = MSG_NOSIGNAL;
+#else
+constexpr int KU_SEND_FLAGS = 0;
+#endif
+
 #endif
 

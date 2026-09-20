@@ -7205,6 +7205,8 @@ public:
 	void performPostJobRoutine() {
 
 		Character *ch = CharacterUtil::getOnlineCharacterById(userId);
+		if (!ch)
+			return; // The requester may have logged out while the job was running.
 
 		std::string upOrDown = isUp ? "online" : "offline";
 

@@ -7,6 +7,8 @@ int kuDescriptor::d_TopUID = 0;
 kuDescriptor::kuDescriptor(class kuListener *server)
 {
 	this->server = server;
+	this->sock = INVALID_SOCKET;
+	this->hostRetriever = nullptr;
 	d_UID = kuDescriptor::d_TopUID++;
 }
 
@@ -127,8 +129,10 @@ int kuDescriptor::socketWrite()
 
 	server->handleBeforeSocketWriteCallback(this);
 
-	if((bytesWritten = ::send(this->sock, outputBuffer, output.size(), 0)) < 0)
+	if((bytesWritten = ::send(this->sock, outputBuffer, output.size(), KU_SEND_FLAGS)) < 0)
 	{
+		if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK)
+			return 0;
 		this->socketClose();
 		return -1;
 	}
@@ -207,21 +211,22 @@ void kuDescriptor::disconnect() {
 //Write a message to the socket immediately.
 void kuDescriptor::socketWriteInstant(const std::string &message)
 {
-	//send() is not guaranteed to write the full message to the connected socket.
-	//Keep attempting to send until the full message has been written, or until an error has occurred.
-	int bytesSent = 0, bytesRemaining = message.size();
-	const char *buffer = message.c_str(), *bufferReadPosition;
-	while (bytesRemaining)
+	// Queue behind pending output and let pulse retry a nonblocking short write.
+	output += message;
+	while (!output.empty() && !socketIsClosed())
 	{
-		bufferReadPosition = (buffer + bytesSent);
-
-		if ((bytesSent = ::send(sock, bufferReadPosition, bytesRemaining, 0)) < 0) {
-			//Under zero return value indicates error.
+		const int sent = ::send(sock, output.data(), output.size(), KU_SEND_FLAGS);
+		if (sent > 0)
+			output.erase(0, sent);
+		else if (sent < 0 && errno == EINTR)
+			continue;
+		else if (sent < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
+			return;
+		else
+		{
 			socketClose();
 			return;
 		}
-
-		bytesRemaining -= bytesSent;
 	}
 }
 

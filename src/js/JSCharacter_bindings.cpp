@@ -1372,8 +1372,7 @@ void RegisterJSCharacterBindings() {
         std::string value = argc > 1 ? from_jsval_string(cx, args[1]) : "";
         bool instant = argc > 2 ? from_jsval_bool(cx, args[2]) : false;
         std::string ownerID = std::to_string(self->toReal()->player.idnum);
-        PvalManager::get()->setPval("C", ownerID, keyName, value, instant);
-        args.rval().setUndefined();
+        args.rval().setBoolean(PvalManager::get()->setPval("C", ownerID, keyName, value, instant));
         return true;
     };
 

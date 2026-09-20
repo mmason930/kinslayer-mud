@@ -46,6 +46,12 @@ kuListener::kuListener(const int port, e_SocketType socketType)
 	else
 		this->socket = this->createTCPSocket();
 
+	if (!kuSocketCanSelect(this->socket))
+	{
+		close();
+		return;
+	}
+
 	if (setsockopt(this->socket, SOL_SOCKET, SO_REUSEADDR, (const char *)&opt, sizeof(opt)) < 0)
 	{
 		return;
@@ -136,6 +142,12 @@ std::pair< kuDescriptor *, bool > kuListener::accept()
 	}
 	else
 	{
+		if (!kuSocketCanSelect(sock))
+		{
+			closesocket(sock);
+			delete d;
+			return {nullptr, false};
+		}
 		d->sock = sock;
 		d->nonBlock();
 		d->ipAddress = inet_ntoa(d->sin.sin_addr);
@@ -151,6 +163,8 @@ std::pair< kuDescriptor *, bool > kuListener::accept()
 //Is there a new connection to be grabbed?
 bool kuListener::canAccept()
 {
+	if (!isListening() || !kuSocketCanSelect(this->socket))
+		return false;
 	fd_set pending;
 	timeval nt = {0,0};
 
@@ -172,6 +186,7 @@ void kuListener::close()
 {
 	if( this->getSocket() != INVALID_SOCKET ) {
 		closesocket(this->socket);
+		this->socket = INVALID_SOCKET;
 	}
 	this->bound = false;
 	this->listening = false;
@@ -203,6 +218,8 @@ SOCKET kuListener::getSocket()
 std::list< kuDescriptor * > kuListener::acceptNewHosts()
 {
 	std::list< kuDescriptor * > lNewDescriptors;
+	if (!isListening() || !kuSocketCanSelect(this->socket))
+		return lNewDescriptors;
 	FD_ZERO(&inset );
 	FD_ZERO(&outset);
 	FD_ZERO(&excset);
@@ -228,11 +245,20 @@ std::list< kuDescriptor * > kuListener::acceptNewHosts()
 
 void kuListener::pulse()
 {
+	FD_ZERO(&inset);
+	FD_ZERO(&outset);
+	FD_ZERO(&excset);
+	nulltime.tv_sec = nulltime.tv_usec = 0;
 	SOCKET max = 0;
 	for (auto descriptorPair : descriptorMap)
 	{
 		if (descriptorPair.second->socketIsClosed())
 			continue;
+		if (!kuSocketCanSelect(descriptorPair.second->sock))
+		{
+			descriptorPair.second->socketClose();
+			continue;
+		}
 		max = descriptorPair.second->sock > max ? descriptorPair.second->sock : max;
 		FD_SET(descriptorPair.second->sock, &inset);
 		FD_SET(descriptorPair.second->sock, &outset);

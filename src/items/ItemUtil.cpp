@@ -10,6 +10,7 @@
 #include "../js/js_functions.h"
 
 #include "ItemUtil.h"
+#include "ObjectSelection.h"
 
 
 ItemUtil *ItemUtil::self = nullptr;
@@ -40,6 +41,12 @@ void ItemUtil::destroy()
 
 Object *ItemUtil::getObjectInListVis(Character * ch, const char *name, Object *objectList)
 {
+    if (name && name[0] == '@') {
+        for (auto obj = objectList; obj; obj = obj->next_content)
+            if (exactObjectSelector(name, obj) && !obj->hidden && canSelectObject(ch, obj)) return obj;
+        return nullptr;
+    }
+
 	Object *i;
 	int j = 0, num = 0;
 	char tmpname[MAX_INPUT_LENGTH];
@@ -103,7 +110,8 @@ Object *ItemUtil::getObjectInEquipVis(Character *ch, const char *arg, Object *eq
 	{
 		if (equipment[(*j)])
 		{
-			if (isname(arg, equipment[(*j)]->getName()))
+			if ((arg[0] == '@' && canSelectObject(ch, equipment[(*j)]) && exactObjectSelector(arg, equipment[(*j)])) ||
+                (arg[0] != '@' && isname(arg, equipment[(*j)]->getName())))
 				return (equipment[(*j)]);
 		}
 	}
@@ -145,6 +153,12 @@ Object *ItemUtil::getObjectVis(Character *ch, const char *name)
 
 Object *ItemUtil::getObjectInList(const char *name, Object *objectList)
 {
+    if (name && name[0] == '@') {
+        for (auto obj = objectList; obj; obj = obj->next_content)
+            if (exactObjectSelector(name, obj) && !obj->hidden) return obj;
+        return nullptr;
+    }
+
 	Object *i;
 
 	for (Object *i = objectList; i; i = i->next_content)

@@ -8,7 +8,7 @@ function strlenDisplay(value) { return value.replace(/\x1b\[[0-9;]*m/g, '').leng
 load('scripts/lib/HelpManager.js');
 load('scripts/lib/-38_strColFormat.js');
 var payload = typeof embeddedPayload === 'undefined'
-    ? JSON.parse(read('docs/help/remaining-command-help.json')) : embeddedPayload;
+    ? JSON.parse(read('tests/fixtures/command-help.json')) : embeddedPayload;
 var manager = Object.create(HelpManager.prototype);
 manager.helpFiles = {
     1: {id: 1, parentId: null, minimumLevel: 0, name: 'Table of Contents', keywords: 'contents'},

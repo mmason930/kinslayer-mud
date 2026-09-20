@@ -81,7 +81,8 @@ flusspferd::value JSObject::getInRoom()
 int JSObject::getCount()
 {
 	if( !real ) return 0;
-	return ((int) ItemCount.size() > GET_OBJ_RNUM(real) ? ItemCount[GET_OBJ_RNUM(real)] : 1);
+	const int rnum = GET_OBJ_RNUM(real);
+	return rnum >= 0 && static_cast<size_t>(rnum) < ItemCount.size() ? ItemCount[rnum] : 1;
 }
 bool JSObject::getIsCorpse()
 {
