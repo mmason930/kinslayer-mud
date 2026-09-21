@@ -13,6 +13,8 @@ GatewayDescriptor::GatewayDescriptor()
 }
 GatewayDescriptor::~GatewayDescriptor()
 {
+	// The listener owns the client socket; this descriptor owns the MUD connection.
+	delete serverConnection;
 }
 
 void GatewayDescriptor::setClientConnection(kuDescriptor *clientConnection)

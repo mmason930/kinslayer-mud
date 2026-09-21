@@ -1548,8 +1548,10 @@ void heartbeat( int pulse )
 		lagMonitor.stopClock( LAG_MONITOR_KJS_RANDOM_TRIGGERS );
     }
 
-	if( !( pulse % (3600 RL_SEC)) )
+	static bool initialForumSyncPending = true;
+	if(initialForumSyncPending || !( pulse % (3600 RL_SEC)))
 	{
+		initialForumSyncPending = false;
 		lagMonitor.startClock();
 		try { ForumUtil::archiveAndRemoveDeletedForumUsers(gameDatabase); }
         catch (sql::Exception &e) { MudLog(BRF, LVL_APPR, TRUE, "Forum archiveAndRemoveDeletedForumUsers failed: %s", e.getMessage().c_str()); }

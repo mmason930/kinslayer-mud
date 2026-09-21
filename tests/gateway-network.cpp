@@ -2,6 +2,7 @@
 #include "websocket/WebSocketMessageStream.h"
 #include "ku/kuClient.h"
 #include "ku/kuListener.h"
+#include "gateway/GatewayDescriptor.h"
 #include <cassert>
 #include <fstream>
 #include <iostream>
@@ -92,6 +93,20 @@ static void transport()
     assert(client.connect("127.0.0.1", ntohs(address.sin_port)));
     assert(fcntl(client.sock, F_GETFL) & O_NONBLOCK);
     assert(!client.send(std::string(4 * 1024 * 1024 + 1, 'x')) && !client.isConnected());
+
+    // Disconnect cleanup must release the owning connection and its queued bytes.
+    assert(socketpair(AF_UNIX, SOCK_STREAM, 0, peers) == 0);
+    auto *connection = new kuClient;
+    connection->sock = peers[0]; connection->connected = true;
+    assert(fcntl(peers[0], F_SETFL, O_NONBLOCK) == 0);
+    assert(connection->send(std::string(1024 * 1024, 'x')));
+    assert(connection->pendingOutputSize() > 0);
+    {
+        GatewayDescriptor descriptor;
+        descriptor.setServerConnection(connection);
+    }
+    assert(fcntl(peers[0], F_GETFL) == -1 && errno == EBADF);
+    close(peers[1]);
 }
 
 static void addressesAndAuthentication()

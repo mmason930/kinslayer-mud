@@ -24,6 +24,20 @@ try:
            "user_password VARCHAR(40) NOT NULL DEFAULT '') ENGINE=InnoDB")
     migration.migrate(db, apply=True)
     migration.migrate(db, apply=True)
+    # The address migration preserves legacy MyISAM rows and column defaults.
+    spec = importlib.util.spec_from_file_location('addresses', root / 'tools/migrate-gateway-addresses.py')
+    addresses = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(addresses)
+    db.run("CREATE TABLE userLogin (host VARCHAR(32) NOT NULL DEFAULT '') ENGINE=MyISAM DEFAULT CHARSET=latin1")
+    db.run("CREATE TABLE switchExemption (from_host VARCHAR(32) NOT NULL, to_host VARCHAR(32) NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=latin1")
+    db.run("INSERT INTO userLogin VALUES ('192.0.2.1')")
+    db.run("INSERT INTO switchExemption VALUES ('192.0.2.1','192.0.2.2')")
+    addresses.migrate(db, apply=True)
+    addresses.migrate(db, apply=True)
+    full_address = '2001:db8:ffff:ffff:ffff:ffff:ffff:ffff'
+    db.run(f"INSERT INTO userLogin VALUES ('{full_address}')")
+    assert db.run("SELECT host FROM userLogin WHERE host='192.0.2.1'") == [['192.0.2.1']]
+    assert db.run(f"SELECT host FROM userLogin WHERE host='{full_address}'") == [[full_address]]
     with tempfile.TemporaryDirectory(prefix='kinslayer-forum-test-') as directory:
         binary = str(Path(directory) / 'forum-archive')
         subprocess.run(['g++', '-std=c++23', '-O1', '-g', '-I' + str(root / 'src'),

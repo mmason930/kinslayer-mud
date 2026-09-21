@@ -12,6 +12,7 @@
 void ForumUtil::addForumUser(const int userId)
 {
 	Character *character = CharacterUtil::loadCharacter(userId);
+	if (!character) return; // The account may have been removed since the sync query.
 
 	addForumUser(character);
 
