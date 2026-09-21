@@ -12,6 +12,7 @@ spec = importlib.util.spec_from_file_location('migration', root / 'tools/migrate
 migration = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(migration)
 db = migration.module.Database()
+original_schema = db.run('SELECT DATABASE()')[0][0]
 schema = 'kinslayer_test_forum_' + uuid.uuid4().hex
 db.run(f'CREATE DATABASE `{schema}`')
 try:
@@ -42,6 +43,18 @@ try:
         binary = str(Path(directory) / 'forum-archive')
         subprocess.run(['g++', '-std=c++23', '-O1', '-g', '-I' + str(root / 'src'),
                         str(root / 'tests/forum-archive.cpp'), '-lsqlDatabase', '-lmysqlclient', '-o', binary], check=True)
+        subprocess.run([binary], env=dict(os.environ, DB_SCHEMA=schema), check=True, timeout=30)
+        # Copy only the installed table structure; never copy player credentials.
+        db.run('DROP TABLE phpbb_users')
+        quoted_original = original_schema.replace('`', '``')
+        db.run(f'CREATE TABLE phpbb_users LIKE `{quoted_original}`.phpbb_users')
+        source = (root / 'src/ForumUtil.cpp').read_text()
+        start = source.index('void ForumUtil::addForumUser(Character *character)')
+        end = source.index('void ForumUtil::archiveAndRemoveDeletedForumUsers', start)
+        (Path(directory) / 'forum-user-under-test.inc').write_text(source[start:end])
+        binary = str(Path(directory) / 'forum-user-insert')
+        subprocess.run(['g++', '-std=c++23', '-O1', '-g', '-I' + directory,
+                        str(root / 'tests/forum-user-insert.cpp'), '-lsqlDatabase', '-lmysqlclient', '-o', binary], check=True)
         subprocess.run([binary], env=dict(os.environ, DB_SCHEMA=schema), check=True, timeout=30)
 finally:
     db.run(f'DROP DATABASE `{schema}`')
