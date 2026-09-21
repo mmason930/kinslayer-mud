@@ -1,3 +1,4 @@
+#include "../websocket/WebSocketMessageStream.h"
 #ifndef GATEWAY_DESCRIPTOR_H
 #define GATEWAY_DESCRIPTOR_H
 
@@ -22,6 +23,7 @@ private:
 	GatewayDescriptorType *type;
 	std::string randomId;
 	std::string currentInputBuffer;
+    WebSocketMessageStream webSocketMessages;
 	std::optional<std::string> proxyForwardedIpAddress;
 
 public:

@@ -101,25 +101,8 @@ std::string GatewayDescriptor::pullFromClient()
 	std::string input;
 	if(this->getGatewayListener()->getType() == GATEWAY_LISTENER_TYPE_WEBSOCKET && getStatus() != GatewayDescriptorStatus::handshaking)
 	{
-		input = clientConnection->getInputBuffer();
-		if(input.size() > 0)
-		{
-			unsigned int bytesRead = 0;
-			WebSocketDataFrame *webSocketDataFrame = WebSocketDataFrame::parse(input, bytesRead);
-
-			if(webSocketDataFrame != nullptr)
-			{
-				if(webSocketDataFrame->getOpCode() == 0x8)
-				{
-					delete webSocketDataFrame;
-					throw WebSocketException("Socket Closed");
-				}
-				clientConnection->eraseInput(0, bytesRead);
-				input = webSocketDataFrame->getPayloadData();
-				delete webSocketDataFrame;
-				return input;
-			}
-		}
+        auto message = webSocketMessages.read(*clientConnection);
+        return message ? *message : "";
 	}
 	else
 	{
@@ -150,9 +133,7 @@ bool GatewayDescriptor::connect(const std::string host, const int port)
 	}
 
 	serverConnection = new kuClient();
-	serverConnection->connect(host, port);
-
-	return true;
+	return serverConnection->connect(host, port);
 }
 
 kuDescriptor *GatewayDescriptor::getClientConnection()

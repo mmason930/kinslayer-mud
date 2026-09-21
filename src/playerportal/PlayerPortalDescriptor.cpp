@@ -86,27 +86,12 @@ void PlayerPortalDescriptor::processInput()
 	}
 	else
 	{
-		if( *(this->descriptor->getInputDataBuffer()) )
-		{
-			unsigned int bytesRead = 0;
-			WebSocketDataFrame *webSocketDataFrame = WebSocketDataFrame::parse(this->descriptor->getInputBuffer(), bytesRead);
-			
-			if (webSocketDataFrame != nullptr)
-			{
-				if (webSocketDataFrame->getOpCode() == 0x8)
-				{
-					delete webSocketDataFrame;
-					Log("Web Socket already closed while reading data frames in PlayerPortalDescriptor.cpp");
-					return;
-				}
-				else
-				{
-					descriptor->eraseInput(0, bytesRead);
-					inputBuffer += webSocketDataFrame->getPayloadData();
-					delete webSocketDataFrame;
-				}
-			}
-		}
+        try {
+            if (auto message = webSocketMessages.read(*descriptor)) inputBuffer += *message;
+            if (inputBuffer.size() > WebSocketDataFrame::maxPayloadSize)
+                throw WebSocketException("Player portal command too large");
+        }
+        catch (const WebSocketException &) { close(); return; }
 
 		if(inputBuffer.size() > 0)
 		{

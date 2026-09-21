@@ -1,3 +1,4 @@
+#include "../utils/GatewaySecurity.h"
 #include <iostream>
 #include <thread>
 
@@ -265,7 +266,7 @@ void GatewayServer::attemptConnectionWithGameServer()
 		std::cout << makeTimestamp() << " Connection established. Sending validation token." << std::endl;
 		this->mudProcessId = 0;
 
-		motherConnectionToServer->send("Validate 78fd516c2825e7f463f045e609a8523e\r\n");
+		motherConnectionToServer->send("Validate " + GatewaySecurity::secret() + "\r\n");
 	}
 }
 
@@ -371,7 +372,7 @@ void GatewayServer::processInputFromMotherConnectionToServer()
 				std::string randomId = vArgs.at(1);
 				std::string sessionKey = vArgs.at(2);
 
-				std::cout << makeTimestamp() << " Session received: " << sessionKey << std::endl;
+				std::cout << makeTimestamp() << " Session received." << std::endl;
 
 				descriptorIter = descriptors.begin();
 
@@ -383,7 +384,11 @@ void GatewayServer::processInputFromMotherConnectionToServer()
 
 						descriptor->setSession(sessionKey);
 
-						descriptor->connect(serverHost, serverPort);
+						if (!descriptor->connect(serverHost, serverPort)) {
+                            descriptor->getClientConnection()->socketClose();
+                            descriptor->setStatus(GatewayDescriptorStatus::disconnected);
+                            break;
+                        }
 
 						descriptor->sendToServer( "Session " + sessionKey + "\r\n" );
 
@@ -669,12 +674,11 @@ void GatewayServer::run()
 				}
 				catch(WebSocketException &webSocketException)
 				{
-					if(webSocketException.what() == "Socket Closed")
-					{
-						this->disconnectDescriptorFromGameAndGateway(descriptor);
-						descriptorIter = descriptors.erase(descriptorIter);
-						removedDescriptor = true;
-					}
+                    // Protocol errors close this client, never the gateway or game.
+                    this->disconnectDescriptorFromGameAndGateway(descriptor);
+                    descriptorIter = descriptors.erase(descriptorIter);
+                    delete descriptor;
+                    removedDescriptor = true;
 				}
 
 				if(!removedDescriptor)
@@ -690,6 +694,12 @@ void GatewayServer::run()
 
 						descriptor->sendToServer(inputFromClient);
 					}
+                    if (!descriptor->getServerConnection()->isConnected()) {
+                        this->disconnectDescriptorFromGameAndGateway(descriptor);
+                        descriptorIter = descriptors.erase(descriptorIter);
+                        delete descriptor;
+                        removedDescriptor = true;
+                    }
 				}
 			}
 			else if(descriptor->getStatus() == GatewayDescriptorStatus::awaitingConnection && getMotherConnectionToServer() != nullptr && !this->mudIsDown()) {
@@ -718,6 +728,8 @@ void GatewayServer::run()
 					std::string dataFromWebSocketClient = descriptor->pullFromClient();
 
 					descriptor->appendToCurrentInputBuffer(dataFromWebSocketClient);
+                    if (descriptor->getCurrentInputBuffer().size() > 16384)
+                        throw WebSocketException("WebSocket handshake too large");
 
 					if(WebSocketClientHeader::isComplete(descriptor->getCurrentInputBuffer()))
 					{
@@ -727,21 +739,18 @@ void GatewayServer::run()
 						webSocketClientHeader->read(dataFromWebSocketClient);
 						std::string response = webSocketClientHeader->generateResponse(descriptor->getGatewayListener()->getListener()->getPort(), "mud-protocol");
 
-						// Get the X-Forwarded-For header value, if it exists, and set the client IP address to that.
-						// Note that this is insecure unless we also check to see if we trust the client IP address,
-						// such as validating that it's being forwarded from an internal IP. Otherwise, clients could
-						// easily spoof their IP address. However, since we intend to shut off direct websocket access
-						// once we begin forwarding, this shouldn't matter.
-						std::optional<std::string> xForwardedFor = webSocketClientHeader->getFieldByName("X-Forwarded-For");
-						if(xForwardedFor.has_value())
-						{
-							descriptor->setProxyForwardedIpAddress(xForwardedFor);
-						}
+                        // Only the configured reverse proxy may supply a single numeric address.
+                        auto forwarded = webSocketClientHeader->getFieldByName("X-Forwarded-For");
+                        if (forwarded && GatewaySecurity::trustedProxy(descriptor->getClientConnection()->getIp())) {
+                            auto address = GatewaySecurity::normalizeAddress(*forwarded);
+                            if (!address) throw WebSocketException("Invalid forwarded client address");
+                            descriptor->setProxyForwardedIpAddress(address);
+                        }
 
 						descriptor->sendToClient(response);
 						descriptor->setStatus(GatewayDescriptorStatus::awaitingConnection);
 
-						std::cout << makeTimestamp() << " Client `" << descriptor->getSession() << "` is being put into awaitingConnection status." << std::endl;
+						std::cout << makeTimestamp() << " WebSocket client is awaiting a game connection." << std::endl;
 					}
 				}
 				catch(WebSocketException &webSocketException)

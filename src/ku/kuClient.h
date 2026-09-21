@@ -6,6 +6,8 @@
 class kuClient
 {
 private:
+    std::string pendingOutput;
+    std::size_t outputOffset = 0;
 public:
 
 	int		port;
@@ -21,6 +23,8 @@ public:
 
 	int receive( std::stringstream &buf );
 	bool send(const std::string &data);
+    bool flushOutput();
+    std::size_t pendingOutputSize() const { return pendingOutput.size() - outputOffset; }
 	bool connect(const std::string &h, const int p);
 	bool isConnected();
 	void disconnect();

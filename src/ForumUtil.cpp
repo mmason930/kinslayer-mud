@@ -6,6 +6,7 @@
 
 #include "CharacterUtil.h"
 #include "ForumUtil.h"
+#include "utils/ForumArchive.h"
 #include "StringUtil.h"
 
 void ForumUtil::addForumUser(const int userId)
@@ -132,29 +133,7 @@ void ForumUtil::addForumUser(Character *character)
 
 void ForumUtil::archiveAndRemoveDeletedForumUsers(sql::Connection connection)
 {
-	std::stringstream queryBuffer;
-	
-	queryBuffer << " INSERT IGNORE INTO phpbb_usersArchive"
-				<< " SELECT"
-				<< "   phpbb_users.*"
-				<< " FROM"
-				<< "   phpbb_users"
-				<< " LEFT JOIN users ON phpbb_users.user_id = users.user_id"
-				<< " WHERE users.user_id IS NULL";
-
-	connection->sendRawQuery(queryBuffer.str());
-
-	queryBuffer.str("");
-
-	queryBuffer << " DELETE"
-				<< "   phpbb_users.*"
-				<< " FROM"
-				<< "   phpbb_users"
-				<< " LEFT JOIN users ON phpbb_users.user_id = users.user_id"
-				<< " WHERE users.user_id IS NULL";
-
-	connection->sendRawQuery(queryBuffer.str());
-
+	ForumArchive::archive(connection);
 }
 void ForumUtil::addUsersToForum(sql::Connection connection)
 {

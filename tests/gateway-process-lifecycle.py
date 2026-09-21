@@ -47,6 +47,9 @@ def test_gateway(binary):
     with tempfile.TemporaryDirectory(prefix="gateway-lifecycle-") as directory:
         root = Path(directory)
         (root / "lib/misc").mkdir(parents=True)
+        secret_file = root / "gateway.key"
+        secret_file.write_text("a" * 64)
+        secret_file.chmod(0o600)
         game_port, gateway_port = free_port(), free_port()
         while gateway_port == game_port:
             gateway_port = free_port()
@@ -64,6 +67,7 @@ def test_gateway(binary):
         with (root / "gateway.log").open("w+") as log:
             gateway = subprocess.Popen([str(Path(binary).resolve())], cwd=root,
                                        stdout=log, stderr=subprocess.STDOUT,
+                                       env=dict(os.environ, KINSLAYER_GATEWAY_SECRET_FILE=str(secret_file)),
                                        start_new_session=True)
             try:
                 deadline = time.monotonic() + 80

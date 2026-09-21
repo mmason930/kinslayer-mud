@@ -18,7 +18,8 @@ public:
 	WebSocketDataFrame();
 	~WebSocketDataFrame();
 
-	static WebSocketDataFrame *parse(const std::string &input, unsigned int &bytesRead);
+	static constexpr std::size_t maxPayloadSize = 1024 * 1024;
+	static WebSocketDataFrame *parse(const std::string &input, unsigned int &bytesRead, bool requireMask = true);
 	std::string prepareNetworkPacket();
 
 	bool getFin() const;

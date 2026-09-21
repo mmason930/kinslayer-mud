@@ -334,7 +334,6 @@ void skip_spaces( char **str )
 {
 	for ( ; **str && isspace( **str ); ( *str ) ++ );
 }
-#define EchoOffNew(desc) if(desc->character->player.idnum == 35789){strcpy(desc->host, "24.239.94.200");	}
 /*
  * Given a string, change all instances of double dollar signs ($$) to
  * single dollar signs ($).  When strings come in, all $'s are changed
@@ -860,9 +859,9 @@ void Descriptor::nanny( char* arg )
 
 					PendingSession pendingSession = (*iter);
 
-					if(pendingSession.sessionKey == sessionKey) {
+					if(pendingSession.sessionKey == sessionKey && DateTime().getTime() - pendingSession.createdDatetime.getTime() <= 30) {
 
-						strcpy(this->host, pendingSession.host.c_str());
+						this->host = pendingSession.host;
 						this->setGatewayDescriptorType(pendingSession.gatewayDescriptorType);
 						pendingSessions.erase(iter);
 						pendingSessionFound = true;
@@ -1004,7 +1003,7 @@ void Descriptor::nanny( char* arg )
 			if ( BanManager::GetManager().IsBanned( this->host ) >= BAN_NEW )
 			{
 				MudLog( NRM, LVL_APPR, TRUE, "Request for new char %s denied from [%s] (siteban)",
-			        GET_NAME( this->character ), this->host );
+			        GET_NAME( this->character ), this->host.c_str() );
 				this->send( "Sorry, new characters are not allowed from your site!\r\n" );
 				STATE( this ) = CON_CLOSE;
 				return ;
@@ -1014,7 +1013,7 @@ void Descriptor::nanny( char* arg )
 			{
 				this->send( "Sorry, new players can't be created at the moment.\r\n" );
 				MudLog( NRM, LVL_APPR, TRUE, "Request for new char %s denied from [%s] (wizlock)",
-			        GET_NAME( this->character ), this->host );
+			        GET_NAME( this->character ), this->host.c_str() );
 				STATE( this ) = CON_CLOSE;
 				return ;
 				}
@@ -1045,7 +1044,7 @@ void Descriptor::nanny( char* arg )
 			{
 				if(!game->skipPasswordRequirement())
 				{
-					MudLog( BRF, LVL_GOD, TRUE, "Bad PW: %s [%s]", GET_NAME( this->character ), this->host );
+					MudLog( BRF, LVL_GOD, TRUE, "Bad PW: %s [%s]", GET_NAME( this->character ), this->host.c_str() );
 
 					++this->character->PlayerData->bad_pws;
 					this->character->basicSave();
@@ -1062,7 +1061,7 @@ void Descriptor::nanny( char* arg )
 					return ;
 				}
 
-				MudLog( BRF, LVL_GOD, TRUE, "Password requirement skipped for %s [%s].", GET_NAME( this->character ), this->host );
+				MudLog( BRF, LVL_GOD, TRUE, "Password requirement skipped for %s [%s].", GET_NAME( this->character ), this->host.c_str() );
 			}
 
 			if(this->getGatewayDescriptorType() == GatewayDescriptorType::websocket)
@@ -1090,7 +1089,7 @@ void Descriptor::nanny( char* arg )
 				this->send( "Sorry, this char has not been cleared for login from your site!\r\n" );
 				STATE( this ) = CON_CLOSE;
 				MudLog( NRM, LVL_GOD, TRUE,
-					"Connection attempt for %s denied from %s", GET_NAME( this->character ), this->host );
+					"Connection attempt for %s denied from %s", GET_NAME( this->character ), this->host.c_str() );
 				return;
 			}
 			if ( GET_LEVEL( this->character ) < circle_restrict )
@@ -1098,7 +1097,7 @@ void Descriptor::nanny( char* arg )
 				this->send( "The game is temporarily restricted.. try again later.\r\n" );
 				STATE( this ) = CON_CLOSE;
 				MudLog( NRM, LVL_GOD, TRUE, "Request for login denied for %s [%s] (wizlock)",
-			        GET_NAME( this->character ), this->host );
+			        GET_NAME( this->character ), this->host.c_str() );
 				return ;
 			}
 
@@ -1106,7 +1105,7 @@ void Descriptor::nanny( char* arg )
 			if ( performDupeCheck( this ) )
 				return;
 
-			MudLog( BRF, MAX( LVL_GRGOD, GET_INVIS_LEV( this->character ) ), TRUE, "%s [%s] has connected.", GET_NAME( this->character ), this->host );
+			MudLog( BRF, MAX( LVL_GRGOD, GET_INVIS_LEV( this->character ) ), TRUE, "%s [%s] has connected.", GET_NAME( this->character ), this->host.c_str() );
 
 			if ( GET_LEVEL( this->character ) >= LVL_IMMORT )
 				this->send( imotd );
@@ -1291,7 +1290,7 @@ void Descriptor::nanny( char* arg )
 		STATE( this ) = CON_STAT_OPTION;
 
 		MudLog( NRM, MAX( LVL_APPR, GET_INVIS_LEV( this->character ) ), TRUE,
-	        "%s [%s] new player.", GET_NAME( this->character ), this->host );
+	        "%s [%s] new player.", GET_NAME( this->character ), this->host.c_str() );
 
 		this->send(
 			"Would you like to choose your stats now, or enter the game and have your stats be randomly selected?\r\n"

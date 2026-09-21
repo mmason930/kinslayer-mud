@@ -1,3 +1,4 @@
+#include "../utils/GatewaySecurity.h"
 #include "GatewayServer.h"
 
 #include <fstream>
@@ -18,6 +19,8 @@ int main( void )
 #ifndef WIN32
 	std::signal(SIGPIPE, SIG_IGN);
 #endif
+	try { GatewaySecurity::secret(); }
+    catch (const std::exception &e) { std::cerr << e.what() << std::endl; return 1; }
 	GatewayServer gatewayServer;
 
 	time_t currentTime = time(0);

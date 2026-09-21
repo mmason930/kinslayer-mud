@@ -9,7 +9,7 @@
 #include "kuListener.h"
 
 
-kuListener::kuListener(const int port, e_SocketType socketType)
+kuListener::kuListener(const int port, e_SocketType socketType, bool loopbackOnly)
 {
 	closeDescriptorCallback = nullptr;
 	dataForCloseDescriptorCallback = nullptr;
@@ -22,6 +22,7 @@ kuListener::kuListener(const int port, e_SocketType socketType)
 	dataForSocketReadCallback = nullptr;
 	socketReadCallback = nullptr;
 	this->socketType = socketType;
+	this->loopbackOnly = loopbackOnly;
 	nulltime.tv_sec = 0;
 	nulltime.tv_usec = 0;
 	this->listening = false;
@@ -109,7 +110,7 @@ int kuListener::bind(const int port)
 	struct sockaddr_in sin;
 
 	sin.sin_family	= AF_INET;
-	sin.sin_addr.s_addr = htonl(INADDR_ANY);
+	sin.sin_addr.s_addr = htonl(loopbackOnly ? INADDR_LOOPBACK : INADDR_ANY);
 	sin.sin_port	= htons(port);
 
 	if ((i = ::bind(this->socket, (struct sockaddr *)(&sin), sizeof(sin))) == INVALID_SOCKET)

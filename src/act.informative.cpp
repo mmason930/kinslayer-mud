@@ -2360,7 +2360,7 @@ CommandHandler do_users = DEFINE_COMMAND
 		}
 		else
 			name = "Undefined";
-		host = (*d->host) ? d->host : "Unknown";
+		host = !d->host.empty() ? d->host.c_str() : "Unknown";
 
 		if(d->character ? (CAN_SEE(ch, d->character)) : (1))
 		{

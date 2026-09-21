@@ -62,6 +62,7 @@
 #include "ForumUtil.h"
 #include "UserLogoutType.h"
 #include "gateway/GatewayServer.h"
+#include "utils/GatewaySecurity.h"
 #include "Descriptor.h"
 #include "rooms/Room.h"
 #include "UserType.h"
@@ -523,7 +524,7 @@ void onDescriptorOpen(void *data, kuListener *listener, kuDescriptor *descriptor
 
 	newd->descriptor = descriptor;
 
-	strcpy(newd->host, descriptor->getHost().c_str());
+	newd->host = descriptor->getIp();
 
 	newd->setGatewayDescriptorType(GatewayDescriptorType::unknown);
 	newd->connected = CON_GATEWAY;
@@ -581,25 +582,12 @@ void waitForGatewayConnection() {
 
 			std::vector<std::string> vArgs = StringUtil::getArgVector(input);
 
-			std::string command = vArgs.at(0);
-
-			if(command == "Validate")
-			{
-				std::string passwordExpected = "78fd516c2825e7f463f045e609a8523e";
-
-				if(vArgs.at(1) == passwordExpected) {
-
-					gatewayConnection = desc;
-					std::stringstream processIdMessage;
-					processIdMessage << "ProcessID " << SystemUtil::getProcessId() << std::endl;
-					desc->socketWriteInstant(processIdMessage.str());
-					break;
-				}
-			}
-			else {
-
-				desc->socketClose();
-			}
+            if (GatewaySecurity::validAuthentication(vArgs)) {
+                gatewayConnection = desc;
+                desc->socketWriteInstant("ProcessID " + std::to_string(SystemUtil::getProcessId()) + "\n");
+                break;
+            }
+            desc->socketClose();
 		}
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -626,14 +614,21 @@ void processGatewayCommand(const std::string &input)
 		if(command == "Host")
 		{
 			std::string clientId = vArgs.at(1);
-			std::string host = vArgs.at(2);
+			auto address = GatewaySecurity::normalizeAddress(vArgs.at(2));
+			if (vArgs.size() != 4 || !address) return;
+			std::string host = *address;
 			GatewayDescriptorType *gatewayDescriptorType = (GatewayDescriptorType*)GatewayDescriptorType::getEnumByValue(atoi(vArgs.at(3).c_str()));
 
+			if (!gatewayDescriptorType || (vArgs[3] != "1" && vArgs[3] != "2")) return;
+			pendingSessions.remove_if([](const PendingSession &entry) {
+				return DateTime().getTime() - entry.createdDatetime.getTime() > 30;
+			});
+			if (pendingSessions.size() >= 1024) return;
 			PendingSession pendingSession;
 
 			pendingSession.createdDatetime = DateTime();
 			pendingSession.host = host;
-			pendingSession.sessionKey = StringUtil::getRandomString(40);
+			pendingSession.sessionKey = GatewaySecurity::randomToken();
 			pendingSession.gatewayDescriptorType = gatewayDescriptorType;
 
 			pendingSessions.push_back(pendingSession);
@@ -651,7 +646,7 @@ void processGatewayCommand(const std::string &input)
 	}
 	catch(std::out_of_range &e) {
 
-		Log("Invalid input received from gateway: %s", input.c_str());
+		Log("Invalid input received from gateway.");
 	}
 }
 
@@ -719,7 +714,8 @@ void initiateGame( int port )
 
 	srand( time( 0 ) );
 
-	listener = new kuListener(port, TCP);
+	GatewaySecurity::secret(); // Fail closed before accepting any game connections.
+	listener = new kuListener(port, TCP, true);
 
 	if( !listener->isListening() ) {
 
@@ -1555,11 +1551,15 @@ void heartbeat( int pulse )
 	if( !( pulse % (3600 RL_SEC)) )
 	{
 		lagMonitor.startClock();
-		ForumUtil::archiveAndRemoveDeletedForumUsers(gameDatabase);
+		try { ForumUtil::archiveAndRemoveDeletedForumUsers(gameDatabase); }
+        catch (sql::Exception &e) { MudLog(BRF, LVL_APPR, TRUE, "Forum archiveAndRemoveDeletedForumUsers failed: %s", e.getMessage().c_str()); }
+        catch (const std::exception &e) { MudLog(BRF, LVL_APPR, TRUE, "Forum archiveAndRemoveDeletedForumUsers failed: %s", e.what()); }
 		lagMonitor.stopClock( LAG_MONITOR_ARCHIVE_FORUM_USERS );
 
 		lagMonitor.startClock();
-		ForumUtil::addUsersToForum(gameDatabase);
+		try { ForumUtil::addUsersToForum(gameDatabase); }
+        catch (sql::Exception &e) { MudLog(BRF, LVL_APPR, TRUE, "Forum addUsersToForum failed: %s", e.getMessage().c_str()); }
+        catch (const std::exception &e) { MudLog(BRF, LVL_APPR, TRUE, "Forum addUsersToForum failed: %s", e.what()); }
 		lagMonitor.stopClock( LAG_MONITOR_ADD_FORUM_USERS );
 	}
 

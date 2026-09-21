@@ -9,3 +9,5 @@ bin/
 src/obj
 /lib/
 cmake-build-debug/
+/backups/
+__pycache__/

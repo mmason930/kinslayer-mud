@@ -27,7 +27,7 @@ public:
 
 	bool loggedIn;					//Has this descriptor successfully logged in during this session?
 	class kuDescriptor *descriptor;
-	char	host[ 31 ];				// Hostname
+	std::string host;				// Hostname
 	sbyte	bad_pws;				// Number of bad pw attemps this login
 	sbyte	idle_tics;				// Tics idle at password prompt
 	int	connected;					// Mode of 'connectedness'

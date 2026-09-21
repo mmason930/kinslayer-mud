@@ -60,6 +60,13 @@ fi
 ### to modify this file will fail.
 echo "core.%p.%t" > /proc/sys/kernel/core_pattern
 
+# The gateway and MUD share a private per-container credential, never a source literal.
+install -d -m 700 /run/kinslayer
+if [[ ! -s /run/kinslayer/gateway.key ]]; then
+    (umask 077; openssl rand -hex 32 > /run/kinslayer/gateway.key) || exit 1
+fi
+chmod 600 /run/kinslayer/gateway.key
+
 # Build failures must stop startup instead of launching a stale executable.
 set -e
 

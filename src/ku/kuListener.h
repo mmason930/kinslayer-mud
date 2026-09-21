@@ -23,6 +23,7 @@ public:
 	e_SocketType socketType;
 private:
 	u_short	port;
+	bool loopbackOnly;
 	fd_set inset, outset, excset;
 	timeval nulltime;
 	void *dataForCloseDescriptorCallback;
@@ -37,7 +38,7 @@ private:
 	void (*socketReadCallback)(void *, kuListener *, kuDescriptor*, const std::string &input);
 
 public:
-	kuListener(const int port, e_SocketType socketType);
+	kuListener(const int port, e_SocketType socketType, bool loopbackOnly = false);
 	~kuListener(void);
 
 	void setCloseDescriptorCallback( void (*closeDescriptorCallback)(void*, kuListener*, kuDescriptor*) );

@@ -1,3 +1,4 @@
+#include "../websocket/WebSocketMessageStream.h"
 #ifndef PLAYER_PORTAL_DESCRIPTOR_H
 #define PLAYER_PORTAL_DESCRIPTOR_H
 
@@ -20,6 +21,7 @@ protected:
 	int userId;
 	int uid;
 	std::string inputBuffer;
+    WebSocketMessageStream webSocketMessages;
 public:
 
 	PlayerPortalDescriptor(kuDescriptor *descriptor, PlayerPortalServer *server);

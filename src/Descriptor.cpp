@@ -66,7 +66,7 @@ static std::string stripHighBytes(const std::string &input)
 Descriptor::Descriptor()
 {
 	descriptor = nullptr;
-	memset( &host, 0, sizeof( host ) );
+	host.clear();
 	bad_pws = 0;
 	idle_tics = 0;
 	connected = 0;
@@ -841,14 +841,14 @@ void Descriptor::processWebSocketSignInCommand(Json::Value &commandObject)
 			return;
 		}
 
-		MudLog( BRF, LVL_GOD, TRUE, "Password requirement skipped for %s [%s].", GET_NAME( ch ), this->host );
+		MudLog( BRF, LVL_GOD, TRUE, "Password requirement skipped for %s [%s].", GET_NAME( ch ), this->host.c_str() );
 	}
 
 	if ( BanManager::GetManager().IsBanned( this->host ) == BAN_SELECT && !PLR_FLAGGED( ch, PLR_SITEOK ) )
 	{
 		response["error"] = "Sorry, this char has not been cleared for login from your site!";
 		STATE( this ) = CON_CLOSE;
-		MudLog( NRM, LVL_GOD, TRUE, "Connection attempt for %s denied from %s", GET_NAME( ch ), this->host );
+		MudLog( NRM, LVL_GOD, TRUE, "Connection attempt for %s denied from %s", GET_NAME( ch ), this->host.c_str() );
 		this->sendWebSocketCommand(writer.write(response));
 		delete ch;
 		return;
@@ -869,7 +869,7 @@ void Descriptor::processWebSocketSignInCommand(Json::Value &commandObject)
 	{
 		response["error"] = "The game is temporarily restricted.. try again later.";
 		STATE( this ) = CON_CLOSE;
-		MudLog( NRM, LVL_GOD, TRUE, "Request for login denied for %s [%s] (wizlock)", GET_NAME( ch ), this->host );
+		MudLog( NRM, LVL_GOD, TRUE, "Request for login denied for %s [%s] (wizlock)", GET_NAME( ch ), this->host.c_str() );
 		this->sendWebSocketCommand(writer.write(response));
 		delete ch;
 		return ;
@@ -895,7 +895,7 @@ void Descriptor::processWebSocketSignInCommand(Json::Value &commandObject)
 		return;
 	}
 
-	MudLog( BRF, MAX( LVL_GRGOD, GET_INVIS_LEV( this->character ) ), TRUE, "%s [%s] has connected.", GET_NAME( this->character ), this->host );
+	MudLog( BRF, MAX( LVL_GRGOD, GET_INVIS_LEV( this->character ) ), TRUE, "%s [%s] has connected.", GET_NAME( this->character ), this->host.c_str() );
 
 	if ( GET_LEVEL( this->character ) >= LVL_IMMORT )
 		this->send( imotd );
@@ -1035,7 +1035,7 @@ void Descriptor::processWebSocketUserCreationCommand(Json::Value &commandObject)
 	
 	if (BanManager::GetManager().IsBanned(this->host) >= BAN_NEW)
 	{
-		MudLog(NRM, LVL_APPR, TRUE, "Request for new char %s denied from [%s] (siteban)", GET_NAME(this->character), this->host);
+		MudLog(NRM, LVL_APPR, TRUE, "Request for new char %s denied from [%s] (siteban)", GET_NAME(this->character), this->host.c_str());
 		errors.push_back("Sorry, new characters are not allowed from your site!");
 		STATE(this) = CON_CLOSE;
 	}
@@ -1064,7 +1064,7 @@ void Descriptor::processWebSocketUserCreationCommand(Json::Value &commandObject)
 	this->setEmailAddress(emailAddress);
 	this->character->PasswordUpdated(true);
 	
-	MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(this->character)), TRUE, "%s [%s] new player.", GET_NAME(this->character), this->host);
+	MudLog(NRM, MAX(LVL_APPR, GET_INVIS_LEV(this->character)), TRUE, "%s [%s] new player.", GET_NAME(this->character), this->host.c_str());
 
 	this->echoOn();
 	this->character->Init();

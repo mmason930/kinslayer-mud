@@ -1,10 +1,12 @@
 #include "WebSocketDataFrame.h"
 
 #include <sstream>
+#include <memory>
+#include "WebSocketException.h"
 
 WebSocketDataFrame::WebSocketDataFrame()
 {
-	fin = rsv1 = rsv2 = rsv3 = false;
+	fin = rsv1 = rsv2 = rsv3 = isMasked = false;
 	opcode = 0;
 }
 WebSocketDataFrame::~WebSocketDataFrame()
@@ -85,115 +87,51 @@ void WebSocketDataFrame::setMaskCode(const std::vector<unsigned char> &maskCode)
 	this->maskCode = maskCode;
 }
 
-WebSocketDataFrame *WebSocketDataFrame::parse(const std::string &input, unsigned int &bytesRead)
+WebSocketDataFrame *WebSocketDataFrame::parse(const std::string &input, unsigned int &bytesRead, bool requireMask)
 {
-	WebSocketDataFrame *webSocketDataFrame;
-	bytesRead = 0;
-
-	if(input.size() < 2)
-		return nullptr;
-
-	int readPos = 0;
-	bool fin = ((unsigned char)input[ readPos ]) & (1);
-	bool rsv1 = ((unsigned char)input[ readPos ]) & (1 << 1);
-	bool rsv2 = ((unsigned char)input[ readPos ]) & (1 << 2);
-	bool rsv3 = ((unsigned char)input[ readPos ]) & (1 << 3);
-
-	unsigned char opcode = ((unsigned char)input[ readPos ]) & ~(240);
-
-	if(opcode == 0x8)
-	{
-		webSocketDataFrame = new WebSocketDataFrame();
-		webSocketDataFrame->setOpCode(opcode);
-		return webSocketDataFrame;
-	}
-
-	++readPos;
-
-	bool mask = ((unsigned char)input[ readPos ]) & (1 << 7);
-	unsigned long long payloadLength = (unsigned char) (input[readPos] & ~(1 << 7));
-
-	++readPos;
-
-	if(payloadLength == 126)
-	{//If length == 126, then the actual payload length is the next 2 bytes interpreted as unsigned integers.
-
-		if(readPos + 2 > input.size())
-			return nullptr;
-		
-		payloadLength = 0;
-		
-		payloadLength = (payloadLength << 8) + ((unsigned char)input[readPos    ]);
-		payloadLength = (payloadLength << 8) + ((unsigned char)input[readPos + 1]);
-
-		readPos += 2;
-	}
-	else if(payloadLength == 127)
-	{//If length == 127, then the actual payload length is the next 8 bytes interpreted as an unsiged 64-bit integer.
-
-		if(readPos + 8 > input.size())
-			return nullptr;
-
-		payloadLength = 0;
-
-		payloadLength = (payloadLength << 8) + ((unsigned char)input[readPos + 7]);
-		payloadLength = (payloadLength << 8) + ((unsigned char)input[readPos + 6]);
-		payloadLength = (payloadLength << 8) + ((unsigned char)input[readPos + 5]);
-		payloadLength = (payloadLength << 8) + ((unsigned char)input[readPos + 4]);
-		payloadLength = (payloadLength << 8) + ((unsigned char)input[readPos + 3]);
-		payloadLength = (payloadLength << 8) + ((unsigned char)input[readPos + 2]);
-		payloadLength = (payloadLength << 8) + ((unsigned char)input[readPos + 1]);
-		payloadLength = (payloadLength << 8) + ((unsigned char)input[readPos    ]);
-
-		readPos += 8;
-	}
-
-	unsigned char maskingKey[4];
-
-	if(mask)
-	{
-		if(readPos + 4 > input.size())
-			return nullptr;
-
-		maskingKey[0] = (unsigned char)input[readPos    ];
-		maskingKey[1] = (unsigned char)input[readPos + 1];
-		maskingKey[2] = (unsigned char)input[readPos + 2];
-		maskingKey[3] = (unsigned char)input[readPos + 3];
-
-		readPos += 4;
-	}
-
-	if(readPos + payloadLength > input.size())
-		return nullptr;
-
-	std::string payloadData = input.substr(readPos, payloadLength);
-
-	if(payloadData.size() == payloadLength)
-	{
-		if(mask)
-		{
-			for(std::string::size_type i = 0;i < payloadData.size();++i)
-			{
-				payloadData[ i ] = payloadData[ i ] ^ maskingKey[ i % 4 ];
-			}
-		}
-	}
-	else
-		return nullptr;
-
-	readPos += payloadLength;
-	bytesRead = readPos;
-	
-	webSocketDataFrame = new WebSocketDataFrame();
-
-	webSocketDataFrame->setFin(fin);
-	webSocketDataFrame->setRsv1(rsv1);
-	webSocketDataFrame->setRsv2(rsv2);
-	webSocketDataFrame->setRsv3(rsv3);
-	webSocketDataFrame->setOpCode(opcode);
-	webSocketDataFrame->setPayloadData(payloadData);
-
-	return webSocketDataFrame;
+    bytesRead = 0;
+    if (input.size() < 2) return nullptr;
+    const auto first = static_cast<unsigned char>(input[0]);
+    const auto second = static_cast<unsigned char>(input[1]);
+    const bool fin = (first & 0x80) != 0, masked = (second & 0x80) != 0;
+    const unsigned char opcode = first & 0x0f;
+    if ((first & 0x70) || (opcode != 0 && opcode != 1 && opcode != 2 && opcode != 8 && opcode != 9 && opcode != 10))
+        throw WebSocketException("Invalid WebSocket frame flags");
+    if (requireMask && !masked) throw WebSocketException("Client frames must be masked");
+    const bool control = opcode >= 8;
+    const unsigned char marker = second & 0x7f;
+    if (control && (!fin || marker > 125)) throw WebSocketException("Invalid control frame");
+    std::size_t position = 2;
+    uint64_t length = marker;
+    if (marker >= 126) {
+        const std::size_t width = marker == 126 ? 2 : 8;
+        if (input.size() - position < width) return nullptr;
+        if (width == 8 && (static_cast<unsigned char>(input[position]) & 0x80))
+            throw WebSocketException("Invalid 64-bit frame length");
+        length = 0;
+        for (std::size_t i = 0; i < width; ++i)
+            length = (length << 8) | static_cast<unsigned char>(input[position++]);
+        if ((width == 2 && length < 126) || (width == 8 && length <= 65535))
+            throw WebSocketException("Noncanonical frame length");
+    }
+    if (length > maxPayloadSize) throw WebSocketException("WebSocket frame too large");
+    std::vector<unsigned char> key;
+    if (masked) {
+        if (input.size() - position < 4) return nullptr;
+        for (int i = 0; i < 4; ++i) key.push_back(static_cast<unsigned char>(input[position++]));
+    }
+    if (length > input.size() - position) return nullptr;
+    auto frame = std::make_unique<WebSocketDataFrame>();
+    frame->fin = fin;
+    frame->opcode = opcode;
+    frame->isMasked = masked;
+    frame->maskCode = key;
+    frame->payloadData = input.substr(position, length);
+    if (masked)
+        for (std::size_t i = 0; i < length; ++i) frame->payloadData[i] ^= key[i % 4];
+    if (opcode == 8 && length == 1) throw WebSocketException("Invalid close frame");
+    bytesRead = static_cast<unsigned int>(position + length);
+    return frame.release();
 }
 
 void sendToStringStreamAsBinary(std::stringstream &stream, const unsigned long long packet)
@@ -242,7 +180,7 @@ std::string WebSocketDataFrame::prepareNetworkPacket()
 
 	if(payloadData.size() < 126)
 		payloadSize = payloadData.size();
-	else if(payloadData.size() >= 126 && payloadData.size() <= 65536)
+	else if(payloadData.size() >= 126 && payloadData.size() <= 65535)
 		payloadSize = 126;
 	else
 		payloadSize = 127;
@@ -265,13 +203,18 @@ std::string WebSocketDataFrame::prepareNetworkPacket()
 
 	if(getIsMasked())
 	{
+        if (maskCode.size() != 4) throw WebSocketException("Invalid mask key");
 		outputStream << this->maskCode[ 0 ]
 					 << this->maskCode[ 1 ]
 					 << this->maskCode[ 2 ]
 					 << this->maskCode[ 3 ];
 	}
 
-	outputStream << this->getPayloadData();
+	if (getIsMasked()) {
+        std::string encoded = payloadData;
+        for (std::size_t i = 0; i < encoded.size(); ++i) encoded[i] ^= maskCode[i % 4];
+        outputStream << encoded;
+    } else outputStream << payloadData;
 
 	return outputStream.str();
 }

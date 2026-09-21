@@ -80,8 +80,8 @@ int kuDescriptor::socketRead()
 	else if(WSAGetLastError() == WSAEWOULDBLOCK || errno == EAGAIN)
 		return -1;
 #else
-	else if(errno == EAGAIN || errno == EINTR)
-		return -1;
+	else if(errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
+		return 0;
 #endif
 	else
 	{

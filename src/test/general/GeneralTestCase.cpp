@@ -46,7 +46,7 @@ void GeneralTestCase::process()
 		void initMock(class Character *ch)
 		{
 			descriptor = new kuDescriptor(nullptr);
-			strcpy(host, "127.0.0.1");
+			host = "127.0.0.1";
 			setGatewayDescriptorType(GatewayDescriptorType::unknown);
 			connected = CON_PLAYING;
 			idle_tics = 0;

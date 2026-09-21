@@ -5,8 +5,10 @@
 
 kuClient::kuClient()
 {
-	sock = 0;
+	sock = INVALID_SOCKET;
 	connected = false;
+    pendingOutput.clear();
+    outputOffset = 0;
 	hasHost = HOSTERR;
 	port = 0;
 	hostData = nullptr;
@@ -20,7 +22,7 @@ kuClient::~kuClient()
 
 int kuClient::receive( std::stringstream &buf )
 {
-	if (!connected || !kuSocketCanSelect(sock))
+	if (!connected || !kuSocketCanSelect(sock) || !flushOutput())
 		return -1;
 	char buffer[2048];
 	timeval nulltime = {0,0};
@@ -36,6 +38,7 @@ int kuClient::receive( std::stringstream &buf )
 
 	if(select(this->sock + 1, &inset, &outset, &excset, &nulltime) < 0)
 	{
+		if (errno == EINTR) return 0;
 		disconnect();
 		return -1;
 	}
@@ -47,8 +50,7 @@ int kuClient::receive( std::stringstream &buf )
 
 	if(retval > 0)
 	{
-		buffer[retval] = '\0';
-		buf << buffer;
+		buf.write(buffer, retval);
 		return retval;
 	}
 	else if(retval == 0) {
@@ -67,18 +69,41 @@ int kuClient::receive( std::stringstream &buf )
 }
 bool kuClient::send(const std::string &data)
 {
-	int i = 0;
+    constexpr std::size_t limit = 4 * 1024 * 1024;
+    if (!connected) return false;
+    if (data.size() > limit - pendingOutputSize()) { disconnect(); return false; }
+    if (outputOffset) { pendingOutput.erase(0, outputOffset); outputOffset = 0; }
+    pendingOutput.append(data);
+    return flushOutput();
+}
 
-	if( (i = ::send(this->sock, data.c_str(), data.size(), KU_SEND_FLAGS)) < 0)
-	{
-		disconnect();
-		return false;
-	}
-	return true;
+bool kuClient::flushOutput()
+{
+    if (!connected) return false;
+    // Bound the work per gateway iteration; preserve bytes on short writes/EAGAIN.
+    std::size_t budget = 256 * 1024;
+    while (pendingOutputSize() && budget) {
+        const auto count = std::min(pendingOutputSize(), budget);
+        const auto sent = ::send(sock, pendingOutput.data() + outputOffset, count, KU_SEND_FLAGS);
+        if (sent > 0) { outputOffset += sent; budget -= sent; continue; }
+#ifdef WIN32
+        const auto error = WSAGetLastError();
+        if (sent < 0 && error == WSAEINTR) continue;
+        if (sent < 0 && error == WSAEWOULDBLOCK) return true;
+#else
+        if (sent < 0 && errno == EINTR) continue;
+        if (sent < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) return true;
+#endif
+        disconnect();
+        return false;
+    }
+    if (!pendingOutputSize()) { pendingOutput.clear(); outputOffset = 0; }
+    return true;
 }
 
 bool kuClient::connect(const std::string &h, const int p)
 {
+	disconnect();
 	this->hasHost	= HOSTERR;
 	this->hostData	= 0;
 	this->connected = false;
@@ -134,18 +159,27 @@ bool kuClient::connect(const std::string &h, const int p)
 		return false;
 	}
 
-	hasHost = HOSTOK;
+	#ifdef WIN32
+    u_long nonblocking = 1;
+    if (ioctlsocket(sock, FIONBIO, &nonblocking) != 0) { disconnect(); return false; }
+#else
+    const int flags = fcntl(sock, F_GETFL, 0);
+    if (flags < 0 || fcntl(sock, F_SETFL, flags | O_NONBLOCK) < 0) { disconnect(); return false; }
+#endif
+    hasHost = HOSTOK;
 	connected = true;
 	return true;
 }
 
 void kuClient::disconnect() {
 
-	if( sock ) {
+	if( sock != INVALID_SOCKET ) {
 		closesocket(sock);
-		sock = 0;
+		sock = INVALID_SOCKET;
 	}
 	connected = false;
+    pendingOutput.clear();
+    outputOffset = 0;
 	hasHost = HOSTERR;
 	port = 0;
 	hostData = nullptr;
