@@ -27,6 +27,10 @@ flusspferd::string JSQuery::getFieldByIndex( int index )
 {
 	return real->MyQuery->getFieldByIndex( index );
 }
+void JSQuery::reverseRows()
+{
+	real->MyQuery->reverseRows();
+}
 void JSQuery::resetRowQueue()
 {
 	real->MyQuery->resetRowQueue();

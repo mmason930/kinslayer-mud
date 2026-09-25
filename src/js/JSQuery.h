@@ -48,6 +48,7 @@ FLUSSPFERD_CLASS_DESCRIPTION(
         ("skipRow", bind, skipRow)
 		("getIndexByField", bind, getIndexByField)
 		("getFieldByIndex", bind, getFieldByIndex)
+		("reverseRows", bind, reverseRows)
 		("resetRowQueue", bind, resetRowQueue)
 		)
     (properties,
